@@ -7,7 +7,7 @@
  */
 return array(
 
-    'baseAPIURL' => '/api/index.php',
+    'baseAPIURL' => '127.0.0.1/api/index.php',
     'apiKey' => 'cs-dev',
     'privateKey' => 'SHOULD_MATCH_API_CONFIG',
 
