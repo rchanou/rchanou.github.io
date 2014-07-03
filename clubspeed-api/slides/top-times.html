@@ -1,0 +1,290 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Result Sheet</title>
+  <!-- http://assemble.io/helpers/ -->
+  <script src ="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-latest.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+        html, body {
+            font-family: 'Open Sans', sans-serif;
+            height: 100%;
+            min-height: 100%;
+            margin: 0;
+            background-color: #000000;
+        }
+        html, body :hover {
+            cursor: default;
+        }
+        #wrapper {
+            min-height: 100%;
+            height: 100%;
+            width: 100%;
+
+        }
+        #header {
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 1vw;
+            margin-right: 1vw;
+            height: 15vh;
+            width: 93vw;
+            color: whitesmoke;
+            text-align: center;
+        }
+        #header .mainHeader {
+            height: 66%;
+            font-size: 5.4vmin;
+            font-weight: bold;
+            width: 50%;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, #000000, #A9A9A9); /* black to darkgrey */
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        #header .secondaryHeader {
+            height: 33%;
+            font-size: 3.6vmin;
+            background: linear-gradient(to top, #000000, #A9A9A9); /* black to darkgrey */
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            width: 35%;
+            margin: 0 auto;
+        }
+        #results {
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 2vw;
+            margin-right: 2vw;
+            height: 84vh;
+            width: 96vw;
+            opacity: 0.9;
+        }
+        #results .racer {
+            width: 100%;
+            height: 100%;
+            height: 7.8vh;
+            margin-top: 0.5vh;
+            margin-bottom: 0.5vh;
+            margin-left: 2vw;
+            margin-right: 4vw;
+        }
+        #results .racer div {
+            float: left;
+            height: 100%;
+        }
+        #results .racer .racerText {
+            width: 100%;
+            height: 100%;
+            line-height: 190%; /* need a better way for vertical align (?) */
+            vertical-align: middle; /* no effect */
+            -webkit-transform: skew(25deg); /* reverse skew to make text straight again (?) */
+            -moz-transform: skew(25deg);
+            -o-transform: skew(25deg);
+            font-weight: bold;
+            font-size: 4vmin;
+        }
+        #results .racer .position {
+            width: 10%;
+        }
+        #results .racer .nickname {
+            width: 70%;
+        }
+        #results .racer .lapTime {
+            width: 17%;
+        }
+        .padLeft5 {
+            padding-left: 5vmin;
+        }
+        .centerText {
+            text-align: center;
+        }
+        .uppercase {
+            text-transform: uppercase;
+        }
+        .parallelogram {
+            -webkit-transform: skew(335deg);
+            -moz-transform: skew(335deg);
+            -o-transform: skew(335deg);
+            -transform: skew(335deg);
+            -webkit-border-radius: 5px 5px 5px 5px;
+            -moz-border-radius: 5px 5px 5px 5px;
+            border-radius: 5px 5px 5px 5px;
+        }
+        .racerTextWrapper {
+            margin-right: -6px; /* hackish css to get the parallelograms to overlap smoothly */
+        }
+        #results .firstPlace .racerTextWrapper {
+            background: linear-gradient(to top right, #DAA520, #F5F5F5); /* goldenrod to whitesmoke */
+            color: black;
+        }
+        #results .secondPlace .racerTextWrapper {
+            background: linear-gradient(to top right, #C0C0C0, #F5F5F5); /* silver to whitesmoke */
+            color: black;
+        } 
+        #results .thirdPlace .racerTextWrapper {
+            background: linear-gradient(to top right, #8C7853, #F5F5F5); /* bronze to whitesmoke */
+            color: black;
+        }
+        #results .otherPlace .racerTextWrapper {
+            background: linear-gradient(to top right, #000000, #A9A9A9); /* black to darkgrey */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<script>
+
+    // define location helper functions
+    var z = {}; // container for ganked zutil library functions
+    var _regexPlus = /\+/g;
+    var getParameters = function() {
+        var params = {};
+        var href = window.location.href;
+        var indexOfQueries = href.indexOf("?");
+        if (indexOfQueries > -1) {
+            var queries = href.substring(indexOfQueries+1).split("&");
+            for (var i = 0; i < queries.length; i++) {
+                var query = queries[i].split("=");
+                if (query.length != 2) continue;
+                params[query[0]] = decodeURIComponent(query[1].replace(_regexPlus, " "));
+            }
+        }
+        return params;
+    };
+    z.location = (function(locationObj) {
+        Object.defineProperty(locationObj, "parameters", {
+            get: function() { return getParameters() }, // automatically re-search for query parameters when accessing
+            writeable: false
+        });
+        return locationObj;
+    })({});
+
+    var currentTrackId = z.location.parameters.trackId;
+    var currentDateSpan = z.location.parameters.dateSpan;
+    var currentSpeedLevel = z.location.parameters.speedLevel;
+
+    // set up api call url information
+    var apiRootUrl = 'https://ekwigan.clubspeedtiming.com'; // todo: replace with dynamic location selection
+    var apiRootPath = '/api/index.php';
+    var apiTracksUrl = '/tracks/index.js';
+    var apiFastestUrl = '/races/fastest.js';
+
+    // create default queries to be applied to all api calls
+    var apiDefaults = {
+        track: currentTrackId,
+        key: 'cs-dev' // todo: replace with actual apiKey selection
+    };
+    function addDefaults(apiQueries) {
+        return $.extend({}, apiQueries, apiDefaults);
+    }
+
+    // set up the api query parameters
+    var apiTracksQueries = addDefaults({});
+    var apiFastestQueries = addDefaults({
+        range: currentDateSpan,
+        speed_level: currentSpeedLevel,
+        limit: 10
+    });
+
+    var src = '' +
+            '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
+        +   '   <div id="header">'
+        +   '       <div class="mainHeader uppercase">BEST TIMES OF THE {{dateSpan}}</div>'
+        +   '       <div class="secondaryHeader">Track {{id}}: {{name}} | Speed Level: {{speedLevel}}</div>'
+        +   '   </div>'
+        +   '   <div id="results">'
+        +   '       {{#each fastest}}'
+        +   '           <div class="racer {{#getPlace @index}}{{/getPlace}}">'
+        +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText">{{inc @index}}</div></div>'
+        +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText padLeft5">{{nickname}}</div></div>'
+        +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText">{{lap_time}}</div></div>'
+        +   '           </div>'
+        +   '       {{/each}}'
+        +   '   </div>'
+        +   '</div>';
+
+    function buildUrl(api, queries) {
+        // builds the api url based off of the originally defined root url, and the provided apiType
+        return apiRootUrl 
+            + apiRootPath
+            + api
+            + "?" + (queries ? $.param(queries) + "&" : "")
+            + "callback=?"; // seemingly can't use "?" inside $.param without having it converted, and $.getJSON does not like the converted value
+    }
+
+    function localizeData(data) {
+        // handle localization of numbers here(?)
+    }
+
+    function handleError(err) {
+        console.error(err); // todo: something else to handle errors
+    }
+
+    Handlebars.registerHelper('getPlace', function(index, options) {
+        switch (index) {
+            case 0: return "firstPlace";
+            case 1: return "secondPlace";
+            case 2: return "thirdPlace";
+            default: return "otherPlace";
+        }
+    });
+    Handlebars.registerHelper('inc', function(value, options) {
+        return parseInt(value) + 1;
+    });
+
+    function buildAndAppendHtml() {
+        var deferreds = [];
+
+        // setup handlebars data object to be extended with api data
+        var data = {};
+        $.extend(data, z.location.parameters); // add all url parameter data into the handlebars data object
+
+        console.log(buildUrl(apiFastestUrl, apiFastestQueries));
+
+        // build an array of deferred objects for api data collection
+
+        // push the getJSON call for track list
+        deferreds.push(
+            $.getJSON(buildUrl(apiTracksUrl, apiTracksQueries))
+            .done(function(trackData) {
+                for (var i = 0; i < trackData.tracks.length; i++) {
+                    // can we pass the API a parameter to just get a specific track's information?
+                    // doing data manipulation on javascript in the interim
+                    if (trackData.tracks[i].id == currentTrackId) {
+                        $.extend(data, trackData.tracks[i]);
+                        break;
+                    }
+                }
+            })
+            .fail(function(err) {
+                handleError(err);
+            })
+        );
+
+        // push the getJSON call for fastest times
+        deferreds.push(
+            $.getJSON(buildUrl(apiFastestUrl, apiFastestQueries))
+            .done(function(fastestData) {
+                $.extend(data, fastestData);
+            })
+            .fail(function(err) {
+                handleError(err);
+            })
+        );
+
+        // handle the final async call to use the built data object
+        $.when.apply($, deferreds).then(function() {
+            localizeData(data); // handle the timestamp alterations here(?)
+            var template = Handlebars.compile(src); // compile the originally defined source
+            var output = template(data); // attach the data so handlebars can interpret it
+            $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
+        });
+    }
+
+    buildAndAppendHtml(); // call the previously defined function
+    
+</script>
+</body>
+</html>

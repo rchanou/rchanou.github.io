@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Result Sheet</title>
+  <script src ="http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars-latest.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+        html, body {
+            font-family: 'Open Sans', sans-serif;
+            height: 100%;
+            min-height: 100%;
+            margin: 0;
+        }
+        html, body :hover {
+            cursor: default;
+        }
+        #wrapper {
+            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
+            background-color: #000000;
+            margin: 0;
+        }
+        #speedScreenVideo {
+            position: absolute;
+            min-width: 100%;
+            min-height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+<script>
+    // define location helper functions
+    var z = {}; // container for ganked zutil library functions
+    var _regexPlus = /\+/g;
+    var getParameters = function() {
+        var params = {};
+        var href = window.location.href;
+        var indexOfQueries = href.indexOf("?");
+        if (indexOfQueries > -1) {
+            var queries = href.substring(indexOfQueries+1).split("&");
+            for (var i = 0; i < queries.length; i++) {
+                var query = queries[i].split("=");
+                if (query.length != 2) continue;
+                params[query[0]] = decodeURIComponent(query[1].replace(_regexPlus, " "));
+            }
+        }
+        return params;
+    };
+    z.location = (function(locationObj) {
+        Object.defineProperty(locationObj, "parameters", {
+            get: function() { return getParameters() }, // automatically re-search for query parameters when accessing
+            writeable: false
+        });
+        return locationObj;
+    })({});
+
+    // setup speed screen items
+    var src = '' +
+            '<div id="wrapper">'
+        +   '   <video id="speedScreenVideo" preload="auto" autoplay="autoplay">'
+        +   '       <source src={{videoUrl}}>'
+        +   '   </video>'
+        +   '</div>';
+
+    function buildAndAppendHtml() {
+        var data = {}; // declare handlebars data object
+        $.extend(data, z.location.parameters); // add all url parameter data into the handlebars data object
+        var template = Handlebars.compile(src); // compile the originally defined source
+        var output = template(data); // attach the data so handlebars can interpret it
+        $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML -- **NEEDS TO BE CHANGED FROM BODY**
+    }
+
+    buildAndAppendHtml(); // call the previously defined function
+    
+</script>
+</body>
+</html>
