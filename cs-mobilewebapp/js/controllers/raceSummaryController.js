@@ -1,0 +1,32 @@
+//This controller is used for the race summary page, and handles Google Graph creation and displaying of tables
+clubSpeedOnlineApp.controller('raceSummaryController', function($scope, $routeParams, $location, ClubSpeedJSONService) {
+
+    //This function routes to the racer profile page for the given racer_id
+    $scope.go = function ( racer_id ) {
+        $location.path( '/racersearch/' + racer_id );
+    };
+
+    $scope.spinnerActive = 1;
+    ClubSpeedJSONService.getRaceDetails($routeParams.race_id).success(function (data) {
+        $scope.jsonData = data;
+        $scope.notEnoughRaceData = 0;
+        if (data.race.laps !== undefined) //If lap data was recorded, produce Google graphs
+        {
+            $scope.chartData = convertRaceDetailsToGoogleChartFormat(data);
+            google.setOnLoadCallback(drawChart($scope.chartData,'chart_div'));
+        }
+        else
+        {
+            $scope.notEnoughRaceData = 1;
+        }
+        if (data.scoreboard === undefined) //If the race never concluded, let the view know
+        {
+            $scope.raceConcluded = 0;
+        }
+        else
+        {
+            $scope.raceConcluded = 1;
+        }
+        $scope.spinnerActive = 0;
+    });
+});

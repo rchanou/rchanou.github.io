@@ -1,0 +1,69 @@
+<!-- This page displays all live timing tables. The table to display is determined by the parameter passed to the URL. -->
+<div class="jumbotron text-center">
+    <h4 style="margin-top: 2px;">Live Timing</h4>
+
+	<div ng-controller="liveTimingController">
+
+        <!-- Begin live timing menu options -->
+        <select id="livetimingselector" style="color: white; background-color: black; min-width: 300px; max-width: 600px; width: 90%"
+                ng-model="desiredLiveTiming" ng-change="goToLiveTiming(desiredLiveTiming)">
+            <option value="">Select one of the following options:</option>
+            <option value="topRPMScores">Top RPM Scores</option>
+            <option value="fastestTimeByDay">Top Lap Time (Today)</option>
+            <option value="fastestTimeByWeek">Top Lap Time (This Week)</option>
+            <option value="fastestTimeByMonth">Top Lap Time (This Month)</option>
+            <option value="liveScoreboard">Live Scoreboard</option>
+        </select>
+        <p/>
+        <!-- End live timing menu options -->
+
+    <!-- Spinner is only visible if content is loading -->
+    <span id="spinner" ng-if="spinnerActive">
+        <img width="30" src="images/spinner.gif"><br/>
+        Powered by Club Speed
+    </span>
+
+    <!-- Begin fastest times table - can be by Day, Week, or Month -->
+    <div ng-if="tableType == 'fastestTimesTable' && spinnerActive==0">
+        <span class="dataHeader">{{tableCaption}}</span>
+        <div class="dataWrapper" ng-repeat="racer in jsonData.fastest">
+            <table class="dataTable">
+                <tr ng-click="go(racer.racer_id)">
+                    <td>
+                        <span class="dataSubHeader">{{racer.first_name}} {{racer.last_name}}</span><br/>
+                        {{racer.nickname}}<br/>
+                        Track: {{racer.track_name}}
+                    </td>
+                    <td class="dataHighlightCell">
+                        <span class="dataSubHeader">Lap Time</span><br/>
+                        <span class="dataHighlight">{{racer.lap_time | formatLapTime}}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!-- End fastest time table -->
+
+    <!-- Begin top RPM table -->
+    <div ng-if="tableType == 'topRPMTable' && spinnerActive==0">
+        <span class="dataHeader">{{tableCaption}}</span>
+        <div class="dataWrapper" ng-repeat="racer in jsonData.racers">
+            <table class="dataTable">
+                <tr ng-click="go(racer.id)">
+                    <td>
+                        <span class="dataSubHeader">#{{$index + 1}}: {{racer.name.first}} {{racer.name.last}}</span><br/>
+                        {{racer.name.nickname}}<br/>
+                        Joined: <span>{{racer.created_at| amDateFormat:'MMMM Do YYYY'}}</span>
+                    </td>
+                    <td class="dataHighlightCell">
+                        <span class="dataSubHeader">RPM</span><br/>
+                        <span class="dataHighlightSmall">{{racer.rpm}}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!-- End top RPM table -->
+
+	</div>
+</div>

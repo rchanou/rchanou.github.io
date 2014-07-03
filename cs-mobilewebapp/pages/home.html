@@ -1,0 +1,30 @@
+<!-- This displays the home page, currently consisting of a carousel slide show and fastest lap time. -->
+<div class="jumbotron text-center" ng-controller="homeController">
+    <h2 style="margin-top: 2px;">Club Speed Online</h2>
+
+    <!-- Begin slide show -->
+	<div ng-controller="homeCarouselController" class="homeCarousel">
+		<carousel interval="myInterval">
+			<slide ng-repeat="slide in slides" active="slide.active">
+				<img ng-src="{{slide.image}}" style="margin:auto;">
+			</slide>
+		</carousel>
+	</div>
+    <!-- End slide show -->
+
+    <!-- Begin fastest lap time: Only displays if there has been a lap time today -->
+	<span ng-if="output_lap_time">
+	Today's fastest lap time: <br/>
+	<strong>{{lap_time}}</strong>s by <strong>{{nickname}}</strong>
+	</span>
+    <!-- End fastest lap time -->
+
+    <!-- Spinner is only visible if content is loading -->
+    <span id="spinner" ng-if="spinnerActive">
+        <img width="30" src="images/spinner.gif"><br/>
+        Powered by Club Speed
+    </span>
+
+    <p/>
+
+</div>

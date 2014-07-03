@@ -1,0 +1,116 @@
+<!-- This page displays a summary of a race, including a lap time chart,
+average and best lap times, and final positions -->
+
+<div class="jumbotron text-center">
+
+	<div ng-controller="raceSummaryController">
+
+        <!-- Spinner is only visible if content is loading -->
+        <span id="spinner" ng-if="spinnerActive">
+            <img width="30" src="images/spinner.gif"><br/>
+            Powered by Club Speed
+        </span>
+
+        <!-- Begin race header -->
+        <div class="raceSummary" ng-if="spinnerActive==0">
+            <div class="raceSummaryHeader">
+                <span class="raceSummaryTitle">
+                {{jsonData.race.race_name}}<br/>
+                </span>
+                {{jsonData.race.starts_at | amDateFormat:'MMMM Do YYYY h:mm a'}}<br/>
+                Track: {{jsonData.race.track}}
+            </div>
+        </div>
+        <!-- End race header -->
+
+        <p/>
+
+        <!-- Google graph of lap times -->
+        <div ng-hide="notEnoughRaceData">
+            <div ng-hide="notEnoughRaceData" id="chart_div" class="lapTimeChart"></div>
+        </div>
+        <p/>
+
+        <!-- Begin race results table -->
+        <div ng-if="spinnerActive==0 && raceConcluded">
+            <span class="dataHeader">Race Results</span>
+            <div ng-repeat="racer in jsonData.scoreboard">
+                <div class="dataWrapper">
+                    <table class="dataTable">
+                        <tr ng-click="go(racer.racer_id)">
+                            <td>
+                                <span class="dataSubHeader">{{racer.nickname}}</span><br/>
+                                Best Lap Time: {{racer.fastest_lap_time | formatLapTime}}<br/>
+                                Avg Lap Time: {{racer.average_lap_time  | formatLapTime}}<br/>
+                                Gap: {{racer.gap}}<br/>
+                            </td>
+                            <td class="dataHighlightCell">
+                                <span class="dataSubHeader">Position</span><br/>
+                                <span class="dataHighlightSmall">{{racer.position}}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- End race results table -->
+
+        <!--
+        <button type="button" class="btn btn-danger" data-toggle="collapse" data-target="#demo">
+          simple collapsible
+        </button>
+
+        <div id="demo" class="collapse in">...</div>
+        -->
+
+        <!-- TODO: So many inline styles! Aaaah -->
+        <p/>
+        <!-- Begin lap times table -->
+        <div ng-if="spinnerActive==0 && raceConcluded">
+            <span class="dataHeader">Lap Times by Racer</span><br/>
+            (Click a racer to expand!)<p/>
+            <div ng-repeat="racer in jsonData.scoreboard">
+                <button type="button" style="margin: 2px; font-size: 16pt; min-width: 300px; max-width: 600px; color: gold; border: 1px solid gray; background-color: #1f1f1f; font-weight: bold" class="btn" data-toggle="collapse" data-target="#{{racer.racer_id}}">
+                    {{racer.nickname}}
+                </button>
+                <div class="collapse out" id="{{racer.racer_id}}">
+                    <div class="dataWrapper" style="width: 300px;" ng-repeat="lap in jsonData.race.laps" ng-if="lap.racer_id == racer.racer_id && lap.lap_number != 0">
+                        <table class="dataTable">
+                            <tr>
+                                <td>
+                                    <span class="dataSubHeader">Lap {{lap.lap_number}}</span><br/>
+                                </td>
+                                <td class="dataHighlightCell" style="padding: 5px; width: 200px; ">
+                                    <div style="float: right; text-align: right">
+                                        <span class="dataSubHeader">Lap Time</span><br/>
+                                        <span class="dataHighlightSmall">{{lap.lap_time | formatLapTime}}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End lap times table -->
+
+        <!-- Show a special message if the race never concluded -->
+        <div ng-if="spinnerActive==0 && raceConcluded == 0">
+            <div class="dataWrapper">
+                <table class="dataTable">
+                    <tr>
+                        <td>
+                            <span>This race was never concluded and there is no more data to display.</span><br/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- End special message -->
+
+	</div>
+
+</div>
+
+
+

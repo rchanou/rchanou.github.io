@@ -1,0 +1,129 @@
+<!-- TODO: Description and finish implementation -->
+
+<div class="jumbotron text-center">
+
+    <div ng-controller="liveScoreboardController">
+
+        <!-- Spinner is only visible if content is loading -->
+        <span id="spinner" ng-if="spinnerActive">
+            <img width="30" src="images/spinner.gif"><br/>
+            Powered by Club Speed
+        </span>
+
+        <!-- TODO: Clean up the temporary inline CSS -->
+        <span class="dataHeader">Live Scoreboard</span><p/>
+        <div style="margin: 0 auto" ng-if="raceRunning"><p/>
+            Track: {{race.track}}, Race: {{race.race_name}}, Start Time: {{race.starts_at | amDateFormat:'h:mm a'}}<p/>
+        </div>
+        <!--
+        {"race":{"id":"44851","track_id":"1","track":"Rental",
+        "starts_at":"2014-01-06 13:36:00.000","heat_type_id":"1",
+        "heat_status_id":"1","speed_level_id":"6",
+        "speed_level":"Adult Kart - Rental CW",
+        "win_by":"laptime","race_by":"minutes",
+        "duration":9,"race_name":"10 Minute Heat"},"scoreboard":[]}
+        -->
+        <table class="table table-condensed" ng-if="raceRunning" style="word-break: normal; font-size: 10pt; width: 100%;">
+            <thead>
+                <tr>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle; width: 50px">Pos</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Racer</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle; width: 50px">Kart</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Best Time</td>
+                    <td class="hidden-xs" style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Avg Time</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Last Time</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Gap</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Laps</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="racer in currentScoreboard.scoreboardRows" ng-class="{racerJustEnteredRace: racer.racerJustEnteredRace}">
+                    <td style="word-break: normal; border-color: #1f1f1f; width: 50px; overflow: hidden; white-space: nowrap;">{{racer.position}}
+                        <img src="images/uparrow.png" ng-if="racer.currentState == 'wentUp'" style="height: 10px; vertical-align: baseline;">
+                        <img src="images/downarrow.png" ng-if="racer.currentState == 'wentDown'" style="height: 10px; vertical-align: baseline;">
+                        <img src="images/noarrow.png" ng-if="racer.currentState != 'wentUp' && racer.currentState != 'wentDown'" style="height: 10px; vertical-align: baseline;">
+                    </td>
+                    <td style="word-break: normal; border-color: #1f1f1f; max-width: 65px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left">
+                        <a href="#racersearch/{{racer.racer_id}}">{{racer.nickname}}</a></td>
+                    <td style="word-break: normal; border-color: #1f1f1f; width: 50px">{{racer.kart_num}}</td>
+                    <td ng-class="{fastestOverall: racer.currentState_Speed == 'fastestOverall',racerGotABetterTime: racer.racerGotABetterTime == '1'}" style="word-break: normal; border-color: #1f1f1f">{{racer.fastest_lap_time | formatLapTime}}</td>
+                    <td class="hidden-xs" style="word-break: normal; border-color: #1f1f1f">{{racer.average_lap_time | formatLapTime}}</td>
+                    <td ng-class="{racerFinishedALap: racer.racerFinishedALap}" style="word-break: normal; border-color: #1f1f1f">{{racer.last_lap_time | formatLapTime}}</td>
+                    <td style="word-break: normal; border-color: #1f1f1f">{{racer.gap}}</td>
+                    <td ng-class="{racerFinishedALap: racer.racerFinishedALap}" style="word-break: normal; border-color: #1f1f1f">{{racer.lap_num}}</td>
+                </tr>
+            </tbody>
+            <tfoot></tfoot>
+        </table>
+
+        <div ng-if="raceRunning == 0">
+            There is currently no race running on this track. <p/><p/>
+            This page will automatically update when a new race starts.
+        </div>
+
+        <!--
+        <div ng-if="raceRunning == 0">
+            There is currently no race running on this track. <p/><p/>
+            This page will automatically update when a new race starts.
+
+            <div style="margin: 0 auto" ng-if="raceRunning == 0"><p/>
+                <table class="table-hover racerProfileSummaryTable" style="margin: 0 auto">
+                    <thead>
+                    <tr>
+                        <td>Track</td>
+                        <td>Race</td>
+                        <td>Start Time</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>{{lastRaceDetails.track}}</td>
+                        <td>{{lastRaceDetails.race_name}}</td>
+                        <td>{{lastRaceDetails.starts_at | amDateFormat:'h:mm a'}}</td>
+                    </tr>
+                    </tbody>
+                </table><p/>
+            </div>
+            <br/>
+            <span class="dataHeader">Last Race's Scoreboard</span>
+            <table class="table table-condensed" ng-if="raceRunning == 0" style="word-break: normal; font-size: 10pt; width: 100%;">
+                <thead>
+                <tr>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle; width: 50px">Pos</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Racer</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle; width: 50px">Kart</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Best Time</td>
+                    <td class="hidden-xs" style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Avg Time</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Last Time</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Gap</td>
+                    <td style="word-break: normal; background-image: url('images/gradient_bg.png'); background-size: 100% 100%; vertical-align: middle;">Laps</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="racer in lastScoreboardRows" ng-class="{racerJustEnteredRace: racer.racerJustEnteredRace}">
+                    <td style="word-break: normal; border-color: #1f1f1f; width: 50px; overflow: hidden; white-space: nowrap;">{{racer.position}}
+                        <img src="images/uparrow.png" ng-if="racer.currentState == 'wentUp'" style="height: 10px; vertical-align: baseline;">
+                        <img src="images/downarrow.png" ng-if="racer.currentState == 'wentDown'" style="height: 10px; vertical-align: baseline;">
+                        <img src="images/noarrow.png" ng-if="racer.currentState != 'wentUp' && racer.currentState != 'wentDown'" style="height: 10px; vertical-align: baseline;">
+                    </td>
+                    <td style="word-break: normal; border-color: #1f1f1f; max-width: 65px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left">
+                        <a href="#racersearch/{{racer.racer_id}}">{{racer.nickname}}</a></td>
+                    <td style="word-break: normal; border-color: #1f1f1f; width: 50px">{{racer.kart_num}}</td>
+                    <td ng-class="{fastestOverall: racer.currentState_Speed == 'fastestOverall',racerGotABetterTime: racer.racerGotABetterTime == '1'}" style="word-break: normal; border-color: #1f1f1f">{{racer.fastest_lap_time}}</td>
+                    <td class="hidden-xs" style="word-break: normal; border-color: #1f1f1f">{{racer.average_lap_time}}</td>
+                    <td ng-class="{racerFinishedALap: racer.racerFinishedALap}" style="word-break: normal; border-color: #1f1f1f">{{racer.last_lap_time}}</td>
+                    <td style="word-break: normal; border-color: #1f1f1f">{{racer.gap}}</td>
+                    <td ng-class="{racerFinishedALap: racer.racerFinishedALap}" style="word-break: normal; border-color: #1f1f1f">{{racer.lap_num}}</td>
+                </tr>
+                </tbody>
+                <tfoot></tfoot>
+            </table>
+        </div>
+        -->
+
+    </div>
+
+</div>
+
+
+
