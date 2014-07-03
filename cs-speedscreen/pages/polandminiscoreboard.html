@@ -1,0 +1,93 @@
+<div ng-controller="newHDScoreboardController" class="polandMiniScoreboard">
+
+<div id="debugInfo" style="display: none">
+    <span id="clickMe2">Hide debug info</span><br/>
+    {{currentScoreboard}}<p/>
+    {{currentNextRace}}<p/>
+    {{scoreboardState}} {{finalResultsScreenTimeMs}}<p/>
+
+    {{slidePanelVisible}} = slidePanelVisible<p/>
+    lastHeatID: {{lastHeatID}}<p/>
+    lastHeatsHistory: {{lastHeatsHistory}}<p/>
+    nextRacersHistory: {{nextRacersHistory}}<p/>
+
+    <!--    <button type="button" data-ng-click="startScoreboard()">startScoreboard</button><br/>
+        <button type="button" data-ng-click="stopScoreboard()">stopScoreboard</button><p/>-->
+</div>
+
+<!-- ## MAIN ISOTOPE CONTAINER ## -->
+<div>
+    <div id="container" class="polandContainer">
+
+        <!-- ## RACE ONGOING MODE ## -->
+        <div ng-repeat="racer in racers" class="racerBox polandRacerBox shadow" ng-if="scoreboardState == 'race_ongoing'">
+            <div class="racerBoxUpper racerBoxUpperRegular" ng-class="{'racerGotABetterTimePoland': (racer.lastCompletedLapWasBest)}">
+                    <span class="polandPositionBox ellipsis">
+                        <span class="polandData">{{racer.position.toUpperCase()}}</span>
+                    </span>
+                    <span class="polandKartBox ellipsis">
+                        <span class="polandData">#{{racer.kart_num.toUpperCase()}}</span>
+                    </span>
+                    <span class="racerName polandNameBox ellipsis">
+                        <span class="polandRacerNameData">{{racer.nickname.toUpperCase()}}</span>
+                    </span>
+                    <span class="polandBestLapBox ellipsis" ng-class="{'racerGotABetterTime': (racer.beatBestLap)}">
+                        <span ng-class="{'fastestOverall': racer.isFastest}" ng-if="racer.lap_num != 0" class="polandData">{{racer.last_lap_time.toUpperCase()}}</span>
+                    </span>
+                    <span class="polandLapsBox ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}">
+                        <span class="polandData">{{racer.lap_num.toUpperCase()}}</span>
+                    </span>
+
+            </div>
+            <div class="position" style="display: none">{{racer.position}}</div>
+        </div>
+        <!-- ## END RACE ONGOING MODE ## -->
+
+        <!-- ## FINAL RESULTS MODE ## TODO: Bug observed: Blank final results -->
+        <div ng-repeat="racer in lastRaceRacers" class="racerBox polandRacerBox shadow" ng-if="scoreboardState == 'final_results'">
+            <div class="racerBoxUpper racerBoxUpperRegular" ng-class="{'racerGotABetterTimePoland': (racer.lastCompletedLapWasBest)}">
+                    <span class="polandPositionBox ellipsis">
+                        <span class="polandData">{{racer.position.toUpperCase()}}</span>
+                    </span>
+                    <span class="polandKartBox ellipsis">
+                        <span class="polandData">#{{racer.kart_num.toUpperCase()}}</span>
+                    </span>
+                    <span class="racerName polandNameBox ellipsis">
+                        <span class="polandRacerNameData">{{racer.nickname.toUpperCase()}}</span>
+                    </span>
+                    <span class="polandBestLapBox ellipsis" ng-class="{'racerGotABetterTime': (racer.beatBestLap)}">
+                        <span ng-class="{'fastestOverall': racer.isFastest}" ng-if="racer.lap_num != 0" class="polandData">{{racer.fastest_lap_time.toUpperCase()}}</span>
+                    </span>
+                    <span class="polandLapsBox ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}">
+                        <span class="polandData">{{racer.lap_num.toUpperCase()}}</span>
+                    </span>
+
+            </div>
+            <div class="position" style="display: none">{{racer.position}}</div>
+        </div>
+        <!-- ## END FINAL RESULTS MODE ## -->
+
+        <!-- ## COMING UP NEXT MODE ## -->
+
+        <div ng-if="scoreboardState == 'driver_lineup'">
+            <div class="polandComingUpNextTitle ellipsis" style="margin-top: 120px;">Wkrótce Następny</div>
+            <div class="polandComingUpNextData ellipsis">{{nextRace.race.race_name}}</div>
+            <div class="polandComingUpNextData ellipsis">{{nextRace.race.starts_at | amDateFormat:'H:mm'}}</div>
+        </div>
+
+        <!-- ## END COMING UP NEXT MODE ## -->
+
+        <!-- ## NO RACES MODE ## -->
+
+        <div ng-if="scoreboardState == 'no_races'">
+            <div class="polandComingUpNextTitle" style="margin-top: 140px;">Czekam na następny wyścig</div>
+        </div>
+
+        <!-- ## END NO RACES MODE ## -->
+
+    </div>
+
+</div>
+<!-- ## END MAIN ISOTOPE CONTAINER ## -->
+
+</div>

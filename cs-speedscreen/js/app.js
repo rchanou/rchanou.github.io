@@ -1,0 +1,9 @@
+// Creation of the Speed Screen Demo App
+var speedScreenDemoApp = angular.module('speedScreenDemoApp', ['ngRoute','ui.bootstrap','speedScreenDemoApp.services','angularMoment']);
+
+// Routing for single page design
+speedScreenDemoApp.config(function($routeProvider) {
+    $routeProvider
+        .when('/', {templateUrl : 'pages/channel.html', controller  : 'channelController'})
+        .when('/:channel_id', {templateUrl : 'pages/channel.html', controller  : 'channelController'});
+});

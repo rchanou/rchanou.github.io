@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<!-- Angular app definition -->
+<html ng-app="speedScreenDemoApp">
+    <head>
+        <title>Speed Screen</title>
+        <!-- TODO: Full audit of things being included. Make sure not to rely on internet-based stuff. -->
+        <link rel="stylesheet" href="css/vendors/bootstrap.min.css" />
+        <link rel="stylesheet" href="css/vendors/font-awesome.css" />
+        <link rel="stylesheet" href="css/clubspeedstyle.css" />
+
+    </head>
+<body style="overflow: hidden;">
+
+<!-- Angular view injection location -->
+<div ng-view></div>
+
+<!-- JavaScript placed at the bottom so the page loads more quickly -->
+
+<!-- Application configuration -->
+<script src="config.js"></script>
+
+<script src="js/vendors/jquery.min.js"></script>
+<script src="js/vendors/bootstrap.min.js"></script>
+<script src="js/vendors/angular.min.js"></script>
+<script src="js/vendors/angular-route.min.js"></script>
+
+<!-- Isotope -->
+<script src="js/vendors/jquery.isotope.min.js"></script>
+
+<!-- Angular scripts -->
+<script src="js/app.js"></script>
+<script src="js/services/speedScreenServices.js"></script>
+<script src="js/controllers/channelController.js"></script>
+<script src="js/controllers/liveScoreboardController.js"></script>
+<script src="js/controllers/hdScoreboardController.js"></script>
+<script src="js/controllers/karttracerController.js"></script>
+<script src="js/controllers/newHDScoreboardController.js"></script>
+
+<!-- AngularJS Bootstrap tools -->
+<script src="js/vendors/ui-bootstrap-tpls-0.7.0.js"></script>
+
+<!-- Date formatting and internationalization -->
+<script src="js/vendors/moment-with-langs.js"></script>
+<script src="js/vendors/angular-moment.js"></script>
+
+<!-- Scoreboard simulation (local) -->
+<script src="js/tools/liveScoreboardSimulator.js"></script>
+
+<!-- Socket.io -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+
+<!-- Google charts for races TODO: GET RID OF THIS -->
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+</script>
+<script src="js/tools/googleCharts.js"></script>
+
+</body>
+</html>

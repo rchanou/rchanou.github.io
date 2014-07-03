@@ -1,0 +1,1423 @@
+/*@media all and (min-height: 1079px) {*/
+    /*html, body {*/
+    /*width: 1920px;*/
+    /*height: 1080px;*/
+    /*overflow: hidden;*/
+    /*}*/
+/*}*/
+
+/*@media all and (max-height: 1078px) {*/
+    /*html, body {*/
+        /*width: 1280px;*/
+        /*height: 720px;*/
+        /*overflow: hidden;*/
+    /*}*/
+/*}*/
+
+html, body {
+    color: #ffffff;
+    background-color: #333333;
+    margin:0px;
+    padding:0px;
+}
+
+.jumbotron {
+    background-color: #333333;
+    font-size: 12pt;
+    margin: 0px; padding: 0px;
+}
+
+@media all and (min-height: 1079px) {
+.speedScreenBody {
+    width: 1920px;
+    height: 1080px;
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+    float: left;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .speedScreenBody {
+        width: 1280px;
+        height: 720px;
+        margin: 0 auto;
+        padding: 0;
+        text-align: center;
+        float: left;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .imageBox {
+        width: 1920px;
+        height: 1080px;
+        margin: 0 auto;
+        padding: 0;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .imageBox {
+        width: 1280px;
+        height: 720px;
+        margin: 0 auto;
+        padding: 0;
+    }
+}
+
+.verticalAlignHelper {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+.centeredImage {
+    vertical-align: middle;
+}
+
+@media all and (min-height: 1079px) {
+    .scaledImageLandscape {
+        width: 100%;
+        max-width: 1920px;
+        max-height: 1080px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .scaledImageLandscape {
+        width: 100%;
+        max-width: 1280px;
+        max-height: 720px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .scaledImagePortrait {
+        height: 100%;
+        max-width: 1920px;
+        max-height: 1080px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .scaledImagePortrait {
+        height: 100%;
+        max-width: 1280px;
+        max-height: 720px;
+    }
+}
+
+.dataHeader {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.table, .table-responsive {
+    background-color: #000000;
+    margin: auto;
+    width: 95%;
+    word-break: break-all;
+}
+.tableHeader
+{
+    word-break: keep-all;
+}
+
+.table-condensed thead > tr > th,
+.table-condensed tbody > tr > th,
+.table-condensed tfoot > tr > th,
+.table-condensed thead > tr > td,
+.table-condensed tbody > tr > td,
+.table-condensed tfoot > tr > td {
+    font-size: 10pt;
+}
+
+/* Handles flashing a row when a racer completes a lap */
+
+@-webkit-keyframes racerFinishedALap {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+@-moz-keyframes racerFinishedALap {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+@-o-keyframes racerFinishedALap {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+@keyframes racerFinishedALap {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+.racerFinishedALap {
+    -webkit-animation: racerFinishedALap 0.5s; /* Safari 4+ */
+    -moz-animation:    racerFinishedALap 0.5s; /* Fx 5+ */
+    -o-animation:      racerFinishedALap 0.5s; /* Opera 12+ */
+    animation:         racerFinishedALap 0.5s; /* IE 10+ */
+}
+
+/* Handles flashing a row when a racer beats their previous best time */
+
+@-webkit-keyframes racerGotABetterTime {
+    from { background-color: #cb00cc; }
+    to { background-color: inherit; }
+}
+@-moz-keyframes racerGotABetterTime {
+    from { background-color: #cb00cc; }
+    to { background-color: inherit; }
+}
+@-o-keyframes racerGotABetterTime {
+    from { background-color: #cb00cc; }
+    to { background-color: inherit; }
+}
+@keyframes racerGotABetterTime {
+    from { background-color: #cb00cc; }
+    to { background-color: inherit; }
+}
+.racerGotABetterTime {
+    -webkit-animation: racerGotABetterTime 0.5s; /* Safari 4+ */
+    -moz-animation:    racerGotABetterTime 0.5s; /* Fx 5+ */
+    -o-animation:      racerGotABetterTime 0.5s; /* Opera 12+ */
+    animation:         racerGotABetterTime 0.5s; /* IE 10+ */
+}
+
+/* Handles flashing a row when a racer first enters the race */
+
+@-webkit-keyframes racerJustEnteredRace {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+@-moz-keyframes racerJustEnteredRace {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+@-o-keyframes racerJustEnteredRace {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+@keyframes racerJustEnteredRace {
+    from { background-color: #FFD700; }
+    to { background-color: inherit; }
+}
+.racerJustEnteredRace {
+    -webkit-animation: racerJustEnteredRace 0.5s; /* Safari 4+ */
+    -moz-animation:    racerJustEnteredRace 0.5s; /* Fx 5+ */
+    -o-animation:      racerJustEnteredRace 0.5s; /* Opera 12+ */
+    animation:         racerJustEnteredRace 0.5s; /* IE 10+ */
+}
+
+
+/* 1080p
+@media all and (min-height: 1079px) {
+
+}
+
+720p (=1080p * 2/3)
+@media all and (max-height: 1078px) {
+
+}*/
+
+/* HD Scoreboard Styles */
+
+@media all and (min-height: 1079px) {
+    .hdScoreboard {
+        background-image:url('../images/1.jpg');
+        background-repeat:no-repeat;
+        width: 1920px;
+        height: 1080px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .hdScoreboard {
+        background-image:url('../images/1_720p.jpg');
+        background-repeat:no-repeat;
+        width: 1280px;
+        height: 720px;
+    }
+}
+
+
+@media all and (min-height: 1079px) {
+    #container {
+        min-height: 810px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    #container {
+        min-height: 540px;
+    }
+}
+
+.shadow {
+    -moz-box-shadow:    inset 0 0 10px #434343;
+    -webkit-box-shadow: inset 0 0 10px #434343;
+    box-shadow:         inset 0 0 10px #434343;
+}
+
+@media all and (min-height: 1079px) {
+    .containerRegular {
+        width: 1920px;
+        height: 810px;
+        min-height: 810px;
+        position: absolute !important;
+        top: 114px !important;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .containerRegular {
+        width: 1280px;
+        height: 540px;
+        min-height: 540px;
+        position: absolute !important;
+        top: 76px !important;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .containerSmall {
+        width: 1520px;
+        height: 810px;
+        min-height: 810px;
+        position: absolute !important;
+        top: 114px !important;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .containerSmall {
+        width: 1013px;
+        height: 540px;
+        min-height: 540px;
+        position: absolute !important;
+        top: 76px !important;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .hdScoreboardHeader {
+        font-size: 80px;
+        text-align: left;
+        font-weight: bold;
+        margin-left: 20px;
+        height: 114px;
+        min-height: 114px;
+        max-height: 114px;
+        width: 1880px;
+        min-width: 1880px;
+        max-width: 1880px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .hdScoreboardHeader {
+        font-size: 53px;
+        text-align: left;
+        font-weight: bold;
+        margin-left: 13px;
+        height: 76px;
+        min-height: 76px;
+        max-height: 76px;
+        width: 1253px;
+        min-width: 1253px;
+        max-width: 1253px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .nextRacersHeader {
+        font-size: 40px;
+        margin-top: 10px;
+        text-align: center;
+        font-weight: bold;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .nextRacersHeader {
+         font-size: 26px;
+         margin-top: 6px;
+         text-align: center;
+         font-weight: bold;
+     }
+}
+
+@media all and (min-height: 1079px) {
+    .nextRacersContentBig {
+        font-size: 35px;
+        text-align: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        color: #FFD700;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .nextRacersContentBig {
+        font-size: 23px;
+        text-align: center;
+        margin-left: 6px;
+        margin-right: 6px;
+        color: #FFD700;
+    }
+}
+@media all and (min-height: 1079px) {
+    .nextRacersContent {
+        font-size: 30px;
+        text-align: left;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .nextRacersContent {
+        font-size: 20px;
+        text-align: left;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxUpperRegular {
+        height: 90px; min-height: 90px; max-height: 90px;
+        /*border: 1px solid gray;*/
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxUpperRegular {
+        height: 60px; min-height: 60px; max-height: 60px;
+        /*border: 1px solid gray;*/
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxUpperHeader {
+        font-size: 25px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxUpperHeader {
+        font-size: 16px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .nextRacerBoxUpperHeader {
+        font-size: 35px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .nextRacerBoxUpperHeader {
+        font-size: 23px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxUpperData {
+        font-size: 40px;
+        color: #ffd200;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxUpperData {
+        font-size: 26px;
+        color: #ffd200;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .nextRacerBoxUpperData{
+        font-size: 40px;
+        color: #ffd200;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .nextRacerBoxUpperData{
+        font-size: 26px;
+        color: #ffd200;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxUpperDataRacerName {
+        font-size: 40px;
+        color: white;
+        /*color: #ffd200;*/
+    }
+}
+@media all and (max-height: 1078px) {
+    .racerBoxUpperDataRacerName {
+        font-size: 26px;
+        color: white;
+        /*color: #ffd200;*/
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .positionBox {
+        width: 85px; min-width: 85px; max-width: 85px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .positionBox {
+        width: 56px; min-width: 56px; max-width: 56px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .nextRacerPositionBox {
+        width: 185px; min-width: 185px; max-width: 185px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .nextRacerPositionBox {
+        width: 123px; min-width: 123px; max-width: 123px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+.racerName {
+
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+}
+
+@media all and (min-height: 1079px) {
+    .racerNameBox {
+        width: 500px; min-width: 500px; max-width: 500px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerNameBox {
+        width: 333px; min-width: 333px; max-width: 333px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .nextRacerNameBox {
+        width: 730px; min-width: 730px; max-width: 730px;
+        height: 100%;
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .nextRacerNameBox {
+        width: 486px; min-width: 486px; max-width: 486px;
+        height: 100%;
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerNameBoxSmaller {
+        width: 300px; min-width: 300px; max-width: 300px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerNameBoxSmaller {
+        width: 200px; min-width: 200px; max-width: 200px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .kartBox {
+        width: 85px; min-width: 85px; max-width: 85px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .kartBox {
+        width: 56px; min-width: 56px; max-width: 56px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .lapsBox {
+        width: 85px; min-width: 85px; max-width: 85px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .lapsBox {
+        width: 56px; min-width: 56px; max-width: 56px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .bestLapBox {
+        width: 150px; min-width: 150px; max-width: 150px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .bestLapBox {
+        width: 95px; min-width: 95px; max-width: 95px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+        text-align: center;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxRegular {
+        width: 930px; max-width: 930px; min-width: 930px;
+        height: 140px; max-height: 140px; min-height: 140px;
+        border: 2px solid white;
+        /*background-color: #161616;*/
+        background:rgba(22,22,22,0.8);
+        text-align: left;
+        margin-bottom: 20px;
+        margin-left: 20px;
+        overflow: hidden;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxRegular {
+        width: 620px; max-width: 620px; min-width: 620px;
+        height: 93px; max-height: 93px; min-height: 93px;
+        border: 2px solid white;
+        /*background-color: #161616;*/
+        background:rgba(22,22,22,0.8);
+        text-align: left;
+        margin-bottom: 14px;
+        margin-left: 14px;
+        overflow: hidden;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxSmaller {
+        width: 730px; max-width: 730px; min-width: 730px;
+        height: 140px; max-height: 140px; min-height: 140px;
+        border: 2px solid white;
+        /*background-color: #161616;*/
+        background:rgba(22,22,22,0.8);
+        text-align: left;
+        margin-bottom: 20px;
+        margin-left: 20px;
+        overflow: hidden;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxSmaller {
+        width: 486px; max-width: 486px; min-width: 486px;
+        height: 93px; max-height: 93px; min-height: 93px;
+        border: 2px solid white;
+        /*background-color: #161616;*/
+        background:rgba(22,22,22,0.8);
+        text-align: left;
+        margin-bottom: 14px;
+        margin-left: 14px;
+        overflow: hidden;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxLowerRegular {
+        height: 45px; min-height: 45px; max-height: 45px;
+        border-top: 1px solid gray;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxLowerRegular {
+        height: 30px; min-height: 30px; max-height: 30px;
+        border-top: 1px solid gray;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxLowerHeader {
+        font-size: 30px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxLowerHeader {
+        font-size: 20px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxLowerData {
+        font-size: 30px;
+        color: #ffd200;
+        margin-left: 10px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxLowerData {
+        font-size: 20px;
+        color: #ffd200;
+        margin-left: 6px;
+    }
+}
+
+.status {
+
+}
+
+@media all and (min-height: 1079px) {
+    .statusBox {
+        width: 85px; min-width: 85px; max-width: 85px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .statusBox {
+        width: 56px; min-width: 56px; max-width: 56px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .statusBoxSmaller {
+        width: 85px; min-width: 85px; max-width: 85px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .statusBoxSmaller {
+        width: 56px; min-width: 56px; max-width: 56px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+.avgLap {
+
+}
+
+@media all and (min-height: 1079px) {
+    .avgLapBox {
+        width: 280px; min-width: 280px; max-width: 280px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .avgLapBox {
+        width: 186px; min-width: 186px; max-width: 186px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .avgLapBoxSmaller {
+        width: 170px; min-width: 170px; max-width: 170px;
+        height: 100%;
+        margin-left: 5px;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .avgLapBoxSmaller {
+        width: 113px; min-width: 113px; max-width: 113px;
+        height: 100%;
+        margin-left: 3px;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+.lastLap {
+
+}
+
+@media all and (min-height: 1079px) {
+    .lastLapBox {
+         width: 305px; min-width: 305px; max-width: 305px;
+         height: 100%;
+         /*border: 1px solid ghostwhite;*/
+         display: inline-block;
+         vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .lastLapBox {
+        width: 203px; min-width: 203px; max-width: 203px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .lastLapBoxSmaller {
+        width: 260px; min-width: 260px; max-width: 260px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .lastLapBoxSmaller {
+        width: 173px; min-width: 173px; max-width: 173px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+.gap {
+
+}
+@media all and (min-height: 1079px) {
+    .gapBox {
+        width: 239px; min-width: 239px; max-width: 239px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .gapBox {
+        width: 154px; min-width: 154px; max-width: 154px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .gapBoxSmaller {
+        width: 190px; min-width: 190px; max-width: 190px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .gapBoxSmaller {
+        width: 121px; min-width: 121px; max-width: 121px;
+        height: 100%;
+        /*border: 1px solid ghostwhite;*/
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxContent {
+        /*vertical-align: baseline;*/
+        font-size: 30px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxContent {
+        /*vertical-align: baseline;*/
+        font-size: 20px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .racerBoxHeader {
+        /*vertical-align: baseline;*/
+        font-size: 40px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .racerBoxHeader {
+        /*vertical-align: baseline;*/
+        font-size: 26px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .comingUpNextBox {
+        position: absolute;
+        top: 114px;
+        left: 1520px;
+        width: 380px; min-width: 380px; max-width: 380px;
+        height: 780px; min-height: 780px; max-height: 780px;
+        border: 2px solid white;
+        /*background-color: #161616;*/
+        background:rgba(22,22,22,0.8);
+        overflow: hidden;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextBox {
+        position: absolute;
+        top: 76px;
+        left: 1013px;
+        width: 253px; min-width: 253px; max-width: 253px;
+        height: 520px; min-height: 520px; max-height: 520px;
+        border: 2px solid white;
+        /*background-color: #161616;*/
+        background:rgba(22,22,22,0.8);
+        overflow: hidden;
+    }
+}
+
+.hiddenComingUpNextBox {
+    display: none;
+}
+
+.visibleComingUpNextBox {
+    display: inline;
+}
+
+@media all and (min-height: 1079px) {
+    .comingUpNextPosHeader {
+        width: 50px; min-width: 50px; max-width: 50px; display: inline-block;
+        margin-left: 10px;
+        font-size: 30px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextPosHeader {
+        width: 33px; min-width: 33px; max-width: 33px; display: inline-block;
+        margin-left: 6px;
+        font-size: 20px;
+    }
+}
+
+
+@media all and (min-height: 1079px) {
+    .comingUpNextRacerNameHeader {
+        width: 230px; display: inline-block;
+        text-align: left;
+        font-size: 30px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextRacerNameHeader {
+        width: 153px; display: inline-block;
+        text-align: left;
+        font-size: 20px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .comingUpNextSpecialSymbol {
+        width: 60px; font-size: 30px; display: inline-block;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextSpecialSymbol {
+        width: 40px; font-size: 20px; display: inline-block;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .comingUpNextPosContent {
+        width: 50px; min-width: 50px; max-width: 50px; display: inline-block;
+        font-size: 25px; height: 37px; min-height: 37px; max-height: 37px;
+        vertical-align: middle;
+        color: #ffd200;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextPosContent {
+        width: 33px; min-width: 33px; max-width: 33px; display: inline-block;
+        font-size: 16px; height: 24px; min-height: 24px; max-height: 24px;
+        vertical-align: middle;
+        color: #ffd200;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .comingUpNextRacerNameContent {
+        width: 230px; display: inline-block;
+        font-size: 25px; height: 37px; min-height: 37px; max-height: 37px;
+        vertical-align: middle;
+        text-align: left;
+        color: #ffd200;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextRacerNameContent {
+        width: 153px; display: inline-block;
+        font-size: 16px; height: 24px; min-height: 24px; max-height: 24px;
+        vertical-align: middle;
+        text-align: left;
+        color: #ffd200;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .comingUpNextSpecialSymbolContent {
+        width: 60px; min-width: 50px; max-width: 50px; font-size: 25px; display: inline-block;
+        height: 37px; min-height: 37px; max-height: 37px;
+        vertical-align: middle;
+        color: #ffd200;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextSpecialSymbolContent {
+        width: 40px; min-width: 33px; max-width: 33px; font-size: 16px; display: inline-block;
+        height: 24px; min-height: 24px; max-height: 24px;
+        vertical-align: middle;
+        color: #ffd200;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .statusBar {
+        /*background-color: black;*/
+        background:rgba(0,0,0,0.8);
+        height: 140px;
+        border: 2px solid red;
+        margin-left: 20px;
+        margin-right: 20px;
+        position: absolute !important;
+        top: 924px !important;
+        width: 1880px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .statusBar {
+        /*background-color: black;*/
+        background:rgba(0,0,0,0.8);
+        height: 93px;
+        border: 2px solid red;
+        margin-left: 14px;
+        margin-right: 14px;
+        position: absolute !important;
+        top: 616px !important;
+        width: 1252px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .fastestTimeName {
+        font-size: 40px;
+        width: 318px;
+        max-width: 318px;
+        display: inline-block;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .fastestTimeName {
+        font-size: 26px;
+        width: 212px;
+        max-width: 212px;
+        display: inline-block;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .fastestTimeTime {
+        font-size: 40px;
+        color: #ffd200;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .fastestTimeTime {
+        font-size: 26px;
+        color: #ffd200;
+    }
+}
+
+.fastestOverall {
+    color: #cb00cc;
+}
+
+.lapTimeChart {
+    width: 1600px; margin: auto;
+    height: 790px;
+}
+
+.recentRaceBox {
+    width: 610px; min-width: 610px; max-width: 610px;
+    height: 780px; min-height: 780px; max-height: 780px;
+    border: 2px solid white;
+    margin-left: 20px;
+    /*background-color: #161616;*/
+    background:rgba(22,22,22,0.8);
+}
+
+@media all and (min-height: 1079px) {
+    .comingUpNextStar {
+        vertical-align: bottom;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .comingUpNextStar {
+        vertical-align: bottom;
+        width: 23px;
+        height: 23px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .raceTimerBox {
+        width: 280px; min-width: 280px; max-width: 280px; text-align: right; float: right;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .raceTimerBox {
+        width: 186px; min-width: 186px; max-width: 186px; text-align: right; float: right;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .headerTextBox{
+        width: 1580px; min-width: 1580px; max-width: 1580px; float: left;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .headerTextBox{
+        width: 1053px; min-width: 1053px; max-width: 1053px; float: left;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .positionStatusImage {
+        margin-top: 4px; margin-left: 25px; height: 35px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .positionStatusImage {
+        margin-top: 2px; margin-left: 16px; height: 23px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .statusBarLeftBox {
+        width: 280px; height: 100%; font-size: 40px; display: inline-block;
+        vertical-align: middle; text-align: center; float: left;
+        padding-top: 10px; font-weight: bold;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .statusBarLeftBox {
+        width: 186px; height: 100%; font-size: 26px; display: inline-block;
+        vertical-align: middle; text-align: center; float: left;
+        padding-top: 6px; font-weight: bold;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .statusBarTimeBox {
+        width: 318px; height: 100%; display: inline-block;  float: left; padding-top: 10px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .statusBarTimeBox {
+        width: 212px; height: 100%; display: inline-block;  float: left; padding-top: 6px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .statusBarNoneBox {
+        width: 1277px; height: 100%; font-size: 60px; display: inline-block;  float: left; padding-top: 20px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .statusBarNoneBox {
+        width: 850px; height: 100%; font-size: 40px; display: inline-block;  float: left; padding-top: 13px;
+    }
+}
+
+@media all and (min-height: 1079px) {
+    .clubSpeedLogo {
+        width: 300px;
+    }
+}
+
+@media all and (max-height: 1078px) {
+    .clubSpeedLogo {
+        width: 200px;
+    }
+}
+
+/*
+@media all and (min-height: 1079px) {
+
+}
+
+@media all and (max-height: 1078px) {
+
+}
+
+*/
+/* Isotope Styles */
+
+/**** Isotope Filtering ****/
+
+.isotope-item {
+    z-index: 2;
+}
+
+
+.isotope-hidden.isotope-item {
+    pointer-events: none;
+    z-index: 1;
+}
+
+/**** Isotope CSS3 transitions ****/
+
+.isotope,
+.isotope .isotope-item {
+    -webkit-transition-duration: 0.8s;
+    -moz-transition-duration: 0.8s;
+    -ms-transition-duration: 0.8s;
+    -o-transition-duration: 0.8s;
+    transition-duration: 0.8s;
+}
+
+.isotope {
+    -webkit-transition-property: height, width;
+    -moz-transition-property: height, width;
+    -ms-transition-property: height, width;
+    -o-transition-property: height, width;
+    transition-property: height, width;
+}
+
+.isotope .isotope-item {
+    -webkit-transition-property: -webkit-transform, opacity;
+    -moz-transition-property:    -moz-transform, opacity;
+    -ms-transition-property:     -ms-transform, opacity;
+    -o-transition-property:      -o-transform, opacity;
+    transition-property:         transform, opacity;
+}
+
+/**** disabling Isotope CSS3 transitions ****/
+
+.isotope.no-transition,
+.isotope.no-transition .isotope-item,
+.isotope .isotope-item.no-transition {
+    -webkit-transition-duration: 0s;
+    -moz-transition-duration: 0s;
+    -ms-transition-duration: 0s;
+    -o-transition-duration: 0s;
+    transition-duration: 0s;
+}
+
+/* POLAND MINI SCOREBOARD */
+
+.polandMiniScoreboard {
+    background-color: black;
+    width: 500px;
+    height: 480px;
+    font-weight: bolder;
+}
+
+.polandRacerBox {
+    width: 496px; max-width: 496px; min-width: 496px;
+    height: 50px; max-height: 50px; min-height: 50px;
+    border: 2px solid white;
+    /*background: rgb(0, 89, 0);*/
+    background: rgb(89, 0, 0);
+    text-align: left;
+    margin-bottom: 3px;
+    margin-left: 0px;
+    margin-right: 2px;
+    overflow: hidden;
+}
+
+.racerGotABetterTimePoland
+{
+    background: rgb(0, 89, 0);
+}
+
+.polandContainer {
+    width: 496px;
+    min-height: 480px !important;
+    max-height: 480px !important;
+    position: absolute !important;
+}
+
+.polandPositionBox {
+    width: 50px; min-width: 50px; max-width: 50px;
+    height: 50px;
+    /*border: 1px solid ghostwhite;*/
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.polandKartBox {
+    width: 60px; min-width: 60px; max-width: 60px;
+    height: 50px;
+    /*border: 1px solid ghostwhite;*/
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+}
+
+.polandNameBox {
+    width: 180px; min-width: 180px; max-width: 180px;
+    height: 50px;
+    /*border: 1px solid ghostwhite;*/
+    display: inline-block;
+    vertical-align: top;
+}
+
+.polandBestLapBox {
+    width: 125px; min-width: 125px; max-width: 125px;
+    height: 50px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+}
+
+.polandLapsBox {
+    width: 56px; min-width: 56px; max-width: 56px;
+    height: 50px;
+    /*border: 1px solid ghostwhite;*/
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+}
+
+.polandData {
+    font-size: 32px;
+    color: #ffd200;
+}
+
+.polandRacerNameData {
+    font-size: 32px;
+    color: white;
+}
+
+.polandComingUpNextTitle {
+    font-size: 55px;
+    color: white;
+}
+
+.polandComingUpNextData {
+    font-size: 55px;
+    color: #ffd200;
+}
