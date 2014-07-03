@@ -1,0 +1,20 @@
+{
+  "author": "Club Speed",
+  "name": "csapi",
+  "description": "REST API offering gridding services",
+  "author": "Wes Ratcliff <wes@clubspeed.com>",
+  "main": "./rest-server.js",
+	"dependencies": {
+    "restify": "^2.7.0"
+  },
+  "devDependencies": {
+	  "mocha": "~1.12"
+	},
+  "optionalDependencies": {},
+  "engines": {
+    "node": ">= 0.4.1"
+  },
+	"scripts": {
+    "test": "mocha --reporter spec"
+  }
+}
