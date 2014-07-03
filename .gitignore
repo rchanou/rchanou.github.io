@@ -34,3 +34,5 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+cs-registration/laravel/app/config/config.php
