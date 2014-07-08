@@ -43,17 +43,29 @@
 <!-- BEGIN SIGNING POP-UP -->
 <div class="modal fade" id="signModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content" style="height: 650px;">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel" style="color: black">{{$strings['signHere']}}</h4>
             </div>
             <div class="modal-body">
+                @if(Config::get('config.minorSignatureWithParent') && Session::get('isMinor') == "true")
+                <div style="position: relative; width: 0; height: 0">
+                    <div style="position: absolute; top: 40px; left: 10px; color: black; font-size: 18px; z-index: 999">
+                        Parent/Guardian
+                    </div>
+                </div>
+                <div style="position: relative; width: 0; height: 0">
+                    <div style="position: absolute; top: 284px; left: 10px; color: black; font-size: 18px; z-index: 999">
+                        Participant
+                    </div>
+                </div>
+                @endif
                 {{ Form::open(array('action' => 'RegistrationController@postStep3', 'files' => 'true', 'style' => '', 'class' => 'sigPad')) }}
                     <ul class=sigNav>
                         <li class=clearButton><a href="#clear" class="btn btn-warning btn-lg" style="color: white; text-decoration: none">{{$strings['clearSignature']}}</a></li>
                     </ul>
-                    <div class="sig sigWrapper"> <canvas class="pad" width=850 height=250></canvas>
+                    <div class="sig sigWrapper" style="height: 483px;"> <canvas class="pad" width=850 height=478></canvas>
                         <input type=hidden name=signatureOutput class=output> </div>
                     <button type="button" data-dismiss="modal" style="width: 425px; text-align: center; background-color: #7a0000; color: white">{{$strings['cancelSigning']}}</button>
                     <button type=submit onclick="$('#loadingModal').modal();" style="width: 425px; text-align: center; background-color: #008000; color: white">{{$strings['startSigning']}}</button>
@@ -63,6 +75,12 @@
     </div>
 </div>
 <!-- END SIGNING POP-UP -->
+
+@if(Config::get('config.minorSignatureWithParent') && Session::get('isMinor') == "true")
+<input type="hidden" name="minorSignatureWithParent" id="minorSignatureWithParent" value="true">
+@else
+<input type="hidden" name="minorSignatureWithParent" id="minorSignatureWithParent" value="false">
+@endif
 
 <p/>
 
@@ -76,7 +94,7 @@
 @stop
 
 @section('rightFooterButton')
-    @if (Session::get('isMinor') == "false" || $settings['cfgRegAllowMinorToSign'])
+    @if (Session::get('isMinor') == "false" || $settings['cfgRegAllowMinorToSign'] || Config::get('config.minorSignatureWithParent'))
     <button class="btn btn-success btn-lg rightButton" data-toggle="modal" data-target="#signModal">
         {{$strings['step3Agree']}}
     </button>
@@ -101,7 +119,17 @@
 
 <script>
     $(document).ready(function () {
-        $('.sigPad').signaturePad({drawOnly:true, lineTop: 200});
+        var minorSignatureWithParent = $('#minorSignatureWithParent').val();
+        if (minorSignatureWithParent == 'true')
+        {
+            $('.sigPad').signaturePad({drawOnly:true, lineTop: 239, lineColour: '#000000', lineWidth: 10});
+
+        }
+        else
+        {
+            $('.sigPad').signaturePad({drawOnly:true, lineTop: 428});
+        }
+        //minorSignatureWithParent
     });
 </script>
 @stop

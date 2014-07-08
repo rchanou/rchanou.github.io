@@ -251,14 +251,14 @@
                     <input type="hidden" name="disableEmailIfMinor" id="disableEmailIfMinor" value="false">
                 @endif
 
-                <input type="hidden" name="isMinor" id="isMinor" value="false">
-                <input type="hidden" name="minorAge" id="minorAge" value={{$settings['AgeNeedParentWaiver']}}>
-
             {{str_replace('##TRACKNAME##',$settings['BusinessName'],$strings['emailText'])}}<p/>
 
             {{ Form::checkbox('donotemail', 'true',false) }} {{ Form::label('donotemail', $strings['emailsOptOut']) }}
             </div>
         @endif
+
+        <input type="hidden" name="isMinor" id="isMinor" value="false">
+        <input type="hidden" name="minorAge" id="minorAge" value={{$settings['AgeNeedParentWaiver']}}>
 
     </div>
 </div>
@@ -273,7 +273,7 @@
 @stop
 
 @section('rightFooterButton')
-{{ Form::submit($strings['step2Submit'], array('class'=>'rightButton btn btn-success btn-lg')); }}
+{{ Form::submit($strings['step2Submit'], array('class'=>'rightButton btn btn-success btn-lg', "onclick" => "$('#loadingModal').modal()")) }}
 {{ Form::close() }}
 @stop
 
@@ -304,7 +304,6 @@
         else
         {
             $('#email').prop('disabled',false);
-            console.log("Banana");
             updateAge();
             $("#birthdate").change(updateAge);
         }

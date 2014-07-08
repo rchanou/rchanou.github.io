@@ -12,5 +12,7 @@ return array(
     'privateKey' => 'SHOULD_MATCH_API_CONFIG',
 
     'LocationID' => '1',
-    'localized' => false
+    'localized' => false,
+    'minorSignatureWithParent' => true, //Whether or not both the minor and parent sign simultaneously
+
 );

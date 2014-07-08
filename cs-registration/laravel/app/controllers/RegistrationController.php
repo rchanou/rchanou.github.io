@@ -183,6 +183,10 @@ class RegistrationController extends BaseController {
         $session = Session::all();
         $settings = $session['settings'];
         $input = Input::all();
+        if (!array_key_exists('isMinor',$input))
+        {
+            $input['isMinor'] = false;
+        }
         Session::put('isMinor',$input['isMinor']);
         $session['isMinor'] = $input['isMinor'];
 
@@ -465,7 +469,20 @@ class RegistrationController extends BaseController {
 
         if ($stringTranslations === false || $currentCulture === false) //If Club Speed could not be reached
         {
-            return false;
+            //Default to English strings
+
+            $stringTranslations = array();
+            $currentCulture = "en-US";
+
+            Session::put('currentCulture',$currentCulture);
+            Session::put('currentCultureFB',$this->convertCultureToFacebook($currentCulture));
+            Session::put('supportedCultures', array('en-US'));
+
+            $stringTranslations["en-US"] = Strings::getDefaultEnglish();
+            Session::put('translations', $stringTranslations);
+            return $stringTranslations[$currentCulture];
+
+            //return false;
 
             /*
              *
@@ -633,7 +650,7 @@ class RegistrationController extends BaseController {
     {
         //Convert the signature to an image resource
         $signatureImage = sigJsonToImage($signatureJSON, array(
-            'imageSize' => array(850, 250) //array(160,90) array(850, 250)
+            'imageSize' => array(850, 478) //array(160,90) array(850, 250)
         ,'bgColour' => array(0xff, 0xff, 0xff)
         ,'penWidth' => 2
         ,'penColour' => array(0x14, 0x53, 0x94)
@@ -642,7 +659,7 @@ class RegistrationController extends BaseController {
 
         //Resizing to Club Speed signature size
         $imgDest = imagecreatetruecolor(160, 90);
-        imagecopyresampled($imgDest,$signatureImage,0,0,0,0,160,90,850,250);
+        imagecopyresampled($imgDest,$signatureImage,0,0,0,0,160,90,850,478);
         $signatureImage = $imgDest;
 
         //Convert the image resource to a png

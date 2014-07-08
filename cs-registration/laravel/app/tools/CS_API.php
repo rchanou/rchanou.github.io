@@ -110,7 +110,7 @@ class CS_API
                 $url = $url . '/translations/getNamespace.json' . '?namespace=Interfaces.Common&key=' .self::$apiKey;
                 $result = self::callApi($url);
                 $resultFormatted = array();
-                if ($result == null || array_key_exists("error",$result))
+                if ($result == null || array_key_exists("error",$result) || !is_array($result))
                 {
                     $result = null;
                 }
@@ -130,7 +130,7 @@ class CS_API
                 $url = $url . '/settings/get.json' . '?group=MainEngine&setting=currentCulture&key=' .self::$privateKey;
 
                 $result = self::callApi($url);
-                if ($result == null || array_key_exists("error",$result))
+                if ($result == null || array_key_exists("error",$result) || !is_array($result) || !array_key_exists("CurrentCulture",$result["settings"]))
                 {
                     $result = "en-US";
                 }
@@ -146,7 +146,8 @@ class CS_API
             case 'getSettings':
                 $url = $url . '/settings/get.json' . '?group=kiosk&key=' .self::$privateKey;
                 $resultBeforeProcessing = self::callApi($url);
-                if ($resultBeforeProcessing === null || (is_array($result) && array_key_exists("error",$result)))
+
+                if ($resultBeforeProcessing === null || (is_array($resultBeforeProcessing) && array_key_exists("error",$resultBeforeProcessing)))
                 {
                     $result = null;
                 }

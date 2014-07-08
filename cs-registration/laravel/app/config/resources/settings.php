@@ -89,7 +89,7 @@ class Settings {
            "cfgRegCustTxt3Show":false, //TODO: Unused. Should add?
            "cfgRegCustTxt4req":false, //TODO: Unused. Should add?
            "cfgRegCustTxt4Show":false, //TODO: Unused. Should add?
-           "cfgRegAllowMinorToSign":false, //TODO: Unused.
+           "cfgRegAllowMinorToSign":false,
            "cfgRegShowBeenHereBefr":true //TODO: Unused. Need to implement?
          }
          */
