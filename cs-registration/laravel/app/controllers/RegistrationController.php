@@ -622,7 +622,10 @@ class RegistrationController extends BaseController {
         //Forcing Facebook to be enabled
         $settings["Reg_EnableFacebook"] = true;
 
-
+        if (!array_key_exists('CfgRegDisblEmlForMinr',$settings))
+        {
+            $settings['CfgRegDisblEmlForMinr'] = false;
+        }
         //TODO: Just for test purposes
 /*        $settings['CfgRegDisblEmlForMinr'] = false;
 
