@@ -79,7 +79,7 @@ class Channel
 
 							// Image slide - 5
 							case 2:
-								$output['lineup'][] = array('type' => 'image', 'options' => array('url' => $this->host . $this->channelImageUrl . $slide['Text0'], 'duration' => $slide['TimeInSecond']*1000));
+								$output['lineup'][] = array('type' => 'image', 'options' => array('url' => $this->channelImageUrl . $slide['Text0'], 'duration' => $slide['TimeInSecond']*1000));
 								break;							
 
 							// Top Time of the Day - 5
