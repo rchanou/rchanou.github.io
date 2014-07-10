@@ -42,7 +42,7 @@
             opacity: 0.90;
         }
         #headerWrapper .headerText {
-            font-size: 5vh;
+            font-size: 4.3vh;
             font-weight: bold;
             color: black;
             height:100%;
@@ -111,7 +111,7 @@
         #results .racer {
             width: 100%;
             height: 100%;
-            height: 7.4vh;
+            /*height: 7.4vh;*/
             margin-left: 2vw;
             margin-right: 4vw;
         }
@@ -124,7 +124,7 @@
             height: 100%;
             vertical-align: middle;
             font-weight: bold;
-            font-size: 4vmin;
+            /*font-size: 4vmin;*/
         }
         #results .racer .position {
             width: 10%;
@@ -318,6 +318,7 @@
     var assert = z.assert;
     var sw = z.sw;
     var parameters = z.location.parameters;
+    var data = {}; // for use with handlebars
 
 
     /**
@@ -353,18 +354,18 @@
         speed_level: parseInt(parameters.speedLevel) || 1,
         limit: parseInt(parameters.limit) || 10
     });
-
     function buildUrl(api, queries) {
         // builds the api url based off of the originally defined root url, and the provided apiType
         return apiRootUrl 
             + apiRootPath
             + api
-            + "?" + (queries ? $.param(queries) + "&" : "")
-            + "callback=?"; // seemingly can't use "?" inside $.param without having it converted, and $.getJSON does not like the converted value
+            + (queries ? "?" + $.param(queries) : "");
     }
-
-    function handleError(err) {
-        console.error(err); // todo: something else to handle errors
+    function handleSuccess(apiData, textStatus, xhr) {
+        data.extend(apiData);
+    }
+    function handleError(xhr, textStatus, errorThrown) {
+        log.error(xhr.status + ": " + errorThrown);
     }
 
 
@@ -395,66 +396,75 @@
         }
     }
 
-    var currentLocale = parameters.locale || navigator.language || navigator.userLanguage || "en-US"; // use the locale if provided, use the current language if not, use en-US as a last resort
+    function applyAnimations() {
+        // ensure that the delay is never longer than 1/2 of the slideTimeout, but dont go over 350ms
+        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+        var d, delay = (d = (+parameters.slideTimeout || 15000) / data.fastest.length * 0.5) > 350 ? 350 : d;
+        applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
+    }
+
     function localizeData(data) {
+        var locale = z.location.locale; // make a copy so the computation is only done once
         if (z.check.exists(data) && z.check.isArray(data.fastest)) {
             for (var i = 0; i < data.fastest.length; i++) {
                 var currentRacer = data.fastest[i];
-                currentRacer.lap_time = currentRacer.lap_time.toLocaleString(currentLocale);
+                currentRacer.lap_time = currentRacer.lap_time.toLocaleString(locale);
             }
         }
     }
 
     function buildAndAppendHtml(templateHtml) {
+        // build an array of deferred objects for api data collection
         var deferreds = [];
 
         // setup handlebars data object to be extended with api data
-        var data = {}.extend(z.location.parameters, apiTracksQueries, apiFastestQueries);
+        data.extend(parameters, apiTracksQueries, apiFastestQueries);
 
-        // build an array of deferred objects for api data collection
-        log(buildUrl(apiTracksUrl, apiTracksQueries));
-
-        // push the getJSON call for track list
+        // push the ajax call for track list
         deferreds.push(
-            $.getJSON(buildUrl(apiTracksUrl, apiTracksQueries))
-            .done(function(trackData) {
-                for (var i = 0; i < trackData.tracks.length; i++) {
+            $.ajax({
+                url: buildUrl(apiTracksUrl, apiTracksQueries),
+                type: "GET",
+                dataType: "json",
+                async: true
+            })
+            .done(function(apiData) {
+                for (var i = 0; i < apiData.tracks.length; i++) {
                     // can we pass the API a parameter to just get a specific track's information?
                     // doing data manipulation on javascript in the interim
-                    if (trackData.tracks[i].id == apiTracksQueries.track) {
-                        data.extend(trackData.tracks[i]);
+                    if (apiData.tracks[i].id == apiTracksQueries.track) {
+                        data.extend(apiData.tracks[i]);
                         break;
                     }
                 }
             })
-            .fail(function(err) {
-                handleError(err);
-            })
+            .fail(handleError)
         );
 
-        // push the getJSON call for fastest times
+        // push the ajax call for fastest
         deferreds.push(
-            $.getJSON(buildUrl(apiFastestUrl, apiFastestQueries))
-            .done(function(fastestData) {
-                data.extend(fastestData);
+            $.ajax({
+                url: buildUrl(apiFastestUrl, apiFastestQueries),
+                type: "GET",
+                dataType: "json",
+                async: true
             })
-            .fail(function(err) {
-                handleError(err);
-            })
+            .done(handleSuccess)
+            .fail(handleError)
         );
 
         // handle the final async call to use the built data object
-        $.when.apply($, deferreds).then(function() {
+        $.when.apply($, deferreds).always(function() {
             localizeData(data);
             var template = Handlebars.compile(templateHtml); // compile the originally defined source
             var output = template(data); // attach the data so handlebars can interpret it
             $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
-            // var disableAnimations = z.convert(parameters.disableAnimations, z.types.boolean); // convert disableAnimations to bool, take the opposite
             if (z.convert(parameters.disableAnimations, z.types.boolean)) {
                 $('.racer').addClass('visible');
             }
             else {
-                applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], 350);
+                applyAnimations();
+                
             }
         });
     }
@@ -513,13 +523,19 @@
     Handlebars.registerHelper('inc', function(value, options) {
         return parseInt(value) + 1;
     });
+    Handlebars.registerHelper('getRacerHeight', function(options) {
+        return (96 / options.data.root.fastest.length);
+    });
+    Handlebars.registerHelper('getRacerFontSize', function(options) {
+        return 2 + (100 / (options.data.root.fastest.length * 5));
+    });
 
     var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
         +   '       <div id="headerTop" class="parallelogram">'
-        +   '           <div class="headerText unskew uppercase shadows">TOP TIMES OF THE {{range}}</div>'
+        +   '           <div class="headerText unskew uppercase shadows">TOP TIMES OF THE {{range}} ON TRACK:&nbsp;&nbsp;{{name}}</div>'
         +   '       </div>'
         +   '       <div id="headerBottom" class="parallelogram">'
         +   '           <div class="unskew">'
@@ -535,7 +551,7 @@
         +   '   </div>'
         +   '   <div id="results">'
         +   '       {{#each fastest}}'
-        +   '           <div class="racer {{getPlace @index}} hidden">'
+        +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{getRacerHeight}}%; font-size: {{getRacerFontSize}}vh;">'
         +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText unskew">{{inc @index}}</div></div>'
         +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText unskew padLeft5">{{nickname}}</div></div>'
         +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText unskew">{{lap_time}}</div></div>'

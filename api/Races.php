@@ -628,7 +628,6 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
                     break;
 								case 'year':
                     $start = date($GLOBALS['dateFormat'], strtotime('first day of january')) . ' 12:00:00 AM';
-										die($start);
                     break;
                 default:
                     throw new RestException(412,'Invalid range given');

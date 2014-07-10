@@ -764,7 +764,10 @@ EOD;
 
 		$tsql_params = array($start, $end);
 
-		$tsql = "select top($limit) custid, birthdate, cell, fname, lname, racername, birthdate, gender, emailaddress, zip, rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail  from customers where emailaddress <> '' and deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
+		$tsql = "select top($limit) custid, birthdate, phonenumber, (custid/1000000) AS locationid, membershipstatus, membershiptextlong AS membershiptext, cell, fname, lname, racername, birthdate, gender, emailaddress, address, address2, city, state, zip, country rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail from customers c where emailaddress <> '' and deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
+
+		// OLD QUERY
+		//$tsql = "select top($limit) custid, birthdate, cell, fname, lname, racername, birthdate, gender, emailaddress, zip, rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail  from customers where emailaddress <> '' and deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
 
 		$rows = $this->run_query($tsql, $tsql_params);
 

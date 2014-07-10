@@ -49,13 +49,13 @@
     var assert = z.assert;
     var sw = z.sw;
     var parameters = z.location.parameters;
+    var data = {}; // for use with handlebars
 
     function buildAndAppendHtml(templateHtml) {
-        var data = {}; // declare handlebars data object
-        z.extend(data, z.location.parameters); // add all url parameter data into the handlebars data object
+        data.extend(parameters);
         var template = Handlebars.compile(templateHtml); // compile the originally defined source
         var output = template(data); // attach the data so handlebars can interpret it
-        $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML -- **NEEDS TO BE CHANGED FROM BODY**
+        $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
     }
 
     var src = '' +

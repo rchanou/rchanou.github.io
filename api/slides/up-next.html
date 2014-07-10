@@ -20,7 +20,7 @@
             -webkit-font-smoothing: antialiased;
         }
         html, body :hover {
-            cursor: none;
+            cursor: default;
         }
         .spacing {
             background: transparent;
@@ -47,7 +47,7 @@
         }
         .labelText {
             font-weight: bold;
-            font-size: 2vh;
+            /*font-size: 2vh;*/
             color: #FFFFFF;
         }
         #upNextWrapper {
@@ -118,7 +118,7 @@
         }
         .portraitHeaderText {
             /*font-weight: bold;*/
-            font-size: 2.3vh;
+            /*font-size: 2.3vh;*/
             color: white;
         }
         .portraitPictureWrapper {
@@ -149,7 +149,7 @@
         .portraitText {
             vertical-align: middle;
             font-weight: bold;
-            font-size: 2.0vh;
+            /*font-size: 2.0vh;*/
             margin-right: 500px; /* not working? */
             height: 100%;
             width: 100%;
@@ -427,9 +427,7 @@
     var assert = z.assert;
     var sw = z.sw;
     var parameters = z.location.parameters;
-    var gridSizes; // declared at this location so Handlebars helpers can access it
-
-    // var slideTimeout = parameters.slideTimeout; // total time for the slide to be shown
+    var data = {}; // for use with handlebars
 
 
     /**
@@ -437,12 +435,12 @@
     */
 
     function GridSizes(data) {
-        this.width = null;
-        this.height = null;
+        this.width = 0;
+        this.height = 0;
         this.widthMax = 96;
         this.heightMax = 78;
-        this.numRows = null;
-        this.numCols = null;
+        this.numRows = 0;
+        this.numCols = 0;
         this.determineSizes(data);
     }
     z.defineProperty(GridSizes.prototype, 'widthStyle', { get: function() { return "width:" + this.width + "%;"; }, writeable: false });
@@ -471,8 +469,9 @@
     var apiRootUrl;
     if (!document.location.hostname || document.location.hostname == "localhost") { // can be removed in production code -- just for testing
         // apiRootUrl = 'https://ekwigan.clubspeedtiming.com';
+        apiRootUrl = 'https://ftikcincinnati.clubspeedtiming.com';
         // apiRootUrl = 'https://k1anaheim.clubspeedtiming.com';
-        apiRootUrl = 'https://ghhonolulu.clubspeedtiming.com';
+        // apiRootUrl = 'https://ghhonolulu.clubspeedtiming.com';
     }
     else {
         apiRootUrl = window.location.origin || (window.location.protocol + "//" + window.location.host);
@@ -492,18 +491,18 @@
     var apiNextQueries = addDefaults({
         track: parseInt(parameters.track) || 1
     });
-
     function buildUrl(api, queries) {
         // builds the api url based off of the originally defined root url, and the provided apiType
         return apiRootUrl 
             + apiRootPath
             + api
-            + "?" + (queries ? $.param(queries) + "&" : "")
-            + "callback=?"; // seemingly can't use "?" inside $.param without having it converted, and $.getJSON does not like the converted value
+            + (queries ? "?" + $.param(queries) : "");
     }
-
-    function handleError(err) {
-        console.error(err); // todo: something else to handle errors
+    function handleSuccess(apiData, textStatus, xhr) {
+        data.extend(apiData);
+    }
+    function handleError(xhr, textStatus, errorThrown) {
+        log.error(xhr.status + ": " + errorThrown);
     }
 
 
@@ -534,58 +533,64 @@
         }
     }
 
-    var currentLocale = parameters.locale || navigator.language || navigator.userLanguage || "en-US"; // use the locale if provided, use the current language if not, use en-US as a last resort
     function localizeData(data) {
+        var locale = z.location.locale; // make a copy so the computation is only done once
         if (data && data.race && data.race.racers && data.race.racers.length) {
             var racers = data.race.racers;
             for (var i = 0; i < racers.length; i++) {
-                racers[i].rpm = parseInt(racers[i].rpm).toLocaleString(currentLocale);
+                racers[i].rpm = parseInt(racers[i].rpm).toLocaleString(locale);
             }
         }
     }
 
     function handleError(err) {
         log.error(err); // todo: something else to handle errors
+        alert(err.toString());
+    }
+
+    function applyAnimations() {
+        // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 280ms
+        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+        var d, delay = (d = (+parameters.slideTimeout || 15000) / (data.race.racers.length * 1.5)) > 280 ? 280 : d;
+        applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
+        applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
+        setTimeout(function() {
+            // dont start the flip until the cards are finished applying fadeInDown
+            applyHtmlClass($('.flippable'), 'flip', delay);
+        }, delay*3);
+        $('.flippable').click(function() {
+            $(this).toggleClass('flip');
+        });
     }
 
     function buildAndAppendHtml(templateHtml) {
+        // build an array of deferred objects for api data collection
         var deferreds = [];
 
         // setup handlebars data object to be extended with api data
-        var data = {}.extend(z.location.parameters, apiNextQueries);
-
-        // build an array of deferred objects for api data collection
-        log(buildUrl(apiNextUrl, apiNextQueries));
+        data.extend(parameters, apiNextQueries);
 
         // push the getJSON call for track list
         deferreds.push(
-            $.getJSON(buildUrl(apiNextUrl, apiNextQueries))
-            .done(function(nextData) {
-                z.extend(data, nextData); //data.extend(nextData);
+            $.ajax({
+                url: buildUrl(apiNextUrl, apiNextQueries),
+                type: "GET",
+                dataType: "json",
+                async: true
             })
-            .fail(function(err) {
-                handleError(err);
+            .done(function(apiData, textStatus, xhr) {
+                data.extend(apiData);
             })
         );
 
         // handle the final async call to use the built data object
-        $.when.apply($, deferreds).then(function() {
+        $.when.apply($, deferreds).always(function() {
             localizeData(data);
-            data.race.racers = data.race.racers.take(parameters.limit || 15); // FOR TEST PURPOSES
-            gridSizes = new GridSizes(data.race.racers);
+            data.gridSizes = new GridSizes(data && data.race && data.race.racers ? data.race.racers : 0);
             var template = Handlebars.compile(templateHtml); // compile the originally defined source
             var output = template(data); // attach the data so handlebars can interpret it
             $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
-            var delay = 280;
-            applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
-            applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
-            setTimeout(function() {
-                // dont start the flip until the cards are finished applying fadeInDown
-                applyHtmlClass($('.flippable'), 'flip', delay);
-            }, delay*3);
-            $('.flippable').click(function() {
-                $(this).toggleClass('flip');
-            });
+            applyAnimations();
         });
     }
 
@@ -647,31 +652,29 @@
         return parseInt(value) + 1;
     });
     Handlebars.registerHelper('getName', function(index, options) {
+        // note: this may not be necessary. the API may be able to determine this ahead of time
         var racer = options.data.root.race.racers[index];
         return (z.convert(parameters.useRealName, z.types.boolean) ? racer.first_name + " " + racer.last_name.charAt(0) : racer.nickname);
-    });
-    Handlebars.registerHelper('getLabels', function(options) {
-        var heightStyle = getRacerHeight();
-        var srcArray = new Array(gridSizes.numRows);
-        for (var i = 0; i < srcArray.length; i++) {
-            srcArray[i] = labelSrc.replace(/\{\{getRacerHeight\}\}/g, gridSizes.heightStyle);
-        }
-        return new Handlebars.SafeString(srcArray.join('\n'));
     });
     Handlebars.registerHelper('getYesNo', function(item, options) {
         return (z.convert(item, z.types.boolean) ? "YES" : "NO");
     });
     Handlebars.registerHelper('getRacerStyle', function(options) {
-        log(gridSizes.style);
-        return gridSizes.style;
+        return options.data.root.gridSizes.style;
     });
-
-    function getRacerHeight(options) {
-        return gridSizes.heightStyle;
-    }
-
+    Handlebars.registerHelper('repeat', function(count, options) {
+        var src = '';
+        for (var i = 0; i < count; i++) {
+            src += options.fn();
+        }
+        return src;
+    });
+    Handlebars.registerHelper('getFontSize', function(options) {
+        var gridSizes = options.data.root.gridSizes;
+        return (20 / (gridSizes.numRows + 6)); // formula tbd
+    });
     Handlebars.registerHelper('getRacerHeight', function(options) {
-        return gridSizes.heightStyle;
+        return options.data.root.gridSizes.heightStyle;
     });
 
     function imageExists(imageUri) {
@@ -697,7 +700,7 @@
         +   '               <div class="logoWrapper fill roundAll"></div>'
         +   '           </div>'
         +   '           <div class="back face fill roundAll">'
-        +   '               <div class="portraitWrapper fill roundAll">'
+        +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{getFontSize}}vh;">'
         +   '                   <div class="portraitHeaderWrapper roundTop">'
         +   '                       <div class="portraitHeaderText fill vMiddle hCenter">{{getName @index}}</div>'
         +   '                   </div>'
@@ -721,7 +724,7 @@
     var labelSrc = '' +
             '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
         +   '       <div class="portraitHeaderWrapper"></div>'
-        +   '       <div class="portraitBodyWrapper">'
+        +   '       <div class="portraitBodyWrapper" style="font-size:{{getFontSize}}vh;">'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">START POSITION:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
@@ -734,7 +737,9 @@
         +   '   <div class="spacing"></div>'
         +   '   <div id="labelsWrapper" class="lFloat">'
         +   '       <div class="upNextHeader hidden"></div>' // for spacing purposes
-        +   '       {{getLabels}}'
+        +   '       {{#repeat gridSizes.numRows}}'
+        +               labelSrc
+        +   '       {{/repeat}}'
         +   '   </div>'
         +   '   <div id="upNextWrapper">'
         +   '       <div id="upNextTopWrapper" class="fill">'

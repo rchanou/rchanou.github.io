@@ -7,7 +7,7 @@ class Channel
 
     function __construct(){
         header('Access-Control-Allow-Origin: *');
-        $this->host = empty($_SERVER['HTTPS']) ? 'http://' . $_SERVER['HTTP_HOST'] : 'https://' . $_SERVER['HTTP_HOST'];
+        $this->host = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http://' . $_SERVER['HTTP_HOST'] : 'https://' . $_SERVER['HTTP_HOST'];
         $this->channelImageUrl = empty($GLOBALS['channelImageUrl']) ? $this->host . '/sp_admin/ScreenImages/' : $this->host . $GLOBALS['channelImageUrl']; // Set if not defined in configuration
 				$this->channelSlideUrl = empty($GLOBALS['channelSlideUrl']) ? $this->host . '/api/slides/' : $this->host . $GLOBALS['channelSlideUrl']; // Set if not defined in configuration
 				$this->speedScreenBackgroundUrl = $this->host . '/PrivateWWW/SpeedScreen.gif';

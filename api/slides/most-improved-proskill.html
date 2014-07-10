@@ -311,7 +311,7 @@
     var assert = z.assert;
     var sw = z.sw;
     var parameters = z.location.parameters;
-    // var slideTimeout = parameters.slideTimeout; // total time for the slide to be shown -- not being used yet, could be used to determine animation times
+    var data = {}; // for use with handlebars
 
 
     /**
@@ -343,18 +343,18 @@
         limit: parameters.limit || 10,
         year: (parameters.range === "year" ? parameters.year || new Date().getFullYear() : undefined)
     });
-
     function buildUrl(api, queries) {
         // builds the api url based off of the originally defined root url, and the provided apiType
         return apiRootUrl 
             + apiRootPath
             + api
-            + "?" + (queries ? $.param(queries) + "&" : "")
-            + "callback=?"; // seemingly can't use "?" inside $.param without having it converted, and $.getJSON does not like the converted value
+            + (queries ? "?" + $.param(queries) : "");
     }
-
-    function handleError(err) {
-        console.error(err); // todo: something else to handle errors
+    function handleSuccess(apiData, textStatus, xhr) {
+        data.extend(apiData);
+    }
+    function handleError(xhr, textStatus, errorThrown) {
+        log.error(xhr.status + ": " + errorThrown);
     }
 
 
@@ -385,35 +385,46 @@
         }
     }
 
-    var currentLocale = parameters.locale || navigator.language || navigator.userLanguage || "en-US"; // collect the culture once, prefer parameters to navigator, and have a last resort of en-US
+    function applyAnimations() {
+        // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
+        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+        var d, delay = (d = (+parameters.slideTimeout || 15000) / (data.racers.length * 1.5)) > 350 ? 350 : d;
+        applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
+    }
+
     function localizeData(data) {
+        var locale = z.location.locale; // make a copy so the computation is only done once
         if (data && data.racers) {
             for (var i = 0; i < data.racers.length; i++) {
-                data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(currentLocale);
+                data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(locale);
             }
         }
     }
 
+    var data = {};
     function buildAndAppendHtml(templateHtml) {
         // build an array of deferred objects for json collection
         var deferreds = [];
 
         // setup handlebars data object to be extended with api data
-        var data = {}.extend(z.location.parameters, apiMostImprovedRpmQueries);
+        data.extend(parameters, apiMostImprovedRpmQueries);
 
-        // push the getJSON call for track list
+        // push the ajax call for most improved
         deferreds.push(
-            $.getJSON(buildUrl(apiMostImprovedRpmUrl, apiMostImprovedRpmQueries))
-            .done(function(mostImprovedRpmData) {
-                data.racers = mostImprovedRpmData;
+            $.ajax({
+                url: buildUrl(apiMostImprovedRpmUrl, apiMostImprovedRpmQueries),
+                type: "GET",
+                dataType: "json",
+                async: true
             })
-            .fail(function(err) {
-                handleError(err);
+            .done(function handleSuccess(apiData, textStatus, xhr) {
+                data.racers = apiData;
             })
+            .fail(handleError)
         );
 
         // handle the final async call to use the built data object
-        $.when.apply($, deferreds).then(function() {
+        $.when.apply($, deferreds).always(function() {
             localizeData(data);
             var template = Handlebars.compile(templateHtml); // compile the originally defined source
             var output = template(data); // attach the data so handlebars can interpret it
@@ -422,7 +433,7 @@
                 $('.racer').addClass('visible');
             }
             else {
-                applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], 350);
+                applyAnimations();
             }
         });
     }

@@ -318,7 +318,7 @@
     var assert = z.assert;
     var sw = z.sw;
     var parameters = z.location.parameters;
-    // var slideTimeout = parameters.slideTimeout; // total time for the slide to be shown
+    var data = {}; // for use with handlebars
 
 
     /**
@@ -349,18 +349,18 @@
     var apiTopRpmQueries = addDefaults({
         limit: parseInt(parameters.limit) || 10,
     });
-
     function buildUrl(api, queries) {
         // builds the api url based off of the originally defined root url, and the provided apiType
         return apiRootUrl 
             + apiRootPath
             + api
-            + "?" + (queries ? $.param(queries) + "&" : "")
-            + "callback=?"; // seemingly can't use "?" inside $.param without having it converted, and $.getJSON does not like the converted value
+            + (queries ? "?" + $.param(queries) : "");
     }
-
-    function handleError(err) {
-        console.error(err); // todo: something else to handle errors
+    function handleSuccess(apiData, textStatus, xhr) {
+        data.extend(apiData);
+    }
+    function handleError(xhr, textStatus, errorThrown) {
+        log.error(xhr.status + ": " + errorThrown);
     }
 
 
@@ -391,32 +391,39 @@
         }
     }
 
-    var currentLocale = parameters.locale || navigator.language || navigator.userLanguage || "en-US"; // use the locale if provided, use the current language if not, use en-US as a last resort
+    function applyAnimations() {
+        // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
+        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+        var d, delay = (d = (+parameters.slideTimeout || 15000) / (data.racers.length * 1.5)) > 350 ? 350 : d;
+        applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
+    }
+
     function localizeData(data) {
-        for (var i = 0; i < data.racers.length; i++) {
-            data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(currentLocale);
+        var locale = z.location.locale; // make a copy so the computation is only done once
+        if (z.check.exists(data) && z.check.isArray(data.racers)) {
+            for (var i = 0; i < data.racers.length; i++) {
+                data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(locale);
+            }
         }
     }
 
-    
-
     function buildAndAppendHtml(templateHtml) {
+        // build an array of deferred objects for api data collection
         var deferreds = [];
 
         // setup handlebars data object to be extended with api data
-        var data = {}.extend(z.location.parameters, apiTopRpmQueries);
+        data.extend(parameters, apiTopRpmQueries);
 
-        // build an array of deferred objects for api data collection
-
-        // push the getJSON call for track list
+        // push the getJSON call for top RPM
         deferreds.push(
-            $.getJSON(buildUrl(apiTopRpmUrl, apiTopRpmQueries))
-            .done(function(topRpmData) {
-                z.extend(data, topRpmData);
+            $.ajax({
+                url: buildUrl(apiTopRpmUrl, apiTopRpmQueries),
+                type: "GET",
+                dataType: "json",
+                async: true
             })
-            .fail(function(err) {
-                handleError(err);
-            })
+            .done(handleSuccess)
+            .fail(handleError)
         );
 
         // handle the final async call to use the built data object
@@ -429,7 +436,7 @@
                 $('.racer').addClass('visible');
             }
             else {
-                applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], 350);
+                applyAnimations();
             }
         });
     }
