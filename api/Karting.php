@@ -228,7 +228,7 @@ class Karting
                     </ul>
                     
                     <h4><i class="icon-plus"></i> Settings</h4>
-                    <p class="description">Retrieve settings from Club Speed <strong>(requires private key)</strong>. Settings are grouped and may be accessed by the entire group or by a specific group/setting pair.</p>
+                    <p class="description">Retrieve settings from Club Speed <strong>(most settings require a private key)</strong>. Settings are grouped and may be accessed by the entire group or by a specific group/setting pair.</p>
                     <p class="description">A special group entitled "kiosk" exists that presents a consolidated registration kiosk setting group regardless of the version of Club Speed.</p>
                     <p class="description"><strong>Other supported groups:</strong> "decoders"</p>
 

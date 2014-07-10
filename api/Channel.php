@@ -8,9 +8,9 @@ class Channel
     function __construct(){
         header('Access-Control-Allow-Origin: *');
         $this->host = empty($_SERVER['HTTPS']) ? 'http://' . $_SERVER['HTTP_HOST'] : 'https://' . $_SERVER['HTTP_HOST'];
-        $this->channelImageUrl = empty($GLOBALS['channelImageUrl']) ? '/sp_admin/ScreenImages/' : $GLOBALS['channelImageUrl']; // Set if not defined in configuration
-				$this->channelSlideUrl = empty($GLOBALS['channelSlideUrl']) ? '/api/slides/' : $GLOBALS['channelSlideUrl']; // Set if not defined in configuration
-				$this->speedScreenBackgroundUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/PrivateWWW/SpeedScreen.gif';
+        $this->channelImageUrl = empty($GLOBALS['channelImageUrl']) ? $this->host . '/sp_admin/ScreenImages/' : $this->host . $GLOBALS['channelImageUrl']; // Set if not defined in configuration
+				$this->channelSlideUrl = empty($GLOBALS['channelSlideUrl']) ? $this->host . '/api/slides/' : $this->host . $GLOBALS['channelSlideUrl']; // Set if not defined in configuration
+				$this->speedScreenBackgroundUrl = $this->host . '/PrivateWWW/SpeedScreen.gif';
     }
 
     protected function index($channelId, $sub = null) {
@@ -32,7 +32,7 @@ class Channel
 				if(!is_numeric($channelId)) throw new RestException(412,'Channel ID must be numeric');
 				
 				// Base path for video URLs
-				$videoUrl = 'http://' . $_SERVER['HTTP_HOST'] . $this->channelSlideUrl . 'video.html?videoUrl=';
+                $baseVideoUrl = $this->channelSlideUrl . 'video.html?videoUrl=';
 				
 				// Get screen
 				$tsql = "SELECT * FROM ScreenTemplate WHERE templateid = ? AND deleted = 0";
@@ -87,7 +87,7 @@ class Channel
 								//?trackId=1&dateSpan=day&backgroundUrl=http://www.w8themes.com/wp-content/uploads/2013/11/White-Background-Wallpaper.jpg
 								
 								// Build path to Top Time TODO Get Background Url
-								$url = 'http://' . $_SERVER['HTTP_HOST'] . $this->channelSlideUrl . 'top-times.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&dateSpan=day&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$url = $this->channelSlideUrl . 'top-times.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=day&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
 								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'speedLevel' =>  (int)$slide['Text1'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'topTimeOfDay'));
 								break;
 
@@ -96,7 +96,7 @@ class Channel
 								//?trackId=1&dateSpan=week&backgroundUrl=http://www.w8themes.com/wp-content/uploads/2013/11/White-Background-Wallpaper.jpg
 								
 								// Build path to Top Time TODO Get Background Url
-								$url = 'http://' . $_SERVER['HTTP_HOST'] . $this->channelSlideUrl . 'top-times.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&dateSpan=week&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$url = $this->channelSlideUrl . 'top-times.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=week&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
 								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'speedLevel' =>  (int)$slide['Text1'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'topTimeOfWeek'));
 								break;
 
@@ -105,13 +105,14 @@ class Channel
 								//?trackId=1&dateSpan=month&backgroundUrl=http://www.w8themes.com/wp-content/uploads/2013/11/White-Background-Wallpaper.jpg
 								
 								// Build path to Top Time TODO Get Background Url
-								$url = 'http://' . $_SERVER['HTTP_HOST'] . $this->channelSlideUrl . 'top-times.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&dateSpan=month&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$url = $this->channelSlideUrl . 'top-times.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=month&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
 								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'speedLevel' =>  (int)$slide['Text1'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'topTimeOfMonth'));
 								break;
 
 							// Top Time of the Year - 4
 							case 6:
-								$output['lineup'][] = array('type' => 'topTimeOfYear', 'options' => array('startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
+								$url = $this->channelSlideUrl . 'top-times.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=year&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'speedLevel' =>  (int)$slide['Text1'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'topTimeOfYear'));
 								break;
 
 							// Top RPM Overall - 5
@@ -166,9 +167,10 @@ class Channel
 							case 18:
 								// It's a VIDEO URL (.mp4, .webm, .ogv)
 								if(filter_var($slide['Text0'], FILTER_VALIDATE_URL) && (substr($slide['Text0'], -4) == '.mp4' || substr($slide['Text0'], -5) == '.webm' || substr($slide['Text0'], -4) == '.ogv')) {
-									
+
+
 									// Build path to video
-									$videoUrl = $videoUrl . urlencode($slide['Text0']);
+									$videoUrl = $baseVideoUrl . urlencode($slide['Text0']);
 									$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $videoUrl, 'originalUrl' => $slide['Text0'], 'duration' => $slide['TimeInSecond']*1000));
 								
 								
@@ -185,7 +187,7 @@ class Channel
 								break;
 
 
-							// 19 Flash TODO: Not implemented
+							// 19 Flash: Not implemented
 
 							// Event Screen - 3
 							case 20:

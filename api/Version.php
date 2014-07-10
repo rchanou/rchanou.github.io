@@ -49,8 +49,8 @@ class Version
 
     protected function api()
     {
-        $output["CurrentVersion"] = "1.1.9";
-        $output["LastUpdated"] = "6/23/2014 10:41";
+        $output["CurrentVersion"] = "1.1.10";
+        $output["LastUpdated"] = "7/7/2014 10:52";
         return $output;
     }
 

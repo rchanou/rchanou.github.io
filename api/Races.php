@@ -815,17 +815,33 @@ EOD;
         $output['race'] = $rowsRace[0];
 
         //$tsql = 'GetNextHeatRacersInfo';
-        //$tsql_params = array(&$heatId);
-        $tsql = 'GetNextHeatRacersInfo' . ' ' . $heatId;
-        $rowsRacers = $this->run_query($tsql);
+        $tsql_params = array(&$heatId);
+        $tsql = 'Select hd.CustID id, hd.LineUpPosition start_position, CASE autono WHEN -1 then hd.historyautono ELSE autono END AS kart_number, hd.RPM rpm, case when c.TotalRaces > 1 then 1 else 0 end is_first_time, hd.FinishPosition finish_position, c.RacerName nickname, c.FName first_name, c.LName last_name From HeatMain hm inner join HeatTypes ht on hm.HeatTypeNo = ht.HeatTypeNo inner join SpeedLevel sl on hm.SpeedLevel = sl.SpeedLevel inner join Tracks t on hm.trackno = t.TrackNo inner join HeatDetails hd on hm.heatno = hd.heatno inner join Customers c on hd.CustID = c.CustID Where hd.HeatNo = ? order by hd.LineUpPosition';
+        $rowsRacers = $this->run_query($tsql, $tsql_params);
         $output['race']['racers'] = $rowsRacers;
+
+				foreach($output['race']['racers'] as $key => $racer) {
+					$racerInfo = $this->run_query('GetRacerProfile '.(int)$racer['id'].', ' . (int)$heatId, array());
+					$output['race']['racers'][$key]['total_customers'] = $racerInfo[0]['TotalCustomers'];
+					$output['race']['racers'][$key]['ranking_by_rpm'] = $racerInfo[0]['RankingByRPM'];
+					$output['race']['racers'][$key]['group_id'] = $racerInfo[0]['GroupID'];
+					$output['race']['racers'][$key]['total_visits'] = $racerInfo[0]['TotalVisits'];
+					$output['race']['racers'][$key]['total_races'] = $racerInfo[0]['TotalRaces'];
+				}
 
         if (is_numeric($heatId)) //TODO: Document and explain the SQL 2005 hacks
         {
             $tsql = "SELECT * FROM RacingData WHERE HeatNo = " . $heatId . " AND IsBadTime = 0";
             $laps = $this->run_query($tsql);
-            foreach($laps as $lap) {
-                $output['race']['laps'][] = array(
+            
+						// Build mapping between customer id and the key in the array
+						$racersToKeys = array();
+						foreach($output['race']['racers'] as $key => $racer) {
+							$racersToKeys[$racer['id']] = $key;
+						}
+						
+						foreach($laps as $lap) {
+                $currentLap = array(
                     'id' => $lap['ID'],
                     'kart_number' => $lap['AutoNo'],
                     'lap_time' => $lap['LTime']/1000,
@@ -833,6 +849,10 @@ EOD;
                     'lap_number' => $lap['LapNum'],
                     'racer_id' => $lap['CustID']
                 );
+								
+								$key = $racersToKeys[$currentLap['racer_id']];
+								$output['race']['racers'][$key]['laps'][] = $currentLap;
+								$output['race']['laps'][] = $currentLap;
             }
 
             if(isset($output['race']['laps'])) {

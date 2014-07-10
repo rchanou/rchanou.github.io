@@ -3,6 +3,16 @@
 class Settings
 {
     public $restler;
+		
+		/**
+     * Whitelist of groups/settings. Set setting (or group) to "true" if it is whitelisted.
+     * By default, nothing is allowed.
+     */
+    private $isAllowedWhitelist = array(
+      'Registration1' => array('RacerNameShow' => true),
+      'kiosk' => true
+    );
+		
 		private $settingsNotExistingInOlderVersions = array(
 							array('SettingName' => 'CfgRegType', 'TerminalName' => 'kiosk', 'SettingValue' => 0, 'DataType' => 'int'),
 							array('SettingName' => 'CfgRegRcrNameReq', 'TerminalName' => 'kiosk', 'SettingValue' => "true", 'DataType' => 'bit'), // TODO Should come from MainEngine > ShowRacerNameInRegistration
@@ -62,47 +72,69 @@ class Settings
 
     protected function index($desiredData, $sub = null) {
 				
-				// Secure API
-				if($_REQUEST['key'] != $GLOBALS['privateKey'])
+				// Put settings into an array (if they are not already)
+				if(isset($_GET['setting']) && !is_array($_GET['setting'])) $_GET['setting'] = array($_GET['setting']);
+				
+				$requestContainsPrivateSetting = false;
+				
+				// Check requested keys against the whitelist to see if we are looking for private settings
+				if(isset($_GET['setting'])) {
+						foreach(@$_GET['setting'] as $settingName) {
+							if(@$this->isAllowedWhitelist[@$_GET['group']][$settingName] !== true) $requestContainsPrivateSetting = true;
+						}
+				} else {
+						if(@$this->isAllowedWhitelist[@$_GET['group']] !== true) $requestContainsPrivateSetting = true;
+				}
+				
+				// Require private key if we are looking for private settings
+				if($requestContainsPrivateSetting && $_REQUEST['key'] != $GLOBALS['privateKey'])
 					throw new RestException(412,'Not authorized');
 				
 				switch($desiredData) {
-                    case 'get':
-								return $this->getSettings(@$_GET['group'], @$_GET['setting']);
-								break;
-                    case 'getImages':
-                                return $this->getImages(@$_GET['app']);
-                                break;
+					case 'get':
+						return $this->getSettings(@$_GET['group'], @$_GET['setting']);
+						break;
+					case 'getImages':
+						return $this->getImages(@$_GET['app']);
+						break;
         }
     }
 
-        protected function getImages($app)
-        {
-            //TODO: Default images are currently hard-coded. Will eventually be pulled from Club Speed.
-            if ($app === "kiosk")
-            {
-                return array(
-                    'bg_image' => 'http://localhost/cs-assets/cs-registration/images/bg_default.jpg',
-                    'createAccount' => 'http://localhost/cs-assets/cs-registration/images/new_account.png',
-                    'createAccountFacebook' => 'http://localhost/cs-assets/cs-registration/images/facebook_connect.png',
-                    'venueLogo' => 'http://localhost/cs-assets/cs-registration/images/default_header.png',
-                    'poweredByClubSpeed' => 'http://localhost/cs-assets/cs-registration/images/clubspeed.png',
-                    'completeRegistration' => 'http://localhost/cs-assets/cs-registration/images/complete_registration.png'
-                );
-            }
-            else
-            {
-                throw new RestException(412,'Image group ' . $app . ' is not recognized.');
-            }
+		protected function getImages($app)
+		{
+				//TODO: Default images are currently hard-coded. Will eventually be pulled from Club Speed.
+				if ($app === "kiosk")
+				{
+						return array(
+								'bg_image' => 'http://localhost/cs-assets/cs-registration/images/bg_default.jpg',
+								'createAccount' => 'http://localhost/cs-assets/cs-registration/images/new_account.png',
+								'createAccountFacebook' => 'http://localhost/cs-assets/cs-registration/images/facebook_connect.png',
+								'venueLogo' => 'http://localhost/cs-assets/cs-registration/images/default_header.png',
+								'poweredByClubSpeed' => 'http://localhost/cs-assets/cs-registration/images/clubspeed.png',
+								'completeRegistration' => 'http://localhost/cs-assets/cs-registration/images/complete_registration.png'
+						);
+				}
+				else
+				{
+						throw new RestException(412,'Image group ' . $app . ' is not recognized.');
+				}
 
-        }
+		}
+		
 		protected function getSettings($group, $setting = null)
 		{
 				$output = array();
-				
 				if(!empty($setting)) { // Get specific settings
-					$tsql = "SELECT * FROM ControlPanel WHERE TerminalName = ? AND SettingName = ?";
-					$tsql_params = array(&$group, &$setting);
+					$tsql_params = array(&$group);
+					
+					// Create placeholders in query
+					$placeholders = array();
+					foreach($setting as $key => $settingName) {
+						$tsql_params[] = &$settingName;
+						$placeholders[] = '?';
+					}
+					
+					$tsql = 'SELECT * FROM ControlPanel WHERE TerminalName = ? AND SettingName IN ' . '(' . implode(',', $placeholders) . ')';
 					$rows = $this->run_query($tsql, $tsql_params);
 				} else { // Get entire group
 
@@ -155,15 +187,15 @@ class Settings
 					// Applies to all kiosks
 					if($group == 'kiosk') {
 
-                        $mainEngineSettings = array('MainEngine' => array('AgeNeedParentWaiver','Reg_EnableFacebook','AllowDuplicateEmail','BusinessName'));
+						$mainEngineSettings = array('MainEngine' => array('AgeNeedParentWaiver','Reg_EnableFacebook','AllowDuplicateEmail','BusinessName'));
 
-                        foreach($mainEngineSettings as $group => $values) {
-                            foreach($values as $currentValue)
-                            {
-                                $setting = $this->getSettings($group, $currentValue);
-                                $rows[] = $setting['settings'][$currentValue];
-                            }
-                        }
+						foreach($mainEngineSettings as $group => $values) {
+								foreach($values as $currentValue)
+								{
+										$setting = $this->getSettings($group, array($currentValue));
+										$rows[] = $setting['settings'][$currentValue];
+								}
+						}
 						
 						// Add in waivers (Club Speed is hardcoded to 1 = Adult, 2 = Kid)
 						$tsql = "SELECT * FROM WaiverTemplates WHERE Waiver IN (1,2)";

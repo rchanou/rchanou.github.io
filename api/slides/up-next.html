@@ -1,0 +1,757 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Up Next</title>
+    <script src ="../js/handlebars-latest.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/zutil.min.js"></script>
+    <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+
+        /* elements */
+
+        html, body {
+            font-family: 'Open Sans', sans-serif;
+            height: 100%;
+            min-height: 100%;
+            margin: 0;
+            background-color: #000000;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.04);
+            -webkit-font-smoothing: antialiased;
+        }
+        html, body :hover {
+            cursor: none;
+        }
+        .spacing {
+            background: transparent;
+            height: 2%;
+        }
+        #wrapper {
+            min-height: 100%;
+        }
+        #labelsWrapper {
+            height: 98vh;
+            width: 14vw;
+            /*margin-left: 1vw;*/
+            /*margin-right: 1vw;*/
+        }
+        .labelsRacerWrapper {
+            width: 100%;
+            margin-top: 0.1vw;
+            margin-bottom: 0.1vw;
+        }
+        .labelTextWrapper {
+            height: 25%;
+            width: 100%;
+            background: linear-gradient(to bottom left, #000000, #585858);
+        }
+        .labelText {
+            font-weight: bold;
+            font-size: 2vh;
+            color: #FFFFFF;
+        }
+        #upNextWrapper {
+            height: 98vh;
+            width: 85vw;
+            margin-left: 15vw;
+        }
+        .upNextHeader {
+            height: 12%;
+            width: 92%;
+            background: linear-gradient(to top right, #FFFFFF, #C9C9C9);
+            margin-bottom: 1vh;
+            border: 1px black solid;
+        }
+        .upNextRacers {
+            width: 100%;
+            height: 82%;
+        }
+        .racer {
+            /*height: 26%;*/
+            /*width: 19.2%;*/
+            margin: 0.1vw;
+        }
+        .card {
+        }
+        /*.card:hover {
+            -webkit-transform: rotateY(180deg);
+            -moz-transform: rotateY(180deg);
+            -o-transform: rotateY(180deg);
+            -ms-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+        }*/
+        .face {
+            -webkit-backface-visibility: hidden;
+            -moz-backface-visibility: hidden;
+            -o-backface-visibility: hidden;
+            -ms-backface-visibility: hidden;
+            backface-visibility: hidden;
+            position:absolute;
+        }
+        .front {
+            background: linear-gradient(to top right, #000000, #A9A9A9);
+        }
+        .back {
+            /* start off backwards */
+            -webkit-transform: rotateY(180deg);
+            -moz-transform: rotateY(180deg);
+            -o-transform: rotateY(180deg);
+            -ms-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+        }
+        .logoWrapper {
+            background-image: url('../img/clubspeed_logo.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 50%;
+        }
+        .portraitWrapper {
+            background: linear-gradient(to bottom left, #000000, #585858);
+        }
+        .portraitHeaderWrapper {
+            height: 20%;
+            width: 100%;
+        }
+        .portraitBodyWrapper {
+            height: 80%;
+            width: 100%;
+        }
+        .portraitHeaderText {
+            /*font-weight: bold;*/
+            font-size: 2.3vh;
+            color: white;
+        }
+        .portraitPictureWrapper {
+            height: 100%;
+            width: 70%;
+        }
+        .portraitPictureWrapperInner {
+            background-repeat: no-repeat;
+            background-position: center;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            -webkit-box-shadow:inset 1px 0px 0px 0px #777777;
+            -moz-box-shadow:inset 1px 0px 0px 0px #777777;
+            box-shadow:inset 1px 0px 0px 0px #777777;
+        }
+        .portraitBodyTextWrapper {
+            height: 100%;
+            width: 30%;
+        }
+        .portraitTextWrapper {
+            height: 25%;
+            width: 100%;
+            background: linear-gradient(to top right, #FFFFFF, #A9A9A9);
+            /*margin-left: 0.8vw;*/
+        }
+        .portraitText {
+            vertical-align: middle;
+            font-weight: bold;
+            font-size: 2.0vh;
+            margin-right: 500px; /* not working? */
+            height: 100%;
+            width: 100%;
+        }
+
+        /* helpers */
+
+        .lFloat {
+            float: left;
+        }
+        .rFloat {
+            float: right;
+        }
+        .fill {
+            height: 100%;
+            width: 100%;
+        }
+        .hLeft {
+            text-align: left;
+        }
+        .hCenter {
+            text-align: center;
+        }
+        .hRight {
+            text-align: right;
+        }
+        .vMiddle {
+            vertical-align: middle;
+        }
+        .vMiddle::before {
+            content: "";
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+        .textCenterCenter {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .textCenterCenter::before {
+            content: "";
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+        .boxShadow {
+            -webkit-box-shadow: 10px 10px 10px #aaa;
+            -moz-box-shadow: 10px 10px 10px #aaa;
+            box-shadow: 10px 10px 10px #aaa;
+        }
+        .innerBorder {
+            -webkit-box-shadow:inset 0px 0px 0px 1px #000000;
+            -moz-box-shadow:inset 0px 0px 0px 1px #000000;
+            box-shadow:inset 0px 0px 0px 1px #000000;
+        }
+        .roundBottom {
+            -webkit-border-bottom-right-radius: 15px;
+            -moz-border-bottom-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+            -webkit-border-bottom-left-radius: 15px;
+            -moz-border-bottom-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+        .roundTop {
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-top-right-radius: 15px;
+            border-top-right-radius: 15px;
+            -webkit-border-top-left-radius: 15px;
+            -moz-border-top-left-radius: 15px;
+            border-top-left-radius: 15px;
+        }
+        .roundLeft {
+            -webkit-border-top-left-radius: 15px;
+            -moz-border-top-left-radius: 15px;
+            border-top-left-radius: 15px;
+            -webkit-border-bottom-left-radius: 15px;
+            -moz-border-bottom-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+        .roundRight {
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-top-right-radius: 15px;
+            border-top-right-radius: 15px;
+            -webkit-border-bottom-right-radius: 15px;
+            -moz-border-bottom-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        .roundAll {
+            -webkit-border-radius: 15px;
+            -moz-border-radius: 15px;
+            border-radius: 15px;
+        }
+        .roundTopRight {
+            -webkit-border-top-right-radius: 15px;
+            -moz-border-top-right-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .roundTopLeft {
+            -webkit-border-top-left-radius: 15px;
+            -moz-border-top-left-radius: 15px;
+            border-top-left-radius: 15px;
+        }
+        .roundBottomRight {
+            -webkit-border-bottom-right-radius: 15px;
+            -moz-border-bottom-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        .roundBottomLeft {
+            -webkit-border-bottom-left-radius: 15px;
+            -moz-border-bottom-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+        .textShadow {
+            text-shadow: 0 0.175vmin 0 rgba(201,201,201,1),
+                0 0.2625vmin 0 rgba(187,187,187,1),
+                0 0.35vmin 0 rgba(185,185,185,1),
+                0 0.4375vmin 0 rgba(170,170,170,1),
+                0 0.375vmin 0.175vmin rgba(0,0,0,.1),
+                0 0 0.4375vmin rgba(0,0,0,.1),
+                0 0.0875vmin 0.2625vmin rgba(0,0,0,.3),
+                0 0.2625vmin 0.4375vmin rgba(0,0,0,.2),
+                0 0.4375vmin 0.875vmin rgba(0,0,0,.25),
+                0 0.875vmin 0.875vmin rgba(0,0,0,.2),
+                0 1.75vmin 1.75vmin rgba(0,0,0,.15);
+        }
+        .padLeft5 {
+            padding-left: 5vmin;
+        }
+        .centerText {
+            text-align: center;
+        }
+        .uppercase {
+            text-transform: uppercase;
+        }
+        .italic {
+            font-style: italic;
+        }
+        .parallelogram {
+            -webkit-transform: skew(335deg);
+            -moz-transform: skew(335deg);
+            -o-transform: skew(335deg);
+            -transform: skew(335deg);
+            -webkit-border-radius: 5px 5px 5px 5px;
+            -moz-border-radius: 5px 5px 5px 5px;
+            border-radius: 5px 5px 5px 5px;
+        }
+        .unskew {
+            -webkit-transform: skew(25deg);
+            -moz-transform: skew(25deg);
+            -o-transform: skew(25deg);
+        }
+        .headerText {
+            font-size: 4.4vh;
+            font-weight: bold;
+            color: black;
+            vertical-align: middle;
+        }
+        .perspective {
+            -webkit-perspective: 1000;
+            perspective: 1000;
+        }
+        .hidden {
+            visibility: hidden;
+        }
+        .visible {
+            visibility: visible;
+        }
+
+        /* animations */
+
+        @-webkit-keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                -webkit-transform: translateY(-8vh);
+                transform: translateY(-8vh);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: translateY(0);
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                -webkit-transform: translateY(-8vh);
+                -ms-transform: translateY(-8vh);
+                transform: translateY(-8vh);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: translateY(0);
+                -ms-transform: translateY(0);
+                transform: translateY(0);
+            }
+        }
+        .fadeInDown {
+            -webkit-animation-name: fadeInDown;
+            -webkit-animation-iteration-count: 1;
+            -webkit-animation-timing-function: ease-in;
+            -webkit-animation-duration: 0.5s;
+
+            animation-name: fadeInDown;
+            animation-iteration-count: 1;
+            animation-timing-function: ease-in;
+            animation-duration: 0.5s;
+        }
+        @-webkit-keyframes fadeInLeft {
+            0% {
+                opacity: 0;
+                -webkit-transform: translateX(-8vw);
+                transform: translateX(-8vw);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: translateX(0);
+                transform: translateX(0);
+            }
+        }
+        @keyframes fadeInLeft {
+            0% {
+                opacity: 0;
+                -webkit-transform: translateX(-8vw);
+                -ms-transform: translateX(-8vw);
+                transform: translateX(-8vw);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: translateX(0);
+                -ms-transform: translateX(0);
+                transform: translateX(0);
+            }
+        }
+        .fadeInLeft {
+            -webkit-animation-name: fadeInLeft;
+            -webkit-animation-iteration-count: 1;
+            -webkit-animation-timing-function: ease-in;
+            -webkit-animation-duration: 0.5s;
+
+            animation-name: fadeInLeft;
+            animation-iteration-count: 1;
+            animation-timing-function: ease-in;
+            animation-duration: 0.5s;
+        }
+        .flippable {
+            -webkit-transform-style: preserve-3d;
+            -webkit-transition: all 1.0s linear;
+            -moz-transform-style: preserve-3d;
+            -moz-transition: all 1.0s linear;
+            -o-transform-style: preserve-3d;
+            -o-transition: all 1.0s linear;
+            -ms-transform-style: preserve-3d;
+            -ms-transition: all 1.0s linear;
+            transform-style: preserve-3d;
+            transition: all 1.0s linear;
+        }
+        .flip {
+            -webkit-transform: rotateY(180deg);
+            -moz-transform: rotateY(180deg);
+            -o-transform: rotateY(180deg);
+            -ms-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+<script>
+    var z = new zUtil({
+        useArrayExtensions: true,
+        useNumberExtensions: true,
+        useObjectExtensions: true,
+        defaultLogger: console
+    });
+    var log = z.log;
+    var assert = z.assert;
+    var sw = z.sw;
+    var parameters = z.location.parameters;
+    var gridSizes; // declared at this location so Handlebars helpers can access it
+
+    // var slideTimeout = parameters.slideTimeout; // total time for the slide to be shown
+
+
+    /**
+        Internal page helpers
+    */
+
+    function GridSizes(data) {
+        this.width = null;
+        this.height = null;
+        this.widthMax = 96;
+        this.heightMax = 78;
+        this.numRows = null;
+        this.numCols = null;
+        this.determineSizes(data);
+    }
+    z.defineProperty(GridSizes.prototype, 'widthStyle', { get: function() { return "width:" + this.width + "%;"; }, writeable: false });
+    z.defineProperty(GridSizes.prototype, 'heightStyle', { get: function() { return "height:" + this.height + "%;"; }, writeable: false });
+    z.defineProperty(GridSizes.prototype, 'style', { get: function() { return this.widthStyle + this.heightStyle; }, writeable: false });
+    GridSizes.prototype.toString = function() {
+        return this.style;
+    };
+    GridSizes.prototype.determineSizes = function(data) {
+        if (data && data.length) {
+            // var rowDividend = Math.ceil(Math.sqrt(data.length)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
+            var rowDividend = Math.ceil(Math.sqrt(data.length)) + (data.length > 4 && (Math.sqrt(data.length) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
+            this.numRows = Math.ceil(data.length / rowDividend);
+            this.numCols = data.length.roundUp(this.numRows) / this.numRows;
+            this.height = this.heightMax / this.numRows;
+            this.width = this.widthMax / this.numCols;
+        }
+    };
+
+
+    /**
+        API and parameter query string helpers
+    */ 
+
+    // set up api call url information
+    var apiRootUrl;
+    if (!document.location.hostname || document.location.hostname == "localhost") { // can be removed in production code -- just for testing
+        // apiRootUrl = 'https://ekwigan.clubspeedtiming.com';
+        // apiRootUrl = 'https://k1anaheim.clubspeedtiming.com';
+        apiRootUrl = 'https://ghhonolulu.clubspeedtiming.com';
+    }
+    else {
+        apiRootUrl = window.location.origin || (window.location.protocol + "//" + window.location.host);
+    }
+    var apiRootPath = '/api/index.php';
+    var apiNextUrl = '/races/next.js';
+
+    // create default queries to be applied to all api calls
+    var apiDefaults = {
+        key: 'cs-dev' // todo: replace with actual apiKey selection
+    };
+    function addDefaults(apiQueries) {
+        return z.extend({}, apiQueries, apiDefaults);
+    }
+
+    // set up the api query parameters
+    var apiNextQueries = addDefaults({
+        track: parseInt(parameters.track) || 1
+    });
+
+    function buildUrl(api, queries) {
+        // builds the api url based off of the originally defined root url, and the provided apiType
+        return apiRootUrl 
+            + apiRootPath
+            + api
+            + "?" + (queries ? $.param(queries) + "&" : "")
+            + "callback=?"; // seemingly can't use "?" inside $.param without having it converted, and $.getJSON does not like the converted value
+    }
+
+    function handleError(err) {
+        console.error(err); // todo: something else to handle errors
+    }
+
+
+    /**
+        HTML and API data manipulators
+    */
+
+    function applyHtmlClass(elems, cssClasses, delay) {
+        var currentDelay = 0;
+        delay = delay || 0;
+        if (z.check.isString(cssClasses)) {
+            cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
+        }
+        z.assert.isArray(cssClasses);
+        if (elems) {
+            if (elems.length) {
+                for (var i = 0; i < elems.length; i++) {
+                    (function(index) {
+                        setTimeout(function() {
+                            var elem = $(elems[index]);
+                            for (var k = 0; k < cssClasses.length; k++) {
+                                elem.addClass(cssClasses[k]);
+                            }
+                        }, delay*index);
+                    })(i); // use an iife to maintain the correct index for setTimeout
+                }
+            }
+        }
+    }
+
+    var currentLocale = parameters.locale || navigator.language || navigator.userLanguage || "en-US"; // use the locale if provided, use the current language if not, use en-US as a last resort
+    function localizeData(data) {
+        if (data && data.race && data.race.racers && data.race.racers.length) {
+            var racers = data.race.racers;
+            for (var i = 0; i < racers.length; i++) {
+                racers[i].rpm = parseInt(racers[i].rpm).toLocaleString(currentLocale);
+            }
+        }
+    }
+
+    function handleError(err) {
+        log.error(err); // todo: something else to handle errors
+    }
+
+    function buildAndAppendHtml(templateHtml) {
+        var deferreds = [];
+
+        // setup handlebars data object to be extended with api data
+        var data = {}.extend(z.location.parameters, apiNextQueries);
+
+        // build an array of deferred objects for api data collection
+        log(buildUrl(apiNextUrl, apiNextQueries));
+
+        // push the getJSON call for track list
+        deferreds.push(
+            $.getJSON(buildUrl(apiNextUrl, apiNextQueries))
+            .done(function(nextData) {
+                z.extend(data, nextData); //data.extend(nextData);
+            })
+            .fail(function(err) {
+                handleError(err);
+            })
+        );
+
+        // handle the final async call to use the built data object
+        $.when.apply($, deferreds).then(function() {
+            localizeData(data);
+            data.race.racers = data.race.racers.take(parameters.limit || 15); // FOR TEST PURPOSES
+            gridSizes = new GridSizes(data.race.racers);
+            var template = Handlebars.compile(templateHtml); // compile the originally defined source
+            var output = template(data); // attach the data so handlebars can interpret it
+            $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
+            var delay = 280;
+            applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
+            applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
+            setTimeout(function() {
+                // dont start the flip until the cards are finished applying fadeInDown
+                applyHtmlClass($('.flippable'), 'flip', delay);
+            }, delay*3);
+            $('.flippable').click(function() {
+                $(this).toggleClass('flip');
+            });
+        });
+    }
+
+    //// --- example data object to be passed to HandleBars templating engine ---
+    //// --- example data object ---
+    // data: {
+    //     "trackId": "1",
+    //     "backgroundUrl": "./temp/white.jpg",
+    //     "race": {
+    //         "id": "124188",
+    //         "track_id": "1",
+    //         "track": "Florida T1",
+    //         "starts_at": "2014-07-02 14:00:00.000",
+    //         "heat_type_id": "4",
+    //         "heat_status_id": "0",
+    //         "speed_level_id": "1",
+    //         "speed_level": "General Races",
+    //         "win_by": "laptime",
+    //         "race_by": "laps",
+    //         "duration": "10",
+    //         "race_name": ".Standard T1",
+    //         "racers": [
+    //             {
+    //                 "id": "8190514",
+    //                 "start_position": "1",
+    //                 "kart_number": "24",
+    //                 "rpm": "1200",
+    //                 "is_first_time": "1",
+    //                 "finish_position": null,
+    //                 "nickname": "Jesus Andrade",
+    //                 "first_name": "Jesus",
+    //                 "last_name": "Andrade"
+    //             },
+    //             {
+    //                 "id": "8190516",
+    //                 "start_position": "2",
+    //                 "kart_number": "33",
+    //                 "rpm": "1200",
+    //                 "is_first_time": "0",
+    //                 "finish_position": null,
+    //                 "nickname": "Taut Scott",
+    //                 "first_name": "Taut",
+    //                 "last_name": "Scott"
+    //             }
+    //         ]
+    //     },
+    //     "races": []
+    // }
+
+    Handlebars.registerHelper('getPlace', function(index, options) {
+        switch (index) {
+            case 0:  return "firstPlace";
+            case 1:  return "secondPlace";
+            case 2:  return "thirdPlace";
+            default: return "otherPlace";
+        }
+    });
+    Handlebars.registerHelper('inc', function(value, options) {
+        return parseInt(value) + 1;
+    });
+    Handlebars.registerHelper('getName', function(index, options) {
+        var racer = options.data.root.race.racers[index];
+        return (z.convert(parameters.useRealName, z.types.boolean) ? racer.first_name + " " + racer.last_name.charAt(0) : racer.nickname);
+    });
+    Handlebars.registerHelper('getLabels', function(options) {
+        var heightStyle = getRacerHeight();
+        var srcArray = new Array(gridSizes.numRows);
+        for (var i = 0; i < srcArray.length; i++) {
+            srcArray[i] = labelSrc.replace(/\{\{getRacerHeight\}\}/g, gridSizes.heightStyle);
+        }
+        return new Handlebars.SafeString(srcArray.join('\n'));
+    });
+    Handlebars.registerHelper('getYesNo', function(item, options) {
+        return (z.convert(item, z.types.boolean) ? "YES" : "NO");
+    });
+    Handlebars.registerHelper('getRacerStyle', function(options) {
+        log(gridSizes.style);
+        return gridSizes.style;
+    });
+
+    function getRacerHeight(options) {
+        return gridSizes.heightStyle;
+    }
+
+    Handlebars.registerHelper('getRacerHeight', function(options) {
+        return gridSizes.heightStyle;
+    });
+
+    function imageExists(imageUri) {
+        var image = new Image();
+        image.src = imageUri;
+        var doesImageExist = (image.width > 0);
+        image = null; // make sure GC runs, so we dont have Image objects floating around
+        return doesImageExist;
+    }
+    var portraitBaseIndex = 1010763;
+    var portraitBaseFolder = './temp/portraits/';
+    var portraitDefault = '../img/clubspeed_logo.png';
+    Handlebars.registerHelper('getPortraitUri', function(index, options) {
+        var portraitUri = portraitBaseFolder + (portraitBaseIndex + index) + '.jpg';
+        return (imageExists(portraitUri) ? portraitUri : portraitDefault);
+    });
+
+    var portraitSrc = '' +
+            '<div class="racer lFloat" style="{{getRacerStyle}}">'
+        +   '   <div class="card perspective fill roundAll hidden">'
+        +   '       <div class="flippable fill roundAll">'
+        +   '           <div class="front face fill roundAll">'
+        +   '               <div class="logoWrapper fill roundAll"></div>'
+        +   '           </div>'
+        +   '           <div class="back face fill roundAll">'
+        +   '               <div class="portraitWrapper fill roundAll">'
+        +   '                   <div class="portraitHeaderWrapper roundTop">'
+        +   '                       <div class="portraitHeaderText fill vMiddle hCenter">{{getName @index}}</div>'
+        +   '                   </div>'
+        +   '                   <div class="portraitBodyWrapper">'
+        +   '                       <div class="portraitBodyTextWrapper lFloat">'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter startPositionText">{{start_position}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter kartNumberText">#{{kart_number}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter proSkillText">{{rpm}}</div></div>'
+        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText vMiddle hCenter firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
+        +   '                       </div>'
+        +   '                       <div class="portraitPictureWrapper rFloat roundBottomRight">'
+        +   '                           <div class="portraitPictureWrapperInner fill roundBottomRight" style="background-image: url(\'{{getPortraitUri @index}}\');"></div>' // todo: get actual portrait URI
+        +   '                       </div>'
+        +   '                   </div>'
+        +   '               </div>'
+        +   '           </div>'
+        +   '       </div>'
+        +   '   </div>'
+        +   '</div>';
+
+    var labelSrc = '' +
+            '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
+        +   '       <div class="portraitHeaderWrapper"></div>'
+        +   '       <div class="portraitBodyWrapper">'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">START POSITION:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FIRST TIME:&nbsp;&nbsp;</div></div>'
+        +   '       </div>'
+        +   '   </div>'
+
+    var src = '' +
+            '<div id="wrapper" class="fill" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
+        +   '   <div class="spacing"></div>'
+        +   '   <div id="labelsWrapper" class="lFloat">'
+        +   '       <div class="upNextHeader hidden"></div>' // for spacing purposes
+        +   '       {{getLabels}}'
+        +   '   </div>'
+        +   '   <div id="upNextWrapper">'
+        +   '       <div id="upNextTopWrapper" class="fill">'
+        +   '           <div class="upNextHeader parallelogram">'
+        +   '               <div class="headerText unskew textShadow vMiddle hCenter uppercase fill">'
+        +   '                   UP NEXT ON TRACK: &nbsp;&nbsp;{{race.track}}'
+        +   '               </div>'
+        +   '           </div>'
+        +   '           {{#each race.racers}}'
+        +                   portraitSrc // template html for up next with picture
+        +   '           {{/each}}'
+        +   '       </div>'
+        +   '   </div>'
+        +   '</div>';
+
+    buildAndAppendHtml(src); // call the previously defined function
+
+</script>
+</body>
+</html>
