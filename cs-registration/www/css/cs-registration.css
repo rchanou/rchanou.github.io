@@ -57,7 +57,7 @@ input {
     }*/
     .container {
         width: 1024px;
-        height: 768px;
+        height: 728px;
     }
 }
 
@@ -185,7 +185,7 @@ img.flag { border:none; vertical-align:baseline; margin-left:10px;}
 */
 
 .step1RegistrationHeader {
-    margin-top: 100px;
+    margin-top: 20px;
 }
 
 .step1RegistrationBody {
@@ -250,7 +250,7 @@ textarea.LV_invalid_field:active {
 */
 
 .termsBox {
-    max-height: 639px; overflow-y: auto; overflow-x: hidden;
+    max-height: 590px; overflow-y: auto; overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     font-size: 18px; padding: 20px;
 }

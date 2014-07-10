@@ -2,13 +2,13 @@
     <div class="col-xs-3 topLeftBackArrow">@yield('backButton')</div>
     <div class="col-xs-6 topCenterHeader">@yield('headerTitle')</div>
     <div class="col-xs-3 topRightDropdown">
-        <dl id="languageDropdown" class="dropdown" style="float: right; z-index: 1049"> <!-- TODO: Change back to localhost. Temporary testing. -->
-            <dt><a href="#"><span>{{$strings["cultureNames"][$currentCulture]}} <img src="http://192.168.111.170/cs-assets/cs-registration/images/flags/{{strtolower(substr($currentCulture,3,2))}}.png" class="flag"></span></a></dt>
+        <dl id="languageDropdown" class="dropdown" style="float: right; z-index: 1049">
+            <dt><a href="#"><span>{{$strings["cultureNames"][$currentCulture]}} <img src="images/flags/{{strtolower(substr($currentCulture,3,2))}}.png" class="flag"></span></a></dt>
             <dd>
                 <ul>
                     @foreach ($strings["cultureNames"] as $currentCultureCode => $currentCulture)
-                        @if (array_key_exists($currentCultureCode,$translations)) <!-- TODO: Change back to localhost. Temporary testing. -->
-                            <li><a href="#">{{$currentCulture}}<img class="flag" src="http://192.168.111.170/cs-assets/cs-registration/images/flags/{{strtolower(substr($currentCultureCode,3,2))}}.png" alt="" />
+                        @if (array_key_exists($currentCultureCode,$translations))
+                            <li><a href="#">{{$currentCulture}}<img class="flag" src="images/flags/{{strtolower(substr($currentCultureCode,3,2))}}.png" alt="" />
                             <span class="value">{{$currentCultureCode}}</span></a></li>
                         @endif
                     @endforeach

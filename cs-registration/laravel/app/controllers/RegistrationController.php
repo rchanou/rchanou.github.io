@@ -474,13 +474,40 @@ class RegistrationController extends BaseController {
             $stringTranslations = array();
             $currentCulture = "en-US";
 
+            /*
+             * International testing for Shakib
+             */
+
+            /*$stringTranslations["es-MX"] = array_merge(Strings::getDefaultEnglish(),Strings::getDefaultSpanish());
+            $stringTranslations["en-GB"] = Strings::getDefaultEnglish();
+            $stringTranslations["en-NZ"] = Strings::getDefaultEnglish();
+            $stringTranslations["en-AU"] = Strings::getDefaultEnglish();
+            $stringTranslations["en-IE"] = Strings::getDefaultEnglish();
+            $stringTranslations["en-CA"] = Strings::getDefaultEnglish();
+            $stringTranslations["es-ES"] = Strings::getDefaultEnglish();
+            $stringTranslations["es-PR"] = Strings::getDefaultEnglish();
+            $stringTranslations["ru-RU"] = Strings::getDefaultEnglish();
+            $stringTranslations["fr-CA"] = Strings::getDefaultEnglish();
+            $stringTranslations["de-DE"] = Strings::getDefaultEnglish();
+            $stringTranslations["nl-NL"] = Strings::getDefaultEnglish();
+            $stringTranslations["pl-PL"] = Strings::getDefaultEnglish();
+            $stringTranslations["da-DK"] = Strings::getDefaultEnglish();
+            $stringTranslations["ar-AE"] = Strings::getDefaultEnglish();
+            $stringTranslations["it-IT"] = Strings::getDefaultEnglish();
+            $stringTranslations["bg-BG"] = Strings::getDefaultEnglish();
+            $stringTranslations["sv-SE"] = Strings::getDefaultEnglish();*/
+
             Session::put('currentCulture',$currentCulture);
             Session::put('currentCultureFB',$this->convertCultureToFacebook($currentCulture));
-            Session::put('supportedCultures', array('en-US'));
+            Session::put('supportedCultures', array('en-US')); //TODO: Revert to this
+            /*Session::put('supportedCultures', array('en-US','en-GB', 'en-NZ', 'en-AU', 'en-IE', 'en-CA', 'es-MX',
+                'es-ES','es-PR','ru-RU','fr-CA','de-DE','nl-NL','pl-PL',
+                'da-DK', 'ar-AE','it-IT','bg-BG','sv-SE'));*/
 
             $stringTranslations["en-US"] = Strings::getDefaultEnglish();
             Session::put('translations', $stringTranslations);
             return $stringTranslations[$currentCulture];
+
 
             //return false;
 

@@ -36,8 +36,12 @@
 </div>
 <div class="row">
     <div class="col-sm-12 centered">
-        <img src="{{$images['poweredByClubSpeed']}}" style="padding-top: 10px; margin-top: 220px">
+        <img src="{{$images['poweredByClubSpeed']}}" style="padding-top: 10px; margin-top: 132px">
     </div>
 </div>
+
+<script type="text/javascript">
+    var timer = setTimeout(function(){ window.location='step1';}, 8000);
+</script>
 @stop
 <!-- END PAGE CONTENT -->
