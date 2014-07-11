@@ -622,7 +622,7 @@ class RegistrationController extends BaseController {
         $settings = CS_API::call("getSettings");
         if ($settings === false) //If we couldn't pull any settings from Club Speed
         {
-            return Settings::getDefaultSettings(); //Just use the default
+            $settings = Settings::getDefaultSettings(); //Just use the default
         }
         else
         {
