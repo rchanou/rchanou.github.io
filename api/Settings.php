@@ -193,7 +193,10 @@ class Settings
 								foreach($values as $currentValue)
 								{
 										$setting = $this->getSettings($group, array($currentValue));
-										$rows[] = $setting['settings'][$currentValue];
+                                        if (array_key_exists('settings',$setting) && array_key_exists($currentValue,$setting['settings']))
+                                        {
+                                            $rows[] = $setting['settings'][$currentValue];
+                                        }
 								}
 						}
 						

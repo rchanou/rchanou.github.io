@@ -687,17 +687,32 @@ EOD;
 		if(!is_numeric($customerId)) throw new RestException(412,'Racer ID is not a valid number');
 
 		$tsql = <<<EOD
-		SELECT     hm.HeatNo, hm.TrackNo, ht.HeatTypeName, t.Description AS TrackName, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.HeatStatus, hm.EventRound, hm.Begining, hm.Finish, hm.WinBy, hm.RaceBy, 
-                      hm.ScheduleDuration, hm.PointsNeeded, hm.SpeedLevel, hm.HeatColor, hm.NumberOfReservation, hm.MemberOnly, hm.HeatNotes, hm.ScoreID, hm.RacersPerHeat, 
-                      hm.NumberOfCadetReservation, hm.CadetsPerHeat, hd.HeatNo AS Expr1, hd.CustID, hd.AutoNo, hd.LineUpPosition, hd.GroupID, hd.RPM, hd.PointHistoryID, 
-                      hd.FirstTime, hd.UserID, hd.FinishPosition, hd.GroupFinishPosition, hd.RPMDiff, hd.PositionEditedDate, hd.HistoryAutoNo, hd.Scores, hd.TimeAdded, 
-                      hd.AssignedtoEntitleHeat
-FROM         HeatMain AS hm LEFT OUTER JOIN
-                      HeatDetails AS hd ON hm.HeatNo = hd.HeatNo LEFT JOIN Tracks t ON hm.TrackNo = t.TrackNo
-LEFT JOIN HeatTypes ht ON hm.HeatTypeNo = ht.HeatTypeNo
-WHERE     (hd.CustID = ?)
+		IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'HeatMain' AND COLUMN_NAME = 'NumberOfCadetReservation')
+        BEGIN
+            EXEC( 'SELECT     hm.HeatNo, hm.TrackNo, ht.HeatTypeName, t.Description AS TrackName, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.HeatStatus, hm.EventRound, hm.Begining, hm.Finish, hm.WinBy, hm.RaceBy,
+                          hm.ScheduleDuration, hm.PointsNeeded, hm.SpeedLevel, hm.HeatColor, hm.NumberOfReservation, hm.MemberOnly, hm.HeatNotes, hm.ScoreID, hm.RacersPerHeat,
+                          hm.NumberOfCadetReservation, hm.CadetsPerHeat, hd.HeatNo AS Expr1, hd.CustID, hd.AutoNo, hd.LineUpPosition, hd.GroupID, hd.RPM, hd.PointHistoryID,
+                          hd.FirstTime, hd.UserID, hd.FinishPosition, hd.GroupFinishPosition, hd.RPMDiff, hd.PositionEditedDate, hd.HistoryAutoNo, hd.Scores, hd.TimeAdded,
+                          hd.AssignedtoEntitleHeat
+                        FROM HeatMain AS hm LEFT OUTER JOIN
+                                              HeatDetails AS hd ON hm.HeatNo = hd.HeatNo LEFT JOIN Tracks t ON hm.TrackNo = t.TrackNo
+                        LEFT JOIN HeatTypes ht ON hm.HeatTypeNo = ht.HeatTypeNo
+                        WHERE (hd.CustID = $customerId)' )
+        END
+        ELSE
+        BEGIN
+            EXEC( 'SELECT     hm.HeatNo, hm.TrackNo, ht.HeatTypeName, t.Description AS TrackName, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.HeatStatus, hm.EventRound, hm.Begining, hm.Finish, hm.WinBy, hm.RaceBy,
+                          hm.ScheduleDuration, hm.PointsNeeded, hm.SpeedLevel, hm.HeatColor, hm.NumberOfReservation, hm.MemberOnly, hm.HeatNotes, hm.ScoreID, hm.RacersPerHeat,
+                          hd.HeatNo AS Expr1, hd.CustID, hd.AutoNo, hd.LineUpPosition, hd.GroupID, hd.RPM, hd.PointHistoryID,
+                          hd.FirstTime, hd.UserID, hd.FinishPosition, hd.GroupFinishPosition, hd.RPMDiff, hd.PositionEditedDate, hd.HistoryAutoNo, hd.Scores, hd.TimeAdded
+                        FROM HeatMain AS hm LEFT OUTER JOIN
+                                              HeatDetails AS hd ON hm.HeatNo = hd.HeatNo LEFT JOIN Tracks t ON hm.TrackNo = t.TrackNo
+                        LEFT JOIN HeatTypes ht ON hm.HeatTypeNo = ht.HeatTypeNo
+                        WHERE (hd.CustID = $customerId)' )
+        END
 EOD;
-		$rows = $this->run_query($tsql, array(&$customerId));
+
+		$rows = $this->run_query($tsql);
 
 		$output = array();
 
