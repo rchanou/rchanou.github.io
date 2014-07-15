@@ -32,7 +32,7 @@ class Channel
 				if(!is_numeric($channelId)) throw new RestException(412,'Channel ID must be numeric');
 				
 				// Base path for video URLs
-                $baseVideoUrl = $this->channelSlideUrl . 'video.html?videoUrl=';
+        $baseVideoUrl = $this->channelSlideUrl . 'video.html?videoUrl=';
 				
 				// Get screen
 				$tsql = "SELECT * FROM ScreenTemplate WHERE templateid = ? AND deleted = 0";
@@ -45,7 +45,7 @@ class Channel
         $tsql_params = array(&$channelId);
         $slides = $this->run_query($tsql, $tsql_params);
 
-				if(count($slides) == 0) return array();
+				//if(count($slides) == 0) return array();
 
 				// Setup output
 				$output = array();
