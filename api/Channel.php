@@ -45,8 +45,6 @@ class Channel
         $tsql_params = array(&$channelId);
         $slides = $this->run_query($tsql, $tsql_params);
 
-				//if(count($slides) == 0) return array();
-
 				// Setup output
 				$output = array();
 				$output['name'] = $screen['TemplateName'];
@@ -57,7 +55,7 @@ class Channel
 					);
 				$output['lineup'] = array();
 
-				// Add scoreboard (if we have elected to show it
+				// Add scoreboard (if we have elected to show it)
 				if($screen['ShowScoreboard'] == 1) {
 					$output['lineup'][] = array(
 						'type' => 'scoreboard',
@@ -68,7 +66,7 @@ class Channel
 						);
 				}			
 
-				// Add slides	if the 		
+				// Add slides if the screen idle time is not "Infinite" (86400)		
 				if($screen['IdleTime'] !== 86400) { 
 					foreach($slides as $slide) {
 						switch($slide['TypeID']) {
@@ -140,12 +138,14 @@ class Channel
 
 							// Next Racers - 5
 							case 13:
-								$output['lineup'][] = array('type' => 'nextRacers', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
+								$url = $this->channelSlideUrl . 'up-next.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=year&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'nextRacers'));
 								break;						
 
 							// Next, Next Racers - 5
 							case 14:
-								$output['lineup'][] = array('type' => 'nextNextRacers', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
+								$url = $this->channelSlideUrl . 'up-next.html?offset=1&trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=year&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'nextNextRacers'));
 								break;
 
 							// Last Winner with Picture - 4
@@ -160,7 +160,8 @@ class Channel
 
 							// Next Heat (with Picture) - 4
 							case 17:
-								$output['lineup'][] = array('type' => 'nextHeatWithPicture', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
+								$url = $this->channelSlideUrl . 'up-next-pictures.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=year&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'upNextWithPicture'));
 								break;
 
 							// HTML - 5
