@@ -138,13 +138,13 @@ class Channel
 
 							// Next Racers - 5
 							case 13:
-								$url = $this->channelSlideUrl . 'up-next.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=year&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$url = $this->channelSlideUrl . 'up-next.html?trackId=' . $slide['TrackNo'] . '&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
 								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'nextRacers'));
 								break;						
 
 							// Next, Next Racers - 5
 							case 14:
-								$url = $this->channelSlideUrl . 'up-next.html?offset=1&trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=year&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$url = $this->channelSlideUrl . 'up-next.html?offset=1&trackId=' . $slide['TrackNo'] . '&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
 								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'nextNextRacers'));
 								break;
 
@@ -160,7 +160,7 @@ class Channel
 
 							// Next Heat (with Picture) - 4
 							case 17:
-								$url = $this->channelSlideUrl . 'up-next-pictures.html?trackId=' . $slide['TrackNo'] . '&speedLevel=' . $slide['Text1'] . '&range=year&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								$url = $this->channelSlideUrl . 'up-next-pictures.html?trackId=' . $slide['TrackNo'] . '&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
 								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'upNextWithPicture'));
 								break;
 
