@@ -812,6 +812,7 @@ EOD;
         $rowsRace = $this->run_query($tsql);
 
         $output['race'] = $rowsRace[0];
+				$output['race']['race_number'] = substr($output['race']['id'], -2); // Race Number is the last two digits of the ID
 
         //$tsql = 'GetNextHeatRacersInfo';
         $tsql_params = array(&$heatId);
