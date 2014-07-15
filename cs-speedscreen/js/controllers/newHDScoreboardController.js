@@ -208,10 +208,14 @@
             {
                 speedScreenServices.getScoreboardData(this.currentTrack).success(function (data) {
                     $scope.currentScoreboard = data;
+                }).error(function (data, status, headers, config) {
+                    $scope.currentScoreboard = data;
                 });
 
 
                 speedScreenServices.getNextHeat(this.currentTrack).success(function (data) {
+                    $scope.currentNextRace = data;
+                }).error(function (data, status, headers, config) {
                     $scope.currentNextRace = data;
                 });
 
@@ -250,10 +254,10 @@
              */
             HDScoreboardModel.prototype.updateScoreboardMemory = function()
             {
-                console.log("Last Heats History:");
+                /*console.log("Last Heats History:");
                 console.log(this.lastHeatsHistory); //this.lastHeatsHistory.scoreboard size must be > 0
                 console.log("Next Racers History:");
-                console.log(this.nextRacersHistory);
+                console.log(this.nextRacersHistory);*/
 
                 if ($scope.currentScoreboard.hasOwnProperty("race")) //If there is a race going on
                 {
@@ -596,7 +600,7 @@
 
                             //Determine the fastest lap time
                             this.racers[currentRacer].isFastest = false;
-                            if (this.racers[currentRacer].fastest_lap_time < fastestTime)
+                            if (parseFloat(this.racers[currentRacer].fastest_lap_time) < parseFloat(fastestTime))
                             {
                                 fastestTime = this.racers[currentRacer].fastest_lap_time;
                                 fastestRacer = currentRacer; //And who made that fastest lap time
@@ -635,7 +639,7 @@
 
                             //If a racer just beat their own best lap, flag them to flash their recent lap purple
                             this.racers[currentRacer].beatBestLap = false;
-                            if (currentRacer in this.oldRacers && this.racers[currentRacer].fastest_lap_time < this.oldRacers[currentRacer].fastest_lap_time)
+                            if (currentRacer in this.oldRacers && parseFloat(this.racers[currentRacer].fastest_lap_time) < parseFloat(this.oldRacers[currentRacer].fastest_lap_time))
                             {
                                 this.racers[currentRacer].beatBestLap = true;
                             }

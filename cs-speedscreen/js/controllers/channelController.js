@@ -55,6 +55,11 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     var scoreboardTotalIdleTimeMs = 0;
     var scoreboardStartedBeingIdleTimeMs = 0;
     var raceWasJustHappening = false;
+    var disableAnimations = false;
+    if ($routeParams.channel_options == 'disableAnimations')
+    {
+        disableAnimations = true;
+    }
 
     //################################
     //# INITIALIZATION AND EXECUTION #
@@ -105,6 +110,9 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                 stop();
                 globalVars.resetStop();
             }
+
+            //console.log(slides);
+            //console.log('Current resourceURL: ' + slides[this.nextSlide].resourceURL);
 
             //If we're about to switch over to a scoreboard slide, but there is no race going on and the scoreboard isn't showing race results, skip to the next slide
             if (slides[this.nextSlide].resourceURL == "pages/newhdscoreboard.html" && !globalVars.isRaceOnGoing() && !scoreboardIsCurrentlyIdle)
@@ -282,6 +290,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                     formattedURL = formattedURL + '?';
                                 }
                                 formattedURL = formattedURL + '&slideTimeout=' + currentScreen.options.duration;
+                                formattedURL = formattedURL + '&disableAnimations=' + (disableAnimations ? '1' : '0');
                                 slides.push(new Slide('iframehtml',formattedURL,currentScreen.options.duration,'landscape'));
                             }
                         }
@@ -340,6 +349,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                         formattedURL = formattedURL + '?';
                                     }
                                     formattedURL = formattedURL + '&slideTimeout=' + currentScreen.options.duration;
+                                    formattedURL = formattedURL + '&disableAnimations=' + (disableAnimations ? '1' : '0');
                                     slides.push(new Slide('iframehtml',formattedURL,currentScreen.options.duration,'landscape'));
                                 }
                             }
