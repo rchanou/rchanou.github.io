@@ -356,7 +356,10 @@ class RegistrationController extends BaseController {
         $formInput = Session::get("formInput");
         $formInput["signature"] = $base64;
 
-        if ($formInput["facebookProfileURL"] != "#")
+        $session = Session::all();
+        $settings = $session['settings'];
+
+        if ($settings['showPicture'] && $formInput["facebookProfileURL"] != "#")
         {
             $base64 = $this->convertPathToImage($formInput["facebookProfileURL"]);
             $formInput["cameraInput"] = $base64;
@@ -637,6 +640,12 @@ class RegistrationController extends BaseController {
 
 /*            print_r(json_encode($settings['dropdownOptions']));
             die();*/
+        }
+
+        if (Config::has('config.showPicture'))
+        {
+            $showPicture = Config::get('config.showPicture');
+            $settings['showPicture'] = $showPicture;
         }
 
         //Assuming that the user is not a minor to start with

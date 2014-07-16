@@ -179,8 +179,8 @@ class CS_API
         var_dump($params);
         echo "<br/>Result: ";
         var_dump($result);
-        echo "<br/>";
-        die();*/
+        echo "<br/>";*/
+        //die();
 
         if ($result === null || (is_array($result) && array_key_exists("error",$result)) ) //If an error occurred
         {

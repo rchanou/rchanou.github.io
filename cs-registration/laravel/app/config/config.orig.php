@@ -14,5 +14,6 @@ return array(
     'LocationID' => '1',
     'localized' => false,
     'minorSignatureWithParent' => true, //Whether or not both the minor and parent sign simultaneously
+    'showPicture' => true, //Whether or not to allow a profile picture to be selected
 
 );
