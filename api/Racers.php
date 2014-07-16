@@ -126,7 +126,7 @@ EOD;
             }
         }
 
-		$tsql = "INSERT INTO Customers ( CustID, RacerName, EmailAddress, DoNotMail, FName, LName, SourceID, BirthDate, Cell, IgnoreDOB, Gender ) OUTPUT INSERTED.CustID VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+		$tsql = "INSERT INTO Customers ( CustID, RacerName, EmailAddress, DoNotMail, FName, LName, SourceID, BirthDate, Cell, IgnoreDOB, Gender, Status1 ) OUTPUT INSERTED.CustID VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		$params = array($customerId,
 			@$request_data['racername'],
 			@$request_data['email'],
@@ -137,7 +137,8 @@ EOD;
             empty($request_data['birthdate']) ? null : date($GLOBALS['dateFormat'], strtotime(date('Y-m-d', strtotime($request_data['birthdate']))) + 24*60*60),
 			@$request_data['mobilephone'],
 			empty($request_data['birthdate']) ? true : false,
-            $genderCode
+            $genderCode,
+            2 //2 in Status1 means "Signed Waiver"
 			);
 
         $rows = $this->run_query($tsql, $params);
