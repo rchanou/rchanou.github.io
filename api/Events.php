@@ -18,7 +18,7 @@ class Events
 
     protected function closures()
     {
-        $tsql = "SELECT StartTime, EndTime FROM EventReservations WHERE StartTime > GETDATE() AND IsEventClosure = 1 ORDER BY StartTime";
+        $tsql = "SELECT StartTime, EndTime FROM EventReservations WHERE StartTime > GETDATE() AND IsEventClosure = 1 AND Deleted = 0 ORDER BY StartTime";
         $tsql_params = array();
 
         $rows = $this->run_query($tsql, $tsql_params);
