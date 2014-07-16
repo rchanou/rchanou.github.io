@@ -34,6 +34,35 @@ class Images {
             'disconnected' => 'images/redhelmet_disconnect.png'
         );
 
+        $assetsURL = 'http://127.0.0.1/assets/cs-registration/';
+        if (Config::has('config.assetsURL'))
+        {
+            $assetsURL = Config::get('config.assetsURL');
+        }
+
+        if (self::urlExists($assetsURL . 'images/'))
+        {
+            foreach(self::$defaultImages as $imageName => $imageURL)
+            {
+                if (self::urlExists($assetsURL . $imageURL))
+                {
+                    self::$defaultImages[$imageName] = $assetsURL . $imageURL;
+                }
+            }
+        }
+
         self::$initialized = true;
+    }
+
+    private static function urlExists($imageURL)
+    {
+        $file_headers = @get_headers($imageURL);
+        if($file_headers[0] == 'HTTP/1.1 404 Not Found') {
+            $exists = false;
+        }
+        else {
+            $exists = true;
+        }
+        return $exists;
     }
 } 
