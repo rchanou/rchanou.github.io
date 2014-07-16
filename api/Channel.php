@@ -166,8 +166,8 @@ class Channel
 
 							// HTML - 5
 							case 18:
-								// It's a VIDEO URL (.mp4, .webm, .ogv)
-								if(filter_var($slide['Text0'], FILTER_VALIDATE_URL) && (substr($slide['Text0'], -4) == '.mp4' || substr($slide['Text0'], -5) == '.webm' || substr($slide['Text0'], -4) == '.ogv')) {
+								// It's a VIDEO URL (.m4v, .mp4, .webm, .ogv)
+								if(filter_var($slide['Text0'], FILTER_VALIDATE_URL) && (substr($slide['Text0'], -4) == '.m4v' || substr($slide['Text0'], -4) == '.mp4' || substr($slide['Text0'], -5) == '.webm' || substr($slide['Text0'], -4) == '.ogv')) {
 
 
 									// Build path to video
