@@ -27,5 +27,6 @@ $r->addAPIClass('Channel');
 $r->addAPIClass('Translations');
 $r->addAPIClass('Settings');
 $r->addAPIClass('Logs');
+$r->addAPIClass('Events');
 $r->addAuthenticationClass('SimpleAuth');
 $r->handle();
