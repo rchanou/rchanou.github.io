@@ -388,7 +388,7 @@
 
     // local variables setup
     // set up api call url information -- default to using ekwigan when running on either file:/// or localhost for testing purposes
-    var h, apiRootUrl = ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/";
+    var h, apiRootUrl = ((!(h = document.location.hostname) || h == "localhost") ? 'https://pprlongisland.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/";
     var api = new clubspeed.classes.ApiService({
         url: apiRootUrl,
         key: 'cs-dev',
@@ -463,9 +463,9 @@
             var race = options.data.root.race;
             switch(offset) {
                 case 0:
-                    return new Handlebars.SafeString("COMING UP:&nbsp;" + (race.race_name || "") + "&nbsp;" + (race.race_number || ""));
+                    return new Handlebars.SafeString("COMING UP:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
                 case 1:
-                    return new Handlebars.SafeString("FOLLOWING NEXT RACE:&nbsp;" + (race.race_name || "") + "&nbsp;" + (race.race_number || ""));
+                    return new Handlebars.SafeString("FOLLOWING NEXT RACE:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
                 default:
                     return new Handlebars.SafeString("IN " + offset + " RACES:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
             }
@@ -538,6 +538,13 @@
         }
     }
 
+    /**
+        Applies a pre-determined set of animations specific to this page
+        based on the provided data.race.racers.length.
+
+        @param {object} data The object which will contain data.race.racers.length.
+        @returns {void}
+    */
     function applyAnimations(data) {
         // ensure that the delay is never longer than 1/2 of the slideTimeout, but dont go over 350ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
@@ -586,7 +593,7 @@
                         pollForChanges(timeout);
                     }
                 }, function() {
-                    // failure pipe - continue to poll for changes
+                    // failure pipe - continue to poll for changes, don't bother comparing
                     pollForChanges(timeout);
                 }
             );

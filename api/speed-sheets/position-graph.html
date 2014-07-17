@@ -1,0 +1,192 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta charset="utf-8" />
+    <title>Position Graph</title>
+
+    <script src="../js/phantomjs-bind-polyfill.js"></script>
+    <script src="../js/handlebars-latest.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/d3.js"></script>
+    <script src="../js/c3.js"></script>
+
+    <script src="../js/zutil.debug.js"></script>
+    <script>
+        // zUtil setup
+        var z = new zUtil({
+            useArrayExtensions: true,
+            useNumberExtensions: true,
+            useObjectExtensions: true,
+            defaultLogger: console
+        });
+        
+    </script>
+    <script src="../js/clubspeed-classes-api.js"></script>
+
+    <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
+    <link href='../css/c3.css' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+
+        /* elements */
+
+        html, body {
+            font-family: 'Open Sans', sans-serif;
+            height: 100%;
+            min-height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            /*text-shadow: 1px 1px 1px rgba(0,0,0,0.04);*/
+            /*-webkit-font-smoothing: antialiased;*/
+        }
+        html, body :hover {
+            cursor: default;
+        }
+        #wrapper {
+            height: 100%;
+            width: 100%;
+            min-height: 100%;
+        }
+        #lapsChart {
+            height: 100%;
+            width: 100%;
+            /*min-height: 100%;*/
+        }
+    </style>
+</head>
+<body>
+<script>
+
+    // main script execution
+
+    var log = z.log;
+    var parameters = z.location.parameters;
+
+
+    // set up api call url information -- default to using ekwigan when running on either file:/// or localhost for testing purposes
+    var h, apiRootUrl = ((!(h = document.location.hostname) || h == "localhost") ? 'https://pprlongisland.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/";
+    var api = new clubspeed.classes.ApiService({
+        url: apiRootUrl,
+        key: 'cs-dev',
+    });
+
+    // var heatNumber = parameters.HeatNo || 900;
+
+    function getData() {
+        var deferred = [];
+
+        deferred.push(api.getRaceDetails(parameters.HeatNo).then(function(data) {
+            // mutate the data here, not later
+            var r = data.race;
+            r.racers = data.race.racers
+                    .innerJoin(data.scoreboard) // join scoreboard to racers
+                    .on(function(x, y) { return x.id === y.racer_id; }) // on racers.id == scoreboard.racer_id
+                    .orderBy(function(x) { return x.finish_position; }) // order by joined_object.finish_position (originally from scoreboard)
+                    .map(function(x) {
+                        x.laps = x.laps // alter the joined_object.laps array
+                            .where(function(y) { return z.convert(y.lap_number, z.types.number) !== 0}) // chop off any laps where lap_number is 0
+                            .orderBy(function(y) { return y.lap_number; }); // ensure that the laps are in order
+                        return x;
+                    });
+            r.currentRacer = r.racers.first(function(x) { return x.id === parameters.CustID; }); // get a pointer to the currentRacer in the racers list
+            return r; // pipe the data back as the deferred resolution
+        }));
+
+        deferred.push(api.getTopTimes("week"));
+
+        return deferred;
+    }
+
+    function setupHandlebars() {
+        Handlebars.registerHelper('inc', function(value, options) {
+            return parseInt(value) + 1;
+        });
+        Handlebars.registerHelper('isCurrentRacer', function(index, options) {
+            return z.equals(options.data.root.racers[parseInt(index)], options.data.root.currentRacer) ? "isCurrentRacer" : "";
+        });
+    }
+    
+    function getHtml() {
+        return '' +
+                '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
+            +   '   <div id="lapsChart"></div>'
+            +   '</div>';
+    }
+
+    function buildPage(html, data) {
+        var template = Handlebars.compile(html);
+        var output = template(data);
+        $(output).appendTo("body");
+    }
+
+    function truncateStr(str, len, append) {
+        if (!z.check.isNumber(len))
+            return str;
+        if (str.length <= len)
+            return str;
+        if (!z.check.exists(append))
+            append = "";
+        len = len - append.length;
+        return str.slice(0, len) + append;
+    }
+
+    function buildCharts(data) {
+        var chartColumns = [];
+        var nickname = truncateStr(data.racers[0].nickname, 18, "...");
+        chartColumns.push([nickname].concat(data.racers[0].laps.select(function(x) { return x.lap_time; })));
+        var currentRacerFinishPosition = z.convert(data.currentRacer.finish_position, z.types.number);
+        if (currentRacerFinishPosition !== 1) {
+            var currentRacer = data.racers[currentRacerFinishPosition-1];
+            nickname = truncateStr(currentRacer.nickname, 18, "...");
+            chartColumns.push([nickname].concat(currentRacer.laps.select(function(x) { return x.lap_time; })));
+        }
+        var lapsChart = c3.generate({
+            bindto: "#lapsChart",
+            data: {
+                columns: chartColumns
+            },
+            type: 'line',
+            axis: {
+                x: {
+                    label: "Lap Number",
+                    tick: {
+                        format: function(x) { return x + 1; }
+                    }
+                },
+                y: {
+                    label: "Lap Time"
+                }
+            },
+            grid: {
+                x: {
+                    show: true
+                },
+                y: {
+                    show: true
+                }
+            }
+        });
+    }
+
+    function getWhenData() {
+        var data = {};
+        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.extend(val); });
+        return data;
+    }
+
+    function loadPage() {
+        setupHandlebars();
+        $.when.apply($, getData()).then(function() {
+            var data = getWhenData.apply(this, arguments).extend(parameters);
+            log.debug(data);
+            buildPage(getHtml(), data);
+            buildCharts(data);
+        });
+    }
+    loadPage();
+
+</script>
+</body>
+</html>
