@@ -283,19 +283,6 @@
                         return x;
                     });
             r.currentRacer = r.racers.first(function(x) { return x.id === parameters.CustID; }); // get a pointer to the currentRacer in the racers list
-
-
-            r.racers.push({nickname: "TEST NAME 3", fastest_lap_time: "33.33"});
-            r.racers.push({nickname: "TEST NAME 4", fastest_lap_time: "44.44"});
-            r.racers.push({nickname: "TEST NAME 5", fastest_lap_time: "55.55"});
-            r.racers.push({nickname: "TEST NAME 6", fastest_lap_time: "66.66"});
-            // r.racers.push({nickname: "TEST NAME 7", fastest_lap_time: "66.66"});
-            // r.racers.push({nickname: "TEST NAME 8", fastest_lap_time: "66.66"});
-            // r.racers.push({nickname: "TEST NAME 9", fastest_lap_time: "66.66"});
-            // r.racers.push({nickname: "TEST NAME 10", fastest_lap_time: "66.66"});
-            // r.racers.push({nickname: "TEST NAME 11", fastest_lap_time: "66.66"});
-            // r.racers.push({nickname: "TEST NAME 12", fastest_lap_time: "66.66"});
-
             return r; // pipe the data back as the deferred resolution
         }));
 
