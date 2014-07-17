@@ -115,7 +115,7 @@ class Races
 				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
 				$return = array('races' => array());
 
-				$tsql = 'SELECT * FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.ScheduledTime DESC)';
+				$tsql = 'SELECT * FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC)';
 				$tsql_params = array(&$track_id, &$track_id);
 				$upcomingRaces = $this->run_query($tsql, $tsql_params);
 				
