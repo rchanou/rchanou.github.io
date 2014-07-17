@@ -5,5 +5,6 @@ var speedScreenDemoApp = angular.module('speedScreenDemoApp', ['ngRoute','ui.boo
 speedScreenDemoApp.config(function($routeProvider) {
     $routeProvider
         .when('/', {templateUrl : 'pages/channel.html', controller  : 'channelController'})
-        .when('/:channel_id', {templateUrl : 'pages/channel.html', controller  : 'channelController'});
+        .when('/:channel_id', {templateUrl : 'pages/channel.html', controller  : 'channelController'})
+        .when('/:channel_id/:channel_options', {templateUrl : 'pages/channel.html', controller  : 'channelController'});
 });

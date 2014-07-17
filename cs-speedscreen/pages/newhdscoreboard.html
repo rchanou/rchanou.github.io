@@ -25,7 +25,7 @@
         <span ng-if="scoreboardState == 'last_few_heats'">Recent Race Results</span>
         <span ng-if="mode == 'simulation'">Race Simulation</span>
     </div>
-    <div ng-if="scoreboardState == 'race_ongoing'" class="raceTimerBox ellipsis">
+    <div ng-if="showTimer && scoreboardState == 'race_ongoing'" class="raceTimerBox ellipsis">
         {{currentTime}}
     </div>
 </div>

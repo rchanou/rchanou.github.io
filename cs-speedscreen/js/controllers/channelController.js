@@ -35,6 +35,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     //#################
     var apiURL = config.apiURL;
     var apiKey = config.apiKey;
+    $scope.showTimer = defaultFor(config.showTimer, true);
 
 //    If testing a specific track is desired:
 /*    var apiURL = 'http://ftikcincinnati.clubspeedtiming.com/api/index.php';
@@ -200,9 +201,21 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
             {
                 //DEBUG: console.log("No need to poll for channel lineup. Scoreboard-only mode activated for Track 1.");
 
+                var desiredBackgroundURL = "";
+/*                var overwrittenBackgroundURL = $('<img src="http://127.0.0.1/assets/cs-speedscreen/images/background_1080p.jpg"/>');
+
+                alert(overwrittenBackgroundURL.attr('width'));
+                if (overwrittenBackgroundURL.attr('width') > 0)
+                {
+                    alert("BANANA");
+                    desiredBackgroundURL = 'http://127.0.0.1/assets/cs-speedscreen/images/background_1080p.jpg';
+                    $('.hdScoreboard').css('background-image','url(' + desiredBackgroundURL + ')');
+                    $('.hdScoreboard').css('background-size','100% 100%');
+                }*/
+
                 //Manually set the Speed Screen to display the scoreboard infinitely, ignoring Club Speed settings
                 slides = [];
-                slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
+                slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1, desiredBackgroundURL));
                 hasScoreboard = true;
                 scoreboardSlide = slides.length - 1;
                 this.currentTrack = 1;
@@ -216,7 +229,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
                 //Manually set the Speed Screen to display the scoreboard infinitely, ignoring Club Speed settings
                 slides = [];
-                slides.push(new Slide("html","pages/polandminiscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
+                slides.push(new Slide("html","pages/polandminiscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1, ""));
                 hasScoreboard = true;
                 scoreboardSlide = slides.length - 1;
                 this.currentTrack = 1;
@@ -269,14 +282,14 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                 if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
                                 {
                                     slides = [];
-                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
                                     scoreboardSlide = slides.length - 1;
                                     this.currentTrack = currentScreen.options.trackId;
                                     globalVars.setTrackID(this.currentTrack);
                                     $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
                                     return;
                                 }
-                                slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
                                 hasScoreboard = true;
                                 scoreboardSlide = slides.length - 1;
                                 this.currentTrack = currentScreen.options.trackId;
@@ -329,14 +342,14 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                     if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
                                     {
                                         slides = [];
-                                        slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                        slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
                                         scoreboardSlide = slides.length - 1;
                                         this.currentTrack = currentScreen.options.trackId;
                                         globalVars.setTrackID(this.currentTrack);
                                         $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
                                         return;
                                     }
-                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
                                     hasScoreboard = true;
                                     scoreboardSlide = slides.length - 1;
                                     this.currentTrack = currentScreen.options.trackId;
@@ -394,6 +407,11 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                     raceWasJustHappening = true;
                     if (slides[this.nextSlide].resourceURL != 'pages/newhdscoreboard.html')
                     {
+                        if (slides[scoreboardSlide].backgroundURL != undefined && slides[scoreboardSlide].backgroundURL != "")
+                        {
+                            $('.hdScoreboard').css('background-image','url(' + slides[scoreboardSlide].backgroundURL + ')');
+                            $('.hdScoreboard').css('background-size','100% 100%');
+                        }
                         this.currentSlide = scoreboardSlide;
                         this.nextSlide = scoreboardSlide;
                         var currentDuration = slides[this.nextSlide].durationMs;
@@ -478,9 +496,10 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
      * @param apiURL The URL of the API to fetch. This allows multiple APIs to exist in the same Speed Screen if desired.
      * @param apiKey The key to the above API.
      * @param trackID If applicable, the track ID associated with the slide.
+     * @param backgroundURL If applicable, the background image URL to use for the slide
      * @constructor
      */
-    function Slide(type,resourceURL,durationMs,orientation, apiURL, apiKey, trackID)
+    function Slide(type,resourceURL,durationMs,orientation, apiURL, apiKey, trackID, backgroundURL)
     {
         this.type = type;
         this.resourceURL = resourceURL;
@@ -489,6 +508,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
         this.apiURL = apiURL;
         this.apiKey = apiKey;
         this.trackID = trackID;
+        this.backgroundURL = backgroundURL;
     }
 
     //#####################

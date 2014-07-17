@@ -1,5 +1,6 @@
 var config =
 {
     apiURL: 'http://' + window.location.hostname + '/api/index.php',
-    apiKey: 'cs-dev'
+    apiKey: 'cs-dev',
+    showTimer: true
 };
