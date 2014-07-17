@@ -512,17 +512,26 @@
 
                 if (this.scoreboardState == "race_ongoing")
                 {
-                    /*if ($scope.currentScoreboard.race.race_by == "minutes") //TODO: Reconsider adding the countdown version... it was jarring, though.
+                    if ($scope.currentScoreboard.race.race_by == "minutes")
                     {
                         var minutes = parseInt(($scope.currentScoreboard.race.duration*60 - $scope.currentScoreboard.race.race_time_in_seconds)/60);
                         var seconds = parseInt(($scope.currentScoreboard.race.duration*60 - $scope.currentScoreboard.race.race_time_in_seconds)%60);
 
                     }
-                    else*/
-                    //{
-                        var minutes = parseInt(($scope.currentScoreboard.race.race_time_in_seconds)/60);
-                        var seconds = parseInt(($scope.currentScoreboard.race.race_time_in_seconds)%60);
-                    //}
+                    else //by laps
+                    {
+                        if ($scope.mostLaps == undefined || $scope.mostLaps > $scope.currentScoreboard.race.duration)
+                        {
+                            $scope.mostLaps = $scope.currentScoreboard.race.duration;
+                        }
+                        var lapsRemaining = $scope.currentScoreboard.race.duration - $scope.mostLaps;
+                        if (lapsRemaining < 0)
+                        {
+                            lapsRemaining = 0;
+                        }
+                        $scope.lapsRemaining = lapsRemaining;
+
+                    }
                     if (seconds < 0)
                     {
                         seconds = 0;
@@ -664,6 +673,8 @@
                     {
                         this.racers[fastestRacer].isFastest = true; //Make a note of the fastest racer by having their best lap time be written in purple text
                     }
+
+                    $scope.mostLaps = mostLaps;
 
                     //If the race is by position
                     if ($scope.currentScoreboard.hasOwnProperty("race") && $scope.currentScoreboard.race.hasOwnProperty("win_by") && $scope.currentScoreboard.race.win_by == "position")

@@ -407,11 +407,11 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                     raceWasJustHappening = true;
                     if (slides[this.nextSlide].resourceURL != 'pages/newhdscoreboard.html')
                     {
-                        if (slides[scoreboardSlide].backgroundURL != undefined && slides[scoreboardSlide].backgroundURL != "")
+/*                        if (slides[scoreboardSlide].backgroundURL != undefined && slides[scoreboardSlide].backgroundURL != "")
                         {
                             $('.hdScoreboard').css('background-image','url(' + slides[scoreboardSlide].backgroundURL + ')');
                             $('.hdScoreboard').css('background-size','100% 100%');
-                        }
+                        }*/
                         this.currentSlide = scoreboardSlide;
                         this.nextSlide = scoreboardSlide;
                         var currentDuration = slides[this.nextSlide].durationMs;
