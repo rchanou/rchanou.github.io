@@ -520,7 +520,7 @@
                     }
                     else //by laps
                     {
-                        if ($scope.mostLaps == undefined || $scope.mostLaps > $scope.currentScoreboard.race.duration)
+                        if ($scope.mostLaps == undefined || parseInt($scope.mostLaps) > parseInt($scope.currentScoreboard.race.duration))
                         {
                             $scope.mostLaps = $scope.currentScoreboard.race.duration;
                         }
@@ -602,7 +602,7 @@
                         if (this.racers.hasOwnProperty(currentRacer))
                         {
                             //Determine the highest number of laps
-                            if (this.racers[currentRacer].lap_num > mostLaps)
+                            if (parseInt(this.racers[currentRacer].lap_num) > parseInt(mostLaps))
                             {
                                 mostLaps = this.racers[currentRacer].lap_num;
                             }
