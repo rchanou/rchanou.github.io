@@ -97,7 +97,7 @@ class CS_API
         switch ($command)
         {
             case 'searchByEmail':
-                $url = $url . '/racers/search.json?filter=email&query=' . $params["email"] . '&key=' . self::$apiKey;
+                $url = $url . '/racers/search.json?field=email&query=' . $params["email"] . '&key=' . self::$apiKey;
                 $result = self::callApi($url);
                 break;
 
