@@ -34,10 +34,10 @@ class Images {
             'disconnected' => 'images/redhelmet_disconnect.png'
         );
 
-        $assetsURL = 'http://127.0.0.1/assets/cs-registration/';
+        $assetsURL = 'http://' . $_SERVER['HTTP_HOST'] . 'assets/cs-registration/';
         if (Config::has('config.assetsURL'))
         {
-            $assetsURL = Config::get('config.assetsURL');
+            $assetsURL = 'http://' . $_SERVER['HTTP_HOST'] . Config::get('config.assetsURL');
         }
 
         if (self::urlExists($assetsURL . 'images/'))
