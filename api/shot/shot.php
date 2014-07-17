@@ -16,7 +16,7 @@ X Add configurable delay
 $cache_life = 120; //caching time, in seconds
 $download = false;
 $here = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-$bin_files = $here . 'bin' . DIRECTORY_SEPARATOR;
+$bin_files = $here . 'phantomjs' . DIRECTORY_SEPARATOR;
 $jobs = $here . 'jobs' . DIRECTORY_SEPARATOR;
 $cache = $here . 'cache' . DIRECTORY_SEPARATOR;
 $w = 400;
