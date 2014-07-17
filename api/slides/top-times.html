@@ -2,9 +2,26 @@
 <html>
 <head>
     <title>Top Times</title>
+    
     <script src ="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
     <script src="../js/zutil.min.js"></script>
+    <script>
+        // zUtil setup
+        var z = new zUtil({
+            useArrayExtensions: true,
+            useNumberExtensions: true,
+            useObjectExtensions: true,
+            defaultLogger: console
+        });
+        var log = z.log;
+        var assert = z.assert;
+        var sw = z.sw;
+        var parameters = z.location.parameters;
+        var events = z.events;
+    </script>
+    <script src="../js/clubspeed-classes-api.js"></script>
+
     <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
     <style type="text/css">
         
@@ -157,39 +174,11 @@
 
         /* helpers */
 
-        /* vertical text alignment helper */
-        .headerText::before, .headerText2::before, .headerImg::before, .racerText::before {
-            content: "";
-            display: inline-block;
-            height: 100%;
-            vertical-align: middle;
+        .lFloat {
+            float: left;
         }
-        .shadows {
-            text-shadow: 0 0.175vmin 0 rgba(201,201,201,1),
-                0 0.2625vmin 0 rgba(187,187,187,1),
-                0 0.35vmin 0 rgba(185,185,185,1),
-                0 0.4375vmin 0 rgba(170,170,170,1),
-                0 0.375vmin 0.175vmin rgba(0,0,0,.1),
-                0 0 0.4375vmin rgba(0,0,0,.1),
-                0 0.0875vmin 0.2625vmin rgba(0,0,0,.3),
-                0 0.2625vmin 0.4375vmin rgba(0,0,0,.2),
-                0 0.4375vmin 0.875vmin rgba(0,0,0,.25),
-                0 0.875vmin 0.875vmin rgba(0,0,0,.2),
-                0 1.75vmin 1.75vmin rgba(0,0,0,.15);
-        }
-        .glowWhiteShadows {
-            text-shadow: 0 0 1vmin rgba(230,230,230,0.7),
-                0 0.125vmin 0 rgba(201,201,201,1),
-                0 0.1875vmin 0 rgba(187,187,187,1),
-                0 0.25vmin 0 rgba(185,185,185,1),
-                0 0.3125vmin 0 rgba(170,170,170,1),
-                0 0.375vmin 0.125vmin rgba(0,0,0,.1),
-                0 0 0.3125vmin rgba(0,0,0,.1),
-                0 0.0625vmin 0.1875vmin rgba(0,0,0,.3),
-                0 0.1875vmin 0.3125vmin rgba(0,0,0,.2),
-                0 0.3125vmin 0.625vmin rgba(0,0,0,.25),
-                0 0.625vmin 0.625vmin rgba(0,0,0,.2),
-                0 1.25vmin 1.25vmin rgba(0,0,0,.15);
+        .rFloat {
+            float: right;
         }
         .padLeft5 {
             padding-left: 5vmin;
@@ -202,6 +191,48 @@
         }
         .italic {
             font-style: italic;
+        }
+        .hidden {
+            visibility: hidden;
+        }
+        .visible {
+            visibility: visible;
+        }
+        .hLeft {
+            text-align: left;
+        }
+        .hCenter {
+            text-align: center;
+        }
+        .hRight {
+            text-align: right;
+        }
+        .vMiddle {
+            vertical-align: middle;
+        }
+        .vMiddle::before {
+            content: "";
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+        .vBottom {
+            vertical-align: text-bottom;
+        }
+        .vBottom::before {
+            content: "";
+            display: inline-block;
+            height: 100%;
+            vertical-align: text-bottom;
+        }
+        .fill {
+            height: 100%;
+            width: 100%;
+        }
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .parallelogram {
             -webkit-transform: skew(335deg);
@@ -221,11 +252,18 @@
             width: 100%;
             height: 100%;
         }
-        .hidden {
-            visibility: hidden;
-        }
-        .visible {
-            visibility: visible;
+        .shadows {
+            text-shadow: 0 0.175vmin 0 rgba(201,201,201,1),
+                0 0.2625vmin 0 rgba(187,187,187,1),
+                0 0.35vmin 0 rgba(185,185,185,1),
+                0 0.4375vmin 0 rgba(170,170,170,1),
+                0 0.375vmin 0.175vmin rgba(0,0,0,.1),
+                0 0 0.4375vmin rgba(0,0,0,.1),
+                0 0.0875vmin 0.2625vmin rgba(0,0,0,.3),
+                0 0.2625vmin 0.4375vmin rgba(0,0,0,.2),
+                0 0.4375vmin 0.875vmin rgba(0,0,0,.25),
+                0 0.875vmin 0.875vmin rgba(0,0,0,.2),
+                0 1.75vmin 1.75vmin rgba(0,0,0,.15);
         }
 
         /* animations */
@@ -308,70 +346,126 @@
 </head>
 <body>
 <script>
-    var z = new zUtil({
-        useArrayExtensions: true,
-        useNumberExtensions: true,
-        useObjectExtensions: true,
-        defaultLogger: console
+
+    // main script execution
+
+    // set up api call url information -- default to using ekwigan when running on either file:/// or localhost for testing purposes
+    var h, apiRootUrl = ((!(h = document.location.hostname) || h == "localhost") ? 'https://ekwigan.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/";
+    var api = new clubspeed.classes.ApiService({
+        url: apiRootUrl,
+        key: 'cs-dev',
     });
-    var log = z.log;
-    var assert = z.assert;
-    var sw = z.sw;
-    var parameters = z.location.parameters;
-    var data = {}; // for use with handlebars
 
+    function getData() {
 
-    /**
-        API and parameter query string helpers
-    */ 
+        var deferred = [];
 
-    // set up api call url information
-    var apiRootUrl;
-    if (!document.location.hostname || document.location.hostname == "localhost") { // can be removed in production code -- just for testing
-        apiRootUrl = 'https://ekwigan.clubspeedtiming.com';
-    }
-    else {
-        apiRootUrl = window.location.origin || (window.location.protocol + "//" + window.location.host);
-    }
-    var apiRootPath = '/api/index.php';
-    var apiTracksUrl = '/tracks/index.js';
-    var apiFastestUrl = '/races/fastest.js';
+        deferred.push(api.getTracks().then(function(data) {
+            var currentTrack = z.convert(parameters.track, z.types.number) || 1; // never a track 0 -- if falsy, take 1
+            for (var i = 0; i < data.tracks.length; i++) {
+                if (data.tracks[i].id == currentTrack) {
+                    data = data.tracks[i];
+                    break;
+                }
+            }
+            return data;
+        }));
 
-    // create default queries to be applied to all api calls
-    var apiDefaults = {
-        track: parseInt(parameters.trackId) || 1,
-        key: 'cs-dev', // todo: replace with actual key selection
-        range: parameters.range || "day"
-    };
-    function addDefaults(apiQueries) {
-        return $.extend({}, apiQueries, apiDefaults);
+        deferred.push(api.getTopTimes(parameters.range, parameters.limit));
+
+        return deferred;
     }
 
-    // set up the api query parameters
-    var apiTracksQueries = addDefaults({});
-    var apiFastestQueries = addDefaults({
-        range: parameters.range || "day",
-        speed_level: parseInt(parameters.speedLevel) || 1,
-        limit: parseInt(parameters.limit) || 10
-    });
-    function buildUrl(api, queries) {
-        // builds the api url based off of the originally defined root url, and the provided apiType
-        return apiRootUrl 
-            + apiRootPath
-            + api
-            + (queries ? "?" + $.param(queries) : "");
+    function setupHandlebars() {
+        Handlebars.registerHelper('getPlace', function(index, options) {
+            switch (index) {
+                case 0: return "firstPlace";
+                case 1: return "secondPlace";
+                case 2: return "thirdPlace";
+                default: return "otherPlace";
+            }
+        });
+        Handlebars.registerHelper('inc', function(value, options) {
+            return parseInt(value) + 1;
+        });
+        Handlebars.registerHelper('getRacerHeight', function(options) {
+            return (96 / options.data.root.fastest.length);
+        });
+        Handlebars.registerHelper('getRacerFontSize', function(options) {
+            return 2 + (100 / (options.data.root.fastest.length * 5));
+        });
     }
-    function handleSuccess(apiData, textStatus, xhr) {
-        data.extend(apiData);
-    }
-    function handleError(xhr, textStatus, errorThrown) {
-        log.error(xhr.status + ": " + errorThrown);
-    }
+    
+    function getHtml() {
 
+        //// --- example data object to be passed to HandleBars templating engine ---
+        // data: {
+        //     "trackId": "1",
+        //     "speedLevel": "1",
+        //     "range": "day",
+        //     "backgroundUrl": "./temp/gold.jpg",
+        //     "id": "1",
+        //     "name": "Austin",
+        //     "fastest": [
+        //         {
+        //             "racer_id": "10123556",
+        //             "nickname": "harold chovanetz",
+        //             "first_name": "Harold",
+        //             "rpm": "1264",
+        //             "last_name": "Chovanetz",
+        //             "lap_time": "23.472",
+        //             "lap_number": "14",
+        //             "speed_level": "1",
+        //             "track_id": "1",
+        //             "track_name": "Austin",
+        //             "timestamp": "2014-07-07 13:26:00"
+        //         },
+        //         {
+        //             "racer_id": "10123563",
+        //             "nickname": "Austin Casper",
+        //             "first_name": "Austin",
+        //             "rpm": "1238",
+        //             "last_name": "Casper",
+        //             "lap_time": "23.732",
+        //             "lap_number": "14",
+        //             "speed_level": "1",
+        //             "track_id": "1",
+        //             "track_name": "Austin",
+        //             "timestamp": "2014-07-07 13:17:00"
+        //         }
+        //     ]
+        // }
 
-    /**
-        HTML and API data manipulators
-    */
+        return '' +
+            '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
+        +   '   <div id="headerSpacing"></div>'
+        +   '   <div id="headerWrapper">'
+        +   '       <div id="headerTop" class="parallelogram">'
+        +   '           <div class="headerText unskew uppercase shadows vMiddle hCenter">TOP TIMES OF THE {{range}}</div>'
+        +   '       </div>'
+        +   '       <div id="headerBottom" class="parallelogram">'
+        +   '           <div class="unskew">'
+        +   '               <div id="headerBottomLeft">'
+        +   '                   <div class="headerText2 italic shadows vMiddle hCenter">TRACK:&nbsp;&nbsp;{{name}}</div>'
+        +   '               </div>'
+        +   '               <div id="headerBottomRight">'
+        +   '                   <div class="headerText2 italic shadows vMiddle hCenter">POWERED BY</div>'
+        +   '                   <div class="headerImg vMiddle hCenter"><img id="clubSpeedLogo" src="../img/clubspeed_full_logo_300.png" /></div>'
+        +   '               </div>'
+        +   '           </div>'
+        +   '       </div>'
+        +   '   </div>'
+        +   '   <div id="results">'
+        +   '       {{#each fastest}}'
+        +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{getRacerHeight}}%; font-size: {{getRacerFontSize}}vh;">'
+        +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText unskew">{{inc @index}}</div></div>'
+        +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText unskew padLeft5">{{nickname}}</div></div>'
+        +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText unskew">{{lap_time}}</div></div>'
+        +   '           </div>'
+        +   '       {{/each}}'
+        +   '   </div>'
+        +   '</div>';
+    }
 
     function applyHtmlClass(elems, cssClasses, delay) {
         var currentDelay = 0;
@@ -396,184 +490,35 @@
         }
     }
 
-    function applyAnimations() {
+    function applyAnimations(data) {
         // ensure that the delay is never longer than 1/2 of the slideTimeout, but dont go over 350ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
         var d, delay = (d = (+parameters.slideTimeout || 15000) / data.fastest.length * 0.5) > 350 ? 350 : d;
         applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
     }
 
-    function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the computation is only done once
-        if (z.check.exists(data) && z.check.isArray(data.fastest)) {
-            for (var i = 0; i < data.fastest.length; i++) {
-                var currentRacer = data.fastest[i];
-                currentRacer.lap_time = currentRacer.lap_time.toLocaleString(locale);
-            }
-        }
+    function buildPage(html, data) {
+        var template = Handlebars.compile(html);
+        var output = template(data);
+        $(output).appendTo("body");
+        applyAnimations(data);
     }
 
-    function buildAndAppendHtml(templateHtml) {
-        // build an array of deferred objects for api data collection
-        var deferreds = [];
+    function getWhenData() {
+        var data = {};
+        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.extend(val); });
+        return data;
+    }
 
-        // setup handlebars data object to be extended with api data
-        data.extend(parameters, apiTracksQueries, apiFastestQueries);
-
-        // push the ajax call for track list
-        deferreds.push(
-            $.ajax({
-                url: buildUrl(apiTracksUrl, apiTracksQueries),
-                type: "GET",
-                dataType: "json",
-                async: true
-            })
-            .done(function(apiData) {
-                for (var i = 0; i < apiData.tracks.length; i++) {
-                    // can we pass the API a parameter to just get a specific track's information?
-                    // doing data manipulation on javascript in the interim
-                    if (apiData.tracks[i].id == apiTracksQueries.track) {
-                        data.extend(apiData.tracks[i]);
-                        break;
-                    }
-                }
-            })
-            .fail(handleError)
-        );
-
-        // push the ajax call for fastest
-        deferreds.push(
-            $.ajax({
-                url: buildUrl(apiFastestUrl, apiFastestQueries),
-                type: "GET",
-                dataType: "json",
-                async: true
-            })
-            .done(handleSuccess)
-            .fail(handleError)
-        );
-
-        // handle the final async call to use the built data object
-        $.when.apply($, deferreds).always(function() {
-            localizeData(data);
-            var template = Handlebars.compile(templateHtml); // compile the originally defined source
-            var output = template(data); // attach the data so handlebars can interpret it
-            $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
-            if (z.convert(parameters.disableAnimations, z.types.boolean)) {
-                $('.racer').addClass('visible');
-            }
-            else {
-                applyAnimations();
-                
-            }
+    function loadPage() {
+        setupHandlebars();
+        $.when.apply($, getData()).then(function() {
+            var data = getWhenData.apply(this, arguments).extend(parameters);
+            log(data);
+            buildPage(getHtml(), data);
         });
     }
-
-
-    /**
-        Functions, data, and documentation for the end-user to modify as desired
-    */
-
-    //// --- example data object to be passed to HandleBars templating engine ---
-    // data: {
-    //     "trackId": "1",
-    //     "speedLevel": "1",
-    //     "range": "day",
-    //     "backgroundUrl": "./temp/gold.jpg",
-    //     "id": "1",
-    //     "name": "Austin",
-    //     "fastest": [
-    //         {
-    //             "racer_id": "10123556",
-    //             "nickname": "harold chovanetz",
-    //             "first_name": "Harold",
-    //             "rpm": "1264",
-    //             "last_name": "Chovanetz",
-    //             "lap_time": "23.472",
-    //             "lap_number": "14",
-    //             "speed_level": "1",
-    //             "track_id": "1",
-    //             "track_name": "Austin",
-    //             "timestamp": "2014-07-07 13:26:00"
-    //         },
-    //         {
-    //             "racer_id": "10123563",
-    //             "nickname": "Austin Casper",
-    //             "first_name": "Austin",
-    //             "rpm": "1238",
-    //             "last_name": "Casper",
-    //             "lap_time": "23.732",
-    //             "lap_number": "14",
-    //             "speed_level": "1",
-    //             "track_id": "1",
-    //             "track_name": "Austin",
-    //             "timestamp": "2014-07-07 13:17:00"
-    //         }
-    //     ]
-    // }
-
-    Handlebars.registerHelper('getPlace', function(index, options) {
-        switch (index) {
-            case 0: return "firstPlace";
-            case 1: return "secondPlace";
-            case 2: return "thirdPlace";
-            default: return "otherPlace";
-        }
-    });
-    Handlebars.registerHelper('inc', function(value, options) {
-        return parseInt(value) + 1;
-    });
-    Handlebars.registerHelper('getRacerHeight', function(options) {
-        return (96 / options.data.root.fastest.length);
-    });
-    Handlebars.registerHelper('getRacerFontSize', function(options) {
-        return 2 + (100 / (options.data.root.fastest.length * 5));
-    });
-
-    var src = '' +
-            '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
-        +   '   <div id="headerSpacing"></div>'
-        +   '   <div id="headerWrapper">'
-        +   '       <div id="headerTop" class="parallelogram">'
-        +   '           <div class="headerText unskew uppercase shadows">TOP TIMES OF THE {{range}} ON TRACK:&nbsp;&nbsp;{{name}}</div>'
-        +   '       </div>'
-        +   '       <div id="headerBottom" class="parallelogram">'
-        +   '           <div class="unskew">'
-        +   '               <div id="headerBottomLeft">'
-        +   '                   <div class="headerText2"></div>'
-        +   '               </div>'
-        +   '               <div id="headerBottomRight">'
-        +   '                   <div class="headerText2 italic shadows">POWERED BY</div>'
-        +   '                   <div class="headerImg"><img id="clubSpeedLogo" src="../img/clubspeed_full_logo_300.png" /></div>'
-        +   '               </div>'
-        +   '           </div>'
-        +   '       </div>'
-        +   '   </div>'
-        +   '   <div id="results">'
-        +   '       {{#each fastest}}'
-        +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{getRacerHeight}}%; font-size: {{getRacerFontSize}}vh;">'
-        +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText unskew">{{inc @index}}</div></div>'
-        +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText unskew padLeft5">{{nickname}}</div></div>'
-        +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText unskew">{{lap_time}}</div></div>'
-        +   '           </div>'
-        +   '       {{/each}}'
-        +   '   </div>'
-        +   '</div>';
-
-    buildAndAppendHtml(src); // call the previously defined function
-
-    // // code for the parent (angularjs wrapper)
-    // function receiveMessage(event) {
-    //     // console.log(event);
-    //     // console.log(event.origin);
-    //     // console.log(event.data);
-    // }
-    // window.addEventListener("message", receiveMessage, false);
-
-    // // code for the slide js
-    // window.postMessage({
-    //     slideComplete:true
-    // }, "*");
+    loadPage();
 
 </script>
 </body>

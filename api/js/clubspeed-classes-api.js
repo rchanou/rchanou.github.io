@@ -1,0 +1,138 @@
+/**
+    ClubSpeed ApiService class definition.
+
+    Library Requirements:
+        1. zutil
+            a. assert
+            b. base
+            c. check
+            d. convert
+            e. log
+        2. jQuery
+*/
+(function(w, z, $, undefined) {
+    var clubspeed = w.clubspeed = (w.clubspeed || {}); // implement or collect pointer for the clubspeed namespace
+    clubspeed.classes = clubspeed.classes || {}; // implement or collect pointer for the clubspeed.classes namespace
+
+    /**
+        A wrapper class used to make api calls to ClubSpeed servers.
+
+        @class Contains an api interface.
+     */
+    var ApiService = (function() {
+
+        /**
+            Creates a new ApiService class.
+
+            @constructor
+            @param object setup A required object containing values to use to set up the api.
+            @param string setup.url A required string representing the base url for the api.
+            @param [string] setup.key The api key to use.
+        */
+        function ApiService(setup) {
+            var self = this;
+            var sw = new z.classes.StopwatchStack(); // make a self-contained stopwatch class for internal timing
+            var log = z.log;
+
+            function getNextRacers(track, offset) {
+                return sendRequest({
+                    api: "races/next.json",
+                    type: "GET",
+                    data: {
+                        track: z.convert(track, z.types.number) || 1,
+                        offset: z.convert(offset, z.types.number) || 0 // next vs next, next
+                    }
+                });
+            }
+            function getRaceDetails(raceId) {
+                return sendRequest({
+                    api: "races/" + raceId + ".json",
+                    type: "GET"
+                });
+            }
+            function getTopTimes(range, limit) {
+                return sendRequest({
+                    api: "races/fastest.json",
+                    type: "GET",
+                    data: {
+                        range: range || "week",
+                        limit: limit || 10
+                    }
+                });
+            }
+            function getTracks() {
+                return sendRequest({
+                    api: "tracks/index.json",
+                    type: "GET"
+                });
+            }
+            
+            function apiSuccessHandler(data, textStatus, xhr) {
+                z.assert(function() { return z.equals(data, xhr.responseJSON); });
+                z.assert(function() { return z.equals(textStatus, "success"); });
+                z.assert(function() { return z.equals(xhr.status, 200); });
+                log.debug("  ---  Return success from: " + xhr.url + " (" + xhr.status + ")");
+                log.debug(xhr);
+            }
+            function apiFailHandler(xhr, textStatus, errorThrown) {
+                log.error("  ---  Return failure from: " + xhr.url + " (" + xhr.status + "): " + textStatus);
+                log.error(xhr);
+            }
+            function apiThenHandler(data, textStatus, xhr) {
+                return data; // for automated piping purposes -- problematic?
+            }
+            function apiAlwaysHandler(dataOrXhr, textStatus, xhrOrErrorThrown) {
+                sw.pop();
+            }
+            function buildRequest(requestInfo) {
+                requestInfo.async = z.check.exists(requestInfo.async) ? z.convert(requestInfo.async, z.types.boolean) : true; // default async to true
+                requestInfo.type = requestInfo.type || "GET"; // use default type of "GET"
+                requestInfo.url = self.data.url + requestInfo.api;
+                requestInfo.data = requestInfo.data || {};
+                requestInfo.data.key = self.data.key;
+                requestInfo.beforeSend = function(xhr, settings) {
+                    xhr.url = settings.url; // store the url for debugging purposes
+                }
+                return requestInfo;
+            }
+
+            function sendRequest(requestInfo) {
+                var builtInfo = buildRequest(requestInfo);
+                var fullPath = builtInfo.url + (builtInfo.data ? ("?" + $.param(builtInfo.data)) : "");
+                log.debug("  ---   Sending request to: " + fullPath);
+                sw.push(  "  ---              Calling: " + fullPath);
+                return $.ajax(builtInfo)
+                    .done(apiSuccessHandler)
+                    .fail(apiFailHandler)
+                    .then(apiThenHandler)
+                    .always(apiAlwaysHandler);
+            }
+
+            // default setup and assertions
+            (function() {
+                z.assert.exists(setup);
+                z.assert.exists(setup.url);
+                self.data = {
+                    key: setup.key || 'cs-dev', // fallback to cs-dev
+                    url: setup.url
+                }
+            })();
+
+            return (function(apiObj) {
+                // expose the internal functions as pointers on a new object to be sent back up the chain to be the ApiService class
+                z.defineProperty(apiObj, "getNextRacers", { get: function() { return getNextRacers; }, writeable: false });
+                z.defineProperty(apiObj, "getRaceDetails", { get: function() { return getRaceDetails; }, writeable: false });
+                z.defineProperty(apiObj, "getTopTimes", { get: function() { return getTopTimes; }, writeable: false });
+                z.defineProperty(apiObj, "getTracks", { get: function() { return getTracks; }, writeable: false });
+                return apiObj;
+            })({});
+
+        }
+
+        return ApiService;
+
+    })();
+
+    clubspeed.classes.ApiService = ApiService;
+
+})(window || this /* object on which to declare clubspeed */, z /* zUtil */, $ /* jquery */);
