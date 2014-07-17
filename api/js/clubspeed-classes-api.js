@@ -14,6 +14,17 @@
     var clubspeed = w.clubspeed = (w.clubspeed || {}); // implement or collect pointer for the clubspeed namespace
     clubspeed.classes = clubspeed.classes || {}; // implement or collect pointer for the clubspeed.classes namespace
 
+
+    var ApiCall = (function() {
+
+        function ApiCall(setup) {
+
+        }
+
+        return ApiCall;
+
+    })();
+
     /**
         A wrapper class used to make api calls to ClubSpeed servers.
 
@@ -34,39 +45,52 @@
             var sw = new z.classes.StopwatchStack(); // make a self-contained stopwatch class for internal timing
             var log = z.log;
 
-            function getNextRacers(track, offset) {
+            var getNextRacers = function(track, offset) {
                 return sendRequest({
                     api: "races/next.json",
                     type: "GET",
                     data: {
-                        track: z.convert(track, z.types.number) || 1,
-                        offset: z.convert(offset, z.types.number) || 0 // next vs next, next
+                        track: z.convert(track, z.types.number) || getNextRacers.defaults.track,
+                        offset: z.convert(offset, z.types.number) || getNextRacers.defaults.offset
                     }
                 });
-            }
-            function getRaceDetails(raceId) {
+            }.extend({
+                defaults: {
+                    track: 1,
+                    offset: 0
+                }
+            });
+
+            var getRaceDetails = function(raceId) {
                 return sendRequest({
                     api: "races/" + raceId + ".json",
                     type: "GET"
                 });
-            }
-            function getTopTimes(range, limit) {
+            };
+
+            var getTopTimes = function(range, limit) {
                 return sendRequest({
                     api: "races/fastest.json",
                     type: "GET",
                     data: {
-                        range: range || "week",
-                        limit: limit || 10
+                        range: range || getTopTimes.defaults.range,
+                        limit: limit || getTopTimes.defaults.limit
                     }
                 });
-            }
-            function getTracks() {
+            }.extend({
+                defaults: {
+                    range: "week",
+                    limit: 10
+                }
+            });
+
+            var getTracks = function() {
                 return sendRequest({
                     api: "tracks/index.json",
                     type: "GET"
                 });
-            }
-            
+            };
+
             function apiSuccessHandler(data, textStatus, xhr) {
                 z.assert(function() { return z.equals(data, xhr.responseJSON); });
                 z.assert(function() { return z.equals(textStatus, "success"); });
@@ -82,7 +106,7 @@
                 return data; // for automated piping purposes -- problematic?
             }
             function apiAlwaysHandler(dataOrXhr, textStatus, xhrOrErrorThrown) {
-                sw.pop();
+                sw.pop(); // find a way to self contain stopwatches with api calls, instead of a generic stack for $.when() usage
             }
             function buildRequest(requestInfo) {
                 requestInfo.async = z.check.exists(requestInfo.async) ? z.convert(requestInfo.async, z.types.boolean) : true; // default async to true
@@ -101,6 +125,7 @@
                 var fullPath = builtInfo.url + (builtInfo.data ? ("?" + $.param(builtInfo.data)) : "");
                 log.debug("  ---   Sending request to: " + fullPath);
                 sw.push(  "  ---              Calling: " + fullPath);
+                // var sw = new z.classes.StopwatchWrapper(  "  ---              Calling: " + fullPath);
                 return $.ajax(builtInfo)
                     .done(apiSuccessHandler)
                     .fail(apiFailHandler)

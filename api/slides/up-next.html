@@ -366,35 +366,34 @@
 
 <script>
 
-    // main script execution
+    /**
+        Constant variable setup
+    */
 
-
-    // cache class setup
-    function Cache() {
-        this.data = {};
-    };
-    Cache.prototype.compare = function(key, newData) {
-        if (!z.equals(this.data[key], newData)) {
-            this.data[key] = newData;
-            return false;
-        }
-        return true;
-    }
-
-    // constants setup
     var KEYS = {
-        NEXT_RACERS: "nextRacersKey"
+        API_DATA: "apiDataKey"
     };
+    
 
-    // local variables setup
-    // set up api call url information -- default to using ekwigan when running on either file:/// or localhost for testing purposes
-    var h, apiRootUrl = ((!(h = document.location.hostname) || h == "localhost") ? 'https://pprlongisland.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/";
+    /**
+        Window variable setup
+    */
+
+    // if current document.location.hostname does not exist, or is "localhost", 
+    // then use a fallback for api root (in this case, ftikcincinnati)
+    // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
-        url: apiRootUrl,
+        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
-    var cache = new Cache();
+    var cache = {};
 
+
+    /**
+        Initializes, calls, and pushes API deferred objects onto an array, returning them to be collected by $.when();
+
+        @returns {array<object>} The array of deferred objects.
+    */
     function getData() {
         var deferred = [];
 
@@ -431,6 +430,13 @@
         return deferred;
     }
 
+    /**
+        Initializes, calls, and pushes API deferred objects onto an array, 
+        returning them to be collected by $.when()
+        after the initial getData() returns with a failure.
+
+        @returns {array<object>} The array of deferred objects.
+    */
     function getFallbackData() {
         var deferred = [];
 
@@ -447,6 +453,11 @@
         return deferred;
     }
 
+    /**
+        Registers helpers to be used by Handlebars.
+
+        @returns {void}
+    */
     function setupHandlebars() {
         Handlebars.registerHelper('inc', function(value, options) {
             return parseInt(value) + 1;
@@ -484,7 +495,70 @@
         });
     }
     
+    /**
+        Method which builds and returns the HTML string for use as a Handlebars template.
+
+        @returns {string} The HTML template for use with Handlebars.
+    */
     function getHtml() {
+
+        //// --- example data object to be passed to HandleBars templating engine ---
+        // data: {
+        //     "race": {
+        //         "id": "69932",
+        //         "track_id": "1",
+        //         "track": "Full Throttle Track",
+        //         "starts_at": "2014-07-17 17:00:00.000",
+        //         "heat_type_id": "1",
+        //         "heat_status_id": "4",
+        //         "speed_level_id": "1",
+        //         "speed_level": "Adult Speed Level",
+        //         "win_by": "laptime",
+        //         "race_by": "minutes",
+        //         "duration": "10",
+        //         "race_name": "8 Min Race",
+        //         "race_number": "32",
+        //         "racers": [
+        //             {
+        //                 "id": "1279275",
+        //                 "start_position": "1",
+        //                 "kart_number": null,
+        //                 "rpm": "1200",
+        //                 "is_first_time": "0",
+        //                 "finish_position": null,
+        //                 "nickname": "MaeAnna Hazelett",
+        //                 "first_name": "Maeanna",
+        //                 "last_name": "Hazelett",
+        //                 "total_customers": "130254",
+        //                 "ranking_by_rpm": "51003",
+        //                 "group_id": "0",
+        //                 "total_visits": "1",
+        //                 "total_races": "0",
+        //                 "position_display": "1"
+        //             },
+        //             {
+        //                 "id": "1279276",
+        //                 "start_position": "2",
+        //                 "kart_number": null,
+        //                 "rpm": "1200",
+        //                 "is_first_time": "0",
+        //                 "finish_position": null,
+        //                 "nickname": "Danny",
+        //                 "first_name": "Danny",
+        //                 "last_name": "Hazelett",
+        //                 "total_customers": "130254",
+        //                 "ranking_by_rpm": "51003",
+        //                 "group_id": "0",
+        //                 "total_visits": "1",
+        //                 "total_races": "0",
+        //                 "position_display": "2"
+        //             }
+        //         ],
+        //         "racerHeight": "10.666666666666666%",
+        //         "racerFontSize": "4.222222222222222vh"
+        //     }
+        // }
+
         return '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
@@ -515,7 +589,16 @@
         +   '</div>';
     }
 
-    function applyHtmlClass(elems, cssClasses, delay) {
+    /**
+        Applies css classes to a set of elements with an optional delay between each application.
+
+        @param {string} elemSelector The selector used to collect elements using jQuery/sizzle.
+        @param {string|array<string>} cssClasses A string or array of strings containing the classes to be applied to the elements.
+        @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
+        @returns {void}
+    */
+    function applyHtmlClass(elemSelector, cssClasses, delay) {
+        var elems = $(elemSelector);
         var currentDelay = 0;
         delay = delay || 0;
         if (z.check.isString(cssClasses)) {
@@ -539,17 +622,19 @@
     }
 
     /**
-        Applies a pre-determined set of animations specific to this page
-        based on the provided data.race.racers.length.
+        Applies a pre-determined set of 
+        animations specific to this page
+        based on the provided data object.
 
-        @param {object} data The object which will contain data.race.racers.length.
+        @param {number} data The data object used to determine the number of expected elements for use with the minimum animation length calculation.
         @returns {void}
     */
     function applyAnimations(data) {
         // ensure that the delay is never longer than 1/2 of the slideTimeout, but dont go over 350ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var d, delay = (d = (+parameters.slideTimeout || 15000) / data.race.racers.length * 0.5) > 350 ? 350 : d;
-        applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
+        var numElements = data.race.racers.length;
+        var d, delay = (d = (+parameters.slideTimeout || 15000) / numElements * 0.5) > 350 ? 350 : d;
+        applyHtmlClass('.racer', ['fadeInDown', 'visible'], delay);
     }
 
     /**
@@ -565,7 +650,7 @@
         var output = template(data);
         $(output).appendTo("body");
         applyAnimations(data);
-        cache.data[KEYS.NEXT_RACERS] = data.deepCopy();
+        cache[KEYS.API_DATA] = data.deepCopy();
         pollForChanges(5000);
     }
 
@@ -583,8 +668,8 @@
             $.when.apply($, getData()).then(
                 function() {
                     // success pipe - check for changes
-                    var data = getWhenData.apply(this, arguments).extend(parameters);
-                    if (!cache.compare(KEYS.NEXT_RACERS, data)) {
+                    var data = smashArgs.apply(this, arguments);
+                    if (!z.equals(cache[KEYS.API_DATA], data)) {
                         log.debug(  "  --- API data has changed: ");
                         window.location.reload(); // for now, just reload the whole page -- consider working in animations on only the items which changed
                     }
@@ -607,9 +692,11 @@
         @param {...object} var_args The objects to extend together.
         @returns {object} The extended object from the argument list.
     */
-    function getWhenData() {
-        var data = {};
-        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.extend(val); });
+    function smashArgs() {
+        var data = {}.smash(parameters);
+        data.track = data.track || api.getNextRacers.defaults.track;
+        data.offset = data.offset || api.getNextRacers.defaults.offset;
+        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
         return data;
     }
 
@@ -622,17 +709,22 @@
         @returns {void}
     */
     function loadPage() {
+        sw.push("  ---    Loading page");
         setupHandlebars();
         $.when.apply($, getData()).then(
             function() {
                 // success pipe
-                var data = getWhenData.apply(this, arguments).extend(parameters);
+                var data = smashArgs.apply(this, arguments);
+                log.debug(data);
                 buildPage(getHtml(), data);
+                sw.pop();
             }, function() {
                 // failure pipe -- grab fallback data to build the page
                 $.when.apply($, getFallbackData()).then(function() {
-                    var data = getWhenData.apply(this, arguments).extend(parameters);
+                    var data = smashArgs.apply(this, arguments);
+                    log.debug(data);
                     buildPage(getHtml(), data);
+                    sw.pop();
                 });
             }
         );

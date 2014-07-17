@@ -449,15 +449,34 @@
 </script>
 <script>
 
-    // main script execution
+    /**
+        Constant variable setup
+    */
 
-    // set up api call url information -- default to using ekwigan when running on either file:/// or localhost for testing purposes
-    var h, apiRootUrl = ((!(h = document.location.hostname) || h == "localhost") ? 'https://ekwigan.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/";
+    var KEYS = {
+        API_DATA: "apiDataKey"
+    };
+    
+
+    /**
+        Window variable setup
+    */
+
+    // if current document.location.hostname does not exist, or is "localhost", 
+    // then use a fallback for api root (in this case, ftikcincinnati)
+    // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
-        url: apiRootUrl,
+        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
+    var cache = {};
 
+
+    /**
+        Initializes, calls, and pushes API deferred objects onto an array, returning them to be collected by $.when();
+
+        @returns {array<object>} The array of deferred objects.
+    */
     function getData() {
         var deferred = [];
 
@@ -466,9 +485,10 @@
             var racers = race.racers;
 
             if (racers.length > 0) {
-                // setup the position_display (based on kart # existence)
+
+                // prepend the race.racers[].kart_number with a "#", if it exists
                 z.forEach(racers, function(value, key) {
-                    value.position_display = (z.check.exists(value.kart_number) ? "#" + value.kart_number : value.start_position);
+                    value.kart_number = (z.check.exists(value.kart_number) ? "#" + value.kart_number : "");
                 });
 
                 // setup the label "racer"
@@ -477,9 +497,10 @@
                 var label = {
                     position_display: (containsKartNumber ? containsStartPosition ? "Pos./Kart #" : "Kart #" : "Position"),
                     nickname: "NICKNAME"
-                };
-                racers.unshift(label);
+                }
             }
+
+            // prepend race.race_number with a "#" if it exists
             race.race_number = z.check.exists(race.race_number) ? "(#" + race.race_number + ")" : "";
 
             // pipe the mutated data back
@@ -489,6 +510,13 @@
         return deferred;
     }
 
+    /**
+        Initializes, calls, and pushes API deferred objects onto an array, 
+        returning them to be collected by $.when()
+        after the initial getData() returns with a failure.
+
+        @returns {array<object>} The array of deferred objects.
+    */
     function getFallbackData() {
         var deferred = [];
 
@@ -505,6 +533,11 @@
         return deferred;
     }
 
+    /**
+        Registers helpers to be used by Handlebars.
+
+        @returns {void}
+    */
     function setupHandlebars() {
         Handlebars.registerHelper('getPlace', function(index, options) {
             switch (index) {
@@ -536,11 +569,23 @@
             return src;
         });
         Handlebars.registerHelper('getFontSize', function(options) {
-            var gridSizes = options.data.root.gridSizes;
-            return (20 / (gridSizes.numRows + 6));
+            return (20 / (options.data.root.gridSizes.numRows + 6));
         });
         Handlebars.registerHelper('getRacerHeight', function(options) {
             return options.data.root.gridSizes.heightStyle;
+        });
+        Handlebars.registerHelper('getHeaderText', function(options) {
+            var offset = z.convert(parameters.offset, z.types.number);
+            if (isNaN(offset) || offset < 0) offset = 0;
+            var race = options.data.root.race;
+            switch(offset) {
+                case 0:
+                    return new Handlebars.SafeString("COMING UP:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
+                case 1:
+                    return new Handlebars.SafeString("FOLLOWING NEXT RACE:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
+                default:
+                    return new Handlebars.SafeString("IN " + offset + " RACES:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
+            }
         });
 
         function imageExists(imageUri) {
@@ -559,6 +604,11 @@
         });
     }
     
+    /**
+        Method which builds and returns the HTML string for use as a Handlebars template.
+
+        @returns {string} The HTML template for use with Handlebars.
+    */
     function getHtml() {
 
         //// --- example data object to be passed to HandleBars templating engine ---
@@ -629,7 +679,7 @@
         +   '                   <div class="portraitBodyWrapper">'
         +   '                       <div class="portraitBodyTextWrapper lFloat">'
         +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter startPositionText">{{start_position}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter kartNumberText">#{{kart_number}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter kartNumberText">{{kart_number}}</div></div>'
         +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter proSkillText">{{rpm}}</div></div>'
         +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText vMiddle hCenter firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
         +   '                       </div>'
@@ -666,9 +716,7 @@
         +   '   <div id="upNextWrapper">'
         +   '       <div id="upNextTopWrapper" class="fill">'
         +   '           <div class="upNextHeader parallelogram">'
-        +   '               <div class="headerText unskew textShadow vMiddle hCenter uppercase fill">'
-        +   '                   UP NEXT ON TRACK: &nbsp;&nbsp;{{race.track}}'
-        +   '               </div>'
+        +   '               <div class="headerText unskew textShadow vMiddle hCenter fill">{{getHeaderText}}</div>'
         +   '           </div>'
         +   '           {{#each race.racers}}'
         +                   portraitSrc // template html for up next with picture
@@ -680,6 +728,14 @@
         return src;
     }
 
+    /**
+        Applies css classes to a set of elements with an optional delay between each application.
+
+        @param {string} elemSelector The selector used to collect elements using jQuery/sizzle.
+        @param {string|array<string>} cssClasses A string or array of strings containing the classes to be applied to the elements.
+        @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
+        @returns {void}
+    */
     function applyHtmlClass(elems, cssClasses, delay) {
         var currentDelay = 0;
         delay = delay || 0;
@@ -703,9 +759,18 @@
         }
     }
 
+    /**
+        Applies a pre-determined set of 
+        animations specific to this page
+        based on the provided data object.
+
+        @param {number} data The data object used to determine the number of expected elements for use with the minimum animation length calculation.
+        @returns {void}
+    */
     function applyAnimations(data) {
         // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 280ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+        var numElements = data.race.racers.length;
         var d, delay = (d = (+parameters.slideTimeout || 15000) / (data.race.racers.length * 1.5)) > 280 ? 280 : d;
         applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
         applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
@@ -713,13 +778,13 @@
             // dont start the flip until the cards are finished applying fadeInDown
             applyHtmlClass($('.flippable'), 'flip', delay);
         }, delay*3);
-        $('.flippable').click(function() {
-            $(this).toggleClass('flip');
-        });
+        // $('.flippable').click(function() {
+        //     $(this).toggleClass('flip');
+        // });
     }
 
     function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the computation is only done once
+        var locale = z.location.locale; // make a copy so the collection is only done once per call
         if (data && data.race && data.race.racers && data.race.racers.length) {
             var racers = data.race.racers;
             for (var i = 0; i < racers.length; i++) {
@@ -734,27 +799,78 @@
         var output = template(data);
         $(output).appendTo("body");
         applyAnimations(data);
+        cache[KEYS.API_DATA] = data.deepCopy();
+        pollForChanges(5000);
     }
 
-    function getWhenData() {
-        var data = {};
-        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.extend(val); });
+    /**
+        Polls for changes in the API return data
+        based on a given timeout.
+
+        @param {number} [timeout] The time in milliseconds to wait between polls. If not provided, this will default to 5000.
+        @returns {void}
+    */
+    function pollForChanges(timeout) {
+        timeout = timeout || 5000;
+        log.debug("  ---  Polling for changes: ");
+        setTimeout(function() { 
+            $.when.apply($, getData()).then(
+                function() {
+                    // success pipe - check for changes
+                    var data = smashArgs.apply(this, arguments);
+                    if (!z.equals(cache[KEYS.API_DATA], data)) {
+                        log.debug(  "  --- API data has changed: ");
+                        window.location.reload(); // for now, just reload the whole page -- consider working in animations on only the items which changed
+                    }
+                    else {
+                        log.debug(  "  ---    No change in data: ");
+                        pollForChanges(timeout);
+                    }
+                }, function() {
+                    // failure pipe - continue to poll for changes, don't bother comparing
+                    pollForChanges(timeout);
+                }
+            );
+        }, timeout);
+    }
+
+    /**
+        Collects, extends, and returns 
+        all argument items into a single object.
+
+        @param {...object} var_args The objects to extend together.
+        @returns {object} The extended object from the argument list.
+    */
+    function smashArgs() {
+        var data = {}.smash(parameters);
+        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
+        data = localizeData(data);
+        data.track = data.track || api.getNextRacers.defaults.track;
+        data.offset = data.offset || api.getNextRacers.defaults.offset;
+        data.gridSizes = new GridSizes(data && data.race && data.race.racers ? data.race.racers : 0);
         return data;
     }
 
+    /**
+        Main initialize method for the speed screen.
+        Handles calling getData(), and piping that data
+        alongside the HTML template from getHtml()
+        into the buildPage() method.
+
+        @returns {void}
+    */
     function loadPage() {
         setupHandlebars();
         $.when.apply($, getData()).then(
             function() {
                 // success pipe
-                var data = localizeData(getWhenData.apply(this, arguments).extend(parameters));
-                localizeData(data);
-                data.gridSizes = new GridSizes(data && data.race && data.race.racers ? data.race.racers : 0);
+                var data = smashArgs.apply(this, arguments);
+                log.debug(data);
                 buildPage(getHtml(), data);
             }, function() {
                 // failure pipe -- grab fallback data
                 $.when.apply($, getFallbackData()).then(function() {
-                    var data = localizeData(getWhenData.apply(this, arguments).extend(parameters));
+                    var data = smashArgs.apply(this, arguments);
                     buildPage(getHtml(), data);
                 });
             }

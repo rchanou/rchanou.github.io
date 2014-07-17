@@ -5,7 +5,7 @@
     
     <script src ="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
-    <script src="../js/zutil.min.js"></script>
+    <script src="../js/zutil.debug.js"></script>
     <script>
         // zUtil setup
         var z = new zUtil({
@@ -37,7 +37,7 @@
             -webkit-font-smoothing: antialiased;
         }
         html, body :hover {
-            cursor: none;
+            cursor: default;
         }
         #wrapper {
             min-height: 100%;
@@ -347,15 +347,35 @@
 <body>
 <script>
 
-    // main script execution
+    /**
+        Constant variable setup
+    */
 
-    // set up api call url information -- default to using ekwigan when running on either file:/// or localhost for testing purposes
-    var h, apiRootUrl = ((!(h = document.location.hostname) || h == "localhost") ? 'https://ekwigan.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/";
+    var KEYS = {
+        API_DATA: "apiDataKey"
+    };
+    
+
+    /**
+        Window variable setup
+    */
+
+    // if current document.location.hostname does not exist, or is "localhost", 
+    // then use a fallback for api root (in this case, ftikcincinnati)
+    // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
-        url: apiRootUrl,
+        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
+    var cache = {};
+    // var params {}.extend(parameters).deepCopy();
 
+
+    /**
+        Initializes, calls, and pushes API deferred objects onto an array, returning them to be collected by $.when();
+
+        @returns {array<object>} The array of deferred objects.
+    */
     function getData() {
 
         var deferred = [];
@@ -371,11 +391,22 @@
             return data;
         }));
 
-        deferred.push(api.getTopTimes(parameters.range, parameters.limit));
+        deferred.push(api.getTopTimes(parameters.range, parameters.limit).then(function(data) {
+            // don't calculate any fewer than 5 (don't need super-giant elements on the page)
+            var fastest = data.fastest;
+            data.racerHeight = (96 / (fastest.length > 4 ? fastest.length : 5 )) + "%"; 
+            data.racerFontSize = 2 + (100 / ((fastest.length > 4 ? fastest.length : 5) * 5)) + "vh";
+            return data;
+        }));
 
         return deferred;
     }
 
+    /**
+        Registers helpers to be used by Handlebars.
+
+        @returns {void}
+    */
     function setupHandlebars() {
         Handlebars.registerHelper('getPlace', function(index, options) {
             switch (index) {
@@ -389,13 +420,18 @@
             return parseInt(value) + 1;
         });
         Handlebars.registerHelper('getRacerHeight', function(options) {
-            return (96 / options.data.root.fastest.length);
+            return options.data.root.racerHeight;
         });
         Handlebars.registerHelper('getRacerFontSize', function(options) {
-            return 2 + (100 / (options.data.root.fastest.length * 5));
+            return options.data.root.racerFontSize;
         });
     }
     
+    /**
+        Method which builds and returns the HTML string for use as a Handlebars template.
+
+        @returns {string} The HTML template for use with Handlebars.
+    */
     function getHtml() {
 
         //// --- example data object to be passed to HandleBars templating engine ---
@@ -457,16 +493,24 @@
         +   '   </div>'
         +   '   <div id="results">'
         +   '       {{#each fastest}}'
-        +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{getRacerHeight}}%; font-size: {{getRacerFontSize}}vh;">'
-        +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText unskew">{{inc @index}}</div></div>'
-        +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText unskew padLeft5">{{nickname}}</div></div>'
-        +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText unskew">{{lap_time}}</div></div>'
+        +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{getRacerHeight}}; font-size: {{getRacerFontSize}};">'
+        +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText vMiddle unskew">{{inc @index}}</div></div>'
+        +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText unskew vMiddle padLeft5">{{nickname}}</div></div>'
+        +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText vMiddle unskew">{{lap_time}}</div></div>'
         +   '           </div>'
         +   '       {{/each}}'
         +   '   </div>'
         +   '</div>';
     }
 
+    /**
+        Applies css classes to a set of elements with an optional delay between each application.
+
+        @param {string} elemSelector The selector used to collect elements using jQuery/sizzle.
+        @param {string|array<string>} cssClasses A string or array of strings containing the classes to be applied to the elements.
+        @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
+        @returns {void}
+    */
     function applyHtmlClass(elems, cssClasses, delay) {
         var currentDelay = 0;
         delay = delay || 0;
@@ -490,6 +534,13 @@
         }
     }
 
+    /**
+        Applies a pre-determined set of animations specific to this page
+        based on the provided data.race.racers.length.
+
+        @param {object} data The object which will contain data.race.racers.length.
+        @returns {void}
+    */
     function applyAnimations(data) {
         // ensure that the delay is never longer than 1/2 of the slideTimeout, but dont go over 350ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
@@ -497,6 +548,14 @@
         applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
     }
 
+    /**
+        Builds the Handlebars template based on a provided set of html and data,
+        appending the compiled template directly to the page's body.
+
+        @param {string} html The html string to use with Handlebars.
+        @param {object} data The object to pass to Handlebars for use with the html string.
+        @returns {void}
+    */
     function buildPage(html, data) {
         var template = Handlebars.compile(html);
         var output = template(data);
@@ -504,18 +563,68 @@
         applyAnimations(data);
     }
 
-    function getWhenData() {
-        var data = {};
-        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.extend(val); });
+    /**
+        Polls for changes in the API return data
+        based on a given timeout.
+
+        @param {number} [timeout] The time in milliseconds to wait between polls. If not provided, this will default to 5000.
+        @returns {void}
+    */
+    function pollForChanges(timeout) {
+        timeout = timeout || 5000;
+        log.debug("  ---  Polling for changes: ");
+        setTimeout(function() { 
+            $.when.apply($, getData()).then(
+                function() {
+                    // success pipe - check for changes
+                    var data = smashArgs.apply(this, arguments);
+                    if (!cache.compare(KEYS.TOP_TIMES, data)) {
+                        log.debug(  "  --- API data has changed: ");
+                        window.location.reload(); // for now, just reload the whole page -- consider working in animations on only the items which changed
+                    }
+                    else {
+                        log.debug(  "  ---    No change in data: ");
+                        pollForChanges(timeout);
+                    }
+                }, function() {
+                    // failure pipe - continue to poll for changes, don't bother comparing
+                    pollForChanges(timeout);
+                }
+            );
+        }, timeout);
+    }
+
+    /**
+        Collects, extends, and returns 
+        all argument items into a single object.
+
+        @param {...object} var_args The objects to extend together.
+        @returns {object} The extended object from the argument list.
+    */
+    function smashArgs() {
+        var data = {}.smash(parameters);
+        data.range = data.range || api.getTopTimes.defaults.range;
+        data.limit = data.range || api.getTopTimes.defaults.limit;
+        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
         return data;
     }
 
+    /**
+        Main initialize method for the speed screen.
+        Handles calling getData(), and piping that data
+        alongside the HTML template from getHtml()
+        into the buildPage() method.
+
+        @returns {void}
+    */
     function loadPage() {
+        sw.push("  ---    Loading page");
         setupHandlebars();
         $.when.apply($, getData()).then(function() {
-            var data = getWhenData.apply(this, arguments).extend(parameters);
-            log(data);
+            var data = smashArgs.apply(this, arguments);
+            log.debug(data);
             buildPage(getHtml(), data);
+            sw.pop();
         });
     }
     loadPage();
