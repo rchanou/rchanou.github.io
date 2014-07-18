@@ -816,7 +816,7 @@ EOD;
 
         //$tsql = 'GetNextHeatRacersInfo';
         $tsql_params = array(&$heatId);
-        $tsql = 'Select hd.CustID id, hd.RPMDiff AS rpm_change, hd.LineUpPosition start_position, CASE autono WHEN -1 then hd.historyautono ELSE autono END AS kart_number, hd.RPM rpm, case when c.TotalRaces > 1 then 1 else 0 end is_first_time, hd.FinishPosition finish_position, c.RacerName nickname, c.FName first_name, c.LName last_name From HeatMain hm inner join HeatTypes ht on hm.HeatTypeNo = ht.HeatTypeNo inner join SpeedLevel sl on hm.SpeedLevel = sl.SpeedLevel inner join Tracks t on hm.trackno = t.TrackNo inner join HeatDetails hd on hm.heatno = hd.heatno inner join Customers c on hd.CustID = c.CustID Where hd.HeatNo = ? order by hd.LineUpPosition';
+        $tsql = 'Select hd.CustID id, hd.RPMDiff AS rpm_change, hm.RacersPerHeat AS total_spots, hd.LineUpPosition start_position, CASE autono WHEN -1 then hd.historyautono ELSE autono END AS kart_number, hd.RPM rpm, case when c.TotalRaces > 1 then 1 else 0 end is_first_time, hd.FinishPosition finish_position, c.RacerName nickname, c.FName first_name, c.LName last_name From HeatMain hm inner join HeatTypes ht on hm.HeatTypeNo = ht.HeatTypeNo inner join SpeedLevel sl on hm.SpeedLevel = sl.SpeedLevel inner join Tracks t on hm.trackno = t.TrackNo inner join HeatDetails hd on hm.heatno = hd.heatno inner join Customers c on hd.CustID = c.CustID Where hd.HeatNo = ? order by hd.LineUpPosition';
         $rowsRacers = $this->run_query($tsql, $tsql_params);
         $output['race']['racers'] = $rowsRacers;
 
