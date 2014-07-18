@@ -19,6 +19,7 @@
         var sw = z.sw;
         var parameters = z.location.parameters;
         var events = z.events;
+        var equals = z.equals;
     </script>
     <script src="../js/clubspeed-classes-api.js"></script>
 
@@ -37,7 +38,7 @@
             -webkit-font-smoothing: antialiased;
         }
         html, body :hover {
-            cursor: default;
+            cursor: none;
         }
         #wrapper {
             min-height: 100%;
@@ -536,16 +537,22 @@
 
     /**
         Applies a pre-determined set of animations specific to this page
-        based on the provided data.race.racers.length.
+        based on the provided data.fastest.length.
 
         @param {object} data The object which will contain data.race.racers.length.
         @returns {void}
     */
     function applyAnimations(data) {
-        // ensure that the delay is never longer than 1/2 of the slideTimeout, but dont go over 350ms
-        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var d, delay = (d = (+parameters.slideTimeout || 15000) / data.fastest.length * 0.5) > 350 ? 350 : d;
-        applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
+        if (z.convert(parameters.disableAnimations, z.types.boolean) === true) {
+            $('.racer').addClass('visible');
+        }
+        else {
+            // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
+            // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+            var numElems = data.fastest.length;
+            var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 350 ? 350 : d;
+            applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
+        }
     }
 
     /**
@@ -561,6 +568,8 @@
         var output = template(data);
         $(output).appendTo("body");
         applyAnimations(data);
+        cache[KEYS.API_DATA] = data.deepCopy();
+        pollForChanges();
     }
 
     /**
@@ -578,9 +587,9 @@
                 function() {
                     // success pipe - check for changes
                     var data = smashArgs.apply(this, arguments);
-                    if (!cache.compare(KEYS.TOP_TIMES, data)) {
+                    if (!equals(cache[KEYS.API_DATA], data)) {
                         log.debug(  "  --- API data has changed: ");
-                        window.location.reload(); // for now, just reload the whole page -- consider working in animations on only the items which changed
+                        window.location.reload();
                     }
                     else {
                         log.debug(  "  ---    No change in data: ");
@@ -604,7 +613,7 @@
     function smashArgs() {
         var data = {}.smash(parameters);
         data.range = data.range || api.getTopTimes.defaults.range;
-        data.limit = data.range || api.getTopTimes.defaults.limit;
+        data.limit = data.limit || api.getTopTimes.defaults.limit;
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
         return data;
     }
@@ -628,6 +637,7 @@
         });
     }
     loadPage();
+
 
 </script>
 </body>

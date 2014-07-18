@@ -34,48 +34,41 @@
 
         html, body {
             font-family: Arial, Helvetica, sans-serif;
-            height: 100%;
-            min-height: 100%;
-            width: 100%;
+            width: 8in;
+            height: 4.2in;
             margin: 0;
             padding: 0;
-            /*text-shadow: 1px 1px 1px rgba(0,0,0,0.04);*/
-            /*-webkit-font-smoothing: antialiased;*/
         }
         html, body :hover {
             cursor: default;
         }
         #wrapper {
-            width: 8.5in;
-            height: 5.1in;
+            width: 8in;
+            height: 4.2in;
         }
         .speedSheetBody {
             width: 50%;
-            height: auto;
+            /*height: auto;*/
         }
         #speedSheetHeaderLeft {
-            height: 1.14in;
+            height: 1.54in;
             width: 100%;
         }
         #speedSheetHeaderRight {
-            height: 0.5in;
+            height: 0.9in;
             width: 100%;
             background-color: transparent;
         }
         #speedSheetContentLeft {
-            margin-left: 0.5in;
+            width: 100%;
         }
         #speedSheetContentRight {
-            width: 4.25in;
-            height: 80%;
-            margin-right: 1in;
-        }
-        .speedSheetContent {
-            height: 4.25in;
+            /*width: 4.25in;*/
             width: 100%;
-            background-color: orange;
+
+            height: auto;
         }
-        .speedSheetFooter {
+        /*.speedSheetFooter {
             position: absolute;
             top: 5.1in;
             bottom: 5.5in;
@@ -84,7 +77,7 @@
             height: 0.4in;
             width: 8.5in;
             background-color: transparent;
-        }
+        }*/
         .driverHeader {
             height: 12px;
             margin-right: 9px;
@@ -97,18 +90,21 @@
         .driverRow {
             height: 11px;
             font-size: 9px;
-            width: 3in;
+            width: 100%;
         }
         .infoColLeft {
             font-weight: bold;
-            margin-left: 0.5in;
-            width: 1in;
+            margin-left: 10%;
+            width: 20%;
         }
         .infoColRight {
-            margin-right: 0.5in;
+            width: 20%;
+            margin-right: 30%;
         }
         #lapsChart {
-            height: 2.4in;
+            /*width: 3.65in;*/
+            width: 94%;
+            height: 2.45in;
         }
         .spacing {
             background: transparent;
@@ -121,6 +117,7 @@
             margin-bottom: 0.07in;
         }
         .isCurrentRacer {
+            font-weight: bold;
             background-color: black;
             color: gold;
         }
@@ -311,7 +308,7 @@
         }
         else {
             // use external phantomjs image creation for the chart, and include the image on the page
-            positionChartHtml = '           <img src="http://pprlongisland.clubspeedtiming.com/api/shot/shot.php?url=pprlongisland.clubspeedtiming.com%2Fapi%2Fspeed-sheets%2Fposition-graph.html%3FHeatNo%3D' + parameters.HeatNo + '%26CustID%3D' + parameters.CustID + '&w=480&h=230&rand=Math.random()" />';
+            positionChartHtml = '           <img src="http://pprlongisland.clubspeedtiming.com/api/shot/shot.php?url=pprlongisland.clubspeedtiming.com%2Fapi%2Fspeed-sheets%2Fposition-graph.html%3FHeatNo%3D' + parameters.HeatNo + '%26CustID%3D' + parameters.CustID + '&w=190&h=230&rand=Math.random()" />';
         }
 
         return '' +
@@ -390,9 +387,6 @@
             +               positionChartHtml
             +   '       </div>'
             +   '   </div>'
-            // +   '   <div class="speedSheetFooter">'
-            // +   '       <div class="speedSheetFooterText vMiddle hCenter fill"></div>'
-            // +   '   </div>'
             +   '</div>';
     }
 
@@ -428,10 +422,6 @@
             nickname = truncateStr(currentRacer.nickname, 18, "...");
             chartColumns.push([nickname].concat(currentRacer.laps.select(function(x) { return x.lap_time; })));
         }
-
-        log(data);
-        log(chartColumns);
-
         var lapsChart = c3.generate({
             bindto: "#lapsChart",
             data: {
@@ -446,6 +436,7 @@
                     }
                 },
                 y: {
+                    max: findMaxOutlier(chartColumns[chartColumns.length-1].slice(1)),
                     label: "Lap Time"
                 }
             },
@@ -458,6 +449,15 @@
                 }
             }
         });
+    }
+
+    function findMaxOutlier(arr) {  
+        var a = arr.orderBy(function(x) { return x; });
+        var q1 = a[Math.floor((a.length / 4))];
+        var q3 = a[Math.ceil((a.length * (3 / 4)))];
+        var iqr = q3 - q1;
+        var max = q3 + (iqr * 1.5);
+        return Math.min(max, a[a.length-1]);
     }
 
     function getWhenData() {

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Up Next</title>
+    <title>Up Next With Pictures</title>
 
     <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
 
@@ -271,6 +271,14 @@
                 0 0.4375vmin 0.875vmin rgba(0,0,0,.25),
                 0 0.875vmin 0.875vmin rgba(0,0,0,.2),
                 0 1.75vmin 1.75vmin rgba(0,0,0,.15);
+        }
+        .letterPress {
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            background-clip: text;
+            background-color: #333;
+            color: rgba(0,0,0,0.4);
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.3);
         }
         .padLeft5 {
             padding-left: 5vmin;
@@ -678,10 +686,10 @@
         +   '                   </div>'
         +   '                   <div class="portraitBodyWrapper">'
         +   '                       <div class="portraitBodyTextWrapper lFloat">'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter startPositionText">{{start_position}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter kartNumberText">{{kart_number}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText vMiddle hCenter proSkillText">{{rpm}}</div></div>'
-        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText vMiddle hCenter firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter startPositionText">{{start_position}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter kartNumberText">{{kart_number}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter proSkillText">{{rpm}}</div></div>'
+        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
         +   '                       </div>'
         +   '                       <div class="portraitPictureWrapper rFloat roundBottomRight">'
         +   '                           <div class="portraitPictureWrapperInner fill roundBottomRight" style="background-image: url(\'{{getPortraitUri @index}}\');"></div>' // todo: get actual portrait URI
@@ -770,8 +778,8 @@
     function applyAnimations(data) {
         // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 280ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var numElements = data.race.racers.length;
-        var d, delay = (d = (+parameters.slideTimeout || 15000) / (data.race.racers.length * 1.5)) > 280 ? 280 : d;
+        var numElems = data.race.racers.length;
+        var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 280 ? 280 : d;
         applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
         applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
         setTimeout(function() {

@@ -2,10 +2,28 @@
 <html>
 <head>
   <title>Top ProSkill</title>
+
+    <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
+
     <script src ="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
     <script src="../js/zutil.min.js"></script>
-    <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
+    <script>
+        // zUtil setup
+        var z = new zUtil({
+            useArrayExtensions: true,
+            useNumberExtensions: true,
+            useObjectExtensions: true,
+            defaultLogger: console
+        });
+        var log = z.log;
+        var assert = z.assert;
+        var sw = z.sw;
+        var parameters = z.location.parameters;
+        var events = z.events;
+        var equals = z.equals;
+    </script>
+    <script src="../js/clubspeed-classes-api.js"></script>
     <style type="text/css">
 
         /* elements */
@@ -308,17 +326,6 @@
 </head>
 <body>
 <script>
-    var z = new zUtil({
-        useArrayExtensions: true,
-        useNumberExtensions: true,
-        useObjectExtensions: true,
-        defaultLogger: console
-    });
-    var log = z.log;
-    var assert = z.assert;
-    var sw = z.sw;
-    var parameters = z.location.parameters;
-    var data = {}; // for use with handlebars
 
 
     /**
@@ -326,211 +333,287 @@
     */ 
 
     // set up api call url information
-    var apiRootUrl;
-    if (!document.location.hostname || document.location.hostname == "localhost") { // can be removed in production code -- just for testing
-        apiRootUrl = 'https://ekwigan.clubspeedtiming.com';
-    }
-    else {
-        apiRootUrl = window.location.origin || (window.location.protocol + "//" + window.location.host);
-    }
-    var apiRootPath = '/api/index.php';
-    var apiTopRpmUrl = '/racers/toprpm.js';
+    // var apiRootUrl;
+    // if (!document.location.hostname || document.location.hostname == "localhost") { // can be removed in production code -- just for testing
+    //     apiRootUrl = 'https://ekwigan.clubspeedtiming.com';
+    // }
+    // else {
+    //     apiRootUrl = window.location.origin || (window.location.protocol + "//" + window.location.host);
+    // }
+    // var apiRootPath = '/api/index.php';
+    // var apiTopRpmUrl = '/racers/toprpm.js';
 
-    // create default queries to be applied to all api calls
-    var apiDefaults = {
-        // track: currentTrackId,
-        key: 'cs-dev' // todo: replace with actual apiKey selection
-    };
-    function addDefaults(apiQueries) {
-        return $.extend({}, apiQueries, apiDefaults);
-    }
+    // // create default queries to be applied to all api calls
+    // var apiDefaults = {
+    //     // track: currentTrackId,
+    //     key: 'cs-dev' // todo: replace with actual apiKey selection
+    // };
+    // function addDefaults(apiQueries) {
+    //     return $.extend({}, apiQueries, apiDefaults);
+    // }
 
-    // set up the api query parameters
-    var apiTopRpmQueries = addDefaults({
-        limit: parseInt(parameters.limit) || 10,
-    });
-    function buildUrl(api, queries) {
-        // builds the api url based off of the originally defined root url, and the provided apiType
-        return apiRootUrl 
-            + apiRootPath
-            + api
-            + (queries ? "?" + $.param(queries) : "");
-    }
-    function handleSuccess(apiData, textStatus, xhr) {
-        data.extend(apiData);
-    }
-    function handleError(xhr, textStatus, errorThrown) {
-        log.error(xhr.status + ": " + errorThrown);
-    }
+    // // set up the api query parameters
+    // var apiTopRpmQueries = addDefaults({
+    //     limit: parseInt(parameters.limit) || 10,
+    // });
+    // function buildUrl(api, queries) {
+    //     // builds the api url based off of the originally defined root url, and the provided apiType
+    //     return apiRootUrl 
+    //         + apiRootPath
+    //         + api
+    //         + (queries ? "?" + $.param(queries) : "");
+    // }
+    // function handleSuccess(apiData, textStatus, xhr) {
+    //     data.extend(apiData);
+    // }
+    // function handleError(xhr, textStatus, errorThrown) {
+    //     log.error(xhr.status + ": " + errorThrown);
+    // }
 
 
     /**
         HTML and API data manipulators
     */
 
-    function applyHtmlClass(elems, cssClasses, delay) {
-        var currentDelay = 0;
-        delay = delay || 0;
-        if (z.check.isString(cssClasses)) {
-            cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
-        }
-        z.assert.isArray(cssClasses);
-        if (elems) {
-            if (elems.length) {
-                for (var i = 0; i < elems.length; i++) {
-                    (function(index) {
-                        setTimeout(function() {
-                            var elem = $(elems[index]);
-                            for (var k = 0; k < cssClasses.length; k++) {
-                                elem.addClass(cssClasses[k]);
-                            }
-                        }, delay*index);
-                    })(i); // use an iife to maintain the correct index for setTimeout
-                }
-            }
-        }
-    }
+    // function applyHtmlClass(elems, cssClasses, delay) {
+    //     var currentDelay = 0;
+    //     delay = delay || 0;
+    //     if (z.check.isString(cssClasses)) {
+    //         cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
+    //     }
+    //     z.assert.isArray(cssClasses);
+    //     if (elems) {
+    //         if (elems.length) {
+    //             for (var i = 0; i < elems.length; i++) {
+    //                 (function(index) {
+    //                     setTimeout(function() {
+    //                         var elem = $(elems[index]);
+    //                         for (var k = 0; k < cssClasses.length; k++) {
+    //                             elem.addClass(cssClasses[k]);
+    //                         }
+    //                     }, delay*index);
+    //                 })(i); // use an iife to maintain the correct index for setTimeout
+    //             }
+    //         }
+    //     }
+    // }
 
-    function applyAnimations() {
-        // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
-        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var d, delay = (d = (+parameters.slideTimeout || 15000) / (data.racers.length * 1.5)) > 350 ? 350 : d;
-        applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
-    }
+    
 
-    function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the computation is only done once
-        if (z.check.exists(data) && z.check.isArray(data.racers)) {
-            for (var i = 0; i < data.racers.length; i++) {
-                data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(locale);
-            }
-        }
-    }
+    // function buildAndAppendHtml(templateHtml) {
+    //     // build an array of deferred objects for api data collection
+    //     var deferreds = [];
 
-    function buildAndAppendHtml(templateHtml) {
-        // build an array of deferred objects for api data collection
-        var deferreds = [];
+    //     // setup handlebars data object to be extended with api data
+    //     data.extend(parameters, apiTopRpmQueries);
 
-        // setup handlebars data object to be extended with api data
-        data.extend(parameters, apiTopRpmQueries);
+    //     // push the getJSON call for top RPM
+    //     deferreds.push(
+    //         $.ajax({
+    //             url: buildUrl(apiTopRpmUrl, apiTopRpmQueries),
+    //             type: "GET",
+    //             dataType: "json",
+    //             async: true
+    //         })
+    //         .done(handleSuccess)
+    //         .fail(handleError)
+    //     );
 
-        // push the getJSON call for top RPM
-        deferreds.push(
-            $.ajax({
-                url: buildUrl(apiTopRpmUrl, apiTopRpmQueries),
-                type: "GET",
-                dataType: "json",
-                async: true
-            })
-            .done(handleSuccess)
-            .fail(handleError)
-        );
-
-        // handle the final async call to use the built data object
-        $.when.apply($, deferreds).then(function() {
-            localizeData(data); // handle the timestamp alterations here(?)
-            var template = Handlebars.compile(templateHtml); // compile the originally defined source
-            var output = template(data); // attach the data so handlebars can interpret it
-            $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
-            if (z.convert(parameters.disableAnimations, z.types.boolean)) {
-                $('.racer').addClass('visible');
-            }
-            else {
-                applyAnimations();
-            }
-        });
-    }
+    //     // handle the final async call to use the built data object
+    //     $.when.apply($, deferreds).then(function() {
+    //         localizeData(data); // handle the timestamp alterations here(?)
+    //         var template = Handlebars.compile(templateHtml); // compile the originally defined source
+    //         var output = template(data); // attach the data so handlebars can interpret it
+    //         $(output).appendTo("body"); // attach the interpreted/compiled source to the HTML
+    //         if (z.convert(parameters.disableAnimations, z.types.boolean)) {
+    //             $('.racer').addClass('visible');
+    //         }
+    //         else {
+    //             applyAnimations();
+    //         }
+    //     });
+    // }
 
     /**
         Functions, data, and documentation for the end-user to modify as desired
     */
 
-    //// --- example data object to be passed to HandleBars templating engine ---
-    // data: {
-    //     "locale": "en",
-    //     "trackId": "1",
-    //     "speedLevel": "1",
-    //     "dateSpan": "month",
-    //     "backgroundUrl": "./temp/white.jpg",
-    //     "limit": "5",
-    //     "racers": [
-    //         {
-    //             "id": "1017984",
-    //             "name": {
-    //                 "nickname": "josh",
-    //                 "first": "Joshua",
-    //                 "last": "Booth"
-    //             },
-    //             "rpm": "1,891",
-    //             "created_at": "2013-09-12"
-    //         },
-    //         {
-    //             "id": "1000467",
-    //             "name": {
-    //                 "nickname": "bennett81",
-    //                 "first": "George",
-    //                 "last": "Bennett"
-    //             },
-    //             "rpm": "1,888",
-    //             "created_at": "2013-02-03"
-    //         },
-    //         {
-    //             "id": "1019340",
-    //             "name": {
-    //                 "nickname": "philip c",
-    //                 "first": "Philip",
-    //                 "last": "Cunliffe"
-    //             },
-    //             "rpm": "1,741",
-    //             "created_at": "2013-08-12"
-    //         },
-    //         {
-    //             "id": "1002993",
-    //             "name": {
-    //                 "nickname": "simple jack",
-    //                 "first": "Jack",
-    //                 "last": "Ball"
-    //             },
-    //             "rpm": "1,700",
-    //             "created_at": "2013-27-11"
-    //         },
-    //         {
-    //             "id": "1009789",
-    //             "name": {
-    //                 "nickname": "MR. MARUSHIN",
-    //                 "first": "Mike",
-    //                 "last": "Davies"
-    //             },
-    //             "rpm": "1,697",
-    //             "created_at": "2013-27-11"
-    //         }
-    //     ]
-    // }
+    
 
-    Handlebars.registerHelper('getPlace', function(index, options) {
-        switch (index) {
-            case 0: return "firstPlace";
-            case 1: return "secondPlace";
-            case 2: return "thirdPlace";
-            default: return "otherPlace";
-        }
-    });
-    Handlebars.registerHelper('inc', function(value, options) {
-        return parseInt(value) + 1;
-    });
-    Handlebars.registerHelper('getRacerHeight', function(options) {
-        return (96 / options.data.root.racers.length);
-    });
-    Handlebars.registerHelper('getRacerFontSize', function(options) {
-        return 2 + (100 / (options.data.root.racers.length * 5));
-    });
+    
 
-    var src = '' +
+    // var src = 
+
+    // buildAndAppendHtml(src); // call the previously defined function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+        Constant variable setup
+    */
+
+    var KEYS = {
+        API_DATA: "apiDataKey"
+    };
+    
+
+    /**
+        Window variable setup
+    */
+
+    // if current document.location.hostname does not exist, or is "localhost", 
+    // then use a fallback for api root (in this case, ftikcincinnati)
+    // otherwise, default to the current origin
+    var api = new clubspeed.classes.ApiService({
+        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
+        key: 'cs-dev',
+    });
+    var cache = {};
+    // var params {}.extend(parameters).deepCopy();
+
+
+    /**
+        Initializes, calls, and pushes API deferred objects onto an array, returning them to be collected by $.when();
+
+        @returns {array<object>} The array of deferred objects.
+    */
+    function getData() {
+
+        var deferred = [];
+
+        deferred.push(api.getTopProskill(parameters.limit, parameters.range, parameters.gender));
+
+        return deferred;
+    }
+
+    /**
+        Registers helpers to be used by Handlebars.
+
+        @returns {void}
+    */
+    function setupHandlebars() {
+        Handlebars.registerHelper('getPlace', function(index, options) {
+            switch (index) {
+                case 0: return "firstPlace";
+                case 1: return "secondPlace";
+                case 2: return "thirdPlace";
+                default: return "otherPlace";
+            }
+        });
+        Handlebars.registerHelper('inc', function(value, options) {
+            return parseInt(value) + 1;
+        });
+        Handlebars.registerHelper('getRacerHeight', function(options) {
+            return (96 / options.data.root.racers.length);
+        });
+        Handlebars.registerHelper('getRacerFontSize', function(options) {
+            return 2 + (100 / (options.data.root.racers.length * 5));
+        });
+        Handlebars.registerHelper('getGender', function(options) {
+            var gender = options.data.root.gender;
+            if (z.check.exists(gender)) {
+                gender = gender.toString().charAt(0).toLowerCase(); // get the first character
+                switch(gender) {
+                    case "m": return "Male";
+                    case "f": return "Female";
+                }
+            };
+            return "";
+        });
+    }
+    
+    /**
+        Method which builds and returns the HTML string for use as a Handlebars template.
+
+        @returns {string} The HTML template for use with Handlebars.
+    */
+    function getHtml() {
+
+        //// --- example data object to be passed to HandleBars templating engine ---
+        // data: {
+        //     "locale": "en",
+        //     "trackId": "1",
+        //     "speedLevel": "1",
+        //     "dateSpan": "month",
+        //     "backgroundUrl": "./temp/white.jpg",
+        //     "limit": "5",
+        //     "racers": [
+        //         {
+        //             "id": "1017984",
+        //             "name": {
+        //                 "nickname": "josh",
+        //                 "first": "Joshua",
+        //                 "last": "Booth"
+        //             },
+        //             "rpm": "1,891",
+        //             "created_at": "2013-09-12"
+        //         },
+        //         {
+        //             "id": "1000467",
+        //             "name": {
+        //                 "nickname": "bennett81",
+        //                 "first": "George",
+        //                 "last": "Bennett"
+        //             },
+        //             "rpm": "1,888",
+        //             "created_at": "2013-02-03"
+        //         },
+        //         {
+        //             "id": "1019340",
+        //             "name": {
+        //                 "nickname": "philip c",
+        //                 "first": "Philip",
+        //                 "last": "Cunliffe"
+        //             },
+        //             "rpm": "1,741",
+        //             "created_at": "2013-08-12"
+        //         },
+        //         {
+        //             "id": "1002993",
+        //             "name": {
+        //                 "nickname": "simple jack",
+        //                 "first": "Jack",
+        //                 "last": "Ball"
+        //             },
+        //             "rpm": "1,700",
+        //             "created_at": "2013-27-11"
+        //         },
+        //         {
+        //             "id": "1009789",
+        //             "name": {
+        //                 "nickname": "MR. MARUSHIN",
+        //                 "first": "Mike",
+        //                 "last": "Davies"
+        //             },
+        //             "rpm": "1,697",
+        //             "created_at": "2013-27-11"
+        //         }
+        //     ]
+        // }
+
+        return '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
         +   '       <div id="headerTop" class="parallelogram">'
-        +   '           <div class="headerText unskew uppercase shadows">TOP PROSKILL RANKING</div>'
+        +   '           <div class="headerText unskew uppercase shadows">TOP {{getGender}} PROSKILL</div>'
         +   '       </div>'
         +   '       <div id="headerBottom" class="parallelogram">'
         +   '           <div class="unskew">'
@@ -554,21 +637,156 @@
         +   '       {{/each}}'
         +   '   </div>'
         +   '</div>';
-
-    buildAndAppendHtml(src); // call the previously defined function
-
-    // code for the angularjs
-    function receiveMessage(event) {
-        // console.log(event);
-        // console.log(event.origin);
-        // console.log(event.data);
     }
-    window.addEventListener("message", receiveMessage, false);
 
-    // code for the slide js
-    window.postMessage({
-        slideComplete:true
-    }, "*");
+    /**
+        Applies css classes to a set of elements with an optional delay between each application.
+
+        @param {string} elemSelector The selector used to collect elements using jQuery/sizzle.
+        @param {string|array<string>} cssClasses A string or array of strings containing the classes to be applied to the elements.
+        @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
+        @returns {void}
+    */
+    function applyHtmlClass(elems, cssClasses, delay) {
+        var currentDelay = 0;
+        delay = delay || 0;
+        if (z.check.isString(cssClasses)) {
+            cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
+        }
+        z.assert.isArray(cssClasses);
+        if (elems) {
+            if (elems.length) {
+                for (var i = 0; i < elems.length; i++) {
+                    (function(index) {
+                        setTimeout(function() {
+                            var elem = $(elems[index]);
+                            for (var k = 0; k < cssClasses.length; k++) {
+                                elem.addClass(cssClasses[k]);
+                            }
+                        }, delay*index);
+                    })(i); // use an iife to maintain the correct index for setTimeout
+                }
+            }
+        }
+    }
+
+    /**
+        Applies a pre-determined set of animations specific to this page
+        based on the provided data.racers.length.
+
+        @param {object} data The object which will contain data.racers.length.
+        @returns {void}
+    */
+    function applyAnimations(data) {
+        if (z.convert(parameters.disableAnimations, z.types.boolean) === true) {
+            $('.racer').addClass('visible');
+        }
+        else {
+            // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
+            // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+            var numElems = data.racers.length;
+            var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 350 ? 350 : d;
+            applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
+        }
+    }
+
+    /**
+        Builds the Handlebars template based on a provided set of html and data,
+        appending the compiled template directly to the page's body.
+
+        @param {string} html The html string to use with Handlebars.
+        @param {object} data The object to pass to Handlebars for use with the html string.
+        @returns {void}
+    */
+    function buildPage(html, data) {
+        var template = Handlebars.compile(html);
+        var output = template(data);
+        $(output).appendTo("body");
+        applyAnimations(data);
+        cache[KEYS.API_DATA] = data.deepCopy();
+        pollForChanges();
+    }
+
+    /**
+        Polls for changes in the API return data
+        based on a given timeout.
+
+        @param {number} [timeout] The time in milliseconds to wait between polls. If not provided, this will default to 5000.
+        @returns {void}
+    */
+    function pollForChanges(timeout) {
+        timeout = timeout || 5000;
+        log.debug("  ---  Polling for changes: ");
+        setTimeout(function() { 
+            $.when.apply($, getData()).then(
+                function() {
+                    // success pipe - check for changes
+                    var data = smashArgs.apply(this, arguments);
+                    if (!equals(cache[KEYS.API_DATA], data)) {
+                        log.debug(  "  --- API data has changed: ");
+                        window.location.reload(); // for now, just reload the whole page -- consider working in animations on only the items which changed
+                    }
+                    else {
+                        log.debug(  "  ---    No change in data: ")
+                        pollForChanges(timeout);
+                    }
+                }, function() {
+                    // failure pipe - continue to poll for changes, don't bother comparing
+                    pollForChanges(timeout);
+                }
+            );
+        }, timeout);
+    }
+
+    /**
+        Localizes data.racers[].rpm based on a provided, current, or default locale.
+
+        @param {object} data The data object containing racers[].rpm to be localized.
+    */
+    function localizeData(data) {
+        var locale = z.location.locale; // make a copy so the computation is only done once
+        if (data && data.racers) {
+            for (var i = 0; i < data.racers.length; i++) {
+                data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(locale);
+            }
+        }
+    }
+
+    /**
+        Collects, extends, and returns 
+        all argument items into a single object.
+
+        @param {...object} var_args The objects to extend together.
+        @returns {object} The extended object from the argument list.
+    */
+    function smashArgs() {
+        var data = {}.smash(parameters);
+        data.range = data.range || api.getTopTimes.defaults.range;
+        data.limit = data.limit || api.getTopTimes.defaults.limit;
+        z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
+        return data;
+    }
+
+    /**
+        Main initialize method for the speed screen.
+        Handles calling getData(), and piping that data
+        alongside the HTML template from getHtml()
+        into the buildPage() method.
+
+        @returns {void}
+    */
+    function loadPage() {
+        sw.push("  ---    Loading page");
+        setupHandlebars();
+        $.when.apply($, getData()).then(function() {
+            var data = smashArgs.apply(this, arguments);
+            log.debug(data);
+            buildPage(getHtml(), data);
+            sw.pop();
+        });
+    }
+    loadPage();
+
 
 </script>
 </body>

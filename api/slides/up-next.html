@@ -626,15 +626,20 @@
         animations specific to this page
         based on the provided data object.
 
-        @param {number} data The data object used to determine the number of expected elements for use with the minimum animation length calculation.
+        @param {object} data The object which will contain data.race.racers.length.
         @returns {void}
     */
     function applyAnimations(data) {
-        // ensure that the delay is never longer than 1/2 of the slideTimeout, but dont go over 350ms
-        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var numElements = data.race.racers.length;
-        var d, delay = (d = (+parameters.slideTimeout || 15000) / numElements * 0.5) > 350 ? 350 : d;
-        applyHtmlClass('.racer', ['fadeInDown', 'visible'], delay);
+        if (z.convert(parameters.disableAnimations, z.types.boolean) === true) {
+            $('.racer').addClass('visible');
+        }
+        else {
+            // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
+            // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
+            var numElems = data.race.racers.length;
+            var d, delay = (d = (+parameters.slideTimeout || 15000) / numElems * 0.5) > 350 ? 350 : d;
+            applyHtmlClass('.racer', ['fadeInDown', 'visible'], delay);
+        }
     }
 
     /**
