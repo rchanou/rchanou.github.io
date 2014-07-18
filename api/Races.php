@@ -121,7 +121,7 @@ class Races
 				
 				forEach($upcomingRaces as $id => $race) {
 					$populatedRace = $this->race($race['HeatNo']);
-					$populatedRace['total_spots'] = $race['RacersPerHeat'];
+					$populatedRace['race']['total_spots'] = $race['RacersPerHeat'];
 					$return['races'][] = $populatedRace;
 				}
 				
