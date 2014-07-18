@@ -67,6 +67,10 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    var timer = setTimeout(function(){ window.location='step1';}, 1800000); //Every 30 minutes, reset the session and pull new settings
+</script>
 <!-- END REGISTRATION OPTIONS  -->
 
 @stop
