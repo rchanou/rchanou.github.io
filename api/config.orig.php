@@ -21,13 +21,13 @@ $customerPictureImagePath = 'C:\ClubSpeed\CustomerPictures';
 $customerAdultSignatureImagePath = 'C:\ClubSpeed\CustomerSignatures';
 
 // Absolute Path to Minor Signatures (no trailing slash)
-$customerMinorSignatureImagePath = 'C:\ClubSpeed\CustomerSignatures2';
+$customerMinorSignatureImagePath = 'C:\ClubSpeed\CustomerSignatures';
 
 // Absolute Path to Adult Waivers (no trailing slash)
 $customerAdultWaiverImagePath = 'C:\ClubSpeed\CustomerWaivers';
 
 // Absolute Path to Minor Waivers (no trailing slash)
-$customerMinorWaiverImagePath = 'C:\ClubSpeed\CustomerWaivers2';
+$customerMinorWaiverImagePath = 'C:\ClubSpeed\CustomerWaivers';
 
 // Translation Database
 $translationDatabase = 'ClubspeedResource';
