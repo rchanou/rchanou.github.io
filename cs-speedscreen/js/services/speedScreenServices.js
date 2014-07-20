@@ -85,7 +85,11 @@ angular.module('speedScreenDemoApp.services', [])
                 track_id = defaultFor(track_id,1);
                 //console.log(apiURL + '/races/scoreboard.json?&track_id=' + track_id + '&key=' + apiKey);
                 return $http.get(apiURL + '/races/scoreboard.json?&track_id=' + track_id + '&key=' + apiKey + '&suppress_response_codes=true');
-
+            },
+            getScoreboardDataByHeatID: function(heat_id)
+            {
+                updateAPIInfo();
+                return $http.get(apiURL + '/races/scoreboard.json?&heat_id=' + heat_id + '&key=' + apiKey + '&suppress_response_codes=true');
             },
             getNextHeat: function (track_id)
             {
