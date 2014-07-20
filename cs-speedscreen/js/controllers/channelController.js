@@ -36,6 +36,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     var apiURL = config.apiURL;
     var apiKey = config.apiKey;
     $scope.showTimer = defaultFor(config.showTimer, true);
+    $scope.showHeatNumberInsteadOfRaceTime = defaultFor(config.showHeatNumberInsteadOfRaceTime, false);
 
 //    If testing a specific track is desired:
 /*    var apiURL = 'http://ftikcincinnati.clubspeedtiming.com/api/index.php';

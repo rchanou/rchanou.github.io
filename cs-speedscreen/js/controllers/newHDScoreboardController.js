@@ -219,6 +219,15 @@
                     $scope.currentNextRace = data;
                 });
 
+                if (this.lastHeatID != -1)
+                {
+                    speedScreenServices.getScoreboardDataByHeatID(this.lastHeatID).success(function (data) {
+                        $scope.lastHeatScoreboard = data;
+
+                    }).error(function (data, status, headers, config) {
+                        $scope.lastHeatScoreboard = data;
+                    });
+                }
             };
 
             /** processLatestScoreboardData()
@@ -572,9 +581,9 @@
                 {
                     this.lastRaceRacers = {};
 
-                    for(var key in this.lastHeatsHistory[0].scoreboard) //Package the race data for the view to display
+                    for(var key in $scope.lastHeatScoreboard.scoreboard) //Package the race data for the view to display
                     {
-                        var currentRacer = this.lastHeatsHistory[0].scoreboard[key];
+                        var currentRacer = $scope.lastHeatScoreboard.scoreboard[key];
                         this.lastRaceRacers[currentRacer.racer_id] = currentRacer;
                     }
                 }
