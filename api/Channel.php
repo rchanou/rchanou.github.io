@@ -55,7 +55,8 @@ class Channel
 					);
 				$output['lineup'] = array();
 
-				// Add scoreboard (if we have elected to show it)
+				// Add channel-wide scoreboard
+				// Note: Scoreboards can be specified "channel-wide" here or as slide type "21: newScoreboard" (below)
 				if($screen['ShowScoreboard'] == 1) {
 					$output['lineup'][] = array(
 						'type' => 'scoreboard',
@@ -64,7 +65,7 @@ class Channel
 							'postRaceIdleTime' => $screen['IdleTime']*1000
 							)
 						);
-				}			
+				}
 
 				// Add slides if the screen idle time is not "Infinite" (86400)		
 				if($screen['IdleTime'] !== 86400) { 
@@ -196,8 +197,18 @@ class Channel
 								break;
 
 							// New Scoreboard - 5
-							case 21:
-								$output['lineup'][] = array('type' => 'newScoreboard', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
+							case 21:								
+								// Ensure we haven't already added this scoreboard "channel-wide" above			
+								if($screen['ShowScoreboard'] == 0 ||
+									($screen['ShowScoreboard'] == 1 && (int)$screen['ScoreBoardTrackNo'] != (int)$slide['TrackNo'])) {
+									$output['lineup'][] = array(
+										'type' => 'scoreboard',
+										'options' => array(
+											'trackId' => (int)$slide['TrackNo'],
+											'postRaceIdleTime' => $slide['TimeInSecond']*1000
+											)
+										);
+								}
 								break;
 
 							// Previous Race Results - 4
