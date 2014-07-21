@@ -28,6 +28,7 @@ class Races
         if($race_id == 'current') $race_id = $this->current();
         if($race_id == 'fastest') return $this->fastest();
         if($race_id == 'next') return $this->next(@$_GET['track_id'], @$_GET['offset']);
+				if($race_id == 'previous') return $this->previous(@$_GET['track_id'], @$_GET['offset']);
         if($race_id == 'total_laps') return $this->total_laps();
         if($race_id == 'lap_number') return $this->lap_number($sub);
         if($race_id == 'scoreboard') return $this->scoreboard(@$_GET['track_id'], @$_GET['heat_id']);
@@ -144,6 +145,25 @@ class Races
 				}
 				
         return $this->race($nextHeatId);
+
+    }
+		
+		protected function previous($track = null, $offset = 0) {
+
+				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
+				$offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
+
+				$tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY Begining DESC) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (2,3) AND Begining < (SELECT TOP(1) hm.Begining AS started_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC ) ) SELECT c.* FROM CTE c WHERE Rank = ?';
+				$tsql_params = array(&$track_id, &$track_id, &$offset);
+				$rows = $this->run_query($tsql, $tsql_params);
+				
+				if(empty($rows[0]['HeatNo'])) {
+					throw new RestException(412, 'No previous race found.');
+				} else {
+					$heatId = $rows[0]['HeatNo'];
+				}
+				
+        return $this->race($heatId);
 
     }
 
