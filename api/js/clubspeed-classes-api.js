@@ -82,7 +82,8 @@
                 if (z.check.exists(gender)) {
                     // note: supplying $.ajax() with a null or undefined parameter
                     // results in the key still being added to the url call
-                    // this will result in an API error as of 7/18/2014 (DL)
+                    // this will result in an API error as of 7/18/2014
+                    // make sure gender as a parameter exists before adding anything (DL)
                     data.gender = gender.toString().charAt(0).toLowerCase();
                 }
                 return sendRequest({
@@ -96,18 +97,20 @@
                 }
             });
 
-            var getTopTimes = function(range, limit) {
+            var getTopTimes = function(range, track, limit) {
                 return sendRequest({
                     api: "races/fastest.json",
                     type: "GET",
                     data: {
                         range: range || getTopTimes.defaults.range,
+                        track: track || getTopTimes.defaults.track,
                         limit: limit || getTopTimes.defaults.limit
                     }
                 });
             }.extend({
                 defaults: {
                     range: "week",
+                    track: 1,
                     limit: 10
                 }
             });
@@ -117,7 +120,21 @@
                     api: "tracks/index.json",
                     type: "GET"
                 });
-            };
+            }
+
+            var getUpcoming = function(track) {
+                return sendRequest({
+                    api: "races/upcoming.json",
+                    type: "GET",
+                    data: {
+                        track: track || getUpcoming.defaults.track
+                    }
+                });
+            }.extend({
+                defaults: {
+                    track: 1
+                }
+            });
 
             function apiSuccessHandler(data, textStatus, xhr) {
                 z.assert(function() { return z.equals(data, xhr.responseJSON); });
@@ -181,6 +198,7 @@
                 z.defineProperty(apiObj, "getTopProskill", { get: function() { return getTopProskill; }, writeable: false });
                 z.defineProperty(apiObj, "getTopTimes", { get: function() { return getTopTimes; }, writeable: false });
                 z.defineProperty(apiObj, "getTracks", { get: function() { return getTracks; }, writeable: false });
+                z.defineProperty(apiObj, "getUpcoming", { get: function() { return getUpcoming; }, writeable: false });
                 return apiObj;
             })({});
 
