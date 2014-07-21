@@ -58,9 +58,16 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     var scoreboardStartedBeingIdleTimeMs = 0;
     var raceWasJustHappening = false;
     var disableAnimations = false;
+    var debug = false;
+
     if ($routeParams.channel_options == 'disableAnimations')
     {
         disableAnimations = true;
+    }
+
+    if ($routeParams.channel_options == 'debug')
+    {
+        debug = true;
     }
 
     //################################
@@ -115,6 +122,8 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
             //console.log(slides);
             //console.log('Current resourceURL: ' + slides[this.nextSlide].resourceURL);
+
+            //setCustomBackgroundIfAvailable('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg')
 
             //If we're about to switch over to a scoreboard slide, but there is no race going on and the scoreboard isn't showing race results, skip to the next slide
             if (slides[this.nextSlide].resourceURL == "pages/newhdscoreboard.html" && !globalVars.isRaceOnGoing() && !scoreboardIsCurrentlyIdle)
@@ -202,21 +211,9 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
             {
                 //DEBUG: console.log("No need to poll for channel lineup. Scoreboard-only mode activated for Track 1.");
 
-                var desiredBackgroundURL = "";
-/*                var overwrittenBackgroundURL = $('<img src="http://127.0.0.1/assets/cs-speedscreen/images/background_1080p.jpg"/>');
-
-                alert(overwrittenBackgroundURL.attr('width'));
-                if (overwrittenBackgroundURL.attr('width') > 0)
-                {
-                    alert("BANANA");
-                    desiredBackgroundURL = 'http://127.0.0.1/assets/cs-speedscreen/images/background_1080p.jpg';
-                    $('.hdScoreboard').css('background-image','url(' + desiredBackgroundURL + ')');
-                    $('.hdScoreboard').css('background-size','100% 100%');
-                }*/
-
                 //Manually set the Speed Screen to display the scoreboard infinitely, ignoring Club Speed settings
                 slides = [];
-                slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1, desiredBackgroundURL));
+                slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
                 hasScoreboard = true;
                 scoreboardSlide = slides.length - 1;
                 this.currentTrack = 1;
@@ -230,7 +227,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
                 //Manually set the Speed Screen to display the scoreboard infinitely, ignoring Club Speed settings
                 slides = [];
-                slides.push(new Slide("html","pages/polandminiscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1, ""));
+                slides.push(new Slide("html","pages/polandminiscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
                 hasScoreboard = true;
                 scoreboardSlide = slides.length - 1;
                 this.currentTrack = 1;
@@ -283,14 +280,14 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                 if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
                                 {
                                     slides = [];
-                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
+                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
                                     scoreboardSlide = slides.length - 1;
                                     this.currentTrack = currentScreen.options.trackId;
                                     globalVars.setTrackID(this.currentTrack);
                                     $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
                                     return;
                                 }
-                                slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
+                                slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
                                 hasScoreboard = true;
                                 scoreboardSlide = slides.length - 1;
                                 this.currentTrack = currentScreen.options.trackId;
@@ -305,6 +302,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                 }
                                 formattedURL = formattedURL + '&slideTimeout=' + currentScreen.options.duration;
                                 formattedURL = formattedURL + '&disableAnimations=' + (disableAnimations ? '1' : '0');
+                                formattedURL = formattedURL + '&debug=' + (debug ? '1' : '0');
                                 slides.push(new Slide('iframehtml',formattedURL,currentScreen.options.duration,'landscape'));
                             }
                         }
@@ -343,14 +341,14 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                     if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
                                     {
                                         slides = [];
-                                        slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
+                                        slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
                                         scoreboardSlide = slides.length - 1;
                                         this.currentTrack = currentScreen.options.trackId;
                                         globalVars.setTrackID(this.currentTrack);
                                         $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
                                         return;
                                     }
-                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId, data.options.backgroundImageUrl));
+                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
                                     hasScoreboard = true;
                                     scoreboardSlide = slides.length - 1;
                                     this.currentTrack = currentScreen.options.trackId;
@@ -364,6 +362,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                     }
                                     formattedURL = formattedURL + '&slideTimeout=' + currentScreen.options.duration;
                                     formattedURL = formattedURL + '&disableAnimations=' + (disableAnimations ? '1' : '0');
+                                    formattedURL = formattedURL + '&debug=' + (debug ? '1' : '0');
                                     slides.push(new Slide('iframehtml',formattedURL,currentScreen.options.duration,'landscape'));
                                 }
                             }
@@ -408,11 +407,6 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                     raceWasJustHappening = true;
                     if (slides[this.nextSlide].resourceURL != 'pages/newhdscoreboard.html')
                     {
-/*                        if (slides[scoreboardSlide].backgroundURL != undefined && slides[scoreboardSlide].backgroundURL != "")
-                        {
-                            $('.hdScoreboard').css('background-image','url(' + slides[scoreboardSlide].backgroundURL + ')');
-                            $('.hdScoreboard').css('background-size','100% 100%');
-                        }*/
                         this.currentSlide = scoreboardSlide;
                         this.nextSlide = scoreboardSlide;
                         var currentDuration = slides[this.nextSlide].durationMs;
@@ -500,7 +494,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
      * @param backgroundURL If applicable, the background image URL to use for the slide
      * @constructor
      */
-    function Slide(type,resourceURL,durationMs,orientation, apiURL, apiKey, trackID, backgroundURL)
+    function Slide(type,resourceURL,durationMs,orientation, apiURL, apiKey, trackID)
     {
         this.type = type;
         this.resourceURL = resourceURL;
@@ -509,7 +503,6 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
         this.apiURL = apiURL;
         this.apiKey = apiKey;
         this.trackID = trackID;
-        this.backgroundURL = backgroundURL;
     }
 
     //#####################
@@ -613,3 +606,21 @@ speedScreenDemoApp.factory('globalVars', function() {
  */
 function defaultFor(arg, val)
 { return typeof arg !== 'undefined' ? arg : val; }
+
+/**
+ *
+ * @param url
+ * @constructor
+ */
+function setCustomBackgroundIfAvailable(url) {
+    console.log("setCustomBackgroundIfAvailable");
+    $("<img>", {
+        src: url + '?rnd=' + new Date().getTime(),
+        error: function() { console.log("Returning false"); return false; },
+        load: function() {
+            console.log("Returning true");
+            $('.hdScoreboard').css('background-image','url(' + url + ')');
+            $('.hdScoreboard').css('background-size','100% 100%');
+            return true; }
+    });
+}
