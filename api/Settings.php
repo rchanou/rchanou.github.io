@@ -121,7 +121,7 @@ class Settings
 
 		}
 		
-		protected function getSettings($group, $setting = null)
+		public function getSettings($group, $setting = null)
 		{
 				$output = array();
 				if(!empty($setting)) { // Get specific settings
@@ -130,12 +130,14 @@ class Settings
 					// Create placeholders in query
 					$placeholders = array();
 					foreach($setting as $key => $settingName) {
-						$tsql_params[] = &$settingName;
+						$tsql_params[] = $settingName;
 						$placeholders[] = '?';
 					}
 					
 					$tsql = 'SELECT * FROM ControlPanel WHERE TerminalName = ? AND SettingName IN ' . '(' . implode(',', $placeholders) . ')';
+
 					$rows = $this->run_query($tsql, $tsql_params);
+
 				} else { // Get entire group
 
 					$registrationVersion = $this->getRegistrationVersion(); // Flag so that we can handle registration differently.

@@ -734,6 +734,7 @@ EOD;
                 'track_id' => $row['TrackNo'],
                 'track_name' => $row['TrackName'],
                 'timestamp' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['TimeStamp'])),
+								'photo_url' => $this->getCustomerPhoto($row['CustID'])
             );
 
         }
@@ -849,6 +850,8 @@ EOD;
 					$output['race']['racers'][$key]['group_id'] = $racerInfo[0]['GroupID'];
 					$output['race']['racers'][$key]['total_visits'] = $racerInfo[0]['TotalVisits'];
 					$output['race']['racers'][$key]['total_races'] = $racerInfo[0]['TotalRaces'];
+					$output['race']['racers'][$key]['photo_url'] = $this->getCustomerPhoto($racer['id']);
+
 				}
 
         if (is_numeric($heatId)) //TODO: Document and explain the SQL 2005 hacks
@@ -938,6 +941,31 @@ EOD;
 
         return array('laps' => $output);
     }
+
+		/**
+     * Get the url to the customer's picture (if it exists)
+     * @public
+     * @param integer $racer_id Required, id to lookup picture for
+     * @return string (url to photo) or null (no photo found)
+     */
+		public function getCustomerPhoto($racer_id) {
+			if(empty($this->CustomerPicturesPath) || empty($this->CustIDPicPath)) {
+				// Get the path and URL to the customer pictures
+				$settings = new Settings();
+				$pictureSettings = $settings->getSettings('MainEngine', array('CustomerPicturesPath', 'CustIDPicPath'));
+				$this->CustomerPicturesPath = $pictureSettings['settings']['CustomerPicturesPath']['SettingValue'];
+				$this->CustIDPicPath = $pictureSettings['settings']['CustIDPicPath']['SettingValue'];
+			}
+		
+			// See if this customer has a picture
+			$customerPictureURL = null;
+			$customerPicturePath = $this->CustomerPicturesPath . '\\' . $racer_id . '.jpg';
+			if(file_exists($customerPicturePath)) {
+				$customerPictureURL = 'http://' . $this->CustIDPicPath . '/CustomerPictures/' . $racer_id . '.jpg'; // Path hardcoded in Club Speed
+			}
+			
+			return $customerPictureURL;
+		}
 
     private function run_query($tsql, $params = array()) {
     $tsql_original = $tsql . ' ';
