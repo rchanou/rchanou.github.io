@@ -29,7 +29,7 @@
         /* elements */
 
         html, body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             height: 100%;
             min-height: 100%;
             margin: 0;
@@ -38,7 +38,7 @@
             -webkit-font-smoothing: antialiased;
         }
         html, body :hover {
-            cursor: default;
+            cursor: none;
         }
         #wrapper {
             min-height: 100%;
@@ -147,7 +147,7 @@
             width: 22%;
         }
         #results .racer .nickname {
-            width: 72%;
+            width: 70%;
         }
         .racerTextWrapper {
             margin-right: -6px; /* hackish css to get the parallelograms to overlap smoothly */
@@ -385,7 +385,7 @@
     function getData() {
         var deferred = [];
 
-        deferred.push(api.getNextRacers(parameters.trackId, parameters.offset).then(function(data) {
+        deferred.push(api.getNextRace(parameters.trackId, parameters.offset).then(function(data) {
 
             var race = data.race;
             var racers = race.racers;
@@ -404,11 +404,32 @@
                     nickname: "NICKNAME"
                 };
                 racers.unshift(label);
-
-                // calculate the racer styles
-                race.racerHeight = (96 / (racers.length > 4 ? racers.length : 5)) + "%"; // don't use a calculated for fewer than 5 people
-                race.racerFontSize = (2 + (100 / ((racers.length > 4 ? racers.length : 5) * 5))) + "vh";
             }
+            else {
+                var tempStartsAt = z.convert.toDate(race.starts_at);
+                if (z.check.isDate(tempStartsAt)) {
+                    race.starts_at = tempStartsAt.toLocaleString(z.location.locale);
+                }
+                var labels = [
+                    {
+                        position_display: "TIME:",
+                        nickname: race.starts_at
+                    },
+                    {
+                        position_display: "SPOTS:",
+                        nickname: "All spots still available!"
+                    }
+                ];
+                z.forEach(labels, function(x, key, arr) {
+                    racers.push(x);
+                });
+            }
+
+            // calculate the racer styles
+            race.racerHeight = (96 / (racers.length > 4 ? racers.length : 5)) + "%"; // don't use a calculated for fewer than 5 people
+            race.racerFontSize = (2 + (100 / ((racers.length > 4 ? racers.length : 5) * 5))) + "vh";
+
+            // add styling for race_number
             race.race_number = z.check.exists(race.race_number) ? "(#" + race.race_number + ")" : "";
 
             // pipe the mutated data back
@@ -488,7 +509,7 @@
 
         @returns {string} The HTML template for use with Handlebars.
     */
-    function getHtml() {
+    function buildHtml(data) {
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
@@ -547,7 +568,7 @@
         //     }
         // }
 
-        return '' +
+        var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
@@ -575,6 +596,10 @@
         +   '       {{/each}}'
         +   '   </div>'
         +   '</div>';
+
+        var template = Handlebars.compile(src);
+        var output = template(data);
+        return output;
     }
 
     /**
@@ -638,10 +663,9 @@
         @param {object} data The object to pass to Handlebars for use with the html string.
         @returns {void}
     */
-    function buildPage(html, data) {
-        var template = Handlebars.compile(html);
-        var output = template(data);
-        $(output).appendTo("body");
+    function buildPage(data) {
+        var bodyHtml = buildHtml(data);
+        $(bodyHtml).appendTo("body");
         applyAnimations(data);
         cache[KEYS.API_DATA] = data.deepCopy();
         pollForChanges(5000);
@@ -656,8 +680,8 @@
     */
     function pollForChanges(timeout) {
         timeout = timeout || 5000;
-        log.debug("  ---  Polling for changes: ");
         setTimeout(function() { 
+            log.debug("  ---  Polling for changes: ");
             $.when.apply($, getData()).then(
                 function() {
                     // success pipe - check for changes
@@ -686,9 +710,7 @@
         @returns {object} The extended object from the argument list.
     */
     function smashArgs() {
-        var data = {}.smash(parameters);
-        data.track = data.track || api.getNextRacers.defaults.track;
-        data.offset = data.offset || api.getNextRacers.defaults.offset;
+        var data = {}.smash(parameters).extend(api.getNextRace.defaults);
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
         return data;
     }
@@ -696,7 +718,7 @@
     /**
         Main initialize method for the speed screen.
         Handles calling getData(), and piping that data
-        alongside the HTML template from getHtml()
+        alongside the HTML template from buildHtml()
         into the buildPage() method.
 
         @returns {void}
@@ -709,14 +731,14 @@
                 // success pipe
                 var data = smashArgs.apply(this, arguments);
                 log.debug(data);
-                buildPage(getHtml(), data);
+                buildPage(data);
                 sw.pop();
             }, function() {
                 // failure pipe -- grab fallback data to build the page
                 $.when.apply($, getFallbackData()).then(function() {
                     var data = smashArgs.apply(this, arguments);
                     log.debug(data);
-                    buildPage(getHtml(), data);
+                    buildPage(data);
                     sw.pop();
                 });
             }

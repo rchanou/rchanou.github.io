@@ -7,7 +7,7 @@
 
     <script src ="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
-    <script src="../js/zutil.min.js"></script>
+    <script src="../js/zutil.debug.js"></script>
     <script>
         // zUtil setup
         var z = new zUtil({
@@ -128,7 +128,6 @@
         }
         #results .racer {
             width: 100%;
-            height: 100%;
             height: 7.4vh;
             /*margin-top: 0.4vh;*/
             margin-left: 2vw;
@@ -148,7 +147,7 @@
             width: 10%;
         }
         #results .racer .nickname {
-            width: 70%;
+            width: 67%;
         }
         #results .racer .lapTime {
             width: 17%;
@@ -360,7 +359,26 @@
 
         var deferred = [];
 
-        deferred.push(api.getTopProskill(parameters.limit, parameters.range, parameters.gender));
+        deferred.push(api.getTopProskill(parameters.limit, parameters.range, parameters.gender).then(function(data) {
+            
+            z.forEach(data.racers, function(x, key, arr) {
+                // localize proskill, if available
+                var tempRpm = z.convert.toNumber(x.rpm);
+                if (z.check.isNumber(tempRpm)) {
+                    x.rpm = tempRpm.toLocaleString(z.location.locale);
+                }
+            });
+
+            // check for gender specific request
+            var gender = z.coalesce(parameters.gender, api.getTopProskill.defaults.gender, "");
+            gender = gender.toString().charAt(0).toLowerCase(); // get the first character
+            switch(gender) {
+                case "m": data.gender = "Male"; break;
+                case "f": data.gender = "Female"; break;
+            }
+
+            return data;
+        }));
 
         return deferred;
     }
@@ -388,17 +406,6 @@
         Handlebars.registerHelper('getRacerFontSize', function(racer, options) {
             return 2 + (100 / (options.data.root.racers.length * 5));
         });
-        Handlebars.registerHelper('getGender', function(options) {
-            var gender = options.data.root.gender;
-            if (z.check.exists(gender)) {
-                gender = gender.toString().charAt(0).toLowerCase(); // get the first character
-                switch(gender) {
-                    case "m": return "Male";
-                    case "f": return "Female";
-                }
-            };
-            return "";
-        });
     }
     
     /**
@@ -406,7 +413,7 @@
 
         @returns {string} The HTML template for use with Handlebars.
     */
-    function getHtml() {
+    function buildHtml(data) {
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
@@ -470,12 +477,12 @@
         //     ]
         // }
 
-        return '' +
+        var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
         +   '       <div id="headerTop" class="parallelogram">'
-        +   '           <div class="headerText unskew uppercase shadows">TOP {{getGender}} PROSKILL</div>'
+        +   '           <div class="headerText unskew uppercase shadows">TOP {{gender}} PROSKILL</div>'
         +   '       </div>'
         +   '       <div id="headerBottom" class="parallelogram">'
         +   '           <div class="unskew">'
@@ -499,6 +506,10 @@
         +   '       {{/each}}'
         +   '   </div>'
         +   '</div>';
+
+        var template = Handlebars.compile(src);
+        var output = template(data);
+        return output;
     }
 
     /**
@@ -560,10 +571,9 @@
         @param {object} data The object to pass to Handlebars for use with the html string.
         @returns {void}
     */
-    function buildPage(html, data) {
-        var template = Handlebars.compile(html);
-        var output = template(data);
-        $(output).appendTo("body");
+    function buildPage(data) {
+        var bodyHtml = buildHtml(data);
+        $(bodyHtml).appendTo("body");
         applyAnimations(data);
         cache[KEYS.API_DATA] = data.deepCopy();
         pollForChanges();
@@ -578,8 +588,8 @@
     */
     function pollForChanges(timeout) {
         timeout = timeout || 5000;
-        log.debug("  ---  Polling for changes: ");
         setTimeout(function() { 
+            log.debug("  ---  Polling for changes: ");
             $.when.apply($, getData()).then(
                 function() {
                     // success pipe - check for changes
@@ -601,20 +611,6 @@
     }
 
     /**
-        Localizes data.racers[].rpm based on a provided, current, or default locale.
-
-        @param {object} data The data object containing racers[].rpm to be localized.
-    */
-    function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the computation is only done once
-        if (data && data.racers) {
-            for (var i = 0; i < data.racers.length; i++) {
-                data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(locale);
-            }
-        }
-    }
-
-    /**
         Collects, extends, and returns 
         all argument items into a single object.
 
@@ -632,7 +628,7 @@
     /**
         Main initialize method for the speed screen.
         Handles calling getData(), and piping that data
-        alongside the HTML template from getHtml()
+        alongside the HTML template from buildHtml()
         into the buildPage() method.
 
         @returns {void}
@@ -643,7 +639,7 @@
         $.when.apply($, getData()).then(function() {
             var data = smashArgs.apply(this, arguments);
             log.debug(data);
-            buildPage(getHtml(), data);
+            buildPage(data);
             sw.pop();
         });
     }

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Up Next With Pictures</title>
+    <title>Top Time With Picture</title>
 
     <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
 
@@ -28,7 +28,7 @@
         /* elements */
 
         html, body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Open Sans', sans-serif;
             height: 100%;
             min-height: 100%;
             margin: 0;
@@ -115,12 +115,6 @@
             -o-transform: rotateY(180deg);
             -ms-transform: rotateY(180deg);
             transform: rotateY(180deg);
-        }
-        .logoWrapper {
-            background-image: url('../img/clubspeed_logo.svg');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 50%;
         }
         .portraitWrapper {
             background: linear-gradient(to bottom left, #000000, #585858);
@@ -210,6 +204,11 @@
             height: 100%;
             vertical-align: middle;
         }
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .roundBottom {
             -webkit-border-bottom-right-radius: 15px;
             -moz-border-bottom-right-radius: 15px;
@@ -291,9 +290,6 @@
         .padLeft5 {
             padding-left: 5vmin;
         }
-        .centerText {
-            text-align: center;
-        }
         .uppercase {
             text-transform: uppercase;
         }
@@ -321,8 +317,8 @@
             vertical-align: middle;
         }
         .perspective {
-            -webkit-perspective: 1000;
-            perspective: 1000;
+            -webkit-perspective: 4000;
+            perspective: 4000;
         }
         .hidden {
             visibility: hidden;
@@ -437,12 +433,12 @@
         @class
     */
     function GridSizes(data) {
-        this.width = 0;
-        this.height = 0;
-        this.widthMax = 96;
-        this.heightMax = 78;
-        this.numRows = 0;
-        this.numCols = 0;
+        this.width = 0; // the width of each card element
+        this.height = 0; // the height of each card element
+        this.widthMax = 96; // the percentage of the wrapper width we may use
+        this.heightMax = 78; // the percentage of the wrapper height we may use
+        this.numRows = 0; // total number of rows in the card grid
+        this.numCols = 0; // total number of columns in the card grid
         this.determineSizes(data);
     }
     z.defineProperty(GridSizes.prototype, 'widthStyle', { get: function() { return "width:" + this.width + "%;"; }, writeable: false });
@@ -452,15 +448,14 @@
         return this.style;
     };
     GridSizes.prototype.determineSizes = function(data) {
-        if (data && data.length) {
-            // var rowDividend = Math.ceil(Math.sqrt(data.length)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
-            var rowDividend = Math.ceil(Math.sqrt(data.length)) + (data.length > 4 && (Math.sqrt(data.length) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
-            this.numRows = Math.ceil(data.length / rowDividend);
-            this.numCols = data.length.roundUp(this.numRows) / this.numRows;
-            this.height = this.heightMax / this.numRows;
-            this.width = this.widthMax / this.numCols;
-            this.fontSize = 20 / (this.numRows + 6);
-        }
+        var len = (data && data.length ? data.length : 1);
+        // var rowDividend = Math.ceil(Math.sqrt(data.length)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
+        var rowDividend = Math.ceil(Math.sqrt(len)) + (len > 4 && (Math.sqrt(len) % 1 === 0) ? 2 : 1); // add 2 when perfect square larger than 4 - skip ahead to the next number of rows
+        this.numRows = Math.ceil(len / rowDividend);
+        this.numCols = len.roundUp(this.numRows) / this.numRows; // round up to the nearest numRows, then divide by numRows to get numCols
+        this.height = this.heightMax / this.numRows; // determine the height by 
+        this.width = this.widthMax / this.numCols;
+        this.fontSize = 20 / (this.numRows + 6);
     };
 </script>
 <script>
@@ -482,7 +477,7 @@
     // then use a fallback for api root (in this case, ftikcincinnati)
     // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
-        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
+        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ekwigan.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
     var cache = {};
@@ -510,15 +505,22 @@
     function getData() {
         var deferred = [];
 
-        deferred.push(api.getNextRace(parameters.track, parameters.offset).then(function(data) {
-            var race = data.race;
-            var racers = race.racers;
+        deferred.push(api.getTopTimes(parameters.trackId, parameters.range, parameters.limit).then(function(data) {
+            if (z.check.isNonEmptyArray(data.fastest)) {
+                data.fastest.forEach(function(x, key, arr) {
 
-            if (racers.length > 0) {
+                    // apply locale to lap_time
+                    if (z.check.isNumber(x.lap_time)) {
+                        x.lap_time = x.lap_time.toLocaleString(z.location.locale);
+                    }
 
-                // prepend the race.racers[].kart_number with a "#", if it exists
-                z.forEach(racers, function(x, key) {
-                    x.kart_number = (z.check.exists(x.kart_number) ? "#" + x.kart_number : "");
+                    // attempt to convert and apply locale to proskill
+                    var tempRpm = z.convert(x.rpm, z.types.number);
+                    if (z.check.isNumber(tempRpm)) {
+                        x.rpm = tempRpm.toLocaleString(z.location.locale);
+                    }
+
+                    // check for photo existence, set css classes and url
                     if (z.check.exists(x.photo_url) && imageExists(x.photo_url)) {
                         x.photo_type = "racerPhoto";
                     }
@@ -528,20 +530,13 @@
                     }
                 });
 
-                // setup the label "racer"
-                var containsKartNumber = racers.contains(function(x) { return z.check.exists(x.kart_number); });
-                var containsStartPosition = racers.contains(function(x) { return z.check.exists(x.start_position) && !z.check.exists(x.kart_number); });
-                var label = {
-                    position_display: (containsKartNumber ? containsStartPosition ? "Pos./Kart #" : "Kart #" : "Position"),
-                    nickname: "NICKNAME"
-                }
+                // collect track_name from the first racer, instead of making another api call to tracks (?)
+                data.track_name = data.fastest[0].track_name;
             }
-
-            // prepend race.race_number with a "#" if it exists
-            race.race_number = z.check.exists(race.race_number) ? "(#" + race.race_number + ")" : "";
 
             // pipe the mutated data back
             return data;
+
         }));
 
         return deferred;
@@ -611,18 +606,13 @@
         Handlebars.registerHelper('getRacerHeight', function(options) {
             return options.data.root.gridSizes.heightStyle;
         });
-        Handlebars.registerHelper('getHeaderText', function(options) {
-            var offset = z.convert(parameters.offset, z.types.number);
-            if (isNaN(offset) || offset < 0) offset = 0;
-            var race = options.data.root.race;
-            switch(offset) {
-                case 0:
-                    return new Handlebars.SafeString("COMING UP:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
-                case 1:
-                    return new Handlebars.SafeString("FOLLOWING NEXT RACE:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
-                default:
-                    return new Handlebars.SafeString("IN " + offset + " RACES:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
+        Handlebars.registerHelper('getHeaderText', function(data, options) {
+            var header = "";
+            header += "TOP TIMES OF THE " + data.range.toUpperCase() + (data.track ? " ON TRACK: " + data.track_name : "")
+            if (!data.fastest || data.fastest.length < 1) {
+                header += " (none yet!)";
             }
+            return header;
         });
     }
     
@@ -635,56 +625,48 @@
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
-        //   "race": {
-        //     "id": "4385",
-        //     "track_id": "1",
-        //     "track": "Raceworld",
-        //     "starts_at": "2014-07-16 17:44:00.000",
-        //     "heat_type_id": "61",
-        //     "heat_status_id": "0",
-        //     "speed_level_id": "1",
-        //     "speed_level": "Speed Level 1",
-        //     "win_by": "laptime",
-        //     "race_by": "minutes",
-        //     "duration": "14",
-        //     "race_name": "Arrive & Drive",
-        //     "race_number": "85",
-        //     "racers": [
-        //       {
-        //         "id": "1007512",
-        //         "start_position": "1",
-        //         "kart_number": null,
-        //         "rpm": "1200",
-        //         "is_first_time": "1",
-        //         "finish_position": null,
-        //         "nickname": "Evan scieszka",
-        //         "first_name": "Evan",
-        //         "last_name": "Scieszka",
-        //         "total_customers": "7503",
-        //         "ranking_by_rpm": "3405",
-        //         "group_id": "0",
-        //         "total_visits": "1",
-        //         "total_races": "2"
-        //       },
-        //       {
-        //         "id": "1007515",
-        //         "start_position": "2",
-        //         "kart_number": null,
-        //         "rpm": "1200",
-        //         "is_first_time": "1",
-        //         "finish_position": null,
-        //         "nickname": "Mukie Gosrani",
-        //         "first_name": "Mukie",
-        //         "last_name": "Gosrani",
-        //         "total_customers": "7503",
-        //         "ranking_by_rpm": "3405",
-        //         "group_id": "0",
-        //         "total_visits": "1",
-        //         "total_races": "2"
-        //       }
-        //     ]
-        //   }
-        // }
+        //     "debug": "1",
+        //     "limit": "10",
+        //     "range": "week",
+        //     "track": 1,
+        //     "fastest": [
+        //         {
+        //             "racer_id": "1279947",
+        //             "nickname": "slammincam",
+        //             "first_name": "Cameron",
+        //             "rpm": "1,244",
+        //             "last_name": "Stewart",
+        //             "lap_time": "24.91",
+        //             "lap_number": "11",
+        //             "speed_level": "2",
+        //             "track_id": "1",
+        //             "track_name": "Figure 8 Slot Car",
+        //             "timestamp": "2014-07-20 17:24:00"
+        //         },
+        //         {
+        //             "racer_id": "1004254",
+        //             "nickname": "Fez",
+        //             "first_name": "Brian",
+        //             "rpm": "4,407",
+        //             "last_name": "Faessler",
+        //             "lap_time": "27.983",
+        //             "lap_number": "25",
+        //             "speed_level": "1",
+        //             "track_id": "1",
+        //             "track_name": "Figure 8 Slot Car",
+        //             "timestamp": "2014-07-21 21:18:00"
+        //         }
+        //     ],
+        //     "gridSizes": {
+        //         "width": 48,
+        //         "height": 78,
+        //         "widthMax": 96,
+        //         "heightMax": 78,
+        //         "numRows": 1,
+        //         "numCols": 2,
+        //         "fontSize": 2.857142857142857
+        //     }
+        // } 
 
         var portraitSrc = '' +
             '<div class="racer lFloat" style="{{getRacerStyle}}">'
@@ -696,17 +678,17 @@
         +   '           <div class="back face fill roundAll">'
         +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{getFontSize}}vh;">'
         +   '                   <div class="portraitHeaderWrapper roundTop">'
-        +   '                       <div class="portraitHeaderText fill vMiddle hCenter">{{getName @index}}</div>'
+        +   '                       <div class="portraitHeaderText fill vMiddle hCenter truncate">{{nickname}}</div>'
         +   '                   </div>'
         +   '                   <div class="portraitBodyWrapper">'
         +   '                       <div class="portraitBodyTextWrapper lFloat">'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter startPositionText">{{start_position}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter kartNumberText">{{kart_number}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter proSkillText">{{rpm}}</div></div>'
-        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate startPositionText">{{start_position}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate kartNumberText">{{kart_number}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate proSkillText">{{rpm}}</div></div>'
+        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter truncate firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
         +   '                       </div>'
         +   '                       <div class="portraitPictureWrapper rFloat roundBottomRight">'
-        +   '                           <div class="portraitPictureWrapperInner fill roundBottomRight {{photo_type}}" style="background-image: url({{photo_url}});"></div>'
+        +   '                           <div class="portraitPictureWrapperInner fill roundBottomRight {{photo_type}}" style="background-image: url({{photo_url}});"></div>' // todo: get actual portrait URI
         +   '                       </div>'
         +   '                   </div>'
         +   '               </div>'
@@ -719,12 +701,12 @@
             '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
         +   '       <div class="portraitHeaderWrapper"></div>'
         +   '       <div class="portraitBodyWrapper" style="font-size:{{getFontSize}}vh;">'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">START POSITION:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">LAP TIME:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FIRST TIME:&nbsp;&nbsp;</div></div>'
         +   '       </div>'
-        +   '   </div>'
+        +   '   </div>';
 
     var src = '' +
             '<div id="wrapper" class="fill" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
@@ -738,10 +720,10 @@
         +   '   <div id="upNextWrapper">'
         +   '       <div id="upNextTopWrapper" class="fill">'
         +   '           <div class="upNextHeader parallelogram">'
-        +   '               <div class="headerText unskew textShadow vMiddle hCenter fill">{{getHeaderText}}</div>'
+        +   '               <div class="headerText unskew textShadow vMiddle hCenter fill">{{getHeaderText this}}</div>'
         +   '           </div>'
-        +   '           {{#each race.racers}}'
-        +                   portraitSrc // template html for up next with picture
+        +   '           {{#each fastest}}'
+        +                   portraitSrc // template html for top time with picture
         +   '           {{/each}}'
         +   '       </div>'
         +   '   </div>'
@@ -794,7 +776,7 @@
     function applyAnimations(data) {
         // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 280ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var numElems = data.race.racers.length;
+        var numElems = data.fastest.length;
         var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 280 ? 280 : d;
         applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
         applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
@@ -807,23 +789,12 @@
         // });
     }
 
-    function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the collection is only done once per call
-        if (data && data.race && data.race.racers && data.race.racers.length) {
-            var racers = data.race.racers;
-            for (var i = 0; i < racers.length; i++) {
-                racers[i].rpm = parseInt(racers[i].rpm).toLocaleString(locale);
-            }
-        }
-        return data;
-    }
-
     function buildPage(data) {
         var bodyHtml = buildHtml(data);
         $(bodyHtml).appendTo("body");
         applyAnimations(data);
         cache[KEYS.API_DATA] = data.deepCopy();
-        // pollForChanges(5000);
+        pollForChanges(5000);
     }
 
     /**
@@ -865,10 +836,9 @@
         @returns {object} The extended object from the argument list.
     */
     function smashArgs() {
-        var data = {}.smash(parameters).extend(api.getNextRace.defaults);
+        var data = {}.smash(parameters).extend(api.getTopTimes.defaults);;
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
-        data = localizeData(data);
-        data.gridSizes = new GridSizes(data && data.race && data.race.racers ? data.race.racers : 0);
+        data.gridSizes = new GridSizes(data && data.fastest ? data.fastest : 0);
         return data;
     }
 

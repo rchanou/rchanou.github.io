@@ -35,30 +35,48 @@
             var log = z.log;
 
             var getMostImproved = function(range, limit, year) {
+                var data = {
+                    range: range || getMostImproved.defaults.range,
+                    limit: z.convert(limit, z.types.number) || getMostImproved.defaults.limit,
+                }
+                if (z.check.exists(year)) {
+                    data.year = z.convert(year, z.types.number);
+                }
                 return sendRequest({ 
                     api: "racers/most_improved_rpm.json",
                     type: "GET",
-                    data: {
-                        range: range || getMostImproved.defaults.range,
-                        limit: z.convert(limit, z.types.number) || getMostImproved.defaults.limit,
-                        year: z.convert(year, z.types.number) || getMostImproved.defaults.year
-                    }
+                    data: data
                 });
             }.extend({
                 defaults: {
                     range: "month",
-                    limit: 10,
-                    year: undefined
+                    limit: 10
                 }
             });
 
-            var getNextRacers = function(track, offset) {
+            var getNextRace = function(track, offset) {
                 return sendRequest({
                     api: "races/next.json",
                     type: "GET",
                     data: {
-                        track: z.convert(track, z.types.number) || getNextRacers.defaults.track,
-                        offset: z.convert(offset, z.types.number) || getNextRacers.defaults.offset
+                        track: z.convert(track, z.types.number) || getNextRace.defaults.track,
+                        offset: z.convert(offset, z.types.number) || getNextRace.defaults.offset
+                    }
+                });
+            }.extend({
+                defaults: {
+                    track: 1,
+                    offset: 0
+                }
+            });
+
+            var getPreviousRace = function(track, offset) {
+                return sendRequest({
+                    api: "races/previous.json",
+                    type: "GET",
+                    data: {
+                        track: z.convert(track, z.types.number) || getPreviousRace.defaults.track,
+                        offset: z.convert(track, z.types.number) || getPreviousRace.defaults.offset
                     }
                 });
             }.extend({
@@ -97,20 +115,20 @@
                 }
             });
 
-            var getTopTimes = function(range, track, limit) {
+            var getTopTimes = function(track, range, limit) {
                 return sendRequest({
                     api: "races/fastest.json",
                     type: "GET",
                     data: {
-                        range: range || getTopTimes.defaults.range,
                         track: track || getTopTimes.defaults.track,
+                        range: range || getTopTimes.defaults.range,
                         limit: limit || getTopTimes.defaults.limit
                     }
                 });
             }.extend({
                 defaults: {
                     range: "week",
-                    track: 1,
+                    track: 1, // note that topTimes api can technically NOT have a trackId, and will return a combination of all tracks
                     limit: 10
                 }
             });
@@ -193,7 +211,8 @@
             return (function(apiObj) {
                 // expose the internal functions as pointers on a new object to be sent back up the chain to be the ApiService class
                 z.defineProperty(apiObj, "getMostImproved", { get: function() { return getMostImproved; }, writeable: false });
-                z.defineProperty(apiObj, "getNextRacers", { get: function() { return getNextRacers; }, writeable: false });
+                z.defineProperty(apiObj, "getNextRace", { get: function() { return getNextRace; }, writeable: false });
+                z.defineProperty(apiObj, "getPreviousRace", { get: function() { return getPreviousRace; }, writeable: false });
                 z.defineProperty(apiObj, "getRaceDetails", { get: function() { return getRaceDetails; }, writeable: false });
                 z.defineProperty(apiObj, "getTopProskill", { get: function() { return getTopProskill; }, writeable: false });
                 z.defineProperty(apiObj, "getTopTimes", { get: function() { return getTopTimes; }, writeable: false });

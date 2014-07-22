@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Up Next With Pictures</title>
+    <title>Last Winner</title>
 
     <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
 
@@ -28,7 +28,7 @@
         /* elements */
 
         html, body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Open Sans', sans-serif;
             height: 100%;
             min-height: 100%;
             margin: 0;
@@ -48,7 +48,7 @@
         }
         #labelsWrapper {
             height: 98vh;
-            width: 14vw;
+            width: 18vw;
             /*margin-left: 1vw;*/
             /*margin-right: 1vw;*/
         }
@@ -58,7 +58,7 @@
             margin-bottom: 0.1vw;
         }
         .labelTextWrapper {
-            height: 25%;
+            height: 12.5%;
             width: 100%;
             background: linear-gradient(to bottom left, #000000, #585858);
         }
@@ -67,12 +67,13 @@
             /*font-size: 2vh;*/
             color: #FFFFFF;
         }
-        #upNextWrapper {
+        #topTimesWrapper {
             height: 98vh;
-            width: 85vw;
-            margin-left: 15vw;
+            width: 81vw;
+            /*margin-left: 19vw;*/
+            float: left;
         }
-        .upNextHeader {
+        .topTimesHeader {
             height: 12%;
             width: 92%;
             background: linear-gradient(to top right, #FFFFFF, #C9C9C9);
@@ -116,21 +117,15 @@
             -ms-transform: rotateY(180deg);
             transform: rotateY(180deg);
         }
-        .logoWrapper {
-            background-image: url('../img/clubspeed_logo.svg');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 50%;
-        }
         .portraitWrapper {
             background: linear-gradient(to bottom left, #000000, #585858);
         }
-        .portraitHeaderWrapper {
+        /*.portraitHeaderWrapper {
             height: 20%;
             width: 100%;
-        }
+        }*/
         .portraitBodyWrapper {
-            height: 80%;
+            height: 100%;
             width: 100%;
         }
         .portraitHeaderText {
@@ -166,7 +161,7 @@
             width: 30%;
         }
         .portraitTextWrapper {
-            height: 25%;
+            height: 12.5%;
             width: 100%;
             background: linear-gradient(to top right, #FFFFFF, #A9A9A9);
             /*margin-left: 0.8vw;*/
@@ -175,7 +170,7 @@
             vertical-align: middle;
             font-weight: bold;
             /*font-size: 2.0vh;*/
-            margin-right: 500px; /* not working? */
+            /*margin-right: 500px;*/
             height: 100%;
             width: 100%;
         }
@@ -321,8 +316,8 @@
             vertical-align: middle;
         }
         .perspective {
-            -webkit-perspective: 1000;
-            perspective: 1000;
+            -webkit-perspective: 4000;
+            perspective: 4000;
         }
         .hidden {
             visibility: hidden;
@@ -437,12 +432,12 @@
         @class
     */
     function GridSizes(data) {
-        this.width = 0;
-        this.height = 0;
-        this.widthMax = 96;
-        this.heightMax = 78;
-        this.numRows = 0;
-        this.numCols = 0;
+        this.width = 0; // the width of each card element
+        this.height = 0; // the height of each card element
+        this.widthMax = 96; // the percentage of the wrapper width we may use
+        this.heightMax = 78; // the percentage of the wrapper height we may use
+        this.numRows = 0; // total number of rows in the card grid
+        this.numCols = 0; // total number of columns in the card grid
         this.determineSizes(data);
     }
     z.defineProperty(GridSizes.prototype, 'widthStyle', { get: function() { return "width:" + this.width + "%;"; }, writeable: false });
@@ -452,15 +447,13 @@
         return this.style;
     };
     GridSizes.prototype.determineSizes = function(data) {
-        if (data && data.length) {
-            // var rowDividend = Math.ceil(Math.sqrt(data.length)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
-            var rowDividend = Math.ceil(Math.sqrt(data.length)) + (data.length > 4 && (Math.sqrt(data.length) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
-            this.numRows = Math.ceil(data.length / rowDividend);
-            this.numCols = data.length.roundUp(this.numRows) / this.numRows;
+        var len = 1; // last winner will always contain 1 element -- we could really hard code this data for improvements (todo)
+            var rowDividend = Math.ceil(Math.sqrt(len)) + (len > 4 && (Math.sqrt(len) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
+            this.numRows = Math.ceil(len / rowDividend);
+            this.numCols = len.roundUp(this.numRows) / this.numRows;
             this.height = this.heightMax / this.numRows;
             this.width = this.widthMax / this.numCols;
             this.fontSize = 20 / (this.numRows + 6);
-        }
     };
 </script>
 <script>
@@ -510,60 +503,70 @@
     function getData() {
         var deferred = [];
 
-        deferred.push(api.getNextRace(parameters.track, parameters.offset).then(function(data) {
+        deferred.push(api.getPreviousRace(parameters.track, parameters.offset).then(function(data) {
             var race = data.race;
             var racers = race.racers;
 
             if (racers.length > 0) {
 
-                // prepend the race.racers[].kart_number with a "#", if it exists
-                z.forEach(racers, function(x, key) {
-                    x.kart_number = (z.check.exists(x.kart_number) ? "#" + x.kart_number : "");
-                    if (z.check.exists(x.photo_url) && imageExists(x.photo_url)) {
-                        x.photo_type = "racerPhoto";
-                    }
-                    else {
-                        x.photo_type = "defaultPhoto";
-                        x.photo_url = defaultPhotoUri;
-                    }
-                });
+                // find the winner of the last race
+                var winner = data.race.winner = data.race.racers
+                    .orderBy(function(x) { return x.finish_position; })
+                    .first();
 
-                // setup the label "racer"
-                var containsKartNumber = racers.contains(function(x) { return z.check.exists(x.kart_number); });
-                var containsStartPosition = racers.contains(function(x) { return z.check.exists(x.start_position) && !z.check.exists(x.kart_number); });
-                var label = {
-                    position_display: (containsKartNumber ? containsStartPosition ? "Pos./Kart #" : "Kart #" : "Position"),
-                    nickname: "NICKNAME"
+                // apply styling to kart_number if it exists, append it to nickname
+                winner.kart_number = (z.check.exists(winner.kart_number) ? " (#" + winner.kart_number +")" : "");
+                winner.nickname += winner.kart_number;
+
+                // collect full_name based on first_name and last_name existence
+                winner.full_name = 
+                    z.check.exists(winner.first_name) ?                 // has first name?
+                        z.check.exists(winner.last_name) ?              //     has last name?
+                            winner.first_name + " " + winner.last_name  //         yes: use both
+                            : winner.first_name                         //         no: use first name
+                        : z.check.exists(winner.last_name) ?            //     no first name, has last name?
+                            winner.last_name                            //         yes: use last name
+                            : "";                                       //         no: use empty string
+                
+                // collect fastest lap_time, convert to locale
+                winner.best_lap = winner.laps
+                    .where(function(x) { return z.convert(x.lap_time, z.types.number) > 0; })
+                    .min(function(x) { return x.lap_time; })
+                    .toLocaleString(z.location.locale);
+                
+                // parse rpm, convert to locale
+                var rpm = z.convert(winner.rpm, z.types.number);
+                if (z.check.isNumber(rpm)) {
+                    winner.rpm = rpm.toLocaleString(z.location.locale);
+                }
+
+                // parse rpm_change, check for negative, positive, or zero
+                var rc = z.convert(winner.rpm_change, z.types.number);
+                if (z.check.isNumber(rc)) {
+                    rc = rc.toLocaleString(z.location.locale);
+                    winner.rpm += " (" + (rc < 0 ? "-" : rc > 0 ? "+" : "") + rc + ")";
+                }
+
+                // check for photo existence, set css classes and url
+                if (z.check.exists(winner.photo_url) && imageExists(winner.photo_url)) {
+                    winner.photo_type = "racerPhoto";
+                }
+                else {
+                    winner.photo_type = "defaultPhoto";
+                    winner.photo_url = defaultPhotoUri;
+                }
+
+                // parse starts_at date and convert
+                var tempDate = z.convert(data.race.starts_at, z.types.date);
+                if (z.check.isDate(tempDate)) {
+                    data.race.starts_at = tempDate.toLocaleString(z.location.locale);
                 }
             }
 
             // prepend race.race_number with a "#" if it exists
-            race.race_number = z.check.exists(race.race_number) ? "(#" + race.race_number + ")" : "";
+            race.race_name += z.check.exists(race.race_number) ? " (#" + race.race_number +")" : "";
 
             // pipe the mutated data back
-            return data;
-        }));
-
-        return deferred;
-    }
-
-    /**
-        Initializes, calls, and pushes API deferred objects onto an array, 
-        returning them to be collected by $.when()
-        after the initial getData() returns with a failure.
-
-        @returns {array<object>} The array of deferred objects.
-    */
-    function getFallbackData() {
-        var deferred = [];
-
-        deferred.push(api.getTracks().then(function(data) {
-            data.race = {};
-            data.race.racers = [];
-            data.race.track = data.tracks
-                .where(function(x) { return x.id == (parameters.track || "1"); })
-                .select(function(x) { return x.name; })
-                .first();
             return data;
         }));
 
@@ -587,11 +590,6 @@
         Handlebars.registerHelper('inc', function(value, options) {
             return parseInt(value) + 1;
         });
-        Handlebars.registerHelper('getName', function(index, options) {
-            // note: this may not be necessary. the API may be able to determine this ahead of time
-            var racer = options.data.root.race.racers[index];
-            return (z.convert(parameters.useRealName, z.types.boolean) ? racer.first_name + " " + racer.last_name.charAt(0) : racer.nickname);
-        });
         Handlebars.registerHelper('getYesNo', function(item, options) {
             return (z.convert(item, z.types.boolean) ? "YES" : "NO");
         });
@@ -606,23 +604,10 @@
             return src;
         });
         Handlebars.registerHelper('getFontSize', function(options) {
-            return (20 / (options.data.root.gridSizes.numRows + 6));
+            return (20 / (options.data.root.gridSizes.numRows + 8));
         });
         Handlebars.registerHelper('getRacerHeight', function(options) {
             return options.data.root.gridSizes.heightStyle;
-        });
-        Handlebars.registerHelper('getHeaderText', function(options) {
-            var offset = z.convert(parameters.offset, z.types.number);
-            if (isNaN(offset) || offset < 0) offset = 0;
-            var race = options.data.root.race;
-            switch(offset) {
-                case 0:
-                    return new Handlebars.SafeString("COMING UP:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
-                case 1:
-                    return new Handlebars.SafeString("FOLLOWING NEXT RACE:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
-                default:
-                    return new Handlebars.SafeString("IN " + offset + " RACES:&nbsp;" + (race.race_name || "(no races scheduled)") + "&nbsp;" + (race.race_number || ""));
-            }
         });
     }
     
@@ -686,7 +671,22 @@
         //   }
         // }
 
-        var portraitSrc = '' +
+    var labelSrc = '' +
+            '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
+        +   '       <div class="portraitHeaderWrapper"></div>'
+        +   '       <div class="portraitBodyWrapper" style="font-size:{{getFontSize}}vh;">'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">NICKNAME (KART#):&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FULL NAME:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">TRACK NAME:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">RACE NAME (RACE#):&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">STARTED AT:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">BEST LAP:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FIRST TIME:&nbsp;&nbsp;</div></div>'
+        +   '       </div>'
+        +   '   </div>';
+
+    var portraitSrc = '' +
             '<div class="racer lFloat" style="{{getRacerStyle}}">'
         +   '   <div class="card perspective fill roundAll hidden">'
         +   '       <div class="flippable fill roundAll">'
@@ -695,18 +695,19 @@
         +   '           </div>'
         +   '           <div class="back face fill roundAll">'
         +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{getFontSize}}vh;">'
-        +   '                   <div class="portraitHeaderWrapper roundTop">'
-        +   '                       <div class="portraitHeaderText fill vMiddle hCenter">{{getName @index}}</div>'
-        +   '                   </div>'
         +   '                   <div class="portraitBodyWrapper">'
         +   '                       <div class="portraitBodyTextWrapper lFloat">'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter startPositionText">{{start_position}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter kartNumberText">{{kart_number}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter proSkillText">{{rpm}}</div></div>'
-        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
+        +   '                           <div class="portraitTextWrapper roundTopLeft"><div class="portraitText letterPress vMiddle hCenter nicknameText">{{race.winner.nickname}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter racerNameText">{{race.winner.full_name}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter trackNameText">{{race.track}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter raceNameText">{{race.race_name}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter startsAtText">{{race.starts_at}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter bestLapText">{{race.winner.best_lap}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter proSkillText">{{race.winner.rpm}}</div></div>'
+        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter firstTimeText uppercase">{{getYesNo race.winner.is_first_time}}</div></div>'
         +   '                       </div>'
-        +   '                       <div class="portraitPictureWrapper rFloat roundBottomRight">'
-        +   '                           <div class="portraitPictureWrapperInner fill roundBottomRight {{photo_type}}" style="background-image: url({{photo_url}});"></div>'
+        +   '                       <div class="portraitPictureWrapper rFloat roundRight">'
+        +   '                           <div class="portraitPictureWrapperInner fill roundRight {{race.winner.photo_type}}" style="background-image: url({{race.winner.photo_url}});"></div>'
         +   '                       </div>'
         +   '                   </div>'
         +   '               </div>'
@@ -715,34 +716,19 @@
         +   '   </div>'
         +   '</div>';
 
-    var labelSrc = '' +
-            '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
-        +   '       <div class="portraitHeaderWrapper"></div>'
-        +   '       <div class="portraitBodyWrapper" style="font-size:{{getFontSize}}vh;">'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">START POSITION:&nbsp;&nbsp;</div></div>'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FIRST TIME:&nbsp;&nbsp;</div></div>'
-        +   '       </div>'
-        +   '   </div>'
-
     var src = '' +
             '<div id="wrapper" class="fill" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div class="spacing"></div>'
         +   '   <div id="labelsWrapper" class="lFloat">'
-        +   '       <div class="upNextHeader hidden"></div>' // for spacing purposes
-        +   '       {{#repeat gridSizes.numRows}}'
-        +               labelSrc
-        +   '       {{/repeat}}'
+        +   '       <div class="topTimesHeader hidden"></div>' // for spacing purposes
+        +           labelSrc
         +   '   </div>'
-        +   '   <div id="upNextWrapper">'
-        +   '       <div id="upNextTopWrapper" class="fill">'
-        +   '           <div class="upNextHeader parallelogram">'
-        +   '               <div class="headerText unskew textShadow vMiddle hCenter fill">{{getHeaderText}}</div>'
+        +   '   <div id="topTimesWrapper">'
+        +   '       <div id="topTimesInnerWrapper" class="fill">'
+        +   '           <div class="topTimesHeader parallelogram">'
+        +   '               <div class="headerText unskew textShadow vMiddle hCenter fill">LAST WINNER</div>'
         +   '           </div>'
-        +   '           {{#each race.racers}}'
-        +                   portraitSrc // template html for up next with picture
-        +   '           {{/each}}'
+        +               portraitSrc // template html for up next with picture
         +   '       </div>'
         +   '   </div>'
         +   '</div>';
@@ -760,13 +746,15 @@
         @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
         @returns {void}
     */
-    function applyHtmlClass(elems, cssClasses, delay) {
+    function applyHtmlClass(elemSelector, cssClasses, delay) {
         var currentDelay = 0;
         delay = delay || 0;
         if (z.check.isString(cssClasses)) {
-            cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
+            cssClasses = cssClasses.split(","); // split csv string into array
+            cssClasses.mutate(function(x) { return x.trim(); }); // mutate the array, trim all whitespace
         }
         z.assert.isArray(cssClasses);
+        var elems = $(elemSelector);
         if (elems) {
             if (elems.length) {
                 for (var i = 0; i < elems.length; i++) {
@@ -794,10 +782,10 @@
     function applyAnimations(data) {
         // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 280ms
         // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var numElems = data.race.racers.length;
+        var numElems = 1; // last winner will only ever contain 1 element
         var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 280 ? 280 : d;
-        applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
-        applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
+        applyHtmlClass('.card', ['fadeInDown', 'visible'], delay);
+        applyHtmlClass('.labelTextWrapper', ['fadeInLeft', 'visible'], delay*0.7);
         setTimeout(function() {
             // dont start the flip until the cards are finished applying fadeInDown
             applyHtmlClass($('.flippable'), 'flip', delay);
@@ -805,17 +793,6 @@
         // $('.flippable').click(function() {
         //     $(this).toggleClass('flip');
         // });
-    }
-
-    function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the collection is only done once per call
-        if (data && data.race && data.race.racers && data.race.racers.length) {
-            var racers = data.race.racers;
-            for (var i = 0; i < racers.length; i++) {
-                racers[i].rpm = parseInt(racers[i].rpm).toLocaleString(locale);
-            }
-        }
-        return data;
     }
 
     function buildPage(data) {
@@ -865,9 +842,8 @@
         @returns {object} The extended object from the argument list.
     */
     function smashArgs() {
-        var data = {}.smash(parameters).extend(api.getNextRace.defaults);
+        var data = {}.smash(parameters).extend(api.getPreviousRace.defaults);
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
-        data = localizeData(data);
         data.gridSizes = new GridSizes(data && data.race && data.race.racers ? data.race.racers : 0);
         return data;
     }
@@ -881,6 +857,7 @@
         @returns {void}
     */
     function loadPage() {
+        sw.push("Loading page");
         setupHandlebars();
         $.when.apply($, getData()).then(
             function() {
@@ -888,12 +865,7 @@
                 var data = smashArgs.apply(this, arguments);
                 log.debug(data);
                 buildPage(data);
-            }, function() {
-                // failure pipe -- grab fallback data
-                $.when.apply($, getFallbackData()).then(function() {
-                    var data = smashArgs.apply(this, arguments);
-                    buildPage(data);
-                });
+                sw.pop();
             }
         );
     }

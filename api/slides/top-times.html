@@ -392,7 +392,7 @@
             return data;
         }));
 
-        deferred.push(api.getTopTimes(parameters.range, parameters.trackId, parameters.limit).then(function(data) {
+        deferred.push(api.getTopTimes(parameters.trackId, parameters.range, parameters.limit).then(function(data) {
             // don't calculate any fewer than 5 (don't need super-giant elements on the page)
             var fastest = data.fastest;
             data.racerHeight = (96 / (fastest.length > 4 ? fastest.length : 5 )) + "%"; 
@@ -426,6 +426,14 @@
         Handlebars.registerHelper('getRacerFontSize', function(options) {
             return options.data.root.racerFontSize;
         });
+        Handlebars.registerHelper('getHeaderText', function(data, options) {
+            var header = "";
+            header += "TOP TIMES OF THE " + data.range.toUpperCase();
+            if (!data.fastest || data.fastest.length < 1) {
+                header += " (none yet!)";
+            }
+            return header;
+        });
     }
     
     /**
@@ -433,7 +441,7 @@
 
         @returns {string} The HTML template for use with Handlebars.
     */
-    function getHtml() {
+    function buildHtml(data) {
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
@@ -473,12 +481,12 @@
         //     ]
         // }
 
-        return '' +
+        var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
         +   '       <div id="headerTop" class="parallelogram">'
-        +   '           <div class="headerText unskew uppercase shadows vMiddle hCenter">TOP TIMES OF THE {{range}}</div>'
+        +   '           <div class="headerText unskew uppercase shadows vMiddle hCenter">{{getHeaderText this}}</div>'
         +   '       </div>'
         +   '       <div id="headerBottom" class="parallelogram">'
         +   '           <div class="unskew">'
@@ -502,6 +510,10 @@
         +   '       {{/each}}'
         +   '   </div>'
         +   '</div>';
+
+        var template = Handlebars.compile(src);
+        var output = template(data);
+        return output;
     }
 
     /**
@@ -563,10 +575,9 @@
         @param {object} data The object to pass to Handlebars for use with the html string.
         @returns {void}
     */
-    function buildPage(html, data) {
-        var template = Handlebars.compile(html);
-        var output = template(data);
-        $(output).appendTo("body");
+    function buildPage(data) {
+        var bodyHtml = buildHtml(data);
+        $(bodyHtml).appendTo("body");
         applyAnimations(data);
         cache[KEYS.API_DATA] = data.deepCopy();
         pollForChanges();
@@ -581,8 +592,8 @@
     */
     function pollForChanges(timeout) {
         timeout = timeout || 5000;
-        log.debug("  ---  Polling for changes: ");
         setTimeout(function() { 
+            log.debug("  ---  Polling for changes: ");
             $.when.apply($, getData()).then(
                 function() {
                     // success pipe - check for changes
@@ -611,9 +622,7 @@
         @returns {object} The extended object from the argument list.
     */
     function smashArgs() {
-        var data = {}.smash(parameters);
-        data.range = data.range || api.getTopTimes.defaults.range;
-        data.limit = data.limit || api.getTopTimes.defaults.limit;
+        var data = {}.smash(parameters).extend(api.getTopTimes.defaults);
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
         return data;
     }
@@ -621,7 +630,7 @@
     /**
         Main initialize method for the speed screen.
         Handles calling getData(), and piping that data
-        alongside the HTML template from getHtml()
+        alongside the HTML template from buildHtml()
         into the buildPage() method.
 
         @returns {void}
@@ -632,7 +641,7 @@
         $.when.apply($, getData()).then(function() {
             var data = smashArgs.apply(this, arguments);
             log.debug(data);
-            buildPage(getHtml(), data);
+            buildPage(data);
             sw.pop();
         });
     }

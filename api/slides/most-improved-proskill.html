@@ -354,9 +354,16 @@
         var deferred = [];
 
         deferred.push(api.getMostImproved(parameters.range, parameters.limit, parameters.year).then(function(data) {
-            return {
+            var r = {
                 racers: data
             };
+            z.forEach(r.racers, function(x, key, arr) {
+                var tempRpm = z.convert.toNumber(x.rpm);
+                if (z.check.isNumber(tempRpm)) {
+                    x.rpm = tempRpm.toLocaleString(z.location.locale);
+                }
+            });
+            return r;
         }));
 
         return deferred;
@@ -392,7 +399,7 @@
 
         @returns {string} The HTML template for use with Handlebars.
     */
-    function getHtml() {
+    function buildHtml(data) {
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
@@ -418,7 +425,7 @@
         //     ]
         // }
 
-        return '' +
+        var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
@@ -447,6 +454,10 @@
         +   '       {{/each}}'
         +   '   </div>'
         +   '</div>';
+
+        var template = Handlebars.compile(src);
+        var output = template(data);
+        return output;
     }
 
     /**
@@ -508,10 +519,9 @@
         @param {object} data The object to pass to Handlebars for use with the html string.
         @returns {void}
     */
-    function buildPage(html, data) {
-        var template = Handlebars.compile(html);
-        var output = template(data);
-        $(output).appendTo("body");
+    function buildPage(data) {
+        var bodyHtml = buildHtml(data);
+        $(bodyHtml).appendTo("body");
         applyAnimations(data);
         cache[KEYS.API_DATA] = data.deepCopy();
         pollForChanges();
@@ -526,8 +536,8 @@
     */
     function pollForChanges(timeout) {
         timeout = timeout || 30000;
-        log.debug("  ---  Polling for changes: ");
-        setTimeout(function() { 
+        setTimeout(function() {
+            log.debug("  ---  Polling for changes: ");
             $.when.apply($, getData()).then(
                 function() {
                     // success pipe - check for changes
@@ -549,20 +559,6 @@
     }
 
     /**
-        Localizes data.racers[].rpm based on a provided, current, or default locale.
-
-        @param {object} data The data object containing racers[].rpm to be localized.
-    */
-    function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the computation is only done once
-        if (data && data.racers) {
-            for (var i = 0; i < data.racers.length; i++) {
-                data.racers[i].rpm = parseInt(data.racers[i].rpm).toLocaleString(locale);
-            }
-        }
-    }
-
-    /**
         Collects, extends, and returns 
         all argument items into a single object.
 
@@ -572,14 +568,13 @@
     function smashArgs() {
         var data = {}.smash(parameters).extend(api.getMostImproved.defaults);
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
-        localizeData(data);
         return data;
     }
 
     /**
         Main initialize method for the speed screen.
         Handles calling getData(), and piping that data
-        alongside the HTML template from getHtml()
+        alongside the HTML template from buildHtml()
         into the buildPage() method.
 
         @returns {void}
@@ -590,7 +585,7 @@
         $.when.apply($, getData()).then(function() {
             var data = smashArgs.apply(this, arguments);
             log.debug(data);
-            buildPage(getHtml(), data);
+            buildPage(data);
             sw.pop();
         });
     }

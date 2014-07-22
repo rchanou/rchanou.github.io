@@ -17,6 +17,25 @@ function zUtil(settings) {
     this.setup(settings);
 }
 
+// // start a conversion to jquery style factory for AMD loaders
+// (function(global, factory, undefined) {
+//     if (typeof module === "object" && typeof module.exports === "object") {
+//         // check for AMD loader / nodejs
+//         module.exports = global.document ?
+//             factory(global, true) :
+//             function(w) { 
+//                 return factory(w); 
+//             };
+//     }
+//     else {
+//         factory(global);
+//     }
+// }(typeof window !== "undefined" ? window : this, function(window, noGlobal) {
+
+//     // zutil definition body should be moved here
+
+// }));
+
 (function(undefined) {
 
     var z = zUtil.prototype;
@@ -59,6 +78,22 @@ function zUtil(settings) {
     };
 
     /**
+        Returns the first non-null or non-undefined argument.
+
+        @param {...any} var_args The list of arguments to check for existence.
+        @returns {any} If no arguments exist then null, else the existing argument.
+    */
+    z.coalesce = function(/* arguments */) {
+        var args = Array.prototype.slice.call(arguments);
+        for (var i = 0; i < args.length; i++) {
+            if (z.check.exists(args[i])) {
+                return args[i];
+            }
+        }
+        return null;
+    };
+
+    /**
         Builds a deep copy of the provided source.
         
         @param {any} origSource The item from which to build the deep copy.
@@ -94,7 +129,7 @@ function zUtil(settings) {
                 arr[index] = val.trim();
             });
             var body = s.substring(s.indexOf("{")+1, s.indexOf("}")).trim();
-            var anonymous = new Function(args, body);
+            var anonymous = new Function(args, body); // may need to consider the "this" property
             // make sure we collect any properties which may have been set on the function
             return _singleCopy(source, anonymous);
         }
@@ -301,56 +336,24 @@ function zUtil(settings) {
     z.forEach = function(item, method, context) {
         var itemType = z.getType(item);
         switch(itemType) {
-            case z.types.object:
             case z.types.date:
-            case z.types.regexp:
             case z.types.function:
+            case z.types.object:
+            case z.types.regexp:
                 for (var key in item) {
                     if (item.hasOwnProperty(key)) {
-                        method.call(context, item[key], key);
+                        method.call(context, item[key], key, item);
                     }
                 }
                 break;
+            case z.types.arguments:
             case z.types.array:
                 for (var i = 0; i < item.length; i++) {
-                    method.call(context, item[i], i);
+                    method.call(context, item[i], i, item);
                 }
                 break;
         }
         return item;
-    };
-
-    /**
-        Makes a very, very rough estimate 
-        of the memory usage of a provided item.
-        
-        @param {any} o The root item for which to estimate the memory usage.
-        @returns {number} The estimated memory usage for the item.
-    */
-    z.sizeof = function(o) {
-        var l = [];     // running object list -- used to avoid counting the same object twice
-        var s = [o];    // current object property stack
-        var b = 0;      // running byte total
-
-        while (s.length) {
-            var v = s.pop();
-            if (typeof v === 'boolean') {
-                b += 4; // boolean uses 4 bytes
-            }
-            else if (typeof v === 'string') {
-                b += v.length * 2; // each string char uses 2 bytes
-            }
-            else if ( typeof v === 'number' ) {
-                b += 8; // number uses 8 bytes
-            }
-            else if (typeof v === 'object' && l.indexOf(v) === -1) {
-                l.push(v);          // push object to list
-                for(i in v) {       // each property in the object
-                    s.push(v[i]);   // push each property in the object to the object property stack
-                }
-            }
-        }
-        return b;
     };
 
     /**
@@ -468,7 +471,8 @@ function zUtil(settings) {
             , "matcher": /^(?:[(\s*]*)?(\w+(?:,\s*\w+)*)?(?:[)\s*]*)?=>(?:\s*)?(.*)$/
         };
         z.types = {
-            "array":        z.getType([])
+            "arguments":    z.getType(arguments) 
+            , "array":      z.getType([])
             , "boolean":    z.getType(true)
             , "date":       z.getType(new Date())
             , "function":   z.getType(function(){})
@@ -1383,6 +1387,17 @@ function zUtil(settings) {
     };
 
     /**
+        Asserts that the provided value is a date type.
+        
+        @param {any} value The value on which to check the assertion.
+        @returns {boolean} True, if the assertion passes.
+        @throws {error} An error is thrown if the assertion fails.
+    */
+    var isDate = function(value) {
+        assert(function() { return z.check.isDate(value); });
+    };
+
+    /**
         Asserts that the provided value is a function type.
         
         @param {any} value The value on which to check the assertion.
@@ -1522,6 +1537,7 @@ function zUtil(settings) {
                 z.defineProperty(newAsserter, "exists", { get: function() { return exists; }, writeable: false });
                 z.defineProperty(newAsserter, "isArray", { get: function() { return isArray; }, writeable: false });
                 z.defineProperty(newAsserter, "isBoolean", { get: function() { return isBoolean; }, writeable: false });
+                z.defineProperty(newAsserter, "isDate", { get: function() { return isDate; }, writeable: false });
                 z.defineProperty(newAsserter, "isFunction", { get: function() { return isFunction; }, writeable: false });
                 z.defineProperty(newAsserter, "isNonEmptyArray", { get: function() { return isNonEmptyArray; }, writeable: false });
                 z.defineProperty(newAsserter, "isNumber", { get: function() { return isNumber; }, writeable: false });
@@ -1557,11 +1573,10 @@ function zUtil(settings) {
     var check = function() {};
 
     /**
-        Checks that all of the arguments provided for a method
-        are neither null nor undefined.
+        Checks that all of the arguments provided for a method existing.
         
         @param {string} var_args The arguments provided to a method.
-        @returns {boolean} True if the check passes, false if not.
+        @returns {boolean} True, if the check passes.
     */
     check.argsNotNull = function() {
         for (var i = 0; i < arguments.length; i++) {
@@ -1576,7 +1591,8 @@ function zUtil(settings) {
         Checks that the provided value is not equal to null or undefined.
         
         @param {any} value The value to check for null or undefined values.
-        @returns {boolean} True if the check passes, false if not.
+        @returns {boolean} True, if the check passes.
+        @throws {error} An error is thrown if the value is equal to null or undefined.
     */
     check.exists = function(value) {
         return value != null;
@@ -1585,7 +1601,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is an array type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isArray = function(value) {
@@ -1595,7 +1611,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is a boolean type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isBoolean = function(value) {
@@ -1603,9 +1619,19 @@ function zUtil(settings) {
     };
 
     /**
+        Checks that the provided value is a date type.
+        
+        @param {any} value The value on which to check.
+        @returns {boolean} True if the check passes, false if not.
+    */
+    check.isDate = function(value) {
+        return z.getType(value) === z.types.date;
+    };
+
+    /**
         Checks that the provided value is a function type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isFunction = function(value) {
@@ -1615,7 +1641,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is a generator function type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isGeneratorFunction = function(value) {
@@ -1625,11 +1651,11 @@ function zUtil(settings) {
     /**
         Checks that the provided value is an iterable type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isIterable = function(value) {
-        if (value == null) return false;
+        if (!z.check.exists(value)) return false;
         var iterator = value[z.symbols.iterator] || value.prototype[z.symbols.iterator]; // will this always be on prototype?
         return z.getType(iterator) === z.types.function;
     };
@@ -1637,17 +1663,17 @@ function zUtil(settings) {
     /**
         Checks that the provided value is a non-empty array.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isNonEmptyArray = function(value) {
-        return (value != null && z.getType(value) === z.types.array && value.length > 0);
+        return (z.check.exists(value) && z.getType(value) === z.types.array && value.length > 0);
     };
 
     /**
         Checks that the provided value is a number type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isNumber = function(value) {
@@ -1657,7 +1683,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is an object type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isObject = function(value) {
@@ -1667,7 +1693,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is a reference type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isReference = function(value) {
@@ -1690,7 +1716,7 @@ function zUtil(settings) {
         the same type of either arrays, functions, or objects.
         
         @param {...array|object|function} var_args The items to check for smashability.
-        @returns {boolean} True, if the check passes, false if not.
+        @returns {boolean} True if the check passes, false if not.
     */
     check.isSmashable = function(/* ... arguments */) {
         var args = Array.prototype.slice.call(arguments);
@@ -1719,7 +1745,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is a string type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isString = function(value) {
@@ -1729,7 +1755,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is a provided type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @param {string} type The name of the type for which to check.
         @returns {boolean} True if the check passes, false if not.
     */
@@ -1740,7 +1766,7 @@ function zUtil(settings) {
     /**
         Checks that the provided value is a value (non-reference) type.
         
-        @param {any} value The value on which to check the check.
+        @param {any} value The value on which to check.
         @returns {boolean} True if the check passes, false if not.
     */
     check.isValue = function(value) {
@@ -1764,12 +1790,12 @@ function zUtil(settings) {
     License: MIT
     See license.txt for full license text.
 */
-(function(z, undefined) {
+;(function(z, undefined) {
 
     z.classes = z.classes || {};
 
     /**
-        Executes an conversion for a given source and type.
+        Executes a conversion for a given source and type.
         
         @param {any} source The item to convert.
         @param {string} toType The type to which to convert.
@@ -1780,18 +1806,19 @@ function zUtil(settings) {
         z.assert.isString(toType);
         switch (toType) {
             case z.types.boolean: return toBoolean(source);
+            case z.types.date: return toDate(source);
             case z.types.number: return toNumber(source);
         }
     };
 
     /**
-        Executes an conversion to boolean for a given source.
+        Executes a conversion to boolean for a given source.
         
         @param {any} source The item to convert.
         @returns {boolean} The converted source.
     */
     var toBoolean = function(source) {
-        if (source && z.check.isFunction(source.toBoolean)) {
+        if (z.check.exists(source) && z.check.isFunction(source.toBoolean)) {
             return source.toBoolean(); // allow override to be supplied directly on the source object
         }
         switch (z.getType(source)) {
@@ -1814,13 +1841,33 @@ function zUtil(settings) {
     };
 
     /**
-        Executes an conversion to a number for a given source.
+        Executes a conversion to a date for a given source.
+        
+        @param {any} source The item to convert.
+        @returns {date} The converted source.
+    */
+    var toDate = function(source) {
+        if (z.check.exists(source) && z.check.isFunction(source.toDate)) {
+            return source.toDate();
+        }
+        switch (z.getType(source)) {
+            case z.types.date:
+                return source;
+            case z.types.string:
+                return new Date(Date.parse(source));
+            default:
+                return new Date(Date.parse(source.toString()));
+        }
+    };
+
+    /**
+        Executes a conversion to a number for a given source.
         
         @param {any} source The item to convert.
         @returns {boolean} The converted source.
     */
     var toNumber = function(source) {
-        if (source && z.check.isFunction(source.toNumber)) {
+        if (z.check.exists(source) && z.check.isFunction(source.toNumber)) {
             return source.toNumber(); // allow override to be supplied directly on the source object
         }
         switch (z.getType(source)) {
@@ -1829,8 +1876,7 @@ function zUtil(settings) {
             default:
                 return +source;
         }
-    }
-
+    };
 
     /**
         A wrapper class used to hold and execute different assertion methods.
@@ -1866,6 +1912,7 @@ function zUtil(settings) {
                     @returns {any} The extended item.
                 */
                 z.defineProperty(newConverter, "toBoolean", { get: function() { return toBoolean; }, writeable: false });
+                z.defineProperty(newConverter, "toDate", { get: function() { return toDate; }, writeable: false });
                 z.defineProperty(newConverter, "toNumber", { get: function() { return toNumber; }, writeable: false });
                 return newConverter;
             })(convert);

@@ -38,7 +38,7 @@
             -webkit-font-smoothing: antialiased;
         }
         html, body :hover {
-            cursor: default;
+            cursor: none;
         }
         #wrapper {
             min-height: 100%;
@@ -140,18 +140,20 @@
         #results .racer .racerText {
             width: 100%;
             height: 100%;
-            vertical-align: middle;
             font-weight: bold;
             /*font-size: 4vmin;*/
         }
         #results .racer .raceNumber {
-            width: 15%;
+            width: 13%;
         }
         #results .racer .raceName {
-            width: 65%;
+            width: 38%;
+        }
+        #results .racer .raceStart {
+            width: 30%;
         }
         #results .racer .usedSpots {
-            width: 17%;
+            width: 16%;
         }
         .racerTextWrapper {
             margin-right: -6px; /* hackish css to get the parallelograms to overlap smoothly */
@@ -192,6 +194,15 @@
         }
         .padLeft5 {
             padding-left: 5vmin;
+        }
+        .padRight5 {
+            padding-right: 5vmin;
+        }
+        .mrgLeft5 {
+            margin-left: 5vmin;
+        }
+        .mrgRight5 {
+            margin-right: 500px;
         }
         .centerText {
             text-align: center;
@@ -406,8 +417,9 @@
                     .take(z.convert(parameters.limit, z.types.number) || 10)
                     .select(function(x) { return x.race; });
 
-                // calculate availability header
                 z.forEach(data.races, function(val, key) {
+
+                    // calculate availability header
                     var totalSpots = z.convert(val.total_spots, z.types.number);
                     var usedSpots = z.check.exists(val.racers) ? val.racers.length : 0;
                     if (usedSpots < totalSpots) {
@@ -416,13 +428,23 @@
                     else {
                         val.used_spots_text = "FULL";
                     }
+
+                    // parse starts_at date and convert
+                    var tempDate = z.convert(val.starts_at, z.types.date);
+                    if (z.check.isDate(tempDate)) {
+                        val.starts_at = tempDate.toLocaleString(z.location.locale);
+                    }
+
+                    // apply styling to the race_number
+                    val.race_number = (z.check.exists(val.race_number) ? "#" + val.race_number : "");
                 });
 
                 // add the label "race"
                 data.races.unshift({
                     race_number: "Race #",
                     race_name: "Race Name",
-                    used_spots_text: "Used Spots"                    
+                    used_spots_text: "Used Spots",
+                    starts_at: "Start Time"                 
                 });
 
                 // calculate the dynamic css styling
@@ -467,41 +489,56 @@
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
-        //     "trackId": "1",
-        //     "speedLevel": "1",
-        //     "range": "day",
-        //     "backgroundUrl": "./temp/gold.jpg",
+        //     "debug": "1",
+        //     "track": 1,
         //     "id": "1",
-        //     "name": "Austin",
-        //     "fastest": [
+        //     "name": "Full Throttle Track",
+        //     "races": [
         //         {
-        //             "racer_id": "10123556",
-        //             "nickname": "harold chovanetz",
-        //             "first_name": "Harold",
-        //             "rpm": "1264",
-        //             "last_name": "Chovanetz",
-        //             "lap_time": "23.472",
-        //             "lap_number": "14",
-        //             "speed_level": "1",
-        //             "track_id": "1",
-        //             "track_name": "Austin",
-        //             "timestamp": "2014-07-07 13:26:00"
+        //             "race_number": "Race #",
+        //             "race_name": "Race Name",
+        //             "used_spots_text": "Used Spots"
         //         },
         //         {
-        //             "racer_id": "10123563",
-        //             "nickname": "Austin Casper",
-        //             "first_name": "Austin",
-        //             "rpm": "1238",
-        //             "last_name": "Casper",
-        //             "lap_time": "23.732",
-        //             "lap_number": "14",
-        //             "speed_level": "1",
+        //             "id": "66221",
         //             "track_id": "1",
-        //             "track_name": "Austin",
-        //             "timestamp": "2014-07-07 13:17:00"
+        //             "track": "Full Throttle Track",
+        //             "starts_at": "2014-08-25 13:30:00.000",
+        //             "heat_type_id": "1",
+        //             "heat_status_id": "0",
+        //             "speed_level_id": "1",
+        //             "speed_level": "Adult Speed Level",
+        //             "win_by": "laptime",
+        //             "race_by": "minutes",
+        //             "duration": "10",
+        //             "race_name": "8 Min Race",
+        //             "race_number": "21",
+        //             "racers": [],
+        //             "total_spots": "10",
+        //             "used_spots_text": "0 / 10"
+        //         },
+        //         {
+        //             "id": "66222",
+        //             "track_id": "1",
+        //             "track": "Full Throttle Track",
+        //             "starts_at": "2014-08-25 13:40:00.000",
+        //             "heat_type_id": "41",
+        //             "heat_status_id": "0",
+        //             "speed_level_id": "2",
+        //             "speed_level": "Youth Speed Level",
+        //             "win_by": "laptime",
+        //             "race_by": "minutes",
+        //             "duration": "10",
+        //             "race_name": "8 Min Youth Heat",
+        //             "race_number": "22",
+        //             "racers": [],
+        //             "total_spots": "10",
+        //             "used_spots_text": "0 / 10"
         //         }
-        //     ]
-        // }
+        //     ],
+        //     "racerHeight": "8.727272727272727%",
+        //     "racerFontSize": "3.8181818181818183vh"
+        // } 
 
         return '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
@@ -525,9 +562,10 @@
         +   '   <div id="results">'
         +   '       {{#each races}}'
         +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{getRacerHeight}}; font-size: {{getRacerFontSize}};">'
-        +   '               <div class="racerTextWrapper raceNumber parallelogram centerText"><div class="racerText vMiddle unskew">{{race_number}}</div></div>'
-        +   '               <div class="racerTextWrapper raceName parallelogram"><div class="racerText unskew vMiddle padLeft5">{{race_name}}</div></div>'
-        +   '               <div class="racerTextWrapper usedSpots parallelogram centerText"><div class="racerText vMiddle unskew">{{used_spots_text}}</div></div>'
+        +   '               <div class="racerTextWrapper raceNumber parallelogram"><div class="racerText unskew vMiddle hCenter">{{race_number}}</div></div>'
+        +   '               <div class="racerTextWrapper raceName parallelogram">  <div class="racerText unskew vMiddle hLeft mrgLeft5">{{race_name}}</div></div>'
+        +   '               <div class="racerTextWrapper raceStart parallelogram"> <div class="racerText unskew vMiddle hCenter">{{starts_at}}</div></div>'
+        +   '               <div class="racerTextWrapper usedSpots parallelogram"> <div class="racerText unskew vMiddle hCenter">{{used_spots_text}}</div></div>'
         +   '           </div>'
         +   '       {{/each}}'
         +   '   </div>'
@@ -611,8 +649,8 @@
     */
     function pollForChanges(timeout) {
         timeout = timeout || 5000;
-        log.debug("  ---  Polling for changes: ");
         setTimeout(function() { 
+            log.debug("  ---  Polling for changes: ");
             $.when.apply($, getData()).then(
                 function() {
                     // success pipe - check for changes
