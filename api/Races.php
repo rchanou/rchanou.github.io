@@ -954,14 +954,15 @@ EOD;
 				$settings = new Settings();
 				$pictureSettings = $settings->getSettings('MainEngine', array('CustomerPicturesPath', 'CustIDPicPath'));
 				$this->CustomerPicturesPath = $pictureSettings['settings']['CustomerPicturesPath']['SettingValue'];
-				$this->CustIDPicPath = $pictureSettings['settings']['CustIDPicPath']['SettingValue'];
+				$this->CustIDPicPath = $pictureSettings['settings']['CustIDPicPath']['SettingValue']; // Using the URL you called the API with instead of this
 			}
 		
 			// See if this customer has a picture
 			$customerPictureURL = null;
 			$customerPicturePath = $this->CustomerPicturesPath . '\\' . $racer_id . '.jpg';
+			$host = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http://' . $_SERVER['HTTP_HOST'] : 'https://' . $_SERVER['HTTP_HOST'];
 			if(file_exists($customerPicturePath)) {
-				$customerPictureURL = 'http://' . $this->CustIDPicPath . '/CustomerPictures/' . $racer_id . '.jpg'; // Path hardcoded in Club Speed
+				$customerPictureURL = $host . '/CustomerPictures/' . $racer_id . '.jpg'; // Path hardcoded in Club Speed
 			}
 			
 			return $customerPictureURL;
