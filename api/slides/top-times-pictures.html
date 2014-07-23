@@ -668,7 +668,18 @@
         //     }
         // } 
 
-        var portraitSrc = '' +
+    var labelSrc = '' +
+            '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
+        +   '       <div class="portraitHeaderWrapper"></div>'
+        +   '       <div class="portraitBodyWrapper" style="font-size:{{getFontSize}}vh;">'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">LAP TIME:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
+        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FIRST TIME:&nbsp;&nbsp;</div></div>'
+        +   '       </div>'
+        +   '   </div>';
+
+    var portraitSrc = '' +
             '<div class="racer lFloat" style="{{getRacerStyle}}">'
         +   '   <div class="card perspective fill roundAll hidden">'
         +   '       <div class="flippable fill roundAll">'
@@ -682,8 +693,8 @@
         +   '                   </div>'
         +   '                   <div class="portraitBodyWrapper">'
         +   '                       <div class="portraitBodyTextWrapper lFloat">'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate startPositionText">{{start_position}}</div></div>'
-        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate kartNumberText">{{kart_number}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate lapTimeText">{{lap_time}}</div></div>'
+        +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate speedLevelText">{{speed_level}}</div></div>'
         +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter truncate proSkillText">{{rpm}}</div></div>'
         +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter truncate firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
         +   '                       </div>'
@@ -697,16 +708,7 @@
         +   '   </div>'
         +   '</div>';
 
-    var labelSrc = '' +
-            '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
-        +   '       <div class="portraitHeaderWrapper"></div>'
-        +   '       <div class="portraitBodyWrapper" style="font-size:{{getFontSize}}vh;">'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">LAP TIME:&nbsp;&nbsp;</div></div>'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
-        +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FIRST TIME:&nbsp;&nbsp;</div></div>'
-        +   '       </div>'
-        +   '   </div>';
+    
 
     var src = '' +
             '<div id="wrapper" class="fill" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
