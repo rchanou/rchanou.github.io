@@ -3,6 +3,11 @@
 class Version
 {
     public $restler;
+		
+		// Versions of various applications and modules
+		public $speedscreenVersion = '0.5.0';
+		public $apiVersion = '1.1.10b';
+		public $apiLastUpdatedAt = '7/7/2014 10:52';
 
     function __construct(){
         header('Access-Control-Allow-Origin: *'); //Here for all /say
@@ -49,8 +54,8 @@ class Version
 
     protected function api()
     {
-        $output["CurrentVersion"] = "1.1.10b";
-        $output["LastUpdated"] = "7/7/2014 10:52";
+        $output["CurrentVersion"] = $this->apiVersion;
+        $output["LastUpdated"] = $this->apiLastUpdatedAt;
         return $output;
     }
 

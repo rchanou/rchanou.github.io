@@ -226,6 +226,10 @@ class Channel
 
 				// Hash the lineup
 				$output['hash'] = md5(serialize($output));
+				
+				// Include speedscreen version
+				$version = new Version();
+				$output['speedscreenVersion'] = $version->speedscreenVersion;
 
         return $output;
     }
