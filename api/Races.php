@@ -997,12 +997,11 @@ EOD;
      * @return string (url to photo) or null (no photo found)
      */
 		public function getCustomerPhoto($racer_id) {
-			if(@empty($this->CustomerPicturesPath) || @empty($this->CustIDPicPath)) {
+			if(empty($this->CustomerPicturesPath)) {
 				// Get the path and URL to the customer pictures
 				$settings = new Settings();
 				$pictureSettings = $settings->getSettings('MainEngine', array('CustomerPicturesPath', 'CustIDPicPath'));
-				$this->CustomerPicturesPath = $pictureSettings['settings']['CustomerPicturesPath']['SettingValue'];
-				$this->CustIDPicPath = $pictureSettings['settings']['CustIDPicPath']['SettingValue']; // Using the URL you called the API with instead of this
+				$this->CustomerPicturesPath = @$pictureSettings['settings']['CustomerPicturesPath']['SettingValue'];
 			}
 		
 			// See if this customer has a picture
