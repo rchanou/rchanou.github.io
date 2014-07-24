@@ -32,6 +32,7 @@ class Races
         if($race_id == 'total_laps') return $this->total_laps();
         if($race_id == 'lap_number') return $this->lap_number($sub);
         if($race_id == 'scoreboard') return $this->scoreboard(@$_GET['track_id'], @$_GET['heat_id']);
+				if($race_id == 'copy') return $this->copy(@$_GET['from'], @$_GET['to'], @$_GET['track_id']);
         if($race_id == 'races') return $this->races();
         if($race_id == 'since') return $this->since();
         if($race_id == 'final_positions') return $this->final_positions();
@@ -56,6 +57,53 @@ class Races
             return $this->race($race_id);
         }
     }
+
+		public function copy($fromDate = null, $toDate = null, $track_id = null, $options = null) {
+			if($_REQUEST['key'] != $GLOBALS['privateKey'])
+				throw new RestException(412,'Not authorized');
+
+			// TODO Options? (only web or only A&D)
+			// TODO Accept heat numbers to copy just those?
+			
+			// Setup incoming variables
+			if(empty($fromDate)) throw new RestException(412, 'A valid "from" date was not given.');
+			if(empty($toDate))   throw new RestException(412, 'A valid "to" date was not given.');
+			if(empty($track_id)) throw new RestException(412, 'A valid "track id" was not given.');
+			
+			// Get "from" races
+			$tsql = "SELECT TrackNo, HeatTypeNo, LapsOrMinutes, WinBy, RaceBy, ScheduleDuration, PointsNeeded, SpeedLevel, HeatColor, MemberOnly, ScoreID, RacersPerHeat, CadetsPerHeat, ScheduledTime FROM HeatMain WHERE EventRound IS NULL AND ScheduledTime BETWEEN ? AND ? AND TrackNo = ?";
+			$fromStartOfDay = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($fromDate));
+			$fromEndOfDay   = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($fromDate));
+			$tsql_params = array($fromStartOfDay, $fromEndOfDay, $track_id);
+			$templateRaces = $this->run_query($tsql, $tsql_params);
+			
+			// Build and insert each new race
+			foreach($templateRaces as $templateRace) {
+				// Modify template into "new" race to insert
+				$race = $templateRace;
+				$race['ScheduledTime'] = $toDate . substr($race['ScheduledTime'], -13);
+				$race['HeatStatus'] = 0;
+				$race['Begining'] = null;
+				$race['Finish'] = null;
+				$race['NumberOfReservation'] = 0;
+				$race['NumberOfCadetReservation'] = 0;
+				
+				// Insert race
+				$fields = $placeholders = $params = array();
+				foreach($race as $field => $data) {
+					$fields[] = $field;
+					$placeholders[] = '?';
+					$params[] = $data;
+				}
+				$tsql = "INSERT INTO HeatMain ( " . implode(',', $fields) . " ) OUTPUT INSERTED.HeatNo VALUES ( " . implode(',', $placeholders) . " )";
+				//$result = $this->run_query($tsql, $params);
+			}
+			
+			// TODO Let MainEngine know to refresh the schedule
+			
+			return array('result' => 'success');
+				
+		}
 
     protected function total_laps() {
         $tsql = "SELECT COUNT(*) AS total_laps FROM RacingData";
@@ -839,7 +887,7 @@ EOD;
 
         //$tsql = 'GetNextHeatRacersInfo';
         $tsql_params = array(&$heatId);
-        $tsql = 'Select hd.CustID id, hd.RPMDiff AS rpm_change, hd.LineUpPosition start_position, CASE autono WHEN -1 then hd.historyautono ELSE autono END AS kart_number, hd.RPM rpm, case when c.TotalRaces > 1 then 1 else 0 end is_first_time, hd.FinishPosition finish_position, c.RacerName nickname, c.FName first_name, c.LName last_name From HeatMain hm inner join HeatTypes ht on hm.HeatTypeNo = ht.HeatTypeNo inner join SpeedLevel sl on hm.SpeedLevel = sl.SpeedLevel inner join Tracks t on hm.trackno = t.TrackNo inner join HeatDetails hd on hm.heatno = hd.heatno inner join Customers c on hd.CustID = c.CustID Where hd.HeatNo = ? order by hd.LineUpPosition';
+        $tsql = 'Select hd.CustID id, hd.RPMDiff AS rpm_change, hd.LineUpPosition start_position, CASE autono WHEN -1 then hd.historyautono ELSE autono END AS kart_number, hd.RPM rpm, case when c.TotalRaces > 1 then 0 else 1 end is_first_time, hd.FinishPosition finish_position, c.RacerName nickname, c.FName first_name, c.LName last_name From HeatMain hm inner join HeatTypes ht on hm.HeatTypeNo = ht.HeatTypeNo inner join SpeedLevel sl on hm.SpeedLevel = sl.SpeedLevel inner join Tracks t on hm.trackno = t.TrackNo inner join HeatDetails hd on hm.heatno = hd.heatno inner join Customers c on hd.CustID = c.CustID Where hd.HeatNo = ? order by hd.LineUpPosition';
         $rowsRacers = $this->run_query($tsql, $tsql_params);
         $output['race']['racers'] = $rowsRacers;
 
@@ -949,7 +997,7 @@ EOD;
      * @return string (url to photo) or null (no photo found)
      */
 		public function getCustomerPhoto($racer_id) {
-			if(empty($this->CustomerPicturesPath) || empty($this->CustIDPicPath)) {
+			if(@empty($this->CustomerPicturesPath) || @empty($this->CustIDPicPath)) {
 				// Get the path and URL to the customer pictures
 				$settings = new Settings();
 				$pictureSettings = $settings->getSettings('MainEngine', array('CustomerPicturesPath', 'CustIDPicPath'));
