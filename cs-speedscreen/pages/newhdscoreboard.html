@@ -20,10 +20,10 @@
     <div class="headerTextBox ellipsis">
         <span ng-if="scoreboardState == 'driver_lineup'">Racer Lineup - {{nextRace.race.race_name}} -
             <span ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at | amDateFormat:'H:mm'}}</span>
-            <span ng-if="showHeatNumberInsteadOfRaceTime">#{{nextRace.race.id}}</span>
+            <span ng-if="showHeatNumberInsteadOfRaceTime">#{{nextRace.race.id | formatHeatNumber}}</span>
         </span>
-        <span ng-if="scoreboardState == 'race_ongoing'">{{currentScoreboard.race.race_name}}</span>
-        <span ng-if="scoreboardState == 'final_results'">{{lastRaceScoreboard.race.race_name}} - Final Results</span>
+        <span ng-if="scoreboardState == 'race_ongoing'">{{currentScoreboard.race.race_name}}<span ng-if="showHeatNumberInsteadOfRaceTime"> - #{{currentScoreboard.race.id | formatHeatNumber}}</span></span>
+        <span ng-if="scoreboardState == 'final_results'">{{lastRaceScoreboard.race.race_name}}<span ng-if="showHeatNumberInsteadOfRaceTime"> - #{{lastRaceScoreboard.race.id | formatHeatNumber}}</span> - Final Results</span>
         <span ng-if="scoreboardState == 'no_races'">No Races</span>
         <span ng-if="scoreboardState == 'last_few_heats'">Recent Race Results</span>
         <span ng-if="mode == 'simulation'">Race Simulation</span>
@@ -224,7 +224,7 @@
     <div class="nextRacersHeader" ng-if="!showHeatNumberInsteadOfRaceTime">Start Time</div>
     <div class="nextRacersContentBig" ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at | amDateFormat:'H:mm'}}</div>
     <div class="nextRacersHeader" ng-if="showHeatNumberInsteadOfRaceTime">Heat Number</div>
-    <div class="nextRacersContentBig" ng-if="showHeatNumberInsteadOfRaceTime">{{nextRace.race.id}}</div>
+    <div class="nextRacersContentBig" ng-if="showHeatNumberInsteadOfRaceTime">{{nextRace.race.id | formatHeatNumber}}</div>
 
     <div class="nextRacersHeader">Grid Lineup</div>
     <div style="width: 100%;">
@@ -235,7 +235,7 @@
     <div style="width: 100%;" ng-repeat="racer in nextRacers | orderObjectBy: 'start_position'">
         <span class="comingUpNextPosContent">{{racer.start_position}}</span>
         <span class="comingUpNextRacerNameContent ellipsis">{{racer.nickname}}</span>
-        <span class="comingUpNextSpecialSymbolContent"><img src="images/firsttime.png" ng-if="racer.is_first_time" class="comingUpNextStar"></span>
+        <span class="comingUpNextSpecialSymbolContent"><!--<img src="images/firsttime.png" ng-if="racer.is_first_time" class="comingUpNextStar">--></span>
     </div>
 </div>
 <!-- ## END COMING UP NEXT SIDE PANEL - LIVE DATA ## -->

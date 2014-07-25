@@ -8,3 +8,15 @@ speedScreenDemoApp.config(function($routeProvider) {
         .when('/:channel_id', {templateUrl : 'pages/channel.html', controller  : 'channelController'})
         .when('/:channel_id/:channel_options', {templateUrl : 'pages/channel.html', controller  : 'channelController'});
 });
+
+speedScreenDemoApp.filter('formatHeatNumber', function() {
+    return function(heatNumber)
+    {
+        if (typeof heatNumber == "undefined")
+        {
+            return "";
+        }
+        heatNumber = '00' + heatNumber.toString();
+        return heatNumber.slice(-2);
+    }
+});

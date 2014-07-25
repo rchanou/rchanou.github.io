@@ -791,7 +791,17 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
         }
 
         $tsql = <<<EOD
+<<<<<<< HEAD
 		SELECT DISTINCT TOP ($limit) MAX(rd.CustID) AS CustID, MAX(c.FName) AS FirstName, MAX(c.LName) AS LastName, MAX(c.RacerName) AS RacerName, MAX(c.RPM) AS rpm, MIN(rd.LTime) AS LTime, MAX(rd.TimeStamp) AS TimeStamp, MAX(rd.LapNum) AS LapNum, MAX(hm.TotalRaces) AS TotalRaces, MAX(hm.SpeedLevel) AS SpeedLevel, MAX(hm.TrackNo) AS TrackNo, MIN(t.Description) AS TrackName FROM RacingData AS rd LEFT OUTER JOIN Customers AS c ON c.CustID = rd.CustID LEFT OUTER JOIN Tracks t ON TrackNo = t.TrackNo LEFT OUTER JOIN HeatMain AS hm ON hm.HeatNo = rd.HeatNo WHERE  (rd.LTime <> 0) AND (rd.IsBadTime <> 'true') $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate GROUP BY c.RacerName ORDER BY LTime
+=======
+		SELECT DISTINCT TOP ($limit) MAX(rd.CustID) AS CustID, MAX(c.FName) AS FirstName, MAX(c.LName) AS LastName, MAX(c.RacerName) AS RacerName, MAX(c.RPM) AS rpm, MIN(rd.LTime) AS LTime, MAX(rd.TimeStamp) AS TimeStamp, MAX(rd.LapNum) AS LapNum, MAX(hm.SpeedLevel) AS SpeedLevel, MAX(hm.TrackNo) AS TrackNo, MIN(t.Description) AS TrackName, MAX(c.TotalRaces) AS TotalRaces
+		FROM         RacingData AS rd LEFT OUTER JOIN
+							  Customers AS c ON c.CustID = rd.CustID LEFT OUTER JOIN Tracks t ON TrackNo = t.TrackNo LEFT OUTER JOIN
+							  HeatMain AS hm ON hm.HeatNo = rd.HeatNo 
+		WHERE  (rd.LTime <> 0) AND (rd.IsBadTime <> 'true') $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate
+		GROUP BY c.RacerName
+		ORDER BY LTime
+>>>>>>> FETCH_HEAD
 EOD;
 
         $rows = $this->run_query($tsql, $tsql_params);
@@ -806,7 +816,11 @@ EOD;
                 'last_name' => $row['LastName'],
                 'lap_time' => round($row['LTime'] / 1000, 3),
                 'lap_number' => $row['LapNum'],
+<<<<<<< HEAD
 								'total_races' => $row['TotalRaces'],
+=======
+                'total_races' => $row['TotalRaces'],
+>>>>>>> FETCH_HEAD
                 'speed_level' => $row['SpeedLevel'],
                 'track_id' => $row['TrackNo'],
                 'track_name' => $row['TrackName'],
@@ -857,12 +871,12 @@ EOD;
                 if($row['RaceBy'] == 0) {
                     $tsql = "select top 1 datediff(ms, timestamp, current_timestamp) as time from racingdata where heatno = ? order by timestamp";
                     $raceTimeInSeconds = $this->run_query($tsql, array(&$heatId));
-                    $raceTimeInSeconds = $raceTimeInSeconds[0]['time'] / 1000;
+                    $raceTimeInSeconds = isset($raceTimeInSeconds[0]) && array_key_exists('time',$raceTimeInSeconds[0]) ? $raceTimeInSeconds[0]['time'] / 1000 : null;
                     //TODO: Evaluate this functionality. At the moment the details are being handled by the user of the API.
                 } else {
                     $tsql = "select top 1 datediff(ms, timestamp, current_timestamp) as time from racingdata where heatno = ? order by timestamp";
                     $raceTimeInSeconds = $this->run_query($tsql, array(&$heatId));
-                    $raceTimeInSeconds = $raceTimeInSeconds[0]['time'] / 1000;
+                    $raceTimeInSeconds = isset($raceTimeInSeconds[0]) && array_key_exists('time',$raceTimeInSeconds[0]) ? $raceTimeInSeconds[0]['time'] / 1000 : null;
                 }
 
             } else {

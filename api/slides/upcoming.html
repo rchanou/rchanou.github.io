@@ -3,7 +3,7 @@
 <head>
     <title>Upcoming Races</title>
     
-    <script src ="../js/handlebars-latest.js"></script>
+    <script src="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
     <script src="../js/zutil.debug.js"></script>
     <script>
@@ -22,14 +22,14 @@
         var equals = z.equals;
     </script>
     <script src="../js/clubspeed-classes-api.js"></script>
+    <script src="../js/clubspeed-helpers-css.js"></script>
 
-    <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
     <style type="text/css">
         
         /* elements */
 
         html, body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             height: 100%;
             min-height: 100%;
             margin: 0;
@@ -123,7 +123,7 @@
             margin-left: 2vw;
             margin-right: 2vw;
             height: 79vh;
-            width: 96vw;
+            width: 95vw;
             opacity: 0.90;
         }
         #results .racer {
@@ -364,18 +364,8 @@
 <script>
 
     /**
-        Constant variable setup
-    */
-
-    var KEYS = {
-        API_DATA: "apiDataKey"
-    };
-    
-
-    /**
         Window variable setup
     */
-
     // if current document.location.hostname does not exist, or is "localhost", 
     // then use a fallback for api root (in this case, ftikcincinnati)
     // otherwise, default to the current origin
@@ -383,9 +373,7 @@
         url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
-    var cache = {};
-    // var params {}.extend(parameters).deepCopy();
-
+    var cache = {}; // for use with polling comparison
 
     /**
         Initializes, calls, and pushes API deferred objects onto an array, returning them to be collected by $.when();
@@ -396,7 +384,11 @@
 
         var deferred = [];
 
-        deferred.push(api.getTracks().then(function(data) {
+        deferred.push(api.getTracks({
+            // no additional data required
+        }).then(function(data) {
+            cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
+
             var currentTrack = z.convert(parameters.trackId, z.types.number) || 1; // never a track 0 -- if falsy, take 1
             for (var i = 0; i < data.tracks.length; i++) {
                 if (data.tracks[i].id == currentTrack) {
@@ -407,7 +399,10 @@
             return data;
         }));
 
-        deferred.push(api.getUpcoming(parameters.trackId).then(function(data) {
+        deferred.push(api.getUpcoming({
+            track: parameters.trackId
+        }).then(function(data) {
+            cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
 
             // api call does not support limit -- support it on the front end (?)
             if (z.check.isArray(data.races)) {
@@ -447,9 +442,11 @@
                     starts_at: "Start Time"                 
                 });
 
-                // calculate the dynamic css styling
-                data.racerHeight = (96 / (data.races.length > 4 ? data.races.length : 5 )) + "%";
-                data.racerFontSize = 2 + (100 / ((data.races.length > 4 ? data.races.length : 5) * 5)) + "vh";
+                // calculate racer height and font size
+                var minRacers = 7; // don't use style calculations for fewer than 7 racers
+                var numElems = data.races.length > minRacers ? data.races.length : minRacers;
+                data.racerHeight = 96 / numElems + "%";
+                data.racerFontSize = 2 + (20 / numElems) + "vh";
             }
             return data;
         }));
@@ -472,12 +469,6 @@
         Handlebars.registerHelper('inc', function(value, options) {
             return parseInt(value) + 1;
         });
-        Handlebars.registerHelper('getRacerHeight', function(options) {
-            return options.data.root.racerHeight;
-        });
-        Handlebars.registerHelper('getRacerFontSize', function(options) {
-            return options.data.root.racerFontSize;
-        });
     }
     
     /**
@@ -485,7 +476,7 @@
 
         @returns {string} The HTML template for use with Handlebars.
     */
-    function getHtml() {
+    function buildHtml(data) {
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
@@ -540,7 +531,7 @@
         //     "racerFontSize": "3.8181818181818183vh"
         // } 
 
-        return '' +
+        var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
@@ -561,7 +552,7 @@
         +   '   </div>'
         +   '   <div id="results">'
         +   '       {{#each races}}'
-        +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{getRacerHeight}}; font-size: {{getRacerFontSize}};">'
+        +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{../racerHeight}}; font-size: {{../racerFontSize}};">'
         +   '               <div class="racerTextWrapper raceNumber parallelogram"><div class="racerText unskew vMiddle hCenter">{{race_number}}</div></div>'
         +   '               <div class="racerTextWrapper raceName parallelogram">  <div class="racerText unskew vMiddle hLeft mrgLeft5">{{race_name}}</div></div>'
         +   '               <div class="racerTextWrapper raceStart parallelogram"> <div class="racerText unskew vMiddle hCenter">{{starts_at}}</div></div>'
@@ -570,57 +561,10 @@
         +   '       {{/each}}'
         +   '   </div>'
         +   '</div>';
-    }
 
-    /**
-        Applies css classes to a set of elements with an optional delay between each application.
-
-        @param {string} elemSelector The selector used to collect elements using jQuery/sizzle.
-        @param {string|array<string>} cssClasses A string or array of strings containing the classes to be applied to the elements.
-        @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
-        @returns {void}
-    */
-    function applyHtmlClass(elems, cssClasses, delay) {
-        var currentDelay = 0;
-        delay = delay || 0;
-        if (z.check.isString(cssClasses)) {
-            cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
-        }
-        z.assert.isArray(cssClasses);
-        if (elems) {
-            if (elems.length) {
-                for (var i = 0; i < elems.length; i++) {
-                    (function(index) {
-                        setTimeout(function() {
-                            var elem = $(elems[index]);
-                            for (var k = 0; k < cssClasses.length; k++) {
-                                elem.addClass(cssClasses[k]);
-                            }
-                        }, delay*index);
-                    })(i); // use an iife to maintain the correct index for setTimeout
-                }
-            }
-        }
-    }
-
-    /**
-        Applies a pre-determined set of animations specific to this page
-        based on the provided data.fastest.length.
-
-        @param {object} data The object which will contain data.race.racers.length.
-        @returns {void}
-    */
-    function applyAnimations(data) {
-        if (z.convert(parameters.disableAnimations, z.types.boolean) === true) {
-            $('.racer').addClass('visible');
-        }
-        else {
-            // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
-            // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-            var numElems = data.races.length;
-            var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 350 ? 350 : d;
-            applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
-        }
+        var template = Handlebars.compile(src);
+        var output = template(data);
+        return output;
     }
 
     /**
@@ -631,13 +575,22 @@
         @param {object} data The object to pass to Handlebars for use with the html string.
         @returns {void}
     */
-    function buildPage(html, data) {
-        var template = Handlebars.compile(html);
-        var output = template(data);
-        $(output).appendTo("body");
-        applyAnimations(data);
-        cache[KEYS.API_DATA] = data.deepCopy();
-        pollForChanges();
+    function buildPage(data) {
+        var bodyHtml = buildHtml(data);
+        $(bodyHtml).appendTo("body");
+        clubspeed.helpers.css.applyAnimations({
+            maxDelay: 350,
+            elems: [
+                {
+                    selector: '.racer',
+                    classes: {
+                        defaults: ['visible'],
+                        animations: ['fadeInDown']
+                    }
+                }
+            ]
+        });
+        pollForChanges(5000);
     }
 
     /**
@@ -648,27 +601,15 @@
         @returns {void}
     */
     function pollForChanges(timeout) {
-        timeout = timeout || 5000;
-        setTimeout(function() { 
-            log.debug("  ---  Polling for changes: ");
-            $.when.apply($, getData()).then(
-                function() {
-                    // success pipe - check for changes
-                    var data = smashArgs.apply(this, arguments);
-                    if (!equals(cache[KEYS.API_DATA], data)) {
-                        log.debug(  "  --- API data has changed: ");
-                        window.location.reload();
-                    }
-                    else {
-                        log.debug(  "  ---    No change in data: ");
-                        pollForChanges(timeout);
-                    }
-                }, function() {
-                    // failure pipe - continue to poll for changes, don't bother comparing
-                    pollForChanges(timeout);
+        api.getUpcoming.poll({
+            timeout: timeout || 5000,
+            track: parameters.trackId,
+            callback: function(data) {
+                if (!z.equals(data, cache[data.url])) {
+                    window.location.reload();
                 }
-            );
-        }, timeout);
+            }
+        });
     }
 
     /**
@@ -687,7 +628,7 @@
     /**
         Main initialize method for the speed screen.
         Handles calling getData(), and piping that data
-        alongside the HTML template from getHtml()
+        alongside the HTML template from buildHtml()
         into the buildPage() method.
 
         @returns {void}
@@ -698,7 +639,7 @@
         $.when.apply($, getData()).then(function() {
             var data = smashArgs.apply(this, arguments);
             log.debug(data);
-            buildPage(getHtml(), data);
+            buildPage(data);
             sw.pop();
         });
     }

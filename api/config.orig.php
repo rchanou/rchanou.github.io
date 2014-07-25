@@ -3,6 +3,7 @@
 // Configuration parameters...
 
 $debugging = true;
+$debugging = false;
 $dateFormat = 'Y-m-d';
 date_default_timezone_set('America/Los_Angeles'); // Full list: http://www.php.net/manual/en/timezones.php
 $privateKey = rand() . time(); // Replace with a custom, hardcoded private key
