@@ -31,98 +31,116 @@
         */
         function ApiService(setup) {
             var self = this;
-            var sw = new z.classes.StopwatchStack(); // make a self-contained stopwatch class for internal timing
             var log = z.log;
+            var events = new z.classes.Events();
 
-            var getMostImproved = function(range, limit, year) {
+            var getMostImproved = function(options) {
                 var data = {
-                    range: range || getMostImproved.defaults.range,
-                    limit: z.convert(limit, z.types.number) || getMostImproved.defaults.limit,
+                    range: options.range || getMostImproved.defaults.range,
+                    limit: z.convert(options.limit, z.types.number) || getMostImproved.defaults.limit,
+                };
+                if (z.check.exists(options.year)) {
+                    data.year = z.convert(options.year, z.types.number);
                 }
-                if (z.check.exists(year)) {
-                    data.year = z.convert(year, z.types.number);
-                }
-                return sendRequest({ 
+                return sendRequest({
                     api: "racers/most_improved_rpm.json",
                     type: "GET",
-                    data: data
+                    data: data,
+                    // cache: z.coalesce(options.cache, true) // default to true
                 });
             }.extend({
                 defaults: {
                     range: "month",
                     limit: 10
+                },
+                poll: function(options) {
+                    return _poll(getMostImproved, options);
                 }
             });
 
-            var getNextRace = function(track, offset) {
+            var getNextRace = function(options) {
                 return sendRequest({
                     api: "races/next.json",
                     type: "GET",
                     data: {
-                        track: z.convert(track, z.types.number) || getNextRace.defaults.track,
-                        offset: z.convert(offset, z.types.number) || getNextRace.defaults.offset
+                        track: z.convert(options.track, z.types.number) || getNextRace.defaults.track,
+                        offset: z.convert(options.offset, z.types.number) || getNextRace.defaults.offset
                     }
                 });
             }.extend({
                 defaults: {
                     track: 1,
                     offset: 0
+                },
+                poll: function(options) {
+                    return _poll(getNextRace, options);
                 }
             });
 
-            var getPreviousRace = function(track, offset) {
+            var getPreviousRace = function(options) {
                 return sendRequest({
                     api: "races/previous.json",
                     type: "GET",
                     data: {
-                        track: z.convert(track, z.types.number) || getPreviousRace.defaults.track,
-                        offset: z.convert(track, z.types.number) || getPreviousRace.defaults.offset
+                        track: z.convert(options.track, z.types.number) || getPreviousRace.defaults.track,
+                        offset: z.convert(options.offset, z.types.number) || getPreviousRace.defaults.offset
                     }
                 });
             }.extend({
                 defaults: {
                     track: 1,
                     offset: 0
+                },
+                poll: function(options) {
+                    return _poll(getPreviousRace, options);
                 }
             });
 
-            var getRaceDetails = function(raceId) {
+            var getRaceDetails = function(options) {
                 return sendRequest({
-                    api: "races/" + raceId + ".json",
-                    type: "GET"
+                    api: "races/" + options.raceId + ".json",
+                    type: "GET",
+                    cache: z.coalesce(options.cache, true) // default to true
                 });
-            };
-
-            var getTopProskill = function(limit, range, gender) {
-                var data = {
-                    limit: z.convert(limit, z.types.number) || getTopProskill.defaults.limit
+            }.extend({
+                poll: function(options) {
+                    return _poll(getRaceDetails, options);
                 }
-                if (z.check.exists(gender)) {
+            });
+
+            var getTopProskill = function(options) {
+                var data = {
+                    limit: z.convert(options.limit, z.types.number) || getTopProskill.defaults.limit
+                }
+                if (z.check.exists(options.gender)) {
                     // note: supplying $.ajax() with a null or undefined parameter
                     // results in the key still being added to the url call
                     // this will result in an API error as of 7/18/2014
                     // make sure gender as a parameter exists before adding anything (DL)
-                    data.gender = gender.toString().charAt(0).toLowerCase();
+                    data.gender = options.gender.toString().charAt(0).toLowerCase();
                 }
                 return sendRequest({
                     api: "racers/toprpm.json",
                     type: "GET",
                     data: data
-                })
+                });
             }.extend({
                 defaults: {
                     limit: 10,
+                },
+                poll: function(options) {
+                    return _poll(getTopProskill, options);
                 }
             });
 
-            var getTopTimes = function(track, range, limit) {
+            var getTopTimes = function(options) {
                 return sendRequest({
                     api: "races/fastest.json",
                     type: "GET",
                     data: {
-                        track: track || getTopTimes.defaults.track,
-                        range: range || getTopTimes.defaults.range,
-                        limit: limit || getTopTimes.defaults.limit
+                        track: options.track || getTopTimes.defaults.track,
+                        range: options.range || getTopTimes.defaults.range,
+                        limit: options.limit || getTopTimes.defaults.limit
                     }
                 });
             }.extend({
@@ -130,6 +148,9 @@
                     range: "week",
                     track: 1, // note that topTimes api can technically NOT have a trackId, and will return a combination of all tracks
                     limit: 10
+                },
+                poll: function(options) {
+                    return _poll(getTopTimes, options);
                 }
             });
 
@@ -138,21 +159,63 @@
                     api: "tracks/index.json",
                     type: "GET"
                 });
-            }
+            }.extend({
+                poll: function(options) {
+                    return _poll(getPreviousRace, options);
+                }
+            });
 
-            var getUpcoming = function(track) {
+            var getUpcoming = function(options) {
                 return sendRequest({
                     api: "races/upcoming.json",
                     type: "GET",
                     data: {
-                        track: track || getUpcoming.defaults.track
+                        track: options.track || getUpcoming.defaults.track
                     }
                 });
             }.extend({
                 defaults: {
                     track: 1
+                },
+                poll: function(options) {
+                    return _poll(getUpcoming, options);
                 }
             });
+
+            /**
+                DEFINITION TBD
+            */
+            var _innerPoll = function(method, options, timeout) {
+                setTimeout(function() {
+                    log.debug("  ---     Polling for data:");
+                    method(options).then(
+                        function(data) {
+                            // success pipe
+                            var ret = options.callback(data);
+                            if (!z.check.exists(ret) || z.convert.toBoolean(ret)) {
+                                // callback function returned either undefined/nothing
+                                // or a truthy value -- assume polling should continue
+                                // until a falsy value other than undefined or null is returned
+                                _innerPoll(method, options, timeout);
+                            }
+                        },
+                        function(data) {
+                            // error pipe
+                            // assume a re-poll is desired?
+                            _innerPoll(method, options, timeout);
+                        }
+                    );
+                }, timeout);
+            }
+            var _poll = function(method, options) {
+                // run assertions and set defaults/overrides
+                z.assert.isFunction(method); // required
+                var timeout = options.timeout || 5000;
+                options = options || {};
+
+                // call _innerPoll to prevent assertions/defaults from running every time
+                _innerPoll(method, options, timeout);
+            }
 
             function apiSuccessHandler(data, textStatus, xhr) {
                 z.assert(function() { return z.equals(data, xhr.responseJSON); });
@@ -166,36 +229,39 @@
                 log.error(xhr);
             }
             function apiThenHandler(data, textStatus, xhr) {
-                return data; // for automated piping purposes -- problematic?
+                data.url = xhr.url;
+                return data;
             }
             function apiAlwaysHandler(dataOrXhr, textStatus, xhrOrErrorThrown) {
                 // sw.stop();
             }
             function buildRequest(requestInfo) {
-                requestInfo.async = z.check.exists(requestInfo.async) ? z.convert(requestInfo.async, z.types.boolean) : true; // default async to true
-                requestInfo.type = requestInfo.type || "GET"; // use default type of "GET"
-                requestInfo.url = self.data.url + requestInfo.api;
-                requestInfo.data = requestInfo.data || {};
-                requestInfo.data.key = self.data.key;
-                requestInfo.beforeSend = function(xhr, settings) {
+                var r = {};
+                r.async = z.check.exists(requestInfo.async) ? z.convert(requestInfo.async, z.types.boolean) : true; // default async to true
+                r.type = requestInfo.type || "GET"; // use default type of "GET"
+                r.url = self.data.url + requestInfo.api;
+                r.data = requestInfo.data || {};
+                r.data.key = self.data.key;
+                // note: don't send requestInfo.cache -- this will cause jQuery to add a Math.random() to the query string
+                r.beforeSend = function(xhr, settings) {
                     xhr.url = settings.url; // store the url for debugging purposes
                 }
-                return requestInfo;
+                return r;
             }
 
             function sendRequest(requestInfo) {
                 var builtInfo = buildRequest(requestInfo);
                 var fullPath = builtInfo.url + (builtInfo.data ? ("?" + $.param(builtInfo.data)) : "");
                 log.debug("  ---   Sending request to: " + fullPath);
-                var sw = new z.classes.StopwatchWrapper(  "  ---              Calling: " + fullPath); // declare a separate stopwatch for each call
-                return $.ajax(builtInfo)
-                    .done(apiSuccessHandler)
-                    .fail(apiFailHandler)
-                    .then(apiThenHandler)
-                    // .always(apiAlwaysHandler)
-                    .always(function() {
-                        sw.stop();
-                    });
+                var sw = new z.classes.StopwatchWrapper(  "  ---        API call time: " + fullPath); // declare a separate stopwatch for each call
+                var request = $.ajax(builtInfo);
+                request.done(apiSuccessHandler);
+                request.fail(apiFailHandler);
+                request.then(apiThenHandler);
+                request.always(function() {
+                    sw.stop();
+                });
+                return request;
             }
 
             // default setup and assertions
@@ -204,8 +270,8 @@
                 z.assert.exists(setup.url);
                 self.data = {
                     key: setup.key || 'cs-dev', // fallback to cs-dev
-                    url: setup.url
-                }
+                    url: setup.url,
+                };
             })();
 
             return (function(apiObj) {

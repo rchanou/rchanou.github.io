@@ -3,11 +3,9 @@
 <head>
     <title>Up Next With Pictures</title>
 
-    <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
-
-    <script src ="../js/handlebars-latest.js"></script>
+    <script src="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
-    <script src="../js/zutil.min.js"></script>
+    <script src="../js/zutil.debug.js"></script>
     <script>
         // zUtil setup
         var z = new zUtil({
@@ -21,8 +19,11 @@
         var sw = z.sw;
         var parameters = z.location.parameters;
         var events = z.events;
+        var equals = z.equals;
     </script>
     <script src="../js/clubspeed-classes-api.js"></script>
+    <script src="../js/clubspeed-helpers-css.js"></script>
+    
     <style type="text/css">
 
         /* elements */
@@ -84,8 +85,6 @@
             height: 82%;
         }
         .racer {
-            /*height: 26%;*/
-            /*width: 19.2%;*/
             margin: 0.1vw;
         }
         .card {
@@ -436,14 +435,14 @@
 
         @class
     */
-    function GridSizes(data) {
+    function GridSizes(numElems) {
         this.width = 0;
         this.height = 0;
         this.widthMax = 96;
         this.heightMax = 78;
         this.numRows = 0;
         this.numCols = 0;
-        this.determineSizes(data);
+        this.determineSizes(numElems);
     }
     z.defineProperty(GridSizes.prototype, 'widthStyle', { get: function() { return "width:" + this.width + "%;"; }, writeable: false });
     z.defineProperty(GridSizes.prototype, 'heightStyle', { get: function() { return "height:" + this.height + "%;"; }, writeable: false });
@@ -451,33 +450,21 @@
     GridSizes.prototype.toString = function() {
         return this.style;
     };
-    GridSizes.prototype.determineSizes = function(data) {
-        if (data && data.length) {
-            // var rowDividend = Math.ceil(Math.sqrt(data.length)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
-            var rowDividend = Math.ceil(Math.sqrt(data.length)) + (data.length > 4 && (Math.sqrt(data.length) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
-            this.numRows = Math.ceil(data.length / rowDividend);
-            this.numCols = data.length.roundUp(this.numRows) / this.numRows;
-            this.height = this.heightMax / this.numRows;
-            this.width = this.widthMax / this.numCols;
-            this.fontSize = 20 / (this.numRows + 6);
-        }
+    GridSizes.prototype.determineSizes = function(numElems) {
+        // var rowDividend = Math.ceil(Math.sqrt(numElems)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
+        var rowDividend = Math.ceil(Math.sqrt(numElems)) + (numElems > 4 && (Math.sqrt(numElems) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
+        this.numRows = Math.ceil(numElems / rowDividend);
+        this.numCols = numElems.roundUp(this.numRows) / this.numRows;
+        this.height = this.heightMax / this.numRows;
+        this.width = this.widthMax / this.numCols;
+        this.fontSize = 20 / ((this.numRows > 1 ? this.numRows : 2) + 6) + "vh";
     };
 </script>
 <script>
 
     /**
-        Constant variable setup
-    */
-
-    var KEYS = {
-        API_DATA: "apiDataKey"
-    };
-    
-
-    /**
         Window variable setup
     */
-
     // if current document.location.hostname does not exist, or is "localhost", 
     // then use a fallback for api root (in this case, ftikcincinnati)
     // otherwise, default to the current origin
@@ -485,22 +472,8 @@
         url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
-    var cache = {};
+    var cache = {}; // for use with polling comparison
     var defaultPhotoUri = '../img/clubspeed_logo.svg';
-
-    /**
-        Checks for the existence of an image based on a provided uri.
-
-        @param {string} imageUri The uri to check for existence.
-        @returns {boolean} True if found, false if not found.
-    */
-    function imageExists(imageUri) {
-        var image = new Image();
-        image.src = imageUri;
-        var doesImageExist = (image.width > 0);
-        image = null; // make sure GC runs, so we dont have Image objects floating around
-        return doesImageExist;
-    }
 
     /**
         Initializes, calls, and pushes API deferred objects onto an array, returning them to be collected by $.when();
@@ -510,7 +483,12 @@
     function getData() {
         var deferred = [];
 
-        deferred.push(api.getNextRace(parameters.track, parameters.offset).then(function(data) {
+        deferred.push(api.getNextRace({
+            track: parameters.trackId,
+            offset: parameters.offset
+        })
+        .then(function(data) {
+            cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
             var race = data.race;
             var racers = race.racers;
 
@@ -519,12 +497,17 @@
                 // prepend the race.racers[].kart_number with a "#", if it exists
                 z.forEach(racers, function(x, key) {
                     x.kart_number = (z.check.exists(x.kart_number) ? "#" + x.kart_number : "");
-                    if (z.check.exists(x.photo_url) && imageExists(x.photo_url)) {
+                    if (z.check.exists(x.photo_url) && clubspeed.helpers.css.imageExists(x.photo_url)) {
                         x.photo_type = "racerPhoto";
                     }
                     else {
                         x.photo_type = "defaultPhoto";
                         x.photo_url = defaultPhotoUri;
+                    }
+
+                    var rpm = z.convert.toNumber(x.rpm);
+                    if (z.check.isNumber(rpm)) {
+                        x.rpm = rpm.toLocaleString(z.location.locale);
                     }
                 });
 
@@ -536,6 +519,9 @@
                     nickname: "NICKNAME"
                 }
             }
+
+            // calculate the grid widths, heights, and column/row counts
+            data.gridSizes = new GridSizes(racers.length || 0);
 
             // prepend race.race_number with a "#" if it exists
             race.race_number = z.check.exists(race.race_number) ? "(#" + race.race_number + ")" : "";
@@ -592,11 +578,8 @@
             var racer = options.data.root.race.racers[index];
             return (z.convert(parameters.useRealName, z.types.boolean) ? racer.first_name + " " + racer.last_name.charAt(0) : racer.nickname);
         });
-        Handlebars.registerHelper('getYesNo', function(item, options) {
+        Handlebars.registerHelper('getBoolAsYesOrNo', function(item, options) {
             return (z.convert(item, z.types.boolean) ? "YES" : "NO");
-        });
-        Handlebars.registerHelper('getRacerStyle', function(options) {
-            return options.data.root.gridSizes.style;
         });
         Handlebars.registerHelper('repeat', function(count, options) {
             var src = '';
@@ -604,12 +587,6 @@
                 src += options.fn();
             }
             return src;
-        });
-        Handlebars.registerHelper('getFontSize', function(options) {
-            return (20 / (options.data.root.gridSizes.numRows + 6));
-        });
-        Handlebars.registerHelper('getRacerHeight', function(options) {
-            return options.data.root.gridSizes.heightStyle;
         });
         Handlebars.registerHelper('getHeaderText', function(options) {
             var offset = z.convert(parameters.offset, z.types.number);
@@ -651,7 +628,7 @@
         //     "race_number": "85",
         //     "racers": [
         //       {
-        //         "id": "1007512",
+        //         "iyd": "1007512",
         //         "start_position": "1",
         //         "kart_number": null,
         //         "rpm": "1200",
@@ -687,14 +664,14 @@
         // }
 
         var portraitSrc = '' +
-            '<div class="racer lFloat" style="{{getRacerStyle}}">'
+            '<div class="racer lFloat" style="{{../gridSizes.style}}">'
         +   '   <div class="card perspective fill roundAll hidden">'
         +   '       <div class="flippable fill roundAll">'
         +   '           <div class="front face fill roundAll">'
         +   '               <img class="fill roundAll" src="../img/clubspeed_logo.svg"></img>' // svg works much better with img tag
         +   '           </div>'
         +   '           <div class="back face fill roundAll">'
-        +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{getFontSize}}vh;">'
+        +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{../gridSizes.fontSize}}">'
         +   '                   <div class="portraitHeaderWrapper roundTop">'
         +   '                       <div class="portraitHeaderText fill vMiddle hCenter">{{getName @index}}</div>'
         +   '                   </div>'
@@ -703,7 +680,7 @@
         +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter startPositionText">{{start_position}}</div></div>'
         +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter kartNumberText">{{kart_number}}</div></div>'
         +   '                           <div class="portraitTextWrapper"><div class="portraitText letterPress vMiddle hCenter proSkillText">{{rpm}}</div></div>'
-        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter firstTimeText uppercase">{{getYesNo is_first_time}}</div></div>'
+        +   '                           <div class="portraitTextWrapper roundBottomLeft"><div class="portraitText letterPress vMiddle hCenter firstTimeText uppercase">{{getBoolAsYesOrNo is_first_time}}</div></div>'
         +   '                       </div>'
         +   '                       <div class="portraitPictureWrapper rFloat roundBottomRight">'
         +   '                           <div class="portraitPictureWrapperInner fill roundBottomRight {{photo_type}}" style="background-image: url({{photo_url}});"></div>'
@@ -716,9 +693,9 @@
         +   '</div>';
 
     var labelSrc = '' +
-            '   <div class="labelsRacerWrapper lFloat" style="{{getRacerHeight}}">' // apply lFloat for margin spacing purposes, to match racer elements
+            '   <div class="labelsRacerWrapper lFloat" style="{{../gridSizes.heightStyle}}">' // apply lFloat for margin spacing purposes, to match racer elements
         +   '       <div class="portraitHeaderWrapper"></div>'
-        +   '       <div class="portraitBodyWrapper" style="font-size:{{getFontSize}}vh;">'
+        +   '       <div class="portraitBodyWrapper" style="font-size:{{../gridSizes.fontSize}};">'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">START POSITION:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
@@ -753,77 +730,44 @@
     }
 
     /**
-        Applies css classes to a set of elements with an optional delay between each application.
+        Builds the Handlebars template based on a provided set of html and data,
+        appending the compiled template directly to the page's body.
 
-        @param {string} elemSelector The selector used to collect elements using jQuery/sizzle.
-        @param {string|array<string>} cssClasses A string or array of strings containing the classes to be applied to the elements.
-        @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
+        @param {string} html The html string to use with Handlebars.
+        @param {object} data The object to pass to Handlebars for use with the html string.
         @returns {void}
     */
-    function applyHtmlClass(elems, cssClasses, delay) {
-        var currentDelay = 0;
-        delay = delay || 0;
-        if (z.check.isString(cssClasses)) {
-            cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
-        }
-        z.assert.isArray(cssClasses);
-        if (elems) {
-            if (elems.length) {
-                for (var i = 0; i < elems.length; i++) {
-                    (function(index) {
-                        setTimeout(function() {
-                            var elem = $(elems[index]);
-                            for (var k = 0; k < cssClasses.length; k++) {
-                                elem.addClass(cssClasses[k]);
-                            }
-                        }, delay*index);
-                    })(i); // use an iife to maintain the correct index for setTimeout
-                }
-            }
-        }
-    }
-
-    /**
-        Applies a pre-determined set of 
-        animations specific to this page
-        based on the provided data object.
-
-        @param {number} data The data object used to determine the number of expected elements for use with the minimum animation length calculation.
-        @returns {void}
-    */
-    function applyAnimations(data) {
-        // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 280ms
-        // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-        var numElems = data.race.racers.length;
-        var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 280 ? 280 : d;
-        applyHtmlClass($('.card'), ['fadeInDown', 'visible'], delay);
-        applyHtmlClass($('.labelTextWrapper'), ['fadeInLeft', 'visible'], delay*1.2);
-        setTimeout(function() {
-            // dont start the flip until the cards are finished applying fadeInDown
-            applyHtmlClass($('.flippable'), 'flip', delay);
-        }, delay*3);
-        // $('.flippable').click(function() {
-        //     $(this).toggleClass('flip');
-        // });
-    }
-
-    function localizeData(data) {
-        var locale = z.location.locale; // make a copy so the collection is only done once per call
-        if (data && data.race && data.race.racers && data.race.racers.length) {
-            var racers = data.race.racers;
-            for (var i = 0; i < racers.length; i++) {
-                racers[i].rpm = parseInt(racers[i].rpm).toLocaleString(locale);
-            }
-        }
-        return data;
-    }
-
     function buildPage(data) {
         var bodyHtml = buildHtml(data);
         $(bodyHtml).appendTo("body");
-        applyAnimations(data);
-        cache[KEYS.API_DATA] = data.deepCopy();
-        // pollForChanges(5000);
+        clubspeed.helpers.css.applyAnimations({
+            maxDelay: 200,
+            elems: [
+                {
+                    selector: '.card',
+                    classes: {
+                        defaults: ['visible'],
+                        animations: ['fadeInDown']
+                    }
+                },
+                {
+                    selector: '.labelTextWrapper',
+                    classes: {
+                        defaults: ['visible'],
+                        animations: ['fadeInLeft']
+                    }
+                },
+                {
+                    selector: '.flippable',
+                    classes: {
+                        defaults: ['visible', 'flip'], // flip needs to be applied, even when animations are disabled
+                        animations: ['flip']
+                    },
+                    wait: 4.95 // used in setTimeout with calculated delay * wait
+                }
+            ]
+        });
+        pollForChanges(5000);
     }
 
     /**
@@ -834,27 +778,16 @@
         @returns {void}
     */
     function pollForChanges(timeout) {
-        timeout = timeout || 5000;
-        setTimeout(function() { 
-            log.debug("  ---  Polling for changes: ");
-            $.when.apply($, getData()).then(
-                function() {
-                    // success pipe - check for changes
-                    var data = smashArgs.apply(this, arguments);
-                    if (!z.equals(cache[KEYS.API_DATA], data)) {
-                        log.debug(  "  --- API data has changed: ");
-                        window.location.reload(); // for now, just reload the whole page -- consider working in animations on only the items which changed
-                    }
-                    else {
-                        log.debug(  "  ---    No change in data: ");
-                        pollForChanges(timeout);
-                    }
-                }, function() {
-                    // failure pipe - continue to poll for changes, don't bother comparing
-                    pollForChanges(timeout);
+        api.getNextRace.poll({
+            timeout: timeout || 5000,
+            track: parameters.trackId,
+            offset: parameters.offset,
+            callback: function(data) {
+                if (!z.equals(data, cache[data.url])) {
+                    window.location.reload();
                 }
-            );
-        }, timeout);
+            }
+        });
     }
 
     /**
@@ -867,8 +800,6 @@
     function smashArgs() {
         var data = {}.smash(parameters).extend(api.getNextRace.defaults);
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
-        data = localizeData(data);
-        data.gridSizes = new GridSizes(data && data.race && data.race.racers ? data.race.racers : 0);
         return data;
     }
 

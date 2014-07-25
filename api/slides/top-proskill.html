@@ -3,9 +3,7 @@
 <head>
   <title>Top ProSkill</title>
 
-    <link href='../css/open-sans.css' rel='stylesheet' type='text/css'>
-
-    <script src ="../js/handlebars-latest.js"></script>
+    <script src="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
     <script src="../js/zutil.debug.js"></script>
     <script>
@@ -24,12 +22,14 @@
         var equals = z.equals;
     </script>
     <script src="../js/clubspeed-classes-api.js"></script>
+    <script src="../js/clubspeed-helpers-css.js"></script>
+
     <style type="text/css">
 
         /* elements */
 
         html, body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             height: 100%;
             min-height: 100%;
             margin: 0;
@@ -327,18 +327,8 @@
 <script>
 
     /**
-        Constant variable setup
-    */
-
-    var KEYS = {
-        API_DATA: "apiDataKey"
-    };
-    
-
-    /**
         Window variable setup
     */
-
     // if current document.location.hostname does not exist, or is "localhost", 
     // then use a fallback for api root (in this case, ftikcincinnati)
     // otherwise, default to the current origin
@@ -346,9 +336,7 @@
         url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
-    var cache = {};
-    // var params {}.extend(parameters).deepCopy();
-
+    var cache = {}; // for use with polling comparison
 
     /**
         Initializes, calls, and pushes API deferred objects onto an array, returning them to be collected by $.when();
@@ -359,8 +347,14 @@
 
         var deferred = [];
 
-        deferred.push(api.getTopProskill(parameters.limit, parameters.range, parameters.gender).then(function(data) {
-            
+        deferred.push(api.getTopProskill({
+            limit: parameters.limit,
+            range: parameters.range,
+            gender: parameters.gender
+        })
+        .then(function(data) {
+            cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
+
             z.forEach(data.racers, function(x, key, arr) {
                 // localize proskill, if available
                 var tempRpm = z.convert.toNumber(x.rpm);
@@ -376,6 +370,12 @@
                 case "m": data.gender = "Male"; break;
                 case "f": data.gender = "Female"; break;
             }
+
+            // calculate racer height and font size
+            var minRacers = 7; // don't use style calculations for fewer than 7 racers
+            var numElems = data.racers.length > minRacers ? data.racers.length : minRacers;
+            data.racerHeight = 96 / numElems + "%";
+            data.racerFontSize = 2 + (20 / numElems) + "vh";
 
             return data;
         }));
@@ -498,7 +498,7 @@
         +   '   </div>'
         +   '   <div id="results">'
         +   '       {{#each racers}}'
-        +   '           <div class="racer hidden {{getPlace @index}}" style="height: {{getRacerHeight this}}%; font-size: {{getRacerFontSize this}}vh;">'
+        +   '           <div class="racer hidden {{getPlace @index}}" style="height: {{../racerHeight}}; font-size: {{../racerFontSize}};">'
         +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText unskew">{{inc @index}}</div></div>'
         +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText unskew padLeft5">{{name.nickname}}</div></div>'
         +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText unskew">{{rpm}}</div></div>'
@@ -513,57 +513,6 @@
     }
 
     /**
-        Applies css classes to a set of elements with an optional delay between each application.
-
-        @param {string} elemSelector The selector used to collect elements using jQuery/sizzle.
-        @param {string|array<string>} cssClasses A string or array of strings containing the classes to be applied to the elements.
-        @param {number} [delay] The number of milliseconds to delay between each html class application. If no delay is provided, then 0 is used.
-        @returns {void}
-    */
-    function applyHtmlClass(elems, cssClasses, delay) {
-        var currentDelay = 0;
-        delay = delay || 0;
-        if (z.check.isString(cssClasses)) {
-            cssClasses = [cssClasses.split(",")].reduce(function(x) { return x.trim(); }); // convert a csv string to array
-        }
-        z.assert.isArray(cssClasses);
-        if (elems) {
-            if (elems.length) {
-                for (var i = 0; i < elems.length; i++) {
-                    (function(index) {
-                        setTimeout(function() {
-                            var elem = $(elems[index]);
-                            for (var k = 0; k < cssClasses.length; k++) {
-                                elem.addClass(cssClasses[k]);
-                            }
-                        }, delay*index);
-                    })(i); // use an iife to maintain the correct index for setTimeout
-                }
-            }
-        }
-    }
-
-    /**
-        Applies a pre-determined set of animations specific to this page
-        based on the provided data.racers.length.
-
-        @param {object} data The object which will contain data.racers.length.
-        @returns {void}
-    */
-    function applyAnimations(data) {
-        if (z.convert(parameters.disableAnimations, z.types.boolean) === true) {
-            $('.racer').addClass('visible');
-        }
-        else {
-            // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over 350ms
-            // using 15000 as a default when parameters.slideTimeout is not available to match the default time selection from sp_admin
-            var numElems = data.racers.length;
-            var d, delay = (d = (+parameters.slideTimeout || 15000) / (numElems * 1.5)) > 350 ? 350 : d;
-            applyHtmlClass($('.racer'), ['fadeInDown', 'visible'], delay);
-        }
-    }
-
-    /**
         Builds the Handlebars template based on a provided set of html and data,
         appending the compiled template directly to the page's body.
 
@@ -574,9 +523,19 @@
     function buildPage(data) {
         var bodyHtml = buildHtml(data);
         $(bodyHtml).appendTo("body");
-        applyAnimations(data);
-        cache[KEYS.API_DATA] = data.deepCopy();
-        pollForChanges();
+        clubspeed.helpers.css.applyAnimations({
+            maxDelay: 350,
+            elems: [
+                {
+                    selector: '.racer',
+                    classes: {
+                        defaults: ['visible'],
+                        animations: ['fadeInDown']
+                    }
+                }
+            ]
+        });
+        pollForChanges(5000);
     }
 
     /**
@@ -587,27 +546,17 @@
         @returns {void}
     */
     function pollForChanges(timeout) {
-        timeout = timeout || 5000;
-        setTimeout(function() { 
-            log.debug("  ---  Polling for changes: ");
-            $.when.apply($, getData()).then(
-                function() {
-                    // success pipe - check for changes
-                    var data = smashArgs.apply(this, arguments);
-                    if (!equals(cache[KEYS.API_DATA], data)) {
-                        log.debug(  "  --- API data has changed: ");
-                        window.location.reload(); // for now, just reload the whole page -- consider working in animations on only the items which changed
-                    }
-                    else {
-                        log.debug(  "  ---    No change in data: ")
-                        pollForChanges(timeout);
-                    }
-                }, function() {
-                    // failure pipe - continue to poll for changes, don't bother comparing
-                    pollForChanges(timeout);
+        api.getTopProskill.poll({
+            timeout: timeout || 5000,
+            limit: parameters.limit,
+            range: parameters.range,
+            gender: parameters.gender,
+            callback: function(data) {
+                if (!z.equals(data, cache[data.url])) {
+                    window.location.reload();
                 }
-            );
-        }, timeout);
+            }
+        });
     }
 
     /**
