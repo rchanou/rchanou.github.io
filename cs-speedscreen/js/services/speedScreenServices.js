@@ -91,12 +91,12 @@ angular.module('speedScreenDemoApp.services', [])
                 updateAPIInfo();
                 return $http.get(apiURL + '/races/scoreboard.json?&heat_id=' + heat_id + '&key=' + apiKey + '&suppress_response_codes=true');
             },
-            getNextHeat: function (track_id)
+            getNextHeat: function(track_id)
             {
                 updateAPIInfo();
                 track_id = defaultFor(track_id,1);
-                //console.log(apiURL + '/races/next.json?&track_id=1&key=' + apiKey);
-                return $http.get(apiURL + '/races/next.json?&track_id=' + track_id + '&key=' + apiKey + '&suppress_response_codes=true');
+                //console.log(apiURL + '/races/next.json?&track=' + track_id + '&key=' + apiKey);
+                return $http.get(apiURL + '/races/next.json?&track=' + track_id + '&key=' + apiKey + '&suppress_response_codes=true');
             },
             getTracks: function ()
             {

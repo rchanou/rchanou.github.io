@@ -26,7 +26,6 @@
  */
 
 //TODO: Before release, get the stored procedure fixed for sorting racers by position in position races
-//TODO: Background image... meant for scoreboard?
 
 speedScreenDemoApp.controller('channelController', function($scope, $timeout, $interval, $routeParams, speedScreenServices, globalVars, $sce) {
 
@@ -37,6 +36,8 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     var apiKey = config.apiKey;
     $scope.showTimer = defaultFor(config.showTimer, true);
     $scope.showHeatNumberInsteadOfRaceTime = defaultFor(config.showHeatNumberInsteadOfRaceTime, false);
+    $scope.disableNextRacers = defaultFor(config.disableNextRacers, true);
+    $scope.disableNextRacersTab = defaultFor(config.disableNextRacersTab, false);
 
 //    If testing a specific track is desired:
 /*    var apiURL = 'http://ftikcincinnati.clubspeedtiming.com/api/index.php';
@@ -51,6 +52,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     var scoreboardSlide = 0; //Index
     var hasScoreboard = false;
     var channelHash = "";
+    var speedscreenVersion = "";
     var currentTimeOut = undefined;
     var currentChannel = new Channel();
     var scoreboardIsCurrentlyIdle = false;
@@ -59,6 +61,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     var raceWasJustHappening = false;
     var disableAnimations = false;
     var debug = false;
+    var scoreboardTracks = [];
 
     if ($routeParams.channel_options == 'disableAnimations')
     {
@@ -73,7 +76,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     //################################
     //# INITIALIZATION AND EXECUTION #
     //################################
-    $interval(function(){pollForRaces();},1000);
+    $interval(function(){pollForRaces();},3000);
     currentChannel.initializeSlides($routeParams.channel_id); //Passed in via the URL, defaults to 1
     currentChannel.checkForOnGoingRace();
     currentChannel.run();
@@ -122,13 +125,14 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
             //console.log(slides);
             //console.log('Current resourceURL: ' + slides[this.nextSlide].resourceURL);
+            //console.log('Current duration: ' + slides[this.nextSlide].durationMs);
 
             //setCustomBackgroundIfAvailable('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg')
 
             //If we're about to switch over to a scoreboard slide, but there is no race going on and the scoreboard isn't showing race results, skip to the next slide
             if (slides[this.nextSlide].resourceURL == "pages/newhdscoreboard.html" && !globalVars.isRaceOnGoing() && !scoreboardIsCurrentlyIdle)
             {
-                //DEBUG: console.log("No race currently running. Skipping past scoreboard screen that would have been next.");
+                //console.log("No race currently running. Skipping past scoreboard screen that would have been next.");
 
                 //Let's skip the scoreboard slide and just go on to the next one
                 this.currentSlide = this.nextSlide;
@@ -168,6 +172,17 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
             }
             else //If we're clear to just switch to the next slide
             {
+
+                if (slides[this.nextSlide].resourceURL != "pages/newhdscoreboard.html")
+                {
+                    if (globalVars.getStop() !== undefined) //If a slide has requested that its timeouts/intervals be killed
+                    {
+                        var stop = globalVars.getStop(); //Stop the previous slide's timeouts and intervals
+                        stop();
+                        globalVars.resetStop();
+                    }
+                }
+
                 //Inform the view of its new slide and its contents
                 $scope.track_id = this.currentTrack;
                 $scope.type = slides[this.nextSlide].type;
@@ -217,7 +232,8 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                 hasScoreboard = true;
                 scoreboardSlide = slides.length - 1;
                 this.currentTrack = 1;
-                globalVars.setTrackID(this.currentTrack);
+                globalVars.setCurrentTrack(this.currentTrack);
+                scoreboardTracks.push(this.currentTrack);
                 $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
                 return;
             }
@@ -231,7 +247,8 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                 hasScoreboard = true;
                 scoreboardSlide = slides.length - 1;
                 this.currentTrack = 1;
-                globalVars.setTrackID(this.currentTrack);
+                globalVars.setCurrentTrack(this.currentTrack);
+                scoreboardTracks.push(this.currentTrack);
                 $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
                 return;
             }
@@ -258,12 +275,17 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                 }
                 else //If channel data was returned
                 {
-                    //DEBUG: console.log(data);
-                    //DEBUG: console.log("Hash pulled: " + data.hash + " from channel " + channel_id);
+                    /*console.log(data);
+                    console.log("Hash pulled: " + data.hash + " from channel " + channel_id);*/
 
                     if (channelHash === "") //If it's our first time polling the channel
                     {
                         //DEBUG: console.log("First time pulling the hash.");
+
+                        if (data.hasOwnProperty("speedscreenVersion"))
+                        {
+                            speedscreenVersion = data.speedscreenVersion; //Record the current version for the first time
+                        }
 
                         channelHash = data.hash; //Remember the hash for future channel calls
                         var screens = data.lineup;
@@ -277,21 +299,29 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                             }
                             else if (currentScreen.type == 'scoreboard')
                             {
-                                if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
+                                scoreboardTracks.push(currentScreen.options.trackId);
+
+                                hasScoreboard = true;
+
+                                if (scoreboardTracks.length == 1)
                                 {
-                                    slides = [];
+                                    if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
+                                    {
+                                        slides = [];
+                                        slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                        scoreboardSlide = slides.length - 1;
+                                        this.currentTrack = currentScreen.options.trackId;
+                                        globalVars.setCurrentTrack(this.currentTrack);
+                                        $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
+                                        return;
+                                    }
                                     slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                    hasScoreboard = true;
                                     scoreboardSlide = slides.length - 1;
                                     this.currentTrack = currentScreen.options.trackId;
-                                    globalVars.setTrackID(this.currentTrack);
-                                    $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
-                                    return;
+                                    globalVars.setCurrentTrack(this.currentTrack);
                                 }
-                                slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
-                                hasScoreboard = true;
-                                scoreboardSlide = slides.length - 1;
-                                this.currentTrack = currentScreen.options.trackId;
-                                globalVars.setTrackID(this.currentTrack);
+
                             }
                             else if (currentScreen.type == 'url')
                             {
@@ -309,6 +339,14 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                     }
                     else //If this is not the first time we've polled for a channel lineup
                     {
+                        if (data.hasOwnProperty("speedscreenVersion")) //Get the most recent version
+                        {
+                            if (speedscreenVersion != data.speedscreenVersion && !globalVars.isRaceOnGoing()) //If there's a mismatch and no race is currently running
+                            {
+                                location.reload(true); //Hard reset the speed screen!
+                            }
+                        }
+
                         if (channelHash == data.hash) //If it has the same hash, nothing has changed
                         {
                             //DEBUG: console.log("Same hash as previously seen. No changes to be made.");
@@ -319,6 +357,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
                             cancelTimeouts();
                             slides = [];
+                            scoreboardTracks = [];
                             hasScoreboard = false;
                             this.nextSlide = 0;
                             this.currentSlide = 0;
@@ -336,22 +375,28 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                                 {
                                     slides.push(new Slide('image',currentScreen.options.url,currentScreen.options.duration,'landscape'));
                                 }
-                                else if (currentScreen.type == 'scoreboard')
+                                else if (currentScreen.type == 'scoreboard') //TODO: Change this to only create one scoreboard slide. Multiple tracks can use it.
                                 {
-                                    if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
+                                    scoreboardTracks.push(currentScreen.options.trackId);
+                                    hasScoreboard = true;
+
+                                    if (scoreboardTracks.length == 1)
                                     {
-                                        slides = [];
+                                        if (currentScreen.options.postRaceIdleTime == 86400000) //If the scoreboard should last forever, make it so
+                                        {
+                                            slides = [];
+                                            slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                            scoreboardSlide = slides.length - 1;
+                                            this.currentTrack = currentScreen.options.trackId;
+                                            globalVars.setCurrentTrack(this.currentTrack);
+                                            $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
+                                            return;
+                                        }
                                         slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
+                                        hasScoreboard = true;
                                         scoreboardSlide = slides.length - 1;
                                         this.currentTrack = currentScreen.options.trackId;
-                                        globalVars.setTrackID(this.currentTrack);
-                                        $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
-                                        return;
                                     }
-                                    slides.push(new Slide("html","pages/newhdscoreboard.html",currentScreen.options.postRaceIdleTime,"",this.apiURL,this.apiKey, currentScreen.options.trackId));
-                                    hasScoreboard = true;
-                                    scoreboardSlide = slides.length - 1;
-                                    this.currentTrack = currentScreen.options.trackId;
                                 }
                                 else if (currentScreen.type == 'url')
                                 {
@@ -373,6 +418,9 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
                 }
 
+                //console.log("Slides:");
+                //console.log(slides);
+
             }).error(function (data) { //In case of any error fetching channel data, at least make the Speed Screen show the scoreboard for track 1
                 slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
             });
@@ -388,9 +436,14 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
         Channel.prototype.checkForOnGoingRace = function()
         {
             /*DEBUG: console.log("Is there a race running? " + (globalVars.isRaceOnGoing() ? "Yes" : "No"));
-            console.log("Additional debug info:");
-            console.log("Slides length: " + slides.length);*/
-
+            /*console.log("Additional debug info:");
+            console.log("Slides length: " + slides.length);*//*
+            console.log("=========================================================");
+            console.log("scoreboardIsCurrentlyIdle = " + scoreboardIsCurrentlyIdle);
+            console.log("globalVars.isRaceOnGoing() = " + globalVars.isRaceOnGoing());
+            console.log("scoreboardTotalIdleTimeMs = " + scoreboardTotalIdleTimeMs);
+            //console.log("slides[this.currentSlide].durationMs = " + slides[this.currentSlide].durationMs);
+            console.log("=========================================================");*/
             if (slides.length > 0) //If we have any slides at all
             {
                 /*DEBUG: console.log("Slide's durationMs: " + slides[this.currentSlide].durationMs);
@@ -401,7 +454,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
                 if (globalVars.isRaceOnGoing() && slides[this.currentSlide].durationMs != 86400000) //If a race is going on and the scoreboard isn't set to infinite
                 {
-                    //DEBUG: console.log("A RACE IS ONGOING - FORCING SPEED SCREEN TO SCOREBOARD");
+                    //console.log("A RACE IS ONGOING - FORCING SPEED SCREEN TO STAY ON SCOREBOARD");
 
                     //Force the Speed Screen to switch to the scoreboard
                     raceWasJustHappening = true;
@@ -412,23 +465,23 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                         var currentDuration = slides[this.nextSlide].durationMs;
 
 //                        $scope.track_id = slides[this.nextSlide].trackID;
-//                        globalVars.setTrackID(slides[this.nextSlide].trackID);
+//                        globalVars.setCurrentTrack(slides[this.nextSlide].trackID);
                         $scope.type = slides[this.nextSlide].type;
                         $scope.resourceURL = slides[this.nextSlide].resourceURL;
                         $scope.resourceURLTrusted = $sce.trustAsResourceUrl($scope.resourceURL);
 
                         cancelTimeouts();
                         currentTimeOut = $timeout(function(){currentChannel.run();},currentDuration);
-                        $timeout(function(){currentChannel.checkForOnGoingRace();},1500);
+                        $timeout(function(){currentChannel.checkForOnGoingRace();},500);
                         return;
                     }
                 }
                 else
                 {
-                    //If the screen is currently on the scoreboard and it's not set to finite and a race isn't happening
+                    //If the screen is currently on the scoreboard and it's not set to infinite and a race isn't happening
                     if (slides[this.currentSlide].resourceURL == 'pages/newhdscoreboard.html' && slides[this.currentSlide].durationMs != 86400000 && !globalVars.firstTimeScoreboardLoaded())
                     {
-                        //DEBUG: console.log("TRYING TO SKIP SCOREBOARD SLIDE SINCE THERE ARE NO RACES");
+                        //console.log("TRYING TO SKIP SCOREBOARD SLIDE SINCE THERE ARE NO RACES");
 
                         if (raceWasJustHappening) //If the race just ended, start recording the idle time
                         {
@@ -440,14 +493,12 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                         }
                         scoreboardTotalIdleTimeMs = new Date() - scoreboardStartedBeingIdleTimeMs;
 
-                        //DEBUG: console.log("SCOREBOARD HAS BEEN IDLE FOR " + scoreboardTotalIdleTimeMs);
+                        //console.log("SCOREBOARD HAS BEEN IDLE FOR " + scoreboardTotalIdleTimeMs);
 
                         //If the scoreboard has been idle long enough, switch to the next slide
-                        if (scoreboardTotalIdleTimeMs > slides[this.currentSlide].durationMs)
+                        if (scoreboardTotalIdleTimeMs > slides[this.currentSlide].durationMs && slides.length > 1)
                         {
                             scoreboardIsCurrentlyIdle = false;
-                            /*DEBUG: console.log("THE SCOREBOARD HAS BEEN IDLE FOR LONGER THAN " + slides[this.currentSlide].durationMs);
-                            console.log("Moving on to the next slide...");*/
                             scoreboardTotalIdleTimeMs = 0;
                             scoreboardStartedBeingIdleTimeMs = 0;
 
@@ -470,15 +521,27 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                             {
                                 $scope.landscape = 1;
                             }
+
+                            if (globalVars.getStop() !== undefined) //If a slide has requested that its timeouts/intervals be killed
+                            {
+
+                                var stop = globalVars.getStop(); //Stop the previous slide's timeouts and intervals
+                                stop();
+                                globalVars.resetStop();
+                            }
+
                             cancelTimeouts();
                             currentTimeOut = $timeout(function(){currentChannel.run();},currentDuration);
-                            $timeout(function(){currentChannel.checkForOnGoingRace();},1500);
+                            $timeout(function(){currentChannel.checkForOnGoingRace();},500);
+
+
+
                             return;
                         }
                     }
                 }
             }
-            $timeout(function(){currentChannel.checkForOnGoingRace();},1500);
+            $timeout(function(){currentChannel.checkForOnGoingRace();},500);
          };
     }
 
@@ -526,12 +589,16 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
      */
     function pollForRaces()
     {
-        if (hasScoreboard)
+/*        console.log("Polling for races...");
+        console.log("Number of tracks: " + scoreboardTracks.length);
+        //TODO: Some of these may not be firing.
+        console.log("Has scoreboard: " + hasScoreboard);*/
+        if (hasScoreboard && scoreboardTracks.length <= 1)
         {
-            //DEBUG: console.log("Channel is polling track " + globalVars.getCurrentTrack() + " for races...");
+            //console.log("Channel is polling the only track " + globalVars.getCurrentTrack() + " for races...");
             speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
-                //DEBUG: console.log(data);
-                if (Object.size(data.scoreboard) === 0)
+                //console.log(data);
+                if (!data.hasOwnProperty("race")) //Old method: if (Object.size(data.scoreboard) === 0)
                 {
                     globalVars.setRaceIsOnGoing(false);
                 }
@@ -540,6 +607,50 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                     globalVars.setRaceIsOnGoing(true);
                 }
             });
+        }
+        else if (hasScoreboard && scoreboardTracks.length > 1)
+        {
+            for (var i = 0; i < scoreboardTracks.length; ++i)
+            {
+                //console.log("Channel is polling track " + scoreboardTracks[i] + " for races...");
+
+                speedScreenServices.getScoreboardData(scoreboardTracks[i]).success(function (data, status, headers, config) {
+                    //var track_id = getUrlParam(config.url,"track_id");
+
+                    //console.log(data);
+
+                    if (!data.hasOwnProperty("race"))//Old method: if (Object.size(data.scoreboard) === 0)
+                    {
+                        var track_id = getUrlParam(config.url,"track_id");
+                        //console.log("No race on-going on track " + track_id);
+/*                        console.log("track_id = " + track_id);
+                        console.log("globalVars.getCurrentTrack() = " + globalVars.getCurrentTrack())
+                        console.log("globalVars.isRaceOnGoing() = " + globalVars.isRaceOnGoing());
+
+                        console.log(typeof globalVars.getCurrentTrack());
+                        console.log(typeof track_id);
+                        console.log(globalVars.getCurrentTrack() == track_id);*/
+                        if (parseInt(globalVars.getCurrentTrack()) == parseInt(track_id) && globalVars.isRaceOnGoing())
+                        {
+                            globalVars.setRaceIsOnGoing(false);
+                            //console.log("setRaceIsOnGoing being set to FALSE");
+
+                        }
+
+                        //console.log("setRaceIsOnGoing = " + globalVars.isRaceOnGoing());
+                    }
+                    else
+                    {
+                        var track_id = getUrlParam(config.url,"track_id");
+                        //console.log("Race on-going on track " + track_id);
+                        //console.log("setRaceIsOnGoing being set to TRUE");
+                        globalVars.setCurrentTrack(track_id);
+                        globalVars.setRaceIsOnGoing(true);
+
+                        //console.log("setRaceIsOnGoing = " + globalVars.isRaceOnGoing());
+                    }
+                });
+            }
         }
     }
 
@@ -571,6 +682,10 @@ speedScreenDemoApp.factory('globalVars', function() {
     var raceIsOnGoing = false;
     var track_id = 1;
     var firstTimeScoreboardLoaded = true;
+    var finalResultsScreenTimeMs = 0;
+
+    globalVars.setFinalResultsScreenTimeMs = function(newFinalResultsScreenTimeMs) { finalResultsScreenTimeMs = newFinalResultsScreenTimeMs; }
+    globalVars.getFinalResultsScreenTimeMs = function() { return finalResultsScreenTimeMs; }
 
     globalVars.getStop = function() { return stop; }
     globalVars.setStop = function(newStop) { stop = newStop; }
@@ -589,8 +704,8 @@ speedScreenDemoApp.factory('globalVars', function() {
     globalVars.setRaceIsOnGoing = function(newStatus) { raceIsOnGoing = newStatus; }
     globalVars.isRaceOnGoing = function() { return raceIsOnGoing; }
 
-    globalVars.setTrackID = function(new_track_id) { track_id = new_track_id; }
-    globalVars.getTrackID = function() { return track_id; }
+    globalVars.setTrackID = function(new_track_id) { track_id = new_track_id; } //TODO: Unused? Cull?
+    globalVars.getTrackID = function() { return track_id; } //TODO: Do I use this or getCurrentTrack?
 
     globalVars.setFirstTimeScoreboardLoaded = function(newStatus) { firstTimeScoreboardLoaded = newStatus; }
     globalVars.firstTimeScoreboardLoaded = function() { return firstTimeScoreboardLoaded; }
@@ -613,7 +728,7 @@ function defaultFor(arg, val)
  * @constructor
  */
 function setCustomBackgroundIfAvailable(url) {
-    console.log("setCustomBackgroundIfAvailable");
+    //console.log("setCustomBackgroundIfAvailable");
     $("<img>", {
         src: url + '?rnd=' + new Date().getTime(),
         error: function() { console.log("Returning false"); return false; },
@@ -623,4 +738,19 @@ function setCustomBackgroundIfAvailable(url) {
             $('.hdScoreboard').css('background-size','100% 100%');
             return true; }
     });
+}
+
+function getUrlParam(url, param){
+
+    var paramArray = url.split("?")[1].split("&");
+
+    for(var i = 0; i < paramArray.length; ++i)
+    {
+        potentialParameter = paramArray[i].split("=");
+        if(potentialParameter[0] == param)
+        {
+            return potentialParameter[1];
+        }
+    }
+    return null;
 }

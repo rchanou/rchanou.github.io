@@ -10,12 +10,7 @@
 
 //TODO: Add a simulation mode.
 //TODO: Re-enable "last_few_heats" feature when development time is available for it.
-//TODO: Laps vs time display for position-based races. Especially for final result screen.
-//TODO: Look at timers more closely. For now, they've all been set to count up so they're less jarring.
-
-//RECENT TODO: I don't think the final scoreboard is showing prior to the next racer lineup.
-//It did the most recent time. I think it doesn't if there's an empty heat in the history, or perhaps if it isn't in position 0.
-//It may have just been a hiccup. I'll keep my eye on this. May be an artifact from partial last_few_heats implementation.
+//TODO: Timers are off sometimes. API side.
 
  speedScreenDemoApp.controller('newHDScoreboardController',
     function($scope, $routeParams, speedScreenServices, SocketIOService, $timeout, $interval, globalVars)
@@ -30,9 +25,12 @@
             globalVars.resetStop();
         }
 
-        var HDScoreboard = new HDScoreboardModel(globalVars.getTrackID());
+        var HDScoreboard = new HDScoreboardModel(globalVars.getCurrentTrack());
         var intervalCalls = HDScoreboard.start();
         globalVars.setFirstTimeScoreboardLoaded(false);
+        var disableNextRacers = defaultFor(config.disableNextRacers, true);
+        var disableNextRacersTab = defaultFor(config.disableNextRacersTab, false);
+
 
         // ##################################
         // # HD SCOREBOARD MODEL DEFINITION #
@@ -90,6 +88,7 @@
                 //Periodically, update the scoreboard and refresh the Isotope view
                 intervalsToReturn.push($interval( function()
                 {
+                    //console.log("MAIN HD SCOREBOARD LOOP");
                     HDScoreboard.getLatestScoreboardData();
                     HDScoreboard.processLatestScoreboardData();
 
@@ -101,7 +100,12 @@
                     $('#container').isotope( 'reLayout' );
                     $('#container').isotope({ sortBy : 'position' });
 
-                },250));
+                },500));
+
+                intervalsToReturn.push($interval( function()
+                {
+                    HDScoreboard.getNextRacerDataAndFinalResults();
+                },1000));
 
                 // #####################
                 // # BOTTOM STATUS BAR #
@@ -110,7 +114,7 @@
                 $scope.statusBarMode = validStatusBarModes[currentStatusBarMode]; //The current top time mode
 
                 //Initially populate the view with today's top times
-                speedScreenServices.getFastestLapTimes_Day(4,this.currentTrack).success(function (data) {
+                speedScreenServices.getFastestLapTimes_Day(4,globalVars.getCurrentTrack()).success(function (data) {
                     $scope.fastestTimesThisWeek = data.fastest;
                     $scope.fastestTimeLabel = "Today";
                 });
@@ -128,7 +132,7 @@
 
                         if (validStatusBarModes[currentStatusBarMode] == "Week") //Top times of the week
                         {
-                            speedScreenServices.getFastestLapTimes_Week(4,this.currentTrack).success(function (data) {
+                            speedScreenServices.getFastestLapTimes_Week(4,globalVars.getCurrentTrack()).success(function (data) {
                                 $scope.fastestTimesThisWeek = data.fastest;
                                 $scope.fastestTimeLabel = "This Week";
                             });
@@ -136,7 +140,7 @@
                         }
                         else if (validStatusBarModes[currentStatusBarMode] == "Month") //Top times of the month
                         {
-                            speedScreenServices.getFastestLapTimes_Month(4,this.currentTrack).success(function (data) {
+                            speedScreenServices.getFastestLapTimes_Month(4,globalVars.getCurrentTrack()).success(function (data) {
                                 $scope.fastestTimesThisWeek = data.fastest;
                                 $scope.fastestTimeLabel = "This Month";
                             });
@@ -144,7 +148,7 @@
                         }
                         else if (validStatusBarModes[currentStatusBarMode] == "Today") //Top times today
                         {
-                            speedScreenServices.getFastestLapTimes_Day(4,this.currentTrack).success(function (data) {
+                            speedScreenServices.getFastestLapTimes_Day(4,globalVars.getCurrentTrack()).success(function (data) {
                                 $scope.fastestTimesThisWeek = data.fastest;
                                 $scope.fastestTimeLabel = "Today";
                             });
@@ -206,15 +210,21 @@
              */
             HDScoreboardModel.prototype.getLatestScoreboardData = function()
             {
-                speedScreenServices.getScoreboardData(this.currentTrack).success(function (data) {
+                //console.log("HD Scoreboard is getting data for track " + globalVars.getCurrentTrack());
+                speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
                     $scope.currentScoreboard = data;
+                    //console.log(data);
                 }).error(function (data, status, headers, config) {
                     $scope.currentScoreboard = data;
                 });
+            };
 
 
-                speedScreenServices.getNextHeat(this.currentTrack).success(function (data) {
+            HDScoreboardModel.prototype.getNextRacerDataAndFinalResults = function()
+            {
+                speedScreenServices.getNextHeat(globalVars.getCurrentTrack()).success(function (data) {
                     $scope.currentNextRace = data;
+                    //console.log(data);
                 }).error(function (data, status, headers, config) {
                     $scope.currentNextRace = data;
                 });
@@ -241,7 +251,8 @@
              */
             HDScoreboardModel.prototype.processLatestScoreboardData = function()
             {
-                if (!jQuery.isEmptyObject($scope.currentScoreboard) && !jQuery.isEmptyObject($scope.currentNextRace)) //If we have data to work with
+                //console.log("processLatestScoreboardData");
+                if (!jQuery.isEmptyObject($scope.currentScoreboard)/* && !jQuery.isEmptyObject($scope.currentNextRace)*/) //If we have data to work with
                 {
                     this.updateScoreboardMemory();
                     this.determineScoreboardState();
@@ -305,7 +316,7 @@
                         }
                     }
                 }
-                if ($scope.currentNextRace.hasOwnProperty("race")) //If Club Speed has sent us a "racers coming up" object
+                if (typeof $scope.currentNextRace != "undefined" && $scope.currentNextRace.hasOwnProperty("race")) //If Club Speed has sent us a "racers coming up" object
                 {
                     var currentNextRaceRecorded = false; //Have we already recorded this "racers coming up" object? Let's assume not for now.
 
@@ -383,6 +394,7 @@
                             }
                             else //If this is the first time showing the final results
                             {
+                                //TODO: Maybe not here... Move on to the next state after the timer is up... We now have new slides we can switch to!
                                 this.finalResultsTimeStartedMs = new Date(); //Remember when we first started showing it
                                 this.finalResultsScreenTimeMs = 0; //Reset how long it's been displayed
                             }
@@ -403,7 +415,7 @@
                             this.finalResultsScreenTimeMs = new Date() - this.finalResultsTimeStartedMs;
                             if (this.finalResultsScreenTimeMs > this.finalResultsMaxTimeMs)
                             {
-                                if (Object.size(this.nextRacersHistory[0].race.racers) > 0)
+                                if (Object.size(this.nextRacersHistory[0].race.racers) > 0 && !disableNextRacers)
                                 {
                                     this.scoreboardState = "driver_lineup";
                                 }
@@ -417,7 +429,7 @@
                         }
                         else
                         {
-                            if (Object.size(this.nextRacersHistory[0].race.racers) > 0) //If there are racers in the "racers coming up" data
+                            if (Object.size(this.nextRacersHistory[0].race.racers) > 0  && !disableNextRacers) //If there are racers in the "racers coming up" data
                             {
                                 this.scoreboardState = "driver_lineup"; //Show them as a full screen driver lineup
                             }
@@ -434,7 +446,7 @@
                             {
                                 this.scoreboardState = "race_ongoing";
                             }
-                            else if (Object.size(this.lastHeatsHistory) === 1 && this.lastHeatsHistory[0].race.id != $scope.currentScoreboard.race.id) //If there is a single past heat in memory, show it
+                            else if (Object.size(this.lastHeatsHistory) === 1 && this.lastHeatsHistory[0].race != undefined && this.lastHeatsHistory[0].race.id != $scope.currentScoreboard.race.id) //If there is a single past heat in memory, show it
                             //TODO: Bug. If the current ID race is in the race history, this is wrong.
                             {
                                 this.scoreboardState = "final_results";
@@ -448,9 +460,13 @@
                         }
                         else //If there are next racers currently in the queue, show them
                         {
-                            if (Object.size(this.nextRacersHistory[0].race.racers) > 0)
+                            if (Object.size(this.nextRacersHistory[0].race.racers) > 0  && !disableNextRacers)
                             {
                                 this.scoreboardState = "driver_lineup";
+                            }
+                            else
+                            {
+                                this.scoreboardState = "race_ongoing";
                             }
                         }
                     }
@@ -461,7 +477,7 @@
                 }
 
                 //Coming up next tab visibility
-                if (this.scoreboardState == "driver_lineup") //If we have a full screen driver lineup, hide the sliding tab
+                if (this.scoreboardState == "driver_lineup" && !disableNextRacersTab) //If we have a full screen driver lineup, hide the sliding tab
                 {
                     this.slidePanelVisible = false;
                     if ($('.comingUpNextBox').hasClass('visibleComingUpNextBox')) //Hide the driver lineup box
@@ -475,7 +491,7 @@
                         });
                     }
                 }
-                else if (Object.size(this.nextRacersHistory) > 0 && Object.size(this.nextRacersHistory[0].race.racers) > 0) //If we have racers coming up in any other view, show the sliding tab
+                else if (Object.size(this.nextRacersHistory) > 0 && Object.size(this.nextRacersHistory[0].race.racers) > 0 && !disableNextRacersTab) //If we have racers coming up in any other view, show the sliding tab
                 {
                     this.slidePanelVisible = true;
                     if ($('.comingUpNextBox').hasClass('hiddenComingUpNextBox')) //Show the driver lineup box
@@ -507,6 +523,9 @@
                 $scope.lastHeatsHistory = this.lastHeatsHistory;
                 $scope.nextRacersHistory = this.nextRacersHistory;
                 $scope.scoreboardState = this.scoreboardState;
+
+                //console.log("Scoreboard state: " + this.scoreboardState);
+
                 $scope.finalResultsScreenTimeMs = this.finalResultsScreenTimeMs;
                 $scope.slidePanelVisible = this.slidePanelVisible;
                 $scope.lastRaceRacers = this.lastRaceRacers;
@@ -519,7 +538,7 @@
                     $scope.lastRaceScoreboard = this.lastHeatsHistory[0]; //TODO: Likely will be wrong depending on the ID.
                 }
 
-                if (this.scoreboardState == "race_ongoing")
+                if (this.scoreboardState == "race_ongoing" && typeof $scope.currentScoreboard.race != "undefined")
                 {
                     if ($scope.currentScoreboard.race.race_by == "minutes")
                     {
@@ -577,7 +596,7 @@
                     $scope.nextRacers = this.nextRacers; //And send that array to the view for rendering
                 }
 
-                if (Object.size(this.lastHeatsHistory) > 0) //If we have a history of past races
+                if (Object.size(this.lastHeatsHistory) > 0 && $scope.lastHeatScoreboard != undefined) //If we have a history of past races
                 {
                     this.lastRaceRacers = {};
 
@@ -672,7 +691,7 @@
                             {
                                 this.racers[currentRacer].lastCompletedLapWasBest = true;
                             }
-                            else if (this.racers[currentRacer].lap_num > this.oldRacers[currentRacer].lap_num)
+                            else if (currentRacer in this.oldRacers && this.racers[currentRacer].lap_num > this.oldRacers[currentRacer].lap_num)
                             {
                                 this.racers[currentRacer].lastCompletedLapWasBest = false;
                             }
