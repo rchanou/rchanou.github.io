@@ -828,12 +828,12 @@ EOD;
                 if($row['RaceBy'] == 0) {
                     $tsql = "select top 1 datediff(ms, timestamp, current_timestamp) as time from racingdata where heatno = ? order by timestamp";
                     $raceTimeInSeconds = $this->run_query($tsql, array(&$heatId));
-                    $raceTimeInSeconds = $raceTimeInSeconds[0]['time'] / 1000;
+                    $raceTimeInSeconds = isset($raceTimeInSeconds[0]) && array_key_exists('time',$raceTimeInSeconds[0]) ? $raceTimeInSeconds[0]['time'] / 1000 : null;
                     //TODO: Evaluate this functionality. At the moment the details are being handled by the user of the API.
                 } else {
                     $tsql = "select top 1 datediff(ms, timestamp, current_timestamp) as time from racingdata where heatno = ? order by timestamp";
                     $raceTimeInSeconds = $this->run_query($tsql, array(&$heatId));
-                    $raceTimeInSeconds = $raceTimeInSeconds[0]['time'] / 1000;
+                    $raceTimeInSeconds = isset($raceTimeInSeconds[0]) && array_key_exists('time',$raceTimeInSeconds[0]) ? $raceTimeInSeconds[0]['time'] / 1000 : null;
                 }
 
             } else {
