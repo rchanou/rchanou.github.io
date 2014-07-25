@@ -37,6 +37,7 @@ class Races
         if($race_id == 'since') return $this->since();
         if($race_id == 'final_positions') return $this->final_positions();
         if($race_id == 'matching') return $this->matching();
+				if($race_id == 'upcoming_heat_types') return $this->upcoming_heat_types(@$_GET['date']);
 				if($race_id == 'upcoming') return $this->upcoming();
 
         if($sub != null) {
@@ -232,39 +233,56 @@ class Races
         }
     }
 
+		protected function upcoming_heat_types($date = null) {
+				//TODO, implement date range to return heat types. For now just return all.
+				//$date = date($GLOBALS['dateFormat'] . " 23:59:59", $date);
+				
+				$tsql = "SELECT HeatTypeNo AS heat_type_id, HeatTypeName AS name FROM HeatTypes WHERE Enabled = 1 AND Deleted = 0 AND Web = 1 ORDER BY HeatTypeName";
+        $tsql_params = array();
+        $heatTypes = $this->run_query($tsql, $tsql_params);
+				
+				return array('heatTypes' => $heatTypes);
+		}
+
     protected function matching() {
         $tsql_heatType = '';
         $tsql_numSpots = '';
 
-        $blackoutTime = 1*60; // In minutes
+        $blackoutTime = 1*60;  // In minutes
         $maximumDaysOut = 365; // In days
+
+				/*
+				Dates come in as US format Y-m-d, need to localize (via the global dateFormat) before sending to DB
+				*/
 
         // If no start date given, default to today
         if(!isset($_GET['start'])) {
             $start = date($GLOBALS['dateFormat'] . " H:i:s");
-            $end   = date($GLOBALS['dateFormat'] . " H:i:s", strtotime(date($GLOBALS['dateFormat'], strtotime($start))) + 24*60*60); // End of today
+            $end   = date($GLOBALS['dateFormat'] . " H:i:s", strtotime(date($GLOBALS['dateFormat'], strtotime($_GET['start']))) + 24*60*60); // End of today
         }
 
-        // Otherwise, use range given (defaulting to end of day if no end is given
+        // Otherwise, use range given (defaulting to end of day if no end is given)
         else {
             $start = date($GLOBALS['dateFormat'] . " H:i:s", strtotime($_GET['start']));
-            $end = isset($_GET['end']) ? date($GLOBALS['dateFormat'] . " H:i:s", strtotime($_GET['end'])) : date($GLOBALS['dateFormat'] . " H:i:s", strtotime($start) + 24*60*60); // Use end, or make it the end of the start day given
+            $end = isset($_GET['end']) ? date($GLOBALS['dateFormat'] . " H:i:s", strtotime($_GET['end'])) : date("{$GLOBALS['dateFormat']}  H:i:s", strtotime($_GET['start']) + 24*60*60); // Use end, or make it the end of the start day given
         }
+				
+//echo "{$start} to {$end}";
 
         // Change start to enforce the blackout time
         /*$cannotScheduleBefore = time() + $blackoutTime*60;
-        if(strtotime($start) < $cannotScheduleBefore) {
+        if(strtotime($_GET['start']) < $cannotScheduleBefore) {
             $start = date("Y-m-d H:i:s", $cannotScheduleBefore);
         }*/
 
         // Check to ensure we are not scheduling in the past
-        /*if(strtotime($end) < time()) {
+        /*if(strtotime($_GET['end']) < time()) {
             throw new RestException(412,'Cannot schedule events in the past');
         }*/
 
         // Check to ensure we are not scheduling too far ahead
         $maximumSecondsOut = time() + $maximumDaysOut*24*60*60;
-        if(strtotime($end) > $maximumSecondsOut || strtotime($start) > $maximumSecondsOut) {
+        if(strtotime($end) > $maximumSecondsOut || strtotime($_GET['start']) > $maximumSecondsOut) {
             throw new RestException(412,'Cannot schedule more than ' . $maximumDaysOut . ' in advance');
         }
 
@@ -275,18 +293,16 @@ class Races
             $tsql_params[] = &$_GET['heatType'];
         }
 
-        $tsql = "SELECT hm.HeatNo, ht.HeatTypeName AS title, hm.HeatNotes AS note, hm.HeatStatus, hm.ScheduledTime AS starts, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration,
-                      hm.SpeedLevel, (hm.RacersPerHeat - (hm.NumberOfReservation + hm.NumberOfCadetReservation + COUNT(hd.HeatNo))) AS SpotsAvailable, COUNT(hd.HeatNo) AS NumberOfPaid, hm.NumberOfReservation, hm.NumberOfCadetReservation
-FROM         HeatMain AS hm LEFT OUTER JOIN
-                      HeatDetails AS hd ON hm.HeatNo = hd.HeatNo
-                      LEFT OUTER JOIN HeatTypes AS ht ON hm.HeatTypeNo = ht.HeatTypeNo
-WHERE     (hm.ScheduledTime BETWEEN ? AND ?)  $tsql_heatType $tsql_numSpots
-GROUP BY hm.HeatNo, ht.HeatTypeName, hm.HeatNotes, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, 
-                      hm.ScheduleDuration, hm.SpeedLevel, hm.NumberOfReservation, hm.NumberOfCadetReservation  ORDER BY hm.ScheduledTime";
+        $tsql = "SELECT hm.HeatNo, ht.HeatTypeName AS title, hm.HeatNotes AS note, hm.HeatStatus, hm.ScheduledTime AS starts, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, (hm.RacersPerHeat - (hm.NumberOfReservation + hm.NumberOfCadetReservation + COUNT(hd.HeatNo))) AS SpotsAvailable, COUNT(hd.HeatNo) AS NumberOfPaid, hm.NumberOfReservation, hm.NumberOfCadetReservation FROM HeatMain AS hm LEFT OUTER JOIN HeatDetails AS hd ON hm.HeatNo = hd.HeatNo LEFT OUTER JOIN HeatTypes AS ht ON hm.HeatTypeNo = ht.HeatTypeNo WHERE (hm.ScheduledTime BETWEEN ? AND ?) {$tsql_heatType} {$tsql_numSpots} GROUP BY hm.HeatNo, ht.HeatTypeName, hm.HeatNotes, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, hm.NumberOfReservation, hm.NumberOfCadetReservation ORDER BY hm.ScheduledTime";
+				
+//echo $tsql;
+//print_r($tsql_params);
 
         $scheduledHeats = $this->run_query($tsql, $tsql_params);
+				
+				$matchingHeats = $scheduledHeats; // To bypass commented out code below
 
-        $tsql = "SELECT e.EventID, e.EventDesc as title, e.EventNotes as note, e.EventScheduledTime as starts, e.EventDuration as ScheduleDuration, e.TotalRacers as RacersPerHeat, e.MemberOnly as SpotsAvailable FROM Events e WHERE EventScheduledTime BETWEEN ? AND ?";
+        /*$tsql = "SELECT e.EventID, e.EventDesc as title, e.EventNotes as note, e.EventScheduledTime as starts, e.EventDuration as ScheduleDuration, e.TotalRacers as RacersPerHeat, e.MemberOnly as SpotsAvailable FROM Events e WHERE EventScheduledTime BETWEEN ? AND ?";
         $tsql_params = array(&$start, &$end);
         $scheduledEvents = $this->run_query($tsql, $tsql_params);
 
@@ -313,10 +329,11 @@ GROUP BY hm.HeatNo, ht.HeatTypeName, hm.HeatNotes, hm.HeatStatus, hm.ScheduledTi
         $numHeats     = isset($_GET['numHeats']) ? $_GET['numHeats'] : 1;
         $gapInMinutes = isset($_GET['gapInMinutes']) ? $_GET['gapInMinutes'] : 10;
 
-        $matchingHeats = $this->findMatchingHeats($allHeats, $numDrivers, $numHeats, $gapInMinutes);
+        $matchingHeats = $this->findMatchingHeats($allHeats, $numDrivers, $numHeats, $gapInMinutes);*/
 
-        $matches = array();
-        foreach($matchingHeats as $key => $match) {
+//print_r($matchingHeats);
+        
+				/*foreach($matchingHeats as $key => $match) {
             foreach($match as $heatKey => $heat) {
                 $matches[$key][$heatKey] = array(
                     'heatId' => isset($heat['heatId']) ? $heat['heatId'] : null,
@@ -328,7 +345,24 @@ GROUP BY hm.HeatNo, ht.HeatTypeName, hm.HeatNotes, hm.HeatStatus, hm.ScheduledTi
                     'note'   => $heat['note']
                 );
             }
-        }
+        }*/
+
+				$matches = array();
+				foreach($matchingHeats as $heat) {
+						$matches[] = array(
+								'heatId' => (int)$heat['HeatNo'],
+								'trackId' => (int)$heat['TrackNo'],
+								'name' => $heat['title'],
+								'starts' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts'])),
+								'ends' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts']) + (int)$heat['ScheduleDuration']*60),
+								'total_spots' => (int)$heat['SpotsAvailable'],
+								'available_spots' => (int)$heat['SpotsAvailable'],
+								'title'  => $heat['title'],
+								'note'   => $heat['note'],
+								'price'  => 20.00,
+								//'original' => $heat
+						);
+				}
 
         return array('races' => $matches);
     }
@@ -757,13 +791,7 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
         }
 
         $tsql = <<<EOD
-		SELECT DISTINCT TOP ($limit) MAX(rd.CustID) AS CustID, MAX(c.FName) AS FirstName, MAX(c.LName) AS LastName, MAX(c.RacerName) AS RacerName, MAX(c.RPM) AS rpm, MIN(rd.LTime) AS LTime, MAX(rd.TimeStamp) AS TimeStamp, MAX(rd.LapNum) AS LapNum, MAX(hm.SpeedLevel) AS SpeedLevel, MAX(hm.TrackNo) AS TrackNo, MIN(t.Description) AS TrackName
-		FROM         RacingData AS rd LEFT OUTER JOIN
-							  Customers AS c ON c.CustID = rd.CustID LEFT OUTER JOIN Tracks t ON TrackNo = t.TrackNo LEFT OUTER JOIN
-							  HeatMain AS hm ON hm.HeatNo = rd.HeatNo 
-		WHERE  (rd.LTime <> 0) AND (rd.IsBadTime <> 'true') $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate
-		GROUP BY c.RacerName
-		ORDER BY LTime
+		SELECT DISTINCT TOP ($limit) MAX(rd.CustID) AS CustID, MAX(c.FName) AS FirstName, MAX(c.LName) AS LastName, MAX(c.RacerName) AS RacerName, MAX(c.RPM) AS rpm, MIN(rd.LTime) AS LTime, MAX(rd.TimeStamp) AS TimeStamp, MAX(rd.LapNum) AS LapNum, MAX(hm.TotalRaces) AS TotalRaces, MAX(hm.SpeedLevel) AS SpeedLevel, MAX(hm.TrackNo) AS TrackNo, MIN(t.Description) AS TrackName FROM RacingData AS rd LEFT OUTER JOIN Customers AS c ON c.CustID = rd.CustID LEFT OUTER JOIN Tracks t ON TrackNo = t.TrackNo LEFT OUTER JOIN HeatMain AS hm ON hm.HeatNo = rd.HeatNo WHERE  (rd.LTime <> 0) AND (rd.IsBadTime <> 'true') $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate GROUP BY c.RacerName ORDER BY LTime
 EOD;
 
         $rows = $this->run_query($tsql, $tsql_params);
@@ -778,6 +806,7 @@ EOD;
                 'last_name' => $row['LastName'],
                 'lap_time' => round($row['LTime'] / 1000, 3),
                 'lap_number' => $row['LapNum'],
+								'total_races' => $row['TotalRaces'],
                 'speed_level' => $row['SpeedLevel'],
                 'track_id' => $row['TrackNo'],
                 'track_name' => $row['TrackName'],
