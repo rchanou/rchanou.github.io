@@ -614,6 +614,8 @@ EOD;
 				throw new RestException(412,'Not a valid range (Must be "month" or "year")');
 		}
 		
+		// TODO Add filtering by Speed Level
+		
 		$tsql = "GetMostImproveRPM " . $tsql_params;
 		$rows = $this->run_query($tsql, array());
 		
@@ -834,6 +836,8 @@ EOD;
 			$tsql_gender = 'AND Gender = ?';
 			$tsql_params[] = &$genders[strtolower($_GET['gender'])];
 		}
+
+		// TODO Add filtering by speedlevel
 
 		$tsql = "SELECT TOP(".$limit.") * FROM Customers WHERE RPM <> 10000 $tsql_gender AND Deleted <> 'True' ORDER BY RPM DESC";
 

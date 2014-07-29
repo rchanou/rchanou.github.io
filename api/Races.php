@@ -165,6 +165,8 @@ class Races
 				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
 				$return = array('races' => array());
 
+				// TODO Filter by Speed Level
+
 				$tsql = 'SELECT * FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC)';
 				$tsql_params = array(&$track_id, &$track_id);
 				$upcomingRaces = $this->run_query($tsql, $tsql_params);
@@ -182,6 +184,8 @@ class Races
 
 				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
 				$offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
+
+				// TODO Filter by Speed Level
 
 				$tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ScheduledTime) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC)) SELECT c.* FROM CTE c WHERE Rank = ?';
 				$tsql_params = array(&$track_id, &$track_id, &$offset);
@@ -201,6 +205,8 @@ class Races
 
 				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
 				$offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
+
+				// TODO Filter by Speed Level
 
 				$tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY Begining DESC) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (2,3) AND Begining < (SELECT TOP(1) hm.Begining AS started_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC ) ) SELECT c.* FROM CTE c WHERE Rank = ?';
 				$tsql_params = array(&$track_id, &$track_id, &$offset);
@@ -245,15 +251,13 @@ class Races
 		}
 
     protected function matching() {
-        $tsql_heatType = '';
-        $tsql_numSpots = '';
+        $tsql_heatType = $tsql_numParticipants = $tsql_numSpots = '';
 
-        $blackoutTime = 1*60;  // In minutes
+        // TODO -- pull from configuration
+				$blackoutTime = 1*60;  // In minutes
         $maximumDaysOut = 365; // In days
-
-				/*
-				Dates come in as US format Y-m-d, need to localize (via the global dateFormat) before sending to DB
-				*/
+				
+				// TODO -- convert start/end into milliseconds then do the conversion back to local time after we've processed it to avoid all the strtotime()'s
 
         // If no start date given, default to today
         if(!isset($_GET['start'])) {
@@ -266,8 +270,6 @@ class Races
             $start = date($GLOBALS['dateFormat'] . " H:i:s", strtotime($_GET['start']));
             $end = isset($_GET['end']) ? date($GLOBALS['dateFormat'] . " H:i:s", strtotime($_GET['end'])) : date("{$GLOBALS['dateFormat']}  H:i:s", strtotime($_GET['start']) + 24*60*60); // Use end, or make it the end of the start day given
         }
-				
-//echo "{$start} to {$end}";
 
         // Change start to enforce the blackout time
         /*$cannotScheduleBefore = time() + $blackoutTime*60;
@@ -286,82 +288,51 @@ class Races
             throw new RestException(412,'Cannot schedule more than ' . $maximumDaysOut . ' in advance');
         }
 
+				/**
+				 * Create optional filters on query
+				 */
         $tsql_params = array(&$start, &$end);
 
-        if(isset($_GET['heatType']) && is_numeric($_GET['heatType'])) {
+        // TODO -- allow multiple heat types (or all) to be given
+				if(isset($_GET['heatType']) && is_numeric($_GET['heatType'])) {
             $tsql_heatType = 'AND hm.HeatTypeNo = ?';
             $tsql_params[] = &$_GET['heatType'];
         }
-
-        $tsql = "SELECT hm.HeatNo, ht.HeatTypeName AS title, hm.HeatNotes AS note, hm.HeatStatus, hm.ScheduledTime AS starts, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, (hm.RacersPerHeat - (hm.NumberOfReservation + hm.NumberOfCadetReservation + COUNT(hd.HeatNo))) AS SpotsAvailable, COUNT(hd.HeatNo) AS NumberOfPaid, hm.NumberOfReservation, hm.NumberOfCadetReservation FROM HeatMain AS hm LEFT OUTER JOIN HeatDetails AS hd ON hm.HeatNo = hd.HeatNo LEFT OUTER JOIN HeatTypes AS ht ON hm.HeatTypeNo = ht.HeatTypeNo WHERE (hm.ScheduledTime BETWEEN ? AND ?) {$tsql_heatType} {$tsql_numSpots} GROUP BY hm.HeatNo, ht.HeatTypeName, hm.HeatNotes, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, hm.NumberOfReservation, hm.NumberOfCadetReservation ORDER BY hm.ScheduledTime";
 				
-//echo $tsql;
-//print_r($tsql_params);
+				// TODO -- filter number of participants
+				if(false && isset($_GET['numParticipants']) && is_numeric($_GET['numParticipants'])) {
+            $tsql_numParticipants = 'AND SpotsAvailable >= ?';
+            $tsql_params[] = &$_GET['numParticipants'];
+        } else {
+						$_GET['numParticipants'] = 1; // Until we filter by "SpotsAvailable" in SQL...
+				}
+
+				// TODO -- Add restiction that heat needs to be "closed" or "not run": hm.HeatStatus IN (0, 4)
+
+        $tsql = "SELECT hm.HeatNo, ht.HeatTypeName AS title, hm.HeatNotes AS note, hm.HeatStatus, hm.ScheduledTime AS starts, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, (hm.RacersPerHeat - (hm.NumberOfReservation + hm.NumberOfCadetReservation + COUNT(hd.HeatNo))) AS SpotsAvailable, COUNT(hd.HeatNo) AS NumberOfPaid, hm.NumberOfReservation, hm.NumberOfCadetReservation FROM HeatMain AS hm LEFT OUTER JOIN HeatDetails AS hd ON hm.HeatNo = hd.HeatNo LEFT OUTER JOIN HeatTypes AS ht ON hm.HeatTypeNo = ht.HeatTypeNo WHERE hm.EventRound IS NULL AND (hm.ScheduledTime BETWEEN ? AND ?) {$tsql_heatType} {$tsql_numSpots} {$tsql_numParticipants} GROUP BY hm.HeatNo, ht.HeatTypeName, hm.HeatNotes, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, hm.NumberOfReservation, hm.NumberOfCadetReservation ORDER BY hm.ScheduledTime"; // TODO: Modify to using a subquery so that we can filter on SpotsAvailable
 
         $scheduledHeats = $this->run_query($tsql, $tsql_params);
 				
 				$matchingHeats = $scheduledHeats; // To bypass commented out code below
 
-        /*$tsql = "SELECT e.EventID, e.EventDesc as title, e.EventNotes as note, e.EventScheduledTime as starts, e.EventDuration as ScheduleDuration, e.TotalRacers as RacersPerHeat, e.MemberOnly as SpotsAvailable FROM Events e WHERE EventScheduledTime BETWEEN ? AND ?";
-        $tsql_params = array(&$start, &$end);
-        $scheduledEvents = $this->run_query($tsql, $tsql_params);
-
-        // TODO Get from DB
-        $bookingsStartAt = date($GLOBALS['dateFormat'], strtotime($start)) . ' 11:00:00';
-        $bookingsEndAt   = date($GLOBALS['dateFormat'], strtotime($start)) . ' 12:30:00';
-        $bookingLengthInMinutes = 20;
-        $defaultSpots = 10;
-        $trackId = 4;
-        $daysInAdvance = 7;
-        $blackoutTimeInMinutes = 0;
-
-        $combinedEventsAndHeats = array_merge($scheduledHeats, $scheduledEvents);
-        //print_r($combinedEventsAndHeats); die();
-
-        $allHeats = $this->getHeatSlotsForDay($combinedEventsAndHeats, $start, $bookingsStartAt, $bookingsEndAt, $bookingLengthInMinutes, $defaultSpots, $trackId, $daysInAdvance, $blackoutTimeInMinutes);
-
-//print_r($allHeats);die();
-
-        if(!isset($_GET['numDrivers'])   || !is_numeric($_GET['numDrivers']))   throw new RestException(412,'Please provide the number of drivers (numDrivers)');
-        if(!isset($_GET['numHeats'])     || !is_numeric($_GET['numHeats']))     throw new RestException(412,'Please provide the number of heats (numHeats)');
-        if(!isset($_GET['gapInMinutes']) || !is_numeric($_GET['gapInMinutes'])) throw new RestException(412,'Please provide the gap in minutes (gapInMinutes)');
-        $numDrivers   = isset($_GET['numDrivers']) ? $_GET['numDrivers'] : 1;
-        $numHeats     = isset($_GET['numHeats']) ? $_GET['numHeats'] : 1;
-        $gapInMinutes = isset($_GET['gapInMinutes']) ? $_GET['gapInMinutes'] : 10;
-
-        $matchingHeats = $this->findMatchingHeats($allHeats, $numDrivers, $numHeats, $gapInMinutes);*/
-
-//print_r($matchingHeats);
-        
-				/*foreach($matchingHeats as $key => $match) {
-            foreach($match as $heatKey => $heat) {
-                $matches[$key][$heatKey] = array(
-                    'heatId' => isset($heat['heatId']) ? $heat['heatId'] : null,
-                    'starts' => date($GLOBALS['dateFormat'] . ' H:i:s', $heat['starts']),
-                    'ends'   => date($GLOBALS['dateFormat'] . ' H:i:s', $heat['ends']),
-                    'spots'  => $heat['spots'],
-                    'racers' => $heat['racers'],
-                    'title'  => $heat['title'],
-                    'note'   => $heat['note']
-                );
-            }
-        }*/
-
 				$matches = array();
 				foreach($matchingHeats as $heat) {
-						$matches[] = array(
-								'heatId' => (int)$heat['HeatNo'],
-								'trackId' => (int)$heat['TrackNo'],
-								'name' => $heat['title'],
-								'starts' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts'])),
-								'ends' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts']) + (int)$heat['ScheduleDuration']*60),
-								'total_spots' => (int)$heat['SpotsAvailable'],
-								'available_spots' => (int)$heat['SpotsAvailable'],
-								'title'  => $heat['title'],
-								'note'   => $heat['note'],
-								'price'  => 20.00,
-								//'original' => $heat
-						);
+						 // Until we filter by "SpotsAvailable" in SQL...
+						if(isset($_GET['numParticipants']) && is_numeric($_GET['numParticipants']) && (int)$heat['SpotsAvailable'] >= $_GET['numParticipants']) {
+								$matches[] = array(
+										'heatId' => (int)$heat['HeatNo'],
+										'trackId' => (int)$heat['TrackNo'],
+										'name' => $heat['title'],
+										'starts' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts'])),
+										'ends' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts']) + (int)$heat['ScheduleDuration']*60),
+										'total_spots' => (int)$heat['RacersPerHeat'],
+										'available_spots' => (int)$heat['SpotsAvailable'],
+										'title'  => $heat['title'],
+										'note'   => $heat['note'],
+										'price'  => 20.00,
+										//'original' => $heat
+										);
+						}
 				}
 
         return array('races' => $matches);
