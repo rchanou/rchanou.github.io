@@ -6,6 +6,22 @@
     <script src="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
     <script src="../js/zutil.debug.js"></script>
+    <script>
+        // zUtil setup
+        z.setup({
+            useArrayExtensions: true,
+            useFunctionExtensions: true,
+            useNumberExtensions: true,
+            useObjectExtensions: true,
+            defaultLogger: console
+        });
+        var log = z.log;
+        var assert = z.assert;
+        var sw = z.sw;
+        var parameters = z.location.parameters;
+        var events = z.events;
+        var equals = z.equals;
+    </script>
 
     <style type="text/css">
         html, body {
@@ -35,23 +51,7 @@
 </head>
 <body>
 <script>
-
-    /**
-        Location helper functions
-    */
-
-    var z = new zUtil({
-        useArrayExtensions: true,
-        useNumberExtensions: true,
-        useObjectExtensions: true,
-        defaultLogger: console
-    });
-    var log = z.log;
-    var assert = z.assert;
-    var sw = z.sw;
-    var parameters = z.location.parameters;
-    var data = {}; // for use with handlebars
-
+    var data = {};
     function buildAndAppendHtml(templateHtml) {
         data.extend(parameters);
         var template = Handlebars.compile(templateHtml); // compile the originally defined source

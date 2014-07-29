@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Top Times</title>
+    <title>Schedule</title>
     
     <script src="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
@@ -141,37 +141,48 @@
         #results .racer .racerText {
             width: 100%;
             height: 100%;
-            vertical-align: middle;
             font-weight: bold;
             /*font-size: 4vmin;*/
         }
-        #results .racer .position {
-            width: 10%;
+        #results .racer .raceNumber {
+            width: 13%;
         }
-        #results .racer .nickname {
-            width: 70%;
+        #results .racer .raceName {
+            width: 38%;
         }
-        #results .racer .lapTime {
-            width: 17%;
+        #results .racer .raceStart {
+            width: 30%;
+        }
+        #results .racer .usedSpots {
+            width: 16%;
         }
         .racerTextWrapper {
             margin-right: -6px; /* hackish css to get the parallelograms to overlap smoothly */
         }
-        #results .firstPlace .racerTextWrapper {
-            background: linear-gradient(to top right, #DAA520, #F5F5F5); /* goldenrod to whitesmoke */
-            color: black;
-        }
-        #results .secondPlace .racerTextWrapper {
-            background: linear-gradient(to top right, #C0C0C0, #F5F5F5); /* silver to whitesmoke */
-            color: black;
-        }
-        #results .thirdPlace .racerTextWrapper {
-            background: linear-gradient(to top right, #8C7853, #F5F5F5); /* bronze to whitesmoke */
-            color: black;
-        }
-        #results .otherPlace .racerTextWrapper {
+        #results .labelPlace .racerTextWrapper {
             background: linear-gradient(to top right, #000000, #A9A9A9); /* black to darkgrey */
             color: white;
+        }
+        #results .otherPlace .racerTextWrapper {
+            background: linear-gradient(to top right, #AAAAAA, #F5F5F5); /* silver to whitesmoke */
+            color: black;
+        }
+        #results .labelPlace .racerTextWrapper .racerText {
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            background-clip: text;
+            background-color: #333;
+            color: rgba(0,0,0,0.5);
+            color: rgba(255,255,255,0.8);
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.3);
+        }
+        #results .otherPlace .racerTextWrapper .racerText {
+            -webkit-background-clip: text;
+            -moz-background-clip: text;
+            background-clip: text;
+            background-color: #333;
+            color: rgba(0,0,0,0.4);
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.3);
         }
 
         /* helpers */
@@ -184,6 +195,15 @@
         }
         .padLeft5 {
             padding-left: 5vmin;
+        }
+        .padRight5 {
+            padding-right: 5vmin;
+        }
+        .mrgLeft5 {
+            margin-left: 5vmin;
+        }
+        .mrgRight5 {
+            margin-right: 500px;
         }
         .centerText {
             text-align: center;
@@ -230,11 +250,6 @@
         .fill {
             height: 100%;
             width: 100%;
-        }
-        .truncate {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         .parallelogram {
             -webkit-transform: skew(335deg);
@@ -371,10 +386,10 @@
         var deferred = [];
 
         deferred.push(api.getTracks({
-            // no additional parameters required
-        })
-        .then(function(data) {
+            // no additional data required
+        }).then(function(data) {
             cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
+
             var currentTrack = z.convert(parameters.trackId, z.types.number) || 1; // never a track 0 -- if falsy, take 1
             for (var i = 0; i < data.tracks.length; i++) {
                 if (data.tracks[i].id == currentTrack) {
@@ -385,30 +400,55 @@
             return data;
         }));
 
-        deferred.push(api.getTopTimes({
-            track: parameters.trackId,
-            range: parameters.range,
-            limit: parameters.limit
-        })
-        .then(function(data) {
+        deferred.push(api.getSchedule({
+            track: parameters.trackId
+        }).then(function(data) {
             cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
 
-            // apply locale to lap_time
-            z.forEach(data.fastest, function(x) {
-                if (z.check.isNumber(x.lap_time)) {
-                    x.lap_time = x.lap_time.toLocaleString(z.location.locale, {
-                        minimumFractionDigits: 3,
-                        maximumFractionDigits: 3
-                    });
-                }
-            });
+            // api call does not support limit -- support it on the front end (?)
+            if (z.check.isArray(data.races)) {
 
-            // calculate racer height and font size
-            var minRacers = 7; // don't use style calculations for fewer than 7 racers
-            var numElems = data.fastest.length > minRacers ? data.fastest.length : minRacers;
-            data.racerHeight = 96 / numElems + "%"; 
-            data.racerFontSize = 2 + (20 / numElems) + "vh";
+                // default to taking 10 races
+                data.races = data.races
+                    .take(z.convert(parameters.limit, z.types.number) || 10)
+                    .select(function(x) { return x.race; });
 
+                z.forEach(data.races, function(val, key) {
+
+                    // calculate availability header
+                    var totalSpots = z.convert(val.total_spots, z.types.number);
+                    var usedSpots = z.check.exists(val.racers) ? val.racers.length : 0;
+                    if (usedSpots < totalSpots) {
+                        val.used_spots_text = usedSpots + " / " + totalSpots;
+                    }
+                    else {
+                        val.used_spots_text = "FULL";
+                    }
+
+                    // parse starts_at date and convert
+                    var tempDate = z.convert(val.starts_at, z.types.date);
+                    if (z.check.isDate(tempDate)) {
+                        val.starts_at = tempDate.toLocaleString(z.location.locale);
+                    }
+
+                    // apply styling to the race_number
+                    val.race_number = (z.check.exists(val.race_number) ? "#" + val.race_number : "");
+                });
+
+                // add the label "race"
+                data.races.unshift({
+                    race_number: "Race #",
+                    race_name: "Race Name",
+                    used_spots_text: "Used Spots",
+                    starts_at: "Start Time"                 
+                });
+
+                // calculate racer height and font size
+                var minRacers = 7; // don't use style calculations for fewer than 7 racers
+                var numElems = data.races.length > minRacers ? data.races.length : minRacers;
+                data.racerHeight = 96 / numElems + "%";
+                data.racerFontSize = 2 + (20 / numElems) + "vh";
+            }
             return data;
         }));
 
@@ -423,22 +463,12 @@
     function setupHandlebars() {
         Handlebars.registerHelper('getPlace', function(index, options) {
             switch (index) {
-                case 0: return "firstPlace";
-                case 1: return "secondPlace";
-                case 2: return "thirdPlace";
+                case 0: return "labelPlace";
                 default: return "otherPlace";
             }
         });
         Handlebars.registerHelper('inc', function(value, options) {
             return parseInt(value) + 1;
-        });
-        Handlebars.registerHelper('getHeaderText', function(data, options) {
-            var header = "";
-            header += "TOP TIMES OF THE " + data.range.toUpperCase();
-            if (!data.fastest || data.fastest.length < 1) {
-                header += " (none yet!)";
-            }
-            return header;
         });
     }
     
@@ -451,48 +481,63 @@
 
         //// --- example data object to be passed to HandleBars templating engine ---
         // data: {
-        //     "trackId": "1",
-        //     "speedLevel": "1",
-        //     "range": "day",
-        //     "backgroundUrl": "./temp/gold.jpg",
+        //     "debug": "1",
+        //     "track": 1,
         //     "id": "1",
-        //     "name": "Austin",
-        //     "fastest": [
+        //     "name": "Full Throttle Track",
+        //     "races": [
         //         {
-        //             "racer_id": "10123556",
-        //             "nickname": "harold chovanetz",
-        //             "first_name": "Harold",
-        //             "rpm": "1264",
-        //             "last_name": "Chovanetz",
-        //             "lap_time": "23.472",
-        //             "lap_number": "14",
-        //             "speed_level": "1",
-        //             "track_id": "1",
-        //             "track_name": "Austin",
-        //             "timestamp": "2014-07-07 13:26:00"
+        //             "race_number": "Race #",
+        //             "race_name": "Race Name",
+        //             "used_spots_text": "Used Spots"
         //         },
         //         {
-        //             "racer_id": "10123563",
-        //             "nickname": "Austin Casper",
-        //             "first_name": "Austin",
-        //             "rpm": "1238",
-        //             "last_name": "Casper",
-        //             "lap_time": "23.732",
-        //             "lap_number": "14",
-        //             "speed_level": "1",
+        //             "id": "66221",
         //             "track_id": "1",
-        //             "track_name": "Austin",
-        //             "timestamp": "2014-07-07 13:17:00"
+        //             "track": "Full Throttle Track",
+        //             "starts_at": "2014-08-25 13:30:00.000",
+        //             "heat_type_id": "1",
+        //             "heat_status_id": "0",
+        //             "speed_level_id": "1",
+        //             "speed_level": "Adult Speed Level",
+        //             "win_by": "laptime",
+        //             "race_by": "minutes",
+        //             "duration": "10",
+        //             "race_name": "8 Min Race",
+        //             "race_number": "21",
+        //             "racers": [],
+        //             "total_spots": "10",
+        //             "used_spots_text": "0 / 10"
+        //         },
+        //         {
+        //             "id": "66222",
+        //             "track_id": "1",
+        //             "track": "Full Throttle Track",
+        //             "starts_at": "2014-08-25 13:40:00.000",
+        //             "heat_type_id": "41",
+        //             "heat_status_id": "0",
+        //             "speed_level_id": "2",
+        //             "speed_level": "Youth Speed Level",
+        //             "win_by": "laptime",
+        //             "race_by": "minutes",
+        //             "duration": "10",
+        //             "race_name": "8 Min Youth Heat",
+        //             "race_number": "22",
+        //             "racers": [],
+        //             "total_spots": "10",
+        //             "used_spots_text": "0 / 10"
         //         }
-        //     ]
-        // }
+        //     ],
+        //     "racerHeight": "8.727272727272727%",
+        //     "racerFontSize": "3.8181818181818183vh"
+        // } 
 
         var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
         +   '       <div id="headerTop" class="parallelogram">'
-        +   '           <div class="headerText unskew uppercase shadows vMiddle hCenter">{{getHeaderText this}}</div>'
+        +   '           <div class="headerText unskew uppercase shadows vMiddle hCenter">SCHEDULED RACES</div>'
         +   '       </div>'
         +   '       <div id="headerBottom" class="parallelogram">'
         +   '           <div class="unskew">'
@@ -507,11 +552,12 @@
         +   '       </div>'
         +   '   </div>'
         +   '   <div id="results">'
-        +   '       {{#each fastest}}'
+        +   '       {{#each races}}'
         +   '           <div class="racer {{getPlace @index}} hidden" style="height: {{../racerHeight}}; font-size: {{../racerFontSize}};">'
-        +   '               <div class="racerTextWrapper position parallelogram centerText"><div class="racerText vMiddle unskew">{{inc @index}}</div></div>'
-        +   '               <div class="racerTextWrapper nickname parallelogram"><div class="racerText unskew vMiddle padLeft5">{{nickname}}</div></div>'
-        +   '               <div class="racerTextWrapper lapTime parallelogram centerText"><div class="racerText vMiddle unskew">{{lap_time}}</div></div>'
+        +   '               <div class="racerTextWrapper raceNumber parallelogram"><div class="racerText unskew vMiddle hCenter">{{race_number}}</div></div>'
+        +   '               <div class="racerTextWrapper raceName parallelogram">  <div class="racerText unskew vMiddle hLeft mrgLeft5">{{race_name}}</div></div>'
+        +   '               <div class="racerTextWrapper raceStart parallelogram"> <div class="racerText unskew vMiddle hCenter">{{starts_at}}</div></div>'
+        +   '               <div class="racerTextWrapper usedSpots parallelogram"> <div class="racerText unskew vMiddle hCenter">{{used_spots_text}}</div></div>'
         +   '           </div>'
         +   '       {{/each}}'
         +   '   </div>'
@@ -556,18 +602,15 @@
         @returns {void}
     */
     function pollForChanges(timeout) {
-        api.getTopTimes.poll({
+        api.getSchedule.poll({
             timeout: timeout || 5000,
             track: parameters.trackId,
-            range: parameters.range,
-            limit: parameters.limit,
             callback: function(data) {
                 if (!z.equals(data, cache[data.url])) {
                     window.location.reload();
                 }
             }
         });
-        // poll for track information? probably not useful.
     }
 
     /**
@@ -578,7 +621,7 @@
         @returns {object} The extended object from the argument list.
     */
     function smashArgs() {
-        var data = {}.smash(parameters).extend(api.getTopTimes.defaults);
+        var data = {}.smash(parameters).extend(api.getSchedule.defaults);
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
         return data;
     }

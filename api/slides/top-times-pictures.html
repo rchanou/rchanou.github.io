@@ -8,8 +8,9 @@
     <script src="../js/zutil.debug.js"></script>
     <script>
         // zUtil setup
-        var z = new zUtil({
+        z.setup({
             useArrayExtensions: true,
+            useFunctionExtensions: true,
             useNumberExtensions: true,
             useObjectExtensions: true,
             defaultLogger: console
@@ -482,6 +483,21 @@
     function getData() {
         var deferred = [];
 
+        deferred.push(api.getTracks({
+            // no additional parameters required
+        })
+        .then(function(data) {
+            cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
+            var currentTrack = z.convert(parameters.trackId, z.types.number) || 1; // never a track 0 -- if falsy, take 1
+            for (var i = 0; i < data.tracks.length; i++) {
+                if (data.tracks[i].id == currentTrack) {
+                    data = data.tracks[i];
+                    break;
+                }
+            }
+            return data;
+        }));
+
         deferred.push(api.getTopTimes({
             track: parameters.trackId,
             range: parameters.range,
@@ -517,7 +533,7 @@
                 });
 
                 // collect track_name from the first racer, instead of making another api call to tracks (?)
-                data.track_name = data.fastest[0].track_name;
+                // data.track_name = data.fastest.length > 0 ? (data.fastest[0].track_name || "") : "";
             }
 
             // calculate the grid widths, heights, and column/row counts
@@ -587,12 +603,15 @@
             return src;
         });
         Handlebars.registerHelper('getHeaderText', function(data, options) {
-            var header = "";
-            header += "TOP TIMES OF THE " + data.range.toUpperCase() + (data.track ? " ON TRACK: " + data.track_name : "")
-            if (!data.fastest || data.fastest.length < 1) {
-                header += " (none yet!)";
-            }
-            return header;
+            return  "TOP TIMES OF THE " + data.range.toUpperCase()
+                +   (
+                        data.fastest && data.fastest.length > 0 ?
+                            data.name ?                     // data.fastest.length > 0
+                                " ON TRACK: " + data.name   // has data.name
+                                : ""                        // does not have data.name
+                            : " (none yet!)"                // data.fastest.length <= 0
+                    )
+                ;
         });
     }
     
@@ -668,7 +687,7 @@
         +   '           <div class="back face fill roundAll">'
         +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{../gridSizes.fontSize}};">'
         +   '                   <div class="portraitHeaderWrapper roundTop">'
-        +   '                       <div class="portraitHeaderText fill vMiddle hCenter truncate">{{nickname}}</div>'
+        +   '                       <div class="portraitHeaderText fill vMiddle hCenter truncate ">{{nickname}}</div>'
         +   '                   </div>'
         +   '                   <div class="portraitBodyWrapper">'
         +   '                       <div class="portraitBodyTextWrapper lFloat">'
@@ -698,7 +717,7 @@
         +   '   <div id="upNextWrapper">'
         +   '       <div id="upNextTopWrapper" class="fill">'
         +   '           <div class="upNextHeader parallelogram">'
-        +   '               <div class="headerText unskew textShadow vMiddle hCenter fill">{{getHeaderText this}}</div>'
+        +   '               <div class="headerText unskew textShadow vMiddle hCenter fill truncate">{{getHeaderText this}}</div>'
         +   '           </div>'
         +   '           {{#each fastest}}'
         +                   portraitSrc // template html for top time with picture

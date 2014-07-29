@@ -10,7 +10,7 @@
             e. log
         2. jQuery
 */
-(function(w, z, $, undefined) {
+;(function(w, z, $, undefined) {
     var clubspeed = w.clubspeed = (w.clubspeed || {}); // implement or collect pointer for the clubspeed namespace
     clubspeed.classes = clubspeed.classes || {}; // implement or collect pointer for the clubspeed.classes namespace
 
@@ -108,6 +108,23 @@
                 }
             });
 
+            var getSchedule = function(options) {
+                return sendRequest({
+                    api: "races/upcoming.json",
+                    type: "GET",
+                    data: {
+                        track: options.track || getSchedule.defaults.track
+                    }
+                });
+            }.extend({
+                defaults: {
+                    track: 1
+                },
+                poll: function(options) {
+                    return _poll(getSchedule, options);
+                }
+            });
+
             var getTopProskill = function(options) {
                 var data = {
                     limit: z.convert(options.limit, z.types.number) || getTopProskill.defaults.limit
@@ -162,23 +179,6 @@
             }.extend({
                 poll: function(options) {
                     return _poll(getPreviousRace, options);
-                }
-            });
-
-            var getUpcoming = function(options) {
-                return sendRequest({
-                    api: "races/upcoming.json",
-                    type: "GET",
-                    data: {
-                        track: options.track || getUpcoming.defaults.track
-                    }
-                });
-            }.extend({
-                defaults: {
-                    track: 1
-                },
-                poll: function(options) {
-                    return _poll(getUpcoming, options);
                 }
             });
 
@@ -280,10 +280,10 @@
                 z.defineProperty(apiObj, "getNextRace", { get: function() { return getNextRace; }, writeable: false });
                 z.defineProperty(apiObj, "getPreviousRace", { get: function() { return getPreviousRace; }, writeable: false });
                 z.defineProperty(apiObj, "getRaceDetails", { get: function() { return getRaceDetails; }, writeable: false });
+                z.defineProperty(apiObj, "getSchedule", { get: function() { return getSchedule; }, writeable: false });
                 z.defineProperty(apiObj, "getTopProskill", { get: function() { return getTopProskill; }, writeable: false });
                 z.defineProperty(apiObj, "getTopTimes", { get: function() { return getTopTimes; }, writeable: false });
                 z.defineProperty(apiObj, "getTracks", { get: function() { return getTracks; }, writeable: false });
-                z.defineProperty(apiObj, "getUpcoming", { get: function() { return getUpcoming; }, writeable: false });
                 return apiObj;
             })({});
 

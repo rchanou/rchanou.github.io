@@ -8,8 +8,9 @@
     <script src="../js/zutil.debug.js"></script>
     <script>
         // zUtil setup
-        var z = new zUtil({
+        z.setup({
             useArrayExtensions: true,
+            useFunctionExtensions: true,
             useNumberExtensions: true,
             useObjectExtensions: true,
             defaultLogger: console
@@ -354,7 +355,7 @@
     // then use a fallback for api root (in this case, ftikcincinnati)
     // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
-        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
+        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ekwigan.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
     var cache = {}; // for use with polling comparison
@@ -608,7 +609,7 @@
         @returns {object} The extended object from the argument list.
     */
     function smashArgs() {
-        var data = {}.smash(parameters).extend(api.getUpcoming.defaults);
+        var data = {}.smash(parameters).extend(api.getPreviousRace.defaults);
         z.forEach(Array.prototype.slice.call(arguments), function(val, key) { data.smash(val); });
         return data;
     }
