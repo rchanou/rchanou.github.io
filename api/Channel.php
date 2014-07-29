@@ -137,10 +137,30 @@ class Channel
 							// 11 Video - 3 TODO: Not implemented
 							// 12 Camera TODO: Not implemented
 
-							// Next Racers - 5
+							// Next Racers - 5 (and with picture)
 							case 13:
-								$url = $this->channelSlideUrl . 'up-next.html?trackId=' . $slide['TrackNo'] . '&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
-								$output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'nextRacers'));
+								$slideUrl = ($slide['Text2'] == 1) ? 'up-next-pictures.html' : 'up-next.html';
+								$url = $this->channelSlideUrl
+									.  $slideUrl
+									. '?trackId=' 		  . $slide['TrackNo']
+									. '&speedLevel='	  . $slide['Text1']
+									. '&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
+								
+								$output['lineup'][] = array(
+									'type' => 'url',
+									'options' => array(
+										'url' => $url,
+										'duration' => $slide['TimeInSecond']*1000,
+										'trackId' => (int)$slide['TrackNo'],
+										'backgroundUrl' => $this->speedScreenBackgroundUrl,
+										'speedLevel' => (int)$slide['Text1'],
+										'showPicture' => $slide['Text2'] == 1 ? true : false,
+										'showLineUpNumber' => $slide['Text3'] == 1 ? true : false,
+										'showKartNumber' => $slide['Text4'] == 1 ? true : false,
+										'rowsPerPage' => (int)$slide['Text5'],
+										'type' => 'nextRacers'
+										)
+									);
 								break;						
 
 							// Next, Next Racers - 5
@@ -193,6 +213,14 @@ class Channel
 
 							// Event Screen - 3
 							case 20:
+								/*
+								Event procedures:
+								1. GetLastRanHeatNoByTrack @TrackNo
+								2. GetCurrentRunningEvent @HeatNo
+								3. GetEventScorePerRound @EventNo
+								4. Massage data from #3 into table
+								*/
+								
 								$output['lineup'][] = array('type' => 'eventScreen', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
 								break;
 
