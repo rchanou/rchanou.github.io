@@ -42,3 +42,7 @@ admin/www/web.config
 api/web.config
 booking/www/web.config
 cs-registration/www/web.config
+admin/www/web.config.bak
+api/web.config.bak
+booking/www/web.config.bak
+cs-registration/www/web.config.bak
