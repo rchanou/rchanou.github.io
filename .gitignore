@@ -35,6 +35,7 @@ Icon
 .Spotlight-V100
 .Trashes
 
+web.config
 cs-registration/laravel/app/config/config.php
 cs-speedscreen/config.js
 admin/www/web.config
