@@ -37,3 +37,7 @@ Icon
 
 cs-registration/laravel/app/config/config.php
 cs-speedscreen/config.js
+admin/www/web.config
+api/web.config
+booking/www/web.config
+cs-registration/www/web.config
