@@ -3,11 +3,11 @@ var gridding = require("../lib/gridding.js");
 
 // Setup some variables that we can test with
 var participantsDefault = [
-			 	{ participantId: 'Wes', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
-				{ participantId: 'Glenda', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
-				{ participantId: 'Max', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
-				{ participantId: 'Tommy', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
-				{ participantId: 'Shakib', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 }
+			 	{ participantId: 'Wes', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5, vehicleId: 1},
+				{ participantId: 'Glenda', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4, vehicleId: 2 },
+				{ participantId: 'Max', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3, vehicleId: 3 },
+				{ participantId: 'Tommy', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2, vehicleId: 4 },
+				{ participantId: 'Shakib', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1, vehicleId: 5 }
 			 ];
 var particpants = [];
 
@@ -213,6 +213,7 @@ describe("Participant Sorting Methods", function() {
 			expect(res).to.have.deep.property('[0][2].participantId', 'Max');
 			expect(res).to.have.deep.property('[0][3].participantId', 'Glenda');
 			expect(res).to.have.deep.property('[0][4].participantId', 'Wes');
+			
 		});
 		
 		it("should handle missing finishing grid positions", function(){
@@ -407,10 +408,33 @@ describe("Participant Sorting Methods", function() {
 					 expect(res).to.have.deep.property('[4].participantId');
        });
 			 
-			 it("should return three copies", function(){			
-					var res = gridding.create('randomized', participants.slice(0), { numHeatsPerParticipant: 3 });
-					expect(res).to.have.length(3);
+			 it("should return five copies that are different", function(){			
+					var res = gridding.create('randomized', participants.slice(0), { numHeatsPerParticipant: 5 });
+					expect(res).to.have.length(5);
+					expect(res[0]).not.to.deep.equal(res[1]);
 				});
+				
+				/*
+				Test for scenario Chris needed to understand
+				it("should group and copy correctly for randomized", function() {
+					var twelveParticipants = [
+						{ participantId: 'Person 1', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'Person 2', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+						{ participantId: 'Person 3', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+						{ participantId: 'Person 4', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+						{ participantId: 'Person 5', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+						{ participantId: 'Person 6', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'Person 7', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+						{ participantId: 'Person 8', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+						{ participantId: 'Person 9', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+						{ participantId: 'Person 10', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+						{ participantId: 'Person 11', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'Person 12', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 }
+					 ];
+					 
+					var res = gridding.create('randomized', twelveParticipants, { maxDrivers: 5, numHeatsPerParticipant: 5 });
+					console.log(res);
+				});*/
 
    });
 	 
@@ -444,6 +468,209 @@ describe("Participant Sorting Methods", function() {
 					 expect(res2).to.have.deep.property('[0][1].startingPosition', 2);
 					 expect(res2).to.have.deep.property('[0][2].startingPosition', 3);
        });
+			 
+			 /*
+			 //Testing speeders gridding
+			 it("should grid for speeders", function() {
+				 var speedersParticipants = [
+						{ participantId: 'JoshK 1', points: 5, bestAverageLapTime: 31.00, bestLapTime: 23.041, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'All business 2', points: 3, bestAverageLapTime: 33.00, bestLapTime: 23.088, startingPosition: 2, finishingPosition: 4 },
+						{ participantId: 'CAShorty 3', points: 3, bestAverageLapTime: 35.00, bestLapTime: 23.142, startingPosition: 1, finishingPosition: 3 },
+						{ participantId: 'Poles Dancer 4', points: 2, bestAverageLapTime: 34.00, bestLapTime: 23.286, startingPosition: 4, finishingPosition: 2 },
+						{ participantId: 'Herby 5', points: 0, bestAverageLapTime: 32.00, bestLapTime: 23.584, startingPosition: 5, finishingPosition: 1 },
+						{ participantId: 'BP Racing 6', points: 5, bestAverageLapTime: 31.00, bestLapTime: 24.292, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'Phil McCracken 7', points: 3, bestAverageLapTime: 33.00, bestLapTime: 24.701, startingPosition: 2, finishingPosition: 4 },
+						{ participantId: 'Clay 8', points: 3, bestAverageLapTime: 35.00, bestLapTime: 24.752, startingPosition: 1, finishingPosition: 3 },
+						{ participantId: 'JD on the go 9', points: 2, bestAverageLapTime: 34.00, bestLapTime: 25.036, startingPosition: 4, finishingPosition: 2 },
+						{ participantId: 'Shawn Roberts 10', points: 0, bestAverageLapTime: 32.00, bestLapTime: 25.144, startingPosition: 5, finishingPosition: 1 },
+						{ participantId: 'Fred Kerschubau 11', points: 5, bestAverageLapTime: 31.00, bestLapTime: 25.173, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'JS 12', points: 3, bestAverageLapTime: 33.00, bestLapTime: 25.56, startingPosition: 2, finishingPosition: 4 },
+						{ participantId: 'Speedy Gonzales 13', points: 5, bestAverageLapTime: 25.283, bestLapTime: 25.283, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'Baddog64 14', points: 3, bestAverageLapTime: 33.00, bestLapTime: 26.726, startingPosition: 2, finishingPosition: 4 },
+						{ participantId: 'DK speeder 15', points: 0, bestAverageLapTime: 32.00, bestLapTime: 26.806, startingPosition: 5, finishingPosition: 1 },
+						{ participantId: 'Marice Kennedy 16', points: 5, bestAverageLapTime: 31.00, bestLapTime: 30.001, startingPosition: 3, finishingPosition: 5 },
+						{ participantId: 'Tara 17', points: 3, bestAverageLapTime: 33.00, bestLapTime: 30.25, startingPosition: 2, finishingPosition: 4 },
+						{ participantId: 'Tony\'s Girl 18', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.142, startingPosition: 1, finishingPosition: 3 },
+					 ];
+					 
+					var res = gridding.create('bestLapTime', speedersParticipants, { maxDrivers: 10 });
+					console.log(res);
+			 });
+			 */
+
+   });
+	 
+	 /*describe("#magixFair()", function() {
+			 
+			 var participants = [
+			 	{ participantId: 'Person 1', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+				{ participantId: 'Person 2', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+				{ participantId: 'Person 3', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+				{ participantId: 'Person 4', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+				{ participantId: 'Person 5', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+				{ participantId: 'Person 6', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+				{ participantId: 'Person 7', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+				{ participantId: 'Person 8', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+				{ participantId: 'Person 9', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+				{ participantId: 'Person 10', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+				{ participantId: 'Person 11', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+				{ participantId: 'Person 12', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+				{ participantId: 'Person 13', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+				{ participantId: 'Person 14', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+				{ participantId: 'Person 15', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+				{ participantId: 'Person 16', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+				{ participantId: 'Person 17', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+				{ participantId: 'Person 18', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+				{ participantId: 'Person 19', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+				{ participantId: 'Person 20', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 }
+			 ];
+
+			var lineup = participants;
+			var numRacesPerRacer = 3;
+			var numRoundsTotal = 12;
+			var res = gridding.createMagixFairRoundLineup(lineup.length, numRoundsTotal, numRacesPerRacer); //numDriversTotal, numRoundsTotal, numRacesPerRacer
+			
+			var racers = [];
+			
+			// Compile some metadata to ease the tests below
+			res.forEach(function(lineup, raceNum) {
+				lineup.forEach(function(racerId, position) {
+					if(typeof racers[racerId] == 'undefined') racers[racerId] = { racerId: racerId, totalRounds: 0, positions: [], rounds: [], positionSummation: 0 };
+
+					var gridPosition = position + 1;
+					racers[racerId].totalRounds += 1;
+					racers[racerId].positions.push(gridPosition);
+					racers[racerId].rounds.push(raceNum + 1);
+					racers[racerId].positionSummation += gridPosition;
+				});
+			});
+
+			console.log(res);			
+			console.log(racers);
+			 
+			it("participants should race the correct number of times", function() {
+				racers.forEach(function(racer) {
+					expect(racer.rounds.length).to.equal(numRacesPerRacer);
+				});
+      });
+			 
+			it("rounds should have the correct number of heats", function() {				 
+				expect(res.length).to.equal(numRoundsTotal);
+			});
+			
+			it("participants should not race back to back races", function() {
+				var lastRound = null;
+				racers.forEach(function(racer) {
+					racer.rounds.forEach(function(currentRound) {
+						if(lastRound !== null) expect(currentRound).to.be.above(lastRound + 1);
+						lastRound = currentRound;
+					});
+					lastRound = null;
+				});
+			});
+
+			it("participants should not have pole more than once", function() {
+				racers.forEach(function(racer) {
+					expect(racer.positions.indexOf(1)).to.equal(racer.positions.lastIndexOf(1));
+				});
+			});
+
+			it("participants should have equal total starting positions", function() {
+				var lastPositionSummation;
+				racers.forEach(function(racer) {
+					if(typeof lastPositionSummation !== 'undefined') {
+						expect(lastPositionSummation).to.equal(racer.positionSummation);
+					}
+					lastPositionSummation = racer.positionSummation;
+				});
+			});
+
+   });*/
+	 
+	 describe("#balanced()", function() {
+			 
+			  var participants = [
+					{ participantId: 'Person 1', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+					{ participantId: 'Person 2', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+					{ participantId: 'Person 3', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },					
+					{ participantId: 'Person 4', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+					{ participantId: 'Person 5', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },					
+					{ participantId: 'Person 6', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },					
+					{ participantId: 'Person 7', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },										
+					{ participantId: 'Person 8', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+					{ participantId: 'Person 9', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },					
+					{ participantId: 'Person 10', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+					{ participantId: 'Person 11', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+					{ participantId: 'Person 12', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+					{ participantId: 'Person 13', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+					{ participantId: 'Person 14', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },					
+					{ participantId: 'Person 15', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },					
+					{ participantId: 'Person 16', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+					{ participantId: 'Person 17', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+					{ participantId: 'Person 18', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+					{ participantId: 'Person 19', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+					{ participantId: 'Person 20', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 }
+				 ];
+			 
+			 it("should create the correct lineup", function(){
+           var lineup = participants.slice(0);
+					 var res = gridding.balanced(lineup.length, 4);
+					 expect(res).to.deep.equal([[1,6,11,16], [2,7,12,17], [3,8,13,18], [4,9,14,19], [5,10,15,20]]);
+       });
+			 
+			 it("should create the correct lineup with an odd split", function(){
+           var lineup = participants.slice(0);
+					 var res = gridding.balanced(lineup.length, 7);
+					 expect(res).to.deep.equal([[1,4,7,10,13,16,19], [2,5,8,11,14,17,20], [3,6,9,12,15,18]]);
+       });
+
+   });
+	 
+	 describe("#fair()", function() {
+			 
+			  var participants = [
+					{ participantId: 'Person 1', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+					{ participantId: 'Person 2', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+					{ participantId: 'Person 3', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },					
+					{ participantId: 'Person 4', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+					{ participantId: 'Person 5', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+					
+					{ participantId: 'Person 6', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },					
+					{ participantId: 'Person 7', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },					
+					{ participantId: 'Person 8', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+					{ participantId: 'Person 9', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },										
+					{ participantId: 'Person 10', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },
+					
+					{ participantId: 'Person 11', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+					{ participantId: 'Person 12', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+					{ participantId: 'Person 13', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+					{ participantId: 'Person 14', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },					
+					{ participantId: 'Person 15', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 },					
+					
+					{ participantId: 'Person 16', points: 5, bestAverageLapTime: 31.00, bestLapTime: 35.234, startingPosition: 3, finishingPosition: 5 },
+					{ participantId: 'Person 17', points: 3, bestAverageLapTime: 33.00, bestLapTime: 33.234, startingPosition: 2, finishingPosition: 4 },
+					{ participantId: 'Person 18', points: 3, bestAverageLapTime: 35.00, bestLapTime: 33.536, startingPosition: 1, finishingPosition: 3 },
+					{ participantId: 'Person 19', points: 2, bestAverageLapTime: 34.00, bestLapTime: 36.234, startingPosition: 4, finishingPosition: 2 },
+					{ participantId: 'Person 20', points: 0, bestAverageLapTime: 32.00, bestLapTime: 31.234, startingPosition: 5, finishingPosition: 1 }
+				 ];
+			 
+			 it("should create the correct lineup", function(){
+           var lineup = participants.slice(0);
+					 var res = gridding.fair(lineup.length, 4);
+					 expect(res).to.deep.equal([[1,6,15,20], [2,7,14,19], [3,8,13,18], [4,9,12,17], [5,10,11,16]]);
+       });
+			 
+			 it("should create the correct lineup with an odd split", function(){
+           var lineup = participants.slice(0);
+					 var res = gridding.fair(lineup.length, 7);
+					 expect(res).to.deep.equal([[1,4,7,11,15,18,20], [2,5,8,10,14,17,19], [3,6,9,12,13,16]]);
+       });
+			 
+			 it("should create the correct lineup with a very odd split", function(){
+           var lineup = participants.slice(0, 10);
+					 var res = gridding.fair(lineup.length, 3); // [3,3,2,2]
+					 expect(res).to.deep.equal([[1,4,8,10], [2,5,7,9], [], []]);
+       });
 
    });
 
@@ -456,6 +683,60 @@ describe("Gridding & Helper Methods (That probably don't belong here)", function
 			.to.throw('Oh no')
 		});
 	});*/
+
+	
+	describe("#vehicleAssignment()", function() {
+	
+		it("should correctly assign no karts", function(){
+			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'none' });
+			expect(res).not.to.have.deep.property('[0][0].vehicleId');
+			expect(res).not.to.have.deep.property('[0][4].vehicleId');
+		});
+		
+		it("should correctly assign same", function(){
+			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'same' });
+			expect(res).to.have.deep.property('[0][0].vehicleId', 5);
+			expect(res).to.have.deep.property('[0][4].vehicleId', 1);
+		});
+		
+		it("should correctly assign same with less vehicles than drivers", function(){
+			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'fair', vehiclesAvailable: [ 8, 9 ] });
+			expect(res).to.have.deep.property('[0][0].vehicleId', 9);
+			expect(res).to.have.deep.property('[0][1].vehicleId', 8);
+			expect(res[0][4].vehicleId).to.equal(undefined);
+		});
+		
+		it("should correctly assign same", function(){
+			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 3, inverted: false, vehicleAssignmentType: 'same' });
+			expect(res).to.have.deep.property('[0][0].vehicleId', 5);
+			expect(res).to.have.deep.property('[1][1].vehicleId', 1);
+		});
+		
+		it("should correctly assign same inverted, grouped", function(){
+			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 3, inverted: true, vehicleAssignmentType: 'same' });
+			expect(res).to.have.deep.property('[0][0].vehicleId', 1);
+			expect(res).to.have.deep.property('[1][1].vehicleId', 5);
+		});
+		
+		it("should correctly assign fair", function(){
+			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'fair' });
+			expect(res).to.have.deep.property('[0][0].vehicleId', 1);
+			expect(res).to.have.deep.property('[0][4].vehicleId', 5);
+		});
+		
+		it("should correctly assign fair, grouped", function(){
+			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 3, inverted: false, vehicleAssignmentType: 'fair' });
+			expect(res).to.have.deep.property('[0][0].vehicleId', 1);
+			expect(res).to.have.deep.property('[1][1].vehicleId', 5);
+		});
+		
+		it("should correctly assign random", function(){
+			var res1 = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'random' });
+			var res2 = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'random' });
+			
+			expect(res1).not.to.deep.equal(res2);
+		});
+	});
 	
 	describe("#balanceParticipants()", function() {
 	
@@ -505,29 +786,44 @@ describe("Gridding & Helper Methods (That probably don't belong here)", function
 	 
 	 describe("#filterParticipantsInRound()", function() {
 			 
+			 var twentyParticipants = JSON.parse(JSON.stringify(participantsDefault)).concat(
+			 	JSON.parse(JSON.stringify(participantsDefault)),
+				JSON.parse(JSON.stringify(participantsDefault)),
+				JSON.parse(JSON.stringify(participantsDefault))
+				);
+			 var twoParticipants = JSON.parse(JSON.stringify(participantsDefault)).slice(0,2);
+			 
 			 it("should limit by number", function(){
-           var res = gridding.filterParticipantsInRound('topNumber', 5, 20);
-           expect(res).to.equal(5);
+           var res = gridding.filterParticipantsInRound('topNumber', 5, twentyParticipants);
+           expect(res.length).to.equal(5);
        });
 			 
 			 it("should limit by number (and not return more than number of participants", function(){
-           var res = gridding.filterParticipantsInRound('topNumber', 5, 2);
-           expect(res).to.equal(2);
+           var res = gridding.filterParticipantsInRound('topNumber', 5, twoParticipants);
+           expect(res.length).to.equal(2);
        });
 			 
 			 it("should limit by percentage", function(){
-           var res = gridding.filterParticipantsInRound('topPercent', 50, 20);
-           expect(res).to.equal(10);
+           var res = gridding.filterParticipantsInRound('topPercent', 50, twentyParticipants);
+           expect(res.length).to.equal(10);
        });
 			 
 			 it("should limit by percentage (and round)", function(){
-           var res = gridding.filterParticipantsInRound('topPercent', 33, 20);
-           expect(res).to.equal(7);
+           var res = gridding.filterParticipantsInRound('topPercent', 33, twentyParticipants);
+           expect(res.length).to.equal(7);
        });
 			 
 			 it("should handle bad filter name", function(){
-           var res = gridding.filterParticipantsInRound('missingFilter', 5, 20);
-           expect(res).to.equal(20);
+           var res = gridding.filterParticipantsInRound('missingFilter', 5, twentyParticipants);
+           expect(res.length).to.equal(20);
+       });
+			 
+			 it("should handle best lap within a percentage of the fastest (107% rule)", function(){
+           var participants = JSON.parse(JSON.stringify(participantsDefault));
+					 var res = gridding.filterParticipantsInRound('bestLapWithinPercentOfFastest', 107, participants);
+           expect(res.length).to.equal(2);
+					 expect(res[0].bestLapTime).to.be.below(33.42038);
+					 expect(res[1].bestLapTime).to.be.below(33.42038);
        });
 
    });
