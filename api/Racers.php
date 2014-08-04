@@ -784,12 +784,20 @@ EOD;
 
 		$tsql = "select top($limit) custid, birthdate, phonenumber, (custid/1000000) AS locationid, membershipstatus, membershiptextlong AS membershiptext, cell, fname, lname, racername, birthdate, gender, emailaddress, address, address2, city, state, zip, country rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail from customers c where emailaddress <> '' and deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
 
-		// OLD QUERY
-		//$tsql = "select top($limit) custid, birthdate, cell, fname, lname, racername, birthdate, gender, emailaddress, zip, rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail  from customers where emailaddress <> '' and deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
+		$racers = $this->run_query($tsql, $tsql_params);
 
-		$rows = $this->run_query($tsql, $tsql_params);
+		foreach($racers as $id => $racer) {
+			$racers[$id]['memberships'] = array();
+			$memberships = $this->run_query("GetCustomerMemberships {$racer['custid']}", array());
+			foreach($memberships as $membership) {
+				$racers[$id]['memberships'][] = array('name' => $membership['Description'], 'expiration' => $membership['ExpirationDate']);
+			}
+			
+			$points = $this->run_query("GetCustomerStandardPoints {$racer['custid']}", array());
+			$racers[$id]['points'] = floatval($points[0]['Points']);
+		}
 
-		return array('racers' => $rows);
+		return array('racers' => $racers);
 	}
 
 	/**
