@@ -100,7 +100,7 @@
                     $('#container').isotope( 'reLayout' );
                     $('#container').isotope({ sortBy : 'position' });
 
-                },500));
+                },250));
 
                 intervalsToReturn.push($interval( function()
                 {
