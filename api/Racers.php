@@ -787,14 +787,26 @@ EOD;
 		$racers = $this->run_query($tsql, $tsql_params);
 
 		foreach($racers as $id => $racer) {
+			
+			// Add memberships
 			$racers[$id]['memberships'] = array();
 			$memberships = $this->run_query("GetCustomerMemberships {$racer['custid']}", array());
 			foreach($memberships as $membership) {
 				$racers[$id]['memberships'][] = array('name' => $membership['Description'], 'expiration' => $membership['ExpirationDate']);
 			}
 			
+			// Add points
 			$points = $this->run_query("GetCustomerStandardPoints {$racer['custid']}", array());
 			$racers[$id]['points'] = floatval($points[0]['Points']);
+			
+			// Add cell phone consent and date
+			$racers[$id]['cell_consent_given'] = empty($racer['cell']) ? false : true;
+			$racers[$id]['cell_consent_date']  = empty($racers[$id]['cell_consent_given']) ? null : $racer['accountcreated'];
+			
+			// Add email consent and date
+			$racers[$id]['email_consent_given'] = ($racer['donotmail'] == 1) ? false : true;
+			$racers[$id]['email_consent_date']  = empty($racers[$id]['email_consent_given']) ? null : $racer['accountcreated'];
+			
 		}
 
 		return array('racers' => $racers);
