@@ -97,7 +97,7 @@ class Races
 					$params[] = $data;
 				}
 				$tsql = "INSERT INTO HeatMain ( " . implode(',', $fields) . " ) OUTPUT INSERTED.HeatNo VALUES ( " . implode(',', $placeholders) . " )";
-				//$result = $this->run_query($tsql, $params);
+				$result = $this->run_query($tsql, $params);
 			}
 			
 			// TODO Let MainEngine know to refresh the schedule
