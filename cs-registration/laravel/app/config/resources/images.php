@@ -57,7 +57,7 @@ class Images {
     private static function urlExists($imageURL)
     {
         $file_headers = @get_headers($imageURL);
-        if($file_headers[0] == 'HTTP/1.1 404 Not Found') {
+        if($file_headers[0] == 'HTTP/1.1 404 Not Found' || $file_headers[0] == 'HTTP/1.1 401 Unauthorized') {
             $exists = false;
         }
         else {
