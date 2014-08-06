@@ -139,12 +139,12 @@ EOD;
 			empty($request_data['birthdate']) ? true : false,
             $genderCode,
             2, //2 in Status1 means "Signed Waiver"
-            @$request_data['Address'],
-            @$request_data['Address2'],
-            @$request_data['Country'],
-            @$request_data['City'],
-            @$request_data['State'],
-            @$request_data['Zip']
+            isset($request_data['Address']) ? $request_data['Address'] : '',
+            isset($request_data['Address2']) ? $request_data['Address2'] : '',
+            isset($request_data['Country']) ? $request_data['Country'] : '',
+            isset($request_data['City']) ? $request_data['City'] : '',
+            isset($request_data['State']) ? $request_data['State'] : '',
+            isset($request_data['Zip']) ? $request_data['Zip'] : '',
 			);
 
         $rows = $this->run_query($tsql, $params);
