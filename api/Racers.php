@@ -134,7 +134,7 @@ EOD;
 			@$request_data['firstname'],
 			@$request_data['lastname'],
 			@$request_data['howdidyouhearaboutus'],
-            empty($request_data['birthdate']) ? null : date($GLOBALS['dateFormat'], strtotime(date('Y-m-d', strtotime($request_data['birthdate']))) + 24*60*60),
+            empty($request_data['birthdate']) ? null : date($GLOBALS['dateFormat'], strtotime(date('Y-m-d', strtotime($request_data['birthdate'])))),
 			@$request_data['mobilephone'],
 			empty($request_data['birthdate']) ? true : false,
             $genderCode,
