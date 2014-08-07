@@ -361,7 +361,7 @@
 @stop
 
 @section('rightFooterButton')
-{{ Form::submit($strings['step2Submit'], array('class'=>'rightButton btn btn-success btn-lg', "onclick" => "$('#loadingModal').modal()")) }}
+{{ Form::submit($strings['step2Submit'], array('class'=>'rightButton btn btn-success btn-lg')) }}
 {{ Form::close() }}
 @stop
 
