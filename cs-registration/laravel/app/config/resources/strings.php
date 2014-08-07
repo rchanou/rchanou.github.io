@@ -58,6 +58,7 @@ class Strings {
             'email' => 'Email Address',
             'emailsMessage' => 'We will email your results and special offers.<br/> We do not share your e-mail.',
             'emailsOptOut' => 'Do not email my results or special offers.',
+            'emailsOptIn' => 'Please email me my results and special offers.',
             'step2Clear' => 'Clear',
             'step2Submit' => 'Submit',
             'step3Header' => 'Terms & Conditions',
@@ -91,7 +92,13 @@ class Strings {
             'Other' => 'Other',
             'gender' => 'Gender',
             'switchToFacebookPic' => 'Switch back to Facebook profile picture',
-            'emailText' => 'By providing your email, you agree to receive periodic messages from ##TRACKNAME## notifying you of exclusive offers, special discounts, and the latest news on upcoming special events. You can withdraw your consent at any time.'
+            'emailText' => Config::has('config.emailText') ? Config::get('config.emailText') : 'By providing your email, you agree to receive periodic messages from ##TRACKNAME## notifying you of exclusive offers, special discounts, and the latest news on upcoming special events. You can withdraw your consent at any time.',
+            'states' => 'State',
+            'Address' => 'Address line 1',
+            'Address2' => 'Address line 2',
+            'Zip' => 'Postal Code',
+            'countries' => 'Country',
+            'city' => 'City'
         );
 
         self::$cultureNames = array(

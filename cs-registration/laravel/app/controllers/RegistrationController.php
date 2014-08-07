@@ -157,12 +157,31 @@ class RegistrationController extends BaseController {
         /*print_r(json_encode($session['settings']));
         die();*/
 
+        $numberOfItemsInAddressRow = 0;
+        if ($session['settings']['CfgRegCityShow'])
+            { $numberOfItemsInAddressRow++; }
+        if ($session['settings']['CfgRegStateShow'])
+            { $numberOfItemsInAddressRow++; }
+        if ($session['settings']['CfgRegZipShow'])
+            { $numberOfItemsInAddressRow++; }
+
+        $columnClass = "col-sm-4";
+        if ($numberOfItemsInAddressRow == 2)
+        {
+            $columnClass = "col-sm-6";
+        }
+        else if ($numberOfItemsInAddressRow == 1)
+        {
+            $columnClass = "col-sm-12";
+        }
+
         return View::make('/steps/step2', array('strings' => $session['strings'],
             'images' => $session['images'],
             'settings' => $session['settings'],
             'translations' => $session['translations'],
         'currentCulture' => $session['currentCulture'],
-            'currentCultureFB' => $session['currentCultureFB']));
+            'currentCultureFB' => $session['currentCultureFB'],
+            'addressColumnClass' => $columnClass));
     }
 
     /**
@@ -247,6 +266,27 @@ class RegistrationController extends BaseController {
                 $messages->add('errors', "This e-mail address has already been registered."); //TODO: Localize this string, switch to modal errors
                 return Redirect::to('/step2')->withErrors($messages)->withInput();
             }
+
+            if ($settings['CfgRegAddShow'] && $settings['CfgRegAddReq'])
+            {
+                $rules['Address'] = 'required';
+            }
+            if ($settings['CfgRegCntryShow'] && $settings['CfgRegCntryReq'])
+            {
+                $rules['Country'] = 'required';
+            }
+            if ($settings['CfgRegCityShow'] && $settings['CfgRegCityReq'])
+            {
+                $rules['City'] = 'required';
+            }
+            if ($settings['CfgRegStateShow'] && $settings['CfgRegStateReq'])
+            {
+                $rules['State'] = 'required';
+            }
+            if ($settings['CfgRegZipShow'] && $settings['CfgRegZipReq'])
+            {
+                $rules['Zip'] = 'required';
+            }
         }
 
         //TODO: Localize these error messages
@@ -262,6 +302,11 @@ class RegistrationController extends BaseController {
             'racername.required' => 'Racer name is required.',
             'email.required' => 'E-mail address is required.',
             'email.email' => 'E-mail address must be valid.',
+            'Address.required' => 'Address is required.',
+            'Country.required' => 'Country is required.',
+            'City.required' => 'City is required.',
+            'State.required' => 'State is required.',
+            'Zip.required' => 'Zip is required.'
         );
 
         //Create the validator
@@ -291,7 +336,7 @@ class RegistrationController extends BaseController {
         {
             $input["cameraInput"] = null;
         }
-        $input["donotemail"] = Input::has("donotemail") ? true : false;
+        $input["consenttoemail"] = Input::has("consenttoemail") ? true : false;
 
         Session::put('formInput',$input); //Insert all form input into session
 
@@ -377,18 +422,24 @@ class RegistrationController extends BaseController {
               "lastname" => $formInput["lastname"],
               "racername" => $formInput["racername"],
               "email" => isset($formInput["email"]) ? $formInput["email"] : "",
-              "donotemail" => $formInput["donotemail"],
+              "donotemail" => (!$formInput["consenttoemail"]),
               "profilephoto" => $formInput["cameraInput"],
               "signaturephoto" => $formInput["signature"],
               "gender" => $formInput["gender"],
               "BusinessName" => $settings["BusinessName"],
               "Waiver1" => $settings["Waiver1"],
               "Waiver2" => $settings["Waiver2"],
-              "isMinor" => Session::get("isMinor")
+              "isMinor" => Session::get("isMinor"),
+              "Address" => isset($formInput["Address"]) ? $formInput["Address"] : "",
+              "Address2" => isset($formInput["Address2"]) ? $formInput["Address2"] : "",
+              "Country" => isset($formInput["Country"]) ? $formInput["Country"] : "",
+              "City" => isset($formInput["City"]) ? $formInput["City"] : "",
+              "State" => isset($formInput["State"]) ? $formInput["State"] : "",
+              "Zip" => isset($formInput["Zip"]) ? $formInput["Zip"] : ""
         );
 
-/*      //Useful debugging output
-        echo '<h1>Data sent to API</h1>';
+      //Useful debugging output
+/*        echo '<h1>Data sent to API</h1>';
         echo '<b>Birth date: </b>' .  $clubSpeedCustomerData["birthdate"] . '<br/>';
         echo '<b>Mobile phone: </b>' .  $clubSpeedCustomerData["mobilephone"] . '<br/>';
         echo '<b>How did you hear about us?: </b>' .  $clubSpeedCustomerData["howdidyouhearaboutus"] . '<br/>';
@@ -405,7 +456,12 @@ class RegistrationController extends BaseController {
         //echo '<b>Facebook profile URL: </b>' . $formInput["facebookProfileURL"] . '<br/>';
         echo '<b>Profile photo:</b> <br/><img src="'.  $clubSpeedCustomerData["profilephoto"]  . '"><br/>';
         echo '<b>Signature photo:</b> <br/><img src="'.  $clubSpeedCustomerData["signaturephoto"]  . '"><br/>';
-
+        echo '<b>Address: </b>' . $clubSpeedCustomerData["Address"] . '<br/>';
+        echo '<b>Address2: </b>' . $clubSpeedCustomerData["Address2"] . '<br/>';
+        echo '<b>Country: </b>' . $clubSpeedCustomerData["Country"] . '<br/>';
+        echo '<b>City: </b>' . $clubSpeedCustomerData["City"] . '<br/>';
+        echo '<b>State: </b>' . $clubSpeedCustomerData["State"] . '<br/>';
+        echo '<b>Zip: </b>' . $clubSpeedCustomerData["Zip"] . '<br/>';
         die();*/
 
         $result = CS_API::call("registerCustomer",$clubSpeedCustomerData);

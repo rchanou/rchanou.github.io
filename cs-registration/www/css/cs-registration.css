@@ -202,14 +202,14 @@ img.flag { border:none; vertical-align:baseline; margin-left:10px;}
 
 .cameraPicture {
     max-width: 480px;
-    max-height: 300px;
+    max-height: 200px;
     padding-top: 10px;
     padding-bottom: 10px;
 }
 
 .facebookProfilePicture {
     max-width: 480px;
-    max-height: 300px;
+    max-height: 200px;
     padding-top: 10px;
     padding-bottom: 10px;
 }

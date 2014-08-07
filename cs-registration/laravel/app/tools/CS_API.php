@@ -74,8 +74,8 @@ class CS_API
         echo (($result));
         echo "<br/><strong>Errors from cURL:</strong> ";
         echo (json_encode(curl_error($ch)));
-        echo '</div>';
-        die();*/
+        echo '</div>';*/
+        //die();
 
         //Return the result to the caller as an associative array
         return json_decode($result,true);

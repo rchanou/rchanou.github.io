@@ -146,28 +146,112 @@
             </div>
         @endif
 
-        @if ($settings['showFirstName'])
-        <div class="centered">
-            {{ Form::label('firstname', $strings['firstname'] . ':') }}
-            @if($settings['requireFirstName'])
-            <span class="requiredAsterisk">*</span><br/>{{ Form::text('firstname','',array('class'=>'required')) }}<p/>
-            @else
-            <br/>{{ Form::text('firstname') }}<p/>
+        <div class="row">
+            <div class="col-sm-6">
+                @if ($settings['showFirstName'])
+                <div class="centered">
+                    {{ Form::label('firstname', $strings['firstname'] . ':') }}
+                    @if($settings['requireFirstName'])
+                    <span class="requiredAsterisk">*</span><br/>{{ Form::text('firstname','',array('class'=>'required')) }}<p/>
+                    @else
+                    <br/>{{ Form::text('firstname') }}<p/>
+                    @endif
+                </div>
+                @endif
+            </div>
+            <div class="col-sm-6">
+                @if ($settings['showLastName'])
+                <div class="centered">
+                    {{ Form::label('lastname', $strings['lastname'] . ':') }}
+                    @if($settings['requireLastName'])
+                    <span class="requiredAsterisk">*</span><br/>{{ Form::text('lastname','',array('class'=>'required')) }}<p/>
+                    @else
+                    <br/>{{ Form::text('lastname') }}<p/>
+                    @endif
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                @if ($settings['CfgRegAddShow'])
+                <div class="centered">
+                    {{ Form::label('Address', $strings['Address'] . ':') }}
+                    @if($settings['CfgRegAddReq'])
+                    <span class="requiredAsterisk">*</span><br/>{{ Form::text('Address','',array('class'=>'required')) }}<p/>
+                    @else
+                    <br/>{{ Form::text('Address') }}<p/>
+                    @endif
+                </div>
+                @endif
+            </div>
+            <div class="col-sm-6">
+                @if ($settings['CfgRegAddShow'])
+                <div class="centered">
+                    {{ Form::label('Address2', $strings['Address2'] . ':') }}
+                    <br/>{{ Form::text('Address2') }}<p/>
+                </div>
+                @endif
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                @if ($settings['CfgRegCntryShow'])
+                <div class="centered">
+                    {{ Form::label('country', $strings['countries'] . ':') }}
+                    @if ($settings['CfgRegCntryReq'])
+                    <span class="requiredAsterisk">*</span><br/>
+                    {{ Form::select('Country', $settings['countries'], 'United States', array('style' => 'color: black; height: 26px', 'class' => 'required','id'=>'country') ) }}
+                    @else
+                    <br/>{{ Form::select('Country', $settings['countries'], 'United States' ,array('style' => 'color: black; height: 26px', 'id'=>'country') ) }}
+                    @endif
+                </div>
+                @endif
+            </div>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+            @if ($settings['CfgRegCityShow'])
+            <div class="{{$addressColumnClass}}">
+                <div class="centered">
+                    {{ Form::label('city', $strings['city'] . ':',array('id'=>'cityLabel')) }}
+                    @if ($settings['CfgRegCityReq'])
+                    <span class="requiredAsterisk">*</span><br/>
+                    <input type="text" name="City" id="city" class="required">
+                    @else
+                    <br/><input type="text" name="City" id="city">
+                    @endif
+                </div>
+            </div>
+            @endif
+            @if ($settings['CfgRegStateShow'])
+            <div class="{{$addressColumnClass}}">
+                <div class="centered">
+                    {{ Form::label('state', $strings['states'] . ':',array('id'=>'stateLabel')) }}
+                    @if ($settings['CfgRegStateReq'])
+                    <span class="requiredAsterisk">*</span><br/>
+                    <input type="text" name="State" id="state" class="required">
+                    @else
+                    <br/><input type="text" name="State" id="state">
+                    @endif
+                </div>
+            </div>
+            @endif
+            @if ($settings['CfgRegZipShow'])
+            <div class="{{$addressColumnClass}}">
+                <div class="centered">
+                    <div>
+                        {{ Form::label('Zip', $strings['Zip'] . ':') }}
+                        @if($settings['CfgRegZipReq'])
+                        <span class="requiredAsterisk">*</span><br/>{{ Form::text('Zip','',array('class'=>'required')) }}<p/>
+                        @else
+                        <br/>{{ Form::text('Zip') }}<p/>
+                        @endif
+                    </div>
+                </div>
+            </div>
             @endif
         </div>
-        @endif
-
-        @if ($settings['showLastName'])
-        <div class="centered">
-            {{ Form::label('lastname', $strings['lastname'] . ':') }}
-            @if($settings['requireLastName'])
-            <span class="requiredAsterisk">*</span><br/>{{ Form::text('lastname','',array('class'=>'required')) }}<p/>
-            @else
-            <br/>{{ Form::text('lastname') }}<p/>
-            @endif
-        </div>
-        @endif
-
 
 
         <p/>
@@ -175,6 +259,7 @@
 
     </div>
     <div class="col-sm-6">
+
 
         @if ($settings['CfgRegRcrNameShow'])
         <div class="centered">
@@ -193,16 +278,16 @@
             {{ $strings['Male'] }} {{ Form::radio('gender', 'male', true,array('id'=>'male')) }}
             {{ $strings['Female'] }} {{ Form::radio('gender', 'female',false, array('id'=>'female')) }}
             {{ $strings['Other'] }} {{ Form::radio('gender', 'other',false, array('id'=>'other')) }}<p/>
-
         </div>
+
 
         @if ($settings['showBirthDate'])
         <div class="centered">
             {{ Form::label('birthdate', $strings['birthdate'] . ':') }}
             @if($settings['requireBirthDate'])
-            <span class="requiredAsterisk">*</span><br/><input type="date" name="birthdate" id="birthdate" class="required" value="{{Input::old('birthdate')}}"><p/>
+            <span class="requiredAsterisk">*</span><br/><input style="line-height: normal !important" type="date" name="birthdate" id="birthdate" class="required" value="{{Input::old('birthdate')}}"><p/>
             @else
-            <br/><input type="date" name="birthdate" id="birthdate"><p/>
+            <br/><input style="line-height: normal !important" type="date" name="birthdate" id="birthdate"><p/>
             @endif
         </div>
         @endif
@@ -214,6 +299,9 @@
             <span class="requiredAsterisk">*</span><br/>{{ Form::text('mobilephone','',array('class'=>'required')) }}<p/>
             @else
             <br/>{{ Form::text('mobilephone') }}<p/>
+            @endif
+            @if( Config::has('config.showTextingWaiver') && Config::get('config.showTextingWaiver') && Config::has('config.textingWaiver') )
+                {{Config::get('config.textingWaiver')}}
             @endif
         </div>
         @endif
@@ -253,7 +341,7 @@
 
             {{str_replace('##TRACKNAME##',$settings['BusinessName'],$strings['emailText'])}}<p/>
 
-            {{ Form::checkbox('donotemail', 'true',false) }} {{ Form::label('donotemail', $strings['emailsOptOut']) }}
+            {{ Form::checkbox('consenttoemail', 'true',false) }} {{ Form::label('consenttoemail', $strings['emailsOptIn']) }}
             </div>
         @endif
 
@@ -495,10 +583,63 @@
                 email.add( Validate.Email, { failureMessage: "{{$strings['mustBeAValidEmailAddress']}}" } );
             }
 
+            if ($('#Address').length > 0 && $('#Address').hasClass('required'))
+            {
+                var Address = new LiveValidation('Address');
+                Address.add( Validate.Presence,
+                    { failureMessage: "{{$strings['required']}}" } );
+            }
+
+            if ($('#state').length > 0 && $('#state').hasClass('required'))
+            {
+                var state = new LiveValidation('state');
+                state.add( Validate.Presence,
+                    { failureMessage: "{{$strings['required']}}" } );
+            }
+
+            if ($('#Zip').length > 0 && $('#Zip').hasClass('required'))
+            {
+                var Zip = new LiveValidation('Zip');
+                Zip.add( Validate.Presence,
+                    { failureMessage: "{{$strings['required']}}" } );
+            }
+
+            if ($('#city').length > 0 && $('#city').hasClass('required'))
+            {
+                var city = new LiveValidation('city');
+                city.add( Validate.Presence,
+                    { failureMessage: "{{$strings['required']}}" } );
+            }
         });
 
 
     </script>
-    <!-- LIVE VALIDATION SCRIPT -->
+    <!-- END LIVE VALIDATION SCRIPT -->
+
+    <!-- UNITED STATES AND CANADA DROPDOWN SCRIPT -->
+    <script>
+        $(function()
+            {
+                $('#country').change(function()
+                {
+                    var selectedCountry = $('#country').val();
+                    if (selectedCountry == 'United States')
+                    {
+                        $('#stateLabel').text('State');
+                    }
+                    else if (selectedCountry == 'Canada')
+                    {
+                        $('#stateLabel').text('Province/Territory');
+                    }
+                    else
+                    {
+                        $('#stateLabel').text('State/Province/Territory');
+                    }
+                });
+            }
+        );
+    </script>
+    <!-- END UNITED STATES AND CANADA DROPDOWN SCRIPT -->
+
 @stop
 <!-- END JAVASCRIPT INCLUDES -->
