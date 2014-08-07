@@ -10,7 +10,8 @@ class Settings
      */
     private $isAllowedWhitelist = array(
       'Registration1' => array('RacerNameShow' => true),
-      'kiosk' => true
+      'kiosk' => true,
+			'ScotKart' => true
     );
 		
 		private $settingsNotExistingInOlderVersions = array(
@@ -261,7 +262,9 @@ class Settings
 				
 				foreach($rows as $key => $val) {
 					if($val['DataType'] == 'bit') {
-						$rows[$key]['SettingValue'] = empty($rows[$key]['SettingValue']) || $rows[$key]['SettingValue'] == '0' || $rows[$key]['SettingValue'] == 'false' ? false : true;
+						// Replaced the below with PHP's filter_var() call
+						//$rows[$key]['SettingValue'] = empty($rows[$key]['SettingValue']) || $rows[$key]['SettingValue'] == '0' || $rows[$key]['SettingValue'] == 'false' ? false : true;
+						$rows[$key]['SettingValue'] = filter_var($rows[$key]['SettingValue'], FILTER_VALIDATE_BOOLEAN);
 					}
 					$output[$val['SettingName']] = $rows[$key];
 				}
