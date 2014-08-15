@@ -4,7 +4,22 @@ class Translations
 {
     public $restler;
 
-    protected function index($desiredData, $sub = null) {
+    public function getInsert($namespace, $name, $value, $language = null, $comment = null) {
+
+				if(empty($namespace)) throw new RestException(412, 'No namespace given for translation.');
+				if(!strstr($namespace, '.')) throw new RestException(412, 'A period (".") must exist in the namespace. Ex. "My.Banana"');
+				if(empty($name)) throw new RestException(412, 'No name given for translation.');
+				if(substr($name, 0, 3) !== 'str') throw new RestException(412, 'A name must begin with "str". Ex. "strMyBanana"');
+				
+				$existingTranslation = $this->translate($name, $language, $namespace);
+				if(!empty($existingTranslation['translation'])) throw new RestException(412, "Translation already exists for {$namespace}:{$name}");
+				
+				$tsql = 'INSERT INTO ResourceSets (ResourceSetName, ResourceName, ResourceValue, Culture, ResourceComment) VALUES (?, ?, ?, ?, ?)';
+				$tsql_params = array($namespace, $name, $value, $language, $comment);
+				return $this->run_query($tsql, $tsql_params, false);
+		}
+		
+		protected function index($desiredData, $sub = null) {
 				switch($desiredData) {
             case 'getTranslations':
 								return $this->getTranslations(@$_GET['language']);
@@ -13,10 +28,18 @@ class Translations
 								return $this->getNamespace(@$_GET['namespace'], @$_GET['language']);
 								break;
 						case 'translate':
-								return $this->translate(@$_GET['keys'], @$_GET['language'], @$_GET['namespace']);
+								return $this->translate(@$_GET['names'], @$_GET['language'], @$_GET['namespace']);
 								break;
+						/*case 'add': // Wes's method to bulk load in strings. This would be done from installer
+								$translations = array(
+									'strWelcomeMessage' => 'Welcome to our track!'
+									);
+								foreach($translations as $name => $value) {
+									$this->getInsert('Booking.Strings', $name, $value);
+								}
+								break;*/
         }
-    }
+		}
 
 		protected function getTranslations($language = null)
 		{
@@ -68,12 +91,12 @@ class Translations
 				return array('translation' => $output);  
 		}
 
-    protected function translate($keys, $language = null, $namespace = null)
+    protected function translate($names, $language = null, $namespace = null)
     {
-        if(empty($keys)) throw new RestException(412, 'No key(s) given to translate.');
+        if(empty($names)) throw new RestException(412, 'No name(s) given to translate.');
 
 				// Initialize default values (if we were not given one)
-				$resourceKeys = !is_array($keys) ? array($keys) : $keys;				
+				$resourceKeys = !is_array($names) ? array($names) : $names;				
 				$language     = empty($language) ? 'en-US' : $language;
 				$namespace    = empty($namespace) ? 'Interfaces.Common' : $namespace;	
 				$output       = array();			
@@ -103,7 +126,7 @@ class Translations
         return array('translation' => $output);   
     }
 
-    private function run_query($tsql, $params = array()) {
+    private function run_query($tsql, $params = array(), $fetchResults = true) {
         $tsql_original = $tsql . ' ';
 				$translationDatabase = empty($GLOBALS['translationDatabase']) ? 'ClubspeedResource' : $GLOBALS['translationDatabase'];
         // Connect
@@ -117,8 +140,8 @@ class Translations
             // Execute statement
             $stmt->execute($params);
 
-            // Put in array
-            $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Put response in array
+						$output = $fetchResults ? $stmt->fetchAll(PDO::FETCH_ASSOC) : array('result' => 'success');
 
         } catch(Exception $e) {
             die('Exception Message:'  . $e->getMessage()  . '<br/>(Line: '. $e->getLine() . ')' . '<br/>Passed query: ' . $tsql_original . '<br/>Parameters passed: ' . print_r($params,true));
