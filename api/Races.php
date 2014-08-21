@@ -167,7 +167,7 @@ class Races
 
 				// TODO Filter by Speed Level
 
-				$tsql = 'SELECT * FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC) ORDER BY Begining ASC';
+				$tsql = 'SELECT * FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.ScheduledTime DESC) ORDER BY ScheduledTime ASC';
 				$tsql_params = array(&$track_id, &$track_id);
 				$upcomingRaces = $this->run_query($tsql, $tsql_params);
 				
