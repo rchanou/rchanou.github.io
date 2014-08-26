@@ -23,7 +23,7 @@ class Racers
 
 	function __construct(){
 		header('Access-Control-Allow-Origin: *'); //Here for all /say
-        $this->db = $GLOBALS['db'];
+        // $this->db = $GLOBALS['db'];
 	}
 
 	private function getNextCustomerId() {
