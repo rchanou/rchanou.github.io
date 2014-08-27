@@ -422,7 +422,8 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                 //console.log(slides);
 
             }).error(function (data) { //In case of any error fetching channel data, at least make the Speed Screen show the scoreboard for track 1
-                slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
+                console.log(data);
+                //slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
             });
             $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
         };
