@@ -7,3 +7,4 @@ Route::get('/logout','LoginController@logout');
 
 Route::get('/admin', 'AdminController@dashboard');
 Route::get('/dashboard', 'AdminController@dashboard');
+Route::get('/channel', 'ChannelController@index');
