@@ -71,16 +71,17 @@ Dashboard
                         <p> This tool will create a downloadable applicaiton that will launch the Speed Screen Channel application with the settings below. For non-Windows devices, you may use <a href="https://www.google.com/chrome/browser/" target="_blank">Google Chrome</a> to load the Channel URL directly. </p>
                       </div>
                       <form action="#" method="get" class="form-horizontal">
+                        <input type="hidden" name="channelId" id="channelId" value="1" />
                         <div class="form-group">
                           <label class="col-sm-3 col-md-3 col-lg-2 control-label">Channel URL</label>
                           <div class="col-sm-9 col-md-9 col-lg-10">
-                            <input type="text" class="form-control input-sm" placeholder="http://<trackName>.clubspeedtiming.com/cs-speedscreen/#/1">
+                            <input name="channelUrl" id="channelUrl" type="text" class="form-control input-sm" placeholder="http://<trackName>.clubspeedtiming.com/cs-speedscreen/#/1">
                           </div>
                         </div>
                         <div class="form-group">
                           <label class="col-sm-3 col-md-3 col-lg-2 control-label">Target Monitor</label>
                           <div class="col-sm-9 col-md-9 col-lg-10">
-                            <select tabindex="-1" class="select2-offscreen">
+                            <select name="targetMonitor" id="targetMonitor" tabindex="-1" class="select2-offscreen">
                               <option value="1">Monitor 1 (Default)</option>
                               <option value="2">Monitor 2</option>
                               <option value="3">Monitor 3</option>
@@ -104,7 +105,7 @@ Dashboard
                           <label class="col-sm-3 col-md-3 col-lg-2 control-label">Disable Animations</label>
                           <div class="col-sm-9 col-md-9 col-lg-10">
                             <label>
-                              <input type="checkbox" name="checkboxes" checked />
+                              <input name="disableAnimations" id="disableAnimations" type="checkbox" name="checkboxes" checked />
                               Yes, disable slide animations</label>
                           </div>
                         </div>
@@ -143,4 +144,14 @@ Dashboard
         </div>
       </div>
     </div>
+    <script language="javascript">
+		$(function() {
+			$('#disableAnimations').click(function() {
+				var host = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+				var full = host + '/cs-speedscreen/#/' + $('#channelId').val();
+				full = $('#disableAnimations').val() == 'on' ? full + '/disableAnimations' : full;
+				$('#channelUrl').val(full);
+			});
+		});
+		</script>
 @stop
