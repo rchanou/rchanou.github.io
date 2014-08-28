@@ -27,9 +27,8 @@ To proceed from one round to the next, new terms are introduced:
 - Tie Breakers: Ties may be ignored, broken on fastest lap of a certain race or most first place, second place, etc finishes
 - Custom Function (Ex. only those with a certain laptime or faster)
 
-Gridding Options: X=DONE -=IN PROGRESS
+Grid Sorting Options: X=DONE -=IN PROGRESS
 X Random (In Event, Round(s), Group(s))
-X Round Robin (In Event, Round(s), Group(s))
 X Inverted (In Event, Round(s), Group(s))
 X By Most Points (In Event, Round(s), Group(s))
 X By Least Points (In Event, Round(s), Group(s))
@@ -41,6 +40,9 @@ X User Template/Custom Function (In Event, Round(s))
 - Fair (Makes "fair" groups combining fastest and slowest into balanced teams)
 - Balanced (Puts the top finishers each on pole of their own race)
 X No auto gridding
+
+Grid Type Options:
+// TODO -- Add documentation
 
 All Options Together:
 
@@ -81,7 +83,13 @@ Select Participant Results From: Entire Event, Last Round
 
 Keep in Same Groups? Yes/No *Determined by last race run
 
-Lineup Type: Random, Starting Position, Finishing Position, Points, Fastest LapTime, Average LapTime, Magix, No gridding
+Lineup (sorting) Type: Random, Starting Position, Finishing Position, Points, Fastest LapTime, Average LapTime, Magix, No gridding
+
+Gridding Types:
+- "Default" (gridded in order of sorting into most equal numbered groups)
+- Balanced: P1 given to 1, 2, 3; P2 for 4, 5, 6; P3 for 7, 8, 9; P4 for 10 (in the case of a 10 person, 4 per group race)
+- Magix (every racer races every grid position)
+- Fair (most equal combination of best and worst people)
 
 Invert the Lineup? Yes/No
 
@@ -240,7 +248,7 @@ curl -i -X POST -H "Content-Type: application/json" -d '{ "participants": [{"nam
 curl -i -X POST -H "Content-Type: application/json" -d '{"partcipiants":[{"name":"Shakib","points":39,"bestAverageLapTime":123.025,"bestLapTime":123,"startingPosition":1,"finishingPosition":1},{"name":"Shakib2","points":39,"bestAverageLapTime":123.025,"bestLapTime":123,"startingPosition":1,"finishingPosition":1}],"options":{"maxDrivers":10}}' http://192.168.111.103:8000/grid/bestLapTime
 
 
-curl -i -X POST -H "Content-Type: application/json" -d '{ "participants": [{"name":"Wes","points":5,"bestAverageLapTime":31,"startingPosition":3,"finishingPosition":5},{"name":"Glenda","points":3,"bestAverageLapTime":33,"bestLapTime":33.234,"startingPosition":2,"finishingPosition":4},{"name":"Max","points":3,"bestAverageLapTime":35,"bestLapTime":33.536,"startingPosition":1,"finishingPosition":3},{"name":"Tommy","points":2,"bestAverageLapTime":34,"bestLapTime":36.234,"startingPosition":4,"finishingPosition":2},{"name":"Shakib","points":0,"bestAverageLapTime":32,"bestLapTime":31.234,"startingPosition":5,"finishingPosition":1}], "options": { "maxDrivers": 3 } }' http://127.0.0.1:8000/grid/bestLapTime
+curl -i -X POST -H "Content-Type: application/json" -d '{ "participants": [{"name":"Wes","points":5,"bestAverageLapTime":31,"startingPosition":3,"finishingPosition":5},{"name":"Glenda","points":3,"bestAverageLapTime":33,"bestLapTime":33.234,"startingPosition":2,"finishingPosition":4},{"name":"Max","points":3,"bestAverageLapTime":35,"bestLapTime":33.536,"startingPosition":1,"finishingPosition":3},{"name":"Tommy","points":2,"bestAverageLapTime":34,"bestLapTime":36.234,"startingPosition":4,"finishingPosition":2},{"name":"Shakib","points":0,"bestAverageLapTime":32,"bestLapTime":31.234,"startingPosition":5,"finishingPosition":1}], "options": { "maxDrivers": 3 } }' http://127.0.0.1:8000/grid/balanced
 
 Output: (array of heats with participants in grid order)
 [[{"name":"Shakib","startingPosition":1,"originalData":{"name":"Shakib","points":0,"bestAverageLapTime":32,"bestLapTime":31.234,"startingPosition":5,"finishingPosition":1}},{"name":"Glenda","startingPosition":2,"originalData":{"name":"Glenda","points":3,"bestAverageLapTime":33,"bestLapTime":33.234,"startingPosition":2,"finishingPosition":4}},{"name":"Max","startingPosition":3,"originalData":{"name":"Max","points":3,"bestAverageLapTime":35,"bestLapTime":33.536,"startingPosition":1,"finishingPosition":3}}],[{"name":"Wes","startingPosition":1,"originalData":{"name":"Wes","points":5,"bestAverageLapTime":31,"bestLapTime":35.234,"startingPosition":3,"finishingPosition":5}},{"name":"Tommy","startingPosition":2,"originalData":{"name":"Tommy","points":2,"bestAverageLapTime":34,"bestLapTime":36.234,"startingPosition":4,"finishingPosition":2}}]]
@@ -251,7 +259,6 @@ __API DOCS__
 POST to http://192.168.111.103/grid/:griddingType
 
 Where :griddingType is:
-- roundRobin (Options: numGroups)
 - startingPosition
 - finishingPosition
 - bestLapTime
@@ -277,9 +284,9 @@ maxDrivers: Default: Infinity
 numHeatsPerParticipant: Default: 1
 filterName: topNumber || topPercent
 filterValue: Integer
-numGroups: Integer (valid for roundRobin)
 inverted: true || false Default: false
 customGrid: [[1,3,5]] (1st Driver P1; 3rd Driver P2, 5th Driver P3) (Array of heats in a "round" array)
+gridType: fair, custom, magix, balanced, default
 
 Filter examples:
 topPercent, 50 (top 50%)
@@ -306,129 +313,79 @@ exports.create = function(method, participantsToGrid, opts) {
 	/*if(typeof participantsToGrid !== "object" || participantsToGrid === null || participantsToGrid.length == 0)
 		throw new Error('No participants given for gridding');*/
 
-	// Force opt_options to be an object
+	// Set intelligent defaults
   opts = opts || {};
 	opts.maxDrivers = opts.maxDrivers || 9999999;
 	opts.numHeatsPerParticipant = opts.numHeatsPerParticipant || 1;
 	opts.vehicleAssignmentType = opts.vehicleAssignmentType || 'none'; // none, random, same, fair
 	opts.vehiclesAvailable = opts.vehiclesAvailable || []; // [1, 2, 3, 4] (Can also be an array of strings)
+	opts.gridType = opts.gridType || 'default'; // default, balanced, fair, custom, magix (how to arrange people in grids)
 	//Other options but not sure we need to define: filterName, filterValue, maxDrivers, 
 
-	// Take in type of sort method, all drivers, any options (Max Drivers, Sorting Options (inverted), etc)
-
-	// To create the lineups for a round, there are a couple steps...
-	// 1. Sort the participants according to a sorting method... end up with an array of participant objects
-	// 2. Get the grid lineup template for the round (which participants #s are in which heats/positions)... end up with an array of heats that contain driver position #s
-	// 3. Match #1 and #2 together and return a lineup
+	/**
+	 * HOW GRIDDING A ROUND WORKS
+	 * 1. Sort the participants according to a sorting method... end up with an array of participant objects
+	 * 2. Filter these drivers if we want to reduce the results (Ex. Get rid of everyone but the "top 10")
+	 * 3. Get the grid lineup template for the round (which participants #s are in which heats/positions)... end up with an array of heats that contain driver position #s
+	 * 4. Match the drivers and grid together to return a lineup for the round
+	 */
 
 	switch(method) {
-		/*case 'previousGridPositionPlusOne':
-			var sortedDrivers = previousGridPositionPlusOne(participantsToGrid, opts);
-			sortedDrivers = sortedDrivers.slice(0, this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers.length));
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;*/
-			
-		case 'roundRobin':
-			var sortedDrivers = bestLapTime(participantsToGrid, opts); // TODO Make this by other items than lap time? module['bestLapTime'](participantsToGrid, opts)
-			opts.numGroups = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = roundRobin(sortedDrivers, opts);
-			break;
 
-		case 'startingPosition':
-			var sortedDrivers = startingPosition(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-			
-		case 'finishingPosition':
-			var sortedDrivers = finishingPosition(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-			
-		case 'bestLapTime':
-			var sortedDrivers = bestLapTime(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-			
-		case 'bestAverageLapTime':
-			var sortedDrivers = bestAverageLapTime(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-			
-		case 'mostPoints':
-			var sortedDrivers = this.mostPoints(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
+		/**
+		 * Support for some legacy "griddingMethods" that were really a hardcoded pair
+		 * of a particular griddingMethod & griddingType.
+		 */
 		
-		case 'randomized':
-			var sortedDrivers = this.randomized(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-			
-		case 'magix':
-			var sortedDrivers = this.noGrid(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createMagixRoundLineup(sortedDrivers.length, opts.maxDrivers);			
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-
-		case 'fair':
-			var sortedDrivers = finishingPosition(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.fair(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-			
-		case 'balanced':
-			var sortedDrivers = finishingPosition(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.balanced(sortedDrivers.length, opts.maxDrivers);
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-			
-		case 'magixFair':
-			var sortedDrivers = this.noGrid(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createMagixFairRoundLineup(sortedDrivers.length, 12, opts.numHeatsPerParticipant); // numDriversTotal, numRoundsTotal, numRacesPerRacer
-			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
-		
-		case 'custom':
-			var inverted = opts.inverted || false;
-			var sortedDrivers = this.noGrid(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = opts.customGrid || [[]]; // TODO Validate this custom grid?	
-			
-			if(inverted) {
-				heatLineup.forEach(function(heat, i) {
-					heatLineup[i] = heatLineup[i].reverse();
-				});
+		case 'balanced': // Legacy call
+			if(method == 'balanced') {
+				method = 'finishingPosition';
+				opts.gridType = 'balanced';
 			}
 			
+		case 'magix': // Legacy call
+			if(method == 'magix') {
+				method = 'noGrid';
+				opts.gridType = 'magix';
+			}
+
+		case 'custom':
+			if(method == 'custom') {
+				var customGrid = opts.customGrid || [[]]; // TODO Validate this custom grid?
+				method = 'noGrid';
+				opts.gridType = 'custom';
+			}
+
+		case 'startingPosition':
+		case 'finishingPosition':
+		case 'bestLapTime':
+		case 'bestAverageLapTime':
+		case 'mostPoints':
+		case 'randomized':
+		case 'noGrid':
+			var sortedDrivers = this[method](participantsToGrid, opts);
+			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
+			var heatLineup = this.createGrid(opts.gridType, sortedDrivers.length, opts.maxDrivers, opts);
 			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
 			break;
 
-		case 'noGrid':
-			var sortedDrivers = this.noGrid(participantsToGrid, opts);
-			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
-			var heatLineup = this.createBalancedGrid(sortedDrivers.length, opts.maxDrivers);
+		/* TODO
+		case 'previousGridPositionPlusOne':
+			var sortedDrivers = previousGridPositionPlusOne(participantsToGrid, opts);
+			sortedDrivers = sortedDrivers.slice(0, this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers.length));
+			var heatLineup = this.createGrid(opts.gridType, sortedDrivers.length, opts.maxDrivers);
 			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
-			break;
+			break;*/
+
+		/* TODO
+		case 'fair': // Legacy call
+			if(method == 'fair') {
+				method = 'finishingPosition';
+				opts.gridType = 'fair';
+			}*/
 
 		default:
-			throw new Error('Invalid gridding method given: ' + method);
+			throw new Error('Invalid gridding sort method given: ' + method);
 			break;
 	}
 	
@@ -494,6 +451,7 @@ exports.create = function(method, participantsToGrid, opts) {
 	return results;
 }
 
+
 /*
 ////
 // Previous grid position + 1 (puts next person on pole) (or inverted)
@@ -524,349 +482,163 @@ function previousGridPositionPlusOne(array, opts) {
 }
 */
 
-////
-// Round Robin
-////
-function roundRobin(array, opts) {
-	
-	var nextLineup = [];
-	var inverted = opts.inverted || false;
-	var numGroups = opts.numGroups.length || 1;
-
-	array.forEach(function(person, personNum) {
-		var groupNumber = personNum % numGroups;
-		
-		if(typeof nextLineup[groupNumber] === 'undefined') {
-			nextLineup[groupNumber] = []
-		}
-		var newPosition = nextLineup[groupNumber].length + 1;
-		nextLineup[groupNumber].push({ participantId: person.participantId, startingPosition: newPosition, originalData: person });
-	});
-
-	return nextLineup;
-}
-
 
 ////
-// Magix Fair Lineup
+// Magix Lineup
 ////
-exports.createMagixFairRoundLineup = function(numDriversTotal, numRoundsTotal, numRacesPerRacer) {
-	numDriversTotal = 22;
-	numRoundsTotal = 12;
-	numRacesPerRacer = 3;
-
-	var eventRounds = [];
-	
-	var racersPerRace = (numDriversTotal * numRacesPerRacer) / numRoundsTotal;
-	
-	// Create the heats for the entire event
-	var racesRemaining = numDriversTotal * numRacesPerRacer;
-	for(var i = 0; i < numRoundsTotal; i++) {
-		var racersInThisRound = Math.ceil(racesRemaining / (numRoundsTotal - i));
-		racesRemaining -= racersInThisRound;
-		eventRounds.push(racersInThisRound);
-	}
-
-	// Find total that summation of each racer's grid position should equal
-	var targetPositionSum = Math.ceil((racersPerRace / 2) * numRacesPerRacer) + 1;
-	
-	// Create array of racers we are gridding
-	var originalRacers = [];
-	for(var i = 1; i <= numDriversTotal; i++) {
-		originalRacers.push({ id: i, heats: [], positions: [], positionSum: 0, unassignedPositions: [] });
-	}
-	
-	// Fill rounds with racers
-	var racers = shuffle(originalRacers.slice(0)); // Randomize racers
-	
-	// This could be "subset sum", "bin packing"
-	
-	for(var eventRound = 0; eventRound < eventRounds.length; eventRound++) {
-		var heatLineup = [];
-
-		// Empty racers into slots and total up their heats, positions and position sum
-		var numHeatsInRound = eventRounds[eventRound];
-		var heat = new Array(numHeatsInRound);
-		for(var gridPosition = 0; gridPosition < numHeatsInRound; gridPosition++) {
-			if(racers.length > 0) {
-				var racer = racers.shift();
-				originalRacers[racer.id - 1].heats.push(eventRound);
-				originalRacers[racer.id - 1].positions.push(gridPosition + 1);
-				originalRacers[racer.id - 1].positionSum += (gridPosition + 1);
-				heat[gridPosition] = (racer.id);
-			} else {
-			
-				// When array is empty, TODO figure out who can be put into (not in last heat, if P1, no P1's). Randomize again?
-				
-				// Loop original racers, find first one who:
-				// 1. Hasn't raced last heat (racer.heats.indexOf(eventRound - 1) === -1)
-				// 2. If P1 then racer shouldn't have raced P1 before
-				// 3. racer.positionSum < targetPositionSum
-				
-				// Loop original racers
-				// targetPositionSum = 9
-				// { id: 22, heats: [ 2 ], positions: [ 2 ], positionSum: 2 }
-				// Add unassigned race positions 
-				/*originalRacers.forEach(function(racer, index) {
-					for(var i = racer.heats.length; i < numRacesPerRacer; i++) { // (numRacesPerRacer !== racer.heats.length + racer.unassignedPositions.length)
-						var unassignedPosition = Math.ceil((targetPositionSum - racer.positionSum) / numRacesPerRacer - (racer.heats.length + racer.unassignedPositions.length));
-						originalRacers[index].unassignedPositions.push(unassignedPosition);
-						originalRacers[index].positionSum += unassignedPosition;
-					}
-				});*/
-			}
-		}
-		
-		eventRounds[eventRound] = heat;
-
-	}
-	
-	///
-	
-	var availablePositions = [];
-	eventRounds.forEach(function(heats) {
-		for(i = 1; i <= heats.length; i++) {
-			availablePositions.push(i);
-		}
-	});
-	
-	// Remove spots we are already using above
-	availablePositions.splice(0, numDriversTotal);
-	
-	var approx = require('subset-sum');
-	console.log('Subset Sum: ' + approx(availablePositions, targetPositionSum) + ' Target: ' + targetPositionSum);
-	console.log(availablePositions);
-	
-	///
-	
-	var subset_sum = function(items, target) {
-			var perms = [], layer = 0, depth = 4, attempts = 0, sum, perm,
-			ss = function(items) {
-					var item = items.shift();
-					for (i = 0; i < items.length; i++) {
-							attempts = attempts + 1;
-							if (attempts <= items.length * items.length) {
-									if (layer === 0) {
-											perm = [items[0], items[i]];
-									} else {
-											perm = perms.shift();
-											perm.push(items[0]);
-									}
-									sum = 0;
-									for(j = 0;j < perm.length; j++){
-											sum += perm[j];
-									}
-									perms.push(perm);
-									if (sum == target){
-											return perm;
-									}
-							} else {
-									if (layer < depth) {
-											attempts = 0;
-											layer = layer + 1;
-									} else {
-											return null;
-									}
-							}
-					}
-					items.push(item);
-					return ss(items);
-			}
-			return ss(items)
-	}
-	
-	originalRacers.forEach(function(racer, i) {
-		result = subset_sum(availablePositions, targetPositionSum - racer.positions[0]);
-		originalRacers[i].positions = result.concat(originalRacers[i].positions);
-		result.forEach(function(position) {
-			var removed = availablePositions.splice(availablePositions.indexOf(position), 1);
-		});
-	});
-	console.log(originalRacers);
-
-	
-	///
-	
-	//console.log(originalRacers);
-	//console.log(eventRounds);
-	
-	return eventRounds;
-	
-	/****/
-	
-	var racerCount = numDriversTotal;
-	var racesPerRacer = numRacesPerRacer;
-	var totalRaces = numRoundsTotal;
-	var racersPerRace = Math.floor((racerCount * racesPerRacer) / totalRaces);
-	var targetTotalPosition = Math.ceil((racersPerRace / 2) * racesPerRacer);
-	var _ = require('underscore');
-	
-	// Distribute slots across races.
-	var grandTotalSlots = racerCount * racesPerRacer;
-	var raceSlots = [];
-	
-	for(var i = 0; i < totalRaces; i++) {
-		raceSlots.push(racersPerRace);
-	}
-	
-	var raceNumber = 0
-	
-	_.each( raceSlots, function (race) {
-		var sum = _.reduce(raceSlots, function(memo, num){ return memo + num; }, 0);
-		if ( sum < grandTotalSlots) {
-			raceSlots[raceNumber]++;
-		}
-		raceNumber++
-	});
-	
-	//raceSlots = _.shuffle(raceSlots);
-	
-	//console.log('Race Slots');
-	//console.log(raceSlots);
-	
+exports.magix = function magix(numDrivers, numDriversPerRace, numRacesPerDriver) {
+  var grid = [];
+  var targetPositionSummation = Math.ceil((numDriversPerRace/2)*numRacesPerDriver) + 1;
+	var positions = [];
 	var racers = [];
+
+	// Create the grid lineup
+	var gridLineup = this.createBalancedGrid(numDrivers*numRacesPerDriver, Math.min(numDrivers, numDriversPerRace));
+	gridLineup.sort(function(a, b) { return b.length - a.length });
 	
-	//Set up racer array
-	
-	for( var i = 0; i < racerCount; i++) {
-		
-		var racer = {
-			name : 'Racer ' + (i + 1),
-			num: (i + 1),
-			races : [],
-			competitors : []
+	// Create the list of positions we need to assign (and clean up gridLineup)
+	gridLineup.forEach(function(race, index) {
+		for(i = 1; i <= race.length; i++) {
+			gridLineup[index][i-1] = null
+			positions.push(i);
 		}
-		
-		racers.push(racer);
+	});
+
+	// Assign the first round of positions -- this assigns pole to unique people
+	positions.sort(function(a, b) { return a - b; });
+	for(i = 0; i < numDrivers; i++) {
+		racers[i] = { num: i+1, positions: [positions.shift()] }; // Give first position
 	}
-	
-	
-	var races = [];
-	
-	for ( var i = 0; i < totalRaces; i++) {
-	
-		var race = {
-			raceNo : i + 1,
-			slots :[]
+
+	// Assign the remaining positions, try to make everyone meet the target position summation
+	for(i = 0; i < numDrivers; i++) {
+		for(j = 1; j < numRacesPerDriver; j++) {			
+			var total = racers[i].positions.reduce(function(a, b) { return a + b; });			
+			var goal = Math.ceil((targetPositionSummation - total)/(numRacesPerDriver - j));
+			var closest = null;
+			
+			var idx = positions.indexOf(goal);
+			racers[i].positions.push(positions.splice(idx,1)[0]);
 		}
-	
-		races.push(race);
 	}
-	
-	raceNumber = 0;
-	
-	_.each(races, function (race) {
-	
-		var eligibleDrivers = [];
+
+	// Add some randomization to racers and their positions
+	racers.sort(function() { return 0.5 - Math.random() });
+
+
+	/**
+	 * Fit participants into grids
+	 */
+
+	// Fill the grid lineup with racers that have this position (that were not in previous round)
+	var racersInPreviousRound = [];
+  var gridLineupOriginal = JSON.parse(JSON.stringify(gridLineup));
+	var racersOriginal = JSON.parse(JSON.stringify(racers));
+
+	for(var i = 0; i < gridLineup.length; i++) {
 		
-		
-		//Alternate list if we need to break previous competitor rule to fill races.
-		var alternateDrivers = [];
-		
-		//Second alternate if we need to break the back to back rule.
-		var secondAlternate = [];
-		
-		_.each(racers, function(racer) {
+		var count = 0; // Count our iterations so we know if we need to invoke super-kludge logic
+
+		while(gridLineup[i].indexOf(null) !== -1) {
+			// Find first null and try to fill.
+			var positionIndex = gridLineup[i].indexOf(null);
+			var positionToFill = positionIndex + 1;
 			
-			//Check if racer is out of Races
-			var outOfRaces = racer.races.length >= racesPerRacer;
+			// Randomize racers
+			racers.sort(function() { return 0.5 - Math.random() });
 			
-			//Check if any competitors are in this race
+			// Find person in pool of racers, matching position that isn't in exclusion list
+			var foundRacer = findRacerByPosition(positionToFill, racers, racersInPreviousRound, gridLineup[i]);
 			
-			var prevCompetitorsInRace = false;
-			
-			_.each(race.slots, function(slot) {
-				if (prevCompetitorsInRace == false) {
-					prevCompetitorsInRace = _.contains(racer.competitors, slot.name);
-				}
-			});
-	
-			//Check if racer was in last race
-			
-			var inPrevRace = false;
-			
-			if( raceNumber > 0 ) {
-				_.each(races[raceNumber - 1].slots, function(slot) {
-					if( typeof slot != 'undefined') {
-						if( slot.name == racer.name && inPrevRace == false) {
-							inPrevRace = true;
+			// Assign racer (or handle conflict)
+			if(foundRacer !== null) { 
+				gridLineup[i][positionIndex] = foundRacer;
+			} else { // BEGIN THE KLUDGE TO BRUTE FORCE OUR WAY THROUGH CONFLICTS
+				var spotsToGiveBack = [];
+				gridLineup[i].forEach(function(ele, idx) {
+					gridLineup[i][idx] = null;
+					racersInPreviousRound = [];
+					spotsToGiveBack.push({ num: ele, position: (idx+1 )});
+				});
+				spotsToGiveBack.forEach(function(spotToGiveBack) {
+					racers.forEach(function(racer, i) {
+						if(racer.num == spotToGiveBack.num) {
+							racers[i].positions.push(spotToGiveBack.position);
 						}
-					}
+					});
 				});
 			}
 			
-			if( outOfRaces == false && prevCompetitorsInRace == false && inPrevRace == false ) {
-				eligibleDrivers.push(racer);
+			// MOST SPECTACULAR HACK AND SUPER-KLUDGE EVER IF BRUTE FORCE ABOVE FAILS...
+			if(count === gridLineup.length * (numDriversPerRace + 10)) { // We're giving up and starting all over
+				i = 0;
+				gridLineup = JSON.parse(JSON.stringify(gridLineupOriginal));
+				racers = JSON.parse(JSON.stringify(racersOriginal));
+				racers.sort(function() { return 0.5 - Math.random() });
+				racersInPreviousRound = [];
 			}
-	
-			if( outOfRaces == false && inPrevRace == false) {
-				alternateDrivers.push(racer);
-			}
-	
-			if( outOfRaces == false) {
-				secondAlternate.push(racer);
-			}
-		}); 
-	
-		alternateDrivers = _.shuffle(alternateDrivers);
-		
-		secondAlternate = _.shuffle(secondAlternate);
-		
-		var numberOfSlots = raceSlots[raceNumber];
-		
-		if( eligibleDrivers.length < numberOfSlots ) {
-		
-			eligibleDrivers = _.union( eligibleDrivers, alternateDrivers);
-		
-		}
-		
-		if( eligibleDrivers.length < numberOfSlots ) {
-		
-			eligibleDrivers = _.union( eligibleDrivers, secondAlternate);
-		
-		}
-		eligibleDrivers = _.shuffle(eligibleDrivers);
-	
-		for( var i = 0; i < numberOfSlots; i++) {
-			race.slots.push(eligibleDrivers[i]);
-			_.each(racers, function(racer) {
-				if (typeof eligibleDrivers[i]  != 'undefined') { 
-					if( eligibleDrivers[i].name == racer.name) {
-						racer.races.push(race.raceNo);
-					}
-				}
-			});
-		}
 			
-			
-		raceNumber++;
-	});
-	
-	raceNumber = 0;
-	
-	_.each(races, function(race) {
-		race.raceNo = raceNumber + 1;
+			count++;
+		}
 		
-		//$('#grid').append('<strong>Race ' + race.raceNo + '</strong><br/>');
-		
-		eventRounds[raceNumber] = [];
-		
-		_.each(race.slots, function(slot) {
-			if( typeof slot != 'undefined') {
-				//$('#grid').append(slot.name + '<br/>');
-				eventRounds[raceNumber].push(slot.num)  
-			} 
-		});
-	
-		raceNumber++;
-	});
+		// Handle the exclusion list (shouldn't race in back to back rounds unless our grid lineup is too small)
+		if(numDriversPerRace * 2 > numDrivers) {
+			racersInPreviousRound = []; // Our grid lineup is too small to not have racers run back to back
+		} else if(i > 0) {
+			racersInPreviousRound.splice(0, gridLineup[i-1].length); // Remove the previous round's excluded racers
+		} 
 
+  }
+  
+  return gridLineup;
 	
-	/****/
+	/**
+	 * Find a racer with this starting position (and remove that position from him)
+	 */
+	function findRacerByPosition(startingPosition, availableRacers, excludedRacers, gridLineup) {
+		var racerNumber;
+		
+		for(var idx = 0; idx < availableRacers.length; idx++) {
+			positionLocation = availableRacers[idx].positions.indexOf(startingPosition);
 	
+			if(positionLocation !== -1 && excludedRacers.indexOf(availableRacers[idx].num) == -1) { 
+				availableRacers[idx].positions.splice(positionLocation, 1); // Remove this position from the racer
+				excludedRacers.push(availableRacers[idx].num);
+				return availableRacers[idx].num; // Return the racer number with this position
+			}
+		}
 	
-	return eventRounds;
+		return null;
+	}
 }
+
+
+function createBalancedGrid(numParticipants, maxParticipantsPerGroup) {
+	
+	// Handle max participants as an object... used for percentage
+	if(typeof maxParticipantsPerGroup === 'object') {
+		maxParticipantsPerGroup = Math.ceil(numParticipants * (maxParticipantsPerGroup.percent / 100));
+	}
+	
+	maxParticipantsPerGroup = maxParticipantsPerGroup || numParticipants;
+	var balancedGrid = balanceParticipants(numParticipants, maxParticipantsPerGroup); // returns [ 3, 3, 2, 2 ]
+	var roundLineup = [];
+	var participantNumber = 1;
+	
+	balancedGrid.forEach(function(numInHeat) {
+		var heat = [];
+		
+		for(i = 0; i < numInHeat; i++) {
+			heat.push(participantNumber);
+			participantNumber++;
+		}
+		
+		roundLineup.push(heat);
+	});
+	
+	return roundLineup;
+}
+
 
 /**
  * Balanced lineup
@@ -884,7 +656,7 @@ exports.balanced = function(numDriversTotal, numDriversPerHeat) {
 }
 
 /**
- * Fair lineup
+ * Fair lineup -- Create even groups where the best are paired with the worst. P1 & P4 == P2 & P3
  */
 
 // TODO -- Is this clear? We're making groups, not gridding people. This is a departure from how this class works.
@@ -922,71 +694,11 @@ exports.fair = function(numDriversTotal, numDriversPerHeat) {
 	return fairGroups;
 }
 
-exports.createMagixRoundLineup = function(numDriversTotal, numDriversPerHeat, numRoundsTotal) {
-	// Find grid lineup
-	var startingGrid = createStartingLineup(numDriversPerHeat, numDriversTotal);
-	var numRoundsTotal = typeof numRoundsTotal === 'undefined' ? numDriversTotal : numRoundsTotal;
-
-	var eventRounds = [];
-
-	for(var currentRoundNumber = 1; currentRoundNumber <= numRoundsTotal; currentRoundNumber++) {
-		// Create a copy of the starting grid to shift
-		var roundLineup = startingGrid.slice(0);
-		
-		for(var i = currentRoundNumber; i > 1; i--) {
-			
-			// Take last position
-			var lastPosition = roundLineup.pop();
-			
-			// Put it first
-			roundLineup.unshift(lastPosition);
-			
-		}
-		
-		// Convert to the proper grid lineup... [ 1, null, 3, null, 2 ] -> [1, 5, 3]
-		var modifiedRoundLineup = [];
-		roundLineup.forEach(function(position, driverNum) {
-			if(position == null) return;
-			modifiedRoundLineup[position - 1] = driverNum + 1;
-		});
-
-		// Put into the lineup
-		eventRounds.push(modifiedRoundLineup);
-	}
-	
-	return eventRounds;
-	
-	function createStartingLineup(numDriversPerHeat, numDriversTotal) {
-		var startingLineup = [1];
-		var gapsRemaining = numDriversTotal - numDriversPerHeat;
-	
-		for(var nextDriverPosition = numDriversPerHeat; nextDriverPosition > 1; nextDriverPosition--) {
-	
-			var gapsToInsert = Math.ceil(gapsRemaining / nextDriverPosition);
-			gapsRemaining = gapsRemaining - gapsToInsert;
-	
-			for(var i = gapsToInsert; i > 0; i--) {
-				startingLineup.push(null);
-			}
-	
-			startingLineup.push(nextDriverPosition);
-	
-		}
-		
-		for(var i = gapsRemaining; i > 0; i--) {
-			startingLineup.push(null);
-		}
-		
-		return startingLineup;
-	
-	}
-	
-}
 
 ////
 // Previous starting grid position (or inverted)
 ////
-function startingPosition(array, opts) {
+exports.startingPosition = function startingPosition(array, opts) {
 	var nextLineup = [];
 	var inverted = opts.inverted || false;
 
@@ -1014,7 +726,7 @@ function startingPosition(array, opts) {
 ////
 // Previous finishing position (or inverted)
 ////
-function finishingPosition(array, opts) {
+exports.finishingPosition = function finishingPosition(array, opts) {
 	var nextLineup = [];
 	var inverted = opts.inverted || false;
 
@@ -1042,7 +754,7 @@ function finishingPosition(array, opts) {
 ////
 // Best laptime (or inverted)
 ////
-function bestLapTime(array, opts) {
+exports.bestLapTime = function bestLapTime(array, opts) {
 	var inverted = opts.inverted || false;
 	var nextLineup = [];
 	
@@ -1064,7 +776,7 @@ function bestLapTime(array, opts) {
 ////
 // Best average laptime (or inverted)
 ////
-function bestAverageLapTime(array, opts) {
+exports.bestAverageLapTime = function bestAverageLapTime(array, opts) {
 	var inverted = opts.inverted || false;
 	var nextLineup = [];
 	
@@ -1086,7 +798,7 @@ function bestAverageLapTime(array, opts) {
 ////
 // Most points (or inverted)
 ////
-exports.mostPoints = function(array, opts) {
+exports.mostPoints = exports.mostPoints = function(array, opts) {
 	var inverted = opts.inverted || false;
 	var nextLineup = [];
 	
@@ -1112,8 +824,12 @@ exports.mostPoints = function(array, opts) {
 ////
 // No gridding
 ////
-exports.noGrid = function(array, opts) {
+exports.noGrid = function noGrid(array, opts) {
+	var inverted = opts.inverted || false;
 	var nextLineup = [];
+	
+	// Invert?
+	if(inverted) array.reverse();
 	
 	// Create lineup
 	array.forEach(function(person, index) {
@@ -1126,7 +842,7 @@ exports.noGrid = function(array, opts) {
 ////
 // Random
 ////
-exports.randomized = function(array, opts) {
+exports.randomized = function randomized(array, opts) {
 	var nextLineup = [];
 	
 	// Randomzie array
@@ -1152,6 +868,34 @@ exports.balanceParticipants = function(numParticipants, maxParticipantsPerGroup)
 	}
 	
 	return participantGroupings;
+}
+
+exports.createGrid = function(gridType, numParticipants, maxParticipantsPerGroup, opts) {
+	var gridLineup = [[]];
+
+	switch(gridType) {
+		case 'fair':
+			gridLineup = this.fair(numParticipants, maxParticipantsPerGroup);
+			break;
+		case 'custom':
+			gridLineup = opts.customGrid;
+			break;
+		case 'magix':
+			/*gridLineup = this.createMagixRoundLineup(numParticipants, maxParticipantsPerGroup);
+			break;
+		case 'magixFair':*/
+			gridLineup = this.magix(numParticipants, maxParticipantsPerGroup, opts.numHeatsPerParticipant);
+			opts.numHeatsPerParticipant = 1; // Overriding the heat copying functionality
+			break;
+		case 'balanced':
+			gridLineup = this.balanced(numParticipants, maxParticipantsPerGroup);
+			break;
+		case 'default':
+		default:
+			gridLineup = this.createBalancedGrid(numParticipants, maxParticipantsPerGroup);
+			break;
+	}
+	return gridLineup;
 }
 
 exports.createBalancedGrid = function(numParticipants, maxParticipantsPerGroup) {
