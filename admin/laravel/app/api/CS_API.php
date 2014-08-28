@@ -1,0 +1,122 @@
+<?php
+
+/**
+ * Class CS_API
+ *
+ * This static class allows the user to call the Club Speed API via the use of the Httpful library.
+ * It also massages and formats the data as appropriate. It is not a literal 1-to-1 mapping to
+ * calling the Club Speed API.
+ *
+ * For any of these calls, a return of NULL is considered an error.
+ * Empty arrays/values will be returned in the case of no data.
+ */
+class CS_API
+{
+    private static $apiURL;
+    private static $apiKey;
+    private static $privateKey;
+
+    private function __construct() { }
+    private static $initialized = false;
+
+    private static function initialize()
+    {
+        if (self::$initialized) return;
+
+        self::$apiURL = Config::get('config.apiURL');
+        self::$apiKey = Config::get('config.apiKey');
+        self::$privateKey = Config::get('config.privateKey');
+
+        self::$initialized = true;
+    }
+
+    /**
+     * This function performs a GET or POST call via the Club Speed PHP API.
+     * It returns null if there is any sort of error, or the results if successful.
+     * @param $url The URL to call, with all GET parameters included.
+     * @param null $params POST parameters to include, if any.
+     * @param string $verb Whether the call is a 'GET' or 'POST'.
+     * @return [ 'response': data, 'error': data ]
+     */
+    private static function call($url, $params = null, $verb = 'GET') //TODO: Getting a little messy. Rename output.
+    {
+        self::initialize();
+
+        $response = null;
+        $errorMessage = null;
+        if ($verb == 'GET')
+        {
+            $response = \Httpful\Request::get($url)->send();
+        }
+        else if ($verb == 'POST')
+        {
+            try {
+                $response = \Httpful\Request::post($url)
+                    ->body($params)
+                    ->sendsJson()
+                    ->send();
+            }
+            catch (Exception $e)
+            {
+                //If there was an error, store debugging information in the session
+                $errorInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $e->getMessage());
+                Session::put('errorInfo', $errorInfo);
+
+                if ($response !== null && property_exists($response, 'body') && property_exists($response->body, 'error'))
+                {
+                    $errorMessage = $response->body->error;
+                }
+
+                $response = null;
+                return array('response' => $response,
+                    'error' => $errorMessage);
+            }
+        }
+        if ($response === null || !property_exists($response, 'code') || $response->code != 200)
+        {
+
+            //If there was an error, store debugging information in the session
+            $errorInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $response);
+            Session::put('errorInfo', $errorInfo);
+
+            if ($response !== null && property_exists($response, 'body') && property_exists($response->body, 'error'))
+            {
+                $errorMessage = $response->body->error->message;
+            }
+            $response = null;
+        }
+
+
+
+        return array('response' => $response,
+                     'error' => $errorMessage);
+    }
+
+
+    //TODO: Documentation
+    public static function login($username,$password)
+    {
+        self::initialize();
+
+        $urlVars = array('username' => $username,
+            'password' => $password,
+            'is_admin' => 1,
+            'key' => self::$apiKey);
+
+        $url = self::$apiURL . '/users/login.json?' . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body') && property_exists($response->body,'valid'))
+        {
+            return $response->body->valid;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+}
