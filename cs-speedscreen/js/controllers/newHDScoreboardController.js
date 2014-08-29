@@ -55,6 +55,30 @@
             this.finalResultsTimeStartedMs = 0;
             this.slidePanelVisible = false;
 
+            $scope.backgroundImageURL = 'images/background_1080p.jpg';
+                $.ajax({
+                        url:'http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg',
+                        type:'HEAD',
+                        error: function(){
+                            console.log('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg does not exist');
+                            $.ajax({
+                                url:'http://' + window.location.hostname + '/privatewww/speedscreen.gif',
+                                type:'HEAD',
+                                error: function(){
+                                    console.log('http://' + window.location.hostname + '/privatewww/speedscreen.gif does not exist');
+                                },
+                                success: function(){
+                                    console.log('http://' + window.location.hostname + '/privatewww/speedscreen.gif exists');
+                                    $scope.backgroundImageURL = 'http://' + window.location.hostname + '/privatewww/speedscreen.gif';
+                                }
+                            });
+                        },
+                        success: function(){
+                            console.log('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg exists');
+                            $scope.backgroundImageURL = 'http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg';
+                            }
+                        });
+
             //TODO: Change these to member variables
             var validStatusBarModes = ["Today","Week","Month"]; //Array of valid "Top Times" time periods
             var currentStatusBarMode = 0; //Index of first top time to display

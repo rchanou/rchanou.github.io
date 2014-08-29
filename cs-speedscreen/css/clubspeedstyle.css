@@ -223,10 +223,13 @@ html, body {
 
 /* HD Scoreboard Styles */
 
+
 @media all and (min-height: 1079px) {
     .hdScoreboard {
         background-image:url('../images/background_1080p.jpg');
         background-repeat:no-repeat;
+        background-size: 100%;
+        background-position: center;
         width: 1920px;
         height: 1080px;
     }
@@ -234,8 +237,10 @@ html, body {
 
 @media all and (max-height: 1078px) {
     .hdScoreboard {
-        background-image:url('../images/background_720p.jpg');
+        background-image:url('../images/background_1080p.jpg');
         background-repeat:no-repeat;
+        background-size: 100%;
+        background-position: center;
         width: 1280px;
         height: 720px;
     }
