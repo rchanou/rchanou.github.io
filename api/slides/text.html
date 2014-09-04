@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Video</title>
+    <title>Text</title>
 
     <script src="../js/handlebars-latest.js"></script>
     <script src="../js/jquery.min.js"></script>
@@ -58,7 +58,7 @@
         .line {
             color: white;
             height: calc(100%/6);
-            font-size: 6vh;
+            font-size: 9vh;
         }
         .hLeft {
             text-align: left;
@@ -91,6 +91,19 @@
             height: 100%;
             width: 100%;
         }
+        .shadows {
+            text-shadow: 0 0.175vmin 0 rgba(201,201,201,1),
+                0 0.2625vmin 0 rgba(187,187,187,1),
+                0 0.35vmin 0 rgba(185,185,185,1),
+                0 0.4375vmin 0 rgba(170,170,170,1),
+                0 0.375vmin 0.175vmin rgba(0,0,0,.2),
+                0 0 0.4375vmin rgba(0,0,0,.2),
+                0 0.0875vmin 0.2625vmin rgba(0,0,0,.5),
+                0 0.2625vmin 0.4375vmin rgba(0,0,0,.4),
+                0 0.4375vmin 0.875vmin rgba(0,0,0,.4),
+                0 0.875vmin 0.875vmin rgba(0,0,0,.3),
+                0 1.75vmin 1.75vmin rgba(0,0,0,.2);
+        }
     </style>
 </head>
 <body>
@@ -103,18 +116,16 @@
     */
     function buildHtml(data) {
 
-        log(JSON.stringify(data, undefined, 4));
-
         var src = '' +
             '<div id="wrapper" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
-        +   '   <div class="header vMiddle hCenter">{{line0}}</div>'
+        +   '   <div class="header vMiddle hCenter shadows">{{line0}}</div>'
         +   '   <div class="lineWrapper">'
-        +   '       <div class="line vMiddle hCenter">{{line1}}</div>'
-        +   '       <div class="line vMiddle hCenter">{{line2}}</div>'
-        +   '       <div class="line vMiddle hCenter">{{line3}}</div>'
-        +   '       <div class="line vMiddle hCenter">{{line4}}</div>'
-        +   '       <div class="line vMiddle hCenter">{{line5}}</div>'
-        +   '       <div class="line vMiddle hCenter">{{line6}}</div>'
+        +   '       <div class="line vMiddle hCenter shadows">{{line1}}</div>'
+        +   '       <div class="line vMiddle hCenter shadows">{{line2}}</div>'
+        +   '       <div class="line vMiddle hCenter shadows">{{line3}}</div>'
+        +   '       <div class="line vMiddle hCenter shadows">{{line4}}</div>'
+        +   '       <div class="line vMiddle hCenter shadows">{{line5}}</div>'
+        +   '       <div class="line vMiddle hCenter shadows">{{line6}}</div>'
         +   '   </div>'
         +   '</div>';
 
@@ -134,18 +145,6 @@
     function buildPage(data) {
         var bodyHtml = buildHtml(data);
         $(bodyHtml).appendTo("body");
-        // clubspeed.helpers.css.applyAnimations({
-        //     maxDelay: 350,
-        //     elems: [
-        //         {
-        //             selector: '.racer',
-        //             classes: {
-        //                 defaults: ['visible'],
-        //                 animations: ['fadeInDown']
-        //             }
-        //         }
-        //     ]
-        // });
     }
 
 
