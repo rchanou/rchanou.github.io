@@ -22,8 +22,8 @@ Speed Screen Channels
             <ul class="nav nav-tabs tab-green">
                 <?php $currentChannelCount = 0;?>
                 @foreach($listOfChannels as $currentChannel)
-                <?php $currentChannelCount++; ?>
-                <li class="{{$currentChannelCount == 1 ? 'active' : ''}}"> <a data-toggle="tab" href="#panel_tab4_channel{{$currentChannel->channelId}}"> {{$currentChannel->channelId}}. {{$currentChannel->channelName}} </a> </li>
+                <?php $currentChannelCount++;?>
+                <li{{$currentChannelCount == 1 ? ' class="active"' : ''}}> <a data-toggle="tab" href="#panel_tab4_channel{{$currentChannel->channelId}}">{{$currentChannel->channelId}}. {{$currentChannel->channelName}} </a> </li>
                 @endforeach
             </ul>
 
@@ -32,14 +32,14 @@ Speed Screen Channels
                 <?php $currentChannelCount = 0;?>
                 @foreach($listOfChannels as $currentChannel)
                 <?php $currentChannelCount++; ?>
-                <div id="panel_tab4_channel{{$currentChannel->channelId}}" class="tab-pane channel-tab {{$currentChannelCount == 1 ? 'active' : ''}}">
+                <div id="panel_tab4_channel{{$currentChannel->channelId}}" class="tab-pane channel-tab{{$currentChannelCount == 1 ? ' active' : ''}}">
                     <!-- Channel header -->
                     <div class="row">
                         <div class="col-sm-10">
                             <h2>{{$currentChannel->channelId}}. {{$currentChannel->channelName}}</h2>
                         </div>
                         <div class="col-sm-2">
-                            <a href="" target="_blank" class="channelPreviewLink"><input type="button" class="btn btn-success btn-block" value="Preview" style="margin-top: 1.5em"></a> <!-- TODO: Implement -->
+                            <a href="" target="_blank" class="channelPreviewLink"><input type="button" class="btn btn-success btn-block" value="Preview" style="margin-top: 1.5em"></a>
                         </div>
                     </div>
                     <div class="tabbable inline">
@@ -51,23 +51,6 @@ Speed Screen Channels
                         </ul>
                         <!-- Content of all channel tabs -->
                         <div class="tab-content">
-
-                            <!-- Slide lineup tab -->
-                            <div id="panel_tab2_slidelineup_channel{{$currentChannel->channelId}}" class="tab-pane">
-                                <div class="alert alert-info">
-                                    <p> This feature is under development and will allow editing of each slide in this channel. <p/>In the meanwhile, please proceed to the <a href="http://{{$_SERVER['HTTP_HOST']}}/sp_admin" target="_blank">current admin panel</a>. </p>
-                                </div>
-                                @foreach($channelLineups[$currentChannel->channelId] as $currentSlideIndex => $currentSlide)
-                                <div class="widget-box collapsible" style="display: none;">
-                                    <div class="widget-title"> <a href="#slide{{$currentSlideIndex+1}}_channel{{$currentChannel->channelId}}" data-toggle="collapse"> <span class="icon"><i class="fa fa-bar-chart-o"></i></span>
-                                            <h5>{{$currentSlideIndex+1}}. {{$currentSlide->type}}</h5>
-                                        </a> </div>
-                                    <div class="collapse" id="slide{{$currentSlideIndex+1}}_channel{{$currentChannel->channelId}}">
-                                        <div class="widget-content">{{json_encode($currentSlide->options)}} </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
 
                             <!-- Deploy tab -->
                             <div id="panel_tab2_deploy_channel{{$currentChannel->channelId}}" class="tab-pane active">
@@ -85,7 +68,7 @@ Speed Screen Channels
                                     <div class="form-group">
                                         <label class="col-sm-3 col-md-3 col-lg-2 control-label">Target Monitor</label>
                                         <div class="col-sm-9 col-md-9 col-lg-10">
-                                            <select name="targetMonitor" class="targetMonitor" tabindex="-1" class="select2-offscreen">
+                                            <select name="targetMonitor" class="targetMonitor select2-offscreen" tabindex="-1">
                                                 <option value="1">Monitor 1 (Default)</option>
                                                 @for($i=2; $i <= $numberOfMonitors; $i++)
                                                 <option value="{{$i}}">Monitor {{$i}}</option>
@@ -96,14 +79,31 @@ Speed Screen Channels
                                     <div class="form-group">
                                         <label class="col-sm-3 col-md-3 col-lg-2 control-label">Disable Animations</label>
                                         <div class="col-sm-9 col-md-9 col-lg-10">
-                                        <input class="channel-animations-checkbox" type="checkbox">
-                                        <span class="help-block text-left">If checked, animations will be disabled in most slides.</span>
+                                            <input class="channel-animations-checkbox" type="checkbox">
+                                            <span class="help-block text-left">If checked, animations will be disabled in most slides.</span>
                                         </div>
                                     </div>
                                     <div class="form-actions">
                                         <button type="submit" class="btn btn-info">Create Application</button>
                                     </div>
                                 </form>
+                            </div>
+
+                            <!-- Slide lineup tab -->
+                            <div id="panel_tab2_slidelineup_channel{{$currentChannel->channelId}}" class="tab-pane">
+                                <div class="alert alert-info">
+                                    <p> This feature is under development and will allow editing of each slide in this channel. <p/>In the meanwhile, please proceed to the <a href="http://{{$_SERVER['HTTP_HOST']}}/sp_admin" target="_blank">current admin panel</a>. </p>
+                                </div>
+                                @foreach($channelLineups[$currentChannel->channelId] as $currentSlideIndex => $currentSlide)
+                                <div class="widget-box collapsible" style="display: none;">
+                                    <div class="widget-title"> <a href="#slide{{$currentSlideIndex+1}}_channel{{$currentChannel->channelId}}" data-toggle="collapse"> <span class="icon"><i class="fa fa-bar-chart-o"></i></span>
+                                            <h5>{{$currentSlideIndex+1}}. {{$currentSlide->type}}</h5>
+                                        </a> </div>
+                                    <div class="collapse" id="slide{{$currentSlideIndex+1}}_channel{{$currentChannel->channelId}}">
+                                        <div class="widget-content"></div>
+                                    </div>
+                                </div>
+                                @endforeach
                             </div>
 
                             <!-- Channel Settings tab -->
@@ -114,9 +114,7 @@ Speed Screen Channels
                         </div>
                     </div>
                 </div>
-
                 @endforeach
-
             </div>
           </div>
         </div>

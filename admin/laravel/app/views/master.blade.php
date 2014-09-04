@@ -104,9 +104,8 @@
 <script src="js/jquery.flot.resize.min.js"></script>
 <script src="js/jquery.sparkline.min.js"></script>
 <script src="js/fullcalendar.min.js"></script>
-<script src="js/jquery.icheck.min.js"></script> 
-<script src="js/select2.min.js"></script> 
-<script src="js/jquery.nicescroll.min.js"></script>
+<script src="js/jquery.icheck.min.js"></script>
+<script src="js/select2.min.js"></script>
 <script src="js/jquery.nicescroll.min.js"></script>
 <script src="js/unicorn.js"></script>
 <script src="js/unicorn.form_common.js"></script>
