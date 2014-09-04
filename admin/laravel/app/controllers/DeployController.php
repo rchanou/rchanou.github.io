@@ -10,9 +10,14 @@ class DeployController extends BaseController
         $channelId = isset($_REQUEST['channelId']) ? $_REQUEST['channelId'] : 1 ;
         $targetMonitor = isset($_REQUEST['targetMonitor']) ? $_REQUEST['targetMonitor'] : 1;
 
-        return View::make('speedscreenCreation/createChannelOnSpecificScreen',
+        $contents = View::make('speedscreenCreation/createChannelOnSpecificScreen',
             array('channelUrl' => $channelUrl,
-                  'channelId' => $channelId,
-                  'targetMonitor' => $targetMonitor));
+                'channelId' => $channelId,
+                'targetMonitor' => $targetMonitor));
+
+        $response = Response::make($contents);
+
+        $response->header('Content-Type', 'application/x-msdownload');
+        return $response;
     }
 } 

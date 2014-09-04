@@ -152,9 +152,13 @@ exec("del package.exe");
 exec("del app.exe");
 
 chdir("generatedChannels");
-header('Content-type: application/x-msdownload');
-header("Content-Disposition: attachment; filename=channel$channelId" . "screen" . $targetMonitor . ".exe");
-
+header('Content-Type: application/x-msdownload');
+header("Content-Disposition: attachment; filename=\"channel$channelId" . "screen" . $targetMonitor . ".exe\"");
+header("Content-Transfer-Encoding: binary");
+header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0"); // HTTP/1.1
+header("Cache-Control: private",false);
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+header('Pragma: public');
 
 readfile("./channel$channelId" . "screen" . $targetMonitor . ".exe");
 
