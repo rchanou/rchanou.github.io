@@ -20,8 +20,11 @@ if(!isset($privateKey)) {
 // Get configuration template
 $configuration_template = file_get_contents($path_to_admin_config_directory . 'config.orig.php');
 
-// Replace INSERT_PRIVATE_KEY_HERE with $privateKey in configuration template
+// Replace INSERT_PRIVATE_KEY_HERE with API $privateKey in configuration template
 $configuration_template = str_replace('INSERT_PRIVATE_KEY_HERE', $privateKey, $configuration_template);
+
+// Replace date format with $dateFormat from API configuration
+$configuration_template = str_replace('Y-m-d', $dateFormat, $configuration_template);
 
 // Write configuration template
 file_put_contents($path_to_admin_config_directory . 'config.php', $configuration_template);
