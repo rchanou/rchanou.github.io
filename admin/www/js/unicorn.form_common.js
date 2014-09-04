@@ -10,9 +10,8 @@ $(document).ready(function(){
     	radioClass: 'iradio_flat-blue'
 	});
 	
-	$('select').select2();
-    $('.colorpicker').colorpicker();
-    $('.datepicker').datepicker();
-    $('.spinner').spinner();
-
+	 $('select').select2();
+    // $('.colorpicker').colorpicker();
+    // $('.datepicker').datepicker();
+    // $('.spinner').spinner();
 });

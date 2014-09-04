@@ -7,4 +7,5 @@ return array(
     'dateFormat' => 'Y-m-d',
     'debugging' => true,
     'assetsURL' => 'http://' . $_SERVER['HTTP_HOST'] . '/assets/admin',
+    'numberOfMonitors' => 16
 );

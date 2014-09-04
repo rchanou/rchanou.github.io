@@ -119,4 +119,43 @@ class CS_API
         }
     }
 
+    public static function getListOfChannels()
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$apiKey);
+        $url = self::$apiURL . '/channel/all.json?' . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function getDetailsOnChannel($channelId)
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$apiKey);
+        $url = self::$apiURL . "/channel/$channelId.json?" . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
 }

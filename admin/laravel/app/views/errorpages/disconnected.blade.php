@@ -1,0 +1,39 @@
+@extends('master')
+
+@section('title')
+Dashboard
+@stop
+
+@section('pageHeader')
+Disconnected
+@stop
+
+@section('breadcrumb')
+    <a href="dashboard" title="Go to Home" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="#" class="current">Disconnected</a>
+@stop
+
+@section('content')
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-3"></div>
+        <div class="col-xs-12 col-sm-6 text-center">
+            <h1>Disconnected!</h1>
+            <img src="img/disconnected.png"><p/>
+            <div class="alert alert-info alert-block">Unable to reach the Club Speed server. Please try again later. If the issue persists, contact Club Speed support.</div>
+        </div>
+        <div class="col-xs-12 col-sm-3"></div>
+    </div>
+
+@stop
+
+    <!-- BEGIN JAVASCRIPT INCLUDES -->
+@section('js_includes')
+@parent
+<script>
+    var errorInfo = {{$errorInfo}};
+    console.log("Error information:");
+    console.log(errorInfo);
+</script>
+@stop
+    <!-- END JAVASCRIPT INCLUDES -->

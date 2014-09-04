@@ -35,7 +35,7 @@
     <div id="user-nav">
         <ul class="btn-group">
             <li class="btn"><a href="#">Logged in as: {{Session::get('user')}}</a></li>
-            <li class="btn"><a title="" href="logout"><i class="fa fa-share"></i> <span class="text">Logout</span></a></li>
+            <li class="btn"><a title="" href="{{action('LoginController@logout')}}"><i class="fa fa-share"></i> <span class="text">Logout</span></a></li>
         </ul>
     </div>
 
@@ -44,7 +44,7 @@
             <input type="text" placeholder="Search here..."/><button type="submit" class="tip-right" title="Search"><i class="fa fa-search"></i></button>
         </div>-->
         <ul>
-            <li class="active"><a href="dashboard"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
+            <li><a href="dashboard"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
             <!--<li class="submenu">
                 <a href="#"><i class="fa fa-flask"></i> <span>Sub-Menu 1</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
@@ -54,11 +54,15 @@
                 </ul>
             </li>
             <li><a href="#"><i class="fa fa-th"></i> <span>Direct Link Item</span></a></li>-->
+            @if (@$controller == 'ChannelController')
+            <li class="active open submenu">
+            @else
             <li class="submenu">
+            @endif
                 <a href="#"><i class="fa fa-desktop"></i> <span>Speed Screens</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
-                    <li><a href="/admin/channel">Channel Editor</a></li>
-                    <li><a href="/admin/docs/Club Speed - Speed Screen Guide.pdf" target="_blank">Documentation</a></li>
+                    <li>{{link_to('/channel','Channel Editor')}}</li>
+                    <li>{{link_to('/docs/Club Speed - Speed Screen Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
         </ul>
