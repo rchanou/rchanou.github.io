@@ -1,13 +1,77 @@
 <?php
 
-/*
-TODO
-X Clean cache & jobs
-X Use PNG by default
-X Enforce security on domain
-X Add configurable delay
-- Verify script is secure, remove some DoS-ability
-*/
+if(!function_exists('mime_content_type')) {
+
+    function mime_content_type($filename) {
+
+        $mime_types = array(
+            // images
+            'png' => 'image/png',
+            'jpe' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'jpg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'bmp' => 'image/bmp',
+            'ico' => 'image/vnd.microsoft.icon',
+            'tiff' => 'image/tiff',
+            'tif' => 'image/tiff',
+            'svg' => 'image/svg+xml',
+            'svgz' => 'image/svg+xml',
+        );
+
+        $ext = strtolower(array_pop(explode('.',$filename)));
+        if (array_key_exists($ext, $mime_types)) {
+						return $mime_types[$ext];
+        }
+        elseif (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME);
+            $mimetype = finfo_file($finfo, $filename);
+            finfo_close($finfo);
+						return $mimetype;
+        }
+        else {
+            return 'application/octet-stream';
+        }
+    }
+}
+
+/**
+ * Proxy images as base64
+ * Created to get around CORS problems from iPad registration
+ *
+ * Usage: http://vm-122.clubspeedtiming.com/api/shot/shot.php?base64=192.168.111.133/image.jpg
+ */
+$whitelist = 'image.jpg'; // Could be turned into an array of regex's later?
+$timeoutInSeconds = 5; // Timeout if image cannot be reached -- in seconds
+
+if(isset($_REQUEST['base64'])) {
+	// Set timeout default
+	ini_set('default_socket_timeout', $timeoutInSeconds);
+	
+	// Append http (if not provided)
+	$url = (false === strpos($_REQUEST['base64'], '://')) ? 'http://' . $_REQUEST['base64'] : $_REQUEST['base64'];
+
+	// Parse URL
+	$imagePath = parse_url($url, PHP_URL_PATH);
+
+	// Enforce Whitelist -- can be expanded as more types arise
+	if ($whitelist !== substr($url, -9)) exit('Image URL not supported.');
+	
+	// Get image data or return an error.
+	$imageData = file_get_contents($url);
+	if(!$imageData) exit('Image not found.');
+	
+	// Format the image SRC: data:{mime};base64,{data};
+	$base64Data = 'data: ' . mime_content_type($imagePath) . ';base64,' . base64_encode($imageData);
+	
+	// Return base64'd image
+	if(isset($_REQUEST['callback'])) { // Handle JSONP requests
+    $base64Data = array('image' => $base64Data);
+    die("{$_REQUEST['callback']}(" . json_encode($base64Data) . ");");
+	} else { // Non JSONP requests
+    die($base64Data);
+	}
+}
 
 /**
  * CONFIGURATION SETTINGS

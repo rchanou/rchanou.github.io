@@ -8,71 +8,65 @@
  * @version 0.1
  */
  
- /**
-  * /users/
-  */
+/**
+ * /users/
+ */
+
+// require_once('./clubspeed/security/validate.php');
+
 class Users
 {
     public $restler;
+    private $logic;
+
+    function __construct() {
+        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
+    }
+
+    /**
+     * Note: this is a login for USER, not CUSTOMER
+     */
+    public function login() {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        $is_admin = empty($_GET['is_admin']) ? 0 : 1;
+        if($is_admin == 1) {
+            $tsql = "select top(1) * from users u left join userroles ur on u.UserID = ur.userid WHERE (ur.roleid = 1 OR ur.roleid = 11) AND u.UserName = ? AND u.Password = ? AND u.Enabled = 1 AND u.Deleted = 0";
+        } else {
+            $tsql = "SELECT * FROM Users WHERE UserName = ? AND Password = ? AND Enabled = 1 AND Deleted = 0";
+        }
+
+        $rows = $this->run_query($tsql, array(&$_GET['username'], &$_GET['password']));
+        
+        // Login valid if we return a row
+        $login_valid = (count($rows) > 0);
+
+        return array('valid' => $login_valid);  
+    }   
     
-	function __construct(){
-		header('Access-Control-Allow-Origin: *'); //Here for all /say
-	}
-	
-	/**
-	 * Entry method
-	 */
-	
-	protected function index($param, $sub = null) {
-		return $this->login();
-	}
+    private function run_query($tsql, $params = array()) {
+        
+     // Connect
+     try {
+         $conn = new PDO( "sqlsrv:server=(local) ; Database=ClubSpeedV8", "", "");
+         $conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            
+         // Prepare statement
+         $stmt = $conn->prepare($tsql);
+    
+         // Execute statement
+         $stmt->execute($params);
+            
+         // Put in array
+         $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-	/**
-	 * Attempt to login
-	 * @protected
-	 * @param integer $customerId
-	 * @return array 
-	 */
-	protected function login() {		
-		if($_REQUEST['key'] != $GLOBALS['privateKey'])
-					throw new RestException(412,'Not authorized');
-		
-		$is_admin = empty($_GET['is_admin']) ? 0 : 1;
-		if($is_admin == 1) {
-			$tsql = "select top(1) * from users u left join userroles ur on u.UserID = ur.userid WHERE (ur.roleid = 1 OR ur.roleid = 11) AND u.UserName = ? AND u.Password = ? AND u.Enabled = 1 AND u.Deleted = 0";
-		} else {
-			$tsql = "SELECT * FROM Users WHERE UserName = ? AND Password = ? AND Enabled = 1 AND Deleted = 0";
-		}
-
-		$rows = $this->run_query($tsql, array(&$_GET['username'], &$_GET['password']));
-		
-		// Login valid if we return a row
-		$login_valid = (count($rows) > 0);
-
-		return array('valid' => $login_valid);	
-	}	
-	
-	private function run_query($tsql, $params = array()) {
-		
-		// Connect
-		try {
-			$conn = new PDO( "sqlsrv:server=(local) ; Database=ClubSpeedV8", "", "");
-			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-			
-			// Prepare statement
-			$stmt = $conn->prepare($tsql);
-	
-			// Execute statement
-			$stmt->execute($params);
-			
-			// Put in array
-			$output = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-		} catch(Exception $e) { 
-			die( print_r( $e->getMessage() ) ); 
-		}
-		
-		return $output;
-	}
-	
+     } catch(Exception $e) { 
+         die( print_r( $e->getMessage() ) ); 
+     }
+        
+     return $output;
+    }
+    
 }

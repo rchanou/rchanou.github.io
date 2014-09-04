@@ -109,6 +109,10 @@
             });
 
             var getSchedule = function(options) {
+                var data = {
+                    // no items needed!
+                };
+                
                 return sendRequest({
                     api: "races/upcoming.json",
                     type: "GET",
@@ -118,7 +122,7 @@
                 });
             }.extend({
                 defaults: {
-                    track: 1
+                    track: 1 // move this from a default!!
                 },
                 poll: function(options) {
                     return _poll(getSchedule, options);

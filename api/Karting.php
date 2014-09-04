@@ -42,9 +42,11 @@ class Karting
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="img/favicon.ico">
+
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
   </head>
 
-  <body>
+  <body onload="prettyPrint()"">
   
     <div class="container">
       <div class="row">		
@@ -60,10 +62,10 @@ class Karting
 		  </div>
 		  
           <div class="row">
-                    <div class="span8">
-                        <div class="wannabe-unit">
-                        <p>We currently have our Rental Karting data exposed and documented below.</p>
-                    </div>
+                <div class="span8">
+                    <div class="wannabe-unit">
+                    <p>We currently have our Rental Karting data exposed and documented below.</p>
+                </div>
                 </div><!--/span-->
           </div>
           
@@ -243,6 +245,29 @@ class Karting
                     <p class="description">Currently supported apps: kiosk</p>
                     <ul>
                         <li><strong>Retrieve images by app:</strong> <code>/settings/getImages</code> (<a href="index.php/settings/getImages.json?app=kiosk&key=$daily_key">JSON</a>, <a href="index.php/settings/getImages.js?app=kiosk&key=$daily_key&callback=myCallback">JSONP</a>, <a href="index.php/settings/getImages.xml?app=kiosk&key=$daily_key">XML</a>)</li>
+                    </ul>
+                    <h4><i class="icon-plus"></i> Queues</h4>
+                    <p class="description">Add racers to either standard or event queues <strong>(requires private key).</strong></p>
+                    <ul>
+                        <li>
+                            <strong>Add racer_id to Event Queue:</strong><code>/queues/add</code>(POST)
+                            <br>
+                            <code class="prettyprint">
+                            {
+                              "customerId": 1000001,
+                              "eventId": 1
+                            }
+                            </code>
+                        </li>
+                        <li>
+                            <strong>Add racer_id to Standard Queue:</strong><code>/queues/add</code>(POST)
+                            <br>
+                            <code class="prettyprint">
+                            {
+                                "customerId": 1000001
+                            }
+                            </code>
+                        </li>
                     </ul>
 
             </div><!--/span-->

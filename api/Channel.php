@@ -13,11 +13,11 @@ class Channel
         $this->speedScreenBackgroundUrl = $this->host . '/PrivateWWW/SpeedScreen.gif';
     }
 
-    protected function index($channelId, $sub = null) {
+    public function index($channelId, $sub = null) {
         die('GETINDEX' . $channelId);
     }
 
-    protected function html($htmlId) {
+    public function html($htmlId) {
         die('GETHTML' . $htmlId);
         
         // Get screen
@@ -27,7 +27,26 @@ class Channel
         return $slide[0];
     }
 
-    protected function get($channelId) {                            
+    public function get($channelId) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
+        if ($channelId == 'all')
+        {
+            $tsql = "SELECT * FROM ScreenTemplate WHERE deleted = 0";
+            $screens = $this->run_query($tsql);
+            $output = array();
+            foreach($screens as $currentScreen)
+            {
+                $channelId = $currentScreen["TemplateID"];
+                $channelName = $currentScreen["TemplateName"];
+                $output[$channelId] = array('channelId' => $channelId,
+                                            'channelName' => $channelName);
+            }
+            return $output;
+        }
+
         if(!is_numeric($channelId)) throw new RestException(412,'Channel ID must be numeric');
         
         // Base path for video URLs

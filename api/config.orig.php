@@ -7,6 +7,8 @@ $dateFormat = 'Y-m-d';
 date_default_timezone_set('America/Los_Angeles'); // Full list: http://www.php.net/manual/en/timezones.php
 $privateKey = rand() . time(); // Replace with a custom, hardcoded private key
 $authentication_keys = array($privateKey, 'cs-dev', md5(date('Y-m-d')));
+$apiUsername = 'PUT_USERNAME_HERE';
+$apiPassword = 'PUT_PASSWORD_HERE';
 
 // URL to images used for the digital signage aka "Speed Screen"
 $channelImageUrl = '/sp_admin/ScreenImages/'; // This is hardcoded in Club Speed, cannot get elsewhere. :-(

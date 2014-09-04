@@ -6,15 +6,18 @@ class Version
 		
 		// Versions of various applications and modules
 		public $speedscreenVersion = '0.5.0';
-		public $apiVersion = '1.1.10b';
-		public $apiLastUpdatedAt = '7/30/2014 5:45';
+		public $apiVersion = '1.1.10';
+		public $apiLastUpdatedAt = '7/7/2014 10:52';
 
     function __construct(){
         header('Access-Control-Allow-Origin: *'); //Here for all /say
     }
 
-
-    protected function index($desiredData, $sub = null) {
+    public function index($desiredData, $sub = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        
         if ($desiredData == 'current')
         {
             return $this->current();
@@ -29,8 +32,12 @@ class Version
         }
     }
 
-    protected function current()
+    public function current()
     {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $tsql = "SELECT TOP 1 * FROM Version_CS order by UpdatedDate desc";
         $tsql_params = array();
 
@@ -52,15 +59,23 @@ class Version
         return $output;
     }
 
-    protected function api()
+    public function api()
     {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $output["CurrentVersion"] = $this->apiVersion;
         $output["LastUpdated"] = $this->apiLastUpdatedAt;
         return $output;
     }
 
-    protected function os()
+    public function os()
     {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $output["OS"] = php_uname('s');
         $output["Version"] = php_uname('v');
         return $output;

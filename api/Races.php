@@ -20,25 +20,24 @@ class Races
         header('Access-Control-Allow-Origin: *'); //Here for all /say
     }
 
-
-    protected function index($race_id, $sub = null) {
+    public function index($race_id, $sub = null) {
         //if(!is_numeric($race_id) || $race_id !== 'current') throw new RestException(412,'Not a valid race id');
 
         if($race_id == 'current_race_id') return $this->current();
         if($race_id == 'current') $race_id = $this->current();
         if($race_id == 'fastest') return $this->fastest();
         if($race_id == 'next') return $this->next(@$_GET['track_id'], @$_GET['offset']);
-				if($race_id == 'previous') return $this->previous(@$_GET['track_id'], @$_GET['offset']);
+                if($race_id == 'previous') return $this->previous(@$_GET['track_id'], @$_GET['offset']);
         if($race_id == 'total_laps') return $this->total_laps();
         if($race_id == 'lap_number') return $this->lap_number($sub);
         if($race_id == 'scoreboard') return $this->scoreboard(@$_GET['track_id'], @$_GET['heat_id']);
-				if($race_id == 'copy') return $this->copy(@$_GET['from'], @$_GET['to'], @$_GET['track_id']);
+                if($race_id == 'copy') return $this->copy(@$_GET['from'], @$_GET['to'], @$_GET['track_id']);
         if($race_id == 'races') return $this->races();
         if($race_id == 'since') return $this->since();
         if($race_id == 'final_positions') return $this->final_positions();
         if($race_id == 'matching') return $this->matching();
-				if($race_id == 'upcoming_heat_types') return $this->upcoming_heat_types(@$_GET['date']);
-				if($race_id == 'upcoming') return $this->upcoming();
+                if($race_id == 'upcoming_heat_types') return $this->upcoming_heat_types(@$_GET['date']);
+                if($race_id == 'upcoming') return $this->upcoming();
 
         if($sub != null) {
             switch($sub) {
@@ -59,54 +58,57 @@ class Races
         }
     }
 
-		public function copy($fromDate = null, $toDate = null, $track_id = null, $options = null) {
-			if($_REQUEST['key'] != $GLOBALS['privateKey'])
-				throw new RestException(412,'Not authorized');
+    public function copy($fromDate = null, $toDate = null, $track_id = null, $options = null) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        // TODO Options? (only web or only A&D)
+        // TODO Accept heat numbers to copy just those?
+        
+        // Setup incoming variables
+        if(empty($fromDate)) throw new RestException(412, 'A valid "from" date was not given.');
+        if(empty($toDate))   throw new RestException(412, 'A valid "to" date was not given.');
+        if(empty($track_id)) throw new RestException(412, 'A valid "track id" was not given.');
+        
+        // Get "from" races
+        $tsql = "SELECT TrackNo, HeatTypeNo, LapsOrMinutes, WinBy, RaceBy, ScheduleDuration, PointsNeeded, SpeedLevel, HeatColor, MemberOnly, ScoreID, RacersPerHeat, CadetsPerHeat, ScheduledTime FROM HeatMain WHERE EventRound IS NULL AND ScheduledTime BETWEEN ? AND ? AND TrackNo = ?";
+        $fromStartOfDay = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($fromDate));
+        $fromEndOfDay   = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($fromDate));
+        $tsql_params = array($fromStartOfDay, $fromEndOfDay, $track_id);
+        $templateRaces = $this->run_query($tsql, $tsql_params);
+        
+        // Build and insert each new race
+        foreach($templateRaces as $templateRace) {
+            // Modify template into "new" race to insert
+            $race = $templateRace;
+            $race['ScheduledTime'] = $toDate . substr($race['ScheduledTime'], -13);
+            $race['HeatStatus'] = 0;
+            $race['Begining'] = null;
+            $race['Finish'] = null;
+            $race['NumberOfReservation'] = 0;
+            $race['NumberOfCadetReservation'] = 0;
+            
+            // Insert race
+            $fields = $placeholders = $params = array();
+            foreach($race as $field => $data) {
+                $fields[] = $field;
+                $placeholders[] = '?';
+                $params[] = $data;
+            }
+            $tsql = "INSERT INTO HeatMain ( " . implode(',', $fields) . " ) OUTPUT INSERTED.HeatNo VALUES ( " . implode(',', $placeholders) . " )";
+            $result = $this->run_query($tsql, $params);
+        }
+        
+        // TODO Let MainEngine know to refresh the schedule
+        
+        return array('result' => 'success');
+            
+    }
 
-			// TODO Options? (only web or only A&D)
-			// TODO Accept heat numbers to copy just those?
-			
-			// Setup incoming variables
-			if(empty($fromDate)) throw new RestException(412, 'A valid "from" date was not given.');
-			if(empty($toDate))   throw new RestException(412, 'A valid "to" date was not given.');
-			if(empty($track_id)) throw new RestException(412, 'A valid "track id" was not given.');
-			
-			// Get "from" races
-			$tsql = "SELECT TrackNo, HeatTypeNo, LapsOrMinutes, WinBy, RaceBy, ScheduleDuration, PointsNeeded, SpeedLevel, HeatColor, MemberOnly, ScoreID, RacersPerHeat, CadetsPerHeat, ScheduledTime FROM HeatMain WHERE EventRound IS NULL AND ScheduledTime BETWEEN ? AND ? AND TrackNo = ?";
-			$fromStartOfDay = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($fromDate));
-			$fromEndOfDay   = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($fromDate));
-			$tsql_params = array($fromStartOfDay, $fromEndOfDay, $track_id);
-			$templateRaces = $this->run_query($tsql, $tsql_params);
-			
-			// Build and insert each new race
-			foreach($templateRaces as $templateRace) {
-				// Modify template into "new" race to insert
-				$race = $templateRace;
-				$race['ScheduledTime'] = $toDate . substr($race['ScheduledTime'], -13);
-				$race['HeatStatus'] = 0;
-				$race['Begining'] = null;
-				$race['Finish'] = null;
-				$race['NumberOfReservation'] = 0;
-				$race['NumberOfCadetReservation'] = 0;
-				
-				// Insert race
-				$fields = $placeholders = $params = array();
-				foreach($race as $field => $data) {
-					$fields[] = $field;
-					$placeholders[] = '?';
-					$params[] = $data;
-				}
-				$tsql = "INSERT INTO HeatMain ( " . implode(',', $fields) . " ) OUTPUT INSERTED.HeatNo VALUES ( " . implode(',', $placeholders) . " )";
-				$result = $this->run_query($tsql, $params);
-			}
-			
-			// TODO Let MainEngine know to refresh the schedule
-			
-			return array('result' => 'success');
-				
-		}
-
-    protected function total_laps() {
+    public function total_laps() {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
         $tsql = "SELECT COUNT(*) AS total_laps FROM RacingData";
         $tsql_params = array();
 
@@ -122,7 +124,10 @@ class Races
         }
     }
 
-    protected function lap_number($num) {
+    public function lap_number($num) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
         if(empty($num) || !is_numeric($num)) {
             $_GET['suppress_response_codes'] = true;
             throw new RestException(412, 'No lap number given.');
@@ -159,70 +164,81 @@ class Races
      * @param int $nextNum See Wes. Currently being unused.
      * @return mixed The 'id' field of the next heat coming up.
      * @throws RestException Error code 412 is returned if no races are coming up.
-     *
      */
-    protected function upcoming($track = null) {
-				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
-				$return = array('races' => array());
+    public function upcoming($track = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        $track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
+        $return = array('races' => array());
 
-				// TODO Filter by Speed Level
+        // TODO Filter by Speed Level
 
-				$tsql = 'SELECT * FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.ScheduledTime DESC) ORDER BY ScheduledTime ASC';
-				$tsql_params = array(&$track_id, &$track_id);
-				$upcomingRaces = $this->run_query($tsql, $tsql_params);
-				
-				forEach($upcomingRaces as $id => $race) {
-					$populatedRace = $this->race($race['HeatNo']);
-					$populatedRace['race']['total_spots'] = $race['RacersPerHeat'];
-					$return['races'][] = $populatedRace;
-				}
-				
+        $tsql = 'SELECT * FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC) ORDER BY Begining ASC';
+        $tsql_params = array(&$track_id, &$track_id);
+        $upcomingRaces = $this->run_query($tsql, $tsql_params);
+        
+        forEach($upcomingRaces as $id => $race) {
+            $populatedRace = $this->race($race['HeatNo']);
+            $populatedRace['race']['total_spots'] = $race['RacersPerHeat'];
+            $return['races'][] = $populatedRace;
+        }
         return $return;
-		}
-		
-		protected function next($track = null, $offset = 0) {
+    }
+        
+    public function next($track = null, $offset = 0) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
-				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
-				$offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
+        $track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
+        $offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
 
-				// TODO Filter by Speed Level
+        // TODO Filter by Speed Level
 
-				$tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ScheduledTime) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC)) SELECT c.* FROM CTE c WHERE Rank = ?';
-				$tsql_params = array(&$track_id, &$track_id, &$offset);
-				$rows = $this->run_query($tsql, $tsql_params);
-				
-				if(empty($rows[0]['HeatNo'])) {
-					throw new RestException(412, 'No upcoming race found.');
-				} else {
-					$nextHeatId = $rows[0]['HeatNo'];
-				}
-				
+        $tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ScheduledTime) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC)) SELECT c.* FROM CTE c WHERE Rank = ?';
+        $tsql_params = array(&$track_id, &$track_id, &$offset);
+        $rows = $this->run_query($tsql, $tsql_params);
+        
+        if(empty($rows[0]['HeatNo'])) {
+            throw new RestException(412, 'No upcoming race found.');
+        } 
+        else {
+            $nextHeatId = $rows[0]['HeatNo'];
+        }
+
         return $this->race($nextHeatId);
-
     }
-		
-		protected function previous($track = null, $offset = 0) {
+        
+    public function previous($track = null, $offset = 0) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
-				$track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
-				$offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
+        $track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
+        $offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
 
-				// TODO Filter by Speed Level
+        // TODO Filter by Speed Level
 
-				$tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY Begining DESC) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (2,3) AND Begining < (SELECT TOP(1) hm.Begining AS started_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC ) ) SELECT c.* FROM CTE c WHERE Rank = ?';
-				$tsql_params = array(&$track_id, &$track_id, &$offset);
-				$rows = $this->run_query($tsql, $tsql_params);
-				
-				if(empty($rows[0]['HeatNo'])) {
-					throw new RestException(412, 'No previous race found.');
-				} else {
-					$heatId = $rows[0]['HeatNo'];
-				}
-				
+        $tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY Begining DESC) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (2,3) AND Begining < (SELECT TOP(1) hm.Begining AS started_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC ) ) SELECT c.* FROM CTE c WHERE Rank = ?';
+        $tsql_params = array(&$track_id, &$track_id, &$offset);
+        $rows = $this->run_query($tsql, $tsql_params);
+        
+        if(empty($rows[0]['HeatNo'])) {
+            throw new RestException(412, 'No previous race found.');
+        } 
+        else {
+            $heatId = $rows[0]['HeatNo'];
+        }
+
         return $this->race($heatId);
-
     }
 
-    protected function current($track = null) {
+    public function current($track = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $track_id = (isset($_GET['track_id']) && is_numeric($_GET['track_id'])) ? (int)$_GET['track_id'] : 1;
         $tsql = "SELECT HeatNo FROM HeatMain WHERE (HeatStatus = 1) AND (TrackNo = ?)";
         $tsql_params = array(&$track_id);
@@ -239,25 +255,33 @@ class Races
         }
     }
 
-		protected function upcoming_heat_types($date = null) {
-				//TODO, implement date range to return heat types. For now just return all.
-				//$date = date($GLOBALS['dateFormat'] . " 23:59:59", $date);
-				
-				$tsql = "SELECT HeatTypeNo AS heat_type_id, HeatTypeName AS name FROM HeatTypes WHERE Enabled = 1 AND Deleted = 0 AND Web = 1 ORDER BY HeatTypeName";
+    public function upcoming_heat_types($date = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
+        //TODO, implement date range to return heat types. For now just return all.
+        //$date = date($GLOBALS['dateFormat'] . " 23:59:59", $date);
+        
+        $tsql = "SELECT HeatTypeNo AS heat_type_id, HeatTypeName AS name FROM HeatTypes WHERE Enabled = 1 AND Deleted = 0 AND Web = 1 ORDER BY HeatTypeName";
         $tsql_params = array();
         $heatTypes = $this->run_query($tsql, $tsql_params);
-				
-				return array('heatTypes' => $heatTypes);
-		}
+            
+        return array('heatTypes' => $heatTypes);
+    }
 
-    protected function matching() {
+    public function matching() {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $tsql_heatType = $tsql_numParticipants = $tsql_numSpots = '';
 
         // TODO -- pull from configuration
-				$blackoutTime = 1*60;  // In minutes
+        $blackoutTime = 1*60;  // In minutes
         $maximumDaysOut = 365; // In days
-				
-				// TODO -- convert start/end into milliseconds then do the conversion back to local time after we've processed it to avoid all the strtotime()'s
+                
+        // TODO -- convert start/end into milliseconds then do the conversion back to local time after we've processed it to avoid all the strtotime()'s
 
         // If no start date given, default to today
         if(!isset($_GET['start'])) {
@@ -288,57 +312,62 @@ class Races
             throw new RestException(412,'Cannot schedule more than ' . $maximumDaysOut . ' in advance');
         }
 
-				/**
-				 * Create optional filters on query
-				 */
+        /**
+         * Create optional filters on query
+         */
         $tsql_params = array(&$start, &$end);
 
         // TODO -- allow multiple heat types (or all) to be given
-				if(isset($_GET['heatType']) && is_numeric($_GET['heatType'])) {
+        if(isset($_GET['heatType']) && is_numeric($_GET['heatType'])) {
             $tsql_heatType = 'AND hm.HeatTypeNo = ?';
             $tsql_params[] = &$_GET['heatType'];
         }
-				
-				// TODO -- filter number of participants
-				if(false && isset($_GET['numParticipants']) && is_numeric($_GET['numParticipants'])) {
+                
+        // TODO -- filter number of participants
+        if(false && isset($_GET['numParticipants']) && is_numeric($_GET['numParticipants'])) {
             $tsql_numParticipants = 'AND SpotsAvailable >= ?';
             $tsql_params[] = &$_GET['numParticipants'];
-        } else {
-						$_GET['numParticipants'] = 1; // Until we filter by "SpotsAvailable" in SQL...
-				}
+        }
+        else {
+            $_GET['numParticipants'] = 1; // Until we filter by "SpotsAvailable" in SQL...
+        }
 
-				// TODO -- Add restiction that heat needs to be "closed" or "not run": hm.HeatStatus IN (0, 4)
+        // TODO -- Add restiction that heat needs to be "closed" or "not run": hm.HeatStatus IN (0, 4)
 
         $tsql = "SELECT hm.HeatNo, ht.HeatTypeName AS title, hm.HeatNotes AS note, hm.HeatStatus, hm.ScheduledTime AS starts, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, (hm.RacersPerHeat - (hm.NumberOfReservation + hm.NumberOfCadetReservation + COUNT(hd.HeatNo))) AS SpotsAvailable, COUNT(hd.HeatNo) AS NumberOfPaid, hm.NumberOfReservation, hm.NumberOfCadetReservation FROM HeatMain AS hm LEFT OUTER JOIN HeatDetails AS hd ON hm.HeatNo = hd.HeatNo LEFT OUTER JOIN HeatTypes AS ht ON hm.HeatTypeNo = ht.HeatTypeNo WHERE hm.EventRound IS NULL AND (hm.ScheduledTime BETWEEN ? AND ?) {$tsql_heatType} {$tsql_numSpots} {$tsql_numParticipants} GROUP BY hm.HeatNo, ht.HeatTypeName, hm.HeatNotes, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, hm.NumberOfReservation, hm.NumberOfCadetReservation ORDER BY hm.ScheduledTime"; // TODO: Modify to using a subquery so that we can filter on SpotsAvailable
 
         $scheduledHeats = $this->run_query($tsql, $tsql_params);
-				
-				$matchingHeats = $scheduledHeats; // To bypass commented out code below
+                
+        $matchingHeats = $scheduledHeats; // To bypass commented out code below
 
-				$matches = array();
-				foreach($matchingHeats as $heat) {
-						 // Until we filter by "SpotsAvailable" in SQL...
-						if(isset($_GET['numParticipants']) && is_numeric($_GET['numParticipants']) && (int)$heat['SpotsAvailable'] >= $_GET['numParticipants']) {
-								$matches[] = array(
-										'heatId' => (int)$heat['HeatNo'],
-										'trackId' => (int)$heat['TrackNo'],
-										'name' => $heat['title'],
-										'starts' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts'])),
-										'ends' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts']) + (int)$heat['ScheduleDuration']*60),
-										'total_spots' => (int)$heat['RacersPerHeat'],
-										'available_spots' => (int)$heat['SpotsAvailable'],
-										'title'  => $heat['title'],
-										'note'   => $heat['note'],
-										'price'  => 20.00,
-										//'original' => $heat
-										);
-						}
-				}
+        $matches = array();
+        foreach($matchingHeats as $heat) {
+             // Until we filter by "SpotsAvailable" in SQL...
+            if(isset($_GET['numParticipants']) && is_numeric($_GET['numParticipants']) && (int)$heat['SpotsAvailable'] >= $_GET['numParticipants']) {
+                $matches[] = array(
+                    'heatId' => (int)$heat['HeatNo'],
+                    'trackId' => (int)$heat['TrackNo'],
+                    'name' => $heat['title'],
+                    'starts' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts'])),
+                    'ends' => date("{$GLOBALS['dateFormat']} H:i:s", strtotime($heat['starts']) + (int)$heat['ScheduleDuration']*60),
+                    'total_spots' => (int)$heat['RacersPerHeat'],
+                    'available_spots' => (int)$heat['SpotsAvailable'],
+                    'title'  => $heat['title'],
+                    'note'   => $heat['note'],
+                    'price'  => 20.00,
+                    //'original' => $heat
+                );
+            }
+        }
 
         return array('races' => $matches);
     }
 
-    protected function sort_heatStart($a, $b) {
+    public function sort_heatStart($a, $b) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $adist = intval($a['starts']);
         $bdist = intval($b['starts']);
 
@@ -348,8 +377,10 @@ class Races
         return ($adist < $bdist) ? -1 : 1;
     }
 
-
-    protected function findMatchingHeats($heats, $numDrivers, $numHeats, $gapInMinutes) {
+    public function findMatchingHeats($heats, $numDrivers, $numHeats, $gapInMinutes) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
         //usort($heats, array("Races", "sort_heatStart"));
 
@@ -387,14 +418,17 @@ class Races
             // We have the correct amount of heats that match the criteria, so add them to the available heats
             if(count($potentialHeats) == $numHeats)
                 $availableHeats[] = $potentialHeats;
-
         }
 
         return $availableHeats;
     }
 
 
-    protected function findHeat($starts, $heats) {
+    public function findHeat($starts, $heats) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         // Loop heats -- if we find a match, return it, otherwise return null
         foreach($heats as $heat) {
             if($heat['starts'] == $starts)
@@ -402,8 +436,11 @@ class Races
         }
     }
 
+    public function getHeatSlotsForDay($scheduledHeats, $date, $bookingsStartAt, $bookingsEndAt, $bookingLengthInMinutes = 10, $defaultSpots = 25, $trackId = 0, $daysInAdvance = 365, $blackoutTimeInMinutes = 0) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
-    protected function getHeatSlotsForDay($scheduledHeats, $date, $bookingsStartAt, $bookingsEndAt, $bookingLengthInMinutes = 10, $defaultSpots = 25, $trackId = 0, $daysInAdvance = 365, $blackoutTimeInMinutes = 0) {
         $allHeats = array();
         $addedHeats = array();
 
@@ -519,14 +556,30 @@ class Races
         return $allHeats;
     }
 
-    protected function races($trackId = null) {
+    public function races($trackId = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $trackWhere = empty($trackId) ? '' : ' AND hm.TrackNo = ' . (int)$trackId;
-				
-				$tsql = "SELECT hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, COUNT(hd.HeatNo) AS Racers
-FROM HeatMain AS hm
-LEFT OUTER JOIN HeatDetails AS hd ON hm.HeatNo = hd.HeatNo
-WHERE (hm.ScheduledTime BETWEEN ? AND ?) $trackWhere
-GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel ORDER BY hm.ScheduledTime";
+        $tsql= "SELECT"
+            ."\n    hm.HeatNo"
+            ."\n    , hm.HeatStatus"
+            ."\n    , hm.ScheduledTime"
+            ."\n    , hm.HeatTypeNo"
+            ."\n    , hm.LapsOrMinutes"
+            ."\n    , hm.RacersPerHeat"
+            ."\n    , hm.TrackNo"
+            ."\n    , hm.WinBy"
+            ."\n    , hm.RaceBy"
+            ."\n    , hm.ScheduleDuration"
+            ."\n    , hm.SpeedLevel"
+            ."\n    , COUNT(hd.HeatNo)"
+            ."\nFROM HeatMain AS hm"
+            ."\nLEFT OUTER JOIN HeatDetails AS hd ON hm.HeatNo = hd.HeatNo"
+            ."\nWHERE (hm.ScheduledTime BETWEEN ? AND ?) $trackWhere"
+            ."\nGROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel"
+            ."\nORDER BY hm.ScheduledTime";
 
         // If no start date given, default to today
         if(!isset($_GET['start'])) {
@@ -541,16 +594,16 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
         }
 
         $tsql_params = array(&$start, &$end);
-
         $rows = $this->run_query($tsql, $tsql_params);
-
         $output = $rows;
-
         return array('races' => $output);
     }
 
     //TODO: Check for "banana" input as date... perhaps in all of these methods.
-    protected function since() {
+    public function since() {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
         $tsql = "SELECT TOP 100    hm.HeatNo AS race_id, hm.Finish AS finish_time
                 FROM         HeatMain AS hm
                 WHERE     (hm.Finish > ?)
@@ -597,7 +650,11 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
         return array('races' => $output);
     }
 
-    protected function final_positions($heatNum = -1) {
+    public function final_positions($heatNum = -1) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $output = array();
         $trackId = -1;
 
@@ -644,17 +701,20 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
 
     /**
      * Get the fastest lap times. Defaults to fastest of day on most recently run speedlevel/track
-     * @protected
+     * Requires public access
      * @param array $options Optional, date range, day, week, month, year, speed level, track id, number to return
      * @return array
      */
-    protected function fastest() {
+    public function fastest() {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
         /*
         /results?range=day    " fastest of day
         /results?range=week   " fastest of week
         /results?range=month  " fastest of month
-				/results?range=year   " fastest of year
+                /results?range=year   " fastest of year
 
         " Date range.
         /results?start=2012-01-01&end=2012-01-01
@@ -701,7 +761,7 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
                 case 'month':
                     $start = date($GLOBALS['dateFormat'], strtotime('first day of this month')) . ' 12:00:00 AM';
                     break;
-								case 'year':
+                                case 'year':
                     $start = date($GLOBALS['dateFormat'], strtotime('first day of january')) . ' 12:00:00 AM';
                     break;
                 default:
@@ -762,13 +822,13 @@ GROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMin
         }
 
         $tsql = <<<EOD
-		SELECT DISTINCT TOP ($limit) MAX(rd.CustID) AS CustID, MAX(c.FName) AS FirstName, MAX(c.LName) AS LastName, MAX(c.RacerName) AS RacerName, MAX(c.RPM) AS rpm, MIN(rd.LTime) AS LTime, MAX(rd.TimeStamp) AS TimeStamp, MAX(rd.LapNum) AS LapNum, MAX(hm.SpeedLevel) AS SpeedLevel, MAX(hm.TrackNo) AS TrackNo, MIN(t.Description) AS TrackName, MAX(c.TotalRaces) AS TotalRaces
-		FROM         RacingData AS rd LEFT OUTER JOIN
-							  Customers AS c ON c.CustID = rd.CustID LEFT OUTER JOIN Tracks t ON TrackNo = t.TrackNo LEFT OUTER JOIN
-							  HeatMain AS hm ON hm.HeatNo = rd.HeatNo 
-		WHERE  (rd.LTime <> 0) AND (rd.IsBadTime <> 'true') $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate
-		GROUP BY c.RacerName
-		ORDER BY LTime
+        SELECT DISTINCT TOP ($limit) MAX(rd.CustID) AS CustID, MAX(c.FName) AS FirstName, MAX(c.LName) AS LastName, MAX(c.RacerName) AS RacerName, MAX(c.RPM) AS rpm, MIN(rd.LTime) AS LTime, MAX(rd.TimeStamp) AS TimeStamp, MAX(rd.LapNum) AS LapNum, MAX(hm.SpeedLevel) AS SpeedLevel, MAX(hm.TrackNo) AS TrackNo, MIN(t.Description) AS TrackName, MAX(c.TotalRaces) AS TotalRaces
+        FROM         RacingData AS rd LEFT OUTER JOIN
+                              Customers AS c ON c.CustID = rd.CustID LEFT OUTER JOIN Tracks t ON TrackNo = t.TrackNo LEFT OUTER JOIN
+                              HeatMain AS hm ON hm.HeatNo = rd.HeatNo 
+        WHERE  (rd.LTime <> 0) AND (rd.IsBadTime <> 'true') $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate
+        GROUP BY c.RacerName
+        ORDER BY LTime
 EOD;
 
         $rows = $this->run_query($tsql, $tsql_params);
@@ -788,7 +848,7 @@ EOD;
                 'track_id' => $row['TrackNo'],
                 'track_name' => $row['TrackName'],
                 'timestamp' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['TimeStamp'])),
-								'photo_url' => $this->getCustomerPhoto($row['CustID'])
+                                'photo_url' => $this->getCustomerPhoto($row['CustID'])
             );
 
         }
@@ -796,7 +856,11 @@ EOD;
         return array('fastest' => $output);
     }
 
-    protected function scoreboard($trackId = -1, $heatNum = -1) {
+    public function scoreboard($trackId = -1, $heatNum = -1) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $race = array();
 
         if(!is_numeric($trackId) && !empty($trackId)) throw new RestException(412,'track_id is not a valid number');
@@ -821,7 +885,11 @@ EOD;
 
     }
 
-    protected function raceSummary($heatId) {
+    public function raceSummary($heatId) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         $tsql = "SELECT hm.*, ht.HeatTypeName, sl.Description AS sl_Description, t.Description AS t_Description FROM HeatMain hm LEFT JOIN HeatTypes ht ON ht.HeatTypeNo = hm.HeatTypeNo LEFT JOIN Tracks t ON t.TrackNo = hm.TrackNo LEFT JOIN SpeedLevel sl ON hm.SpeedLevel = sl.SpeedLevel WHERE HeatNo = ?";
         $heat = $this->run_query($tsql, array(&$heatId));
 
@@ -867,11 +935,15 @@ EOD;
 
     /**
      * Get the racers, laps and other details of a heat
-     * @protected
+     * Requires public access
      * @param integer $heatId Optional, heat to return, defaults to currently running heat
      * @return array
      */
-    protected function race($heatId) {
+    public function race($heatId) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         if(!is_numeric($heatId) && !in_array($heatId, array('current', 'next'))) throw new RestException(412,'Heat ID is not a number, "next" or "current"');
         $output = array();
 
@@ -889,7 +961,7 @@ EOD;
         $rowsRace = $this->run_query($tsql);
 
         $output['race'] = $rowsRace[0];
-				$output['race']['race_number'] = substr($output['race']['id'], -2); // Race Number is the last two digits of the ID
+                $output['race']['race_number'] = substr($output['race']['id'], -2); // Race Number is the last two digits of the ID
 
         //$tsql = 'GetNextHeatRacersInfo';
         $tsql_params = array(&$heatId);
@@ -897,29 +969,29 @@ EOD;
         $rowsRacers = $this->run_query($tsql, $tsql_params);
         $output['race']['racers'] = $rowsRacers;
 
-				foreach($output['race']['racers'] as $key => $racer) {
-					$racerInfo = $this->run_query('GetRacerProfile '.(int)$racer['id'].', ' . (int)$heatId, array());
-					$output['race']['racers'][$key]['total_customers'] = $racerInfo[0]['TotalCustomers'];
-					$output['race']['racers'][$key]['ranking_by_rpm'] = $racerInfo[0]['RankingByRPM'];
-					$output['race']['racers'][$key]['group_id'] = $racerInfo[0]['GroupID'];
-					$output['race']['racers'][$key]['total_visits'] = $racerInfo[0]['TotalVisits'];
-					$output['race']['racers'][$key]['total_races'] = $racerInfo[0]['TotalRaces'];
-					$output['race']['racers'][$key]['photo_url'] = $this->getCustomerPhoto($racer['id']);
+                foreach($output['race']['racers'] as $key => $racer) {
+                    $racerInfo = $this->run_query('GetRacerProfile '.(int)$racer['id'].', ' . (int)$heatId, array());
+                    $output['race']['racers'][$key]['total_customers'] = $racerInfo[0]['TotalCustomers'];
+                    $output['race']['racers'][$key]['ranking_by_rpm'] = $racerInfo[0]['RankingByRPM'];
+                    $output['race']['racers'][$key]['group_id'] = $racerInfo[0]['GroupID'];
+                    $output['race']['racers'][$key]['total_visits'] = $racerInfo[0]['TotalVisits'];
+                    $output['race']['racers'][$key]['total_races'] = $racerInfo[0]['TotalRaces'];
+                    $output['race']['racers'][$key]['photo_url'] = $this->getCustomerPhoto($racer['id']);
 
-				}
+                }
 
         if (is_numeric($heatId)) //TODO: Document and explain the SQL 2005 hacks
         {
             $tsql = "SELECT * FROM RacingData WHERE HeatNo = " . $heatId . " AND IsBadTime = 0";
             $laps = $this->run_query($tsql);
             
-						// Build mapping between customer id and the key in the array
-						$racersToKeys = array();
-						foreach($output['race']['racers'] as $key => $racer) {
-							$racersToKeys[$racer['id']] = $key;
-						}
-						
-						foreach($laps as $lap) {
+                        // Build mapping between customer id and the key in the array
+                        $racersToKeys = array();
+                        foreach($output['race']['racers'] as $key => $racer) {
+                            $racersToKeys[$racer['id']] = $key;
+                        }
+                        
+                        foreach($laps as $lap) {
                 $currentLap = array(
                     'id' => $lap['ID'],
                     'kart_number' => $lap['AutoNo'],
@@ -928,10 +1000,10 @@ EOD;
                     'lap_number' => $lap['LapNum'],
                     'racer_id' => $lap['CustID']
                 );
-								
-								$key = $racersToKeys[$currentLap['racer_id']];
-								$output['race']['racers'][$key]['laps'][] = $currentLap;
-								$output['race']['laps'][] = $currentLap;
+                                
+                                $key = $racersToKeys[$currentLap['racer_id']];
+                                $output['race']['racers'][$key]['laps'][] = $currentLap;
+                                $output['race']['laps'][] = $currentLap;
             }
 
             if(isset($output['race']['laps'])) {
@@ -944,11 +1016,15 @@ EOD;
 
     /**
      * Get # of passings from a heat
-     * @protected
+     * Requires public access
      * @param integer $heatId Optional, heat to return, defaults to currently running heat
      * @return array
      */
-    protected function number_of_laps($heatId = null) {
+    public function number_of_laps($heatId = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         // If heatId == null, get current heat
 
         $tsql_params = array(&$heatId);
@@ -963,13 +1039,17 @@ EOD;
 
     /**
      * Get the laps from a heat
-     * @protected
+     * Requires public access
      * @param integer $heatId Optional, heat to return, defaults to currently running heat
      * @param integer $lapId Optional, returns only laps after lap id.
      * @param integer $racerId Optional, returns only laps for this racer id.
      * @return array
      */
     protected function laps($heatId = null, $lapId = 0, $racerId = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
         // If heatId == null, get current heat
 
         $tsql_params = array(&$heatId, &$lapId);
@@ -996,30 +1076,34 @@ EOD;
         return array('laps' => $output);
     }
 
-		/**
+    /**
      * Get the url to the customer's picture (if it exists)
-     * @public
+     * Requires public access
      * @param integer $racer_id Required, id to lookup picture for
      * @return string (url to photo) or null (no photo found)
      */
-		public function getCustomerPhoto($racer_id) {
-			if(empty($this->CustomerPicturesPath)) {
-				// Get the path and URL to the customer pictures
-				$settings = new Settings();
-				$pictureSettings = $settings->getSettings('MainEngine', array('CustomerPicturesPath', 'CustIDPicPath'));
-				$this->CustomerPicturesPath = @$pictureSettings['settings']['CustomerPicturesPath']['SettingValue'];
-			}
-		
-			// See if this customer has a picture
-			$customerPictureURL = null;
-			$customerPicturePath = $this->CustomerPicturesPath . '\\' . $racer_id . '.jpg';
-			$host = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http://' . $_SERVER['HTTP_HOST'] : 'https://' . $_SERVER['HTTP_HOST'];
-			if(file_exists($customerPicturePath)) {
-				$customerPictureURL = $host . '/CustomerPictures/' . $racer_id . '.jpg'; // Path hardcoded in Club Speed
-			}
-			
-			return $customerPictureURL;
-		}
+    public function getCustomerPhoto($racer_id) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        
+        if(empty($this->CustomerPicturesPath)) {
+            // Get the path and URL to the customer pictures
+            $settings = new Settings();
+            $pictureSettings = $settings->getSettings('MainEngine', array('CustomerPicturesPath', 'CustIDPicPath'));
+            $this->CustomerPicturesPath = @$pictureSettings['settings']['CustomerPicturesPath']['SettingValue'];
+        }
+    
+        // See if this customer has a picture
+        $customerPictureURL = null;
+        $customerPicturePath = $this->CustomerPicturesPath . '\\' . $racer_id . '.jpg';
+        $host = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http://' . $_SERVER['HTTP_HOST'] : 'https://' . $_SERVER['HTTP_HOST'];
+        if(file_exists($customerPicturePath)) {
+            $customerPictureURL = $host . '/CustomerPictures/' . $racer_id . '.jpg'; // Path hardcoded in Club Speed
+        }
+        
+        return $customerPictureURL;
+    }
 
     private function run_query($tsql, $params = array()) {
     $tsql_original = $tsql . ' ';

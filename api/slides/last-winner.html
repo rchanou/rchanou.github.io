@@ -460,7 +460,7 @@
         this.numCols = numElems.roundUp(this.numRows) / this.numRows;
         this.height = this.heightMax / this.numRows;
         this.width = this.widthMax / this.numCols;
-        this.fontSize = 20 / (this.numRows + 6);
+        this.fontSize = 16 / (this.numRows + 6);
     };
 </script>
 <script>
@@ -468,11 +468,9 @@
     /**
         Window variable setup
     */
-    // if current document.location.hostname does not exist, or is "localhost", 
-    // then use a fallback for api root (in this case, ftikcincinnati)
-    // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
         url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ekwigan.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
+        // url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? '192.168.111.140' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
         key: 'cs-dev',
     });
     var cache = {}; // for use with polling comparison

@@ -605,11 +605,11 @@
         Handlebars.registerHelper('getHeaderText', function(data, options) {
             return  "TOP TIMES OF THE " + data.range.toUpperCase()
                 +   (
-                        data.fastest && data.fastest.length > 0 ?
-                            data.name ?                     // data.fastest.length > 0
-                                " ON TRACK: " + data.name   // has data.name
-                                : ""                        // does not have data.name
-                            : " (none yet!)"                // data.fastest.length <= 0
+                        data.fastest && data.fastest.length > 0 ?   // has data.fastest as an array?
+                            data.name ?                             //     yes: has data.name?
+                                " ON TRACK: " + data.name           //         yes: prepend to data.name
+                                : ""                                //         no: does not have data.name
+                            : " (none yet!)"                        //     no: use "none yet"
                     )
                 ;
         });

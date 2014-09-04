@@ -1,5 +1,6 @@
 <?php
 require_once('vendors/swiftmailer/lib/swift_required.php');
+require_once('./Queues.php');
 
 /**
  * ClubSpeed API
@@ -19,149 +20,356 @@ require_once('vendors/swiftmailer/lib/swift_required.php');
 class Racers
 {
     public $restler;
-    private $db;
 
-	function __construct(){
-		header('Access-Control-Allow-Origin: *'); //Here for all /say
-        // $this->db = $GLOBALS['db'];
-	}
+    /**
+     * A reference to the globally set DbConnection.
+     */
+    private $logic;
 
-	private function getNextCustomerId() {
-		$customerIdSql = <<<EOD
-DECLARE @IsRepl_On bit
-SELECT @IsRepl_On = Settingvalue From Controlpanel where settingname = 'ReplicateCustomerInfo'
+    /**
+     * A reference to the internal instance of the Queues class.
+     */
+    private $queues;
 
-IF @IsRepl_On = 1
-Begin
-	DECLARE @LocationID int
-	SELECT @LocationID = Settingvalue From Controlpanel Where Settingname = 'LocationID'	
-	SELECT ISNULL(Max(CustID) + 1, (@LocationID * 1000000 + 1)) From Customers Where CustID Between (@LocationID * 1000000) and ((@LocationID + 1) * 1000000)
-End
-Else
-Begin
-	SELECT ISNULL(Max(CustID) + 1, (@LocationID * 1000000 + 1)) From Customers 
-End
-EOD;
-		$rows = $this->run_query($customerIdSql, array());
-		return $rows[0][''];
-	}
+    function __construct(){
+        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
+        $this->queues = new Queues();
+    }
 
-	/**
-	 * Create a customer
-	 * @protected
-	 * @param array $request_data
-	 * @return array
-	 */
-	protected function postCreate($request_data) {
+    /**
+     * Validate a customer's login by email address and password.
+     *
+     * @param mixed[string] $request_data An associative array containing all of the request data for the current session.
+     * @return mixed[string] An associative array containing customer information.
+     */
+    public function postlogin($request_data) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        // should we allow users to hit the login api using basic auth,
+        // or should we require the login call to come from the api user itself as well?
+        try {
+            $username = $request_data['username'];
+            $password = $request_data['password'];
+            $account = $this->logic->customers->login($username, $password);
+            return $account;
+        }
+        catch (\InvalidEmailException $e) {
+            throw new RestException(401, "Invalid username or password!");
+        }
+        catch (\InvalidPasswordException $e) {
+            // throwing the same error as invalid email for security purposes
+            throw new RestException(401, "Invalid username or password!");
+        }
+        catch (\Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
+    }
 
-        if($_REQUEST['key'] != $GLOBALS['privateKey']) throw new RestException(412, 'Not authorized');
-
-		/*
-		$fieldMapping = array(
-			'first' => 'FName',
-			'last' => 'LName',
-			'racerName' => 'RacerName',
-			'birthDate' => 'BirthDate',
-			'gender' => 'Gender',
-			'email' => 'EmailAddress',
-			'howDidYouHearId' => 'SourceID',
-			'doNotMail' => 'DoNotMail',
-			'addressLine1' => 'Address',
-			'addressLine2' => 'Address2',
-			'city' => 'City',
-			'state' => 'State',
-			'postalcode' => 'Zip',
-			'country' => 'Country',
-			'cellNumber' => 'Cell',
-			'custom1' => 'Custom1',
-			'custom2' => 'Custom2',
-			'custom3' => 'Custom3',
-			'custom4' => 'Custom4',
-			'waiverStatus' => 'Status1',
-			'waiver1TemplateSigned' => 'Waiver',
-			'waiver2TemplateSigned' => 'Waiver2',
-			'facebookId' => '',
-			'facebookToken' => '',
-			'signature' => array('type', 'data'),
-			'photo' => array('type', 'data'),
-			);
-		*/
-
-		// Get customer id
-		$customerId = $this->getNextCustomerId();
-
-		/*
-		Example posting
-		{
-			"birthdate": "1985-03-13",
-			"mobilephone": "7142705683",
-			"howdidyouhearaboutus": "billboard",
-			"firstname": "Brian",
-			"lastname": "Chuchua",
-			"racername": "Brian Chuchua",
-			"email": "brian@clubspeed.com",
-			"donotemail": true,
-			"profilephoto": "data:image/jpeg;base64,blahblah",
-			"signaturephoto": "data:image/png;base64,blahblah",
-		    "gender": blahblah,
-		    "BusinessName": blahblah
-		}
-		*/
-
-		// Create customer
-		// Create a customer flow from Shakib: Get ID, Check for Unicode, Set Status Flags (based on actions defined), Send Welcome Email, Check for Duplicates, Set privacy_4 = true (if using Facebook)
-
-		// TODO -- Handle setting status fields
-		// TODO -- Handle saving SQL
-
-        $genderCode = 0;
-        if (!empty($request_data['gender']))
-        {
-            switch ($genderCode)
-            {
-                case "male":
-                    $genderCode = 1;
-                    break;
-                case "female":
-                    $genderCode = 2;
-                    break;
+    /**
+     * Upserts a facebook customer and relevant facebook information into the database.
+     * Note that this is being handled as an upsert to allow the facebook login to make
+     * only a single call for both create and login. This will allow the client to bypass
+     * any additional calls to determine whether or not the facebook data is already stored.
+     *
+     * Requires private access
+     * @param mixed[string] An associative array of request data.
+     * @return int[string] An associative array containing the customerId at 'CustID'.
+     */
+    public function postfb_login($request_data) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        try {
+            $params = $this->mapCreateParams($request_data);
+            // should customer existence be checked here, or inside facebook->fb_login ??
+            $account = $this->logic->customers->find_primary_account($params['Standard']['EmailAddress']);
+            if (empty($account)) {
+                $results = $this->postCreate($request_data);
+                $customerId = $results['customerId'];
             }
+            else {
+                $customerId = (int)$account['CustID'];
+            }
+            $fbId = $params['Facebook']['UId'];
+            $fbAccessToken = $params['Facebook']['Access_token'];
+            $fbAllowEmail = $params['Facebook']['AllowEmail'];
+            $fbAllowPost = $params['Facebook']['AllowPost'];
+            $fbEnabled = $params['Facebook']['Enabled'];
+
+            $customer = $this->logic->facebook->fb_login(
+                $fbId
+                , $customerId
+                , $fbAccessToken
+                , $fbAllowEmail
+                , $fbAllowPost
+                , $fbEnabled
+            );
+            return $customer;
+        }
+        catch (RestException $e) {
+            throw $e; // passthrough
+        }
+        catch (\CSException $e) {
+            throw new RestException(412, $e->getMessage());
+        }
+        catch (Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * Creates a new customer in the database, includes running new account logic.
+     * Requires private access
+     *
+     * @see Racers::run_new_account_logic() For the additional functions being run on account creation.
+     * @param mixed[string] An associative array of request data.
+     * @return int[string] An associative array containing the customerId at 'CustID'.
+     */
+    public function postCreate($request_data) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
         }
 
-		$tsql = "INSERT INTO Customers ( CustID, RacerName, EmailAddress, DoNotMail, FName, LName, SourceID, BirthDate, Cell, IgnoreDOB, Gender, Status1, Address, Address2, Country, City, State, Zip ) OUTPUT INSERTED.CustID VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
-		$params = array($customerId,
-			@$request_data['racername'],
-			@$request_data['email'],
-			@$request_data['donotemail'],
-			@$request_data['firstname'],
-			@$request_data['lastname'],
-			@$request_data['howdidyouhearaboutus'],
-            empty($request_data['birthdate']) ? null : date($GLOBALS['dateFormat'], strtotime(date('Y-m-d', strtotime($request_data['birthdate'])))),
-			@$request_data['mobilephone'],
-			empty($request_data['birthdate']) ? true : false,
-            $genderCode,
-            2, //2 in Status1 means "Signed Waiver"
-            isset($request_data['Address']) ? $request_data['Address'] : '',
-            isset($request_data['Address2']) ? $request_data['Address2'] : '',
-            isset($request_data['Country']) ? $request_data['Country'] : '',
-            isset($request_data['City']) ? $request_data['City'] : '',
-            isset($request_data['State']) ? $request_data['State'] : '',
-            isset($request_data['Zip']) ? $request_data['Zip'] : '',
-			);
+        // Create customer
+        // Create a customer flow from Shakib: Get ID, Check for Unicode, Set Status Flags (based on actions defined), Send Welcome Email, Check for Duplicates, Set privacy_4 = true (if using Facebook)
 
-        $rows = $this->run_query($tsql, $params);
+        // TODO -- Handle setting status fields
+        // TODO -- Handle saving SQL
 
-		// Create photo
-		// TODO -- Handle resize
-		if(!empty($request_data['profilephoto'])) {
-			$picturePath = empty($GLOBALS['customerPictureImagePath']) ? 'C:\ClubSpeed\CustomerPictures' : $GLOBALS['customerPictureImagePath'];
-			file_put_contents($picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg',
-				$this->base64_to_img($request_data['profilephoto']));
-		}
+        // use helper function to map 
+        // parameters for a customer create
+        // to the expected database names
+        $params = $this->mapCreateParams($request_data);
+        try {
+            $customerId = $this->logic->customers->create($params['Standard']);
+        }
+        catch(\CSException $e) {
+            throw new RestException(412, $e->getMessage());
+        }
+        catch (RestException $e) {
+            throw $e; // let the rest exception through
+        }
+        catch (Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
+
+        return array('customerId' => $customerId);
+    }
+
+    /**
+     * Registers a new customer in the database, the type of which
+     * is determined by the request data which was provided.
+     * Requires private access
+     *
+     * @see Racers::is_fb_registration() For the method being used to determine the type of registration.
+     * @see Racers::postCreate() For the method being run on a standard registration.
+     * @see Racers::postfb_login() For the method being run on a facebook registration.
+     * @see Queues::postadd() For the method being run to add a customer to queues.
+     * @param mixed[string] An associative array of request data.
+     * @return int[string] An associative array containing the customerId at 'CustID'.
+     */
+    public final function postregister($request_data) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        // this needs to handle create, add to event, add to event group, send email, etc, etc
+        try {
+            $params = $this->mapCreateParams($request_data);
+
+            // check the underlying type of registration
+            if ($this->is_fb_registration($params)) {
+                // facebook registration
+                $customer = $this->postfb_login($request_data);
+            }
+            else {
+                // standard registration
+                $customer = $this->postCreate($request_data);
+            }
+
+            // send new account emails and create waivers
+            $this->run_new_account_logic($request_data, $params, $customer['customerId']);
+
+            // add to event or customer queue
+            
+            // note: the Queues class typically expects customerId
+            // to be coming in as part of the request -- mimic this
+            // by pushing customerId on to $request_data before sending
+            $request_data['customerId'] = $customer['customerId'];
+
+            // *** COMMENTING OUT UNTIL WEBAPI HAS BEEN FULLY IMPLEMENTED ***
+            // *** DUE TO A BUG FOUND AT PPR LONGISLAND ON 9/3/2014       ***
+            // note: the Queues class contains the logic to determine 
+            // whether or not to add to the customer or event queue
+            // $this->queues->postadd($request_data);
+
+            return $customer;
+        }
+        catch(RestException $e) {
+            throw $e;
+        }
+        catch(CSException $e) {
+            throw new RestException(412, $e->getMessage());
+        }
+        catch(Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * Apply "status" rules to a customer
+     * Requires private access
+     *
+     * For reference (from Club Speed's ENUMs):
+     *  Add_Customer_From_POS = 1
+     *  Add_Customer_From_Registration_Terminal = 2
+     *  Add_Customer_From_Online_Registration = 3
+     *  Add_Event_Customer_From_Online_Registration = 4
+     *  Sign_Primary_Waiver = 5
+     *  Sign_Secondary_Waiver = 6
+     *  Auto_Bill_Succesfull = 7
+     *  Auto_Bill_Failed = 8
+     */
+    public function getapplyRule($customerId, $ruleId) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, 'Invalid authorization');
+        }
+        if(!is_numeric($customerId)) throw new RestException(412, 'Please supply a customerId');
+        if(!is_numeric($ruleId)) throw new RestException(412, 'Please supply a ruleId');
+        
+        // Get customer
+        $customer = $this->racer($customerId);
+        if(count($customer['racer']) == 0) throw new RestException(412, 'Customer not found');
+        
+        // Get rule
+        $rule = $this->run_query('SELECT * FROM Rules WHERE RuleID = ?', array($ruleId));
+        if(count($rule[0]) == 0) throw new RestException(412, 'Rule not found');
+        
+        // Build query to apply rule to customer
+        $placeholders = $params = $fields = $columnsToUpdate = array();
+        if($rule[0]['ChangeStatus1'] > 0) { $fields[] = 'Status1'; $params[] = $rule[0]['ChangeStatus1']; }
+        if($rule[0]['ChangeStatus2'] > 0) { $fields[] = 'Status2'; $params[] = $rule[0]['ChangeStatus2']; }
+        if($rule[0]['ChangeStatus3'] > 0) { $fields[] = 'Status3'; $params[] = $rule[0]['ChangeStatus3']; }
+        if($rule[0]['ChangeStatus4'] > 0) { $fields[] = 'Status4'; $params[] = $rule[0]['ChangeStatus4']; }
+        $params[] = $customerId;
+        
+        if(count($fields) == 0) return array('success' => 'No rules to apply');
+        
+        foreach($fields as $id => $field) {
+            $columnsToUpdate[] = "{$fields[$id]} = ?";
+        }
+        $columnsToUpdate = implode(', ', $columnsToUpdate);
+        
+        $tsql = "UPDATE Customers SET {$columnsToUpdate} WHERE CustID = ?";
+        $result = $this->run_exec($tsql, $params);
+        
+        return array('success' => true);
+    }
+
+    /**
+     * Skims the variables from the provided request_data and splits them into expected Standard and Facebook lists.
+     * @private
+     * @param mixed[] $request_data All of the request information coming from a client.
+     * @return mixed[] The array values split into Standard and Facebook key=>value pairs as the db class expects.
+     */
+    private function mapCreateParams($request_data) {
+        // skim the variables from the request_data
+        // and convert them to the expected database names
+        return array(
+            "Standard" => array(
+                // Standard ClubSpeed parameters
+                // "CustID"         => // CustID to be provided by the db class
+                "RacerName"         => @$request_data['racername']
+                , "EmailAddress"    => @$request_data['email']
+                , "Password"        => @$request_data['password']
+                , "DoNotMail"       => @$request_data['donotemail']
+                , "FName"           => @$request_data['firstname']
+                , "LName"           => @$request_data['lastname']
+                , "SourceID"        => @$request_data['howdidyouhearaboutus']
+                , "BirthDate"       => @$request_data['birthdate'] ?: null //empty($request_data['birthdate']) ? null : \ClubSpeed\Utility\Convert::toDateForServer($request_data['birthdate']) //)) + 24*60*60) what was the +24*60*60 for?
+                , "Cell"            => @$request_data['mobilephone']
+                , "IgnoreDOB"       => empty($request_data['birthdate']) ? true : false
+                , "Gender"          => @$request_data['gender'] // let the db class handle gender conversion
+                , "Status1"         => 2 // signifies "Signed Waiver"
+                , "Address"         => isset($request_data['Address']) ? $request_data['Address'] : ''
+                , "Address2"        => isset($request_data['Address2']) ? $request_data['Address2'] : ''
+                , "Country"         => isset($request_data['Country']) ? $request_data['Country'] : ''
+                , "City"            => isset($request_data['City']) ? $request_data['City'] : ''
+                , "State"           => isset($request_data['State']) ? $request_data['State'] : ''
+                , "Zip"             => isset($request_data['Zip']) ? $request_data['Zip'] : ''
+                , "LicenseNumber"   => @$request_data['LicenseNumber']
+                , "Custom1"         => @$request_data['Custom1']
+                , "Custom2"         => @$request_data['Custom2']
+                , "Custom3"         => @$request_data['Custom3']
+                , "Custom4"         => @$request_data['Custom4']
+                , "EventID"         => @$request_data['eventId']
+                , "CheckID"         => @$request_data['checkId']
+                , "TotalVisits"     => 1 // default TotalVisits to 1
+            )
+            , "Facebook" => array(
+                // Facebook Parameters
+                "UId"               => @$request_data['facebookId']
+                , "Access_token"    => @$request_data['facebookToken']
+                , "AllowEmail"      => @$request_data['facebookAllowEmail']
+                , "AllowPost"       => @$request_data['facebookAllowPost']
+                , "Enabled"         => @$request_data['facebookEnabled']
+                , "Privacy4"        => true // this is always true, when using a facebook login -- set on the customers table
+                // "???"            => @$request_data['facebookExpiresIn'] -- not actually stored(!!!)
+            )
+        );
+    }
+
+    private function is_fb_registration(&$params) {
+        return (
+                !empty($params['Facebook'])
+            &&  !empty($params['Facebook']['UId'])
+            &&  !empty($params['Facebook']['Access_token'])
+        );
+    }
+
+    private function is_event_registration(&$params) {
+        return (
+                !empty($params['Standard']['EventID'])
+            // &&  is_int($params['Standard']['EventID'])
+            &&  $params['Standard']['EventID'] > -1
+        );
+    }
+
+    private function run_new_account_logic(&$request_data, &$params, $customerId) {
+        $this->create_photos($request_data, $customerId);
+        $this->send_welcome_email($request_data, $customerId);
+        if ($this->is_event_registration($params)) {
+            $this->getapplyRule(
+                $customerId
+                , CSEnums::RULE_ADD_EVENT_CUSTOMER_FROM_ONLINE_REGISTRATION
+            );
+        }
+        else {
+            $this->getapplyRule(
+                $customerId
+                , CSEnums::RULE_ADD_CUSTOMER_FROM_REGISTRATION_TERMINAL
+            );
+        }
+    }
+
+    private function create_photos(&$request_data, $customerId) {
+
+        // Create photo
+        // TODO -- Handle resize
+        if(isset($request_data['profilephoto']) && !empty($request_data['profilephoto'])) {
+            pr("found a profilephoto");
+            $picturePath = empty($GLOBALS['customerPictureImagePath']) ? 'C:\ClubSpeed\CustomerPictures' : $GLOBALS['customerPictureImagePath'];
+            file_put_contents(
+                $picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg'
+                , $this->base64_to_img($request_data['profilephoto'])
+            );
+        }
 
         // Create signature, if present
-        if(!empty($request_data['signaturephoto'])) {
-            if ($request_data['isMinor'] == "true")
+        if(isset($request_data['signaturephoto']) && !empty($request_data['signaturephoto']))
+        {
+            if (isset($request_data['isMinor']) && $request_data['isMinor'] == "true")
             {
                 $picturePath = empty($GLOBALS['customerMinorSignatureImagePath']) ? 'C:\ClubSpeed\CustomerSignatures2' : $GLOBALS['customerMinorSignatureImagePath'];
                 file_put_contents($picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg',
@@ -176,7 +384,7 @@ EOD;
         }
 
         // Create waiver
-        if ($request_data['isMinor'] == "true")
+        if (isset($request_data['isMinor']) && $request_data['isMinor'] == "true")
         {
             $waiverPath = empty($GLOBALS['customerMinorWaiverImagePath']) ? 'C:\ClubSpeed\CustomerWaivers2' : $GLOBALS['customerMinorWaiverImagePath'];
             $termsText = $request_data['Waiver2'];
@@ -187,13 +395,22 @@ EOD;
             $termsText = $request_data['Waiver1'];
         }
 
-        $subheaderData = array("Dated" => date("l, F j, Y m/d/y"), "Business" => $request_data['BusinessName'],
-            "Participant" => $request_data['firstname'] . ' ' . $request_data['lastname'] /*array("Andrew Dodge","13000 Quailwood Rd","Midlothian, Virginia 23112")*/,
-            "License #" => "",
-            "Birthdate" => $request_data['birthdate'], "Phone" => $request_data['mobilephone'],
-            "Email" => $request_data['email'], "CustID" => $customerId);
+        $subheaderData = array(
+            "Dated"         => date("l, F j, Y m/d/y")
+            , "Business"    => isset($request_data['BusinessName']) ? $request_data['BusinessName'] : ''
+            , "Participant" => $request_data['firstname'] . ' ' . $request_data['lastname'] /*array("Andrew Dodge","13000 Quailwood Rd","Midlothian, Virginia 23112")*/
+            , "License #"   => ""
+            , "Birthdate"   => $request_data['birthdate']
+            , "Phone"       => $request_data['mobilephone']
+            , "Email"       => $request_data['email']
+            , "CustID"      => $customerId
+        );
 
-        $waivers = $this->createWaiverImages($termsText,$subheaderData,$request_data['signaturephoto']);
+        $waivers = $this->createWaiverImages(
+            $termsText
+            , $subheaderData
+            , @$request_data['signaturephoto']
+        );
 
         $currentPage = 1;
         foreach($waivers as $currentWaiverPage)
@@ -202,32 +419,36 @@ EOD;
                 $this->base64_to_img($currentWaiverPage));
             $currentPage++;
         }
+    }
 
-
+    private function send_welcome_email(&$request_data) {
         //Welcome e-mail
         if ($request_data['email'] != '') //If we have an e-mail address to send to
         {
-            //Get welcome e-mail settings
-            $tsql = "SELECT SettingName, SettingValue FROM ControlPanel WHERE TerminalName = 'MainEngine' AND " .
-                "(SettingName = 'SendWelcomeMail' OR SettingName = 'EmailWelcomeFrom' OR SettingName = 'SMTPServerUseAuthentiation' " .
-                "OR SettingName = 'SMTPServer' " .
-                "OR SettingName = 'SMTPServerPort' " .
-                "OR SettingName = 'SMTPServerAuthenticationUserName' " .
-                "OR SettingName = 'SMTPServerAuthenticationPassword' " .
-                "OR SettingName = 'SMTPServerUseSSL')";
-            $results = $this->run_query($tsql);
-            $settings = array();
-            foreach($results as $currentSetting)
-            {
-                $settings[$currentSetting['SettingName']] = $currentSetting['SettingValue'];
-            }
+            // Get the SMTP settings
+            $settings = $this->logic->helpers->getControlPanelSettings(
+                "MainEngine",
+                array(
+                    "SendWelcomeMail"
+                    , "EmailWelcomeFrom"
+                    , "SMTPServerUseAuthentiation"
+                    , "SMTPServer"
+                    , "SMTPServerPort"
+                    , "SMTPServerAuthenticationUserName"
+                    , "SMTPServerAuthenticationPassword"
+                    , "SMTPServerUseSSL"
+                )
+            );
 
             if (strtolower($settings['SendWelcomeMail']) == "true") //If the track would like to send welcome e-mails
             {
-                //Get the mail template
-                $tsql = "SELECT Text, Subject FROM MailTemplate";
-                $emailStrings = $this->run_query($tsql);
-                if (array_key_exists(0,$emailStrings)) //If a mail template is defined, send an e-mail
+                // Get the SMTP settings
+
+                // Get the mail template
+                $emailStrings = $this->logic->helpers->getMailTemplate();
+
+                //If a mail template is defined, send an e-mail (empty array signifies non-existing)
+                if (array_key_exists(0,$emailStrings)) 
                 {
                     $emailStrings['Subject'] = $emailStrings[0]['Subject'];
                     $emailStrings['Text'] = $emailStrings[0]['Text'];
@@ -282,17 +503,12 @@ EOD;
                 }
             }
         }
+    }
 
-        // TODO -- Trigger logs insertion for tracks with replication enabled
-
-		return array('customerId' => $customerId);
-	}
-
-	function base64_to_img($base64_string) {
-			$data = explode(',', $base64_string);
-
-			return base64_decode($data[1]);
-	}
+    function base64_to_img($base64_string) {
+        $data = explode(',', $base64_string);
+        return base64_decode($data[1]);
+    }
 
     function createWaiverImages($termsText,$subheaderData,$signatureImage)
     {
@@ -538,167 +754,188 @@ EOD;
                 return $ret;*/
     }
 
-	/**
-	 * Find a racer by racer name
-	 * @protected
-	 * @param string nickname
-	 * @return array
-	 */
-	protected function search() {
-		if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');
+    /**
+     * Find a racer by racer name
+     * Requires private access
+     *
+     * @param string nickname
+     * @return array
+     */
+    public function search() {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');
 
-		switch(@$_GET['field']) {
+        switch(@$_GET['field']) {
 
-			case 'email':
-				$tsql = "SELECT * FROM Customers WHERE EmailAddress = ? AND Deleted <> 'True'";
-				$params = array(&$_GET['query']);
-				break;
+            case 'email':
+                $tsql = "SELECT * FROM Customers WHERE EmailAddress = ? AND Deleted <> 'True'";
+                $params = array(&$_GET['query']);
+                break;
 
-			default:
-				$tsql = "SELECT * FROM Customers WHERE (RacerName LIKE ? OR EmailAddress LIKE ? OR FName LIKE ? OR LName LIKE ?) AND Deleted <> 'True'";
-				$_GET['query'] = '%' . $_GET['query'] . '%';
-				$params = array(&$_GET['query'], &$_GET['query'], &$_GET['query'], &$_GET['query']);
-				break;
-		}
+            default:
+                $tsql = "SELECT * FROM Customers WHERE (RacerName LIKE ? OR EmailAddress LIKE ? OR FName LIKE ? OR LName LIKE ?) AND Deleted <> 'True'";
+                $_GET['query'] = '%' . $_GET['query'] . '%';
+                $params = array(&$_GET['query'], &$_GET['query'], &$_GET['query'], &$_GET['query']);
+                break;
+        }
 
-		$rows = $this->run_query($tsql, $params);
+        $rows = $this->run_query($tsql, $params);
 
-		$output = array();
+        $output = array();
 
-		foreach($rows as $row) {
-			$output[] = array('id' => $row['CustID'],
-							'name' => array('nickname' => $row['RacerName'],
-							'first' => $row['FName'],
-							'last'  => $row['LName']),
-							'rpm'       => $row['RPM'],
-							'created_at' => date($GLOBALS['dateFormat'], strtotime($row['AccountCreated'])),
-							);
+        foreach($rows as $row) {
+            $output[] = array('id' => $row['CustID'],
+                            'name' => array('nickname' => $row['RacerName'],
+                            'first' => $row['FName'],
+                            'last'  => $row['LName']),
+                            'rpm'       => $row['RPM'],
+                            'created_at' => date($GLOBALS['dateFormat'], strtotime($row['AccountCreated'])),
+                            );
 
-		}
-		return array('racers' => $output);
-	}
+        }
+        return array('racers' => $output);
+    }
 
-	protected function index($racer_id, $sub = null) {
-		if($racer_id == 'valid') return $this->valid($_REQUEST['email'], $_REQUEST['racerName']);
-		if($racer_id == 'create') return $this->create($_REQUEST);
-		if($racer_id == 'toprpm') return $this->top_rpm();
-		if($racer_id == 'last_updated' && $_REQUEST['key'] == $GLOBALS['privateKey']) return $this->last_updated($_REQUEST['start'], $_REQUEST['end'], @$_REQUEST['limit']);
-		if($racer_id == 'by_id' && $_REQUEST['key'] == $GLOBALS['privateKey']) return $this->by_id($_REQUEST['start'], @$_REQUEST['limit']);
-		if($racer_id == 'update_unsubscribed' && $_REQUEST['key'] == $GLOBALS['privateKey']) return $this->update_unsubscribed($_REQUEST['email']);
-		if($racer_id == 'most_improved_rpm') return $this->most_improved_rpm($_REQUEST);
-		if(!is_numeric($racer_id)) throw new RestException(412,'Not a valid racer id');
+    public function index($racer_id, $sub = null) {
+        if($racer_id == 'valid') return $this->valid($_REQUEST['email'], $_REQUEST['racerName']);
+        if($racer_id == 'create') return $this->postCreate($_REQUEST);
+        if($racer_id == 'login') return $this->login($_REQUEST);
+        if($racer_id == 'fb_login') return $this->postfb_login($_REQUEST);
+        if($racer_id == 'toprpm') return $this->top_rpm();
+        if($racer_id == 'last_updated') return $this->last_updated($_REQUEST['start'], $_REQUEST['end'], @$_REQUEST['limit']);
+        if($racer_id == 'by_id') return $this->by_id($_REQUEST['start'], @$_REQUEST['limit']);
+        if($racer_id == 'update_unsubscribed') return $this->update_unsubscribed($_REQUEST['email']);
+        if($racer_id == 'most_improved_rpm') return $this->most_improved_rpm($_REQUEST);
+        if(!is_numeric($racer_id)) throw new RestException(412,'Not a valid racer id');
 
-		if($sub != null) {
-			switch($sub) {
-				case 'races':
-					return $this->races($racer_id);
-					break;
-			}
-		} else {
-			return $this->racer($racer_id);
-		}
-	}
+        if($sub != null) {
+            switch($sub) {
+                case 'races':
+                    return $this->races($racer_id);
+                    break;
+            }
+        } else {
+            return $this->racer($racer_id);
+        }
+    }
 
-	/**
-	 * Most Improved RPM
-	 * @protected
-	 * @param array $request_data
-	 * @return array
-	 */
+    /**
+     * Most Improved RPM
+     * Requires public access
+     *
+     * @param array $request_data
+     * @return array
+     */
+    public function most_improved_rpm($params) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        $limit = empty($params['limit']) ? 50 : (int)$params['limit'];
+        switch(@$params['range']) {
+            case 'month':
+                $month = empty($params['month']) ? date('n') : (int)$params['month'];
+                $year  = empty($params['year']) ? date('Y') : (int)$params['year'];
+                $tsql_params = $month . ', ' . $year . ', ' . $limit;
+                break;
+            case 'year':
+                $year = empty($params['year']) ? date('Y') : (int)$params['year'];
+                $tsql_params = '0, ' . $year . ', ' . $limit;
+                break;
+            default:
+                throw new RestException(412,'Not a valid range (Must be "month" or "year")');
+        }
+        
+        // TODO Add filtering by Speed Level
+        
+        $tsql = "GetMostImproveRPM " . $tsql_params;
+        $rows = $this->run_query($tsql, array());
+        
+        foreach($rows as $key => $value) {
+            $rows[$key] = array('rpmChange' => $value['RPMDiff'], 'nickname' => $value['RacerName'], 'rpm' => $value['RPM']);
+        }
+        
+        return $rows;
+    }
 
-	protected function most_improved_rpm($params) {
-		$limit = empty($params['limit']) ? 50 : (int)$params['limit'];
-		switch(@$params['range']) {
-			case 'month':
-				$month = empty($params['month']) ? date('n') : (int)$params['month'];
-				$year  = empty($params['year']) ? date('Y') : (int)$params['year'];
-				$tsql_params = $month . ', ' . $year . ', ' . $limit;
-				break;
-			case 'year':
-				$year = empty($params['year']) ? date('Y') : (int)$params['year'];
-				$tsql_params = '0, ' . $year . ', ' . $limit;
-				break;
-			default:
-				throw new RestException(412,'Not a valid range (Must be "month" or "year")');
-		}
-		
-		// TODO Add filtering by Speed Level
-		
-		$tsql = "GetMostImproveRPM " . $tsql_params;
-		$rows = $this->run_query($tsql, array());
-		
-		foreach($rows as $key => $value) {
-			$rows[$key] = array('rpmChange' => $value['RPMDiff'], 'nickname' => $value['RacerName'], 'rpm' => $value['RPM']);
-		}
-		
-		return $rows;
-	}
+    /**
+     * Get a racer's information
+     * Requires public access
+     *
+     * @param integer $customerId
+     * @return array
+     */
+    public function racer($customerId) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        if(!is_numeric($customerId)) throw new RestException(412,'Not a valid number');
 
-	/**
-	 * Get a racer's information
-	 * @protected
-	 * @param integer $customerId
-	 * @return array
-	 */
-	protected function racer($customerId) {
-		if(!is_numeric($customerId)) throw new RestException(412,'Not a valid number');
+        $tsql = "SELECT TOP (1) * FROM Customers WHERE CustID = ?";
 
-		$tsql = "SELECT TOP (1) * FROM Customers WHERE CustID = ?";
+        $params = array(&$customerId);
 
-		$params = array(&$customerId);
+        $rows = $this->run_query($tsql, $params);
 
-		$rows = $this->run_query($tsql, $params);
+        $output = array();
 
-		$output = array();
+        foreach($rows as $row) {
+            $output = array('id' => $row['CustID'],
+                            'name' => array('nickname' => $row['RacerName'],
+                            'first' => $row['FName'],
+                            'last'  => $row['LName']),
+                            'rpm'       => $row['RPM'],
+                            'created_at' => date($GLOBALS['dateFormat'], strtotime($row['AccountCreated'])),
+                            'visits' => $row['TotalVisits'],
+                            'races'  => $row['TotalRaces'],
+                            //'row' => $row
+                            );
 
-		foreach($rows as $row) {
-			$output = array('id' => $row['CustID'],
-							'name' => array('nickname' => $row['RacerName'],
-							'first' => $row['FName'],
-							'last'  => $row['LName']),
-							'rpm'       => $row['RPM'],
-							'created_at' => date($GLOBALS['dateFormat'], strtotime($row['AccountCreated'])),
-							'visits' => $row['TotalVisits'],
-							'races'  => $row['TotalRaces'],
-							//'row' => $row
-							);
+        }
 
-		}
+        return array('racer' => $output);
+    }
 
-		return array('racer' => $output);
-	}
+    /**
+     * See if a user is valid -- for Elite Karting UK
+     * Requires public access
+     *
+     * @param string $email
+     * @param string $racerName
+     * @return array
+     */
+    public function valid($email, $racerName) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
-	/**
-	 * See if a user is valid -- for Elite Karting UK
-	 * @protected
-	 * @param string $email
-	 * @param string $racerName
-	 * @return array
-	 */
-	protected function valid($email, $racerName) {
+        $tsql = "SELECT c.CustID, c.FName, c.LName, c.RacerName, c.EmailAddress FROM Customers c LEFT JOIN Memberships m ON c.CustID = m.CustID WHERE c.EmailAddress = ? AND c.RacerName = ? AND c.Deleted = 0"; //  AND m.ExpirationDate > GETDATE() AND m.MembershipTypeID IN (2,3,4)
 
-		$tsql = "SELECT c.CustID, c.FName, c.LName, c.RacerName, c.EmailAddress FROM Customers c LEFT JOIN Memberships m ON c.CustID = m.CustID WHERE c.EmailAddress = ? AND c.RacerName = ? AND c.Deleted = 0"; //  AND m.ExpirationDate > GETDATE() AND m.MembershipTypeID IN (2,3,4)
+        $params = array(&$email, &$racerName);
 
-		$params = array(&$email, &$racerName);
+        $rows = $this->run_query($tsql, $params);
+        $output = array(count($rows) > 0);
 
-		$rows = $this->run_query($tsql, $params);
-		$output = array(count($rows) > 0);
+        return array('valid' => $output);
+    }
 
-		return array('valid' => $output);
-	}
+    /**
+     * Get the list of races a racer has participated in
+     * Requires public access
+     * 
+     * @param integer $customerId
+     * @return array
+     */
+    public function races($customerId) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
-	/**
-	 * Get the list of races a racer has participated in
-	 * @protected
-	 * @param integer $customerId
-	 * @return array
-	 */
-	protected function races($customerId) {
+        if(!is_numeric($customerId)) throw new RestException(412,'Racer ID is not a valid number');
 
-		if(!is_numeric($customerId)) throw new RestException(412,'Racer ID is not a valid number');
-
-		$tsql = <<<EOD
-		IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'HeatMain' AND COLUMN_NAME = 'NumberOfCadetReservation')
+        $tsql = <<<EOD
+        IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'HeatMain' AND COLUMN_NAME = 'NumberOfCadetReservation')
         BEGIN
             EXEC( 'SELECT     hm.HeatNo, hm.TrackNo, ht.HeatTypeName, t.Description AS TrackName, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.HeatStatus, hm.EventRound, hm.Begining, hm.Finish, hm.WinBy, hm.RaceBy,
                           hm.ScheduleDuration, hm.PointsNeeded, hm.SpeedLevel, hm.HeatColor, hm.NumberOfReservation, hm.MemberOnly, hm.HeatNotes, hm.ScoreID, hm.RacersPerHeat,
@@ -723,193 +960,223 @@ EOD;
         END
 EOD;
 
-		$rows = $this->run_query($tsql);
+        $rows = $this->run_query($tsql);
 
-		$output = array();
+        $output = array();
 
-		foreach( $rows as $row)
-		{
-			  $output[] = array('id' => $row['HeatNo'],
-			  				'track_id' => $row['TrackNo'],
-							'heat_type_id' => $row['HeatTypeNo'],
-							'heat_name' => $row['HeatTypeName'],
-							'track_name' => $row['TrackName'],
-							'speed_level_id' => $row['SpeedLevel'],
-							'starts_at' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['ScheduledTime'])),
-							'racer_id' => $row['CustID'],
-							'finish_position' => $row['FinishPosition'],
-							'rpm' => $row['RPM'],
-							//'row' => $row
-							);
-		}
+        foreach( $rows as $row)
+        {
+              $output[] = array('id' => $row['HeatNo'],
+                            'track_id' => $row['TrackNo'],
+                            'heat_type_id' => $row['HeatTypeNo'],
+                            'heat_name' => $row['HeatTypeName'],
+                            'track_name' => $row['TrackName'],
+                            'speed_level_id' => $row['SpeedLevel'],
+                            'starts_at' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['ScheduledTime'])),
+                            'racer_id' => $row['CustID'],
+                            'finish_position' => $row['FinishPosition'],
+                            'rpm' => $row['RPM'],
+                            //'row' => $row
+                            );
+        }
 
-		return array('heats' => $output);
-	}
+        return array('heats' => $output);
+    }
 
-	protected function update_unsubscribed($email) {
+    public function update_unsubscribed($email) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
-		$output = array('No updates for ' . $email);
+        $output = array('No updates for ' . $email);
 
-		// Look for customer, if exists and donotmail = 0
-		$tsql_params = array($email);
-		$tsql = "SELECT custid, emailaddress, donotmail FROM customers WHERE emailaddress = ?";
-		$rows = $this->run_query($tsql, $tsql_params);
+        // Look for customer, if exists and donotmail = 0
+        $tsql_params = array($email);
+        $tsql = "SELECT custid, emailaddress, donotmail FROM customers WHERE emailaddress = ?";
+        $rows = $this->run_query($tsql, $tsql_params);
 
-		//echo 'Found ' . count($rows);
+        //echo 'Found ' . count($rows);
 
-		if(count($rows) > 0) {
-			foreach($rows as $customer) {
-				if($customer['donotmail'] == 0) {
-					// Update customer row and insert trigger log
+        if(count($rows) > 0) {
+            foreach($rows as $customer) {
+                if($customer['donotmail'] == 0) {
+                    // Update customer row and insert trigger log
 
-					// Set donotmail = 0
-					$tsql_params = array($customer['custid']);
-					$tsql = "UPDATE Customers SET donotmail = '1' WHERE CustId = ?";
-					//echo $tsql;
-					//print_r($tsql_params);
-					$rows = $this->run_query($tsql, $tsql_params);
-					print_r($rows);
+                    // Set donotmail = 0
+                    $tsql_params = array($customer['custid']);
+                    $tsql = "UPDATE Customers SET donotmail = '1' WHERE CustId = ?";
+                    //echo $tsql;
+                    //print_r($tsql_params);
+                    $rows = $this->run_query($tsql, $tsql_params);
+                    print_r($rows);
 
-					// Insert into triggerlog so that it replicates
-					$tsql_params = array($customer['custid']);
-					$tsql = "INSERT INTO triggerlogs (custid, lastupdated, tablename, type, deleted) VALUES (?, GETDATE(), 'Customers', 'Insert/Update', 0)";
-					//echo $tsql;
-					//print_r($tsql_params);
-					$rows = $this->run_query($tsql, $tsql_params);
+                    // Insert into triggerlog so that it replicates
+                    $tsql_params = array($customer['custid']);
+                    $tsql = "INSERT INTO triggerlogs (custid, lastupdated, tablename, type, deleted) VALUES (?, GETDATE(), 'Customers', 'Insert/Update', 0)";
+                    //echo $tsql;
+                    //print_r($tsql_params);
+                    $rows = $this->run_query($tsql, $tsql_params);
 
-					$output = array('Updated ' . $email);
-				}
-			}
-		}
-		return $output;
-	}
+                    $output = array('Updated ' . $email);
+                }
+            }
+        }
+        return $output;
+    }
 
-	protected function last_updated($start, $end, $limit = 1000) {
+    public function last_updated($start, $end, $limit = 1000) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
 
-		$limit = empty($limit) || !is_numeric($limit) ? 1000 : $limit;
+        $limit = empty($limit) || !is_numeric($limit) ? 1000 : $limit;
 
-		$tsql_params = array($start, $end);
+        $tsql_params = array($start, $end);
 
-		$tsql = "select top($limit) custid, birthdate, phonenumber, (custid/1000000) AS locationid, membershipstatus, membershiptextlong AS membershiptext, cell, fname, lname, racername, birthdate, gender, emailaddress, address, address2, city, state, zip, country, rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail from customers c where deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
+        $tsql = "select top($limit) custid, birthdate, phonenumber, (custid/1000000) AS locationid, membershipstatus, membershiptextlong AS membershiptext, cell, fname, lname, racername, birthdate, gender, emailaddress, address, address2, city, state, zip, country, rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail from customers c where deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
 
-		$racers = $this->run_query($tsql, $tsql_params);
+        $racers = $this->run_query($tsql, $tsql_params);
 
-		if(!isset($_GET['suppress_additional_fields'])) { // Hook to prevent these "heavy" queries from being executed
-			foreach($racers as $id => $racer) {
-				
-				// Add memberships
-				$racers[$id]['memberships'] = array();
-				$memberships = $this->run_query("GetCustomerMemberships {$racer['custid']}", array());
-				foreach($memberships as $membership) {
-					$racers[$id]['memberships'][] = array('name' => $membership['Description'], 'expiration' => $membership['ExpirationDate']);
-				}
-				
-				// Add points
-				$points = $this->run_query("GetCustomerStandardPoints {$racer['custid']}", array());
-				$racers[$id]['points'] = floatval($points[0]['Points']);
-				
-				// Add cell phone consent and date
-				$racers[$id]['cell_consent_given'] = empty($racer['cell']) ? false : true;
-				$racers[$id]['cell_consent_date']  = empty($racers[$id]['cell_consent_given']) ? null : $racer['accountcreated'];
-				
-				// Add email consent and date
-				$racers[$id]['email_consent_given'] = ($racer['donotmail'] == 1) ? false : true;
-				$racers[$id]['email_consent_date']  = empty($racers[$id]['email_consent_given']) ? null : $racer['accountcreated'];
-				
-			}
-		}
+        if(!isset($_GET['suppress_additional_fields'])) { // Hook to prevent these "heavy" queries from being executed
+            foreach($racers as $id => $racer) {
+                
+                // Add memberships
+                $racers[$id]['memberships'] = array();
+                $memberships = $this->run_query("GetCustomerMemberships {$racer['custid']}", array());
+                foreach($memberships as $membership) {
+                    $racers[$id]['memberships'][] = array('name' => $membership['Description'], 'expiration' => $membership['ExpirationDate']);
+                }
+                
+                // Add points
+                $points = $this->run_query("GetCustomerStandardPoints {$racer['custid']}", array());
+                $racers[$id]['points'] = floatval($points[0]['Points']);
+                
+                // Add cell phone consent and date
+                $racers[$id]['cell_consent_given'] = empty($racer['cell']) ? false : true;
+                $racers[$id]['cell_consent_date']  = empty($racers[$id]['cell_consent_given']) ? null : $racer['accountcreated'];
+                
+                // Add email consent and date
+                $racers[$id]['email_consent_given'] = ($racer['donotmail'] == 1) ? false : true;
+                $racers[$id]['email_consent_date']  = empty($racers[$id]['email_consent_given']) ? null : $racer['accountcreated'];
+                
+            }
+        }
 
-		return array('racers' => $racers);
-	}
+        return array('racers' => $racers);
+    }
 
-	/**
-	 * Find racers by ID
-	 * @protected
-	 * @param integer $customerId
-	 * @return array
-	 */
-	protected function by_id($startId, $limit = null) {
-		if($_REQUEST['key'] != $GLOBALS['privateKey'])
-					throw new RestException(412,'Not authorized');
-		$limit = empty($limit) || !is_numeric($limit) ? 1000 : $limit;
+    /**
+     * Find racers by ID
+     * Requires private access
+     *
+     * @param integer $customerId
+     * @return array
+     */
+    public function by_id($startId, $limit = null) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        $limit = empty($limit) || !is_numeric($limit) ? 1000 : $limit;
 
-		$tsql_params = array($startId);
+        $tsql_params = array($startId);
 
-		$tsql = "select top($limit) custid, birthdate, cell, fname, lname, racername, birthdate, gender, emailaddress, zip,rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail  from customers where emailaddress <> '' and deleted = 0 and isemployee = 0 and isgiftcard = 0 AND custid > ? ORDER BY custid";
+        $tsql = "select top($limit) custid, birthdate, cell, fname, lname, racername, birthdate, gender, emailaddress, zip,rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail  from customers where emailaddress <> '' and deleted = 0 and isemployee = 0 and isgiftcard = 0 AND custid > ? ORDER BY custid";
 
-		$rows = $this->run_query($tsql, $tsql_params);
+        $rows = $this->run_query($tsql, $tsql_params);
 
-		return array('racers' => $rows);
-	}
+        return array('racers' => $rows);
+    }
 
-	protected function top_rpm() {
-		//if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');
+    public function top_rpm() {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        //if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');
 
-		$tsql_params = array();
-		$tsql_gender = '';
-
-
-		// Limit query
-		if(isset($_GET['limit']) && is_numeric($_GET['limit'])) {
-			if($_GET['limit'] > 100) throw new RestException(412,'Cannot return more than 100 rows');
-			//$tsql_params[] = (int)$_GET['limit'];
-			$limit = (int)$_GET['limit'];
-		} else {
-			//$tsql_params[] = 50;
-			$limit = 50;
-		}
-
-		// Sort by gender
-		if(isset($_GET['gender'])) {
-			$genders = array('m' => 1, 'f' => 2);
-			if(!in_array(strtolower($_GET['gender']), array('m', 'f'))) throw new RestException(412,'Invalid gender given');
-			$tsql_gender = 'AND Gender = ?';
-			$tsql_params[] = &$genders[strtolower($_GET['gender'])];
-		}
-
-		// TODO Add filtering by speedlevel
-
-		$tsql = "SELECT TOP(".$limit.") * FROM Customers WHERE RPM <> 10000 $tsql_gender AND Deleted <> 'True' ORDER BY RPM DESC";
-
-		$rows = $this->run_query($tsql, $tsql_params);
-
-		$output = array();
-
-		foreach($rows as $row) {
-			$output[] = array('id' => $row['CustID'],
-							'name' => array('nickname' => $row['RacerName'],
-							'first' => $row['FName'],
-							'last'  => $row['LName']),
-							'rpm'       => $row['RPM'],
-							'created_at' => date($GLOBALS['dateFormat'], strtotime($row['AccountCreated'])),
-							);
-
-		}
-		return array('racers' => $output);
-	}
+        $tsql_params = array();
+        $tsql_gender = '';
 
 
-	private function run_query($tsql, $params = array()) {
+        // Limit query
+        if(isset($_GET['limit']) && is_numeric($_GET['limit'])) {
+            if($_GET['limit'] > 100) throw new RestException(412,'Cannot return more than 100 rows');
+            //$tsql_params[] = (int)$_GET['limit'];
+            $limit = (int)$_GET['limit'];
+        } else {
+            //$tsql_params[] = 50;
+            $limit = 50;
+        }
 
-		// Connect
-		try {
-			$conn = new PDO( "sqlsrv:server=(local) ; Database=ClubSpeedV8", "", "");
-			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+        // Sort by gender
+        if(isset($_GET['gender'])) {
+            $genders = array('m' => 1, 'f' => 2);
+            if(!in_array(strtolower($_GET['gender']), array('m', 'f'))) throw new RestException(412,'Invalid gender given');
+            $tsql_gender = 'AND Gender = ?';
+            $tsql_params[] = &$genders[strtolower($_GET['gender'])];
+        }
 
-			// Prepare statement
-			$stmt = $conn->prepare($tsql);
+        // TODO Add filtering by speedlevel
 
-			// Execute statement
-			$stmt->execute($params);
+        $tsql = "SELECT TOP(".$limit.") * FROM Customers WHERE RPM <> 10000 $tsql_gender AND Deleted <> 'True' ORDER BY RPM DESC";
 
-			// Put in array
-			$output = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->run_query($tsql, $tsql_params);
 
-		} catch(Exception $e) {
-			die( print_r( $e->getMessage()) );
-		}
+        $output = array();
 
-		return $output;
-	}
+        foreach($rows as $row) {
+            $output[] = array('id' => $row['CustID'],
+                            'name' => array('nickname' => $row['RacerName'],
+                            'first' => $row['FName'],
+                            'last'  => $row['LName']),
+                            'rpm'       => $row['RPM'],
+                            'created_at' => date($GLOBALS['dateFormat'], strtotime($row['AccountCreated'])),
+                            );
+
+        }
+        return array('racers' => $output);
+    }
+
+    private function run_query($tsql, $params = array()) {
+
+        // Connect
+        try {
+            $conn = new PDO( "sqlsrv:server=(local) ; Database=ClubSpeedV8", "", "");
+            $conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+
+            // Prepare statement
+            $stmt = $conn->prepare($tsql);
+
+            // Execute statement
+            $stmt->execute($params);
+
+            // Put in array
+            $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch(Exception $e) {
+            die( print_r( $e->getMessage()) );
+        }
+
+        return $output;
+    }
+    
+    private function run_exec($tsql, $params = array()) {
+
+        // Connect
+        try {
+            $conn = new PDO( "sqlsrv:server=(local) ; Database=ClubSpeedV8", "", "");
+            $conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+
+            // Prepare statement
+            $stmt = $conn->prepare($tsql);
+
+            // Execute statement
+            $stmt->execute($params);
+
+        } catch(Exception $e) {
+            die( print_r( $e->getMessage()) );
+        }
+
+        return true;
+    }
 
 }

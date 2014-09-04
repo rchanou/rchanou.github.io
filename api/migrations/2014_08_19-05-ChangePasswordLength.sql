@@ -1,0 +1,21 @@
+USE ClubspeedV8;
+SET XACT_ABORT ON; -- automatic rollback on run-time error
+GO
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE; -- ensure full isolation (probably not necessary, but safe)
+GO
+BEGIN TRANSACTION;
+
+IF EXISTS (
+	SELECT *
+	FROM INFORMATION_SCHEMA.COLUMNS c
+	WHERE 
+			c.COLUMN_NAME = 'Password'
+		AND c.TABLE_NAME = 'CUSTOMERS'
+		AND c.CHARACTER_MAXIMUM_LENGTH < 255
+)
+BEGIN
+	ALTER TABLE [CUSTOMERS]
+	ALTER COLUMN [Password] nvarchar(255)
+END;
+
+COMMIT;
