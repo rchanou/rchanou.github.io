@@ -54,6 +54,7 @@ $indexHTML = <<<EOT
   <script language="javascript">
 	// Load native UI library
 	var gui = require('nw.gui');
+    gui.App.clearCache();
 
 	function ScreenToString(screen) {
 		var string = "";
