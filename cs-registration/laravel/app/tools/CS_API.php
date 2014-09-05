@@ -66,7 +66,7 @@ class CS_API
         $result = curl_exec($ch);
 
         //Debugging output:
-/*        echo '<div style="color: white; background-color: black; border: 2px solid white; padding: 20px; margin: 20px; word-break: break-word;"><p/><strong>Result of API call to:</strong> ' . $url . '<br/>';
+        /*echo '<div style="color: white; background-color: black; border: 2px solid white; padding: 20px; margin: 20px; word-break: break-word;"><p/><strong>Result of API call to:</strong> ' . $url . '<br/>';
         echo '<strong>cURL Info:</strong> ' . ((json_encode(curl_getinfo($ch))));
         echo "<br/><strong>Data sent:</strong> ";
         echo (json_encode($params));
@@ -76,6 +76,9 @@ class CS_API
         echo (json_encode(curl_error($ch)));
         echo '</div>';*/
         //die();
+
+        $errorInfo = array('url' => $url, 'params' => $params, 'response' => $result);
+        Session::put('errorInfo', $errorInfo);
 
         //Return the result to the caller as an associative array
         return json_decode($result,true);
@@ -102,12 +105,13 @@ class CS_API
                 break;
 
             case 'registerCustomer':
-                $url = $url . '/racers/create.json' . '?key=' . self::$privateKey;
+                //$url = $url . '/racers/create.json' . '?key=' . self::$privateKey;
+                $url = $url . '/racers/register.json' . '?key=' . self::$privateKey;
                 $result = self::callApi($url,$params,'POST');
                 break;
 
             case 'getTranslations':
-                $url = $url . '/translations/getNamespace.json' . '?namespace=Interfaces.Common&key=' .self::$apiKey;
+                $url = $url . '/translations/getNamespace.json' . '?namespace=Translations.Registration&key=' .self::$apiKey;
                 $result = self::callApi($url);
                 $resultFormatted = array();
                 if ($result == null || array_key_exists("error",$result) || !is_array($result))
@@ -128,7 +132,6 @@ class CS_API
                 break;
             case 'getCurrentCulture':
                 $url = $url . '/settings/get.json' . '?group=MainEngine&setting=currentCulture&key=' .self::$privateKey;
-
                 $result = self::callApi($url);
                 if ($result == null || array_key_exists("error",$result) || !is_array($result) || !array_key_exists("CurrentCulture",$result["settings"]))
                 {
@@ -138,6 +141,10 @@ class CS_API
                 {
                     $result = $result["settings"]["CurrentCulture"]["SettingValue"];
                 }
+                break;
+            case 'sendMissingStrings':
+                $url = $url . '/translations.json' . '?key=' . self::$privateKey;
+                $result = self::callApi($url,$params[0],'POST');
                 break;
             case 'getImages':
                 $url = $url . '/settings/getImages.json?app=kiosk' . '&key=' .self::$privateKey;
@@ -160,12 +167,48 @@ class CS_API
                         $result[$currentSettingKey] = $resultBeforeProcessing["settings"][$currentSettingKey]["SettingValue"];
                     }
                 }
-
                 break;
             case 'checkAPI':
                 $url = $url . '/version/api.json?key=' . self::$apiKey;
                 $result = self::callApi($url);
 
+                break;
+            case 'getCameraIP':
+                $terminalName = $params["terminalName"]; //The terminal to pull the camera's IP from
+
+                $urlParameterLabel = "CamIP"; //The label for the IP address of the camera in the URL - TODO: This may need to be a config setting
+
+                $url = $url . '/settings/get.json' . '?group=' . $terminalName . '&key=' .self::$privateKey;
+
+                $resultBeforeProcessing = self::callApi($url);
+                if ($resultBeforeProcessing === null || (is_array($resultBeforeProcessing) && array_key_exists("error",$resultBeforeProcessing)))
+                {
+                    $result = null;
+                }
+                else
+                {
+                    $result = array();
+
+                    //return "192.168.111.133/IMAGE.JPG"; //For testing purposes, hard-coding to local IP Camera
+
+                    foreach($resultBeforeProcessing["settings"] as $currentSettingKey => $currentSettingValue)
+                    {
+                        $result[$currentSettingKey] = $resultBeforeProcessing["settings"][$currentSettingKey]["SettingValue"];
+                    }
+
+                    if (array_key_exists("url",$result)) //If we pulled the setting successfully
+                    {
+                        $parsedParameters = array();
+                        $urlParts = parse_url($result["url"]); //Break the URL into its components
+                        parse_str($urlParts['query'],$parsedParameters); //Parse the 'query' component and put the results in $parsedParameters
+
+                        return $parsedParameters[$urlParameterLabel]; //Return the URL parameter we're looking for: the URL of the IP Camera
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
                 break;
             default:
                 return false;
@@ -173,7 +216,7 @@ class CS_API
         }
 
          //Useful debugging info
-/*        echo "Command: ";
+        /*echo "Command: ";
         var_dump($command);
         echo "<br/>Params: ";
         var_dump($params);
@@ -188,5 +231,79 @@ class CS_API
         }
 
         return $result;
+    }
+
+    /**
+     * This function pings the Club Speed API by trying to get the API version.
+     * If any connectivity issue occurs, this returns true.
+     * Otherwise, it returns false.
+     * @return bool True if there's a connectivity problem, or false otherwise.
+     */
+    public static function cannotConnectToClubSpeedAPI()
+    {
+        return !self::call("checkAPI");
+    }
+
+    /**
+     * This function is called to check for a potential language changed.
+     * This is determined by checking for the existence of "currentCultureChanged" in the session.
+     * If a change was requested, current strings and culture are switched if the desired new language exists in memory.
+     */
+    public static function checkForLanguageChange()
+    {
+        if (Session::has("currentCultureChanged"))
+        {
+            $newCulture = Session::get("currentCultureChanged");
+            $translations = Session::get("translations");
+            if (array_key_exists($newCulture, $translations))
+            {
+                $strings = $translations[$newCulture];
+                $strings["cultureNames"] = Strings::getCultureNames();
+                Session::put('strings',$strings);
+                Session::put("currentCulture",$newCulture);
+                Session::put("currentCultureFB", self::convertCultureToFacebook($newCulture));
+            }
+        }
+    }
+
+    /**
+     * This function takes the standard localization format, "en-US", and converts it to Facebook's format, "en_US".
+     * It also recognizes formats that Facebook does not directly support, and converts to the nearest one instead.
+     * @param string $currentCulture The current culture in a standard en-US format.
+     * @return string Facebook's format of that culture: en_US.
+     */
+    public static function convertCultureToFacebook($currentCulture)
+    {
+        $currentCulture = strtolower(substr($currentCulture,0,2)) . '_' . strtoupper(substr($currentCulture,3,2));
+        switch ($currentCulture)
+        {
+            case "es_MX":
+            case "es_PR":
+                return "es_LA";
+                break;
+            case "ar_AE":
+                return "ar_AR";
+                break;
+        }
+        return $currentCulture;
+    }
+
+    /**
+     * This function is used to check if we need to redirect to the home page for any reason.
+     * This would happen if future steps were navigated to before prior steps were completed, or if past steps
+     * were to be visited after registration had completed.
+     * @return bool True if a session was not initialized and we are at any step other than step1, or if a session is
+     * complete and we are at any step other than the last. False otherwise.
+     */
+    public static function sessionIsInvalid()
+    {
+        if (!Session::has('initialized') || Session::has('sessionComplete'))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

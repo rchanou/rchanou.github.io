@@ -27,7 +27,7 @@ class Settings {
 
         self::$defaultSettings = array(
             'Reg_EnableFacebook' => true,
-            'showPicture' => true, //Assuming always required
+            'Reg_CaptureProfilePic' => false, //Replaced showPicture config setting
             'showBirthDate' => true, //Always required
             'requireBirthDate' => true, //Always required
             'CfgRegPhoneShow' => true,
@@ -44,7 +44,31 @@ class Settings {
             'CfgRegEmailReq' => false,
             'dropdownOptions' => array('0' => '', '1' => 'Radio', '2' => 'Magazine', '3' => 'Billboard'),
             'AllowDuplicateEmail' => true,
+            'enableWaiverStep' => true,
             'Waiver1' => '',
+            'CfgRegAddShow' => true,
+            'CfgRegAddReq' => false,
+            'CfgRegCityShow' => true,
+            'CfgRegCityReq' => false,
+            'CfgRegStateShow' => true,
+            'CfgRegStateReq' => false,
+            'CfgRegZipShow' => true,
+            'CfgRegZipReq' => false,
+            'CfgRegCntryShow' => true,
+            'CfgRegCntryReq' => false,
+            'cfgRegCustTxt1Show' => false,
+            'cfgRegCustTxt1Req' => false,
+            'cfgRegCustTxt2Show' => false,
+            'cfgRegCustTxt2Req' => false,
+            'cfgRegCustTxt3Show' => false,
+            'cfgRegCustTxt3Req' => false,
+            'cfgRegCustTxt4Show' => false,
+            'cfgRegCustTxt4Req' => false,
+            'CfgRegValidateGrp' => false,
+            'CfgRegDrvrLicShow' => false,
+            'BusinessName' => '',
+            'AgeNeedParentWaiver' => '18',
+
             'states' => array('' => '','Alaska' => 'Alaska',
                 'Alabama' => 'Alabama',
                 'Arkansas' => 'Arkansas',
@@ -404,36 +428,18 @@ class Settings {
            "CfgRegWaiverPrntrName":"", //TODO: Okay, I can consider this a setting.
            "CfgRegWlcmeTxt":"Welcome...", //TODO: This isn't a setting, you cheaters!
            "CfgRegDisblEmlForMinr":false, //TODO: Unused.
-           "cfgRegCustTxt1req":false, //TODO: Unused. Should add?
-           "cfgRegCustTxt1Show":false, //TODO: Unused. Should add?
-           "cfgRegCustTxt2req":false, //TODO: Unused. Should add?
-           "cfgRegCustTxt2Show":false, //TODO: Unused. Should add?
-           "cfgRegCustTxt3req":false, //TODO: Unused. Should add?
-           "cfgRegCustTxt3Show":false, //TODO: Unused. Should add?
-           "cfgRegCustTxt4req":false, //TODO: Unused. Should add?
-           "cfgRegCustTxt4Show":false, //TODO: Unused. Should add?
+           "cfgRegCustTxt1req":false, //TODO: USED!
+           "cfgRegCustTxt1Show":false, //TODO: USED!
+           "cfgRegCustTxt2req":false, //TODO: USED!
+           "cfgRegCustTxt2Show":false, //TODO: USED!
+           "cfgRegCustTxt3req":false, //TODO: USED!
+           "cfgRegCustTxt3Show":false, //TODO: USED!
+           "cfgRegCustTxt4req":false, //TODO: USED!
+           "cfgRegCustTxt4Show":false, //TODO: USED!
            "cfgRegAllowMinorToSign":false,
            "cfgRegShowBeenHereBefr":true //TODO: Unused. Need to implement?
          }
          */
-        /*self::$defaultSettings = array(
-            'Reg_EnableFacebook' => true,
-            'showPicture' => true,
-            'showBirthDate' => true,
-            'requireBirthDate' => true,
-            'CfgRegPhoneShow' => true,
-            'CfgRegPhoneReq' => true,
-            'CfgRegSrcShow' => true,
-            'CfgRegSrcReq' => true,
-            'showFirstName' => true,
-            'requireFirstName' => true,
-            'showLastName' => true,
-            'requireLastName' => true,
-            'CfgRegRcrNameShow' => true,
-            'CfgRegRcrNameReq' => true,
-            'CfgRegEmailShow' => true,
-            'CfgRegEmailReq' => true
-        );*/
 
         self::$initialized = true;
     }

@@ -11,13 +11,13 @@
 |
 */
 
-Route::get('/',function() {return Redirect::to('/step1'); });
-Route::get('/step1','RegistrationController@step1');
-Route::get('/step2','RegistrationController@step2');
-Route::post('/step2','RegistrationController@postStep2');
-Route::get('/step3','RegistrationController@step3');
-Route::post('/step3','RegistrationController@postStep3');
-Route::get('/step4','RegistrationController@step4');
-Route::get('/disconnected','RegistrationController@disconnected');
+Route::get('/','Step1Controller@step1');
+Route::get('/step1','Step1Controller@step1');
+Route::get('/step2','Step2Controller@step2');
+Route::post('/step2','Step2Controller@postStep2');
+Route::get('/step3','Step3Controller@step3');
+Route::post('/step3','Step3Controller@postStep3');
+Route::get('/step4','Step4Controller@step4');
+Route::get('/disconnected','DisconnectedController@disconnected');
 
-Route::get('/changeLanguage/{newLanguageCode}/{destinationStep}','RegistrationController@changeLanguage');
+Route::get('/changeLanguage/{newLanguageCode}/{destinationStep}','LocalizationController@changeLanguage');
