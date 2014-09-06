@@ -39,16 +39,16 @@ input {
     text-align: center;
 }
 /* iPad Portrait */
-@media (min-width: 768px) and (max-width: 1023px)
+/*@media (min-width: 601px) and (max-width: 769px)
 {
     .container {
-        width: 768px;
+        width: 728px;
         height: 1024px;
     }
-}
+}*/
 
 /* iPad Landscape */
-@media (min-width: 1024px)
+@media (min-width: 990px)
 {
     /*body {
         max-width: 1024px;
@@ -250,9 +250,15 @@ textarea.LV_invalid_field:active {
 */
 
 .termsBox {
-    max-height: 590px; overflow-y: auto; overflow-x: hidden;
+    max-height: 570px; overflow-y: auto; overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     font-size: 18px; padding: 20px;
+}
+
+.termsCheckboxArea {
+    text-align: right;
+    vertical-align: middle;
+    font-size: 18px;
 }
 /*
     BACK ARROWS

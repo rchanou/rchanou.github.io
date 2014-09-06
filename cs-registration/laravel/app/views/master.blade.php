@@ -112,6 +112,8 @@
 <script src="js/vendors/holder.js"></script> <!-- TODO: Eliminate eventually -->
 <script src="js/vendors/livevalidation.min.js"></script>
 <script src="js/vendors/dropdown.js"></script>
+<script src="js/vendors/modernizr.js"></script>
+
 @show
 <!-- END JAVASCRIPT INCLUDES -->
 

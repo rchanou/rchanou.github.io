@@ -2,11 +2,11 @@
 
 <!-- HEADER -->
 @section('backButton')
-<a href="step1" class="arrow" onclick="$('#loadingModal').modal();"><span>Back</span></a>
+<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" class="arrow" onclick="$('#loadingModal').modal();"><span>Back</span></a>
 @stop
 
 @section('headerTitle')
-Unable to Connect
+{{$strings['str_Unable to Connect']}}
 @stop
 
 @section('languagesDropdown')
@@ -27,9 +27,9 @@ Unable to Connect
     <div class="col-sm-3"></div>
     <div class="col-sm-6">
         <p/>
-        <a href="step1" onclick="$('#loadingModal').modal();">
+        <a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" onclick="$('#loadingModal').modal();">
             <img src="images/redhelmet_disconnect.png" class="center-block" style="margin-top: 80px;">
-            <div class="text-center" style="font-size: 20px;">Unable to connect to Club Speed. <br/>Please try again in a few minutes. <br/>If the issue persists, contact Club Speed support.</div>
+            <div class="text-center" style="font-size: 20px;">{{$strings['str_disconnectedMessage']}}</div>
         </a>
     </div>
     <div class="col-sm-3"></div>
@@ -41,3 +41,14 @@ Unable to Connect
 </div>
 @stop
 <!-- END PAGE CONTENT -->
+
+<!-- BEGIN JAVASCRIPT INCLUDES -->
+@section('js_includes')
+@parent
+<script>
+    var errorInfo = {{json_encode(Session::get('errorInfo'))}};
+    console.log("Error information:");
+    console.log(errorInfo);
+</script>
+@stop
+<!-- END JAVASCRIPT INCLUDES -->
