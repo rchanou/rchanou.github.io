@@ -17,7 +17,7 @@ set_include_path(get_include_path() . PATH_SEPARATOR . './restler');
 spl_autoload_register('spl_autoload');
 
 $r = new Restler();
-$r->setSupportedFormats('JsonFormat');
+$r->setSupportedFormats('JsonFormat', 'XmlFormat', 'JsonpFormat');
 $r->addAPIClass('Karting', '');
 $r->addAPIClass('Racers');
 $r->addAPIClass('Races');

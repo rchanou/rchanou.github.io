@@ -22,7 +22,7 @@ class Racers
     public $restler;
 
     /**
-     * A reference to the globally set DbConnection.
+     * A reference to the globally set CSLogic class.
      */
     private $logic;
 
@@ -804,7 +804,7 @@ class Racers
         if($racer_id == 'login') return $this->login($_REQUEST);
         if($racer_id == 'fb_login') return $this->postfb_login($_REQUEST);
         if($racer_id == 'toprpm') return $this->top_rpm();
-        if($racer_id == 'last_updated') return $this->last_updated($_REQUEST['start'], $_REQUEST['end'], @$_REQUEST['limit']);
+        if($racer_id == 'last_updated') return $this->last_updated(@$_REQUEST['start'], @$_REQUEST['end'], @$_REQUEST['limit']);
         if($racer_id == 'by_id') return $this->by_id($_REQUEST['start'], @$_REQUEST['limit']);
         if($racer_id == 'update_unsubscribed') return $this->update_unsubscribed($_REQUEST['email']);
         if($racer_id == 'most_improved_rpm') return $this->most_improved_rpm($_REQUEST);
