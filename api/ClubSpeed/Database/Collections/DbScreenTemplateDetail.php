@@ -26,7 +26,7 @@ class DbScreenTemplateDetail extends DbCollection {
             , 'Enable'          => 'enable'
             , 'TrackNo'         => 'trackNo'
         );
-        $this->jsonToDb = array_flip($this->dbToJson);
+        parent::secondaryInit();
     }
 
     // public function compress($data = array()) {

@@ -11,7 +11,7 @@ class DbOnlineBookingReservations extends DbCollection {
         parent::__construct($db);
         $this->definition = new \ReflectionClass('\ClubSpeed\Database\Records\OnlineBookingReservations');
         $this->dbToJson = array(
-            'OnlineBookingReservationsID'   => 'onlineBookingReservationsID'
+            'OnlineBookingReservationsID'   => 'onlineBookingReservationsId'
             , 'OnlineBookingsID'            => 'onlineBookingsId'
             , 'CustomersID'                 => 'customersId'
             , 'SessionID'                   => 'sessionId'
@@ -19,24 +19,21 @@ class DbOnlineBookingReservations extends DbCollection {
             , 'CreatedAt'                   => 'createdAt'
             , 'ExpiresAt'                   => 'expiresAt'
         );
-        $this->jsonToDb = array_flip($this->dbToJson);
+        parent::secondaryInit();
     }
 
-    /**
-     * Document: TODO
-     */
     public function compress($data = array()) {
-        $return = array(
-            'reservations' => array()
+        $table = 'reservations';
+        $compressed = array(
+            $table => array()
         );
-        $reservations =& $return['reservations'];
-        if (!is_array($data))
+        $inner =& $compressed[$table];
+        if (isset($data) && !is_array($data))
             $data = array($data);
-
-        foreach($data as $reservation) {
-            if (!empty($reservation))
-                $reservations[] = $reservation->toJson();
+        foreach($data as $record) {
+            if (!empty($record))
+                $inner[] = $this->map('client', $record);
         }
-        return $return;
+        return $compressed;
     }
 }

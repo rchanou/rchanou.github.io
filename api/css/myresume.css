@@ -1,11 +1,11 @@
 body {
   margin: 0;
+  position: relative;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 13px;
   line-height: 18px;
   color: #333333;
   background-color: #ffffff;
-  margin-top:20px;
   margin-bottom:10px;
   overflow: -moz-scrollbars-vertical;
   overflow: scroll;
@@ -22,7 +22,7 @@ li {
 }
 
 .container {
-  width: 700px;
+  width: 1170px;
 }
 
 .well {
@@ -115,5 +115,119 @@ li {
 }
 
 footer, footer p{
-text-align:center;
+  text-align:center;
+}
+
+button:hover {
+    cursor: default;
+}
+
+
+
+.rounded {
+  border-radius: 5px 5px 5px 5px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -o-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+}
+
+.rounded-bottom {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  -moz-border-bottom-left-radius: 5px;
+  -moz-border-bottom-right-radius: 5px;
+  -o-border-bottom-left-radius: 5px;
+  -o-border-bottom-right-radius: 5px;
+  -webkit-border-bottom-left-radius: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+}
+
+.borders {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.borders-top {
+  border-top: 1px solid;
+}
+
+.borders-bottom {
+  border-bottom: 1px solid;
+}
+
+.borders-left {
+  border-left: 1px solid;
+}
+
+.borders-right {
+  border-right: 1px solid;
+}
+
+.background-header {
+  background-color: rgb(50, 50, 50);
+  color: rgb(255, 255, 255);
+}
+.background-even {
+  background-color: rgb(210, 210, 210);
+}
+.background-odd {
+  background-color: rgb(230, 230, 230);
+}
+
+.call-header:hover {
+  cursor: pointer;
+  background-color: rgb(180, 180, 180);
+  color: rgb(0, 0, 0);
+  -webkit-box-shadow:inset 0px 0px 0px 1px #000000;
+  -moz-box-shadow:inset 0px 0px 0px 1px #000000;
+  box-shadow:inset 0px 0px 0px 1px #000000;
+}
+
+.display-none {
+  display: none;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.affix {
+  position: fixed;
+  top: 20px;
+}
+
+.nav > li {
+  padding-left: 20px;
+}
+.nav > li > a {
+  font-size: 16px;
+}
+.nav > li > ul > li > a {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+.nav > li > a:hover,
+.nav > li > a:focus {
+  background-color: transparent;
+  border-left-color: rgb(10, 80, 124);
+  border-left-style: solid;
+  border-left-width: 1px;
+  color: rgb(10, 80, 124);
+}
+
+.nav .active,
+.nav .active:hover,
+.nav .active:focus {
+  background-color: transparent;
+  border-left-color: rgb(10, 80, 124);
+  border-left-style: solid;
+  border-left-width: 2px;
+  color: rgb(10, 80, 124);
+  font-weight: 800;
+}
+
+.active-header {
+  position: fixed;
+  z-index: 9999;
+  top: 0px;
 }

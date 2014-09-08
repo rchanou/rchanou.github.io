@@ -5,7 +5,7 @@ class Booking
     public $restler;
     private $logic;
     
-    function __construct(){
+    function __construct() {
         header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = $GLOBALS['logic'];
     }
@@ -15,7 +15,7 @@ class Booking
             throw new RestException(401, "Invalid authorization!");
         }
         try {
-            return $this->logic->booking->create(\ClubSpeed\Utility\Params::nonReservedData($request_data));
+            return $this->logic->booking->create($request_data);
         }
         catch (CSException $e) {
             throw new RestException($e->getCode() ?: 412, $e->getMessage());
@@ -32,8 +32,11 @@ class Booking
         try {
             return $this->logic->booking->get($id);
         }
+        catch (CSException $e) {
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        }
         catch (Exception $e) {
-            die($e->getMessage());
+            throw new RestException(500, $e->getMessage());
         }
     }
 
@@ -73,7 +76,7 @@ class Booking
         }
         try {
             if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
-                return $this->logic->booking->find(\ClubSpeed\Utility\Params::nonReservedData($request_data));
+                return $this->logic->booking->find($request_data);
             }
             else {
                 return $this->logic->booking->all();

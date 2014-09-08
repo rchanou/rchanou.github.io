@@ -17,6 +17,6 @@ class DbOnlineBookings extends DbCollection {
             , 'ProductsID'      => 'productsId'
             , 'QuantityTotal'   => 'quantityTotal'
         );
-        $this->jsonToDb = array_flip($this->dbToJson);
+        parent::secondaryInit();
     }
 }

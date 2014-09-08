@@ -28,7 +28,7 @@ class DbOnlineBookingAvailability_V extends DbCollection {
             , 'ProductSpotsTotal'           => 'productSpotsTotal'
             , 'ProductSpotsUsed'            => 'productSpotsUsed'
         );
-        $this->jsonToDb = array_flip($this->dbToJson);
+        parent::secondaryInit();
     }
 
     /**;
@@ -57,7 +57,7 @@ class DbOnlineBookingAvailability_V extends DbCollection {
     /**
      * Document: TODO
      */
-    public function compress($data = array()) {
+    public function compress($data = array(), $single = false) {
 
         // does this belong here, or in the cs-booking class? -- sort of stretching the model ideal here
         $return = array(
@@ -67,29 +67,34 @@ class DbOnlineBookingAvailability_V extends DbCollection {
         if (isset($data) && !is_array($data))
             $data = array($data); // convert a single record to an array for the foreach syntax to function
 
-        foreach($data as $row) {
-            $existingHeat = self::findExisting($bookings, 'heatId', $row->HeatNo);
-            if ($existingHeat == null) {
-                $existingHeat = array(
-                      'heatId'                      => $row->HeatNo
-                    , 'heatDescription'             => $row->HeatDescription
-                    , 'heatStartsAt'                => $row->HeatStartsAt
-                    , 'heatEndsAt'                  => $row->HeatEndsAt
-                    , 'heatSpotsTotalActual'        => $row->HeatSpotsTotalActual
-                    , 'heatSpotsAvailableCombined'  => $row->HeatSpotsAvailableCombined
-                    , 'heatSpotsAvailableOnline'    => $row->HeatSpotsAvailableOnline
-                    , 'products'                    => array()
+        if (!is_null($data)) {
+            foreach($data as $row) {
+                $existingHeat = self::findExisting($bookings, 'heatId', $row->HeatNo);
+                if ($existingHeat == null) {
+                    $existingHeat = array(
+                          'heatId'                      => $row->HeatNo
+                        , 'heatDescription'             => $row->HeatDescription
+                        , 'heatStartsAt'                => $row->HeatStartsAt
+                        , 'heatEndsAt'                  => $row->HeatEndsAt
+                        , 'heatSpotsTotalActual'        => $row->HeatSpotsTotalActual
+                        , 'heatSpotsAvailableCombined'  => $row->HeatSpotsAvailableCombined
+                        , 'heatSpotsAvailableOnline'    => $row->HeatSpotsAvailableOnline
+                        , 'products'                    => array()
+                    );
+                    $bookings[] =& $existingHeat;
+                }
+                $existingHeat['products'][] = array(
+                      'onlineBookingsId'            => $row->OnlineBookingsID
+                    , 'productsId'                  => $row->ProductsID
+                    , 'productDescription'          => $row->ProductDescription
+                    , 'price'                       => $row->Price1
+                    , 'productSpotsAvailableOnline' => $row->ProductSpotsAvailableOnline
+                    , 'productSpotsTotal'           => $row->ProductSpotsTotal
                 );
-                $bookings[] =& $existingHeat;
             }
-            $existingHeat['products'][] = array(
-                  'onlineBookingsId'            => $row->OnlineBookingsID
-                , 'productsId'                  => $row->ProductsID
-                , 'productDescription'          => $row->ProductDescription
-                , 'price'                       => $row->Price1
-                , 'productSpotsAvailableOnline' => $row->ProductSpotsAvailableOnline
-                , 'productSpotsTotal'           => $row->ProductSpotsTotal
-            );
+        }
+        if ($single === true) { // do this, or return the single item namespaced?
+            return @$return['bookings'][0] ?: null;
         }
         return $return;
     }

@@ -2,7 +2,18 @@
 
 class Translations
 {
+
+    /**
+     * A reference to the globally set CSLogic class.
+     */
+    private $logic;
+
     public $restler;
+
+    function __construct() {
+        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
+    }
 
     public function getInsert($namespace, $name, $value, $language = null, $comment = null) {
         if (!\ClubSpeed\Security\Validate::publicAccess()) {
@@ -21,18 +32,17 @@ class Translations
         $tsql_params = array($namespace, $name, $value, $language, $comment);
         return $this->run_query($tsql, $tsql_params, false);
     }
-        
+    
     public function index($desiredData, $sub = null) {
         switch($desiredData) {
             case 'getTranslations':
                 return $this->getTranslations(@$_GET['language']);
-                break;
             case 'getNamespace':
                 return $this->getNamespace(@$_GET['namespace'], @$_GET['language']);
-                break;
             case 'translate':
                 return $this->translate(@$_GET['names'], @$_GET['language'], @$_GET['namespace']);
-                break;
+            default:
+                return $this->get($_REQUEST);
             /*case 'add': // Wes's method to bulk load in strings. This would be done from installer
                 $translations = array(
                     'strWelcomeMessage' => 'Welcome to our track!'
@@ -76,29 +86,13 @@ class Translations
             throw new RestException(401, "Invalid authorization!");
         }
 
+        // note that we could use the supported cultures table here
+        // to determine which cultures are actually allowed on the client.
+        // this is a new table and has not been implemented most areas yet.
+
         if(empty($namespace)) throw new RestException(412, 'No namespace given to translate.');
 
-        $output = array();      
-
-        if($language === 'en-US') {
-            $tsql = "SELECT ResourceSetName AS namespace, ResourceName AS langKey, ResourceValue AS langValue, Culture AS language FROM ResourceSets WHERE ResourceSetName = ? AND Culture IS NULL ORDER BY ResourceName";
-            $tsql_params = array(&$namespace);
-        } elseif($language === null) {
-            $tsql = "SELECT ResourceSetName AS namespace, ResourceName AS langKey, ResourceValue AS langValue, Culture AS language FROM ResourceSets WHERE ResourceSetName = ? ORDER BY ResourceName";
-            $tsql_params = array(&$namespace);
-        } else {
-            $tsql = "SELECT ResourceSetName AS namespace, ResourceName AS langKey, ResourceValue AS langValue, Culture AS language FROM ResourceSets WHERE ResourceSetName = ? AND Culture = ? ORDER BY ResourceName";
-            $tsql_params = array(&$namespace, &$language);
-        }
-
-        $rows = $this->run_query($tsql, $tsql_params);
-        
-        foreach($rows as $translation) {
-            $culture = $translation['language'] === null ? 'en-US' : $translation['language'];
-            $output[$culture][$translation['langKey']] = array('value' => $translation['langValue']);
-        }
-        
-        return array('translation' => $output);  
+        return $this->logic->translations->getNamespace($namespace, $language);
     }
 
     public function translate($names, $language = null, $namespace = null)
@@ -162,5 +156,38 @@ class Translations
         }
 
         return $output;
+    }
+
+    public function post($request_data = null) {
+        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        try {
+            if (isset($request_data['batch']) && is_array($request_data['batch']) && !empty($request_data['batch']))
+                return $this->logic->translations->batchCreate($request_data);
+            else
+                return $this->logic->translations->create($request_data);
+        }
+        catch (CSException $e) {
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        }
+        catch (Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
+    }
+
+    public function get($id, $request_data = null) {
+        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        try {
+            return $this->logic->translations->get($id);
+        }
+        catch (CSException $e) {
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        }
+        catch (Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
     }
 }

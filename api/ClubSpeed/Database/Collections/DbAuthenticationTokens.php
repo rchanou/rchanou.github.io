@@ -20,7 +20,6 @@ class DbAuthenticationTokens extends DbCollection {
             , 'ExpiresAt'              => 'expiresAt'
             , 'Meta'                   => 'meta'
         );
-        $this->jsonToDb = array_flip($this->dbToJson);
+        parent::secondaryInit();
     }
-    
 }

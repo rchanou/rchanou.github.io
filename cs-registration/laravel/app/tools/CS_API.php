@@ -120,11 +120,12 @@ class CS_API
                 }
                 else
                 {
-                    foreach($result["translation"] as $language => $translations)
+                    foreach($result["translations"] as $language => $translations)
                     {
-                        foreach($translations as $currentStringLabel => $currentStringValue)
+                        $language = ($language == null ? 'en-US' : $language);
+                        foreach($translations as $currentTranslation)
                         {
-                            $resultFormatted[$language][$currentStringLabel] = $currentStringValue["value"];
+                            $resultFormatted[$language][$currentTranslation["name"]] = $currentTranslation["value"];
                         }
                     }
                     $result = $resultFormatted;

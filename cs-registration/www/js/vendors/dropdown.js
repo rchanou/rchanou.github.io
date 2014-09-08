@@ -8,12 +8,23 @@ $(".dropdown dd ul li a").click(function() {
     $(".dropdown dt a span").html(text);
     $(".dropdown dd ul").hide();
     $('#loadingModal').modal();
-    console.log(window.location.href);
-    window.location.href = (window.location.href).replace("/step","/changeLanguage/" + getSelectedValue("languageDropdown") + "/step").replace("#",""); //replace /step with "/changeLanguage/" + text + "/step"
-    console.log(window.location.href);
 
-    //replace # with ""
-    //$("#result").html("Selected value is: " + getSelectedValue("sample"));
+    if ( (window.location.href).indexOf('/step') != -1)
+    {
+        window.location.href = (window.location.href).replace("#","").replace("/step","/changeLanguage/" + getSelectedValue("languageDropdown") + "/step"); //replace /step with "/changeLanguage/" + text + "/step"
+    }
+    else if ( (window.location.href).indexOf('/www') != -1)
+    {
+        console.log(window.location.href);
+        window.location.href = (window.location.href).replace("#","").replace("/cs-registration/www/","/cs-registration/www/changeLanguage/" + getSelectedValue("languageDropdown") + "/step1");
+        console.log(window.location.href);
+
+    }
+    else
+    {
+        window.location.href = (window.location.href).replace("#","").replace("/cs-registration/","/cs-registration/changeLanguage/" + getSelectedValue("languageDropdown") + "/step1");
+    }
+
     });
 
 function getSelectedValue(id) {

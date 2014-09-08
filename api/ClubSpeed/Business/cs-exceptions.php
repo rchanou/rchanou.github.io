@@ -74,7 +74,14 @@ class UserNotFoundException extends \CSException {}
  * a required record was attempted to be found
  * but none matching the criteria was available.
  */
-class RecordNotFoundException extends \CSException{}
+class RecordNotFoundException extends \CSException {}
+
+/**
+ * Clubspeed exception signifying that
+ * a unique record is already considered to exist,
+ * either by unique id or combination of other columns.
+ */
+class RecordAlreadyExistsException extends \CSException {}
 
 /**
  * A ClubSpeed business logic exception
@@ -100,6 +107,13 @@ class OnlineBookingsQuantityException extends \CSException {}
  * but was either not set or empty.
  */
 class RequiredArgumentMissingException extends \CSException {}
+
+/**
+ * A ClubSpeed business logic exception
+ * signifying that the an argument was supplied
+ * but fails business logic or pre-database validation checks.
+ */
+class InvalidArgumentValueException extends \CSException {}
 
 /**
  * A ClubSpeed business logic exception

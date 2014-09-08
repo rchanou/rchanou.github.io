@@ -45,6 +45,11 @@ class Stopwatch {
     private $_stopTime;
     private $_running;
 
+    private function currentTime() {
+        // get current time in ms
+        return microtime(true) * 1000;
+    }
+
     public function __construct() {
         $this->reset();
     }
@@ -53,13 +58,13 @@ class Stopwatch {
         if (!$this->_running) {
             $this->_stopTime = null;
             $this->_running = true;
-            $this->_startTime = microtime(true);
+            $this->_startTime = $this->currentTime();
         }
     }
 
     public function stop() {
         if ($this->_running) {
-            $this->_stopTime = microtime(true);
+            $this->_stopTime = $this->currentTime();
             $this->_running = false;            
         }
     }
@@ -69,7 +74,7 @@ class Stopwatch {
             return ($this->_stopTime - $this->_startTime);
         }
         else {
-            return (microtime(true) - $this->_startTime);
+            return ($this->currentTime() - $this->_startTime);
         }
     }
 

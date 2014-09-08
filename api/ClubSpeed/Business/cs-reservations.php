@@ -2,7 +2,8 @@
 
 namespace ClubSpeed\Business;
 
-require_once(__DIR__.'../../Utility/Convert.php');
+require_once(__DIR__.'/../Utility/Convert.php');
+require_once(__DIR__.'/../Utility/Convert.php');
 
 /**
  * The business logic class

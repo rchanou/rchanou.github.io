@@ -11,7 +11,7 @@ class Queues
     }
 
     // queues/add.json POST
-    public function postadd($request_data) {
+    public function post($request_data) {
         if (!\ClubSpeed\Security\Validate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }

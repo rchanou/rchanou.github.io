@@ -10,12 +10,16 @@ abstract class DbCollection {
     protected $dbToJson; // expected to be overwritten in the class extension (can't declare properties as abstract in php)
     protected $jsonToDb; // expected to be overwritten in the class extension (can't declare properties as abstract in php)
 
-    // move build statements here?
-    // they really don't belong in the connection class
-    // maybe in a helper class, if nothing else -- similar to params
-
+    public $key;
+    
     public function __construct(&$CSConnection) {
         $this->conn = $CSConnection;
+    }
+
+    protected function secondaryInit() {
+        // to be called by the inherited constructor once internal logic is done
+        $this->jsonToDb = array_flip($this->dbToJson);
+        $this->key = $this->definition->getStaticPropertyValue('key'); // works, but is odd -- should we just store the key name on the collection?
     }
 
     public function blank() {
@@ -36,6 +40,31 @@ abstract class DbCollection {
         $lastId = $this->conn->exec($insert['statement'], $insert['values']);
         $lastId = \ClubSpeed\Utility\Convert::toNumber($lastId);
         return $lastId;
+    }
+
+    public function batchCreate($data) {
+        if (is_array($data) && !empty($data)) {
+            $records = array();
+            foreach($data as $key => $record) {
+                $records[$key] = (is_object($record) && $this->definition->isInstance($record) ? $record : $this->definition->newInstance($record));
+            }
+        }
+        $ids = array();
+        foreach($records as $key => $record) {
+            // note -- if we need more performance out of this,
+            // we can build this into a single insert statement
+            // by using something similar to the following line:
+            //      $batch = \ClubSpeed\Utility\Params::buildBatchInsert($records);
+            // 
+            // for now, just looping and running creates on each
+            try {
+                $ids[$key] = $this->create($record);
+            }
+            catch (\Exception $e) {
+                $ids[$key] = array("error" => $e->getMessage());
+            }
+        }
+        return $ids;
     }
 
     public function all() {
@@ -103,18 +132,32 @@ abstract class DbCollection {
     }
 
     public function map($type, $params = array()) {
-        $mapped = array();
-        switch ($type) {
-            case 'client':
-                $map = $this->dbToJson;
-                break;
-            case 'server':
-                $map = $this->jsonToDb;
-                break;
+        $mapped = null;
+        if (is_array($params) || is_object($params)) {
+            $mapped = array();
+            switch ($type) {
+                case 'client':
+                    $map = $this->dbToJson;
+                    break;
+                case 'server':
+                    $map = $this->jsonToDb;
+                    break;
+            }
+            foreach($params as $key => $val) {
+                if (isset($map[$key]))
+                    $mapped[$map[$key]] = $val;
+            }
         }
-        foreach($params as $key => $val) {
-            if (isset($map[$key]))
-                $mapped[$map[$key]] = $val;
+        else {
+            // expected a single name, not multiple params as an associative array -- rename parameter?
+            switch($type) {
+                case 'client':
+                    $mapped = $this->dbToJson[$params];
+                    break;
+                case 'server':
+                    $mapped = $this->jsonToDb[$params];
+                    break;
+            }
         }
         return $mapped;
     }

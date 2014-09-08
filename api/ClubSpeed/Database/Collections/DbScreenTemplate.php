@@ -21,6 +21,6 @@ class DbScreenTemplate extends DbCollection {
             , 'SizeX'               => 'sizeX'
             , 'SizeY'               => 'sizeY'
         );
-        $this->jsonToDb = array_flip($this->dbToJson);
+        parent::secondaryInit();
     }
 }

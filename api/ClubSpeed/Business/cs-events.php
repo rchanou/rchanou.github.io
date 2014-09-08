@@ -136,7 +136,7 @@ class CSEvents {
             throw new \InvalidArgumentException("Event add to queue requires numeric customerId! Received: $customerId");
         if (!$this->event_exists($eventId))
             throw new \EventNotFoundException("Event add to queue was unable to find event in the database! Received eventId: $eventId");
-        if (!$this->db->customers->customer_exists($customerId))
+        if (!$this->logic->customers->customer_exists($customerId))
             throw new \CustomerNotFoundException("Event add to queue was unable to find customer in the database! Received customerId: $customerId");
 
         $sql = "DECLARE @EventID INT; SET @EventID = ?"

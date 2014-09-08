@@ -12,12 +12,16 @@ $sw = $GLOBALS['sw'] = new \ClubSpeed\Utility\StopwatchStack();
 // contains constants / "enums" for better readability
 require_once('./ClubSpeed/Enums/cs-enums.php');
 
+// contains exception definitions for use throughout the application
+require_once('./ClubSpeed/Business/cs-exceptions.php');
+
 // loads all required underlying classes and attached db modules
 require_once('./ClubSpeed/Database/csconnection.php'); 
 $conn = $GLOBALS['conn'] = new \ClubSpeed\Database\CSConnection();
+$connResource = $GLOBALS['connResource'] = new \ClubSpeed\Database\CSConnection("(local)", "ClubSpeedResource");
 
 require_once('./ClubSpeed/Database/csdatabase.php');
-$db = $GLOBALS['db'] = new \ClubSpeed\Database\CSDatabase($conn);
+$db = $GLOBALS['db'] = new \ClubSpeed\Database\CSDatabase($conn, $connResource);
 
 require_once('./ClubSpeed/Business/cs-logic.php');
 $logic = $GLOBALS['logic'] = new \ClubSpeed\Business\CSLogic($db);
