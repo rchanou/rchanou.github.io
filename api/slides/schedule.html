@@ -369,7 +369,7 @@
     // then use a fallback for api root (in this case, ftikcincinnati)
     // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
-        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ftikcincinnati.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
+        url: (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/api/index.php/",
         key: 'cs-dev',
     });
     var cache = {}; // for use with polling comparison

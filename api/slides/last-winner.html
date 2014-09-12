@@ -464,14 +464,12 @@
     };
 </script>
 <script>
-
     /**
         Window variable setup
     */
     var api = new clubspeed.classes.ApiService({
-        url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? 'https://ekwigan.clubspeedtiming.com' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
-        // url: (function() { var h; return ((!(h = document.location.hostname) || h == "localhost") ? '192.168.111.140' : (window.location.origin || (window.location.protocol + "//" + window.location.host))) + "/api/index.php/"; })(),
-        key: 'cs-dev',
+        url: (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/api/index.php/",
+        key: 'cs-dev'
     });
     var cache = {}; // for use with polling comparison
     var defaultPhotoUri = '../img/clubspeed_logo.svg';
