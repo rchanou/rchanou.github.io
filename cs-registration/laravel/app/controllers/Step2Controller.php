@@ -280,4 +280,21 @@ class Step2Controller extends BaseController {
         return Redirect::to('/step3');
 
     }
+
+    /**
+     * This function, given the path to an image and optionally its type, converts it to base64.
+     * @param string $path Path of the image
+     * @param string $type Optional image type (to overwrite .tmp file extensions)
+     * @return string A base64 encoded version of the image
+     */
+    private function convertPathToImage($path,$type = "")
+    {
+        if ($type == "")
+        {
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+        }
+        $data = file_get_contents($path);
+        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        return $base64;
+    }
 } 
