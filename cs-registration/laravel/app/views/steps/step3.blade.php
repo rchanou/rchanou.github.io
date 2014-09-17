@@ -43,7 +43,7 @@
     @endif
 </div>
 <div class="termsCheckboxArea">
-    <input type="checkbox" name="iagree" id="iagree" style="vertical-align: text-top; margin-right: 5px;">{{$strings['str_termsAndConditionsCheckBox']}}
+    <input type="checkbox" name="iagree" id="iagree" class="iAgreeCheckbox">{{$strings['str_termsAndConditionsCheckBox']}}
 </div>
 <!-- BEGIN SIGNING POP-UP -->
 <div class="modal fade" id="signModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

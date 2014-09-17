@@ -371,6 +371,10 @@ textarea.LV_invalid_field:active {
     .sigWrapper {
         height: 483px !important;
     }
+    .iAgreeCheckbox {
+        vertical-align: text-top;
+        margin-right: 5px !important;
+    }
 }
 
 /* For mobile responsiveness */
@@ -404,6 +408,12 @@ textarea.LV_invalid_field:active {
     }
     .modal-body {
         padding: 1px !important;
+    }
+
+    .iAgreeCheckbox {
+        vertical-align: top;
+        margin-right: 5px !important;
+        margin-top: 0px !important;
     }
 }
 
