@@ -128,7 +128,7 @@
 
 @endif
 
-<div class="row">
+<div class="row formArea">
     <div class="col-sm-6">
 
         @if ($settings['Reg_CaptureProfilePic'] && !Session::has('ipcam'))
@@ -353,9 +353,9 @@
                 <div class="centered">
                     {{ Form::label('howdidyouhearaboutus', $strings['str_howdidyouhearaboutus'] . ':') }}
                     @if($settings['CfgRegSrcReq'])
-                    <span class="requiredAsterisk">*</span><br/>{{ Form::select('howdidyouhearaboutus', $settings['dropdownOptions'], Input::old('howdidyouhearaboutus','0'),array('style' => 'color: black', 'class'=>'required') ) }}<p/>
+                    <span class="requiredAsterisk">*</span><br/>{{ Form::select('howdidyouhearaboutus', $settings['dropdownOptions'], Input::old('howdidyouhearaboutus','0'),array('style' => 'color: black; max-width: 170px;', 'class'=>'required') ) }}<p/>
                     @else
-                    <br/>{{ Form::select('howdidyouhearaboutus', $settings['dropdownOptions'], Input::old('howdidyouhearaboutus','0'),array('style' => 'color: black;') ) }}<p/>
+                    <br/>{{ Form::select('howdidyouhearaboutus', $settings['dropdownOptions'], Input::old('howdidyouhearaboutus','0'),array('style' => 'color: black; max-width: 170px;') ) }}<p/>
                     @endif
                     <br/>
                 </div>
@@ -499,6 +499,8 @@
         <input type="hidden" id="facebookAllowPost" name="facebookAllowPost" value="1"> <!-- Deprecated -->
         <input type="hidden" id="facebookEnabled" name="facebookEnabled" value="1"> <!-- Deprecated -->
 
+        <input type="hidden" id="screenSize" name="screenSize" value="large">
+
 
     </div>
 </div>
@@ -526,6 +528,14 @@
     <!-- CAMERA CAPTURE SCRIPT AND MINOR EMAIL CONTROLS -->
     <script>
     $(document).ready(function() {
+
+        var currentScreenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        if (currentScreenWidth < 768)
+        {
+            $("#screenSize").val('small');
+        }
+
+
         $("#cameraInput").on("change",pictureCaptured);
         $("#resetButton").on("click",resetPictures);
         $("#switchToFacebookPicButton").on("click",switchToFacebookPic);

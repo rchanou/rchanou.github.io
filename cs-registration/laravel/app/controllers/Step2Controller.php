@@ -84,6 +84,11 @@ class Step2Controller extends BaseController {
         Session::put('isMinor',$input['isMinor']);
         $session['isMinor'] = $input['isMinor'];
 
+        if (isset($input['screenSize'])) //Used for resizing signature pads
+        {
+            Session::put('screenSize',$input['screenSize']);
+        }
+
         //Rules for validation - many are determined by the track itself via Club Speed
         $rules = array();
         if ($settings['showBirthDate'] && $settings['requireBirthDate'])

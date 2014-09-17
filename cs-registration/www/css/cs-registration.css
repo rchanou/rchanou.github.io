@@ -125,31 +125,85 @@ only screen and (min-device-pixel-ratio: 1.5){
     text-align: left;
 }
 
-.topCenterHeader {
-    font-size: 30px;
-    text-align: center;
-    margin: 0px;
+
+@media (min-width: 768px) {
+    .topCenterHeader {
+        font-size: 30px;
+        text-align: center;
+        margin: 0px;
+    }
 }
+
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .topCenterHeader {
+        font-size: 20px;
+        text-align: center;
+        margin: 0px;
+    }
+}
+
 
 .topRightDropdown {
     text-align: right;
 }
 
-.dropdown dd, .dropdown dt, .dropdown ul { margin:0px; padding:0px; }
-.dropdown dd { position:relative; }
-.dropdown a, .dropdown a:visited { color:#816c5b; text-decoration:none; outline:none;}
-.dropdown a:hover { color:#5d4617;}
-.dropdown dt a:hover { color:#5d4617; border: 1px solid #d0c9af;}
-.dropdown dt a {background:#e4dfcb url("../images/flags/arrow.png") no-repeat scroll right center; display:block; padding-right:20px;
-    border:1px solid #d4ca9a; width:180px;}
-.dropdown dt a span {cursor:pointer; display:block; padding:5px;}
-.dropdown dd ul { background:#e4dfcb none repeat scroll 0 0; border:1px solid #d4ca9a; color:#C5C0B0; display:none;
-    left:0px; padding:5px 0px; position:absolute; top:2px; width:auto; min-width:180px; max-width: 180px; list-style:none;}
-.dropdown span.value { display:none;}
-.dropdown dd ul li a { padding:5px; display:block;}
-.dropdown dd ul li a:hover { background-color:#d0c9af;}
 
-img.flag { border:none; vertical-align:baseline; margin-left:10px;}
+@media (min-width: 768px) {
+    .languageDropdown {
+        float: right; z-index: 1049;
+    }
+}
+
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .languageDropdown {
+        float: right; z-index: 1049;
+    }
+}
+
+
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .currentCultureString {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .dropdown dd, .dropdown dt, .dropdown ul { margin:0px; padding:0px; }
+    .dropdown dd { position:relative; }
+    .dropdown a, .dropdown a:visited { color:#816c5b; text-decoration:none; outline:none;}
+    .dropdown a:hover { color:#5d4617;}
+    .dropdown dt a:hover { color:#5d4617; border: 1px solid #d0c9af;}
+    .dropdown dt a {background:#e4dfcb url("../images/flags/arrow.png") no-repeat scroll right center; display:block; padding-right:20px;
+        border:1px solid #d4ca9a; width:180px;}
+    .dropdown dt a span {cursor:pointer; display:block; padding:5px;}
+    .dropdown dd ul { background:#e4dfcb none repeat scroll 0 0; border:1px solid #d4ca9a; color:#C5C0B0; display:none;
+        left:0px; padding:5px 0px; position:absolute; top:2px; width:auto; min-width:180px; max-width: 180px; list-style:none;}
+    .dropdown span.value { display:none;}
+    .dropdown dd ul li a { padding:5px; display:block;}
+    .dropdown dd ul li a:hover { background-color:#d0c9af;}
+    img.flag { border:none; vertical-align:baseline; margin-left:10px;}
+}
+
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .dropdown dd, .dropdown dt, .dropdown ul { margin:0px; padding:0px; }
+    .dropdown dd { position:relative; }
+    .dropdown a, .dropdown a:visited { color:#816c5b; text-decoration:none; outline:none;}
+    .dropdown a:hover { color:#5d4617;}
+    .dropdown dt a:hover { color:#5d4617; border: 1px solid #d0c9af;}
+    .dropdown dt a {background:#e4dfcb url("../images/flags/arrow.png") no-repeat scroll right center; display:block; padding-right:20px;
+        border:1px solid #d4ca9a; width:60px;}
+    .dropdown dt a span {cursor:pointer; display:block; padding:5px;}
+    .dropdown dd ul { background:#e4dfcb none repeat scroll 0 0; border:1px solid #d4ca9a; color:#C5C0B0; display:none;
+        left:0px; padding:5px 0px; position:absolute; top:2px; width:auto; min-width:60px; max-width: 60px; list-style:none;}
+    .dropdown span.value { display:none;}
+    .dropdown dd ul li a { padding:5px; display:block;}
+    .dropdown dd ul li a:hover { background-color:#d0c9af;}
+    img.flag { border:none; vertical-align:baseline; margin-left:10px;}
+}
 
 /*
     BOTTOM FOOTER
@@ -245,21 +299,115 @@ textarea.LV_invalid_field:active {
     border: 1px solid #CC0000;
 }
 
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .formArea {
+        margin-bottom: 40px;
+    }
+}
+
 /*
     STEP 3
 */
 
-.termsBox {
-    max-height: 570px; overflow-y: auto; overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    font-size: 18px; padding: 20px;
+@media (min-width: 768px) {
+    .termsBox {
+        max-height: 570px; overflow-y: auto; overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        font-size: 18px; padding: 20px;
+    }
 }
 
-.termsCheckboxArea {
-    text-align: right;
-    vertical-align: middle;
-    font-size: 18px;
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .termsBox {
+        max-height: 220px; overflow-y: auto; overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px; padding: 20px;
+    }
 }
+
+
+@media (min-width: 768px) {
+    .termsCheckboxArea {
+        text-align: right;
+        vertical-align: middle;
+        font-size: 18px;
+    }
+}
+
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .termsCheckboxArea {
+        text-align: right;
+        vertical-align: middle;
+        font-size: 12px;
+        margin-bottom: 25px;
+        margin-top: 10px;
+    }
+
+    #iagreeButton {
+        font-size: 8px;
+    }
+    #idisagreeButton {
+        font-size: 8px;
+    }
+}
+
+@media (min-width: 768px) {
+    .modalContent {
+        height: 650px;
+    }
+    .innerSigPad {
+        width: 850px;
+        height: 478px;
+    }
+    .cancelSigningButton {
+        width: 425px; text-align: center; background-color: #7a0000; color: white;
+    }
+    .startSigningButton {
+        width: 425px; text-align: center; background-color: #008000; color: white;
+    }
+    .sigWrapper {
+        height: 483px !important;
+    }
+}
+
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .modalContent {
+
+    }
+    .innerSigPad {
+        width: 280px;
+        height: 200px;
+    }
+    .cancelSigningButton {
+        width: 138px; text-align: center; background-color: #7a0000; color: white;
+    }
+    .startSigningButton {
+        width: 138px; text-align: center; background-color: #008000; color: white;
+    }
+    .sigWrapper {
+        height: 200px !important;
+        width: 280px !important;
+    }
+    .sigNavInner {
+        display: inline-block;
+        height: 22px !important;
+    }
+    .sigPad {
+        width: 280px !important;
+    }
+    .clearButtonStyle {
+        font-size: 8px !important;
+    }
+    .modal-body {
+        padding: 1px !important;
+    }
+}
+
+
 /*
     BACK ARROWS
 */

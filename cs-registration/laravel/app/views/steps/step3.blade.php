@@ -48,7 +48,7 @@
 <!-- BEGIN SIGNING POP-UP -->
 <div class="modal fade" id="signModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="height: 650px;">
+        <div class="modal-content modalContent">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel" style="color: black">{{$strings['str_signHere']}}</h4>
@@ -67,13 +67,18 @@
                 </div>
                 @endif
                 {{ Form::open(array('action' => 'Step3Controller@postStep3', 'files' => 'true', 'style' => '', 'class' => 'sigPad')) }}
-                    <ul class=sigNav>
-                        <li class=clearButton><a href="#clear" class="btn btn-warning btn-lg" style="color: white; text-decoration: none">{{$strings['str_clearSignature']}}</a></li>
+                    <ul class="sigNav sigNavInner">
+                        <li class=clearButton><a href="#clear" class="btn btn-warning btn-lg clearButtonStyle" style="color: white; text-decoration: none">{{$strings['str_clearSignature']}}</a></li>
                     </ul>
-                    <div class="sig sigWrapper" style="height: 483px;"> <canvas class="pad" width=850 height=478></canvas>
+                    <div class="sig sigWrapper" height="483">
+                    @if (Session::get('screenSize') == 'small')
+                    <canvas class="pad innerSigPad" width=280 height=200></canvas>
+                    @else
+                    <canvas class="pad innerSigPad" width=850 height=478></canvas>
+                    @endif
                         <input type=hidden name=signatureOutput class=output> </div>
-                    <button type="button" data-dismiss="modal" style="width: 425px; text-align: center; background-color: #7a0000; color: white">{{$strings['str_cancelSigning']}}</button>
-                    <button type=submit style="width: 425px; text-align: center; background-color: #008000; color: white">{{$strings['str_startSigning']}}</button>
+                    <button type="button" data-dismiss="modal" style="text-align: center; background-color: #7a0000; color: white" class="cancelSigningButton">{{$strings['str_cancelSigning']}}</button>
+                    <button type=submit style="text-align: center; background-color: #008000; color: white" class="startSigningButton">{{$strings['str_startSigning']}}</button>
                 {{ Form::close() }}
             </div>
         </div>
@@ -93,7 +98,7 @@
 <!-- FOOTER -->
 
 @section('leftFooterButton')
-<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_step3DoNotAgree']}}</a>
+<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" id="idisagreeButton" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_step3DoNotAgree']}}</a>
 @stop
 
 @section('rightFooterButton')
