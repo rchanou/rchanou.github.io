@@ -7,8 +7,16 @@
 $path_to_admin_config_directory = '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR . 'laravel' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
 
 // See if we need to rename config.php
-if(file_exists($path_to_admin_config_directory . 'config.php')) {
-    die($path_to_admin_config_directory . 'config.php already exists. Exiting!');
+$admin_config_file = $path_to_admin_config_directory . 'config.php';
+if(file_exists($admin_config_file)) {
+    // If it exists but is 0 bytes, we should delete it
+		if(filesize( $admin_config_file) == 0) {
+			echo 'Config file is 0 bytes -- removing and replacing with config.orig.php<br/>';
+			unlink($admin_config_file);
+			copy($path_to_admin_config_directory . 'config.orig.php', $admin_config_files);
+		} else {
+			die($path_to_admin_config_directory . 'config.php already exists. Exiting!');
+		}
 }
 
 // Get private key
