@@ -10,12 +10,12 @@
     @section('css_includes')
     <link rel="stylesheet" href="css/vendors/bootstrap.min.css" />
     <link rel="stylesheet" href="css/vendors/bootstrap-theme.min.css" />
-    <link rel="stylesheet" href="css/cs-registration.css" />
+    <link rel="stylesheet" href="css/cs-registration.css?<?php echo time(); ?>" />
 
     <?php
         if (file_exists('css/custom-styles.css')) //Used for tracks to overwrite css
         {
-            echo '<link rel="stylesheet" href="css/custom-styles.css" />';
+            echo '<link rel="stylesheet" href="css/custom-styles.css?' . time() .'" />';
         }
     ?>
     @show

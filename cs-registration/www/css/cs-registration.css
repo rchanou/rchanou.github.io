@@ -312,7 +312,7 @@ textarea.LV_invalid_field:active {
 
 @media (min-width: 768px) {
     .termsBox {
-        max-height: 570px; overflow-y: auto; overflow-x: hidden;
+        max-height: 550px; overflow-y: auto; overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         font-size: 18px; padding: 20px;
     }
