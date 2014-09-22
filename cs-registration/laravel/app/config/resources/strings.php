@@ -136,7 +136,8 @@ class Strings {
             'str_Custom2.required' => 'This field is required',
             'str_Custom3.required' => 'This field is required',
             'str_Custom4.required' => 'This field is required',
-            'str_LicenseNumber.required' => 'License # is required'
+            'str_LicenseNumber.required' => 'License # is required',
+            'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.'
         );
 
         self::$cultureNames = array(

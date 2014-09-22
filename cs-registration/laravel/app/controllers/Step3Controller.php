@@ -65,7 +65,28 @@ class Step3Controller extends BaseController {
      */
     public function postStep3()
     {
-        return $this->attemptCustomerRegistration();
+        $strings = Session::get('strings');
+        if (Session::get('registrationStatus') == null)
+        {
+            Session::put('registrationStatus','processing');
+            return $this->attemptCustomerRegistration();
+        }
+        else if (Session::get('registrationStatus') == 'processing')
+        {
+            sleep(2);
+            return Redirect::action('Step3Controller@postStep3')->withInput();
+        }
+        else if (Session::get('registrationStatus') == 'failed')
+        {
+            $messages = new Illuminate\Support\MessageBag;
+            $messages->add('errors', $strings['str_problemWithRegistration']);
+            Session::forget('registrationStatus');
+            return Redirect::to('/step2')->withErrors($messages)->withInput();
+        }
+        else if (Session::get('registrationStatus') == 'complete')
+        {
+            return Redirect::to('/step4');
+        }
     }
 
     private function attemptCustomerRegistration()
@@ -168,9 +189,11 @@ class Step3Controller extends BaseController {
 
         if ($result === false) //If the call failed
         {
+            Session::put('registrationStatus','failed');
             return Redirect::to('/disconnected'); //Redirect to an error page
         }
 
+        Session::put('registrationStatus','complete');
         return Redirect::to('/step4');
     }
 

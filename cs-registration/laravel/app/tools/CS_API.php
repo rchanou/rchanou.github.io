@@ -120,7 +120,11 @@ class CS_API
                 }
                 else
                 {
-                    foreach($result["translations"] as $language => $translations)
+                    //The index may be either "translation" or "translations" depending on the version of the API
+                    $translationIndex = "translation";
+                    $translationIndex = isset($result["translations"]) ? "translations" : $translationIndex;
+
+                    foreach($result[$translationIndex] as $language => $translations)
                     {
                         $language = ($language == null ? 'en-US' : $language);
                         foreach($translations as $currentTranslation)
