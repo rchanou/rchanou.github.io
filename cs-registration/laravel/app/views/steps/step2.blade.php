@@ -515,7 +515,7 @@
 @stop
 
 @section('rightFooterButton')
-{{ Form::submit($strings['str_step2Submit'], array('class'=>'rightButton btn btn-success btn-lg', 'id'=>'submitButton', "onclick" => "$('#submitButton').addClass('disabled');")) }}
+{{ Form::submit($strings['str_step2Submit'], array('class'=>'rightButton btn btn-success btn-lg', 'id'=>'submitButton')) }}
 {{ Form::close() }}
 @stop
 
@@ -529,12 +529,15 @@
     <script>
     $(document).ready(function() {
 
+
         var currentScreenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
         if (currentScreenWidth < 768)
         {
             $("#screenSize").val('small');
         }
 
+        $('#submitButton').click(function() {setTimeout(function() {$('#submitButton').prop('disabled', true);},1)});
+        $('input').focus(function() {$('#submitButton').prop('disabled', false);});
 
         $("#cameraInput").on("change",pictureCaptured);
         $("#resetButton").on("click",resetPictures);
