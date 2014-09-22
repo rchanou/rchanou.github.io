@@ -78,7 +78,7 @@
                     @endif
                         <input type=hidden name=signatureOutput class=output> </div>
                     <button type="button" data-dismiss="modal" style="text-align: center; background-color: #7a0000; color: white" class="cancelSigningButton">{{$strings['str_cancelSigning']}}</button>
-                    <button type=submit style="text-align: center; background-color: #008000; color: white" class="startSigningButton">{{$strings['str_startSigning']}}</button>
+                    <button type=submit style="text-align: center; background-color: #008000; color: white" class="startSigningButton" id="startSigningButton">{{$strings['str_startSigning']}}</button>
                 {{ Form::close() }}
             </div>
         </div>
@@ -109,7 +109,7 @@
     <input type="hidden" name="signatureRequired" id="signatureRequired" value="true">
     @else
 {{ Form::open(array('action' => 'Step3Controller@postStep3')) }}
-<button id="iagreeButton" onclick="$('#loadingModal').modal();" class="btn btn-success btn-lg rightButton disabled">
+<button id="iagreeButton" onclick="$('#loadingModal').modal(); $('#iagreeButton').addClass('disabled');" class="btn btn-success btn-lg rightButton disabled">
     {{$strings['str_buttonDisabledText']}}
 </button>
     <input type="hidden" name="signatureRequired" id="signatureRequired" value="false">
@@ -132,12 +132,27 @@
         var minorSignatureWithParent = $('#minorSignatureWithParent').val();
         if (minorSignatureWithParent == 'true')
         {
-            $('.sigPad').signaturePad({drawOnly:true, lineTop: 239, lineColour: '#000000', lineWidth: 10});
+            $('.sigPad').signaturePad({drawOnly:true, lineTop: 239, lineColour: '#000000', lineWidth: 10
+            ,onDrawEnd: function(){
+                $('#startSigningButton').prop('disabled', false);
+            }
+            ,onBeforeValidate: function(){
+                 $('#startSigningButton').prop('disabled', true);
+            }
+
+            });
 
         }
         else
         {
-            $('.sigPad').signaturePad({drawOnly:true, lineTop: 428});
+            $('.sigPad').signaturePad({drawOnly:true, lineTop: 428
+            ,onDrawEnd: function(){
+                $('#startSigningButton').prop('disabled', false);
+            }
+            ,onBeforeValidate: function(){
+                 $('#startSigningButton').prop('disabled', true);
+            }
+            });
         }
 
 

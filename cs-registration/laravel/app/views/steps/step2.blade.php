@@ -515,7 +515,7 @@
 @stop
 
 @section('rightFooterButton')
-{{ Form::submit($strings['str_step2Submit'], array('class'=>'rightButton btn btn-success btn-lg', 'id'=>'submitButton')) }}
+{{ Form::submit($strings['str_step2Submit'], array('class'=>'rightButton btn btn-success btn-lg', 'id'=>'submitButton', "onclick" => "$('#submitButton').addClass('disabled');")) }}
 {{ Form::close() }}
 @stop
 

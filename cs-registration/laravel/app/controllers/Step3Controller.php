@@ -23,6 +23,7 @@ class Step3Controller extends BaseController {
      */
     public function step3()
     {
+        Session::forget('registrationStatus');
         CS_API::checkForLanguageChange();
         if(CS_API::sessionIsInvalid() || !Session::has("formInput"))
         {
