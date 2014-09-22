@@ -29,15 +29,21 @@ class ChannelController extends BaseController
             return Redirect::to('/disconnected');
         }
 
-        $channelIds = array_keys(get_object_vars($listOfChannels));
-
-        $channelLineups = $this->getAllChannelLineups($channelIds);
-        $apiCallFailed = ($channelLineups === null);
-        if ($apiCallFailed)
+        if (count($listOfChannels) > 0)
         {
-            return Redirect::to('/disconnected');
-        }
+            $channelIds = array_keys(get_object_vars($listOfChannels));
 
+            $channelLineups = $this->getAllChannelLineups($channelIds);
+            $apiCallFailed = ($channelLineups === null);
+            if ($apiCallFailed)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+        else
+        {
+            $channelLineups = array();
+        }
         $numberOfMonitors = (Config::get('config.numberOfMonitors') == null ? 16 : Config::get('config.numberOfMonitors'));
 
         /*echo json_encode($channelDetails);
