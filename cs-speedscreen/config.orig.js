@@ -5,5 +5,7 @@ var config =
     showTimer: true,
     showHeatNumberInsteadOfRaceTime: false,
     disableNextRacers: true,
-    disableNextRacersTab: false
+    disableNextRacersTab: false,
+    pollingRateMs: 1000,
+    disablePurpleText: false
 };

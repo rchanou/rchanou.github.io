@@ -62,7 +62,7 @@
                     </span>
                     <span class="bestLapBox ellipsis" ng-class="{'racerGotABetterTime': (racer.beatBestLap)}">
                         <span class="racerBoxUpperHeader">Best Time</span><br/>
-                        <span ng-class="{'fastestOverall': racer.isFastest}" ng-if="racer.lap_num != 0" class="racerBoxUpperData">{{racer.fastest_lap_time}}</span>
+                        <span ng-class="{'fastestOverall': racer.isFastest && !disablePurpleText}" ng-if="racer.lap_num != 0" class="racerBoxUpperData">{{racer.fastest_lap_time}}</span>
                     </span>
         </div>
         <div class="racerBoxLower racerBoxLowerRegular">

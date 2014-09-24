@@ -31,7 +31,6 @@
         var disableNextRacers = defaultFor(config.disableNextRacers, true);
         var disableNextRacersTab = defaultFor(config.disableNextRacersTab, false);
 
-
         // ##################################
         // # HD SCOREBOARD MODEL DEFINITION #
         // ##################################
@@ -54,6 +53,9 @@
             this.finalResultsScreenTimeMs = 0;
             this.finalResultsTimeStartedMs = 0;
             this.slidePanelVisible = false;
+
+            $scope.disablePurpleText = defaultFor(config.disablePurpleText, false);
+
 
             $scope.backgroundImageURL = 'images/background_1080p.jpg';
                 $.ajax({
@@ -124,7 +126,7 @@
                     $('#container').isotope( 'reLayout' );
                     $('#container').isotope({ sortBy : 'position' });
 
-                },250));
+                },defaultFor(config.pollingRateMs,1000)));
 
                 intervalsToReturn.push($interval( function()
                 {
