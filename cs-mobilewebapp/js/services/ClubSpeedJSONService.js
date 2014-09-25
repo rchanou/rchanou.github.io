@@ -2,9 +2,22 @@
 angular.module('clubSpeedOnlineApp.services', [])
     .factory('ClubSpeedJSONService',['$http', function($http)
     {
-        var apiURL = '/api/index.php';
-        var apiKey = 'cs-dev';
-        var track = 1; //TODO: Propagate this out to all methods
+        var apiURL, apiKey, track, excludeEmployees;
+        if (typeof config !== "undefined")
+        {
+            apiURL = defaultFor(config.apiURL,'http://' + window.location.hostname + '/api/index.php');
+            apiKey = defaultFor(config.apiKey,'cs-dev');
+            track = defaultFor(config.track,1);
+            excludeEmployees = defaultFor(config.excludeEmployees,true);
+        }
+        else //Backwards compatibility for installs that never had a config.js created
+        {
+            apiURL = 'http://' + window.location.hostname + '/api/index.php';
+            apiKey = 'cs-dev';
+            track = 1;
+            excludeEmployees = true;
+        }
+
         return {
             getFastestLapTimes_Day: function(limit) {
                 var limitString = '';
@@ -12,13 +25,13 @@ angular.module('clubSpeedOnlineApp.services', [])
                 {
                     limitString = '&limit=' + limit;
                 }
-                return $http.get(apiURL + '/races/fastest.json?range=day&track=' + track + '&key=' + apiKey + limitString);
+                return $http.get(apiURL + '/races/fastest.json?range=day&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey + limitString);
             },
             getFastestLapTimes_Week: function() {
-                return $http.get(apiURL + '/races/fastest.json?range=week&track=' + track + '&key=' + apiKey) //TODO: Revert this, multitrack support
+                return $http.get(apiURL + '/races/fastest.json?range=week&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey) //TODO: Revert this, multitrack support
             },
             getFastestLapTimes_Month: function() {
-                return $http.get(apiURL + '/races/fastest.json?range=month&track=' + track + '&key=' + apiKey);
+                return $http.get(apiURL + '/races/fastest.json?range=month&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey);
             },
             getTopRPMScores: function() {
                 return $http.get(apiURL + '/racers/toprpm.json?key=' + apiKey);
@@ -41,7 +54,7 @@ angular.module('clubSpeedOnlineApp.services', [])
             },
             getScoreboardData: function()
             {
-                return $http.get(apiURL + '/races/scoreboard.json?&track_id=1&key=' + apiKey);
+                return $http.get(apiURL + '/races/scoreboard.json?&track_id=' + track + '&key=' + apiKey);
             },
             getTracks: function()
             {
@@ -89,3 +102,12 @@ angular.module('clubSpeedOnlineApp.services', [])
             }
         };*/
     });
+
+/**
+ * Adds default parameter functionality to JavaScript. Woohoo!
+ * @param arg
+ * @param val
+ * @returns {*}
+ */
+function defaultFor(arg, val)
+{ return typeof arg !== 'undefined' ? arg : val; }
