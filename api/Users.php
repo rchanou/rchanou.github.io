@@ -24,27 +24,109 @@ class Users
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
     }
 
+    // public function post($request_data = null) {
+    //     if (!\ClubSpeed\Security\Validate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         return $this->logic->users->create($request_data);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+    // public function get($id, $request_data = null) {
+    //     if (!\ClubSpeed\Security\Validate::publicAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         return $this->logic->users->get($id);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+    // public function put($id, $request_data = null) {
+    //     if (!\ClubSpeed\Security\Validate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         $this->logic->users->update($id, $request_data);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+    // public function delete($id) {
+    //     if (!\ClubSpeed\Security\Validate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         $this->logic->users->delete($id);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+    // public function index($request_data = null) {
+    //     if (!\ClubSpeed\Security\Validate::publicAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
+    //             return $this->logic->users->find($request_data);
+    //         }
+    //         else {
+    //             return $this->logic->users->all();
+    //         }
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
     /**
      * Note: this is a login for USER, not CUSTOMER
+     * @url POST /login
+     * @url GET /login
      */
-    public function login() {
+    public function login($request_data) {
         if (!\ClubSpeed\Security\Validate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
-        $is_admin = empty($_GET['is_admin']) ? 0 : 1;
+        $is_admin = empty($request_data['is_admin']) ? 0 : 1;
         if($is_admin == 1) {
             $tsql = "select top(1) * from users u left join userroles ur on u.UserID = ur.userid WHERE (ur.roleid = 1 OR ur.roleid = 11) AND u.UserName = ? AND u.Password = ? AND u.Enabled = 1 AND u.Deleted = 0";
         } else {
             $tsql = "SELECT * FROM Users WHERE UserName = ? AND Password = ? AND Enabled = 1 AND Deleted = 0";
         }
 
-        $rows = $this->run_query($tsql, array(&$_GET['username'], &$_GET['password']));
+        $rows = $this->run_query($tsql, array(&$request_data['username'], &$request_data['password']));
         
         // Login valid if we return a row
         $login_valid = (count($rows) > 0);
 
-        return array('valid' => $login_valid);  
-    }   
+        return array('valid' => $login_valid);
+    }
     
     private function run_query($tsql, $params = array()) {
         
