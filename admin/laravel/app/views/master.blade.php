@@ -7,15 +7,15 @@
 
     <!-- BEGIN CSS INCLUDES -->
     @section('css_includes')
-    <link rel="stylesheet" href="css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/font-awesome.css" />
-    <link rel="stylesheet" href="css/fullcalendar.css" />
-    <link rel="stylesheet" href="css/jquery.jscrollpane.css" />
-    <link rel="stylesheet" href="css/icheck/flat/blue.css" />
-    <link rel="stylesheet" href="css/select2.css" />
-    <link rel="stylesheet" href="css/unicorn.css" />
+    {{ HTML::style('css/bootstrap.min.css') }}
+    {{ HTML::style('css/font-awesome.css') }}
+    {{ HTML::style('css/fullcalendar.css') }}
+    {{ HTML::style('css/jquery.jscrollpane.css') }}
+    {{ HTML::style('css/icheck/flat/blue.css') }}
+    {{ HTML::style('css/select2.css') }}
+    {{ HTML::style('css/unicorn.css') }}
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="js/respond.min.js"></script>
+    {{ HTML::script('js/respond.min.js')}}
     <![endif]-->
     @show
     <!-- END CSS INCLUDES -->
@@ -96,24 +96,20 @@
 
 <!-- BEGIN JAVASCRIPT INCLUDES -->
 @section('js_includes')
-<script src="js/excanvas.min.js"></script>
-<script src="js/jquery.min.js"></script>
-<script src="js/jquery-ui.custom.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/jquery.flot.min.js"></script>
-<script src="js/jquery.flot.resize.min.js"></script>
-<script src="js/jquery.sparkline.min.js"></script>
-<script src="js/fullcalendar.min.js"></script>
-<script src="js/jquery.icheck.min.js"></script>
-<script src="js/select2.min.js"></script>
-<script src="js/jquery.nicescroll.min.js"></script>
-<script src="js/unicorn.js"></script>
-<script src="js/unicorn.form_common.js"></script>
-<script src="js/unicorn.dashboard.js"></script>
-
-
-
-
+{{ HTML::script('js/excanvas.min.js') }}
+{{ HTML::script('js/jquery.min.js') }}
+{{ HTML::script('js/jquery-ui.custom.js') }}
+{{ HTML::script('js/bootstrap.min.js') }}
+{{ HTML::script('js/jquery.flot.min.js') }}
+{{ HTML::script('js/jquery.flot.resize.min.js') }}
+{{ HTML::script('js/jquery.sparkline.min.js') }}
+{{ HTML::script('js/fullcalendar.min.js') }}
+{{ HTML::script('js/jquery.icheck.min.js') }}
+{{ HTML::script('js/select2.min.js') }}
+{{ HTML::script('js/jquery.nicescroll.min.js') }}
+{{ HTML::script('js/unicorn.js') }}
+{{ HTML::script('js/unicorn.form_common.js') }}
+{{ HTML::script('js/unicorn.dashboard.js') }}
 @show
 <!-- END JAVASCRIPT INCLUDES -->
 

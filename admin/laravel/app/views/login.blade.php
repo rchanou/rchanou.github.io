@@ -4,9 +4,9 @@
     <title>Login || Club Speed Administration</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/unicorn-login.css" />
-    <link rel="stylesheet" href="css/font-awesome.css" />
+    {{ HTML::style('css/bootstrap.min.css') }}
+    {{ HTML::style('css/unicorn-login.css') }}
+    {{ HTML::style('css/font-awesome.css') }}
     <!--[if lt IE 9]>
     <script type="text/javascript" src="js/respond.min.js"></script>
     <![endif]-->
@@ -51,9 +51,9 @@
     </form>
 </div>
 
-<script src="js/jquery.min.js"></script>
-<script src="js/jquery-ui.custom.js"></script>
-<script src="js/bootstrap.min.js"></script>
+{{ HTML::script('js/jquery.min.js') }}
+{{ HTML::script('js/jquery-ui.custom.js') }}
+{{ HTML::script('js/bootstrap.min.js') }}
 <!--<script src="js/unicorn.login.js"></script> TODO: Find out why this was breaking the form-->
 </body>
 </html>
