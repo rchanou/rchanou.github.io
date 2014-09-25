@@ -61,7 +61,8 @@
             @endif
                 <a href="#"><i class="fa fa-desktop"></i> <span>Speed Screens</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
-                    <li>{{link_to('/channel','Channel Editor')}}</li>
+                    <li>{{link_to('/channel','Channels')}}</li>
+                    <li>{{link_to('/channelSettings','Settings')}}</li>
                     <li>{{link_to('/docs/Club Speed - Speed Screen Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
