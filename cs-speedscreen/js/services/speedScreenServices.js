@@ -25,7 +25,7 @@ angular.module('speedScreenDemoApp.services', [])
                     trackString = '&track=' + track;
                 }
                 //console.log(apiURL + '/races/fastest.json?range=day&key=' + apiKey + limitString + trackString);
-                return $http.get(apiURL + '/races/fastest.json?exclude_exployees=1&range=day&key=' + apiKey + limitString + trackString);
+                return $http.get(apiURL + '/races/fastest.json?exclude_employees=1&range=day&key=' + apiKey + limitString + trackString);
             },
             getFastestLapTimes_Week: function(limit,track) {
                 updateAPIInfo();
@@ -39,7 +39,7 @@ angular.module('speedScreenDemoApp.services', [])
                 {
                     trackString = '&track=' + track;
                 }
-                return $http.get(apiURL + '/races/fastest.json?exclude_exployees=1&range=week&key=' + apiKey + limitString + trackString)
+                return $http.get(apiURL + '/races/fastest.json?exclude_employees=1&range=week&key=' + apiKey + limitString + trackString)
             },
             getFastestLapTimes_Month: function(limit,track) {
                 updateAPIInfo();
@@ -53,7 +53,7 @@ angular.module('speedScreenDemoApp.services', [])
                 {
                     trackString = '&track=' + track;
                 }
-                return $http.get(apiURL + '/races/fastest.json?exclude_exployees=1&range=month&key=' + apiKey + limitString + trackString);
+                return $http.get(apiURL + '/races/fastest.json?exclude_employees=1&range=month&key=' + apiKey + limitString + trackString);
             },
             getTopRPMScores: function() {
                 updateAPIInfo();
