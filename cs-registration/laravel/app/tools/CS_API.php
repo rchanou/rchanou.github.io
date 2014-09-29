@@ -45,7 +45,7 @@ class CS_API
         $options = array(
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 6,
-            CURLOPT_HTTPHEADER => array('Content-type: application/json')//,
+            CURLOPT_HTTPHEADER => array('Content-type: application/json')
         );
 
         //If we're sending a POST request, add in additional parameters
@@ -82,6 +82,53 @@ class CS_API
 
         //Return the result to the caller as an associative array
         return json_decode($result,true);
+    }
+
+    public static function extendFacebookToken($shortLivedToken)
+    {
+        self::initialize();
+
+        $urlParams = array(
+            'grant_type' => 'fb_exchange_token',
+            'client_id' => '296582647086963',
+            'client_secret' => 'e4edbb2b80ca8784944784643c90cecc',
+            'fb_exchange_token' => $shortLivedToken
+        );
+
+        $url = 'https://graph.facebook.com/oauth/access_token?' . http_build_query($urlParams);
+
+        //Set up headers
+        $options = array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 6,
+            CURLOPT_HTTPHEADER => array('Content-type: application/json'),
+            CURLOPT_SSL_VERIFYPEER => false
+        );
+
+        //Execute the query
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, $options);
+        $result = curl_exec($ch);
+
+        if ($result !== null)
+        {
+            $parsedString = array();
+            parse_str($result,$parsedString);
+
+            if (isset($parsedString['access_token']))
+            {
+                return $parsedString['access_token'];
+            }
+            else
+            {
+                return $shortLivedToken;
+            }
+        }
+        else
+        {
+            return $shortLivedToken;
+        }
     }
 
     /**

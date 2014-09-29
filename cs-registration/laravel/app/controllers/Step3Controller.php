@@ -116,6 +116,11 @@ class Step3Controller extends BaseController {
         Session::put("formInput", $formInput);
         Session::put("signatureAcquired", true);
 
+        if(isset($formInput['facebookToken']))
+        {
+            $formInput['facebookToken'] = CS_API::extendFacebookToken($formInput['facebookToken']);
+        }
+
         $settings = Session::get("settings");
         $clubSpeedCustomerData = array(
             "birthdate" => isset($formInput["birthdate"]) ? $formInput["birthdate"] : "",
