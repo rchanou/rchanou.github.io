@@ -9,6 +9,8 @@
     <!-- BEGIN CSS INCLUDES -->
     @section('css_includes')
     <link rel="stylesheet" href="css/vendors/bootstrap.min.css" />
+        {{ HTML::style('css/vendors/jquery-ui/jquery-ui.min.css') }}
+        {{ HTML::style('css/vendors/jquery-ui/jquery-ui.theme.min.css') }}
     <link rel="stylesheet" href="css/vendors/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="css/cs-registration.css?<?php echo time(); ?>" />
 
@@ -112,7 +114,21 @@
 <script src="js/vendors/holder.js"></script> <!-- TODO: Eliminate eventually -->
 <script src="js/vendors/livevalidation.min.js"></script>
 <script src="js/vendors/dropdown.js"></script>
-<script src="js/vendors/modernizr.js"></script>
+
+{{ HTML::script('js/vendors/modernizr-latest.js') }}
+{{ HTML::script('js/vendors/jquery-ui/jquery-ui.min.js') }}
+
+    <script>
+        if (!Modernizr.inputtypes.date) {
+            $('input[type=date]').datepicker({
+                // Consistent format with the HTML5 picker
+                dateFormat: 'yy-mm-dd',
+                changeYear: true,
+                yearRange: "1900:2012",
+                defaultDate: '-21y'
+            });
+        }
+    </script>
 
 @show
 <!-- END JAVASCRIPT INCLUDES -->

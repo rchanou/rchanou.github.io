@@ -564,3 +564,7 @@ p.error {
     top: 50%;
     margin-top: -125px;
 }
+
+.ui-datepicker-year {
+    color: black;
+}
