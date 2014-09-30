@@ -86,11 +86,6 @@ class Route {
 		$this->methods = (array) $methods;
 		$this->action = $this->parseAction($action);
 
-		if (in_array('GET', $this->methods) && ! in_array('HEAD', $this->methods))
-		{
-			$this->methods[] = 'HEAD';
-		}
-
 		if (isset($this->action['prefix']))
 		{
 			$this->prefix($this->action['prefix']);
@@ -215,7 +210,7 @@ class Route {
 	{
 		if (is_array($filters)) return static::explodeArrayFilters($filters);
 
-		return array_map('trim', explode('|', $filters));
+		return explode('|', $filters);
 	}
 
 	/**
@@ -230,7 +225,7 @@ class Route {
 
 		foreach ($filters as $filter)
 		{
-			$results = array_merge($results, array_map('trim', explode('|', $filter)));
+			$results = array_merge($results, explode('|', $filter));
 		}
 
 		return $results;
@@ -266,7 +261,7 @@ class Route {
 	 * Get a given parameter from the route.
 	 *
 	 * @param  string  $name
-	 * @param  mixed   $default
+	 * @param  mixed  $default
 	 * @return string
 	 */
 	public function getParameter($name, $default = null)
@@ -278,19 +273,19 @@ class Route {
 	 * Get a given parameter from the route.
 	 *
 	 * @param  string  $name
-	 * @param  mixed   $default
+	 * @param  mixed  $default
 	 * @return string
 	 */
 	public function parameter($name, $default = null)
 	{
-		return array_get($this->parameters(), $name, $default);
+		return array_get($this->parameters(), $name) ?: $default;
 	}
 
 	/**
 	 * Set a parameter to the given value.
 	 *
 	 * @param  string  $name
-	 * @param  mixed   $value
+	 * @param  mixed  $value
 	 * @return void
 	 */
 	public function setParameter($name, $value)
@@ -303,7 +298,7 @@ class Route {
 	/**
 	 * Unset a parameter on the route if it is set.
 	 *
-	 * @param  string  $name
+	 * @param  string $name
 	 * @return void
 	 */
 	public function forgetParameter($name)
@@ -326,7 +321,7 @@ class Route {
 		{
 			return array_map(function($value)
 			{
-				return is_string($value) ? rawurldecode($value) : $value;
+				return is_string($value) ? urldecode($value) : $value;
 
 			}, $this->parameters);
 		}
@@ -430,7 +425,6 @@ class Route {
 	 * Extract the parameter list from the host part of the request.
 	 *
 	 * @param  \Illuminate\Http\Request  $request
-	 * @param  array  $parameters
 	 * @return array
 	 */
 	protected function bindHostParameters(Request $request, $parameters)
@@ -477,7 +471,7 @@ class Route {
 	/**
 	 * Parse the route action into a standard array.
 	 *
-	 * @param  callable|array  $action
+	 * @param  \Closure|array  $action
 	 * @return array
 	 */
 	protected function parseAction($action)
@@ -725,7 +719,7 @@ class Route {
 	 */
 	public function domain()
 	{
-		return isset($this->action['domain']) ? $this->action['domain'] : null;
+		return array_get($this->action, 'domain');
 	}
 
 	/**
@@ -758,7 +752,7 @@ class Route {
 	 */
 	public function getPrefix()
 	{
-		return isset($this->action['prefix']) ? $this->action['prefix'] : null;
+		return array_get($this->action, 'prefix');
 	}
 
 	/**
@@ -768,7 +762,7 @@ class Route {
 	 */
 	public function getName()
 	{
-		return isset($this->action['as']) ? $this->action['as'] : null;
+		return array_get($this->action, 'as');
 	}
 
 	/**
@@ -778,7 +772,7 @@ class Route {
 	 */
 	public function getActionName()
 	{
-		return isset($this->action['controller']) ? $this->action['controller'] : 'Closure';
+		return array_get($this->action, 'controller', 'Closure');
 	}
 
 	/**
