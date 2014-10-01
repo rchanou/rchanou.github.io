@@ -13,7 +13,7 @@ if(file_exists($booking_config_file)) {
 		if(filesize( $booking_config_file) == 0) {
 			echo 'Config file is 0 bytes -- removing and replacing with config.orig.php<br/>';
 			unlink($booking_config_file);
-			copy($path_to_booking_config_directory . 'config.orig.php', $admin_config_files);
+			copy($path_to_booking_config_directory . 'config.orig.php', $booking_config_file);
 		} else {
 			die($path_to_booking_config_directory . 'config.php already exists. Exiting!');
 		}
