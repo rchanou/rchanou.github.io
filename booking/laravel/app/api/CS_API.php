@@ -109,11 +109,14 @@ class CS_API
         self::initialize();
 
         $heatsFiltered = array();
-        foreach($heats as $currentHeat)
+        if ($heats != null)
         {
-            if ($currentHeat['heatSpotsAvailableOnline'] >= $minNumberOfSpots)
+            foreach($heats as $currentHeat)
             {
-                $heatsFiltered[] = $currentHeat;
+                if (isset($currentHeat['heatSpotsAvailableOnline']) && $currentHeat['heatSpotsAvailableOnline'] >= $minNumberOfSpots)
+                {
+                    $heatsFiltered[] = $currentHeat;
+                }
             }
         }
         return $heatsFiltered;
@@ -145,11 +148,14 @@ class CS_API
         self::initialize();
 
         $heatsFiltered = array();
-        foreach($heats as $currentHeat)
+        if ($heats != null)
         {
-            if ($currentHeat->heatSpotsAvailableOnline >= $minNumberOfSpots)
+            foreach($heats as $currentHeat)
             {
-                $heatsFiltered[] = $currentHeat;
+                if ($currentHeat->heatSpotsAvailableOnline >= $minNumberOfSpots)
+                {
+                    $heatsFiltered[] = $currentHeat;
+                }
             }
         }
         return $heatsFiltered;
@@ -419,7 +425,7 @@ class CS_API
 
         if ($result !== null && property_exists($result, 'code'))
         {
-            if ($result->code == 200)
+            if ($result->code == 200 && isset($result->body->onlineBookingReservationsId))
             {
                 return $result->body->onlineBookingReservationsId;
             }
@@ -609,7 +615,7 @@ class CS_API
         $formattedData->checkId = $checkId;
         $formattedData->card = $paymentInformation;
 
-        $url = self::$apiURL . '/payments?&key=' . self::$privateKey;
+        $url = self::$apiURL . '/processPayment?&key=' . self::$privateKey;
 
         $result = self::call($url,$formattedData,'POST');
 

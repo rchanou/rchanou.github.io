@@ -104,7 +104,7 @@ class CartController extends BaseController
                 //See if any items in the local cart have been deleted from the Club Speed server
                 foreach($cart as $cartItemId => $cartItem)
                 {
-                    if(!in_array($cartItem['onlineBookingsReservationId'],$listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
+                    if(!isset($cartItem['onlineBookingsReservationId']) || !in_array($cartItem['onlineBookingsReservationId'],$listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
                     {
                         $localCartHasExpiredItem = true;
                         Cart::removeFromCart($cartItemId); //Then remove it from the local cart

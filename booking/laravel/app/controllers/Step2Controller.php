@@ -59,7 +59,8 @@ class Step2Controller extends BaseController
 
         //Determine today's date
         $dateFormat = Config::get('config.dateFormat');
-        $today = (new DateTime())->format($dateFormat);
+        $currentDateTime = new DateTime();
+        $today = $currentDateTime->format($dateFormat);
 
         if ($start == $today) //If we're searching for today's results, only get the ones from Club Speed that haven't happened yet
         {
@@ -79,8 +80,9 @@ class Step2Controller extends BaseController
         }
 
         //Used to generate links for easy date navigation
-        $previousDay = (new DateTime($start))->modify('-1 day')->format($dateFormat);
-        $nextDay = (new DateTime($start))->modify('+1 day')->format($dateFormat);
+        $startDateTime = new DateTime($start);
+        $previousDay = $startDateTime->modify('-1 day')->format($dateFormat);
+        $nextDay = $startDateTime->modify('+1 day')->format($dateFormat);
 
         return View::make('/steps/step2',
             array(
@@ -111,9 +113,12 @@ class Step2Controller extends BaseController
         $currentProductInfo = Session::get('productInfo');
         if ($currentProductInfo == null) { $currentProductInfo = array(); }
         $productInfo = $currentProductInfo;
-        foreach($products as $currentProduct)
+        if ($products != null)
         {
-            $productInfo[$currentProduct->heatId] = $currentProduct;
+            foreach($products as $currentProduct)
+            {
+                $productInfo[$currentProduct->heatId] = $currentProduct;
+            }
         }
         Session::put('productInfo',$productInfo);
     }

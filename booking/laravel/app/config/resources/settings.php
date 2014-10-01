@@ -39,11 +39,9 @@ class Settings
     {
         if (self::$initialized) return;
 
-        self::$defaultSettings = array( //TODO: Change the default away from SagePay
-            'onlineBookingPaymentProcessorSettings' =>   json_decode('{"name": "SagePay_Direct",
+        self::$defaultSettings = array(
+            'onlineBookingPaymentProcessorSettings' =>   json_decode('{"name": "Dummy",
                                                           "options": {
-                                                            "vendor": "clubspeed3",
-                                                            "simulatorMode": true
                                                             }
                                                           }'),
             'emailShown' => true,
