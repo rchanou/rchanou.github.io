@@ -1183,24 +1183,44 @@ html, body {
 @media all and (min-height: 1079px) {
     .raceTimerBox {
         width: 280px; min-width: 280px; max-width: 280px; text-align: right; float: right;
+        text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
     }
 }
 
 @media all and (max-height: 1078px) {
     .raceTimerBox {
         width: 186px; min-width: 186px; max-width: 186px; text-align: right; float: right;
+        text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
     }
 }
 
 @media all and (min-height: 1079px) {
     .headerTextBox{
         width: 1580px; min-width: 1580px; max-width: 1580px; float: left;
+        text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
     }
 }
 
 @media all and (max-height: 1078px) {
     .headerTextBox{
         width: 1053px; min-width: 1053px; max-width: 1053px; float: left;
+        text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
     }
 }
 
