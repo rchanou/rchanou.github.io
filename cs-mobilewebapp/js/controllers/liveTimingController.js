@@ -23,7 +23,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routePar
     if ($routeParams.desiredTable == "topRPMScores")
     {
         $scope.tableType = "topRPMTable";
-        $scope.tableCaption = "Top RPM Scores";
+        $scope.tableCaption = "Top ProSkill Scores";
         ClubSpeedJSONService.getTopRPMScores().success(function (data) {
             $scope.jsonData = data;
             $scope.spinnerActive = 0;

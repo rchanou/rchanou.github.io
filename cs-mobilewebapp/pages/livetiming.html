@@ -8,7 +8,7 @@
         <select id="livetimingselector" style="color: white; background-color: black; min-width: 300px; max-width: 600px; width: 90%"
                 ng-model="desiredLiveTiming" ng-change="goToLiveTiming(desiredLiveTiming)">
             <option value="">Select one of the following options:</option>
-            <option value="topRPMScores">Top RPM Scores</option>
+            <option value="topRPMScores">Top ProSkill Scores</option>
             <option value="fastestTimeByDay">Top Lap Time (Today)</option>
             <option value="fastestTimeByWeek">Top Lap Time (This Week)</option>
             <option value="fastestTimeByMonth">Top Lap Time (This Month)</option>
@@ -56,7 +56,7 @@
                         Joined: <span>{{racer.created_at| amDateFormat:'MMMM Do YYYY'}}</span>
                     </td>
                     <td class="dataHighlightCell">
-                        <span class="dataSubHeader">RPM</span><br/>
+                        <span class="dataSubHeader">ProSkill</span><br/>
                         <span class="dataHighlightSmall">{{racer.rpm}}</span>
                     </td>
                 </tr>
