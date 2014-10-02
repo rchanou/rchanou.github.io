@@ -81,8 +81,12 @@ class Step2Controller extends BaseController
 
         //Used to generate links for easy date navigation
         $startDateTime = new DateTime($start);
-        $previousDay = $startDateTime->modify('-1 day')->format($dateFormat);
-        $nextDay = $startDateTime->modify('+1 day')->format($dateFormat);
+        $previousDay = $startDateTime;
+        $previousDay = $previousDay->modify('-1 day')->format($dateFormat);
+        $startDateTime = new DateTime($start);
+        $nextDay = $startDateTime;
+        $nextDay = $nextDay->modify('+1 day')->format($dateFormat);
+
 
         return View::make('/steps/step2',
             array(
