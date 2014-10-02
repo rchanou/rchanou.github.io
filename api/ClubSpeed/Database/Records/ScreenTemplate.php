@@ -2,9 +2,7 @@
 
 namespace ClubSpeed\Database\Records;
 
-require_once(__DIR__.'/DbRecord.php');
-
-class ScreenTemplate extends DbRecord {
+class ScreenTemplate extends BaseRecord {
 
     public static $table      = 'dbo.ScreenTemplate';
     public static $tableAlias = 'st';

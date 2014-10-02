@@ -11,167 +11,261 @@
  /**
   * /products/1?key=nms
   */
-class Products
-{
-    public $restler;
-    
-    function __construct(){
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
-    }
-    
-    /**
-     * Find a product by id
-     * Requires public access
-     * @param string nickname
-     * @return array 
-     */
-    public function index($product_id, $sub = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
-            throw new RestException(401, "Invalid authorization!");
-        }
+class Products extends BaseApi {
 
-        if(!is_numeric($product_id)) throw new RestException(412,'Not a valid product id');
-        
-        return $this->product($product_id);
+    function __construct() {
+        parent::__construct();
+        require_once(__DIR__.'/ClubSpeed/Mappers/MapProducts.php');
+        $this->mapper = new \ClubSpeed\Mappers\MapProducts();
+        $this->interface = $this->logic->products;
     }
 
-    /**
-     * Get a racer's information
-     * Requires public access
-     * @param integer $customerId
-     * @return array 
-     */
-    public function product($product_id) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
-            throw new RestException(401, "Invalid authorization!");
-        }
-
-        if(!is_numeric($product_id)) throw new RestException(412,'Not a valid product id');
-
-        $tsql = "SELECT TOP (1) * FROM Products WHERE ProductID = ?";
-
-        $params = array(&$product_id);
-
-        $rows = $this->run_query($tsql, $params);
-
-        return array('product' => $rows);   
-    }
     
-    /**
-     * Get the list of races a racer has participated in
-     * Requires public access
-     * @param integer $customerId
-     * @return array 
-     */
-    public function races($customerId) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
-            throw new RestException(401, "Invalid authorization!");
-        }
-        
-        if(!is_numeric($customerId)) throw new RestException(412,'Racer ID is not a valid number');
-        
-        $tsql = <<<EOD
-        SELECT     hm.HeatNo, hm.TrackNo, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.HeatStatus, hm.EventRound, hm.Begining, hm.Finish, hm.WinBy, hm.RaceBy, 
-                      hm.ScheduleDuration, hm.PointsNeeded, hm.SpeedLevel, hm.HeatColor, hm.NumberOfReservation, hm.MemberOnly, hm.HeatNotes, hm.ScoreID, hm.RacersPerHeat, 
-                      hm.NumberOfCadetReservation, hm.CadetsPerHeat, hd.HeatNo AS Expr1, hd.CustID, hd.AutoNo, hd.LineUpPosition, hd.GroupID, hd.RPM, hd.PointHistoryID, 
-                      hd.FirstTime, hd.UserID, hd.FinishPosition, hd.GroupFinishPosition, hd.RPMDiff, hd.PositionEditedDate, hd.HistoryAutoNo, hd.Scores, hd.TimeAdded, 
-                      hd.AssignedtoEntitleHeat
-FROM         HeatMain AS hm LEFT OUTER JOIN
-                      HeatDetails AS hd ON hm.HeatNo = hd.HeatNo
-WHERE     (hd.CustID = ?)
-EOD;
-        $rows = $this->run_query($tsql, array(&$customerId));
-        
-        $output = array();
-        
-        foreach( $rows as $row)
-        {
-            $output[] = array(
-                'id' => $row['HeatNo'],
-                'track_id' => $row['TrackNo'],
-                'heat_type_id' => $row['HeatTypeNo'],
-                'speed_level_id' => $row['SpeedLevel'],
-                'starts_at' => date('Y-m-d H:i:s', strtotime($row['ScheduledTime'])),
-                'racer_id' => $row['CustID'],
-                'finish_position' => $row['FinishPosition'],
-                'rpm' => $row['RPM'],
-                //'row' => $row
-            );
-        }
-        
-        return array('heats' => $output);
-    }
-    
-    public function top_rpm() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
-            throw new RestException(401, "Invalid authorization!");
-        }
-        //if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');
-        
-        $tsql_params = array();
-        $tsql_gender = '';
-        
-        // Limit query
-        if(isset($_GET['limit']) && is_numeric($_GET['limit'])) {
-            if($_GET['limit'] > 100) throw new RestException(412,'Cannot return more than 100 rows');
-            //$tsql_params[] = (int)$_GET['limit'];
-            $limit = (int)$_GET['limit'];
-        }
-        else {
-            //$tsql_params[] = 50;
-            $limit = 50;
-        }
-        
-        // Sort by gender
-        if(isset($_GET['gender'])) {
-            $genders = array('m' => 1, 'f' => 2);
-            if(!in_array(strtolower($_GET['gender']), array('m', 'f'))) throw new RestException(412,'Invalid gender given');
-            $tsql_gender = 'AND Gender = ?';
-            $tsql_params[] = &$genders[strtolower($_GET['gender'])];
-        }
-        
-        $tsql = "SELECT TOP(".$limit.") * FROM Customers WHERE RPM <> 10000 $tsql_gender AND Deleted <> 'True' ORDER BY RPM DESC";
+    // function __construct(){
+    //     header('Access-Control-Allow-Origin: *'); //Here for all /say
+    //     $this->logic = $GLOBALS['logic'];
+    // }
 
-        $rows = $this->run_query($tsql, $tsql_params);
-        
-        $output = array();
-        
-        foreach($rows as $row) {
-            $output[] = array(
-                'id' => $row['CustID'],
-                'name' => array('nickname' => $row['RacerName'],
-                'first' => $row['FName'],
-                'last'  => $row['LName']),
-                'rpm'       => $row['RPM'],
-                'created_at' => date('Y-m-d', strtotime($row['AccountCreated'])),
-            );
+    // public function post($request_data = null) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         return $this->logic->products->create($request_data);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
 
-        }
-        return array('racers' => $output);
-    }
+    // public function get($id, $request_data = null) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         return $this->logic->products->get($id, $request_data);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+    // public function put($id, $request_data = null) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         $this->logic->products->update($id, $request_data);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+    // public function delete($id) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         $this->logic->products->delete($id);
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+    // public function index($request_data = null) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+    //         throw new RestException(401, "Invalid authorization!");
+    //     }
+    //     try {
+    //         if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
+    //             if (\ClubSpeed\Utility\Params::isFilter($request_data))
+    //                 return $this->logic->products->find($request_data);
+    //             else
+    //                 return $this->logic->products->match($request_data);
+    //         }
+    //         else {
+    //             return $this->logic->products->all($request_data);
+    //         }
+    //     }
+    //     catch (CSException $e) {
+    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    //     }
+    //     catch (Exception $e) {
+    //         throw new RestException(500, $e->getMessage());
+    //     }
+    // }
+
+
+    // NOTE: WE ARE HIJACKING THE INDEX, AND THIS MAY THROW OFF EXISTING FUNCTIONALITY
+    // RUN BY WES BEFORE PUSHING
     
-    
-    private function run_query($tsql, $params = array()) {
+//     /**
+//      * Find a product by id
+//      * Requires public access
+//      * @param string nickname
+//      * @return array 
+//      */
+//     public function index($product_id, $sub = null) {
+//         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+//             throw new RestException(401, "Invalid authorization!");
+//         }
+
+//         if(!is_numeric($product_id)) throw new RestException(412,'Not a valid product id');
         
-        // Connect
-        try {
-            $conn = new PDO( "sqlsrv:server=(local) ; Database=ClubSpeedV8", "", "");
-            $conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+//         return $this->product($product_id);
+//     }
+
+//     /**
+//      * Get a racer's information
+//      * Requires public access
+//      * @param integer $customerId
+//      * @return array 
+//      */
+//     public function product($product_id) {
+//         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+//             throw new RestException(401, "Invalid authorization!");
+//         }
+
+//         if(!is_numeric($product_id)) throw new RestException(412,'Not a valid product id');
+
+//         $tsql = "SELECT TOP (1) * FROM Products WHERE ProductID = ?";
+
+//         $params = array(&$product_id);
+
+//         $rows = $this->run_query($tsql, $params);
+
+//         return array('product' => $rows);   
+//     }
+    
+//     /**
+//      * Get the list of races a racer has participated in
+//      * Requires public access
+//      * @param integer $customerId
+//      * @return array 
+//      */
+//     public function races($customerId) {
+//         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+//             throw new RestException(401, "Invalid authorization!");
+//         }
+        
+//         if(!is_numeric($customerId)) throw new RestException(412,'Racer ID is not a valid number');
+        
+//         $tsql = <<<EOD
+//         SELECT     hm.HeatNo, hm.TrackNo, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.HeatStatus, hm.EventRound, hm.Begining, hm.Finish, hm.WinBy, hm.RaceBy, 
+//                       hm.ScheduleDuration, hm.PointsNeeded, hm.SpeedLevel, hm.HeatColor, hm.NumberOfReservation, hm.MemberOnly, hm.HeatNotes, hm.ScoreID, hm.RacersPerHeat, 
+//                       hm.NumberOfCadetReservation, hm.CadetsPerHeat, hd.HeatNo AS Expr1, hd.CustID, hd.AutoNo, hd.LineUpPosition, hd.GroupID, hd.RPM, hd.PointHistoryID, 
+//                       hd.FirstTime, hd.UserID, hd.FinishPosition, hd.GroupFinishPosition, hd.RPMDiff, hd.PositionEditedDate, hd.HistoryAutoNo, hd.Scores, hd.TimeAdded, 
+//                       hd.AssignedtoEntitleHeat
+// FROM         HeatMain AS hm LEFT OUTER JOIN
+//                       HeatDetails AS hd ON hm.HeatNo = hd.HeatNo
+// WHERE     (hd.CustID = ?)
+// EOD;
+//         $rows = $this->run_query($tsql, array(&$customerId));
+        
+//         $output = array();
+        
+//         foreach( $rows as $row)
+//         {
+//             $output[] = array(
+//                 'id' => $row['HeatNo'],
+//                 'track_id' => $row['TrackNo'],
+//                 'heat_type_id' => $row['HeatTypeNo'],
+//                 'speed_level_id' => $row['SpeedLevel'],
+//                 'starts_at' => date('Y-m-d H:i:s', strtotime($row['ScheduledTime'])),
+//                 'racer_id' => $row['CustID'],
+//                 'finish_position' => $row['FinishPosition'],
+//                 'rpm' => $row['RPM'],
+//                 //'row' => $row
+//             );
+//         }
+        
+//         return array('heats' => $output);
+//     }
+    
+//     public function top_rpm() {
+//         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+//             throw new RestException(401, "Invalid authorization!");
+//         }
+//         //if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');
+        
+//         $tsql_params = array();
+//         $tsql_gender = '';
+        
+//         // Limit query
+//         if(isset($_GET['limit']) && is_numeric($_GET['limit'])) {
+//             if($_GET['limit'] > 100) throw new RestException(412,'Cannot return more than 100 rows');
+//             //$tsql_params[] = (int)$_GET['limit'];
+//             $limit = (int)$_GET['limit'];
+//         }
+//         else {
+//             //$tsql_params[] = 50;
+//             $limit = 50;
+//         }
+        
+//         // Sort by gender
+//         if(isset($_GET['gender'])) {
+//             $genders = array('m' => 1, 'f' => 2);
+//             if(!in_array(strtolower($_GET['gender']), array('m', 'f'))) throw new RestException(412,'Invalid gender given');
+//             $tsql_gender = 'AND Gender = ?';
+//             $tsql_params[] = &$genders[strtolower($_GET['gender'])];
+//         }
+        
+//         $tsql = "SELECT TOP(".$limit.") * FROM Customers WHERE RPM <> 10000 $tsql_gender AND Deleted <> 'True' ORDER BY RPM DESC";
+
+//         $rows = $this->run_query($tsql, $tsql_params);
+        
+//         $output = array();
+        
+//         foreach($rows as $row) {
+//             $output[] = array(
+//                 'id' => $row['CustID'],
+//                 'name' => array('nickname' => $row['RacerName'],
+//                 'first' => $row['FName'],
+//                 'last'  => $row['LName']),
+//                 'rpm'       => $row['RPM'],
+//                 'created_at' => date('Y-m-d', strtotime($row['AccountCreated'])),
+//             );
+
+//         }
+//         return array('racers' => $output);
+//     }
+    
+    
+//     private function run_query($tsql, $params = array()) {
+        
+//         // Connect
+//         try {
+//             $conn = new PDO( "sqlsrv:server=(local) ; Database=ClubSpeedV8", "", "");
+//             $conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
             
-            // Prepare statement
-            $stmt = $conn->prepare($tsql);
+//             // Prepare statement
+//             $stmt = $conn->prepare($tsql);
     
-            // Execute statement
-            $stmt->execute($params);
+//             // Execute statement
+//             $stmt->execute($params);
             
-            // Put in array
-            $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//             // Put in array
+//             $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        } catch(Exception $e) { 
-            die( print_r( $e->getMessage() ) ); 
-        }
+//         } catch(Exception $e) { 
+//             die( print_r( $e->getMessage() ) ); 
+//         }
         
-        return $output;
-    }
+//         return $output;
+//     }
     
 }

@@ -5,21 +5,16 @@ namespace ClubSpeed\Database\Collections;
 abstract class DbCollection {
 
     protected $conn;
-    protected $definition;
-
-    protected $dbToJson; // expected to be overwritten in the class extension (can't declare properties as abstract in php)
-    protected $jsonToDb; // expected to be overwritten in the class extension (can't declare properties as abstract in php)
+    public $definition;
 
     public $key;
+    public $table;
     
     public function __construct(&$CSConnection) {
+        // note: the parent constructor should be called **AFTER** $this->definition is set by the child constructor
         $this->conn = $CSConnection;
-    }
-
-    protected function secondaryInit() {
-        // to be called by the inherited constructor once internal logic is done
-        $this->jsonToDb = array_flip($this->dbToJson);
         $this->key = $this->definition->getStaticPropertyValue('key'); // works, but is odd -- should we just store the key name on the collection?
+        $this->table = $this->definition->getShortName(); // works, but is also odd
     }
 
     public function blank() {
@@ -80,17 +75,38 @@ abstract class DbCollection {
     public function get($id) {
         $get = \ClubSpeed\Utility\Params::buildGet($this->definition->newInstance($id));
         $results = $this->conn->query($get['statement'], $get['values']);
-        if (isset($results) && count($results) > 0)
-            return $this->definition->newInstance($results[0]);
-        return null;
+        $get = array();
+        foreach($results as $result) {
+            $get[] = $this->definition->newInstance($result);
+        }
+        if (empty($get))
+            return null;
+        return $get;
+        // if (isset($results) && count($results) > 0)
+        //     return $this->definition->newInstance($results[0]);
+        // return null;
     }
 
-    public function find($data) {
+    public function match($data) {
         if (is_object($data) && $this->definition->isInstance($data))
             $record = $data;
         else
             $record = $this->definition->newInstance($data);
-        $find = \ClubSpeed\Utility\Params::buildFind($record);
+        $match = \ClubSpeed\Utility\Params::buildFind($record); // note we are using buildFind at this point
+        $results = $this->conn->query($match['statement'], @$match['values']);
+        $match = array();
+        foreach($results as $result) {
+            $match[] = $this->definition->newInstance($result);
+        }
+        return $match;
+    }
+
+    public function find($comparators = array()) {
+        if (!$comparators instanceof \ClubSpeed\Database\Helpers\GroupedComparator)
+            $comparators = new \ClubSpeed\Database\Helpers\GroupedComparator($comparators);
+        if (!$this->validateComparators($comparators))
+            throw new \CSException("Unable to validate querystring comparators! Check the syntax of the filter querystring.");
+        $find = \ClubSpeed\Utility\Params::buildFind($this->definition->newInstance(), $comparators);
         $results = $this->conn->query($find['statement'], @$find['values']);
         $find = array();
         foreach($results as $result) {
@@ -131,50 +147,32 @@ abstract class DbCollection {
         return $affected;
     }
 
-    public function map($type, $params = array()) {
-        $mapped = null;
-        if (is_array($params) || is_object($params)) {
-            $mapped = array();
-            switch ($type) {
-                case 'client':
-                    $map = $this->dbToJson;
-                    break;
-                case 'server':
-                    $map = $this->jsonToDb;
-                    break;
-            }
-            foreach($params as $key => $val) {
-                if (isset($map[$key]))
-                    $mapped[$map[$key]] = $val;
+    public function exists($data) {
+        if (is_object($data) && $this->definition->isInstance($data))
+            $record = $data;
+        else
+            $record = $this->definition->newInstance($data);
+        $exists = \ClubSpeed\Utility\Params::buildExists($record);
+        $results = $this->conn->query($exists['statement'], $exists['values']);
+        if (!is_null($results) && !empty($results) && isset($results[0])) {
+            $result = $results[0];
+            if (isset($result['Exists'])) {
+                return \ClubSpeed\Utility\Convert::toBoolean($result['Exists']);
             }
         }
-        else {
-            // expected a single name, not multiple params as an associative array -- rename parameter?
-            switch($type) {
-                case 'client':
-                    $mapped = $this->dbToJson[$params];
-                    break;
-                case 'server':
-                    $mapped = $this->jsonToDb[$params];
-                    break;
-            }
-        }
-        return $mapped;
+        return false;
     }
 
-    public function compress($data = array()) {
-        // default - this should be overwritten if special logic is necessary
-        $table = $this->definition->getShortName();
-        $compressed = array(
-            $table => array()
-        );
-        $inner =& $compressed[$table];
-        if (isset($data) && !is_array($data))
-            $data = array($data);
-        foreach($data as $record) {
-            if (!empty($record))
-                $inner[] = $this->map('client', $record);
+    public function validateComparators($comparators) {
+        if (!$comparators->validate())// validate structure
+            throw new \CSException('Unable to validate comparator structure!');
+            // return false;
+        foreach($comparators->comparators as $key => $val) { // validate column names
+            // at least one of the filter items must be a column name
+            // allow both to be column names?
+            if (!$this->definition->hasProperty($val['comparator']->left) && !$this->definition->hasProperty($val['comparator']->right))
+                return false;
         }
-        return $compressed;
+        return true;
     }
 }

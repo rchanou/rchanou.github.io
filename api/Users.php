@@ -25,7 +25,7 @@ class Users
     }
 
     // public function post($request_data = null) {
-    //     if (!\ClubSpeed\Security\Validate::privateAccess()) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
     //         throw new RestException(401, "Invalid authorization!");
     //     }
     //     try {
@@ -40,7 +40,7 @@ class Users
     // }
 
     // public function get($id, $request_data = null) {
-    //     if (!\ClubSpeed\Security\Validate::publicAccess()) {
+    //     if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
     //         throw new RestException(401, "Invalid authorization!");
     //     }
     //     try {
@@ -55,7 +55,7 @@ class Users
     // }
 
     // public function put($id, $request_data = null) {
-    //     if (!\ClubSpeed\Security\Validate::privateAccess()) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
     //         throw new RestException(401, "Invalid authorization!");
     //     }
     //     try {
@@ -70,7 +70,7 @@ class Users
     // }
 
     // public function delete($id) {
-    //     if (!\ClubSpeed\Security\Validate::privateAccess()) {
+    //     if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
     //         throw new RestException(401, "Invalid authorization!");
     //     }
     //     try {
@@ -85,7 +85,7 @@ class Users
     // }
 
     // public function index($request_data = null) {
-    //     if (!\ClubSpeed\Security\Validate::publicAccess()) {
+    //     if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
     //         throw new RestException(401, "Invalid authorization!");
     //     }
     //     try {
@@ -110,7 +110,7 @@ class Users
      * @url GET /login
      */
     public function login($request_data) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         $is_admin = empty($request_data['is_admin']) ? 0 : 1;

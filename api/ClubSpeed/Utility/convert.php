@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Utility;
+use ClubSpeed\Enums\Enums as Enums;
 
 class Convert {
 
@@ -16,6 +17,12 @@ class Convert {
      */
     private function __construct() {} // prevent any initialization of this class
 
+    public static function getDate($time = null) {
+        if (!isset($time) || is_null($time))
+            $time = time();
+        return self::toDateForServer(date(self::DATE_FORMAT_FROM_CLIENT, $time), 'Y-m-d H:i:s');
+    }
+
     /**
      * Converts a provided dateString in the format of the client
      * to a new dateString in the format of the server/database.
@@ -26,7 +33,7 @@ class Convert {
      */
     public static function toDateForServer($dateString, $dateFormat = null) {
         if (is_null($dateString))
-            return \CSEnums::DB_NULL;
+            return Enums::DB_NULL;
             // return $dateString; // don't attempt to convert nulls
         
         if (is_string($dateString)) {
@@ -63,7 +70,7 @@ class Convert {
     private static function is_null_or_db_null($val) {
         if (is_null($val))
             return true;
-        if ($val === \CSEnums::DB_NULL)
+        if ($val === Enums::DB_NULL)
             return true;
         return false;
     }

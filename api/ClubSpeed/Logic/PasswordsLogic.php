@@ -1,0 +1,198 @@
+<?php
+
+namespace ClubSpeed\Logic;
+require_once(__DIR__.'/../Utility/Tokens.php');
+
+/**
+ * The business logic class
+ * for ClubSpeed passwords and tokens.
+ */
+class PasswordsLogic extends BaseLogic {
+
+    /**
+     * Constructs a new instance of the PasswordsLogic class.
+     *
+     * The PasswordsLogic constructor requires an instantiated DbService class for injection,
+     * as well as a reference to the LogicService container where this class will be stored.
+     *
+     * @param LogicService $logic The parent logic service container.
+     * @param DbService $db The database collection provider to inject.
+     */
+    public function __construct(&$logic, &$db) {
+        parent::__construct($logic, $db);
+        $this->interface = $this->db->authenticationTokens;
+    }
+
+    public final function create($params = array()) {
+        if (empty($params) || is_null($params['email']) || empty($params['email']))
+            throw new \RequiredArgumentMissingException("Password Reset did not receive an email address!");
+
+        $params = \ClubSpeed\Utility\Params::nonReservedData($params);
+        $email = $params['email'];
+        $customer = $this->logic->customers->find_primary_account($email); // REQUIRED
+        if (is_null($customer) || empty($customer)) {
+            // for security purposes, return without throwing an error
+            // that way this call cannot be used 
+            // to search for existing email accounts
+            // based on the return type
+            return;
+        }
+
+        $authentication = $this->db->authenticationTokens->dummy();
+        $authentication->CustomersID = $customer['CustID'];
+        $authentication->TokenType = 'PasswordReset';
+        $existingAuthentications = $this->db->authenticationTokens->find($authentication);
+
+        if (!empty($existingAuthentications)) {
+            // should we update the existing token here?
+            // or consider this an error for security purposes?
+            // probably update the existing token -- seems to be how most sites handle this
+            $authentication = $existingAuthentications[0];
+            $authentication->Token = \ClubSpeed\Utility\Tokens::generate();
+            $authentication->RemoteUserID = "RemoteUserUPDATED";
+            $affected = $this->db->authenticationTokens->update($authentication);
+        }
+        else {
+            $authentication->Token = \ClubSpeed\Utility\Tokens::generate();
+            $authentication->RemoteUserID = "RemoteUserINSERTED";
+            $this->db->authenticationTokens->create($authentication);
+        }
+
+        $emailTo = $email; // for clarity
+
+        $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
+        if (empty($emailFrom))
+            throw new \CSException("Password token create was unable to find the ControlPanel setting for MainEngine.EmailWelcomeFrom!");
+        $emailFrom = $emailFrom[0];
+        $emailFrom = $emailFrom->SettingValue;
+        $emailFrom = explode('@', $emailFrom);
+        $emailFrom = 'no-reply@' . $emailFrom[1]; // safe way to do this? we don't really have a fallback value, other than clubspeed..
+        
+        $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
+        if (empty($businessName))
+            throw new \CSException("Password token create was unable to find the ControlPanel setting for MainEngine.BusinessName!");
+        $businessName = $businessName[0];
+        $businessName = $businessName->SettingValue;
+
+        $html = $this->logic->controlPanel->find("TerminalName = Templates AND SettingName = resetPasswordHTML");
+        if (empty($html))
+            throw new \CSException("Password token create was unable to find the ControlPanel setting for Templates.resetPasswordHTML!");
+
+        $html = $html[0];
+        $html = $html->SettingValue;
+        $url = 'https://' . $_SERVER['SERVER_NAME'] . '/booking/resetpassword/form?token=' . urlencode($authentication->Token);
+        $html = str_replace("{{url}}", $url, $html);
+        $html = str_replace("{{business}}", $businessName, $html);
+        
+        $settings = $this->logic->helpers->getControlPanelSettings(
+            "MainEngine",
+            array(
+                "SendWelcomeMail"
+                , "EmailWelcomeFrom"
+                , "SMTPServerUseAuthentiation"
+                , "SMTPServer"
+                , "SMTPServerPort"
+                , "SMTPServerAuthenticationUserName"
+                , "SMTPServerAuthenticationPassword"
+                , "SMTPServerUseSSL"
+            )
+        );
+        //Send the e-mail
+        $message = \Swift_Message::newInstance()
+            ->setSubject("Password Reset for " . $businessName)
+            ->setFrom(array($emailFrom => $businessName))
+            ->setTo(array($emailTo => $customer['FName'] . ' ' . $customer['LName']))
+            ->setBody($html,'text/html');
+
+        if (!isset($settings['SMTPServerPort']))
+        {
+            $settings['SMTPServerPort'] = "25";
+        }
+        if (isset($settings['SMTPServerUseAuthentiation']) && strtolower($settings['SMTPServerUseAuthentiation']) == "true")
+        {
+            if (isset($settings['SMTPServerUseSSL']) && strtolower($settings['SMTPServerUseSSL']) == "true")
+            {
+                $transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'], 'ssl')
+                    ->setUsername($settings['SMTPServerAuthenticationUserName'])
+                    ->setPassword($settings['SMTPServerAuthenticationPassword']);
+            }
+            else
+            {
+                $transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'])
+                    ->setUsername($settings['SMTPServerAuthenticationUserName'])
+                    ->setPassword($settings['SMTPServerAuthenticationPassword']);
+            }
+        }
+        else
+        {
+            $transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort']);
+        }
+
+        $mailer = \Swift_Mailer::newInstance($transport);
+        try
+        {
+            $result = $mailer->send($message,$failures);
+        }
+        catch (Exception $e)
+        {
+            return array('Exception' => $e->getMessage(), 'Settings' => $settings);
+        }
+    }
+
+    // public final function get($id) {
+    //     // TODO (if necessary)
+    //     // $authentication = new \ClubSpeed\Database\Classes\AuthenticationTokens($id); // build dummy record with only an id
+    //     $get = $this->db->onlineBookingAvailability_V->get($onlineBookingsId);
+    //     return $get;
+    // }
+
+    // public final function find($params = array()) {
+    //     throw new \CSException("Attempted a Passwords find!");
+    //     // return $this->db->authenticationTokens->find($params);
+    // }
+
+    // public final function update($id, $params = array()) {
+    //     throw new \CSException("Attempted a Passwords update!");
+    //     // don't update directly - use reset
+    // }
+
+    public final function reset($params = array()) {
+        // if (is_null($params['email']) || empty($params['email']))
+            // throw new \RequiredArgumentMissingException("Password reset requires email!");
+        if (is_null($params['token']) || empty($params['token']))
+            throw new \RequiredArgumentMissingException("Password reset requires token!");
+        if (is_null($params['password']) || empty($params['password']))
+            throw new \RequiredArgumentMissingException("Password reset requires password!");
+
+        // $email      = $params['email'];
+        $token      = $params['token'];
+        $password   = $params['password'];
+
+        // validate the token by searching for the entry on the database
+        $results = $this->db->authenticationTokens->match(array(
+            'Token' => $token
+        ));
+        if (count($results) < 1)
+            throw new \InvalidTokenException("Invalid token authentication was supplied to the API!");
+        $authentication = $results[0];
+
+        // find the customer
+        $customerId = $authentication->CustomersID;
+        $customer = $this->db->customers->get($customerId);
+        if (is_null($customer) || empty($customer))
+            throw new \CustomerNotFoundException("Password reset was unable to find the requested customer!");
+        $customer = $customer[0];
+        // update the customer
+        $customer->Password = \ClubSpeed\Security\Hasher::hash($password);
+        $affected = $this->db->customers->update($customer);
+
+        // delete the token record
+        $this->delete($authentication->AuthenticationTokensID);
+
+        // success - return anything other than 200?
+    }
+
+    public final function delete($authenticationId) {
+        $affected = $this->db->authenticationTokens->delete($authenticationId);
+    }
+}

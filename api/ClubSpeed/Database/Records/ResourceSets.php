@@ -2,9 +2,7 @@
 
 namespace ClubSpeed\Database\Records;
 
-require_once(__DIR__.'/DbRecord.php');
-
-class ResourceSets extends DbRecord {
+class ResourceSets extends BaseRecord {
 
     public static $table      = 'dbo.ResourceSets';
     public static $tableAlias = 'rs';
@@ -36,7 +34,7 @@ class ResourceSets extends DbRecord {
                 }
             }
             else {
-                $this->{self::$key} = \ClubSpeed\Utility\Convert::toNumber($data);
+                $this->{self::$key} = \ClubSpeed\Utility\Convert::toNumber(+$data);
             }
         }
     }

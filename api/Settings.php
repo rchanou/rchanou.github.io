@@ -91,7 +91,7 @@ class Settings
         
         // Require private key if we are looking for private settings
         if($requestContainsPrivateSetting) {
-            if (!\ClubSpeed\Security\Validate::privateAccess()) {
+            if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
                 throw new RestException(401, "Invalid authorization!");
             }
         }
@@ -110,7 +110,7 @@ class Settings
 
     public function getImages($app)
     {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         //TODO: Default images are currently hard-coded. Will eventually be pulled from Club Speed.
@@ -134,7 +134,7 @@ class Settings
         
     public function getSettings($group, $setting = null)
     {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         $output = array();

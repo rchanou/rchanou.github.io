@@ -2,9 +2,7 @@
 
 namespace ClubSpeed\Database\Records;
 
-require_once(__DIR__.'/DbRecord.php');
-
-class Checks extends DbRecord {
+class Checks extends BaseRecord {
 
     public static $table      = 'dbo.Checks';
     public static $tableAlias = 'chcks';

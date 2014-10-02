@@ -2,6 +2,8 @@
 require_once('vendors/swiftmailer/lib/swift_required.php');
 require_once('./Queues.php');
 
+use ClubSpeed\Enums\Enums as Enums;
+
 /**
  * ClubSpeed API
  *
@@ -44,7 +46,7 @@ class Racers
      * @return mixed[string] An associative array containing customer information.
      */
     public function postlogin($request_data) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         // should we allow users to hit the login api using basic auth,
@@ -78,7 +80,7 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public function postfb_login($request_data) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         try {
@@ -128,7 +130,7 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public function postCreate($request_data) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -171,13 +173,12 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public final function postregister($request_data) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         // this needs to handle create, add to event, add to event group, send email, etc, etc
         try {
             $params = $this->mapCreateParams($request_data);
-
             // check the underlying type of registration
             if ($this->is_fb_registration($params)) {
                 // facebook registration
@@ -232,7 +233,7 @@ class Racers
      *  Auto_Bill_Failed = 8
      */
     public function getapplyRule($customerId, $ruleId) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, 'Invalid authorization');
         }
         if(!is_numeric($customerId)) throw new RestException(412, 'Please supply a customerId');
@@ -342,13 +343,13 @@ class Racers
         if ($this->is_event_registration($params)) {
             $this->getapplyRule(
                 $customerId
-                , CSEnums::RULE_ADD_EVENT_CUSTOMER_FROM_ONLINE_REGISTRATION
+                , Enums::RULE_ADD_EVENT_CUSTOMER_FROM_ONLINE_REGISTRATION
             );
         }
         else {
             $this->getapplyRule(
                 $customerId
-                , CSEnums::RULE_ADD_CUSTOMER_FROM_REGISTRATION_TERMINAL
+                , Enums::RULE_ADD_CUSTOMER_FROM_REGISTRATION_TERMINAL
             );
         }
     }
@@ -762,7 +763,7 @@ class Racers
      * @return array
      */
     public function search() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');
@@ -798,6 +799,15 @@ class Racers
         return array('racers' => $output);
     }
 
+    public function email_is_claimed($request_data) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        return array(
+            "used" => $this->logic->customers->email_is_claimed(@$request_data['email'])
+        );
+    }
+
     public function index($racer_id, $sub = null) {
         if($racer_id == 'valid') return $this->valid($_REQUEST['email'], $_REQUEST['racerName']);
         if($racer_id == 'create') return $this->postCreate($_REQUEST);
@@ -808,6 +818,7 @@ class Racers
         if($racer_id == 'by_id') return $this->by_id($_REQUEST['start'], @$_REQUEST['limit']);
         if($racer_id == 'update_unsubscribed') return $this->update_unsubscribed($_REQUEST['email']);
         if($racer_id == 'most_improved_rpm') return $this->most_improved_rpm($_REQUEST);
+        if($racer_id == 'email_is_claimed') return $this->email_is_claimed($_REQUEST);
         if(!is_numeric($racer_id)) throw new RestException(412,'Not a valid racer id');
 
         if($sub != null) {
@@ -829,7 +840,7 @@ class Racers
      * @return array
      */
     public function most_improved_rpm($params) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         $limit = empty($params['limit']) ? 50 : (int)$params['limit'];
@@ -867,7 +878,7 @@ class Racers
      * @return array
      */
     public function racer($customerId) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         if(!is_numeric($customerId)) throw new RestException(412,'Not a valid number');
@@ -906,7 +917,7 @@ class Racers
      * @return array
      */
     public function valid($email, $racerName) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -928,7 +939,7 @@ class Racers
      * @return array
      */
     public function races($customerId) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -984,7 +995,7 @@ EOD;
     }
 
     public function update_unsubscribed($email) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -1025,7 +1036,7 @@ EOD;
     }
 
     public function last_updated($start, $end, $limit = 1000) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -1073,7 +1084,7 @@ EOD;
      * @return array
      */
     public function by_id($startId, $limit = null) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         $limit = empty($limit) || !is_numeric($limit) ? 1000 : $limit;
@@ -1088,7 +1099,7 @@ EOD;
     }
 
     public function top_rpm() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         //if(empty($_GET['query'])) throw new RestException(412,'Please provide a search query via ?query=your_query_here');

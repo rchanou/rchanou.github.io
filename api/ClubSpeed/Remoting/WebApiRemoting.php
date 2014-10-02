@@ -1,0 +1,295 @@
+<?php
+
+namespace ClubSpeed\Remoting;
+
+// Grab httpful -- necessary with autoloader?
+require_once(__DIR__.'../../../httpful/httpful.phar');
+
+/**
+ * The CSWebApi class which contains references to remote methods
+ * on the .NET WebApi which need to be executed by the PHP api
+ * for interfacing with the MainEngine.
+ */
+class WebApiRemoting {
+
+    /**
+     * The remote api info broken into an associative array.
+     */
+    private $apiInfo;
+
+    /**
+     * The remote api info imploded into a single base url.
+     */
+    private $apiBase;
+
+    protected $logic;
+
+    /**
+     * Creates a new instance of the CSWebApi class.
+     */
+    public function __construct(&$logic) {
+        $this->logic = $logic;
+        $this->apiInfo = array(
+            // 'protocol'  => ($this->isSecure() ? 'https' : 'http').'://'
+            'protocol'  => 'https://' // https is required for WebAPI -- isSecure() may not actually be required
+            // , 'root'    => $_SERVER['SERVER_NAME'] // for live!
+            , 'root'    => "192.168.111.140" // for testing(!!!)
+            , 'api'     => '/WebAPI'
+            , 'version' => '/v1.5'
+        );
+        $this->apiBase = implode($this->apiInfo);
+    }
+
+    /**
+     * A helper function (could really be moved to a utility class)
+     * to determine whether or not the current connection is being secured.
+     *
+     * @return boolean True if HTTPS is set (but not to 'off') or SERVER_PORT is 443, false if not.
+     */
+    protected final function isSecure() { // should really be a utility function
+        // check for HTTPS and not set to 'off' (IIS compatability) -- if that fails, assume port of 443 is HTTPS
+        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+    }
+
+    /**
+     * A helper function to assist with appending a specific API Call name to the base API URL.
+     *
+     * @param string $callName The name of the specific WebApi call.
+     * @return string The call name appended to the base API URL.
+     */
+    private function getApiUrl($callName) {
+        return $this->apiBase . $callName;
+    }
+
+    /**
+     * Internal helper function to help determine whether or not
+     * the apiUsername and the apiPassword are set in config.php
+     *
+     * @return void
+     * @throws InvalidArgumentException if $GLOBALS['apiUsername'] is either not set or empty.
+     * @throws InvalidArgumentException if $GLOBALS['apiPassword'] is either not set or empty.
+     */
+    private function checkUsernamePasswordAreSet() {
+        if (!isset($GLOBALS['apiUsername']) || empty($GLOBALS['apiUsername']))
+            throw new \InvalidArgumentException("WebAPI received invalid credentials!");
+        if (!isset($GLOBALS['apiPassword']) || empty($GLOBALS['apiPassword']))
+            throw new \InvalidArgumentException("WebAPI received invalid credentials!");
+    }
+
+    /**
+     * Handles a response returned from the httpful library,
+     * checking for any codes that are non-200 and throwing an exception.
+     *
+     * Note that this very well may change in the future, but this is
+     * an attempt to get a more useful error message since httpful doesn't seem
+     * to throw useful error messages in some situations.
+     *
+     * @param Httpful\Response $response The response object returned from an httpful call.
+     * @return Httpful\Response The unmodified response object, if successful.
+     * @throws Exception if the return code of the response was not 200.
+     */
+    private function handleResponse(&$response) {
+        if ($response->code != 200) {
+            // commented out for now
+            throw new \Exception($response->raw_body, $response->code); // find a better way to handle this??
+        }
+    }
+
+    public function startRace($heatId) {
+        $this->checkUsernamePasswordAreSet();
+        $callName = '/Race/Start/' . $heatId;
+        $apiUrl = $this->getApiUrl($callName);
+        $response = \Httpful\Request::get($apiUrl)
+            ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
+            ->send();
+        $this->handleResponse($response);
+    }
+
+    public function stopRace($trackId) {
+        $this->checkUsernamePasswordAreSet();
+        $callName = '/Race/Stop/' . $trackId;
+        $apiUrl = $this->getApiUrl($callName);
+        $response = \Httpful\Request::get($apiUrl)
+            ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
+            ->send();
+        $this->handleResponse($response);
+    }
+
+    /**
+     * A pointer to the remote WebApi call to clear the MainEngine's cache.
+     *
+     * Note that this function will most likely change in the future 
+     * to allow for internal response return handling.
+     *
+     * @return void
+     */
+    public function clearCache() {
+        $this->checkUsernamePasswordAreSet();
+        $callName = '/ClubSpeedCache/clear';
+        $apiUrl = $this->getApiUrl($callName);
+        $response = \Httpful\Request::get($apiUrl)
+            ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
+            ->send();
+        return $this->handleResponse($response);
+    }
+
+    /**
+     * A pointer to the remote WebApi call to process a PCCharge payment.
+     *
+     * Note that this function will most likely change in the future 
+     * to allow for internal response return handling and parameters.
+     *
+     * @return void
+     */
+    public function processPayment($params = array()) {
+        if (empty($params))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received an empty set of params!");
+        if (!isset($params['card']) || empty($params['card']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty credit card object!");
+        if (!isset($params['checkId']) || empty($params['checkId']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty checkId!");
+        $card = $params['card'];
+        if (!isset($card['firstName']) || empty($card['firstName']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.firstName!");
+        if (!isset($card['lastName']) || empty($card['lastName']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.lastName!");
+        if (!isset($card['expiryMonth']) || empty($card['expiryMonth']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.expiryMonth!");
+        if (!isset($card['expiryYear']) || empty($card['expiryYear']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.expiryYear!");
+        if (!isset($card['postcode']) || empty($card['postcode']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.postcode!");
+        if (!isset($card['address1']) || empty($card['address1']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.address1!");
+        if (!isset($card['cvv']) || empty($card['cvv']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.cvv!");
+        
+        $checkId = \ClubSpeed\Utility\Convert::toNumber(@$params['checkId']);
+        if (!isset($checkId) || is_null($checkId) || !is_int($checkId))
+            throw new \RequiredArgumentMissingException("Payment processor received an invalid format for checkId! Received: " . @$params['checkId']);
+        $checkTotals = $this->logic->checkTotals->get($checkId);
+        if (!isset($checkTotals) || is_null($checkTotals) || empty($checkTotals))
+            throw new \InvalidArgumentValueException("Payment processor received a checkId which could not be found in the database! Received: " . $checkId);
+        $checkTotals = $checkTotals[0];
+        if ($checkTotals->CheckStatus != 0)
+            throw new \InvalidArgumentValueException("Payment processor received a checkId with a status other than 0 (open)! Found Check.Status: " . $checkTotals->CheckStatus);
+        $this->logic->checks->applyCheckTotal($checkTotals->CheckID); // ensure that the checktotal is stored on the checks record, for backwards compatibility
+        $check = $this->logic->checks->get($checkTotals->CheckID);
+        $check = $check[0];
+
+        $expiry = str_pad($card['expiryMonth'], 2, '0', STR_PAD_LEFT) . substr($card['expiryYear'], -2);
+        $data = array(
+            "CreditCardNo"      => $card['number']
+            , 'AccountName'     => $card['firstName'] . ' ' . $card['lastName'] // concatenate first + last before sending to webapi
+            , 'ExpirationDate'  => $expiry // this needs to be in 'MMYY' string format
+            , 'Zip'             => $card['postcode']
+            , 'Address'         => $card['address1']
+            , 'CVV'             => $card['cvv']
+            , 'CheckID'         => $checkId
+            , 'CardIssuer'      => ''       // unknown
+            , 'TaxExempt'       => false    // override to false
+            , 'IsCommercial'    => false    // override to false
+            , 'TaxAmount'       => $checkTotals->CheckTax // this is not available directly on the check record - grab from the calculated view
+            , 'AmountToCharge'  => 0.01 // USE 2.00 FOR PCCHARGE TESTING - should come back declined $check->CheckTotal // use the total (INCLUDING THE TAX, NOT THE SUBTOTAL!!!)
+        );
+
+        $callName = '/PCCharge/ProcessPayment';
+        $apiUrl = $this->getApiUrl($callName);
+
+        // we will have to handle the response separately, as 200s can technically be failures
+        // and is based on the return data
+
+        $response = \Httpful\Request::post($apiUrl)
+            ->sendsJson()
+            ->expects('application/json')
+            ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
+            ->body(json_encode($data))
+            ->send();
+
+        if ($response->code != 200) // should we expose the raw_body when not 200? will designate a server failure (most likely 500)
+            throw new \CSException($response->raw_body, $response->code);
+        $data = (array)$response->body;
+        // expected response structure
+        // {
+        //   "ProcessingTime": 0,
+        //   "Result": "",
+        //   "AuthorizationCode": "",
+        //   "ReferenceNumber": "",
+        //   "TroutD": "",
+        //   "TransactionDate": "",
+        //   "ErrorCode": "",
+        //   "ErrorDescription": "",
+        //   "AVS": "",
+        //   "CVV2": "",
+        //   "AmountDue": 0,
+        //   "CardIssuer": "",
+        //   "XMLResponse": "",
+        //   "ResponseText": "",
+        //   "ResultCode": ""
+        // }
+        if (strtolower($data['Result']) == 'captured' || strtolower($data['Result']) == 'approved') {
+
+            $date = strtotime('c', $data['TransactionDate']);
+            pr($date);
+            die();
+            // success!
+            // build a payment record, update necessary items
+            $payment = $this->logic->payment->dummy();
+            $payment->CheckID = $checkId;
+            $payment->UserID = 1; // probably non-nullable, onlinebooking userId?
+            $payment->PayType = 2; // always credit card when through pccharge?
+            $payment->PayDate = \ClubSpeed\Utility\Convert::getDate(); // or do we want to use $data['TransactionDate'] ? 
+            $payment->PayStatus = 1; // PayStatus.PAID from VB
+
+            // Public Enum PayStatus
+            // PAID = 1
+            //     VOID = 2
+            // End Enum
+
+            // Public Enum VoidType ' pccharge
+            //     VOIDSale = 3
+            //     VOIDRefund = 6
+            // End Enum
+
+            // pr("success!");
+            return true; // or something
+        }
+        else {
+            if (isset($data['ErrorCode']) && !empty($data['ErrorCode'])) {
+                throw new \CSException($data['ErrorCode'] . ": " . $data['ErrorDescription']);
+            }
+            else {
+                throw new \CSException($data['Result'] . ": " . $data['AuthorizationCode']);
+            }
+            // failure!
+            // pr("failure!");
+            pr($data);
+            throw new \CSException($data['ErrorCode'] . ": " . $data['ErrorDescription']);
+        }
+        // die();
+        // return $response;
+    }
+
+    /**
+     * A pointer to the remote WebApi call to combine customers.
+     *
+     * Note that this function will most likely change in the future 
+     * to allow for internal response return handling and parameters.
+     *
+     * @return void
+     */
+    public function combineCustomers($custId1, $custId2) {
+        $callName = '/Customer/Combine';
+        $apiUrl = $this->getApiUrl($callName);
+        $data = array(
+            // todo: get expected process payment items -- probably from the argument list
+            // todo: determine the structure that Customer/Combine expects
+        );
+        // $response = Request::post($apiUrl)
+        //     ->sendsJson()
+        //     ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
+        //     ->body(json_encode($data))
+        //     ->send();
+        // return $response;
+    }
+}

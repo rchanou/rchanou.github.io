@@ -2,31 +2,28 @@
 
 namespace ClubSpeed\Database\Collections;
 
-require_once(__DIR__.'/DbCollection.php');
-require_once(__DIR__.'/../Records/ScreenTemplateDetail.php');
-
 class DbScreenTemplateDetail extends DbCollection {
 
     public function __construct($db) {
-        parent::__construct($db);
         $this->definition = new \ReflectionClass('\ClubSpeed\Database\Records\ScreenTemplateDetail');
-        $this->dbToJson = array(
-              'ID'              => 'screenTemplateDetailId'
-            , 'TemplateID'      => 'screenTemplateId'
-            , 'Seq'             => 'seq'
-            , 'TypeID'          => 'typeId'
-            , 'TimeInSecond'    => 'timeInSecond'
-            , 'Text0'           => 'text0'
-            , 'Text1'           => 'text1'
-            , 'Text2'           => 'text2'
-            , 'Text3'           => 'text3'
-            , 'Text4'           => 'text4'
-            , 'Text5'           => 'text5'
-            , 'Text6'           => 'text6'
-            , 'Enable'          => 'enable'
-            , 'TrackNo'         => 'trackNo'
-        );
-        parent::secondaryInit();
+        parent::__construct($db);
+        // $this->dbToJson = array(
+        //       'ID'              => 'screenTemplateDetailId'
+        //     , 'TemplateID'      => 'screenTemplateId'
+        //     , 'Seq'             => 'seq'
+        //     , 'TypeID'          => 'typeId'
+        //     , 'TimeInSecond'    => 'timeInSecond'
+        //     , 'Text0'           => 'text0'
+        //     , 'Text1'           => 'text1'
+        //     , 'Text2'           => 'text2'
+        //     , 'Text3'           => 'text3'
+        //     , 'Text4'           => 'text4'
+        //     , 'Text5'           => 'text5'
+        //     , 'Text6'           => 'text6'
+        //     , 'Enable'          => 'enable'
+        //     , 'TrackNo'         => 'trackNo'
+        // );
+        // parent::secondaryInit();
     }
 
     // public function compress($data = array()) {

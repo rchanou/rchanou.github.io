@@ -34,7 +34,7 @@ class Tracks
      * @return array 
      */
     public function tracks() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         

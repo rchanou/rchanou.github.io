@@ -2,9 +2,7 @@
 
 namespace ClubSpeed\Database\Records;
 
-require_once(__DIR__.'/DbRecord.php');
-
-class Customers extends DbRecord {
+class Customers extends BaseRecord {
 
     public static $table = 'dbo.Customers';
     public static $tableAlias = 'c';
@@ -151,30 +149,6 @@ class Customers extends DbRecord {
                 $this->{self::$key} = \ClubSpeed\Utility\Convert::toNumber($data);
             }
         }
-    }
-
-    protected function _convert() {
-        // $this->AuthenticationTokensID   = \ClubSpeed\Utility\Convert::toNumber($this->AuthenticationTokensID);
-        // $this->CustomersID              = \ClubSpeed\Utility\Convert::toNumber($this->CustomersID);
-        // $this->RemoteUserID             = \ClubSpeed\Utility\Convert::toNumber($this->RemoteUserID);
-        // $this->TokenType                = \ClubSpeed\Utility\Convert::toString($this->TokenType);
-        // $this->Token                    = \ClubSpeed\Utility\Convert::toString($this->Token);
-        // $this->CreatedAt                = \ClubSpeed\Utility\Convert::toString($this->CreatedAt);
-        // $this->ExpiresAt                = \ClubSpeed\Utility\Convert::toString($this->ExpiresAt);
-        // $this->Meta                     = \ClubSpeed\Utility\Convert::toString($this->Meta);
-    }
-
-    public function toJson() {
-        return array(
-              'authenticationTokensID'  => $this->AuthenticationTokensID
-            , 'customersID'             => $this->CustomersID
-            , 'remoteUserID'            => $this->RemoteUserID
-            , 'tokenType'               => $this->TokenType
-            , 'token'                   => $this->Token
-            , 'createdAt'               => $this->CreatedAt
-            , 'expiresAt'               => $this->ExpiresAt
-            , 'meta'                    => $this->Meta
-        );
     }
 
     public function validate($type) {

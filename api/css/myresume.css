@@ -164,27 +164,31 @@ button:hover {
 }
 
 .background-header {
-  background-color: rgb(50, 50, 50);
-  color: rgb(255, 255, 255);
+  /*background-color: rgb(50, 50, 50);*/
+  /*color: rgb(255, 255, 255);*/
 }
 .background-even {
-  background-color: rgb(210, 210, 210);
+  /*background-color: rgb(210, 210, 210);*/
 }
 .background-odd {
-  background-color: rgb(230, 230, 230);
+  /*background-color: rgb(230, 230, 230);*/
 }
 
 .call-header:hover {
-  cursor: pointer;
+/*  cursor: pointer;
   background-color: rgb(180, 180, 180);
   color: rgb(0, 0, 0);
   -webkit-box-shadow:inset 0px 0px 0px 1px #000000;
   -moz-box-shadow:inset 0px 0px 0px 1px #000000;
-  box-shadow:inset 0px 0px 0px 1px #000000;
+  box-shadow:inset 0px 0px 0px 1px #000000;*/
 }
 
 .display-none {
   display: none;
+}
+
+.visibility-hidden {
+  visibility: hidden;
 }
 
 .align-right {
@@ -230,4 +234,149 @@ button:hover {
   position: fixed;
   z-index: 9999;
   top: 0px;
+}
+
+.green {
+  color: #5cb85c;
+}
+.red {
+  color: #d9534f;
+}
+.blue {
+  color: #31b0d5;
+}
+.yellow {
+  color: yellow;
+}
+.orange {
+  color: #f0ad4e;
+}
+.white {
+  color: white;
+}
+.background-orange {
+  background-color: orange;  
+}
+
+.bold {
+  font-weight: 800;
+}
+
+th {
+  font-weight: normal; /* override bootstrap (?) is this bootstrap (?) */
+}
+.call-url {
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.panel-info {
+  border-color: #6f5499;
+}
+.panel-info > .panel-heading {
+  color: #fff;
+  background-color: #6f5499;
+  border-color: #6f5499;
+}
+.panel-info > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #6f5499;
+}
+.panel-info > .panel-heading .badge {
+  color: #6f5499;
+  background-color: #fff;
+}
+.panel-info > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #6f5499;
+}
+
+.panel-create {
+  border-color: #f0ad4e;
+}
+.panel-create > .panel-heading {
+  color: #fff;
+  background-color: #f0ad4e;
+  border-color: #f0ad4e;
+}
+.panel-create > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #f0ad4e;
+}
+.panel-create > .panel-heading .badge {
+  color: #f0ad4e;
+  background-color: #fff;
+}
+.panel-create > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #f0ad4e;
+}
+
+.panel-get {
+  border-color: #5cb85c;
+}
+.panel-get > .panel-heading {
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #5cb85c;
+}
+.panel-get > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #5cb85c;
+}
+.panel-get > .panel-heading .badge {
+  color: #5cb85c;
+  background-color: #fff;
+}
+.panel-get > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #5cb85c;
+}
+
+.panel-update {
+  border-color: #428bca;
+}
+.panel-update > .panel-heading {
+  color: #fff;
+  background-color: #428bca;
+  border-color: #428bca;
+}
+.panel-update > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #428bca;
+}
+.panel-update > .panel-heading .badge {
+  color: #428bca;
+  background-color: #fff;
+}
+.panel-update > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #428bca;
+}
+
+.panel-delete {
+  border-color: #d9534f;
+}
+.panel-delete > .panel-heading {
+  color: #fff;
+  background-color: #d9534f;
+  border-color: #d9534f;
+}
+.panel-delete > .panel-heading + .panel-collapse > .panel-body {
+  border-top-color: #d9534f;
+}
+.panel-delete > .panel-heading .badge {
+  color: #d9534f;
+  background-color: #fff;
+}
+.panel-delete > .panel-footer + .panel-collapse > .panel-body {
+  border-bottom-color: #d9534f;
+}
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+pre.prettyprint.prettyprinted {
+  /*background-color: inherit;*/
+  /*border: none;*/
 }

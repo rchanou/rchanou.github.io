@@ -14,7 +14,7 @@ class Version
     }
 
     public function index($desiredData, $sub = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         
@@ -34,7 +34,7 @@ class Version
 
     public function current()
     {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -61,7 +61,7 @@ class Version
 
     public function api()
     {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -72,7 +72,7 @@ class Version
 
     public function os()
     {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 

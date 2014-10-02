@@ -2,9 +2,7 @@
 
 namespace ClubSpeed\Database\Records;
 
-require_once(__DIR__.'/DbRecord.php');
-
-class OnlineBookingReservations extends DbRecord {
+class OnlineBookingReservations extends BaseRecord {
 
     public static $table      = 'dbo.OnlineBookingReservations';
     public static $tableAlias = 'obr';
@@ -26,14 +24,6 @@ class OnlineBookingReservations extends DbRecord {
         if (isset($data)) {
             if (is_array($data)) {
                 if (!empty($data)) {
-                    // $this->OnlineBookingReservationsID  = isset($data['OnlineBookingReservationsID'])   ? $data['OnlineBookingReservationsID']  : @$data['onlineBookingReservationsID'];
-                    // $this->OnlineBookingsID             = isset($data['OnlineBookingsID'])              ? $data['OnlineBookingsID']             : @$data['onlineBookingsId'];
-                    // $this->CustomersID                  = isset($data['CustomersID'])                   ? $data['CustomersID']                  : @$data['customersId'];
-                    // $this->SessionID                    = isset($data['SessionID'])                     ? $data['SessionID']                    : @$data['sessionId'];
-                    // $this->Quantity                     = isset($data['Quantity'])                      ? $data['Quantity']                     : @$data['quantity'];
-                    // $this->CreatedAt                    = isset($data['CreatedAt'])                     ? $data['CreatedAt']                    : @$data['createdAt'];
-                    // $this->ExpiresAt                    = isset($data['ExpiresAt'])                     ? $data['ExpiresAt']                    : @$data['expiresAt'];
-                    // $this->_convert();
                     if (isset($data['OnlineBookingReservationsID']))    $this->OnlineBookingReservationsID  = \ClubSpeed\Utility\Convert::toNumber($data['OnlineBookingReservationsID']);
                     if (isset($data['OnlineBookingsID']))               $this->OnlineBookingsID             = \ClubSpeed\Utility\Convert::toNumber($data['OnlineBookingsID']);
                     if (isset($data['CustomersID']))                    $this->CustomersID                  = \ClubSpeed\Utility\Convert::toNumber($data['CustomersID']);
@@ -47,28 +37,6 @@ class OnlineBookingReservations extends DbRecord {
                 $this->{self::$key} = \ClubSpeed\Utility\Convert::toNumber($data);
             }
         }
-    }
-
-    protected function _convert() {
-        $this->OnlineBookingReservationsID  = \ClubSpeed\Utility\Convert::toNumber($this->OnlineBookingReservationsID);
-        $this->OnlineBookingsID             = \ClubSpeed\Utility\Convert::toNumber($this->OnlineBookingsID);
-        $this->CustomersID                  = \ClubSpeed\Utility\Convert::toNumber($this->CustomersID);
-        $this->SessionID                    = \ClubSpeed\Utility\Convert::toString($this->SessionID);
-        $this->Quantity                     = \ClubSpeed\Utility\Convert::toNumber($this->Quantity);
-        $this->CreatedAt                    = \ClubSpeed\Utility\Convert::toString($this->CreatedAt);
-        $this->ExpiresAt                    = \ClubSpeed\Utility\Convert::toString($this->ExpiresAt);
-    }
-
-    public function toJson() {
-        return array(
-              'onlineBookingReservationsID' => $this->OnlineBookingReservationsID
-            , 'onlineBookingsId'            => $this->OnlineBookingsID
-            , 'customersId'                 => $this->CustomersID
-            , 'sessionId'                   => $this->SessionID
-            , 'quantity'                    => $this->Quantity
-            , 'createdAt'                   => $this->CreatedAt
-            , 'expiresAt'                   => $this->ExpiresAt
-        );
     }
 
     public function validate($type = "") {

@@ -15,29 +15,32 @@
 class Races
 {
     public $restler;
+    private $webapi;
 
     function __construct(){
         header('Access-Control-Allow-Origin: *'); //Here for all /say
+        $this->webapi = @$GLOBALS['webapi'];
     }
 
     public function index($race_id, $sub = null) {
         //if(!is_numeric($race_id) || $race_id !== 'current') throw new RestException(412,'Not a valid race id');
-
         if($race_id == 'current_race_id') return $this->current();
         if($race_id == 'current') $race_id = $this->current();
         if($race_id == 'fastest') return $this->fastest();
         if($race_id == 'next') return $this->next(@$_GET['track_id'], @$_GET['offset']);
-                if($race_id == 'previous') return $this->previous(@$_GET['track_id'], @$_GET['offset']);
+        if($race_id == 'previous') return $this->previous(@$_GET['track_id'], @$_GET['offset']);
         if($race_id == 'total_laps') return $this->total_laps();
         if($race_id == 'lap_number') return $this->lap_number($sub);
         if($race_id == 'scoreboard') return $this->scoreboard(@$_GET['track_id'], @$_GET['heat_id']);
-                if($race_id == 'copy') return $this->copy(@$_GET['from'], @$_GET['to'], @$_GET['track_id']);
+        if($race_id == 'copy') return $this->copy(@$_GET['from'], @$_GET['to'], @$_GET['track_id']);
         if($race_id == 'races') return $this->races();
         if($race_id == 'since') return $this->since();
         if($race_id == 'final_positions') return $this->final_positions();
         if($race_id == 'matching') return $this->matching();
-                if($race_id == 'upcoming_heat_types') return $this->upcoming_heat_types(@$_GET['date']);
-                if($race_id == 'upcoming') return $this->upcoming();
+        if($race_id == 'upcoming_heat_types') return $this->upcoming_heat_types(@$_GET['date']);
+        if($race_id == 'upcoming') return $this->upcoming();
+        if($race_id == 'start') return $this->start(@$_REQUEST['heatId']);
+        if($race_id == 'stop') return $this->stop(@$_REQUEST['trackId']);
 
         if($sub != null) {
             switch($sub) {
@@ -58,8 +61,26 @@ class Races
         }
     }
 
+    public function start($heatId) {
+        try {
+            $this->webapi->startRace($heatId);
+        }
+        catch (\Exception $e) {
+            throw new \RestException($e->getCode(), $e->getMessage());
+        }
+    }
+
+    public function stop($trackId) {
+        try {
+            $this->webapi->stopRace($trackId);
+        }
+        catch (\Exception $e) {
+            throw new \RestException($e->getCode(), $e->getMessage());
+        }
+    }
+
     public function copy($fromDate = null, $toDate = null, $track_id = null, $options = null) {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         // TODO Options? (only web or only A&D)
@@ -106,7 +127,7 @@ class Races
     }
 
     public function total_laps() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         $tsql = "SELECT COUNT(*) AS total_laps FROM RacingData";
@@ -125,7 +146,7 @@ class Races
     }
 
     public function lap_number($num) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         if(empty($num) || !is_numeric($num)) {
@@ -166,7 +187,7 @@ class Races
      * @throws RestException Error code 412 is returned if no races are coming up.
      */
     public function upcoming($track = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         $track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
@@ -187,7 +208,7 @@ class Races
     }
         
     public function next($track = null, $offset = 0) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -211,7 +232,7 @@ class Races
     }
         
     public function previous($track = null, $offset = 0) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -235,7 +256,7 @@ class Races
     }
 
     public function current($track = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -256,7 +277,7 @@ class Races
     }
 
     public function upcoming_heat_types($date = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -271,7 +292,7 @@ class Races
     }
 
     public function matching() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -364,7 +385,7 @@ class Races
     }
 
     public function sort_heatStart($a, $b) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -378,7 +399,7 @@ class Races
     }
 
     public function findMatchingHeats($heats, $numDrivers, $numHeats, $gapInMinutes) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -425,7 +446,7 @@ class Races
 
 
     public function findHeat($starts, $heats) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -437,7 +458,7 @@ class Races
     }
 
     public function getHeatSlotsForDay($scheduledHeats, $date, $bookingsStartAt, $bookingsEndAt, $bookingLengthInMinutes = 10, $defaultSpots = 25, $trackId = 0, $daysInAdvance = 365, $blackoutTimeInMinutes = 0) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -557,7 +578,7 @@ class Races
     }
 
     public function races($trackId = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -601,7 +622,7 @@ class Races
 
     //TODO: Check for "banana" input as date... perhaps in all of these methods.
     public function since() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         $tsql = "SELECT TOP 100    hm.HeatNo AS race_id, hm.Finish AS finish_time
@@ -651,7 +672,7 @@ class Races
     }
 
     public function final_positions($heatNum = -1) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -706,7 +727,7 @@ class Races
      * @return array
      */
     public function fastest() {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -857,7 +878,7 @@ EOD;
     }
 
     public function scoreboard($trackId = -1, $heatNum = -1) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -886,7 +907,7 @@ EOD;
     }
 
     public function raceSummary($heatId) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -940,7 +961,7 @@ EOD;
      * @return array
      */
     public function race($heatId) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -1021,7 +1042,7 @@ EOD;
      * @return array
      */
     public function number_of_laps($heatId = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -1046,7 +1067,7 @@ EOD;
      * @return array
      */
     protected function laps($heatId = null, $lapId = 0, $racerId = null) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -1083,7 +1104,7 @@ EOD;
      * @return string (url to photo) or null (no photo found)
      */
     public function getCustomerPhoto($racer_id) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         

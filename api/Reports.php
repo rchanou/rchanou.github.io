@@ -69,7 +69,7 @@ ORDER BY Total DESC
 */
 
     public function report() {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -151,7 +151,7 @@ WHERE     (HeatMain.ScheduledTime BETWEEN ? AND ?)";
     }   
     
     public function qb_invoices() {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -201,7 +201,7 @@ WHERE     cd.ProductID IN (388, 424, 425, 426, 429) ORDER BY c.ClosedDate"; //AN
     }
     
     public function potential_revenue() {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
@@ -305,7 +305,7 @@ WHERE     cd.ProductID IN (388, 424, 425, 426, 429) ORDER BY c.ClosedDate"; //AN
     }
     
     public function products() {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 

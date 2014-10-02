@@ -1,0 +1,312 @@
+<?php
+
+namespace ClubSpeed\Logic;
+
+/**
+ * The service container
+ * for all logic classes.
+ */
+class LogicService {
+
+    /**
+     * A reference to the injected ClubSpeed database class.
+     */
+    private $db;
+
+    /**
+     * An associative array used for storing instantiated ClubSpeed business classes.
+     */
+    private $_lazy;
+    
+    /**
+     * Constructs a new instance of the CSBooking class.
+     *
+     * The CSBooking constructor requires an instantiated CSConnection class for injection.
+     *
+     * @param CSConnection $db The CSConnection class to inject.
+     */
+    public function __construct(&$db) {
+        $this->db = $db;
+        $this->_lazy = array();
+    }
+
+    // this structure works fine, but requires us to call functions instead of referencing properties
+    // this may be bad practice (!!!) make sure we test this --
+    // if all else fails, bypass the __get, and call the methods externally instead of the properties
+    function __get($prop) {
+
+        return $this->load($prop);
+
+        // switch($prop) {
+        //     case 'booking':                     return $this->booking();
+        //     case 'bookingAvailability':         return $this->bookingAvailability();
+        //     case 'bookingAvailabilityPublic':   return $this->bookingAvailabilityPublic();
+        //     case 'checks':                      return $this->checks();
+        //     case 'checkDetails':                return $this->checkDetails();
+        //     case 'checkTotals':                 return $this->checkTotals();
+        //     case 'controlPanel':                return $this->controlPanel();
+        //     case 'customers':                   return $this->customers();
+        //     case 'events':                      return $this->events();
+        //     case 'facebook':                    return $this->facebook();
+        //     case 'helpers':                     return $this->helpers();
+        //     case 'passwords':                   return $this->passwords();
+        //     case 'products':                    return $this->products();
+        //     case 'replication':                 return $this->replication();
+        //     case 'reservations':                return $this->reservations();
+        //     case 'screenTemplate':              return $this->screenTemplate();
+        //     case 'screenTemplateDetail':        return $this->screenTemplateDetail();
+        //     case 'taxes':                       return $this->taxes();
+        //     case 'translations':                return $this->translations();
+        //     case 'users':                       return $this->users();
+        //     default:                            throw new \CSException("Attempted to access an invalid CSLogic subclass! Received: " . $prop);
+        // }
+    }
+
+    private function load($prop) {
+        $prop = '\ClubSpeed\Logic\\' . ucfirst($prop) . 'Logic'; // hacky -- we can go back to the old way detailed below, if desired
+        if (!isset($this->_lazy[$prop])) {
+            $this->_lazy[$prop] = new $prop($this, $this->db);
+        }
+        return $this->_lazy[$prop];
+    }
+
+    // /**
+    //  * A lazy-loading reference to a instantiated CSBooking class
+    //  * which contains database interface methods for online booking.
+    //  */
+    // public function booking() {
+    //     if (!isset($this->_lazy['booking'])) {
+    //         require_once(__DIR__.'/cs-booking.php');
+    //         $this->_lazy['booking'] = new \ClubSpeed\Logic\CSBooking($this, $this->db);
+    //     }
+    //     return $this->_lazy['booking'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to a instantiated CSBookingAvailability class
+    //  * which contains database interface methods for online booking.
+    //  */
+    // public function bookingAvailability() {
+    //     if (!isset($this->_lazy['booking'])) {
+    //         require_once(__DIR__.'/cs-booking-availability.php');
+    //         $this->_lazy['booking'] = new \ClubSpeed\Logic\CSBookingAvailability($this, $this->db);
+    //     }
+    //     return $this->_lazy['booking'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to a instantiated CSBookingAvailability class
+    //  * which contains database interface methods for online booking.
+    //  */
+    // public function bookingAvailability() {
+    //     if (!isset($this->_lazy['booking'])) {
+    //         require_once(__DIR__.'/cs-booking-availability.php');
+    //         $this->_lazy['booking'] = new \ClubSpeed\Logic\CSBookingAvailability($this, $this->db);
+    //     }
+    //     return $this->_lazy['booking'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSChecks class
+    //  * which contains database interface methods for checks.
+    //  */
+    // public function checks() {
+    //     if (!isset($this->_lazy['checks'])) {
+    //         require_once(__DIR__.'/cs-checks.php');
+    //         $this->_lazy['checks'] = new \ClubSpeed\Logic\CSChecks($this, $this->db);
+    //     }
+    //     return $this->_lazy['checks'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSCheckDetails class
+    //  * which contains database interface methods for check details.
+    //  */
+    // public function checkDetails() {
+    //     if (!isset($this->_lazy['checkDetails'])) {
+    //         require_once(__DIR__.'/cs-check-details.php');
+    //         $this->_lazy['checkDetails'] = new \ClubSpeed\Logic\CSCheckDetails($this, $this->db);
+    //     }
+    //     return $this->_lazy['checkDetails'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSCheckDetails class
+    //  * which contains database interface methods for check details.
+    //  */
+    // public function checkTotals() {
+    //     if (!isset($this->_lazy['checkTotals'])) {
+    //         require_once(__DIR__.'/cs-check-totals.php');
+    //         $this->_lazy['checkTotals'] = new \ClubSpeed\Logic\CSCheckTotals($this, $this->db);
+    //     }
+    //     return $this->_lazy['checkTotals'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSCustomers class
+    //  * which contains database interface methods for customers.
+    //  */
+    // public function controlPanel() {
+    //     if (!isset($this->_lazy['controlPanel'])) {
+    //         require_once(__DIR__.'/cs-control-panel.php');
+    //         $this->_lazy['controlPanel'] = new \ClubSpeed\Logic\CSControlPanel($this, $this->db);
+    //     }
+    //     return $this->_lazy['controlPanel'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSCustomers class
+    //  * which contains database interface methods for customers.
+    //  */
+    // public function customers() {
+    //     if (!isset($this->_lazy['customers'])) {
+    //         require_once(__DIR__.'/cs-customers.php');
+    //         $this->_lazy['customers'] = new \ClubSpeed\Logic\CSCustomers($this, $this->db);
+    //     }
+    //     return $this->_lazy['customers'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSEvents class
+    //  * which contains database interface methods for events.
+    //  */
+    // public function events() {
+    //     if (!isset($this->_lazy['events'])) {
+    //         require_once(__DIR__.'/cs-events.php');
+    //         $this->_lazy['events'] = new \ClubSpeed\Logic\CSEvents($this, $this->db);
+    //     }
+    //     return $this->_lazy['events'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSFacebook class
+    //  * which contains database interface methods for facebook.
+    //  */
+    // public function facebook() {
+    //     if (!isset($this->_lazy['facebook'])) {
+    //         require_once(__DIR__.'/cs-facebook.php');
+    //         $this->_lazy['facebook'] = new \ClubSpeed\Logic\CSFacebook($this, $this->db);
+    //     }
+    //     return $this->_lazy['facebook'];
+    // }
+
+    // *
+    //  * A lazy-loading reference to the CSHelpers class
+    //  * which contains database interface methods for helper methods.
+     
+    // public function helpers() {
+    //     if (!isset($this->_lazy['helpers'])) {
+    //         require_once(__DIR__.'/cs-helpers.php');
+    //         $this->_lazy['helpers'] = new \ClubSpeed\Logic\CSHelpers($this, $this->db);
+    //     }
+    //     return $this->_lazy['helpers'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSPasswords class
+    //  * which contains database interface methods for passwords.
+    //  */
+    // public function passwords() {
+    //     if (!isset($this->_lazy['passwords'])) {
+    //         require_once(__DIR__.'/cs-passwords.php');
+    //         $this->_lazy['passwords'] = new \ClubSpeed\Logic\CSPasswords($this, $this->db);
+    //     }
+    //     return $this->_lazy['passwords'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSPasswords class
+    //  * which contains database interface methods for passwords.
+    //  */
+    // public function products() {
+    //     if (!isset($this->_lazy['products'])) {
+    //         require_once(__DIR__.'/cs-products.php');
+    //         $this->_lazy['products'] = new \ClubSpeed\Logic\CSProducts($this, $this->db);
+    //     }
+    //     return $this->_lazy['products'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSReplication class
+    //  * which contains database interface methods for replication.
+    //  */
+    // public function replication() {
+    //     if (!isset($this->_lazy['replication'])) {
+    //         require_once(__DIR__.'/cs-replication.php');
+    //         $this->_lazy['replication'] = new \ClubSpeed\Logic\CSReplication($this, $this->db);
+    //     }
+    //     return $this->_lazy['replication'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSReservations class
+    //  * which contains database interface methods for reservations.
+    //  */
+    // public function reservations() {
+    //     if (!isset($this->_lazy['reservations'])) {
+    //         require_once(__DIR__.'/cs-reservations.php');
+    //         $this->_lazy['reservations'] = new \ClubSpeed\Logic\CSReservations($this, $this->db);
+    //     }
+    //     return $this->_lazy['reservations'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSScreenTemplate class
+    //  * which contains database interface methods for screen templates.
+    //  */
+    // public function screenTemplate() {
+    //     if (!isset($this->_lazy['screenTemplate'])) {
+    //         require_once(__DIR__.'/cs-screen-template.php');
+    //         $this->_lazy['screenTemplate'] = new \ClubSpeed\Logic\CSScreenTemplate($this, $this->db);
+    //     }
+    //     return $this->_lazy['screenTemplate'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSScreenTemplateDetail class
+    //  * which contains database interface methods for screen template details.
+    //  */
+    // public function screenTemplateDetail() {
+    //     if (!isset($this->_lazy['screenTemplateDetail'])) {
+    //         require_once(__DIR__.'/cs-screen-template-detail.php');
+    //         $this->_lazy['screenTemplateDetail'] = new \ClubSpeed\Logic\CSScreenTemplateDetail($this, $this->db);
+    //     }
+    //     return $this->_lazy['screenTemplateDetail'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSTaxes class
+    //  * which contains database interface methods for taxes.
+    //  */
+    // public function taxes() {
+    //     if (!isset($this->_lazy['taxes'])) {
+    //         require_once(__DIR__.'/cs-taxes.php');
+    //         $this->_lazy['taxes'] = new \ClubSpeed\Logic\CSTaxes($this, $this->db);
+    //     }
+    //     return $this->_lazy['taxes'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSTranslations class
+    //  * which contains database interface methods for translations and resources.
+    //  */
+    // public function translations() {
+    //     if (!isset($this->_lazy['translations'])) {
+    //         require_once(__DIR__.'/cs-translations.php');
+    //         $this->_lazy['translations'] = new \ClubSpeed\Logic\CSTranslations($this, $this->db);
+    //     }
+    //     return $this->_lazy['translations'];
+    // }
+
+    // /**
+    //  * A lazy-loading reference to the CSUsers class
+    //  * which contains database interface methods for users.
+    //  */
+    // public function users() {
+    //     if (!isset($this->_lazy['users'])) {
+    //         require_once(__DIR__.'/cs-users.php');
+    //         $this->_lazy['users'] = new \ClubSpeed\Logic\CSUsers($this, $this->db);
+    //     }
+    //     return $this->_lazy['users'];
+    // }
+}

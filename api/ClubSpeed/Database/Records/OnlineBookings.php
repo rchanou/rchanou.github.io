@@ -2,9 +2,7 @@
 
 namespace ClubSpeed\Database\Records;
 
-require_once(__DIR__.'/DbRecord.php');
-
-class OnlineBookings extends DbRecord {
+class OnlineBookings extends BaseRecord {
 
     public static $table      = 'dbo.OnlineBookings';
     public static $tableAlias = 'ob';

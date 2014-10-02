@@ -97,10 +97,11 @@
             });
 
             var getRaceDetails = function(options) {
+                log(options);
                 return sendRequest({
                     api: "races/" + options.raceId + ".json",
                     type: "GET",
-                    cache: z.coalesce(options.cache, true) // default to true
+                    // cache: z.coalesce(options.cache, true) // default to true
                 });
             }.extend({
                 poll: function(options) {

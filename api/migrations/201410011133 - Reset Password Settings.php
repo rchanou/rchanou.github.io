@@ -3,11 +3,29 @@
  * Create the settings (with defaults) for "Reset Password" email if they do
  * not already exist.
  */
-
 $settings = array(
-	'resetPasswordHTML' => '<h1>Reset Password Email HTML</h1>',
-	'resetPasswordTEXT' => 'Reset Password Email TEXT',
-	);
+	'resetPasswordHTML' => <<<EOS
+<h4>Reset Password Request</h4>
+<p>A password reset for your {{business}} account has been requested for this email!</p>
+<p>
+	If you made this request, please click the following link
+	or copy and paste the URL into your browser 
+	in order to continue with the password reset.
+</p>
+<a href="{{url}}">{{url}}</a>
+<br>
+<p>If you did not request this password reset, you may safely ignore this email.</p>
+EOS
+	, 'resetPasswordTEXT' => <<<EOS
+A password reset for your {{business}} account has been requested for this email!
+
+If you made this request, please click the following link or copy and paste the URL into your browser in order to continue with the password reset.
+
+{{url}}
+
+If you did not request this password reset, you may safely ignore this email.
+EOS
+);
 
 error_reporting(E_ALL);
 ini_set('display_errors', '1');

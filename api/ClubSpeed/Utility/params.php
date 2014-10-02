@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Utility;
+use ClubSpeed\Enums\Enums as Enums;
 
 /**
  * A utility class containing helper methods for dynamic parameters.
@@ -10,6 +11,12 @@ class Params {
     private static $reserved = array(
         'key'
         , 'debug'
+        , 'select'
+        , 'XDEBUG_PROFILE'
+    );
+
+    private static $special = array(
+        'filter'
     );
 
     /**
@@ -17,20 +24,12 @@ class Params {
      */
     private function __construct() {} // prevent any initialization of this class
 
-    private static function objIsEmpty($obj) {
-        // this really doesn't belong in this class - move eventually
-        foreach($obj as $val) {
-            if (isset($val))
-                return false;
-        }
-        return true;
-    }
-
     public static function hasNonReservedData($data) {
         if (is_null($data) || empty($data))
             return false;
         foreach($data as $key => $val) {
-            if (in_array($key, self::$reserved) === false && isset($val)) {
+            // if (!in_array($key, self::$reserved) && !in_array($key, self::$special) && isset($val)) {
+            if (!in_array($key, self::$reserved) && isset($val)) {
                 return true;
             }
         }
@@ -47,17 +46,82 @@ class Params {
         return $data;
     }
 
-    public static function buildInsert($record = array()) {
-        if (!$record instanceof \ClubSpeed\Database\Records\DbRecord)
-            throw new \InvalidArgumentException("Attempted to get all of a non DbRecord! Received: " . $record);
+    public static function isFilter($data) {
+        if (is_null($data) || empty($data))
+            return false;
+        if (isset($data['filter']))
+            return true;
+        return false;
+    }
 
+    // for use with params coming from the api
+    // cleanParams (below) should be deprecated 
+    // at some point for the newer structure
+    public static function clean($data, $limit = array()) {
+        $return = array(
+            'params' => array()
+        );
+        if (is_null($data) || empty($data)) {
+            return $return; // leave early?
+        }
+
+        foreach($data as $key => $val) {
+            // move the limit for insert/update to here? then we have to use json styled-names, instead of database styled-names
+            if (
+                !in_array($key, self::$reserved)
+                && !in_array($key, self::$special)
+                && (!empty($limit) ? in_array($key, $limit) : true)
+            ) {
+                $return['params'][$key] = $val;
+            }
+        }
+        if (isset($data['select'])) {
+            foreach(explode(',', $data['select']) as $key => $val) {
+                $return['select'][$key] = trim($val);
+            }
+        }
+        if (isset($data['filter']))
+            $return['filter'] = $data['filter']; // keep as string for now?
+
+        return $return;
+    }
+
+    // deprecated (!!!)
+    // public static function map($map = array(), $params = array()) {
+    //     $mapped = null;
+    //     if (is_array($params) || is_object($params)) {
+    //         $mapped = array();
+    //         foreach($params as $key => $val) {
+    //             if (isset($map[$key]))
+    //                 $mapped[$map[$key]] = $val;
+    //         }
+    //     }
+    //     else {
+    //         // expected a single name, not multiple params as an associative array -- rename parameter?
+    //         switch($type) {
+    //             case 'client':
+    //                 $mapped = $map[$params];
+    //                 break;
+    //             case 'server':
+    //                 $mapped = $map[$params];
+    //                 break;
+    //         }
+    //     }
+    //     return $mapped;
+    // }
+
+    public static function buildInsert($record = array()) {
+        if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
+            throw new \InvalidArgumentException("Attempted to build insert statement with a non BaseRecord! Received: " . $record);
+        if (\ClubSpeed\Utility\Objects::isEmpty($record))
+            throw new \InvalidArgumentValueException("Attempted to build insert statement with an empty BaseRecord!");
         $insert = array(
               'names'   => array()
             , 'values'  => array()
             , 'aliases' => array()
         );
         foreach($record as $name => $value) {
-            if (isset($value) && $value !== \CSEnums::DB_NULL) {
+            if (isset($value) && $value !== Enums::DB_NULL) {
                 $insert['names'][]      = $name;
                 $insert['values'][]     = $value;
                 $insert['aliases'][]    = ":" . $name;
@@ -75,8 +139,8 @@ class Params {
     }
 
     public static function buildSelect($record = array()) {
-        if (!$record instanceof \ClubSpeed\Database\Records\DbRecord)
-            throw new \InvalidArgumentException("Attempted to select from a non DbRecord! Received: " . $record);
+        if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
+            throw new \InvalidArgumentException("Attempted to select from a non BaseRecord! Received: " . $record);
         $select = array(
             'names'         => array()
             , 'table'       => $record::$table
@@ -97,39 +161,54 @@ class Params {
     }
 
     public static function buildGet($record = array()) {
-        if (!$record instanceof \ClubSpeed\Database\Records\DbRecord)
-            throw new \InvalidArgumentException("Attempted to get from a non DbRecord! Received: " . $record);
+        if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
+            throw new \InvalidArgumentException("Attempted to get from a non BaseRecord! Received: " . $record);
         $get = array(
             "key"       => $record::$key
-            , "alias"   => ":" . $record::$key
+            , "param"   => ":" . $record::$key
         );
-        $get['values'][$get['alias']] = $record->{$record::$key};
-
+        $get['values'][$get['param']] = $record->{$record::$key};
         $select = self::buildSelect($record);
         $get['statement'] = ""
             ."\n" . $select['statement']
             ."\nWHERE"
-            ."\n    " . $record::$tableAlias . '.' . $get['key'] . " = " . $get['alias']
+            ."\n    " . $record::$tableAlias . '.' . $get['key'] . " = " . $get['param']
             ;
         return $get;
     }
 
-    public static function buildFind($record = array(), $connector = "AND") {
-        if (!$record instanceof \ClubSpeed\Database\Records\DbRecord)
-            throw new \InvalidArgumentException("Attempted to find from a non DbRecord! Received: " . $record);
+    // public static function buildMatch($record = array()) {
+    //     // extension to convert a $record into the expected buildFind comparators,
+    //     // then make an exact match on the provided record properties
+    //     if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
+    //         throw new \InvalidArgumentException("Attempted to get from a non BaseRecord! Received: " . $record);
+
+    //     $comparators = new \ClubSpeed\Database\Helpers\GroupedComparator($record); // assumes direct matches for any set properties
+    //     return self::buildFind($record, $comparators);
+    // }
+
+    public static function buildFind($definition, $groupedComparators = null) {
+        if ($definition instanceof \ReflectionClass) {
+            $record = $definition->newInstance();
+        }
+        else if ($definition instanceof \ClubSpeed\Database\Records\BaseRecord) {
+            $record = $definition;
+            if (is_null($groupedComparators))
+                $groupedComparators = new \ClubSpeed\Database\Helpers\GroupedComparator($record);
+        }
+        else {
+            // should throw an exception here, probably -- didn't receive a definition or a grouped comparator
+            throw new \CSException("Params::buildFind() received a definition which was unable to be converted into a BaseRecord! Received: " . $definition);
+        }
+        $select = self::buildSelect($record);
+        if (is_null($groupedComparators) || $groupedComparators->isEmpty()) {
+            return $select; // just return the "all" select statement?
+        }
         $find = array(
               'columns' => array()
             , 'values'  => array()
         );
-        $select = self::buildSelect($record);
-        if (self::objIsEmpty($record)) {
-            // we will be unable to build a true where statement
-            // just return the select statement at this point (?)
-            // the result may be misleading if we just return all objects
-            // seems to be collect all statements -- maybe an error is best (?)
-            return $select;
-        }
-        $where = self::buildWhere($record);
+        $where = self::buildWhere($record, $groupedComparators);
         $find['statement'] = ""
             ."\n" . $select['statement']
             ."\n" . $where['statement']
@@ -138,43 +217,73 @@ class Params {
         return $find;
     }
 
-    public static function buildWhere($record = array(), $connector = "AND") {
-        // move on to build the where statement, if possible
-        foreach($record as $name => $value) {
-            if (isset($value)) {
-                if ($value === \CSEnums::DB_NULL) {
+    public static function buildWhere($record, $groupedComparators = null) {
+        $where = array();
+        if (is_null($groupedComparators))
+            $groupedComparators = new \ClubSpeed\Database\Helpers\GroupedComparator($record); // build if null?
+        $comparators = $groupedComparators->comparators;
+        foreach($comparators as $key => $data) {
+            $comparator = $data['comparator'];
+            $connector = @$data['connector'];
+            // at least one of left or right has to be a column, after filter validation
+            // note: is this really the job of this function, or should this alias determination
+            // and value vs column determination be moved to a validation method elsewhere (?)
+            if (!property_exists($record, $comparator->left)) {
+                // left is a value
+                $param = ':p' . (count(@$where['values']) ?: 0);
+                $where['columns'][] = array(
+                      'left'        => $param
+                    , 'operator'    => ' '. $comparator->operator . ' '
+                    , 'right'       => $record::$tableAlias . '.' . $comparator->right
+                    , 'connector'   => isset($connector) ? $connector . ' ' : null
+                );
+                $where['values'][$param] = $comparator->left; // alias it to protect against injection
+            }
+            else if (!property_exists($record, $comparator->right)) {
+                // right is a value
+                if ($comparator->right != 'NULL') { // convert to DB_NULL at some point -- make map do the conversion (?)
+                    // check for IS(?: NOT) NULL special case
+                    $param = ':p' . (count(@$where['values']) ?: 0);
                     $where['columns'][] = array(
-                        'name'          => $name
-                        , 'comparator'  => ' IS '
-                        , 'alias'       => 'NULL'
+                          'left'        => $record::$tableAlias . '.' . $comparator->left
+                        , 'operator'    => ' '. $comparator->operator . ' '
+                        , 'right'       => $param
+                        , 'connector'   => isset($connector) ? $connector . ' ' : null
                     );
+                    $where['values'][$param] = $comparator->right;
                 }
                 else {
+                    // don't alias the right, if it is supposed to be a NULL comparison
+                    // CAREFUL FOR INJECTION HERE -- more dangerous than the others
                     $where['columns'][] = array(
-                          'name'        => $name
-                        , 'value'       => $value
-                        , 'alias'       =>  ":" . $name
-                        , 'comparator'  => " = "
+                          'left'        => $record::$tableAlias . '.' . $comparator->left
+                        , 'operator'    => ' '. $comparator->operator . ' '
+                        , 'right'       => $comparator->right
+                        , 'connector'   => isset($connector) ? $connector . ' ' : null
                     );
-                    $where['values'][":" . $name] = $value;
                 }
+            }
+            else {
+                // both are columns (?)
+                // handle later if necessary, this isn't likely to be used
+                return null;
             }
         }
         foreach($where['columns'] as $key => $val) {
             $where['columns'][$key] = "\n    "
-                . $record::$tableAlias . '.'
-                . $val['name']
-                . $val['comparator']
-                . $val['alias']
+                . @$val['connector'] . ''
+                . $val['left']
+                . $val['operator']
+                . $val['right']
                 ;
         }
-        $where['statement'] = "\nWHERE" . implode(" " . $connector . " ", $where['columns']);
+        $where['statement'] = "\nWHERE" . implode("", $where['columns']);
         return $where;
     }
 
     public static function buildUpdate($record = array()) {
-        if (!$record instanceof \ClubSpeed\Database\Records\DbRecord)
-            throw new \InvalidArgumentException("Attempted to update using a non DbRecord! Received: " . $record);
+        if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
+            throw new \InvalidArgumentException("Attempted to update using a non BaseRecord! Received: " . $record);
 
         // get a copy of the record
         // clean all parameters but the id
@@ -201,7 +310,7 @@ class Params {
                       'name' => $name
                     , 'alias' => ":" . $name
                 );
-                $update['values'][":" . $name] = ($value === \CSEnums::DB_NULL ? NULL : $value);
+                $update['values'][":" . $name] = ($value === Enums::DB_NULL ? NULL : $value);
             }
         }
         $tablePrefix = $record::$tableAlias . '.';
@@ -225,11 +334,10 @@ class Params {
     }
 
     public static function buildDelete($record = array()) {
-        if (!$record instanceof \ClubSpeed\Database\Records\DbRecord)
-            throw new \InvalidArgumentException("Attempted to delete from a non DbRecord! Received: " . $record);
+        if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
+            throw new \InvalidArgumentException("Attempted to delete from a non BaseRecord! Received: " . $record);
         if (is_null($record->{$record::$key}))
-            // will this work with php 5.3? if not, use a temp variable to get the static property name
-            throw new \InvalidArgumentException("Attempted to delete a DbRecord without providing an id! Received: " . $record);
+            throw new \InvalidArgumentException("Attempted to delete a BaseRecord without providing an id! Received: " . $record);
         
         $where = self::buildWhere($record);
         $delete['statement'] = ""
@@ -239,6 +347,29 @@ class Params {
             ;
         $delete['values'] = $where['values'];
         return $delete;
+    }
+
+    public static function buildExists($record = array()) {
+        if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
+            throw new \InvalidArgumentException("Attempted to check existence from a non BaseRecord! Received: " . $record);
+        if (is_null($record->{$record::$key}))
+            throw new \InvalidArgumentException("Attempted to check existence of a BaseRecord without providing an id! Received: " . $record);
+        
+        $exists = array();
+        $exists['statement'] = ''
+            ."\nSELECT"
+            ."\n    CASE WHEN EXISTS ("
+            ."\n        SELECT " . $record::$tableAlias . ".*"
+            ."\n        FROM " . $record::$table . " " . $record::$tableAlias
+            ."\n        WHERE " . $record::$tableAlias . "." . $record::$key . " = :" . $record::$key
+            ."\n    )"
+            ."\n    THEN 1"
+            ."\n    ELSE 0"
+            ."\n    END AS [Exists]";
+        $exists['values'] = array(
+            ":" . $record::$key => $record->{$record::$key}
+        );
+        return $exists;
     }
 
     /**
@@ -254,7 +385,7 @@ class Params {
     public static function cleanParams($requiredParams = array(), $allowedParams = array(), $currentParams = array()) {
         $paramsCleaned = array();
         foreach($requiredParams as $requiredParam) {
-            if (!isset($currentParams[$requiredParam]) || empty($currentParams[$requiredParam])) {
+            if (!isset($currentParams[$requiredParam]) || $currentParams[$requiredParam] === "") {
                 throw new \RequiredArgumentMissingException("Required parameter $requiredParam was missing!");
             }
             $paramsCleaned[$requiredParam] = $currentParams[$requiredParam];

@@ -13,7 +13,7 @@ class Events
     // events/list.json GET
     // note that list is a keyword in php -- careful with this...
     public function getlist($request_data) {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         try {
@@ -49,7 +49,7 @@ class Events
     // todo: convert to the db abstracted class
     public function closures()
     {
-        if (!\ClubSpeed\Security\Validate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 

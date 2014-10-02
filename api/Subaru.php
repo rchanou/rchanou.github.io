@@ -35,7 +35,7 @@ class Subaru
      * @return mixed[string] 
      */
     public function survey() {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 

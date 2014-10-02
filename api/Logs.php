@@ -14,7 +14,7 @@ class Logs
 
     protected function getAfter($id, $timestamp)
     {
-        if (!\ClubSpeed\Security\Validate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
