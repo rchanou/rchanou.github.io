@@ -21,8 +21,8 @@ BEGIN
         , RemoteUserID NVARCHAR(255) NOT NULL
         , TokenType NVARCHAR(255) NOT NULL
         , Token NVARCHAR(MAX) NOT NULL
-        , CreatedAt DATETIME2 DEFAULT SYSDATETIME()
-        , ExpiresAt DATETIME2
+        , CreatedAt DATETIME DEFAULT GETDATE()
+        , ExpiresAt DATETIME
         , Meta NVARCHAR(MAX)
         , CONSTRAINT PK_AuthenticationTokens
             PRIMARY KEY CLUSTERED (AuthenticationTokensId)

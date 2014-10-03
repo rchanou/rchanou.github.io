@@ -21,8 +21,8 @@ BEGIN
         , CustomersID INT -- allow to be nullable
         , SessionID NVARCHAR(255) NOT NULL
         , Quantity INT NOT NULL
-        , CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME()
-        , ExpiresAt DATETIME2 NOT NULL DEFAULT DATEADD(MINUTE, 30, SYSDATETIME())
+        , CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
+        , ExpiresAt DATETIME NOT NULL DEFAULT DATEADD(MINUTE, 30, GETDATE())
         , CONSTRAINT PK_OnlineBookingReservations PRIMARY KEY CLUSTERED (OnlineBookingReservationsID)
         , CONSTRAINT FK_OnlineBookingReservations_OnlineBookings FOREIGN KEY (OnlineBookingsID)
             REFERENCES dbo.OnlineBookings (OnlineBookingsID)

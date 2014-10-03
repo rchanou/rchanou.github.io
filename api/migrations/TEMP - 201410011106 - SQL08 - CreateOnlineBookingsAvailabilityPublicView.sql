@@ -24,7 +24,7 @@ WHERE
         DATEADD(
             SECOND
             , CONVERT(INT, COALESCE(SettingValue, DefaultSetting, 1800))
-            , SYSDATETIME()
+            , GETDATE()
         )
         FROM dbo.ControlPanel cp
         WHERE
@@ -37,7 +37,7 @@ WHERE
         DATEADD(
             SECOND
             , CONVERT(INT, COALESCE(SettingValue, DefaultSetting, 1800))
-            , SYSDATETIME()
+            , GETDATE()
         )
         FROM dbo.ControlPanel cp
         WHERE
