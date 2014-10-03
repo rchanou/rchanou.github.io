@@ -273,6 +273,17 @@ class CheckoutController extends BaseController
         }
         else if ($result === true) //STEP 6: If successful, direct to success page
         {
+            $cart = Session::get('cart'); //Remove all online booking reservations
+            if ($cart !== null)
+            {
+                foreach ($cart as $cartItemId => $cartItem)
+                {
+                    $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
+                    CS_API::deleteOnlineReservation($onlineBookingsReservationId); //Remove the online booking
+                }
+            }
+
+            //Direct to success page
             $successResults = array(
                 'check' => $check,
                 'checkId' => $checkId,
