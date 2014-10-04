@@ -570,7 +570,14 @@
                     {
                         var minutes = parseInt(($scope.currentScoreboard.race.duration*60 - $scope.currentScoreboard.race.race_time_in_seconds)/60);
                         var seconds = parseInt(($scope.currentScoreboard.race.duration*60 - $scope.currentScoreboard.race.race_time_in_seconds)%60);
-
+                        if (minutes < 0)
+                        {
+                            minutes = 0;
+                        }
+                        if (seconds < 0)
+                        {
+                            seconds = 0;
+                        }
                     }
                     else //by laps
                     {
