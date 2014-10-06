@@ -23,7 +23,7 @@ $indexHTML = <<<EOT
 		#container {
 			display: block;
 			position: absolute;
-			top: 0;
+			top: 10px;
 			right: 0;
 			padding: 1em;
 			width: 100%;
