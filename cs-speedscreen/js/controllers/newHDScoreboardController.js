@@ -335,7 +335,7 @@
                     {
                         if (Object.size(this.nextRacersHistory) > 0 ) //And we have any "racers coming up" in memory
                         {
-                            if (this.nextRacersHistory[0].race.id == $scope.currentScoreboard.race.id) //If the "racers coming up" are actually racing right now
+                            while (Object.size(this.nextRacersHistory) > 0 && this.nextRacersHistory[0].race.id <= $scope.currentScoreboard.race.id) //If the "racers coming up" are actually racing right now
                             {
                                 this.nextRacersHistory.shift(); //Remove them from the "racers coming up" memory, since they're already racing
                             }
@@ -380,7 +380,7 @@
                 {
                     if (Object.size(this.nextRacersHistory) > 0) //And we have items in the next racer history
                     {
-                        if (this.nextRacersHistory[0].race.id == this.lastHeatID) //And the next racer history heat has already been seen
+                        if (this.nextRacersHistory[0].race.id <= this.lastHeatID) //And the next racer history heat has already been seen
                         {
                             this.nextRacersHistory.splice(0,1); //Remove it; that race is already over
                         }
