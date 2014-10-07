@@ -8,12 +8,9 @@
 			.when('/racersearch', {templateUrl : 'pages/racersearch.html'})
 			.when('/racersearch/:racer_id', {templateUrl : 'pages/racersearch.html'})
 			.when('/racesummary/:race_id', {templateUrl : 'pages/racesummary.html'})
-			.when('/livetiming', {templateUrl : 'pages/livetiming.html',
-				controller  : 'liveTimingController'})//TODO: Bug - triggering controller twice.
-			.when('/livetiming/:desiredTable', {templateUrl : 'pages/livetiming.html',
-				controller  : 'liveTimingController'})
-            .when('/livescoreboard', {templateUrl : 'pages/livescoreboard.html',
-                controller  : 'liveScoreboardController'})
+			.when('/livetiming', {templateUrl : 'pages/livetiming.html'})
+			.when('/livetiming/:desiredTable', {templateUrl : 'pages/livetiming.html'})
+            .when('/livescoreboard', {templateUrl : 'pages/livescoreboard.html'})
 			.when('/aboutus', {templateUrl : 'pages/aboutus.html'})
 			.when('/signin', {templateUrl : 'pages/signin.html',
                 controller  : 'signInController'
