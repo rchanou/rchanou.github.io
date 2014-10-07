@@ -1,5 +1,5 @@
 //TODO: Description
-clubSpeedOnlineApp.controller('liveScoreboardController', function($scope, $routeParams, SocketIOService, ClubSpeedJSONService) {
+clubSpeedOnlineApp.controller('liveScoreboardController', function($scope, $routeParams, SocketIOService, ClubSpeedJSONService,globalVars) {
 
     function LiveScoreboard()
     {
@@ -150,13 +150,15 @@ clubSpeedOnlineApp.controller('liveScoreboardController', function($scope, $rout
 
     $scope.currentScoreboard = currentScoreboard;
 
+
     function pollForScoreboard()
     {
         ClubSpeedJSONService.getScoreboardData().success(function (data) {
             currentScoreboard.receiveLatestScoreboard(data);
             console.log(JSON.stringify(data));
         });
-        setTimeout(pollForScoreboard,1000);
+
+        globalVars.setScoreboardUpdateTimeout(setTimeout(pollForScoreboard,1000));
     }
 
     pollForScoreboard();

@@ -65,10 +65,28 @@
 // ### Miscellaneous AngularJS Behavior Adjustments ###
 // ####################################################
 
+    clubSpeedOnlineApp.factory('globalVars', function() {
+        var globalVars = {};
+        var scoreboardUpdateTimeout = null;
+
+        globalVars.setScoreboardUpdateTimeout = function(newScoreboardUpdateTimeout) { scoreboardUpdateTimeout = newScoreboardUpdateTimeout; }
+        globalVars.resetScoreboardUpdateTimeout = function()
+        {
+            if (scoreboardUpdateTimeout !== null)
+            {
+                clearTimeout(scoreboardUpdateTimeout);
+                scoreboardUpdateTimeout = null;
+            }
+        }
+
+        return globalVars;
+    });
+
 //Scroll to the top of the page whenever a route is changed
-clubSpeedOnlineApp.run(function($rootScope, $location, $anchorScroll,SocketIOService) {
+clubSpeedOnlineApp.run(function($rootScope, $location, $anchorScroll,SocketIOService,globalVars) {
     $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
         $anchorScroll();
+        globalVars.resetScoreboardUpdateTimeout();
         /*if ($location.path() !== "/livescoreboard")
         {
             SocketIOService.disconnect();
