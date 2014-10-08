@@ -32,6 +32,7 @@ class ReservationsLogic extends BaseLogic {
               'ExpiresAt'
             , 'OnlineBookingsID'
             , 'Quantity'
+            , 'OnlineBookingReservationStatusID'
         );
     }
 
@@ -51,6 +52,7 @@ class ReservationsLogic extends BaseLogic {
             if ($reservation->Quantity < 1)
                 throw new \InvalidArgumentValueException("Update reservation attempted to use a quantity less than 1! Received: " . $reservation->Quantity);
 
+            $reservation->OnlineBookingReservationStatusID = 1; // hard coded to 1 (temporary) -- make a lookup from dbo.OnlineBookingReservationStatus eventually
             return $reservation;
         });
     }
@@ -72,6 +74,8 @@ class ReservationsLogic extends BaseLogic {
                 if ($availability->ProductSpotsAvailableOnline < $new->Quantity - $old->Quantity)
                     throw new \InvalidArgumentValueException("Update reservation attempted to use a quantity higher than what was available! Requested: " . $new->Quantity . " :: Available: " . $availability->ProductSpotsAvailableOnline);
             }
+            if ($new->OnlineBookingReservationStatusID === 2) // permanent -- MAKE THIS A LOOKUP LATER
+                $new->ExpiresAt = \ClubSpeed\Utility\Convert::toDateForServer('2999-12-31');
             return $new;
         });
     }

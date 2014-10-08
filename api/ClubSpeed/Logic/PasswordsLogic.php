@@ -1,7 +1,8 @@
 <?php
 
 namespace ClubSpeed\Logic;
-require_once(__DIR__.'/../Utility/Tokens.php');
+use ClubSpeed\Mail\MailService as Mail;
+use ClubSpeed\Logging\LogService as Log;
 
 /**
  * The business logic class
@@ -58,7 +59,7 @@ class PasswordsLogic extends BaseLogic {
             $this->db->authenticationTokens->create($authentication);
         }
 
-        $emailTo = $email; // for clarity
+        $emailTo = array($email => $customer['FName'] . ' ' . $customer['LName']);
 
         $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
         if (empty($emailFrom))
@@ -66,7 +67,7 @@ class PasswordsLogic extends BaseLogic {
         $emailFrom = $emailFrom[0];
         $emailFrom = $emailFrom->SettingValue;
         $emailFrom = explode('@', $emailFrom);
-        $emailFrom = 'no-reply@' . $emailFrom[1]; // safe way to do this? we don't really have a fallback value, other than clubspeed..
+        $emailFrom = array('no-reply@' . $emailFrom[1] => "No Reply"); // safe way to do this? we don't really have a fallback value, other than clubspeed..
         
         $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
         if (empty($businessName))
@@ -83,59 +84,19 @@ class PasswordsLogic extends BaseLogic {
         $url = 'https://' . $_SERVER['SERVER_NAME'] . '/booking/resetpassword/form?token=' . urlencode($authentication->Token);
         $html = str_replace("{{url}}", $url, $html);
         $html = str_replace("{{business}}", $businessName, $html);
-        
-        $settings = $this->logic->helpers->getControlPanelSettings(
-            "MainEngine",
-            array(
-                "SendWelcomeMail"
-                , "EmailWelcomeFrom"
-                , "SMTPServerUseAuthentiation"
-                , "SMTPServer"
-                , "SMTPServerPort"
-                , "SMTPServerAuthenticationUserName"
-                , "SMTPServerAuthenticationPassword"
-                , "SMTPServerUseSSL"
-            )
-        );
-        //Send the e-mail
-        $message = \Swift_Message::newInstance()
-            ->setSubject("Password Reset for " . $businessName)
-            ->setFrom(array($emailFrom => $businessName))
-            ->setTo(array($emailTo => $customer['FName'] . ' ' . $customer['LName']))
-            ->setBody($html,'text/html');
 
-        if (!isset($settings['SMTPServerPort']))
-        {
-            $settings['SMTPServerPort'] = "25";
+        $mail = Mail::builder()
+            ->subject("Password Reset for " . $businessName)
+            ->from($emailFrom)
+            ->to($emailTo)
+            ->body($html);
+        try {
+            Mail::send($mail);
+            Log::debug("Sent password reset email to: " . $customer['EmailAddress']);
         }
-        if (isset($settings['SMTPServerUseAuthentiation']) && strtolower($settings['SMTPServerUseAuthentiation']) == "true")
-        {
-            if (isset($settings['SMTPServerUseSSL']) && strtolower($settings['SMTPServerUseSSL']) == "true")
-            {
-                $transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'], 'ssl')
-                    ->setUsername($settings['SMTPServerAuthenticationUserName'])
-                    ->setPassword($settings['SMTPServerAuthenticationPassword']);
-            }
-            else
-            {
-                $transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'])
-                    ->setUsername($settings['SMTPServerAuthenticationUserName'])
-                    ->setPassword($settings['SMTPServerAuthenticationPassword']);
-            }
-        }
-        else
-        {
-            $transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort']);
-        }
-
-        $mailer = \Swift_Mailer::newInstance($transport);
-        try
-        {
-            $result = $mailer->send($message,$failures);
-        }
-        catch (Exception $e)
-        {
-            return array('Exception' => $e->getMessage(), 'Settings' => $settings);
+        catch(\Exception $e) {
+            Log::error("Unable to send password reset email to: " . $customer['EmailAddress'], $e); 
+            throw $e; // catch the exception to log it, then rethrow / consider this a fatal error
         }
     }
 

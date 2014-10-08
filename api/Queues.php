@@ -10,7 +10,6 @@ class Queues
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
     }
 
-    // queues/add.json POST
     public function post($request_data) {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");

@@ -31,13 +31,19 @@ class Convert {
      * @param string dateFormat (optional) The format to use as an override for the final result for the server. Note that this is typically already defined in config.php.
      * @return string The dateString in the format which the database expects.
      */
-    public static function toDateForServer($dateString, $dateFormat = null) {
-        if (is_null($dateString))
+    public static function toDateForServer($date, $dateFormat = null) {
+        if (is_null($date))
             return Enums::DB_NULL;
             // return $dateString; // don't attempt to convert nulls
-        
-        if (is_string($dateString)) {
-            $dateArray = date_parse_from_format(self::DATE_FORMAT_FROM_CLIENT, $dateString);
+
+        if (is_string($date)) {
+
+            $dateTime = new \DateTime($date);
+            return $dateTime->format($dateFormat ?: $GLOBALS['dateFormat'] ?: 'Y-m-d H:i:s');
+
+            // deprecating the below, due to integer issues with php timestamps (can only go up to 2038-01-18 before overflow)
+
+            // $dateArray = date_parse_from_format(self::DATE_FORMAT_FROM_CLIENT, $date);
             // need a method for trapping errors here and recording them, or just fail?
             // if ($dateArray["error_count"] == 0) {
                 // check to make sure we have a valid month/day/year combination
@@ -63,7 +69,10 @@ class Convert {
                 }
             // }
         }
-        throw new \InvalidArgumentException("Convert::toDateForServer was unable to convert the provided string! Received: " . $dateString);
+        else if ($date instanceof \DateTime) {
+            return $date->format($GLOBALS['dateFormat'] ?: 'Y-m-d H:i:s');
+        }
+        throw new \InvalidArgumentException("Convert::toDateForServer was unable to convert the provided item! Received: " . $date);
         // return null; // what to return in the case of a failure (???)
     }
 

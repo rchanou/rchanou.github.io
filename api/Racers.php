@@ -203,8 +203,12 @@ class Racers
             // *** DUE TO A BUG FOUND AT PPR LONGISLAND ON 9/3/2014       ***
             // note: the Queues class contains the logic to determine 
             // whether or not to add to the customer or event queue
-            // $this->queues->postadd($request_data);
-
+            try {
+                $this->queues->post($request_data);
+            }
+            catch(Exception $e) {
+                // ignore exceptions from queues->post for now, we want to be sure to return the $customer object
+            }
             return $customer;
         }
         catch(RestException $e) {
@@ -462,43 +466,17 @@ class Racers
                     $emailStrings['Text'] = str_replace($tagsToReplace,$dataToInsert,$emailStrings['Text']);
 
                     //Send the e-mail
-                    $message = Swift_Message::newInstance()
-                        ->setSubject($emailStrings['Subject'])
-                        ->setFrom(array($settings['EmailWelcomeFrom'] => $request_data['BusinessName']))
-                        ->setTo(array($request_data['email'] => $request_data['firstname'] . ' ' . $request_data['lastname']))
-                        ->setBody($emailStrings['Text'],'text/html');
-
-                    if (!isset($settings['SMTPServerPort']))
-                    {
-                        $settings['SMTPServerPort'] = "25";
+                    $mail = Mail::builder()
+                        ->subject($emailStrings['Subject'])
+                        ->from(array($settings['EmailWelcomeFrom'] => $request_data['BusinessName']))
+                        ->to(array($request_data['email'] => $request_data['firstname'] . ' ' . $request_data['lastname']))
+                        ->body($emailStrings['Text'],'text/html');
+                    try {
+                        Mail::send($mail);
+                        Log::debug("Welcome email sent to: " . $request_data['email']);
                     }
-                    if (isset($settings['SMTPServerUseAuthentiation']) && strtolower($settings['SMTPServerUseAuthentiation']) == "true")
-                    {
-                        if (isset($settings['SMTPServerUseSSL']) && strtolower($settings['SMTPServerUseSSL']) == "true")
-                        {
-                            $transport = Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'], 'ssl')
-                                ->setUsername($settings['SMTPServerAuthenticationUserName'])
-                                ->setPassword($settings['SMTPServerAuthenticationPassword']);
-                        }
-                        else
-                        {
-                            $transport = Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'])
-                                ->setUsername($settings['SMTPServerAuthenticationUserName'])
-                                ->setPassword($settings['SMTPServerAuthenticationPassword']);
-                        }
-                    }
-                    else
-                    {
-                        $transport = Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort']);
-                    }
-
-                    $mailer = Swift_Mailer::newInstance($transport);
-                    try
-                    {
-                        $result = $mailer->send($message,$failures);
-                    }
-                    catch (Exception $e)
-                    {
+                    catch(Exception $e) {
+                        Log::error("Unable to send welcome email to: " . $request_data['email'], $e);
                         return array('Exception' => $e->getMessage(), 'Settings' => $settings);
                     }
                 }

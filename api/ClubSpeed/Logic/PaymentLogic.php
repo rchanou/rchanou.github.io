@@ -21,4 +21,17 @@ class PaymentLogic extends BaseLogic {
         parent::__construct($logic, $db);
         $this->interface = $this->db->payment;
     }
+
+    public function create($params = array()) {
+        $db =& $this->db;
+        return parent::_create($params, function($payment) use (&$db) {
+
+            // more todo
+
+            if (is_null($payment->VoidTerminal))
+                $payment->VoidTerminal = '';
+
+            return $payment;
+        });
+    }
 }

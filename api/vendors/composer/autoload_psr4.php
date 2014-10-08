@@ -29,4 +29,5 @@ return array(
     'Omnipay\\Coinbase\\' => array($vendorDir . '/omnipay/coinbase/src'),
     'Omnipay\\CardSave\\' => array($vendorDir . '/omnipay/cardsave/src'),
     'Omnipay\\AuthorizeNet\\' => array($vendorDir . '/omnipay/authorizenet/src'),
+    'Omnipay\\PCCharge\\' => array($vendorDir . '/omnipay/pccharge/src'),
 );

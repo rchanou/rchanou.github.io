@@ -32,8 +32,8 @@ class WebApiRemoting {
         $this->apiInfo = array(
             // 'protocol'  => ($this->isSecure() ? 'https' : 'http').'://'
             'protocol'  => 'https://' // https is required for WebAPI -- isSecure() may not actually be required
-            // , 'root'    => $_SERVER['SERVER_NAME'] // for live!
-            , 'root'    => "192.168.111.140" // for testing(!!!)
+            , 'root'    => $_SERVER['SERVER_NAME'] // for live!
+            // , 'root'    => "192.168.111.140" // for testing(!!!)
             , 'api'     => '/WebAPI'
             , 'version' => '/v1.5'
         );
@@ -129,6 +129,7 @@ class WebApiRemoting {
         $apiUrl = $this->getApiUrl($callName);
         $response = \Httpful\Request::get($apiUrl)
             ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
+            ->timeoutIn(3) // timeout after 3 seconds
             ->send();
         return $this->handleResponse($response);
     }
@@ -146,8 +147,9 @@ class WebApiRemoting {
             throw new \RequiredArgumentMissingException("WebApi ProcessPayment received an empty set of params!");
         if (!isset($params['card']) || empty($params['card']))
             throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty credit card object!");
-        if (!isset($params['checkId']) || empty($params['checkId']))
-            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty checkId!");
+        if (!isset($params['check']) || empty($params['check']))
+            throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty check!");
+        
         $card = $params['card'];
         if (!isset($card['firstName']) || empty($card['firstName']))
             throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.firstName!");
@@ -164,7 +166,7 @@ class WebApiRemoting {
         if (!isset($card['cvv']) || empty($card['cvv']))
             throw new \RequiredArgumentMissingException("WebApi ProcessPayment received a null or empty card.cvv!");
         
-        $checkId = \ClubSpeed\Utility\Convert::toNumber(@$params['checkId']);
+        $checkId = \ClubSpeed\Utility\Convert::toNumber(@$params['check']['checkId']);
         if (!isset($checkId) || is_null($checkId) || !is_int($checkId))
             throw new \RequiredArgumentMissingException("Payment processor received an invalid format for checkId! Received: " . @$params['checkId']);
         $checkTotals = $this->logic->checkTotals->get($checkId);
@@ -201,7 +203,7 @@ class WebApiRemoting {
 
         $response = \Httpful\Request::post($apiUrl)
             ->sendsJson()
-            ->expects('application/json')
+            // ->expects('application/json')
             ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
             ->body(json_encode($data))
             ->send();
@@ -209,6 +211,43 @@ class WebApiRemoting {
         if ($response->code != 200) // should we expose the raw_body when not 200? will designate a server failure (most likely 500)
             throw new \CSException($response->raw_body, $response->code);
         $data = (array)$response->body;
+
+        pr($data);
+        die();
+
+        // $data = array( // TEST DATA -- REPRESENTS A SUCCESSFUL CREDIT CARD PURCHASE
+        //     'ProcessingTime' => 9421.5015
+        //     , 'Result' => 'CAPTURED'
+        //     , 'AuthorizationCode' => '07763P'
+        //     , 'ReferenceNumber' => ''
+        //     , 'TroutD' => 2126
+        //     , 'TransactionDate' => '2014-10-02T10:41:50.9158084-07:00'
+        //     , 'ErrorCode' => 0
+        //     , 'ErrorDescription' => ''
+        //     , 'AVS' => 'N'
+        //     , 'CVV2' => ''
+        //     , 'AmountDue' => 0.01
+        //     , 'CardIssuer' => 'MC'
+        //     , 'XMLResponse' =>
+        //     '<XML_REQUEST>
+        //             <USER_ID>User1</USER_ID>
+        //             <TROUTD>2126</TROUTD>
+        //             <RESULT>CAPTURED</RESULT>
+        //             <AUTH_CODE>07763P</AUTH_CODE>
+        //             <AVS_CODE>N</AVS_CODE>
+        //             <TICKET>2365</TICKET>
+        //             <INTRN_SEQ_NUM>2126</INTRN_SEQ_NUM>
+        //             <IND>NN</IND>
+        //             <PROC_RESP_CODE>0</PROC_RESP_CODE>
+        //             <CMRCL_TYPE>0</CMRCL_TYPE>
+        //             <PURCH_CARD_TYPE>0</PURCH_CARD_TYPE>
+        //             <PS2000>MWEKBX8ZC      1002A 01</PS2000>
+        //         </XML_REQUEST>'
+        //     , 'ResponseText' => ''
+        //     , 'ResultCode' => 0
+        // );
+
+
         // expected response structure
         // {
         //   "ProcessingTime": 0,
@@ -229,17 +268,24 @@ class WebApiRemoting {
         // }
         if (strtolower($data['Result']) == 'captured' || strtolower($data['Result']) == 'approved') {
 
-            $date = strtotime('c', $data['TransactionDate']);
-            pr($date);
-            die();
+            $transactionDate = \ClubSpeed\Utility\Convert::toDateForServer(new \DateTime($data['TransactionDate']));
             // success!
             // build a payment record, update necessary items
-            $payment = $this->logic->payment->dummy();
-            $payment->CheckID = $checkId;
-            $payment->UserID = 1; // probably non-nullable, onlinebooking userId?
-            $payment->PayType = 2; // always credit card when through pccharge?
-            $payment->PayDate = \ClubSpeed\Utility\Convert::getDate(); // or do we want to use $data['TransactionDate'] ? 
-            $payment->PayStatus = 1; // PayStatus.PAID from VB
+            $payment                  = $this->logic->payment->dummy();
+            $payment->AVS             = $data['AVS'];
+            $payment->CheckID         = $checkId;
+            $payment->ExtCardType     = $data['CardIssuer'];
+            $payment->PayAmount       = $check->CheckTotal;
+            $payment->PayDate         = $transactionDate;
+            $payment->PayStatus       = 1; // PayStatus.PAID from VB
+            $payment->PayTax          = $checkTotals->CheckTax;
+            $payment->PayTerminal     = 'api';// use this?
+            $payment->PayType         = 2; // always credit card when through pccharge?
+            $payment->ResponseTime    = (int)$data['ProcessingTime'];
+            $payment->TransactionDate = $transactionDate; // doesn't seem to ever be set, but since we have the data anyways..
+            $payment->TroutD          = $data['TroutD'];
+            $payment->UserID          = 1; // probably should be non-nullable, onlinebooking userId?
+            $this->logic->payment->create($payment);
 
             // Public Enum PayStatus
             // PAID = 1
@@ -252,19 +298,17 @@ class WebApiRemoting {
             // End Enum
 
             // pr("success!");
-            return true; // or something
+            // die();
+            // return true; // or something
         }
         else {
+            // more testing required here
             if (isset($data['ErrorCode']) && !empty($data['ErrorCode'])) {
                 throw new \CSException($data['ErrorCode'] . ": " . $data['ErrorDescription']);
             }
             else {
                 throw new \CSException($data['Result'] . ": " . $data['AuthorizationCode']);
             }
-            // failure!
-            // pr("failure!");
-            pr($data);
-            throw new \CSException($data['ErrorCode'] . ": " . $data['ErrorDescription']);
         }
         // die();
         // return $response;

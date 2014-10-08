@@ -66,7 +66,7 @@ abstract class BaseLogic {
     public function get($id) {
         $get = $this->interface->get($id);
         if (is_null($get) || empty($get))
-            throw new \RecordNotFoundException("Looking for record -- " . $this->interface->table . ".[" . $this->interface->key . "] = " . $id);
+            throw new \RecordNotFoundException("Unable to find record -- " . $this->interface->table . ".[" . $this->interface->key . "] = " . $id);
         return $get;
     }
 
@@ -107,7 +107,7 @@ abstract class BaseLogic {
         // assume that if insertable is not set,
         // then all properties are available for create
         if (empty($this->insertable))
-            return $mapped; 
+            return (array)$mapped; 
         return $this->restrict($this->insertable, $mapped);
     }
 
@@ -115,7 +115,7 @@ abstract class BaseLogic {
         // assume that if insertable is not set,
         // then all properties are available for update
         if (empty($this->updatable))
-            return $mapped;
+            return (array)$mapped;
         return $this->restrict($this->updatable, $mapped);
     }
 

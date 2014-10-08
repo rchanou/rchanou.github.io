@@ -1,48 +1,117 @@
 <?php
 
 namespace ClubSpeed\Payments;
+use Omnipay\Omnipay;
+use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Mail\MailService as Mail;
+use ClubSpeed\Logging\LogService as Log;
 
-class CSPaymentsBase {
+class BasePayment {
 
-    protected $payments;
-    protected $gateway;
     protected $logic;
+    protected $handlers;
+    protected $gateway;
+    protected $intlCurrencySymbol;
 
-    private $intlCurrencySymbol;
-
-    public function __construct(&$CSPayments, &$CSLogic) {
-        $this->payments = $CSPayments; // necessary? probably not
-        $this->logic = $CSLogic;
+    public function __construct(&$logic, &$handlers) {
+        $this->logic = $logic;
+        $this->handlers = $handlers;
     }
 
-    // public abstract function handleResponse($response); // is this really the best way to handle this?
-    // public abstract function handleRedirect($)
+    protected function init($data) {
+        $this->gateway = Omnipay::create(@$data['name']);
+        $this->gateway->initialize(@$data['options']);
+    }
 
-    public function handleSuccess($check, $response) {
-        // do something!
-        return;
+    public function handleSuccess(&$check, &$params, &$response) {
+        $now = \ClubSpeed\Utility\Convert::getDate();
+
+        $checkData = @$params['check'];
+
+        // update the check
+        $check->CheckStatus = 1; // CheckStatus.Closed from VB enum
+        $check->Notes = $response->getTransactionReference();
+        $check->ClosedDate = $now;
+        $this->logic->checks->update($check->CheckID, $check);
+
+        $checkTotals = $this->logic->checkTotals->match(array('CheckID' => $check->CheckID));
+        $checkTotal = $checkTotals[0];
+
+        // build and insert a payment record
+        $payment                  = $this->logic->payment->dummy();
+        $payment->CheckID         = $check->CheckID;
+        $payment->PayAmount       = $check->CheckTotal;
+        $payment->PayDate         = $now;
+        $payment->PayStatus       = 1; // PayStatus.PAID from VB
+        $payment->PayTax          = $checkTotal->CheckTax; // this will be the same on each record, as long as the CheckID matches
+        $payment->PayTerminal     = 'api';// use this?
+        $payment->PayType         = 2; // always credit card when through pccharge?
+        $payment->TransactionDate = $now;
+        $payment->ReferenceNumber = $response->getTransactionReference();
+        $payment->UserID          = 1; // probably should be non-nullable, onlinebooking userId?
+        $this->logic->payment->create($payment);
+
+        // should probably have a try catch here for each check detail
+        $handled = array();
+        foreach($checkTotals as $checkTotal) {
+            $metadata = \ClubSpeed\Utility\Arrays::first($checkData['details'], function($val, $key, $arr) use ($checkTotal) {
+                return isset($val['checkDetailId']) && $val['checkDetailId'] == $checkTotal->CheckDetailID;
+            });
+            try {
+                $handled[] = $this->handlers->handle($checkTotal, $metadata); // is this the data we are using to build the receipt?
+            }
+            catch (\Exception $e) {
+                $handled[] = $e->getMessage();
+                // should do something here -- part of the check was not able to be processed
+            }
+        }
+
+        $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
+        $businessName = $businessName[0];
+        $businessName = $businessName->SettingValue;
+
+        $customer = $this->logic->customers->get($checkTotal->CustID);
+        $customer = $customer[0];
+        $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
+
+        $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
+        $emailFrom = $emailFrom[0];
+        $emailFrom = array($emailFrom->SettingValue => $businessName);
+
+        $mail = Mail::builder()
+            ->subject($businessName . ' Receipt for Order Number: ' . $check->CheckID)
+            ->from($emailFrom)
+            ->to($emailTo)
+            ->body("This is my email body for now! Woohoo! Receipt template TODO!");
+        try {
+            Mail::send($mail);
+            Log::debug("Receipt email for CheckID " . $check->CheckID . " has been sent to: " . $customer->EmailAddress);
+        }
+        catch(\Exception $e) {
+            Log::error("Receipt email for CheckID " . $check->CheckID . " could not be sent to: " . $customer->EmailAddress, $e);
+        }
+        // need to send handled off to a mail service, or receipt service, or something
+        // -- someone needs to send off an email to the customer before returning success
     }
 
     public function handleRedirect($check, $response) {
-        // re-get the check, since we need the Checks object, not the CheckTotals_V object
-        // $check = $this->logic->checks->get($checkId);
-        // $check = $check[0];
-        // $check->Notes = $response->getTransactionReference();
-        // $this->logic->checks->update($check->CheckID, $check);
         return array(
             'redirect' => array(
                 'url'       => $response->getRedirectUrl(),
                 'method'    => $response->getRedirectMethod(),
-                'data'      => $response->getRedirectData(),
-                // 'reference' => $response->getTransactionReference() // client probably doesn't need this info
+                'data'      => $response->getRedirectData()
+                // 'reference' => $response->getTransactionReference() // client probably doesn't need this info, and will most likely get it from the payment processor (?)
             )
         );
     }
 
     public function handleFailure($check, $response) {
-        pr($response->getMessage());
-        pr($response->getData());
-        die();
+        return array(
+            'error' => array(
+                'message' => $response->getMessage()
+                , 'data' => $response->getData()
+            )
+        );
     }
 
     protected function passthroughWrapper($params, $callback) {
@@ -51,40 +120,45 @@ class CSPaymentsBase {
     }
 
     protected function wrapper($params, $callback) {
-        $params = \ClubSpeed\Utility\Params::nonReservedData($params);
-        $checkId = \ClubSpeed\Utility\Convert::toNumber(@$params['checkId']);
+        $this->init($params);
+        $checkId = \ClubSpeed\Utility\Convert::toNumber(@$params['check']['checkId']);
         if (!isset($checkId) || is_null($checkId) || !is_int($checkId))
-            throw new \RequiredArgumentMissingException("Payment authorize received an invalid format for checkId! Received: " . @$params['checkId']);
+            throw new \RequiredArgumentMissingException("Payment processor received an invalid format for checkId! Received: " . @$params['checkId']);
+        $check = $this->logic->checks->get($checkId);
+        if (!isset($check) || is_null($check) || empty($check))
+            throw new \InvalidArgumentValueException("Payment processor received a checkId which could not be found in the database! Received: " . $checkId);
+        $check = $check[0];
+        if ($check->CheckStatus != 0)
+            throw new \InvalidArgumentValueException("Payment processor received a checkId with a status other than 0 (open)! Found Check.Status: " . $check->CheckStatus);
+        $this->logic->checks->applyCheckTotal($checkId); // ensure that the checktotal is stored on the checks record, for backwards compatibility
+        $check = $this->logic->checks->get($checkId);
+        $check = $check[0]; // re-get the check record after the applyCheckTotal stored procedure is called
         $checkTotals = $this->logic->checkTotals->get($checkId);
-        if (!isset($checkTotals) || is_null($checkTotals) || empty($checkTotals))
-            throw new \InvalidArgumentValueException("Payment authorize received a checkId which could not be found in the database! Received: " . $checkId);
         $checkTotals = $checkTotals[0];
-        $this->logic->checks->applyCheckTotal($checkTotals->CheckID); // ensure that the checktotal is stored on the checks record, for backwards compatibility
 
         $options = array(
-            'amount'                 => $checkTotals->CheckTotal // this is why we grabbed the CheckTotals_V object instead of the Checks object
+            'amount'                 => $check->CheckTotal // this is why we grabbed the CheckTotals_V object instead of the Checks object
             , 'currency'             => $this->getIntlCurrencySymbol() // THIS REQUIRES php_intl.dll EXTENSION TURNED ON
-            , 'description'          => "ClubSpeed payment for CheckID: " . $checkTotals->CheckID // build description manually?
-            , 'transactionId'        => $checkTotals->CheckID . ((int)rand())
+            , 'description'          => "ClubSpeed payment for CheckID: " . $check->CheckID // build description manually?
+            , 'transactionId'        => $check->CheckID
             , 'transactionReference' => 'some_transaction_reference' // use session id from laravel?
             , 'cardReference'        => 'some_card_reference'
+            , 'taxAmount'            => $checkTotals->CheckTax // this is for WebAPI remoting interface, PCCharge requires it
             , 'returnUrl'            => $this->getReturnUrl()
             , 'cancelUrl'            => $this->getCancelUrl()
             , 'notifyUrl'            => $this->getNotifyUrl()
             , 'issuer'               => ''
-            , 'card'                 => new \Omnipay\Common\CreditCard($params)
-            , 'clientIp'             => $this->getIp() // use the api ip? or the client ip?
+            , 'card'                 => new \Omnipay\Common\CreditCard(@$params['card'])
+            , 'clientIp'             => $this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
         );
 
         $response = $callback($options);
 
-        $check = $this->logic->checks->get($checkId);
-        $check = $check[0];
-        $check->Notes = $response->getTransactionReference(); // store the tx reference in Checks.Notes, since we don't have another field to use at this time
-        $this->logic->checks->update($check->CheckID, $check);
+        // $check->Notes = $response->getTransactionReference(); // store the tx reference in Checks.Notes, since we don't have another field to use at this time
+        // $this->logic->checks->update($check->CheckID, $check);
 
         if ($response->isSuccessful())
-            return $this->handleSuccess($check, $response);
+            return $this->handleSuccess($check, $params, $response);
         else if ($response->isRedirect())
             return $this->handleRedirect($check, $response);
         else
@@ -109,23 +183,17 @@ class CSPaymentsBase {
 
     public function completePurchase($params = array()) {
         // this is sort of its own beast -- do we want to use the wrapper? or a secondary wrapper?
-        $response = $this->gateway->completePurchase($options)->send();
-        $checks = $this->logic->checks->match(array('Notes' => $response->getTransactionReference()));
+        // do we assume that $params are already okay to send on to completePurchase (?)
+        $response = $this->gateway->completePurchase($params)->send();
+        $checks = $this->logic->checks->match(array('Notes' => $response->getTransactionReference())); // find the check with the notes that match the transactionReference
         $check = $checks[0];
 
         if ($response->isSuccessful())
             return $this->handleSuccess($check, $response);
         else if ($response->isRedirect())
-            return $this->handleRedirect($check, $response);
+            return $this->handleRedirect($check, $response); // this probably shouldn't happen
         else
             return $this->handleFailure($check, $response);
-
-        // return $this->wrapper($params, function($options) {
-        //     return $this->gateway->completePurchase($options)->send(); // TEST THIS -- probably won't work, but try it
-        // });
-        // $response = $this->gateway->completePurchase($options)->send();
-
-        // return $this->gateway->completePurchase($options)->send();
     }
 
     protected function getIp() {
@@ -133,7 +201,7 @@ class CSPaymentsBase {
     }
 
     protected function getReturnUrl() {
-        return 'http://' . $this->getIp() . "/api/index.php/payments/" . $this->namespace . "/completePurchase/"; // TODO: get actual return url
+        return 'http://' . $this->getIp() . "/api/index.php/payments/"; // TODO: get actual return url
     }
 
     protected function getNotifyUrl() {

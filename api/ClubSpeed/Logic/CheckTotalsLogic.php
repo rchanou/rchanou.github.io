@@ -41,14 +41,14 @@ class CheckTotalsLogic extends BaseLogic {
             $calc = (array)$calc; // convert to array for check and check detail creation
             if ($calc[$this->interface->key] != $tempCheckId) {
                 // we need to create a new check -- this is either the first checkTotals record, or the client passed multiple checks
-                $check = $this->db->checks->dummy($calc);
+                $check = $this->logic->checks->dummy($calc);
                 $tempCheckId = $check->CheckID;
                 $check->CheckID = null;
                 $checkCreateData = $this->logic->checks->create($check);
                 $actualCheckId = $checkCreateData[$this->interface->key];
             }
             $calc[$this->interface->key] = $actualCheckId; // tie the new details record back to the new CheckID
-            $checkDetailId = $this->db->checkDetails->create($calc);
+            $checkDetailId = $this->logic->checkDetails->create($calc);
         }
         $this->logic->checks->applyCheckTotal($actualCheckId); // run the applyCheckTotal stored procedure, not the virtual one
         return $checkCreateData;

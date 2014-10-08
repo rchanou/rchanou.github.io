@@ -67,4 +67,13 @@ class Enums {
      * The constant signifying an API call should not be exposed to any level access.
      */
     const API_NO_ACCESS = -1;
+
+    const PRODUCT_TYPE_REGULAR = 1;
+    const PRODUCT_TYPE_POINT = 2;
+    const PRODUCT_TYPE_FOOD = 3;
+    const PRODUCT_TYPE_RESERVATION = 4;
+    const PRODUCT_TYPE_GAME_CARD = 5;
+    const PRODUCT_TYPE_MEMBERSHIP = 6;
+    const PRODUCT_TYPE_GIFT_CARD = 7;
+    const PRODUCT_TYPE_ENTITLE = 8;
 }

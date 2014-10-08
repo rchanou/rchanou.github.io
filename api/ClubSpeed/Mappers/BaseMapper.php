@@ -154,7 +154,7 @@ class BaseMapper {
     }
 
     protected function compress($data) {
-        if (!isset($data))
+        if (!isset($data) || is_null($data))
             return null;
         $table = $this->namespace ?: "records";
         if ($this->is_assoc($data)) { // for the id => {id} arrays coming from create calls. this seems hacky -- consider another option

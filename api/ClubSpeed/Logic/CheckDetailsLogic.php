@@ -108,6 +108,13 @@ class CheckDetailsLogic extends BaseLogic {
             $checkDetails->UnitPrice = $product->Price1;
             $checkDetails->UnitPrice2 = $product->Price2;
             $checkDetails->GST = $tax->GST;
+            $checkDetails->P_Points = ($product->P_Points ?: 0) * $checkDetails->Qty;
+            if (!empty($checkDetails->P_Points)) {
+                // apply the check's CustID to checkDetails.P_CustID
+                $checkDetails->P_CustID = $check->CustID;
+
+                // add PointHistory items here, or wait until the check is paid for?
+            }
             return $checkDetails;
         });
     }

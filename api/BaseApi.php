@@ -1,6 +1,7 @@
 <?php
 
 use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Logging\LogService as Log;
 
 abstract class BaseApi {
 
