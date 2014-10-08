@@ -46,7 +46,7 @@
     <input type="checkbox" name="iagree" id="iagree" class="iAgreeCheckbox">{{$strings['str_termsAndConditionsCheckBox']}}
 </div>
 <!-- BEGIN SIGNING POP-UP -->
-<div class="modal fade" id="signModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal" id="signModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content modalContent">
             <div class="modal-header">
