@@ -265,7 +265,38 @@ class CheckoutController extends BaseController
             "email" => isset($input['email']) ? $input['email'] : ''
         );
 
-        $result = CS_API::makePayment($onlineBookingPaymentProcessorSettings,$checkId,$paymentInformation);
+        $checkFormatted = array('checkId' => $checkId,
+                       'details' => array());
+
+        //Format the details array for the API call
+        $details = array();
+        foreach($cart as $cartItemIndex => $cartItem)
+        {
+            $newDetailItem = array();
+            if ($cartItem["type"] == "heat")
+            {
+                $newDetailItem["heatId"] = $cartItem["itemId"];
+            }
+            if ($cartItem["type"] == "heat" && $cartItem["quantity"] > 1)
+            {
+                $newDetailItem["additionalReservations"] = $cartItem["quantity"] - 1;
+            }
+            $details[] = $newDetailItem;
+        }
+
+        foreach($check->checks as $currentCheck)
+        {
+            $currentIndex = 0;
+            foreach($currentCheck->details as $currentCheckDetail)
+            {
+                $details[$currentIndex]["checkDetailId"] = $currentCheckDetail->checkDetailId;
+                $currentIndex++;
+            }
+        }
+
+        $checkFormatted["details"] = $details;
+
+        $result = CS_API::makePayment($onlineBookingPaymentProcessorSettings,$checkFormatted,$paymentInformation);
 
         if ($result === null)
         {
@@ -279,7 +310,11 @@ class CheckoutController extends BaseController
                 foreach ($cart as $cartItemId => $cartItem)
                 {
                     $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
-                    CS_API::deleteOnlineReservation($onlineBookingsReservationId); //Remove the online booking
+                    $result = CS_API::makeOnlineReservationPermanent($onlineBookingsReservationId); //Mark the online booking reservation and permanent
+                    if ($result === null)
+                    {
+                        return Redirect::to('/disconnected');
+                    }
                 }
             }
 

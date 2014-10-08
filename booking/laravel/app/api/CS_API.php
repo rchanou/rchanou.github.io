@@ -468,6 +468,34 @@ class CS_API
         }
     }
 
+    public static function makeOnlineReservationPermanent($onlineBookingsReservationId)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . "/reservations/$onlineBookingsReservationId?key=" . self::$privateKey;
+
+        $putData = array(
+            "onlineBookingReservationStatusId" => 2
+        );
+
+        $result = self::call($url,$putData,'PUT');
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if ($result !== null && property_exists($result, 'code')) {
+            if ($result->code == 200) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if ($error !== null) {
+            return $error;
+        } else {
+            return null;
+        }
+    }
+
     public static function getOnlineReservations()
     {
         self::initialize();
@@ -607,12 +635,12 @@ class CS_API
     ###########
     */
 
-    public static function makePayment($paymentProcessorSettings,$checkId,$paymentInformation)
+    public static function makePayment($paymentProcessorSettings,$check,$paymentInformation)
     {
         self::initialize();
 
         $formattedData = $paymentProcessorSettings;
-        $formattedData->checkId = $checkId;
+        $formattedData->check = $check;
         $formattedData->card = $paymentInformation;
 
         $url = self::$apiURL . '/processPayment?&key=' . self::$privateKey;
