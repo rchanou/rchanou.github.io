@@ -23,21 +23,24 @@ Unable to Connect
 <!-- PAGE CONTENT -->
 @section('content')
 
-<div class="row">
+<div class="row" id="disconnectedInfo">
     <div class="col-sm-3"></div>
     <div class="col-sm-6">
         <p/>
-        <a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" onclick="$('#loadingModal').modal();">
-            <img src="images/redhelmet_disconnect.png" class="center-block" style="margin-top: 80px;">
+            <img src="images/redhelmet_disconnect.png" class="center-block" style="margin-top: 80px;" onclick="$('#errorInfo').toggle();">
+            <a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" onclick="$('#loadingModal').modal();">
             <div class="text-center" style="font-size: 20px;">{{$strings['str_disconnectedMessage']}}</div>
         </a>
     </div>
     <div class="col-sm-3"></div>
 </div>
-<div class="row">
-    <div class="col-sm-12 centered">
-        <img src="images/clubspeed.png" style="padding-top: 10px; margin-top: 220px">
+<div class="row" id="errorInfo" style="display: none; padding-top: 20px; font-size: 18px;">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8 centered well" style="color: black; border: 2px solid gray;">
+    Error information: <p/>
+    {{json_encode(Session::get('errorInfo'))}}
     </div>
+    <div class="col-sm-2"></div>
 </div>
 @stop
 <!-- END PAGE CONTENT -->
