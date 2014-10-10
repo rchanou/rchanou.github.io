@@ -38,7 +38,11 @@ Unable to Connect
     <div class="col-sm-2"></div>
     <div class="col-sm-8 centered well" style="color: black; border: 2px solid gray;">
     Error information: <p/>
-    {{json_encode(Session::get('errorInfo'))}}
+    URL: {{json_encode(Session::get('errorInfoURL'))}}<br/>
+    Response: {{json_encode(Session::get('errorResponse'))}}<br/>
+    Params: {{json_encode(Session::get('errorParams'))}}<p/>
+
+    Entire Object: {{json_encode(Session::get('errorInfo'))}}
     </div>
     <div class="col-sm-2"></div>
 </div>

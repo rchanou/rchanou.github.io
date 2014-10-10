@@ -79,6 +79,9 @@ class CS_API
 
         $errorInfo = array('url' => $url, 'params' => $params, 'response' => $result);
         Session::put('errorInfo', $errorInfo);
+        Session::put('errorInfoURL',$url);
+        Session::put('errorParams',$params);
+        Session::put('errorResponse',$result);
 
         //Return the result to the caller as an associative array
         return json_decode($result,true);
