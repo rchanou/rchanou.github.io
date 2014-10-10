@@ -458,10 +458,6 @@ class CustomersLogic extends BaseLogic {
                 throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
             $customer->Password = \ClubSpeed\Security\Hasher::hash($customer->Password);
         }
-        
-        // if BirthDate is provided, then run it through the conversion utility class
-        if (isset($customer->BirthDate) && !empty($customer->BirthDate))
-            $customer->BirthDate = \ClubSpeed\Utility\Convert::toDateForServer($customer->BirthDate);
 
         // convert the gender to the expected gender "id" on the database
         if (isset($customer->Gender) && !empty($customer->Gender)) {

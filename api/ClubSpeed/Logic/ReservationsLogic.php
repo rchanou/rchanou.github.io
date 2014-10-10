@@ -75,7 +75,7 @@ class ReservationsLogic extends BaseLogic {
                     throw new \InvalidArgumentValueException("Update reservation attempted to use a quantity higher than what was available! Requested: " . $new->Quantity . " :: Available: " . $availability->ProductSpotsAvailableOnline);
             }
             if ($new->OnlineBookingReservationStatusID === 2) // permanent -- MAKE THIS A LOOKUP LATER
-                $new->ExpiresAt = \ClubSpeed\Utility\Convert::toDateForServer('2999-12-31');
+                $new->ExpiresAt = \ClubSpeed\Utility\Convert::toDateForServer('2038-01-18');
             return $new;
         });
     }

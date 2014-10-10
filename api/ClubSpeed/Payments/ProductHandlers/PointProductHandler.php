@@ -21,7 +21,7 @@ class PointProductHandler extends BaseProductHandler {
                 $pointHistory->ReferenceID = 0; // used when transferring points from one customer to another
                 $pointHistory->Type = 0;
                 $pointHistory->PointDate = $now;
-                $pointHistory->PointExpDate = \ClubSpeed\Utility\Convert::toDateForServer('2999-12-31');
+                $pointHistory->PointExpDate = \ClubSpeed\Utility\Convert::toDateForServer('2038-01-18');
                 $pointHistory->Notes = 'CheckID ' . $checkTotal->CheckID;
                 $pointHistory->CheckDetailID = $checkTotal->CheckDetailID;
                 $pointHistory->PointAmount = $checkTotal->P_Points;

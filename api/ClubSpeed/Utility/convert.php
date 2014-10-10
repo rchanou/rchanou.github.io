@@ -37,14 +37,9 @@ class Convert {
             // return $dateString; // don't attempt to convert nulls
 
         if (is_string($date)) {
-
-            $dateTime = new \DateTime($date);
-            return $dateTime->format($dateFormat ?: $GLOBALS['dateFormat'] ?: 'Y-m-d H:i:s');
-
-            // deprecating the below, due to integer issues with php timestamps (can only go up to 2038-01-18 before overflow)
-
-            // $dateArray = date_parse_from_format(self::DATE_FORMAT_FROM_CLIENT, $date);
+            $dateArray = date_parse_from_format(self::DATE_FORMAT_FROM_CLIENT, $date);
             // need a method for trapping errors here and recording them, or just fail?
+            // note that if we receive a date string missing H:i:s, the object below WILL have errors for "data missing"
             // if ($dateArray["error_count"] == 0) {
                 // check to make sure we have a valid month/day/year combination
                 // (checks for leap years, number of days in a specific month, etc)
@@ -54,7 +49,6 @@ class Convert {
                     // the dateFormat global (if available),
                     // or a fallback if all else fails
                     $date = date(
-                        // $dateFormat ?: self::DATE_FORMAT_FROM_CLIENT ?: "Y-m-d H:i:s"
                         $dateFormat ?: $GLOBALS['dateFormat'] ?: 'Y-m-d H:i:s' // todo, grab a better default
                         , mktime(
                             $dateArray['hour']
