@@ -172,7 +172,7 @@ Checkout
                     <tr>
                         <td>{{$cartItem['name']}}</td>
                         <td>{{$cartItem['quantity']}}</td>
-                        <td>{{date('Y/m/d H:i A',strtotime($cartItem['startTime']))}}</td>
+                        <td>{{date('Y/m/d H:i',strtotime($cartItem['startTime']))}}</td>
                         <td>${{number_format($virtualCheckDetails[$cartItemId]->unitPrice,2)}}</td>
                         <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailSubtotal,2)}}</td>
                         <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailTax,2)}}</td>

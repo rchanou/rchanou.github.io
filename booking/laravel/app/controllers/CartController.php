@@ -24,8 +24,13 @@ class CartController extends BaseController
         if (Session::has('authenticated')) //If the user is logged in
         {
             $productInfo = Session::get('productInfo'); //Grab the list of all possible products
-
-            if ($action == "add" && Input::has('heatId') && Input::has('quantity')) //Adding item to cart
+            if ($productInfo == null) //If we hadn't fetched them yet, do so
+            {
+                $races = CS_API::getAvailableBookings();
+                $this->recordProductInfo($races); //Remember every race and its details and store them in the session
+                $productInfo = Session::get('productInfo');
+            }
+            if ($action == "add" && Input::has('heatId') && Input::has('quantity')) //Adding item to cart TODO: Implement non-heat additions
             {
                 $heatId = Input::get('heatId');
                 $quantity = Input::get('quantity');
@@ -66,6 +71,10 @@ class CartController extends BaseController
                             Cart::removeMostRecentItemFromCart();
                         }
                     }
+                }
+                else //If the item doesn't exist, report an error
+                {
+                    $failureToAddToCart = true;
                 }
             }
             else if ($action == "delete") //Removing an item from cart
@@ -144,6 +153,21 @@ class CartController extends BaseController
             }
 
         }
+        else //If the user wasn't logged in
+        {
+            if ($action == "add") //Remember their intent, and redirect them to the login screen
+            {
+                $intent = array('action' => $action,
+                               'heatId' => Input::get('heatId'),
+                               'productId' => Input::get('productId'),
+                               'quantity' => Input::get('quantity'));
+
+                Session::put('intent',$intent);
+                return Redirect::to('/login');
+            }
+        }
+
+        Session::forget('intent'); //Clear any past user intended actions
 
         $cart = Session::get('cart'); //Update the cart one last time
 
@@ -160,5 +184,26 @@ class CartController extends BaseController
                 'virtualCheckDetails' => $virtualCheckDetails
             )
         );
+    }
+
+    /**
+     * This function stores in the session every available product and its details.
+     * The cart will use this to render things like a product name, price, and so on.
+     *
+     * @param $products
+     */
+    public function recordProductInfo($products)
+    {
+        $currentProductInfo = Session::get('productInfo');
+        if ($currentProductInfo == null) { $currentProductInfo = array(); }
+        $productInfo = $currentProductInfo;
+        if ($products != null)
+        {
+            foreach($products as $currentProduct)
+            {
+                $productInfo[$currentProduct->heatId] = $currentProduct;
+            }
+        }
+        Session::put('productInfo',$productInfo);
     }
 } 

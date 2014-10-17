@@ -45,8 +45,6 @@ Shopping Cart - Online Booking
     </div>
     @endif
 
-
-
     @if($localCartHasExpiredItem)
     <div class="alert alert-danger alert-dismissable" role="alert">
         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -76,7 +74,7 @@ Shopping Cart - Online Booking
                 <tr>
                     <td>{{$cartItem['name']}}</td>
                     <td>{{$cartItem['quantity']}}</td>
-                    <td>{{date('Y/m/d H:i A',strtotime($cartItem['startTime']))}}</td>
+                    <td>{{date('Y/m/d H:i',strtotime($cartItem['startTime']))}}</td>
                     <td>${{number_format($virtualCheckDetails[$cartItemId]->unitPrice,2)}}</td>
                     <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailSubtotal,2)}}</td>
                     <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailTax,2)}}</td>
@@ -99,7 +97,7 @@ Shopping Cart - Online Booking
         </div>
 
     @else
-        You must be logged in to view the cart.
+        You must be {{link_to('login','logged in')}} to view the cart.
     @endif
     </div>
 

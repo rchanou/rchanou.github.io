@@ -82,10 +82,14 @@ class Step2Controller extends BaseController
         //Used to generate links for easy date navigation
         $startDateTime = new DateTime($start);
         $previousDay = $startDateTime;
-        $previousDay = $previousDay->modify('-1 day')->format($dateFormat);
+        $previousDay = $previousDay->modify('-1 day')->format('Y-m-d');
+        $previousDayDisplay = new DateTime($start);
+        $previousDayDisplay = $previousDayDisplay->modify('-1 day')->format($dateFormat);
         $startDateTime = new DateTime($start);
         $nextDay = $startDateTime;
-        $nextDay = $nextDay->modify('+1 day')->format($dateFormat);
+        $nextDay = $nextDay->modify('+1 day')->format('Y-m-d');
+        $nextDayDisplay = new DateTime($start);
+        $nextDayDisplay = $nextDayDisplay->modify('+1 day')->format($dateFormat);
 
 
         return View::make('/steps/step2',
@@ -94,6 +98,8 @@ class Step2Controller extends BaseController
                 'races' => $races,
                 'start' => $start,
                 'previousDay' => $previousDay,
+                'previousDayDisplay' => $previousDayDisplay,
+                'nextDayDisplay' => $nextDayDisplay,
                 'nextDay' => $nextDay,
                 'heatType' => $heatType,
                 'numberOfParticipants' => $numberOfParticipants,

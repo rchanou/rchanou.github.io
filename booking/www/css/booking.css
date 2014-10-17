@@ -37,6 +37,15 @@ footer {
     padding-bottom: 10px;
 }
 
+.extras {
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 2px solid #bbbbbb;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
 .step1form {
     padding: 10px;
 }

@@ -15,7 +15,9 @@ class CreateAccountController extends BaseController
     {
         $input = Input::all();
 
-        $heatId = $input['heatId']; //Heat that the user intends to book after creating the account
+        $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
+        $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
+        $source = isset($input['source']) ? $input['source'] : 'step1';
 
         $settings = Session::get('settings');
 
@@ -135,7 +137,11 @@ class CreateAccountController extends BaseController
             {
                 $createAccountErrors = array();
                 $createAccountErrors[$input['heatId']] = $validator->errors()->all();
-                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors)); //TODO: Need to preserve form input myself?
+                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            {
+                return Redirect::to('/login')->withErrors($validator);
             }
             else
             {
@@ -152,19 +158,64 @@ class CreateAccountController extends BaseController
         {
             $createAccountErrors[$heatId][] = 'Your birth date is required.';
 
-            return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            {
+                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', 'Your birth date is required.');
+                return Redirect::to('/login')->withErrors($messages);
+            }
+            else
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', 'Your birth date is required.');
+                return Redirect::to('/step1')->withErrors($messages);
+            }
         }
         if ($input['Password'] != $input['PasswordConfirmation'] ) //Enforce password matching requirement
         {
             $createAccountErrors[$heatId][] = 'Your passwords must match.';
 
-            return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            {
+                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', 'Your passwords must match.');
+                return Redirect::to('/login')->withErrors($messages);
+            }
+            else
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', 'Your passwords must match.');
+                return Redirect::to('/step1')->withErrors($messages);
+            }
         }
         if ($input['EmailAddress'] != $input['EmailAddressConfirmation'] ) //Enforce password matching requirement
         {
-            $createAccountErrors[$heatId][] = 'Your passwords must match.';
+            $createAccountErrors[$heatId][] = 'Your emails must match.';
 
-            return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            {
+                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', 'Your emails must match.');
+                return Redirect::to('/login')->withErrors($messages);
+            }
+            else
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', 'Your emails must match.');
+                return Redirect::to('/step1')->withErrors($messages);
+            }
         }
 
         //If we've made it this far, the form data has passed validation
@@ -183,7 +234,7 @@ class CreateAccountController extends BaseController
 
             if (str_contains($response,$errorCodes['emailAlreadyExists'])) //If the creation failed because an account already existed, let the user know
             {
-                $createAccountErrors[$heatId][] = 'This e-mail has already been registered. <br/>Please <a href="#" onclick="alert(\'Not yet implemented!\')">reset your password</a>.';
+                $createAccountErrors[$heatId][] = 'This e-mail has already been registered.';
 
             }
             else
@@ -191,7 +242,16 @@ class CreateAccountController extends BaseController
                 $createAccountErrors[$heatId][] = 'This was an error creating your account. Please try again later.';
 
             }
-            return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            if ($source == "step2")
+            {
+                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', 'This was an error creating your account or your e-mail has already been registered. Please try again later.');
+                return Redirect::to('/login')->withErrors($messages);
+            }
         }
 
         $customerId = $response; //If creation succeeded, record the customerId
@@ -200,9 +260,27 @@ class CreateAccountController extends BaseController
         Session::put('authenticated',$customerId);
         Session::put('authenticatedEmail',$customerData['email']);
 
-        //Direct them to the URL that will add that item to their cart
-        $numOfRacers = $input['numberOfParticipants'];
-        return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$numOfRacers");
+        $quantity = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : 1;
+        if ($source == "step2") //Direct them to the URL that will add that item to their cart
+        {
+            return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$quantity");
+        }
+        else if ($source == "login")
+        {
+            if ($heatId != null)
+            {
+                return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$quantity"); //TODO: Will this redirect back to a bad place?
+            }
+            else if ($productId != null)
+            {
+                return Redirect::to("/cart?action=add&productId=$productId&quantity=$quantity"); //TODO: Will this redirect back to a bad place?
+            }
+            else
+            {
+                return Redirect::to('/step1');
+            }
+        }
+
     }
 
     /**

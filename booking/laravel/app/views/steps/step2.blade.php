@@ -27,9 +27,9 @@
 <div class="mainBodyContent">
 
     <div class="mainBodyHeader">
-        <span class="yesterdayArrow"><a href="?start={{$previousDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}"><-- {{$previousDay}}</a></span>
+        <span class="yesterdayArrow"><a href="?start={{$previousDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}"><-- {{$previousDayDisplay}}</a></span>
         <span><em>Available Races</em></span>
-        <span class="tomorrowArrow"><a href="?start={{$nextDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}">{{$nextDay}} --></a></span>
+        <span class="tomorrowArrow"><a href="?start={{$nextDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}">{{$nextDayDisplay}} --></a></span>
     </div>
 
     <!-- Race results -->
@@ -43,7 +43,7 @@
         <div class="raceResult" id="{{$race->heatId}}">
             <div class="raceResultHeader">
                 <div class="raceName ellipsis">{{$race->heatDescription}}</div>
-                <div class="raceDate">{{date('Y/m/d H:i A',strtotime($race->heatStartsAt))}}</div>
+                <div class="raceDate">{{date('Y/m/d H:i',strtotime($race->heatStartsAt))}}</div>
             </div>
 
             <div class="spotsAvailable">{{$race->heatSpotsAvailableOnline}} spots available online</div>
