@@ -20,4 +20,9 @@ Route::post('/step3','Step3Controller@postStep3');
 Route::get('/step4','Step4Controller@step4');
 Route::get('/disconnected','DisconnectedController@disconnected');
 
+Route::get('/checkin','CheckInController@checkIn');
+Route::post('/checkin', 'CheckInController@postCheckIn');
+Route::get('/checkinconfirm','CheckInController@checkInConfirm');
+Route::post('/checkinconfirm','CheckInController@postCheckInFinal');
+
 Route::get('/changeLanguage/{newLanguageCode}/{destinationStep}','LocalizationController@changeLanguage');

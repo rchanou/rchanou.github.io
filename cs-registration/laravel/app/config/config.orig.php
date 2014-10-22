@@ -20,5 +20,4 @@ return array(
     //'emailText' => 'Your custom e-mail checkbox text can go here. Anything here will overwrite the default.',
     'showTextingWaiver' => false,
     'textingWaiver' => 'By entering my phone number, I agree to receive text messages containing race status and other news. You can unsubscribe at any time.'
-
 );

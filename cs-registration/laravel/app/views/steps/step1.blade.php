@@ -39,13 +39,19 @@
     </div>
     <div class="row step1RegistrationBody">
         @if ($settings['Reg_EnableFacebook'])
-        <div class="col-sm-6 text-center">
+        <div class="{{$columnSize}} text-center" style="{{$checkInEnabled ? "" : "display: none;"}}">
+            <a href="checkin" style="font-size: 20px;">
+                <img src="{{$images['checkIn']}}"><br/>
+                {{$strings['str_checkIn']}}
+            </a>
+        </div>
+        <div class="{{$columnSize}} text-center">
             <a href="step2" style="font-size: 20px;">
                 <img src="{{$images['createAccount']}}"><br/>
                 {{$strings['str_newAccount']}}
             </a>
         </div>
-        <div class="col-sm-6 text-center" style="font-size: 20px;">
+        <div class="{{$columnSize}} text-center" style="font-size: 20px;">
             @if(strpos(Request::url(),'step1') !== false)
             <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('step1','step2',Request::url())}}&scope=public_profile,email,user_birthday">
             @else
@@ -56,7 +62,13 @@
             </a>
         </div>
         @else
-        <div class="col-sm-12 text-center" style="font-size: 20px;">
+        <div class="{{$columnSize}} text-center" style="{{$checkInEnabled ? "" : "display: none;"}}">
+            <a href="checkin" style="font-size: 20px;">
+                <img src="{{$images['checkIn']}}"><br/>
+                {{$strings['str_checkIn']}}
+            </a>
+        </div>
+        <div class="{{$columnSize}} text-center" style="font-size: 20px;">
             <a href="step2">
                 <img src="{{$images['createAccount']}}"><br/>
                 {{$strings['str_newAccount']}}

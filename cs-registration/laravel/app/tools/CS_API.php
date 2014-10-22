@@ -87,6 +87,126 @@ class CS_API
         return json_decode($result,true);
     }
 
+    public static function updateFacebookToken($email,$facebookId,$facebookToken)
+    {
+        self::initialize();
+
+        $url = self::$baseAPIURL . '/racers/fb_login?key=' . self::$privateKey;
+
+        $params = array (
+                            'email' => $email,
+                            'facebookId' => $facebookId,
+                            'facebookToken' => $facebookToken,
+                            'facebookAllowEmail' => 1,
+                            'facebookAllowPost' => 1,
+                            'facebookEnabled' => 1
+                        );
+
+        //Set up headers
+        $options = array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 6,
+        );
+
+        $data = json_encode($params);
+        $options[CURLOPT_POST] = strlen($data);
+        $options[CURLOPT_POSTFIELDS] = $data;
+        $options[CURLOPT_HTTPHEADER] = array('Content-Type: application/json',
+            'Content-Length: ' . strlen($data));
+
+        //Execute the query
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, $options);
+        $result = curl_exec($ch);
+
+        return true;
+    }
+
+    public static function addUserToQueue($customerId, $eventId = -1)
+    {
+        self::initialize();
+        $url = self::$baseAPIURL . '/queues?key=' . self::$privateKey;
+
+        $params = array('customerId' => $customerId);
+        if ($eventId != -1) //If the customer isn't a walk-in
+        {
+            $params['eventId'] = $eventId; //Include the eventId
+        }
+
+        //Set up headers
+        $options = array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 6,
+        );
+
+        $data = json_encode($params);
+        $options[CURLOPT_POST] = strlen($data);
+        $options[CURLOPT_POSTFIELDS] = $data;
+        $options[CURLOPT_HTTPHEADER] = array('Content-Type: application/json',
+            'Content-Length: ' . strlen($data));
+
+        //Execute the query
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, $options);
+        $result = curl_exec($ch);
+
+        return true;
+    }
+
+    public static function getExistingCustomerMatching($firstname,$lastname,$birthDate)
+    {
+        self::initialize();
+
+        $urlParams = array(
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'birthDate' => $birthDate,
+            'key' => self::$privateKey
+        );
+
+        $url = self::$baseAPIURL. '/primaryCustomers.json?' . http_build_query($urlParams);
+
+        //Set up headers
+        $options = array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 6,
+            CURLOPT_HTTPHEADER => array('Content-type: application/json'),
+            CURLOPT_SSL_VERIFYPEER => false
+        );
+
+        //Execute the query
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, $options);
+        $result = curl_exec($ch);
+        $result = json_decode($result,true);
+
+        $errorInfo = array('url' => $url, 'params' => $urlParams, 'response' => $result);
+        Session::put('errorInfo', $errorInfo);
+        Session::put('errorInfoURL',$url);
+        Session::put('errorParams',$urlParams);
+        Session::put('errorResponse',$result);
+
+        if ($result !== null)
+        {
+            if (isset($result['customers']) && count($result['customers']) > 0)
+            {
+                return $result['customers'][0];
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return null;
+        }
+
+    }
+
     public static function extendFacebookToken($shortLivedToken)
     {
         self::initialize();

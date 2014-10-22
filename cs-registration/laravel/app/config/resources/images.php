@@ -27,6 +27,7 @@ class Images {
         self::$defaultImages = array(
             'bg_image' => 'images/bg_default.jpg',
             'createAccount' => 'images/new_account.png',
+            'checkIn' => 'images/check_in.png',
             'createAccountFacebook' => 'images/facebook_connect.png',
             'venueLogo' => 'images/default_header.png',
             'poweredByClubSpeed' => 'images/clubspeed.png',

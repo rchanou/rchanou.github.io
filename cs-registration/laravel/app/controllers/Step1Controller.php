@@ -75,12 +75,27 @@ class Step1Controller extends BaseController
 
         $session = Session::all();
 
+
+        $columnSizeForFrontEnd = 'col-sm-4';
+        if (!$settings['Reg_EnableFacebook'] && !$settings['cfgRegShowBeenHereBefr'])
+        {
+            $columnSizeForFrontEnd = 'col-sm-12';
+        }
+        else if (!($settings['Reg_EnableFacebook'] && $settings['cfgRegShowBeenHereBefr']))
+        {
+            $columnSizeForFrontEnd = 'col-sm-6';
+        }
+
         return View::make('/steps/step1', array('strings' => $session['strings'],
             'images' => $session['images'],
             'settings' => $session['settings'],
             'translations' => $session['translations'],
             'currentCulture' => $session['currentCulture'],
-            'currentCultureFB' => $session['currentCultureFB']));
+            'currentCultureFB' => $session['currentCultureFB'],
+            'checkInEnabled' => $settings['cfgRegShowBeenHereBefr'],
+            'columnSize' => $columnSizeForFrontEnd
+            )
+        );
     }
 
     //####################
@@ -235,6 +250,11 @@ class Step1Controller extends BaseController
             $settings['AgeAllowOnlineReg'] = 18;
         }
 
+        if (!array_key_exists('cfgRegShowBeenHereBefr',$settings)) //default if setting is missing
+        {
+            $settings['cfgRegShowBeenHereBefr'] = false;
+        }
+
         //Determine if we're using an IP Camera, and if we don't have the settings already, put its IP address in the session
         if (Input::has('terminal') && !Session::has("ipCamURL"))
         {
@@ -266,9 +286,7 @@ class Step1Controller extends BaseController
         {
             $settings['Reg_CaptureProfilePic'] = false;
         }
-
-
-
+        
         //TESTING - Forces every field to be visible
         /*$settings['Reg_CaptureProfilePic'] = true; //Replaced showPicture config setting
         $settings['CfgRegAddShow'] = true;
