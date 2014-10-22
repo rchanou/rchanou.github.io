@@ -133,20 +133,22 @@ class CustomersLogic extends BaseLogic {
         if (!isset($password) || !is_string($password))
             throw new \InvalidArgumentException("Customer login requires password to be a string!");
 
-        $account = $this->find_primary_account($email);
-        if(empty($account)) {
+        $primaryCustomer = $this->find_primary_account($email);
+        if(empty($primaryCustomer)) {
             // Customer email could not be found in the database
             throw new \InvalidEmailException("Invalid credentials!");
         }
-
-        if (!\ClubSpeed\Security\Hasher::verify($password, $account['Password'])) {
+        $customerId = $primaryCustomer->CustID; // password is not exposed on primaryCustomer -- grab the underlying customer record
+        $customer = $this->interface->get($customerId);
+        $customer = $customer[0];
+        if (!\ClubSpeed\Security\Hasher::verify($password, $customer->Password)) {
             // note that $account['Password'] is a salted hash, not the actual password
             // Hasher::verify will handle the salted hash comparison to the provided password
             throw new \InvalidPasswordException("Invalid credentials!");
         }
         return array(
-            "customerId" => (int)$account['CustID'] // PDO returns CustID as a string
-            , "firstName" => $account['FName'] // for testing purposes
+            "customerId" => $primaryCustomer->CustID
+            , "firstName" => $primaryCustomer->FName
         );
     }
 
@@ -161,41 +163,55 @@ class CustomersLogic extends BaseLogic {
         if (!isset($email) || !is_string($email))
             throw new \InvalidArgumentException("find_primary_account requires email to be a string! Received: " . $email);
 
-        $sql = "SELECT"
-            ."\n    c.CustID"
-            ."\n    , ISNULL(c.EmailAddress, '') AS EmailAddress"
-            ."\n    , c.Password"
-            ."\n    , ISNULL(p.Points, 0) AS Points"
-            ."\n    , c.TotalRaces"
-            ."\n    , c.LastVisited"
-            ."\n    , c.RPM AS ProSkill"
-            ."\n    , c.FName"
-            ."\n    , c.LName"
-            ."\nFROM CUSTOMERS c"
-            ."\nLEFT OUTER JOIN ("
-            ."\n    SELECT p.CustID, SUM(ISNULL(p.PointAmount, 0)) as Points"
-            ."\n    FROM POINTHISTORY p"
-            ."\n    WHERE"
-            ."\n        p.PointExpDate IS NULL"
-            ."\n        OR p.PointExpDate >= GETDATE()"
-            ."\n    GROUP BY p.CustID"
-            ."\n) AS p ON p.CustID = c.CustID"
-            ."\nWHERE"
-            ."\n        c.EmailAddress = ?"
-            ."\n    AND c.Deleted = 0"
-            ."\nORDER BY"
-            ."\n    CASE WHEN c.Password IS NULL THEN 1 ELSE 0 END" // push null passwords to bottom
-            ."\n    , Points DESC"
-            ."\n    , c.TotalRaces DESC"
-            ."\n    , c.LastVisited DESC"
-            ."\n    , c.RPM DESC"
-            ;
-        $params = array($email);
-        $results = $this->db->query($sql, $params);
-        if (count($results) > 0) {
-            return $results[0];
+        // cheat! point this to PrimaryCustomersLogic, as a temporary fix
+        $primaryCustomer = $this->logic->primaryCustomers->match(array('EmailAddress' => $email));
+        if (empty($primaryCustomer)) {
+            return array();
         }
-        return array(); // return empty array, or throw exception?
+        return $primaryCustomer[0];
+
+        // pr($primaryCustomer[0]);
+        // die();
+        // return $primaryCustomer[0];
+        // pr($primaryAccount);
+        // die();
+
+        // $sql = "SELECT"
+        //     ."\n    c.CustID"
+        //     ."\n    , ISNULL(c.EmailAddress, '') AS EmailAddress"
+        //     ."\n    , c.Password"
+        //     ."\n    , ISNULL(p.Points, 0) AS Points"
+        //     ."\n    , c.TotalRaces"
+        //     ."\n    , c.LastVisited"
+        //     ."\n    , c.RPM AS ProSkill"
+        //     ."\n    , c.FName"
+        //     ."\n    , c.LName"
+        //     ."\nFROM CUSTOMERS c"
+        //     ."\nLEFT OUTER JOIN ("
+        //     ."\n    SELECT p.CustID, SUM(ISNULL(p.PointAmount, 0)) as Points"
+        //     ."\n    FROM POINTHISTORY p"
+        //     ."\n    WHERE"
+        //     ."\n        p.PointExpDate IS NULL"
+        //     ."\n        OR p.PointExpDate >= GETDATE()"
+        //     ."\n    GROUP BY p.CustID"
+        //     ."\n) AS p ON p.CustID = c.CustID"
+        //     ."\nWHERE"
+        //     ."\n        c.EmailAddress = ?"
+        //     ."\n    AND c.Deleted = 0"
+        //     ."\nORDER BY"
+        //     ."\n    CASE WHEN c.Password IS NULL THEN 1 ELSE 0 END" // push null passwords to bottom
+        //     ."\n    , Points DESC"
+        //     ."\n    , c.TotalRaces DESC"
+        //     ."\n    , c.LastVisited DESC"
+        //     ."\n    , c.RPM DESC"
+        //     ;
+
+        // $params = array($email);
+        // $results = $this->db->query($sql, $params);
+        // if (count($results) > 0) {
+        //     return $results[0];
+        // }
+        // return array(); // return empty array, or throw exception?
         // throw UnexpectedValueException("find_primary_account was unable to find any accounts with EmailAddress of: " . $email);
     }
 

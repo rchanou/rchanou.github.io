@@ -6,8 +6,8 @@ class Version
 		
 		// Versions of various applications and modules
 		public $speedscreenVersion = '0.5.0';
-		public $apiVersion = '1.1.11';
-		public $apiLastUpdatedAt = '10/13/2014 10:49';
+		public $apiVersion = '1.1.12';
+		public $apiLastUpdatedAt = '10/22/2014 9:44';
 
     function __construct(){
         header('Access-Control-Allow-Origin: *'); //Here for all /say

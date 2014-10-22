@@ -19,6 +19,7 @@ class FacebookLogic extends BaseLogic {
      */
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
+        $this->interface = $this->db->fb_customers_new;
     }
 
     // NOTE: we need a find method for facebook, based on a facebook unique id

@@ -34,12 +34,10 @@ class Convert {
     public static function toDateForServer($date, $dateFormat = null) {
         if (is_null($date))
             return Enums::DB_NULL;
-            // return $dateString; // don't attempt to convert nulls
-
         if (is_string($date)) {
             $dateArray = date_parse_from_format(self::DATE_FORMAT_FROM_CLIENT, $date);
             // need a method for trapping errors here and recording them, or just fail?
-            // note that if we receive a date string missing H:i:s, the object below WILL have errors for "data missing"
+            // note that if we receive a date string missing H:i:s, the object below WILL have error_count > 0 for "data missing"
             // if ($dateArray["error_count"] == 0) {
                 // check to make sure we have a valid month/day/year combination
                 // (checks for leap years, number of days in a specific month, etc)
@@ -49,7 +47,8 @@ class Convert {
                     // the dateFormat global (if available),
                     // or a fallback if all else fails
                     $date = date(
-                        $dateFormat ?: $GLOBALS['dateFormat'] ?: 'Y-m-d H:i:s' // todo, grab a better default
+                        //$dateFormat ?: $GLOBALS['dateFormat'] ?: 'Y-m-d H:i:s' // todo, grab a better default
+                        "Y-m-d\TH:i:s" // \DATE_ISO8601 also exists, but SQL server doesn't seem to like the format, for some reason (no space between timezone?)
                         , mktime(
                             $dateArray['hour']
                             , $dateArray['minute']

@@ -79,6 +79,8 @@ class CheckTotals_V extends BaseRecord {
     public $CheckDetailSubtotal;
     public $CheckDetailTax;
     public $CheckDetailTotal;
+    public $PaidAmount;
+    public $PaidTax;
 
     public function __construct($data = array()) {
         $this->load($data);
@@ -159,6 +161,8 @@ class CheckTotals_V extends BaseRecord {
                     if (isset($data['CheckDetailSubtotal']))        $this->CheckDetailSubtotal      = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckDetailSubtotal']);
                     if (isset($data['CheckDetailTax']))             $this->CheckDetailTax           = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckDetailTax']);
                     if (isset($data['CheckDetailTotal']))           $this->CheckDetailTotal         = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckDetailTotal']);
+                    if (isset($data['PaidAmount']))                 $this->PaidAmount               = \ClubSpeed\Utility\Convert::toNumber          ($data['PaidAmount']);
+                    if (isset($data['PaidTax']))                    $this->PaidTax                  = \ClubSpeed\Utility\Convert::toNumber          ($data['PaidTax']);
                 }
             }
             else {

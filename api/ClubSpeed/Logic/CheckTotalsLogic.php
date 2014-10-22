@@ -62,11 +62,35 @@ class CheckTotalsLogic extends BaseLogic {
         throw new \CSException("Attempted a CheckTotals delete!");
     }
 
-    public function virtual($params = array()) {
+    public function virtual($params = array(), $giftCards = array()) {
+        // hack the gift card logic in here
+        // note that giftcards ids provided must match up with dbo.Customers.CrdID
+        // and then that record's CustID should be used to find the GiftCardHistoryID
+        // (odd, but this is the expectation for the database's data)
+        $discount = 0;
+        foreach($giftCards as $giftCardId) {
+            $giftCardCustomer = $this->logic->customers->find("CrdID = " . $giftCardId . " AND IsGiftCard = True");
+            if (empty($giftCardCustomer))
+                throw new \RecordNotFoundException("Unable to find gift card: " . $giftCardId);
+            $giftCardCustomer = $giftCardCustomer[0];
+            $giftCardHistory = $this->logic->giftCardHistory->find("CustID = " . $giftCardCustomer->CustID);
+            if (empty($giftCardHistory))
+                throw new \RecordNotFoundException("Unable to find gift card by CustID: " . $giftCardCustomer->CustID);
+            $giftCardHistory = $giftCardHistory[0];
+            // consider the giftCardHistory Points to be part of a discount
+            // note that giftCardHistory->Points are not actually points,
+            // they are monetary currency (db field misnamed and never fixed?)
+            $discount += $giftCardHistory->Points;
+        }
         if (!is_array($params))
             $params = array($params); // for foreach syntax
         foreach($params as $key => $param) {
-            $params[$key] = $this->interface->dummy($param);
+            $checkTotals = $this->interface->dummy($param);
+            // consider the giftCard total a discount?
+            // altering the checkTotal based on potential future gift card payments
+            // is hacky no matter where we put it, may as well use this for now
+            $checkTotals->Discount = $discount; 
+            $params[$key] = $checkTotals;
         }
         $calculated = $this->applyCheckTotal($params);
         return $calculated;

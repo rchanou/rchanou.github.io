@@ -31,6 +31,5 @@ Authenticate::initialize($logic);
 // inject the LogicService->Logs interface into the static LogService class
 LogService::initialize($logic->logs);
 
-// inject the LogicService into the static MailService class, and load the desired MailInterface
-MailService::initialize($logic); // lazy load, or call this only on use? involves another SQL call to initialize the interface
-MailService::useInterface('Swift');
+// inject the LogicService into the static MailService class, and name the desired MailInterface (lazy-loading)
+MailService::initialize($logic, 'Swift');

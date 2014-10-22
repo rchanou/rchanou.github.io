@@ -3,46 +3,55 @@
 CREATE VIEW [dbo].[CheckTotals_V] AS
 WITH
 CheckDetailSums1 AS (
-	SELECT
-		cd.CheckDetailID
-		, cd.CheckID
-		, ISNULL(
-			(
-				Round(ISNULL((UnitPrice * (Qty + CadetQty) - DiscountApplied) , 0),2) 
-			)
-			, 0
-		) AS CheckDetailSubtotal
-		, ISNULL(
-			(
-				Round(ISNULL((UnitPrice * (Qty + CadetQty) - DiscountApplied) * (CASE WHEN dbo.UseSalesTax() = 1 THEN (((1 + GST / 100) * (1 + (TaxPercent - GST) / 100)) - 1) * 100 ELSE 0 END) / 100.00, 0),2)
-			)
-			, 0
-		) AS CheckDetailTax
-	FROM dbo.CheckDetails cd
-	WHERE cd.Status <> 2
+    SELECT
+        cd.CheckDetailID
+        , cd.CheckID
+        , ISNULL(
+            (
+                Round(ISNULL((UnitPrice * (Qty + CadetQty) - DiscountApplied) , 0),2) 
+            )
+            , 0
+        ) AS CheckDetailSubtotal
+        , ISNULL(
+            (
+                Round(ISNULL((UnitPrice * (Qty + CadetQty) - DiscountApplied) * (CASE WHEN dbo.UseSalesTax() = 1 THEN (((1 + GST / 100) * (1 + (TaxPercent - GST) / 100)) - 1) * 100 ELSE 0 END) / 100.00, 0),2)
+            )
+            , 0
+        ) AS CheckDetailTax
+    FROM dbo.CheckDetails cd
+    WHERE cd.Status <> 2
 )
 , CheckDetailSums2 AS (
-	SELECT
-		cds1.CheckDetailID
-		, cds1.CheckID
-		, cds1.CheckDetailTax
-		, cds1.CheckDetailSubtotal
-		, ISNULL(cds1.CheckDetailSubtotal + cds1.CheckDetailTax, 0) AS CheckDetailTotal
-	FROM CheckDetailSums1 cds1
+    SELECT
+        cds1.CheckDetailID
+        , cds1.CheckID
+        , cds1.CheckDetailTax
+        , cds1.CheckDetailSubtotal
+        , ISNULL(cds1.CheckDetailSubtotal + cds1.CheckDetailTax, 0) AS CheckDetailTotal
+    FROM CheckDetailSums1 cds1
 )
 , CheckSums AS (
-	-- all logic taken from existing stored proc: dbo.ApplyCheckTotal
-	SELECT
-		cds2.CheckID
-		, SUM(cds2.CheckDetailTax) AS CheckTax
-		, SUM(cds2.CheckDetailSubtotal) AS CheckSubtotal
-		, SUM(cds2.CheckDetailTotal) AS CheckTotalTemp
-	FROM CheckDetailSums2 cds2
-	GROUP BY cds2.CheckID
+    -- all logic taken from existing stored proc: dbo.ApplyCheckTotal
+    SELECT
+        cds2.CheckID
+        , SUM(cds2.CheckDetailTax) AS CheckTax
+        , SUM(cds2.CheckDetailSubtotal) AS CheckSubtotal
+        , SUM(cds2.CheckDetailTotal) AS CheckTotalTemp
+    FROM CheckDetailSums2 cds2
+    GROUP BY cds2.CheckID
+)
+, ExistingPayments AS (
+    SELECT
+        p.CheckID
+        , SUM(ISNULL(p.PayAmount, 0)) AS PaidAmount
+        , SUM(ISNULL(p.PayTax, 0)) AS PaidTax
+    FROM dbo.Payment p
+    WHERE p.PayStatus = 1 -- PayStatus.PAID (2 is PayStatus.VOID)
+    GROUP BY p.CheckID
 )
 , CheckTotals AS (
-	SELECT
-		c.CheckID
+    SELECT
+        c.CheckID
         , c.CustID
         , c.CheckType
         , c.CheckStatus
@@ -61,11 +70,11 @@ CheckDetailSums1 AS (
         --, c.DiscountNotes
         --, c.DiscountUserID
         , c.InvoiceDate
-		, cs.CheckTax
-		--, cs.CheckTotal
-		, cs.CheckSubtotal
-		, cs.CheckTotalTemp + c.Gratuity + c.Fee - c.Discount AS CheckTotal
-		, cd.CheckDetailID
+        , cs.CheckTax
+        --, cs.CheckTotal
+        , cs.CheckSubtotal
+        , cs.CheckTotalTemp + c.Gratuity + c.Fee - c.Discount AS CheckTotal
+        , cd.CheckDetailID
         , cd.Status AS CheckDetailStatus
         , cd.Type AS CheckDetailType
         , cd.ProductID
@@ -118,13 +127,17 @@ CheckDetailSums1 AS (
         , cds2.CheckDetailTax
         , cds2.CheckDetailSubTotal
         , cds2.CheckDetailTotal
-	FROM dbo.Checks c
-	LEFT OUTER JOIN CheckDetailSums2 cds2
-		ON c.CheckID = cds2.CheckID
-	LEFT OUTER JOIN CheckSums cs
-		ON c.CheckID = cs.CheckID
-	LEFT OUTER JOIN dbo.CheckDetails cd
-		ON cd.CheckDetailID = cds2.CheckDetailID
+        , ISNULL(ep.PaidAmount, 0) AS PaidAmount -- when no payments exist, use 0
+        , ISNULL(ep.PaidTax, 0) AS PaidTax -- when no payments exist, use 0
+    FROM dbo.Checks c
+    LEFT OUTER JOIN CheckDetailSums2 cds2
+        ON c.CheckID = cds2.CheckID
+    LEFT OUTER JOIN CheckSums cs
+        ON c.CheckID = cs.CheckID
+    LEFT OUTER JOIN dbo.CheckDetails cd
+        ON cd.CheckDetailID = cds2.CheckDetailID
+    LEFT OUTER JOIN ExistingPayments ep
+        ON ep.CheckID = c.CheckID
 )
 SELECT
     c.CheckID
@@ -133,7 +146,7 @@ SELECT
     , c.CheckStatus
     , c.CheckName
     , c.UserID
-	, c.CheckTotalApplied -- stored on the Check record
+    , c.CheckTotalApplied -- stored on the Check record
     , c.BrokerName
     , c.Notes
     , c.Gratuity
@@ -143,9 +156,9 @@ SELECT
     , c.IsTaxExempt
     , c.Discount
     , c.InvoiceDate
-	, c.CheckTax -- calculated
-	, c.CheckSubTotal -- calculated
-	, c.CheckTotal -- calculated
+    , c.CheckTax -- calculated
+    , c.CheckSubTotal -- calculated
+    , c.CheckTotal -- calculated
     , c.CheckDetailID
     , c.CheckDetailStatus
     , c.CheckDetailType
@@ -196,7 +209,9 @@ SELECT
     , c.S_CustID
     , c.S_Vol
     , c.CadetQty
-	, c.CheckDetailTax -- calculated
-	, c.CheckDetailSubtotal -- calculated
-	, c.CheckDetailTotal -- calculated
+    , c.CheckDetailTax -- calculated
+    , c.CheckDetailSubtotal -- calculated
+    , c.CheckDetailTotal -- calculated
+    , c.PaidAmount -- calculated from payments
+    , c.PaidTax -- calculated from payments
 FROM CheckTotals c

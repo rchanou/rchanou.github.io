@@ -35,6 +35,7 @@ if(!function_exists('mime_content_type')) {
     }
 }
 
+
 /**
  * Proxy images as base64
  * Created to get around CORS problems from iPad registration

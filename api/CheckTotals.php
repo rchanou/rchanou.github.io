@@ -6,26 +6,26 @@ class CheckTotals extends BaseApi {
 
     function __construct() {
         parent::__construct();
-        $this->mapper           = new \ClubSpeed\Mappers\CheckTotalsMapper();
-        $this->interface        = $this->logic->checkTotals;
-        $this->access['all']    = Enums::API_NO_ACCESS;
-        $this->access['put']    = Enums::API_NO_ACCESS;
-        $this->access['delete'] = Enums::API_NO_ACCESS;
+        $this->mapper            = new \ClubSpeed\Mappers\CheckTotalsMapper();
+        $this->interface         = $this->logic->checkTotals;
+        $this->access['all']     = Enums::API_NO_ACCESS;
+        $this->access['put']     = Enums::API_NO_ACCESS;
+        $this->access['delete']  = Enums::API_NO_ACCESS;
+        $this->access['virtual'] = Enums::API_PRIVATE_ACCESS;
     }
 
-    public function post($id, $request_data = null) {
-        $this->validate('post');
+    /**
+     * @url POST /virtual
+     */
+    public function virtual($request_data = null) {
+        $this->validate('virtual');
         try {
-            if (isset($id)) {
-                switch($id) {
-                    case 'virtual':
-                        $interface =& $this->interface;
-                        return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
-                            return $interface->virtual($mapped);
-                        });
-                }
-            }
-            return parent::post($id, $request_data);
+            $data = $this->mapper->in($request_data);
+            $mapped = $data->params;
+            $giftCards = @$request_data['giftCards'] ?: array();
+            $virtual = $this->interface->virtual($mapped, $giftCards);
+            $out = $this->mapper->out($virtual);
+            return $out;
         }
         catch (RestException $e) {
             throw $e;

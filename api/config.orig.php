@@ -39,3 +39,6 @@ $defaultDatabase = 'ClubspeedV8';
 
 // Logs Database
 $logsDatabase = 'ClubSpeedLog';
+
+// Override for the WebAPI cache clear - if truthy, then Queues logic will be run, regardless of current version number
+$cacheClearOverride = false;

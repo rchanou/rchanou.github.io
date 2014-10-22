@@ -11,27 +11,28 @@ class Response extends AbstractResponse
 {
     public function isSuccessful()
     {
-        return !isset($this->data['error']);
+        return isset($this->data['Result']) && strtoupper($this->data['Result'] === 'CAPTURED') || strtoupper($this->data['Result'] === 'APPROVED');
     }
 
     public function getTransactionReference()
     {
-        if (isset($this->data['object']) && 'charge' === $this->data['object']) {
-            return $this->data['id'];
+        if (isset($this->data['TroutD'])) {
+            return $this->data['TroutD'];
         }
     }
 
-    public function getCardReference()
-    {
-        if (isset($this->data['object']) && 'customer' === $this->data['object']) {
-            return $this->data['id'];
-        }
-    }
+    // not used with PCCharge
+    // public function getCardReference()
+    // {
+    //     if (isset($this->data['object']) && 'customer' === $this->data['object']) {
+    //         return $this->data['id'];
+    //     }
+    // }
 
     public function getMessage()
     {
         if (!$this->isSuccessful()) {
-            return $this->data['error']['message'];
+            return ($this->data['ErrorDescription'] ?: $this->data['AuthorizationCode']) . ': ' . $this->data['Result'];
         }
     }
 }

@@ -409,7 +409,7 @@
 
             // calculate racer height and font size
             var minRacers = 7; // don't use style calculations for fewer than 7 racers
-            var numElems = data.fastest.length > minRacers ? data.fastest.length : minRacers;
+            var numElems = data.fastest && data.fastest.length && data.fastest.length > minRacers ? data.fastest.length : minRacers;
             data.racerHeight = 96 / numElems + "%"; 
             data.racerFontSize = 2 + (18 / numElems) + "vh";
 

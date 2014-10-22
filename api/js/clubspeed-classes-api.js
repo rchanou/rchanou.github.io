@@ -97,7 +97,6 @@
             });
 
             var getRaceDetails = function(options) {
-                log(options);
                 return sendRequest({
                     api: "races/" + options.raceId + ".json",
                     type: "GET",
@@ -223,9 +222,6 @@
             }
 
             function apiSuccessHandler(data, textStatus, xhr) {
-                z.assert(function() { return z.equals(data, xhr.responseJSON); });
-                z.assert(function() { return z.equals(textStatus, "success"); });
-                z.assert(function() { return z.equals(xhr.status, 200); });
                 log.debug("  ---  Return success from: " + xhr.url + " (" + xhr.status + ")");
                 log.debug(xhr);
             }

@@ -104,15 +104,23 @@
 
         function _funcCopy(source) {
             // rebuild the function from the original body and arguments
-            var s = source.toString();
-            var args = s.substring(s.indexOf("(")+1, s.indexOf(")")).trim().split(",");
-            args.map(function(val, index, arr) {
-                arr[index] = val.trim();
+            // var s = source.toString();
+            // var args = s.substring(s.indexOf("(")+1, s.indexOf(")")).trim().split(",");
+            // args.map(function(val, index, arr) {
+            //     arr[index] = val.trim();
+            // });
+            // var body = s.substring(s.indexOf("{")+1, s.indexOf("}")).trim();
+            // var anonymous = new Function(args, body); // may need to consider the "this" property
+            // // make sure we collect any properties which may have been set on the function
+
+            var temp = function() { return source.apply(source, arguments); };
+            z.forEach(source, function(x, key, fn) {
+                temp[key] = _deepCopy(x);
             });
-            var body = s.substring(s.indexOf("{")+1, s.indexOf("}")).trim();
-            var anonymous = new Function(args, body); // may need to consider the "this" property
-            // make sure we collect any properties which may have been set on the function
-            return _singleCopy(source, anonymous);
+
+            return _singleCopy(source, temp);
+
+            // return _singleCopy(source, anonymous);
         }
 
         function _deepCopy(source) {
@@ -228,14 +236,14 @@
                     }
                     break;
                 case z.types.function:
-                    if (!z.equals(z.functions.getBody(x), z.functions.getBody(y))) {
-                        // function body mismatch
-                        return false;
-                    }
-                    if (!z.equals(z.functions.getArgumentNames(x), z.functions.getArgumentNames(y))) {
-                        // function arguments mismatch
-                        return false;
-                    }
+                    // if (!z.equals(z.functions.getBody(x), z.functions.getBody(y))) {
+                    //     // function body mismatch
+                    //     return false;
+                    // }
+                    // if (!z.equals(z.functions.getArgumentNames(x), z.functions.getArgumentNames(y))) {
+                    //     // function arguments mismatch
+                    //     return false;
+                    // }
                     if (!_compareObject(x, y)) {
                         // property mismatch on function
                         return false;
@@ -289,17 +297,18 @@
         }
         var target = args[0];
         for (var i = 1; i < args.length; i++) {
-            z.assert.isSmashable(target, args[i]);
-            z.forEach(args[i], function(value, key) {
-                if (!z.check.exists(target[key])) {
-                    target[key] = args[i][key];
-                }
-                else {
-                    if (z.check.isSmashable(target[key], args[i][key])) {
-                        target[key] = z.smash(target[key], args[i][key]);
+            if (z.check.isSmashable(target, args[i])) {
+                z.forEach(args[i], function(value, key) {
+                    if (!z.check.exists(target[key])) {
+                        target[key] = args[i][key];
                     }
-                }
-            });
+                    else {
+                        if (z.check.isSmashable(target[key], args[i][key])) {
+                            target[key] = z.smash(target[key], args[i][key]);
+                        }
+                    }
+                });
+            }
         }
         return target;
     };
@@ -990,16 +999,27 @@
                     return (x > y) ? 1 : ((x < y) ? -1 : 0);
                 }
             }
+
+            var comparer = function(x, y, xIndex, yIndex) {
+                var c = predicate(x, y);
+                if (c === 0)
+                    return xIndex - yIndex;
+                return c;
+            };
+
+            // more efficient to declare the internal call outside and just pass params around?
+            // probably is -- more testing should be done here for optimization
             var internalQuickSort = function(left, right) {
                 do {
                     var i = left;
                     var j = right;
-                    var pivot = source[Math.floor((left + right) / 2)];
+                    var pivot = Math.floor((left + right) / 2);
+                    var p = source[pivot];
                     do {
-                        while ((i < source.length) && (predicate(source[i], pivot) < 0)) {
+                        while ((i < source.length) && (comparer(source[i], p, i, pivot) < 0)) {
                             i++;
                         }
-                        while ((0 <= j) && (predicate(pivot, source[j]) < 0)) {
+                        while ((0 <= j) && (comparer(p, source[j], pivot, j) < 0)) {
                             j--;
                         }
                         if (i > j) {
@@ -1076,21 +1096,41 @@
         };
 
         /**
+            Removes the first element from an array which matches a provided predicate.
+             
+            @param {array} source The source array from which to remove an element.
+            @param {function} predicate The method used to determine element removal.
+            @returns {array} The reference to the original array.
+        */
+        arrays.remove = function(/* source, predicate */) {
+            var argsIterator = 0;
+            var source = z.getType(this) === z.types.array ? this : arguments[argsIterator++];
+            var predicate = arguments[argsIterator++];
+            predicate = z.lambda(predicate);
+            for (var i = 0; i < source.length; i++) {
+                if (predicate(source[i])) {
+                    source.splice(i, 1);
+                }
+            }
+            return source;
+        };
+
+        /**
             Removes elements from an array based on a provided predicate.
             Traverses the array backwards, as it modifies the array which is currently being iterated.
              
-            @this {array}
-            @param {function|string} selector The method or lambda string used to determine element removal.
-            @returns {void}
+            @param {array} source The source array.
+            @param {function|string} predicate The method or lambda string used to determine element removal.
+            @returns {number} The count of removed items.
         */
-        arrays.removeAll = function(/* source, selector */) {
+        arrays.removeAll = function(/* source, predicate */) {
             var argsIterator = 0;
             var source = z.getType(this) === z.types.array ? this : arguments[argsIterator++];
-            var selector = arguments[argsIterator++];
+            var predicate = arguments[argsIterator++];
             var removalCount = 0;
-            selector = z.lambda(selector);
+            predicate = z.lambda(predicate);
             for (var i = source.length-1; i > -1; i--) {
-                if (selector(source[i])) {
+                if (predicate(source[i])) {
                     source.splice(i, 1);
                     removalCount++;
                 }
@@ -1101,7 +1141,7 @@
         /**
             Projects a selected set of elements from an array of objects into a new array of new objects.
             
-            @this {array}
+            @param {array} source The source array.
             @param {(string|function|string[])} selectors A property name, function for selecting properties, or an array of property names.
             @returns {array} An array of objects, containing the properties specified by selectors.
         */
@@ -1118,10 +1158,26 @@
         };
 
         /**
+            Shuffles an array using the Fisher-Yates algorithm.
+            Note that the original array in the provided reference will be shuffled.
+
+            @param {array} source The source array to be shuffled.
+            @returns {array} source The shuffled array.
+        */
+        arrays.shuffle = function(/* source */) {
+            var argsIterator = 0;
+            var source = z.getType(this) === z.types.array ? this : arguments[argsIterator++];
+            for (var i = source.length-1; i >= 0; i--) {
+                arrays.swap(source, i, Math.floor(Math.random() * i));
+            }
+            return source; // note that the original array will be shuffled -- return a reference to it anyways
+        };
+
+        /**
             Takes and returns the items of the array
             starting at the provided index.
             
-            @this {array}
+            @param {array} source The source array over which to iterate.
             @param {number} index The index to start at.
             @returns {array} An array containing the taken items.
         */
@@ -1137,6 +1193,58 @@
                 result[i] = source[i+index];
             }
             return result;
+        };
+
+        /**
+            Internal method for assistance with recursively building
+            a set of subsets whose values all add up to the specified target.
+
+            @param {array<number>} remaining The remaining unused values array for which to calculate a set of subsets.
+            @param {number} target The target for each subset's sum.
+            @param {array<number>} partial The array containing a potential subset of numbers whose sum adds to the target.
+            @param {array<array<number>>} successes The reference to the array containing all successfully found subsets.
+            @returns {array<array<number>>} The set of subsets.
+        */
+        function _internalSubsetSum(remaining, target, selector, partial, successes) {
+            var s = partial.sum(selector);
+            if (s === target) {
+                successes.push(partial); // partial is a success!
+                return; // found a success - end of path
+            }
+            if (s > target) {
+                return; // too high - bad path
+            }
+            for (var i = 0; i < remaining.length; i++) {
+                var newRemaining = [];
+                var n = remaining[i];
+                for (var j = i+1; j < remaining.length; j++) {
+                    newRemaining.push(remaining[j]);
+                }
+                var newPartial = partial.deepCopy(); // will this be too inefficient? we could use slice for a shallow copy, if necessary
+                newPartial.push(n);
+                _internalSubsetSum(newRemaining, target, selector, newPartial, successes);
+            }
+            return successes;
+        }
+
+        /**
+            Builds an array of arrays, notating a set of subsets
+            whose values all add up to the specified target.
+
+            @param {array<number>} source The source array for which to calculate a set of subsets.
+            @param {number} target The target for each subset's sum.
+            @returns {array<array<number>>} The set of subsets.
+        */
+        arrays.subsetSum = function(/* source, target, selector */) {
+            var argsIterator = 0;
+            var source = z.getType(this) === z.types.array ? this : arguments[argsIterator++];
+            var target = arguments[argsIterator++];
+            var selector = arguments[argsIterator++];
+            if (!z.check.isFunction(selector)) {
+                selector = z.functions.identity;
+                // source = source.select(selector);
+            }
+            return _internalSubsetSum(source, target, selector, [], []);
         };
 
         /**
@@ -1251,7 +1359,7 @@
             var source = this;
             var result = [];
             for (var i = 0; i < source.length; i++) {
-                if (predicate(source[i])) {
+                if (predicate(source[i], i, source)) {
                     result.push(source[i]);
                 }
             }
@@ -1290,54 +1398,55 @@
         */
         z.setup.initArrays = function(usePrototype) {
             if (!!usePrototype) {
-                z.defineProperty(Array.prototype, "aggregate", { enumerable: false, writable: false, value: arrays.aggregate });
-                z.defineProperty(Array.prototype, "any", { enumerable: false, writable: false, value: arrays.any });
-                z.defineProperty(Array.prototype, "average", { enumerable: false, writable: false, value: arrays.average });
-                z.defineProperty(Array.prototype, "contains", { enumerable: false, writable: false, value: arrays.contains });
-                z.defineProperty(Array.prototype, "count", { enumerable: false, writable: false, value: arrays.count });
-                z.defineProperty(Array.prototype, "deepCopy", { enumerable: false, writable: false, value: _deepCopy });
-                z.defineProperty(Array.prototype, "distinct", { enumerable: false, writable: false, value: arrays.distinct });
-                z.defineProperty(Array.prototype, "equals", { enumerable: false, writable: false, value: _equals });
-                z.defineProperty(Array.prototype, "first", { enumerable: false, writable: false, value: arrays.first });
-                z.defineProperty(Array.prototype, "innerJoin", { enumerable: false, writable: false, value: arrays.innerJoin });
-                z.defineProperty(Array.prototype, "isEmpty", { enumerable: false, writable: false, value: arrays.isEmpty });
-                z.defineProperty(Array.prototype, "isFull", { enumerable: false, writable: false, value: arrays.isFull });
-                z.defineProperty(Array.prototype, "last", { enumerable: false, writable: false, value: arrays.last });
-                z.defineProperty(Array.prototype, "max", { enumerable: false, writable: false, value: arrays.max });
-                z.defineProperty(Array.prototype, "min", { enumerable: false, writable: false, value: arrays.min });
-                z.defineProperty(Array.prototype, "mutate", { enumerable: false, writable: false, value: arrays.mutate });
-                z.defineProperty(Array.prototype, "orderBy", { enumerable: false, writable: false, value: arrays.orderBy });
-                z.defineProperty(Array.prototype, "quicksort", { enumerable: false, writable: false, value: arrays.quicksort });
-                z.defineProperty(Array.prototype, "quicksort3", { enumerable: false, writable: false, value: arrays.quicksort3 });
-                z.defineProperty(Array.prototype, "removeAll", { enumerable: false, writable: false, value: arrays.removeAll });
-                z.defineProperty(Array.prototype, "select", { enumerable: false, writable: false, value: arrays.select });
-                z.defineProperty(Array.prototype, "skip", { enumerable: false, writable: false, value: arrays.skip });
-                z.defineProperty(Array.prototype, "sum", { enumerable: false, writable: false, value: arrays.sum });
-                z.defineProperty(Array.prototype, "swap", { enumerable: false, writable: false, value: arrays.swap });
-                z.defineProperty(Array.prototype, "take", { enumerable: false, writable: false, value: arrays.take });
-                z.defineProperty(Array.prototype, "takeWhile", { enumerable: false, writable: false, value: arrays.takeWhile });
-                z.defineProperty(Array.prototype, "where", { enumerable: false, writable: false, value: arrays.where });
-                z.defineProperty(Array.prototype, "zip", { enumerable: false, writable: false, value: arrays.zip });
+                z.defineProperty(Array.prototype, "aggregate", { enumerable: false, writable: true, value: arrays.aggregate });
+                z.defineProperty(Array.prototype, "any", { enumerable: false, writable: true, value: arrays.any });
+                z.defineProperty(Array.prototype, "average", { enumerable: false, writable: true, value: arrays.average });
+                z.defineProperty(Array.prototype, "contains", { enumerable: false, writable: true, value: arrays.contains });
+                z.defineProperty(Array.prototype, "count", { enumerable: false, writable: true, value: arrays.count });
+                z.defineProperty(Array.prototype, "deepCopy", { enumerable: false, writable: true, value: _deepCopy });
+                z.defineProperty(Array.prototype, "distinct", { enumerable: false, writable: true, value: arrays.distinct });
+                z.defineProperty(Array.prototype, "equals", { enumerable: false, writable: true, value: _equals });
+                z.defineProperty(Array.prototype, "first", { enumerable: false, writable: true, value: arrays.first });
+                z.defineProperty(Array.prototype, "innerJoin", { enumerable: false, writable: true, value: arrays.innerJoin });
+                z.defineProperty(Array.prototype, "isEmpty", { enumerable: false, writable: true, value: arrays.isEmpty });
+                z.defineProperty(Array.prototype, "isFull", { enumerable: false, writable: true, value: arrays.isFull });
+                z.defineProperty(Array.prototype, "last", { enumerable: false, writable: true, value: arrays.last });
+                z.defineProperty(Array.prototype, "max", { enumerable: false, writable: true, value: arrays.max });
+                z.defineProperty(Array.prototype, "min", { enumerable: false, writable: true, value: arrays.min });
+                z.defineProperty(Array.prototype, "mutate", { enumerable: false, writable: true, value: arrays.mutate });
+                z.defineProperty(Array.prototype, "orderBy", { enumerable: false, writable: true, value: arrays.orderBy });
+                z.defineProperty(Array.prototype, "quicksort", { enumerable: false, writable: true, value: arrays.quicksort });
+                z.defineProperty(Array.prototype, "quicksort3", { enumerable: false, writable: true, value: arrays.quicksort3 });
+                z.defineProperty(Array.prototype, "remove", { enumerable: false, writable: true, value: arrays.remove });
+                z.defineProperty(Array.prototype, "removeAll", { enumerable: false, writable: true, value: arrays.removeAll });
+                z.defineProperty(Array.prototype, "select", { enumerable: false, writable: true, value: arrays.select });
+                z.defineProperty(Array.prototype, "shuffle", { enumerable: false, writable: true, value: arrays.shuffle });
+                z.defineProperty(Array.prototype, "skip", { enumerable: false, writable: true, value: arrays.skip });
+                z.defineProperty(Array.prototype, "subsetSum", { enumerable: false, writable: true, value: arrays.subsetSum });
+                z.defineProperty(Array.prototype, "sum", { enumerable: false, writable: true, value: arrays.sum });
+                z.defineProperty(Array.prototype, "swap", { enumerable: false, writable: true, value: arrays.swap });
+                z.defineProperty(Array.prototype, "take", { enumerable: false, writable: true, value: arrays.take });
+                z.defineProperty(Array.prototype, "takeWhile", { enumerable: false, writable: true, value: arrays.takeWhile });
+                z.defineProperty(Array.prototype, "where", { enumerable: false, writable: true, value: arrays.where });
+                z.defineProperty(Array.prototype, "zip", { enumerable: false, writable: true, value: arrays.zip });
             }
         };
     }
 
-    var root,
-        freeModule,
-        freeExports,
-        freeGlobal,
-        moduleExports,
-        freeDefine;
-
-    root = (
+    /**
+        Locate root, and determine how to use the factory method.
+    */
+    var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
@@ -1345,8 +1454,9 @@
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -1622,27 +1732,24 @@
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -1748,22 +1855,20 @@
         z.classes.Cache = Cache;
     }
 
-    var root,
-        freeModule,
-        freeExports,
-        freeGlobal,
-        moduleExports,
-        freeDefine;
-
-    root = (
+    /**
+        Locate root, and determine how to use the factory method.
+    */
+    var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
@@ -1771,8 +1876,9 @@
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -2011,27 +2117,24 @@
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
     
 }());/*
@@ -2184,27 +2287,24 @@
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -2239,11 +2339,11 @@
                     Calls any registered functions under the given event name,
                     passing any additional provided arguments to those functions.
 
-                    @param {string} eventName The name of the event to call.
+                    @param {string} eventName The name of the event to emit.
                     @param {...any} var_args The arguments to pass to each of the registered events.
                     @returns {void}
                 */
-                var call = function(eventName) {
+                var emit = function(eventName) {
                     var events = _eventList[eventName];
                     if (events != null) {
                         for (var i = 0; i < events.length; i++) {
@@ -2298,7 +2398,7 @@
                     @returns {object} The extended object.
                 */
                 return (function(eventsObj) {
-                    z.defineProperty(eventsObj, "call", { get: function() { return call; }, writeable: false });
+                    z.defineProperty(eventsObj, "emit", { get: function() { return emit; }, writeable: false });
                     z.defineProperty(eventsObj, "clear", { get: function() { return clear; }, writeable: false });
                     z.defineProperty(eventsObj, "on", { get: function() { return on; }, writeable: false });
                     return eventsObj;
@@ -2320,27 +2420,24 @@
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -2521,22 +2618,20 @@
         };
     }
 
-    var root,
-        freeModule,
-        freeExports,
-        freeGlobal,
-        moduleExports,
-        freeDefine;
-
-    root = (
+    /**
+        Locate root, and determine how to use the factory method.
+    */
+    var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
@@ -2544,8 +2639,9 @@
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -2615,27 +2711,24 @@
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -2820,22 +2913,20 @@
         z.classes.LogInterface = LogInterface;
     }
 
-    var root,
-        freeModule,
-        freeExports,
-        freeGlobal,
-        moduleExports,
-        freeDefine;
-
-    root = (
+    /**
+        Locate root, and determine how to use the factory method.
+    */
+    var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
@@ -2843,8 +2934,9 @@
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -2960,27 +3052,24 @@
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -3085,49 +3174,46 @@
 
         /**
             Initializes all pre-defined methods
-            as non-enumerable and non-writable properties
+            as non-enumerable but writable properties
             located on the Object.prototype.
             
             @returns {void}
         */
         z.setup.initObjects = function(usePrototype) {
             if (!!usePrototype) {
-                z.defineProperty(Object.prototype, "deepCopy", { enumerable: false, writable: false, value: _deepCopy });
-                z.defineProperty(Object.prototype, "defineProperty", { enumerable: false, writable: false, value: _defineProperty });
-                z.defineProperty(Object.prototype, "equals", { enumerable: false, writable: false, value: _equals });
-                z.defineProperty(Object.prototype, "extend", { enumerable: false, writable: false, value: _extend });
-                z.defineProperty(Object.prototype, "smash", { enumerable: false, writable: false, value: _smash });
+                z.defineProperty(Object.prototype, "deepCopy", { enumerable: false, writable: true, value: _deepCopy });
+                z.defineProperty(Object.prototype, "defineProperty", { enumerable: false, writable: true, value: _defineProperty });
+                z.defineProperty(Object.prototype, "equals", { enumerable: false, writable: true, value: _equals });
+                z.defineProperty(Object.prototype, "extend", { enumerable: false, writable: true, value: _extend });
+                z.defineProperty(Object.prototype, "smash", { enumerable: false, writable: true, value: _smash });
             }
         };
     }
 
-     /**
+    /**
         Locate root, and determine how to use the factory method.
     */
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }());/*
@@ -3279,33 +3365,30 @@
         z.sw = new z.classes.StopwatchStack();
     }
 
-     /**
+    /**
         Locate root, and determine how to use the factory method.
     */
     var root = (
         typeof window !== 'undefined' ?
             window
-            :  typeof window !== 'undefined' ?
+            :  typeof global !== 'undefined' ?
                 global 
                 : this
     );
-    if (typeof root.z !== 'undefined') {
-        // Browser mode -- root should be window
-        // assume that window.z is the defined zUtil object
-        factory(z);
+    if (typeof define !== 'undefined' && typeof define.amd !== 'undefined') {
+        // define.amd exists
+        define(function() { return factory });
+        root.z = z; // expose to root in case require() is not being used to load zutil
     }
     else if (typeof module !== 'undefined') {
         _module = module;
         if (typeof module.exports !== 'undefined') {
-            // module.exports is available
-            // provide the factory as the export
-            // the call to require will need to provide
-            // the zUtil object (applying IoC principles)
             _module.exports = factory;
         }
     }
-    else if (typeof define !== 'undefined') {
-        // find a way to handle define() ??
+    else if (typeof root.z !== 'undefined') {
+        // pass root.z to the factory
+        factory(root.z);
     }
 
 }()); 

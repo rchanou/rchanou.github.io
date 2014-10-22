@@ -99,6 +99,12 @@ EOS
   <li><code class="prettyprint">%gte; ( equivalent to &gt;= )</code></li>
   <li><code class="prettyprint">%eq; ( equivalent to = )</code></li>
   <li><code class="prettyprint">%neq; ( equivalent to != )</code></li>
+  <li><code class="prettyprint">\$lt ( equivalent to &lt; )</code></li>
+  <li><code class="prettyprint">\$lte ( equivalent to &lt;= )</code></li>
+  <li><code class="prettyprint">\$gt ( equivalent to &gt; )</code></li>
+  <li><code class="prettyprint">\$gte ( equivalent to &gt;= )</code></li>
+  <li><code class="prettyprint">\$eq ( equivalent to = )</code></li>
+  <li><code class="prettyprint">\$neq ( equivalent to != )</code></li>
 </ul>
 <h4>
   Available Connectors

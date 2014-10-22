@@ -8,7 +8,7 @@ class Comparator {
     public $operator;
     public $right;
 
-    protected static $pattern = '/(<=?|>=?|(?: )IS(?: NOT)?(?: )|<>|!?=|%(?:[N]?EQ|LT[E]?|GT[E]?);)/i'; // note case-insensitivity
+    protected static $pattern = '/(<=?|>=?|(?: )IS(?: NOT)?(?: )|<>|!?=|(?:(?=.*;)%|(?:(?!.*;)\$))(?:[N]?EQ|LT[E]?|GT[E]?)(?:;?))/i'; // note case-insensitivity
     protected static $operators = array(
           '<'      => '<'
         , '<='     => '<='
@@ -25,6 +25,12 @@ class Comparator {
         , '%gte;'  => '>='
         , '%eq;'   => '='
         , '%neq;'  => '!='
+        , '$lt'    => '<'
+        , '$lte'   => '<='
+        , '$gt'    => '>'
+        , '$gte'   => '>='
+        , '$eq'    => '='
+        , '$neq'   => '!='
     );
 
     public function __construct($data) {

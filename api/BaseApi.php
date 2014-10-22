@@ -17,6 +17,8 @@ abstract class BaseApi {
         $this->access = array(
             'post'   => Enums::API_PRIVATE_ACCESS,
             'get'    => Enums::API_PRIVATE_ACCESS,
+            'match'  => Enums::API_PRIVATE_ACCESS,
+            'filter' => Enums::API_PRIVATE_ACCESS,
             'put'    => Enums::API_PRIVATE_ACCESS,
             'delete' => Enums::API_PRIVATE_ACCESS,
             'all'    => Enums::API_PRIVATE_ACCESS
@@ -63,10 +65,10 @@ abstract class BaseApi {
     }
 
     public function get($id, $request_data = null) {
-        $this->validate('get');
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
             if (isset($id)) {
+                $this->validate('get');
                 return $this->mapper->mutate($id, $request_data, function($id) use (&$interface) {
                     return $interface->get($id);
                 });
@@ -74,18 +76,20 @@ abstract class BaseApi {
             else {
                 if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
                     if (\ClubSpeed\Utility\Params::isFilter($request_data)) {
+                        $this->validate('filter');
                         return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
                             return $interface->find($mapped);
                         });
                     }
                     else {
+                        $this->validate('match');
                         return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
                             return $interface->match($mapped);
                         });
                     }
                 }
                 else {
-                    $this->validate('all'); // special case, sometimes we want to deny this separate from the other gets
+                    $this->validate('all');
                     return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
                         return $interface->all();
                     });

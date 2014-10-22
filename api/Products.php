@@ -15,8 +15,7 @@ class Products extends BaseApi {
 
     function __construct() {
         parent::__construct();
-        require_once(__DIR__.'/ClubSpeed/Mappers/MapProducts.php');
-        $this->mapper = new \ClubSpeed\Mappers\MapProducts();
+        $this->mapper = new \ClubSpeed\Mappers\ProductsMapper();
         $this->interface = $this->logic->products;
     }
 

@@ -79,6 +79,8 @@ class CheckTotalsMapper extends BaseMapper {
             , 'CheckDetailSubtotal'     => ''
             , 'CheckDetailTax'          => ''
             , 'CheckDetailTotal'        => ''
+            , 'PaidAmount'              => ''
+            , 'PaidTax'                 => ''
         ));
     }
 
@@ -161,6 +163,8 @@ class CheckTotalsMapper extends BaseMapper {
                     , 'CheckSubtotal'
                     , 'CheckTax'
                     , 'CheckTotal'
+                    , 'PaidAmount'
+                    , 'PaidTax'
                 );
                 $detailKeys = array(
                       'CheckDetailID'

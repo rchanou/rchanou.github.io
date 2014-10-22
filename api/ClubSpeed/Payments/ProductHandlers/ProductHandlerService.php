@@ -34,11 +34,12 @@ class ProductHandlerService {
             case Enums::PRODUCT_TYPE_POINT:
                 return $this->load('Point')->handle($checkDetail, $metadata);
                 // todo: shuffle off to handle points item? consider heatId in the metadata?
-                break;
             case Enums::PRODUCT_TYPE_RESERVATION:
                 pr("found reservation item");
                 // $this->load('Reservation')->handle($checkDetail, $metadata);
                 break;
+            case Enums::PRODUCT_TYPE_GIFT_CARD:
+                return $this->load('GiftCard')->handle($checkDetail, $metadata);
             // other handlers/logic yet to be determined
             // see enums for other available product types
         }

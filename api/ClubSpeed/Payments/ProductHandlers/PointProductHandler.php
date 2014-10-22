@@ -27,14 +27,21 @@ class PointProductHandler extends BaseProductHandler {
                 $pointHistory->PointAmount = $checkTotal->P_Points;
                 $pointHistory->Username = 'api';
                 $this->logic->pointHistory->create($pointHistory);
-                Log::debug('CheckDetailID ' . $checkTotal->CheckDetailID . ': Added ' . $pointHistory->PointAmount . ' points to Customer ' . $pointHistory->CustID);
+                $message = 'CheckDetailID ' . $checkTotal->CheckDetailID . ': Added ' . $pointHistory->PointAmount . ' points to Customer ' . $pointHistory->CustID;
+                Log::debug($message);
             }
             catch (\Exception $e) {
-                Log::error('CheckDetailID ' . $checkTotal->CheckDetailID . ': Unable to add points to Customer ' . $checkTotal->CustID, $e);
+                $message = 'CheckDetailID ' . $checkTotal->CheckDetailID . ': Unable to add points to Customer ' . $checkTotal->CustID . "! " . $e->getMessage();
+                Log::error($message);
+                return array('error' => $message);
             }
         }
 
-        if (!empty($metadata)) {
+        if (empty($metadata)) {
+            // then we are done processing, return the message
+            return array('success' => $message); // note that message was set up above while processing normal logic
+        }
+        else {
             if (isset($metadata['heatId'])) {
                 // if a heatId is passed along with the metadata, assume the customer also needs to be added to the race
                 // and have their points reduced by a single race amount
@@ -58,10 +65,13 @@ class PointProductHandler extends BaseProductHandler {
                     $pointHistoryReduction->Username      = 'api';
                     $pointHistoryReductionId              = $this->logic->pointHistory->create($pointHistoryReduction);
                     $pointHistoryReductionId              = $pointHistoryReductionId['PointHistoryID'];
-                    Log::debug('CheckDetailID ' . $checkTotal->CheckDetailID . ': Took ' . $pointHistoryReduction->PointAmount . ' points from Customer ' . $pointHistoryReduction->CustID);
+                    $message = 'CheckDetailID ' . $checkTotal->CheckDetailID . ': Took ' . $pointHistoryReduction->PointAmount . ' points from Customer ' . $pointHistoryReduction->CustID;
+                    Log::debug($message);
                 }
                 catch (\Exception $e) {
-                    Log::error('CheckDetailID ' . $checkTotal->CheckDetailID . ': Unable to remove ' . $pointHistoryReduction->PointAmount . ' points from Customer ' . $checkTotal->CustID, $e);
+                    $message = 'CheckDetailID ' . $checkTotal->CheckDetailID . ': Unable to remove ' . $pointHistoryReduction->PointAmount . ' points from Customer ' . $checkTotal->CustID . "! " . $e->getMessage();
+                    Log::error($message);
+                    return array('error' => $message);
                 }
 
                 // attempt to add the customer to the heat
@@ -73,7 +83,8 @@ class PointProductHandler extends BaseProductHandler {
                     $heatDetails->RPM            = $customer->RPM;
                     $heatDetails->PointHistoryID = $pointHistoryReducedId;
                     $this->logic->heatDetails->create($heatDetails);
-                    Log::debug('CheckDetailID ' . $checkTotal->CheckDetailID . ': Added ' . $customer->FName . ' ' . $customer->LName . ' to race #' . $heatId);
+                    $message = 'CheckDetailID ' . $checkTotal->CheckDetailID . ': Added ' . $customer->FName . ' ' . $customer->LName . ' to race #' . $heatId;
+                    Log::debug($message);
                 }
                 catch(\Exception $e) {
                     Log::error('CheckDetailID ' . $checkTotal->CheckDetailID . ': Unable to add' . $customer->FName . ' ' . $customer->LName . ' to race #' . $heatId, $e);
@@ -87,12 +98,18 @@ class PointProductHandler extends BaseProductHandler {
                         $heat                      = $heat[0];
                         $heat->NumberOfReservation = ($heat->NumberOfReservation ?: 0) + $additionalReservations;
                         $this->logic->heatMain->update($heat->HeatNo, $heat);
-                        Log::debug('CheckDetailID ' . $checkTotal->CheckDetailID . ': Added ' . $additionalReservations . ' additional reservations to race #' . $heatId);
+                        $message ='CheckDetailID ' . $checkTotal->CheckDetailID . ': Added ' . $additionalReservations . ' additional reservations to race #' . $heatId;
+                        Log::debug($message);
                     }
                 }
                 catch(\Exception $e) {
-                    Log::error('CheckDetailID ' . $checkTotal->CheckDetailID . ': Unable to add ' . $additionalReservations . ' additional reservations to race #' . $heatId);
+                    $message = 'CheckDetailID ' . $checkTotal->CheckDetailID . ': Unable to add ' . $additionalReservations . ' additional reservations to race #' . $heatId;
+                    Log::error($message);
+                    return array('error' => $message);
                 }
+                return array(
+                    'success' => 'CheckDetailID ' . $checkTotal->CheckDetailID . ': Added customer to heat #' . $heat->HeatNo
+                );
             }
         }
     }

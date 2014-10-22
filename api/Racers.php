@@ -92,7 +92,7 @@ class Racers
                 $customerId = $results['customerId'];
             }
             else {
-                $customerId = (int)$account['CustID'];
+                $customerId = $account->CustID;
             }
             $fbId = $params['Facebook']['UId'];
             $fbAccessToken = $params['Facebook']['Access_token'];
@@ -203,12 +203,12 @@ class Racers
             // *** DUE TO A BUG FOUND AT PPR LONGISLAND ON 9/3/2014       ***
             // note: the Queues class contains the logic to determine 
             // whether or not to add to the customer or event queue
-            // try {
-            //     $this->queues->post($request_data);
-            // }
-            // catch(Exception $e) {
-            //     // ignore exceptions from queues->post for now, we want to be sure to return the $customer object
-            // }
+            try {
+                $this->queues->post($request_data);
+            }
+            catch(Exception $e) {
+                // ignore exceptions from queues->post for now, we want to be sure to return the $customer object
+            }
             return $customer;
         }
         catch(RestException $e) {

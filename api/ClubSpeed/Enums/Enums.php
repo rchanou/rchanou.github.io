@@ -68,6 +68,8 @@ class Enums {
      */
     const API_NO_ACCESS = -1;
 
+
+    // See UserDataType.vb at Enum ProductType
     const PRODUCT_TYPE_REGULAR = 1;
     const PRODUCT_TYPE_POINT = 2;
     const PRODUCT_TYPE_FOOD = 3;
@@ -76,4 +78,21 @@ class Enums {
     const PRODUCT_TYPE_MEMBERSHIP = 6;
     const PRODUCT_TYPE_GIFT_CARD = 7;
     const PRODUCT_TYPE_ENTITLE = 8;
+
+    // See UserDataType.vb at Enum PayType
+    const PAY_TYPE_CASH = 1;
+    const PAY_TYPE_CREDIT_CARD = 2;
+    const PAY_TYPE_EXTERNAL = 3;
+    const PAY_TYPE_GIFT_CARD = 4;
+    const PAY_TYPE_VOUCHER = 5;
+    const PAY_TYPE_COMPLIMENTARY = 6;
+    const PAY_TYPE_CHECK = 7;
+    const PAY_TYPE_GAME_CARD = 8;
+    const PAY_TYPE_DEBIT = 9;
+    const PAY_TYPE_SAGE_PAY = 10;
+    const PAY_TYPE_PAY_PAL_PAY_FLOW_PRO = 11;
+
+    // See UserDataType.vb at Enum PayStatus
+    const PAY_STATUS_PAID = 1;
+    const PAY_STATUS_VOID = 2;
 }

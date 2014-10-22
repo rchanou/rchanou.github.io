@@ -23,97 +23,6 @@ class BasePayment {
         $this->gateway->initialize(@$data['options']);
     }
 
-    public function handleSuccess(&$check, &$params, &$response) {
-        $now = \ClubSpeed\Utility\Convert::getDate();
-
-        $checkData = @$params['check'];
-
-        // update the check
-        $check->CheckStatus = 1; // CheckStatus.Closed from VB enum
-        $check->Notes = $response->getTransactionReference();
-        $check->ClosedDate = $now;
-        $this->logic->checks->update($check->CheckID, $check);
-
-        $checkTotals = $this->logic->checkTotals->match(array('CheckID' => $check->CheckID));
-        $checkTotal = $checkTotals[0];
-
-        // build and insert a payment record
-        $payment                  = $this->logic->payment->dummy();
-        $payment->CheckID         = $check->CheckID;
-        $payment->PayAmount       = $check->CheckTotal;
-        $payment->PayDate         = $now;
-        $payment->PayStatus       = 1; // PayStatus.PAID from VB
-        $payment->PayTax          = $checkTotal->CheckTax; // this will be the same on each record, as long as the CheckID matches
-        $payment->PayTerminal     = 'api';// use this?
-        $payment->PayType         = 2; // always credit card when through pccharge?
-        $payment->TransactionDate = $now;
-        $payment->ReferenceNumber = $response->getTransactionReference();
-        $payment->UserID          = 1; // probably should be non-nullable, onlinebooking userId?
-        $this->logic->payment->create($payment);
-
-        // should probably have a try catch here for each check detail
-        $handled = array();
-        foreach($checkTotals as $checkTotal) {
-            $metadata = \ClubSpeed\Utility\Arrays::first($checkData['details'], function($val, $key, $arr) use ($checkTotal) {
-                return isset($val['checkDetailId']) && $val['checkDetailId'] == $checkTotal->CheckDetailID;
-            });
-            try {
-                $handled[] = $this->handlers->handle($checkTotal, $metadata); // is this the data we are using to build the receipt?
-            }
-            catch (\Exception $e) {
-                $handled[] = $e->getMessage();
-                // should do something here -- part of the check was not able to be processed
-            }
-        }
-
-        $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
-        $businessName = $businessName[0];
-        $businessName = $businessName->SettingValue;
-
-        $customer = $this->logic->customers->get($checkTotal->CustID);
-        $customer = $customer[0];
-        $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
-
-        $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
-        $emailFrom = $emailFrom[0];
-        $emailFrom = array($emailFrom->SettingValue => $businessName);
-
-        $mail = Mail::builder()
-            ->subject($businessName . ' Receipt for Order Number: ' . $check->CheckID)
-            ->from($emailFrom)
-            ->to($emailTo)
-            ->body("This is my email body for now! Woohoo! Receipt template TODO!");
-        try {
-            Mail::send($mail);
-            Log::debug("Receipt email for CheckID " . $check->CheckID . " has been sent to: " . $customer->EmailAddress);
-        }
-        catch(\Exception $e) {
-            Log::error("Receipt email for CheckID " . $check->CheckID . " could not be sent to: " . $customer->EmailAddress, $e);
-        }
-        // need to send handled off to a mail service, or receipt service, or something
-        // -- someone needs to send off an email to the customer before returning success
-    }
-
-    public function handleRedirect($check, $response) {
-        return array(
-            'redirect' => array(
-                'url'       => $response->getRedirectUrl(),
-                'method'    => $response->getRedirectMethod(),
-                'data'      => $response->getRedirectData()
-                // 'reference' => $response->getTransactionReference() // client probably doesn't need this info, and will most likely get it from the payment processor (?)
-            )
-        );
-    }
-
-    public function handleFailure($check, $response) {
-        return array(
-            'error' => array(
-                'message' => $response->getMessage()
-                , 'data' => $response->getData()
-            )
-        );
-    }
-
     protected function passthroughWrapper($params, $callback) {
         // assume params need to be send directly through gateway->completeRequest without being modified
 
@@ -136,33 +45,149 @@ class BasePayment {
         $checkTotals = $this->logic->checkTotals->get($checkId);
         $checkTotals = $checkTotals[0];
 
-        $options = array(
-            'amount'                 => $check->CheckTotal // this is why we grabbed the CheckTotals_V object instead of the Checks object
-            , 'currency'             => $this->getIntlCurrencySymbol() // THIS REQUIRES php_intl.dll EXTENSION TURNED ON
-            , 'description'          => "ClubSpeed payment for CheckID: " . $check->CheckID // build description manually?
-            , 'transactionId'        => $check->CheckID
-            , 'transactionReference' => 'some_transaction_reference' // use session id from laravel?
-            , 'cardReference'        => 'some_card_reference'
-            , 'taxAmount'            => $checkTotals->CheckTax // this is for WebAPI remoting interface, PCCharge requires it
-            , 'returnUrl'            => $this->getReturnUrl()
-            , 'cancelUrl'            => $this->getCancelUrl()
-            , 'notifyUrl'            => $this->getNotifyUrl()
-            , 'issuer'               => ''
-            , 'card'                 => new \Omnipay\Common\CreditCard(@$params['card'])
-            , 'clientIp'             => $this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
-        );
+        // what should the order of events be?
+        // 1. get check total
+        // 2. check to see if gift cards exist
+        // 3. find the gift card balances
+        // 4. if balances < check total and no credit card provided, throw error!
+        // 5. calculate how much tax/subtotal should be applied to each gift card
+        // 6. do we actually make the payment records, before the card is processed? we pretty much have to, in the case of redirect
+        //      and if we make the payment records with gift cards and the credit card fails, do we delete those payment records and revert the gift card history records?
+        //      what happens with the redirect payment with callback url?
 
-        $response = $callback($options);
+        // for the purpose of testing, coding as follows:
+        // - calculate gift card items, without saving payment records
+        // - send off the payment attempt (ignore the server/offsite payments for now)
+        // - if payment attempt is successful, finalize the gift card payment records
+        // - alter gift card history after the payment records have been finalized
 
-        // $check->Notes = $response->getTransactionReference(); // store the tx reference in Checks.Notes, since we don't have another field to use at this time
-        // $this->logic->checks->update($check->CheckID, $check);
+        // declare remaining items here -- they should be used with the omnipay payment call, if necessary
+        $remainingTotal = $checkTotals->CheckTotal; // consider using CheckTotal - (PaidAmount + PaidTax) in the future, to take into account partially paid checks
+        $remainingTax = $checkTotals->CheckTax;
+        $remainingSubtotal = $checkTotals->CheckSubtotal;
+        $overallTaxPercent = $remainingTax / $remainingTotal; // is this safe? rounding issues? note that some items on the check may be taxed differently and/or not taxed at all
 
-        if ($response->isSuccessful())
-            return $this->handleSuccess($check, $params, $response);
-        else if ($response->isRedirect())
-            return $this->handleRedirect($check, $response);
-        else
-            return $this->handleFailure($check, $response);
+        $virtuals = array();
+
+        // handle gift cards here(???)
+        // note that we need to handle the gift cards early
+        // in order to ensure that we have the correct amount
+        // being sent through omnipay, and not any more
+        if (isset($params['giftCards'])) {
+            $giftCardIds = $params['giftCards'];
+            $virtuals['payment'] = array();
+            $virtuals['giftCardHistory'] = array();
+            foreach($giftCardIds as $giftCardId) {
+                if ($remainingTotal > 0) {
+                    // we still have a total to pay -- keep processing provided gift cards
+                    $giftCardHistorySums = $this->logic->giftCardHistorySums->find('CrdID = ' . $giftCardId);
+                    if (empty($giftCardHistorySums)) {
+                        Log::error("Customer " . $checkTotals->CustID . " attempted to use gift card #" . $giftCardId . " but it could not be found in the gift card history sums view!");
+                        throw new \RecordNotFoundException("Unable to find a gift card history sum with a CrdID of " . $giftCardId);
+                    }
+                    $giftCardHistorySums = $giftCardHistorySums[0];
+                    if ($giftCardHistorySums->PointSum <= 0) {
+                        // throw exception for trying to use a gift card which doesn't have points on it, or allow it?
+                        continue; // or just continue through the loop of card ids
+                    }
+
+                    // start building the payment record
+                    $giftCardPayment              = $this->logic->payment->dummy();
+                    $giftCardPayment->CheckID     = $checkTotals->CheckID;
+                    $giftCardPayment->PayDate     = \ClubSpeed\Utility\Convert::getDate();
+                    $giftCardPayment->PayStatus   = 1; // PayStatus.PAID = 1
+                    $giftCardPayment->PayTerminal = 'api';
+                    $giftCardPayment->PayType     = 4; // PayType.GiftcardPayment = 4
+                    $giftCardPayment->UserID      = 0; // support id for now?
+
+                    // start building the gift card history record
+                    $giftCardHistory                = $this->logic->giftCardHistory->dummy();
+                    $giftCardHistory->CheckDetailID = $checkTotals->CheckDetailID;
+                    $giftCardHistory->CheckID       = $checkTotals->CheckID;
+                    $giftCardHistory->CustID        = $giftCardHistorySums->CustID; // DONT use check's CustID -- we need the CustID for the gift card
+                    $giftCardHistory->Type          = 10; // GiftCardHistoryType.PayByGiftCard = 10
+                    $giftCardHistory->UserID        = 0; // support id for now?
+
+                    if ($giftCardHistorySums->PointSum >= $remainingTotal) {
+                        // this gift card can pay off the outstanding balance
+
+                        $giftCardPayment->PayAmount = $remainingTotal; // this is expected to be the total, NOT the subtotal (tax included in this number)
+                        $giftCardPayment->PayTax = $remainingTax;
+
+                        $giftCardHistory->Points = -1 * $remainingTotal; // decrement the remaining total
+
+                        // all remaining totals/taxes will be accounted for when these payments are processed
+                        $remainingTotal = 0;
+                        $remainingSubtotal = 0;
+                        $remainingTax = 0;
+                    }
+                    else {
+                        // this card can only partially cover the outstanding balance
+
+                        $cardTotalToBeApplied = $giftCardHistorySums->PointSum;
+                        $cardTaxToBeApplied = round($cardTotalToBeApplied * $overallTaxPercent, 2); // round to nearest 2 decimals -- sufficient for a partial payment(??)
+                        $cardSubtotalToBeApplied = $cardTotalToBeApplied - $cardTaxToBeApplied; // what about VAT?
+
+                        $giftCardPayment->PayAmount = $cardTotalToBeApplied; // again, this is expected to be the representation of the total (!!!) (tax included)
+                        $giftCardPayment->PayTax = $cardTaxToBeApplied;
+
+                        $giftCardHistory->Points = -1 * $cardTotalToBeApplied; // remove remaining points from this gift card
+                    
+                        $remainingTotal -= $cardTotalToBeApplied;
+                        $remainingSubtotal -= $cardSubtotalToBeApplied;
+                        $remainingTax -= $cardTaxToBeApplied;
+                    }
+
+                    // store the virtual records to be created at a later time, after the credit card has been processed
+                    $virtuals['payment'][] = $giftCardPayment;
+                    $virtuals['giftCardHistory'][] = $giftCardHistory;
+                }
+            }
+
+            pr($remainingTotal);
+            pr($remainingSubtotal);
+            pr($remainingTax);
+            // pr($virtuals);
+
+            // if the entire balance is covered by gift cards,
+            // don't attempt to charge the card for the remaining balance (assuming its given)
+            if ($remainingTotal > 0 && !isset($params['card'])) {
+                Log::error("Customer " . $checkTotals->CustID . " attempted to pay for CheckID " . $check->CheckID . " using only gift cards, but the gift cards point balances were too low! Card IDs: " . print_r($giftCardIds, true));
+                throw new \CSException("Gift card balance could not cover the outstanding check balance!");
+            }
+        }
+
+        if ($remainingTotal === 0) {
+            // gift cards have paid off the balance -- can we just move on to handleSuccess?
+            return $this->handleSuccess($check, $params, $virtuals);
+        }
+        else {
+            // pay the remaining total using omnipay
+            $options = array(
+                'amount'                 => $remainingTotal // note that this INCLUDES the tax -- the only reason tax is included below is for PCCharge
+                , 'currency'             => $this->getIntlCurrencySymbol() // THIS REQUIRES php_intl.dll EXTENSION TURNED ON
+                , 'description'          => "ClubSpeed payment for CheckID: " . $check->CheckID // build description manually?
+                , 'transactionId'        => $check->CheckID
+                , 'transactionReference' => 'some_transaction_reference' // use session id from laravel?
+                , 'cardReference'        => 'some_card_reference'
+                , 'taxAmount'            => $remainingTax // this is for WebAPI remoting interface, PCCharge requires it
+                , 'returnUrl'            => $this->getReturnUrl()
+                , 'cancelUrl'            => $this->getCancelUrl()
+                , 'notifyUrl'            => $this->getNotifyUrl()
+                , 'issuer'               => ''
+                , 'card'                 => new \Omnipay\Common\CreditCard(@$params['card'])
+                , 'clientIp'             => $this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
+            );
+
+            $response = $callback($options);
+
+            if ($response->isSuccessful())
+                return $this->handleSuccess($check, $params, $virtuals, $response);
+            else if ($response->isRedirect())
+                return $this->handleRedirect($check, $response);
+            else
+                return $this->handleFailure($check, $response);
+        }
     }
 
     // todo: support this stuff later -- just handle purchase for now
@@ -194,6 +219,131 @@ class BasePayment {
             return $this->handleRedirect($check, $response); // this probably shouldn't happen
         else
             return $this->handleFailure($check, $response);
+    }
+
+    public function handleSuccess(&$check, &$params, &$virtuals, &$response = null) {
+        // the customer's credit card has been processed at this point
+        // or the credit card does not need to be processed (?) (as in, gift cards provided > than total required)
+
+        $transactionReference = $response ? $response->getTransactionReference() : "No external reference: See CheckID";
+
+        $now = \ClubSpeed\Utility\Convert::getDate();
+        $handled = array();
+        $errored = array();
+
+        $checkData = @$params['check'];
+
+        $checkTotals = $this->logic->checkTotals->match(array('CheckID' => $check->CheckID)); // this wont work with gift cards
+        $checkTotal = $checkTotals[0];
+
+        // build and insert a payment record
+        $payment                  = $this->logic->payment->dummy();
+        $payment->CheckID         = $check->CheckID;
+        $payment->PayAmount       = $check->CheckTotal; // also won't work with gift cards
+        $payment->PayDate         = $now;
+        $payment->PayStatus       = 1; // PayStatus.PAID from VB
+        $payment->PayTax          = $checkTotal->CheckTax; // also won't work with gift cards
+        $payment->PayTerminal     = 'api';// use this?
+        $payment->PayType         = 2; // always credit card when through pccharge?
+        $payment->TransactionDate = $now;
+        $payment->ReferenceNumber = $transactionReference;
+        $payment->UserID          = 1; // probably should be non-nullable, onlinebooking userId?
+        $this->logic->payment->create($payment); // what if this fails? credit card will be charged, but payment record could not be created (!!!)
+
+        // run all of the virtuals -- these will most likely be gift card payments not added to the database yet
+        // note -- this idea will most likely not work when we support external payment processors with redirects
+        foreach($virtuals as $key => $virtual) {
+            foreach($virtual as $record) {
+                $this->logic->{$key}->create($record);                
+            }
+        }
+
+        // consider the check to be closed at this point --
+        // once all payments have been added to the database
+        // update the check
+        $check->CheckStatus = 1; // CheckStatus.Closed from VB enum
+        $check->Notes = $transactionReference;
+        $check->ClosedDate = $now;
+        $this->logic->checks->update($check->CheckID, $check);
+
+        foreach($checkTotals as $checkTotal) {
+            $metadata = \ClubSpeed\Utility\Arrays::first($checkData['details'], function($val, $key, $arr) use ($checkTotal) {
+                return isset($val['checkDetailId']) && $val['checkDetailId'] == $checkTotal->CheckDetailID;
+            });
+            try {
+                // who handles the for loop for quantity? this, or the handler?
+                // note that these should really not be Qty, but should be their own CheckDetail records items
+                // handling here to represent an easier update if Qty ever gets deprecated
+                for ($i = 0; $i < $checkTotal->Qty; $i++) {
+                    $handle = $this->handlers->handle($checkTotal, $metadata);
+                    if (isset($handle['error']))
+                        $errored[] = $handle;
+                    else
+                        $handled[] = $handle;
+                }
+            }
+            catch (\Exception $e) {
+                $errored[] = $e->getMessage();
+            }
+        }
+
+        $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
+        $businessName = $businessName[0];
+        $businessName = $businessName->SettingValue;
+
+        $customer = $this->logic->customers->get($checkTotal->CustID);
+        $customer = $customer[0];
+        $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
+
+        $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
+        $emailFrom = $emailFrom[0];
+        $emailFrom = array($emailFrom->SettingValue => $businessName);
+
+        $mail = Mail::builder()
+            ->subject($businessName . ' Receipt for Order Number: ' . $check->CheckID)
+            ->from($emailFrom)
+            ->to($emailTo)
+            ->body("This is my email body for now! Woohoo! Receipt template TODO!" . print_r($handled, true));
+        try {
+            Mail::send($mail);
+            Log::debug("Receipt email for CheckID " . $check->CheckID . " has been sent to: " . $customer->EmailAddress);
+        }
+        catch(\Exception $e) {
+            Log::error("Receipt email for CheckID " . $check->CheckID . " could not be sent to: " . $customer->EmailAddress, $e);
+        }
+
+        if (!empty($errored)) {
+            pr("found errors!");
+            die(print_r($errored));
+            // TODO -- send off a support email if product handlers had errors?
+        }
+    }
+
+    public function handleRedirect($check, $response) {
+        // TODO!!!!
+        return array(
+            'redirect' => array(
+                'url'       => $response->getRedirectUrl(),
+                'method'    => $response->getRedirectMethod(),
+                'data'      => $response->getRedirectData()
+                // 'reference' => $response->getTransactionReference() // client probably doesn't need this info, and will most likely get it from the payment processor (?)
+            )
+        );
+    }
+
+    public function handleFailure($check, $params, $response) {
+
+        // void out all attempted gift card purchases?
+        // if virtual, then we don't need to worry
+        // if redirect, then we will have problems (fix later)
+        // refund through gift card history?
+
+        return array(
+            'error' => array(
+                'message' => $response->getMessage()
+                , 'data' => $response->getData()
+            )
+        );
     }
 
     protected function getIp() {

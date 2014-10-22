@@ -21,7 +21,6 @@ class ChecksLogic extends BaseLogic {
         parent::__construct($logic, $db);
         $this->interface = $this->db->checks;
 
-
         $this->insertable = array(
               'CustID'
             , 'CheckType'

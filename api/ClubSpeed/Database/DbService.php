@@ -53,16 +53,23 @@ class DbService {
             // hacky way to select the right connection
             // will split into 3 separate contexts when/if time allows
             case 'resourcesets':
-                $conn =& $this->connResource;
+                $conn =& $this->connResource; // needs to use the resource connection injection
+                $record = __NAMESPACE__ . '\Records\\' . ucfirst($prop);
                 break;
             case 'logs':
-                $conn =& $this->connLogs;
+                $conn =& $this->connLogs; // needs to use the logs connection injection
+                $record = __NAMESPACE__ . '\Records\\' . ucfirst($prop);
+                break;
+            case 'fb_customers_new':
+                $conn =& $this->conn;
+                $record = __NAMESPACE__ . '\Records\\FB_Customers_New'; // doesn't match the table naming scheme, load explicitly
                 break;
             default:
                 $conn =& $this->conn;
+                $record = __NAMESPACE__ . '\Records\\' . ucfirst($prop);
                 break;
         }
-        $record = __NAMESPACE__ . '\Records\\' . ucfirst($prop);
+        // $record = __NAMESPACE__ . '\Records\\' . ucfirst($prop);
         if (!isset($this->_lazy[$prop])) {
             $this->_lazy[$prop] = new DbCollection($conn, $record);
         }

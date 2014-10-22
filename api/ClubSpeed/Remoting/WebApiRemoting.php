@@ -124,6 +124,7 @@ class WebApiRemoting {
      * @return void
      */
     public function clearCache() {
+        // should we also have a version check here before attempting to call?
         $this->checkUsernamePasswordAreSet();
         $callName = '/ClubSpeedCache/clear';
         $apiUrl = $this->getApiUrl($callName);
@@ -143,6 +144,9 @@ class WebApiRemoting {
      * @return void
      */
     public function processPayment($params = array()) {
+
+        // this is being deprecated for our custom omnipay PCCharge driver
+
         if (empty($params))
             throw new \RequiredArgumentMissingException("WebApi ProcessPayment received an empty set of params!");
         if (!isset($params['card']) || empty($params['card']))
