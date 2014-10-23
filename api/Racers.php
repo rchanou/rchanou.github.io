@@ -1013,12 +1013,14 @@ EOD;
         return $output;
     }
 
-    public function last_updated($start, $end, $limit = 1000, $startCustId = 0, $endCustId = 9999999999999) {
+    public function last_updated($start, $end, $limit = 1000, $startCustId = 0, $endCustId = 2000000000) {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
         $limit = empty($limit) || !is_numeric($limit) ? 1000 : $limit;
+				$startCustId = empty($startCustId) || !is_numeric($startCustId) ? 0 : $startCustId;
+        $endCustId = empty($endCustId) || !is_numeric($endCustId) ? 2000000000  : $endCustId;
 
         $tsql_params = array($start, $end, $startCustId, $endCustId);
 
