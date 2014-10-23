@@ -792,7 +792,7 @@ class Racers
         if($racer_id == 'login') return $this->login($_REQUEST);
         if($racer_id == 'fb_login') return $this->postfb_login($_REQUEST);
         if($racer_id == 'toprpm') return $this->top_rpm();
-        if($racer_id == 'last_updated') return $this->last_updated(@$_REQUEST['start'], @$_REQUEST['end'], @$_REQUEST['limit']);
+        if($racer_id == 'last_updated') return $this->last_updated(@$_REQUEST['start'], @$_REQUEST['end'], @$_REQUEST['limit'], @$_REQUEST['startCustId'], @$_REQUEST['endCustId']);
         if($racer_id == 'by_id') return $this->by_id($_REQUEST['start'], @$_REQUEST['limit']);
         if($racer_id == 'update_unsubscribed') return $this->update_unsubscribed($_REQUEST['email']);
         if($racer_id == 'most_improved_rpm') return $this->most_improved_rpm($_REQUEST);
@@ -1013,16 +1013,16 @@ EOD;
         return $output;
     }
 
-    public function last_updated($start, $end, $limit = 1000) {
+    public function last_updated($start, $end, $limit = 1000, $startCustId = 0, $endCustId = 9999999999999) {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 
         $limit = empty($limit) || !is_numeric($limit) ? 1000 : $limit;
 
-        $tsql_params = array($start, $end);
+        $tsql_params = array($start, $end, $startCustId, $endCustId);
 
-        $tsql = "select top($limit) custid, birthdate, phonenumber, (custid/1000000) AS locationid, membershipstatus, membershiptextlong AS membershiptext, cell, fname, lname, racername, birthdate, gender, emailaddress, address, address2, city, state, zip, country, rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail from customers c where deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? ORDER BY lastVisited";
+        $tsql = "select top($limit) custid, birthdate, phonenumber, (custid/1000000) AS locationid, membershipstatus, membershiptextlong AS membershiptext, cell, fname, lname, racername, birthdate, gender, emailaddress, address, address2, city, state, zip, country, rpm, accountcreated, lastvisited, totalvisits, totalraces, donotmail from customers c where deleted = 0 and isemployee = 0 and isgiftcard = 0 AND lastVisited between ? and ? AND custid between ? and ? ORDER BY lastVisited";
 
         $racers = $this->run_query($tsql, $tsql_params);
 
