@@ -63,7 +63,6 @@ var ClubSpeedApi = {
 		$.get(
 			config.apiURL + 'races/' + raceId + '.json?key=' + config.apiKey,
 			function(body)  {
-				console.log(body);
 				this.setState({ race: body.race });
 			}.bind(this)
 		);
@@ -183,9 +182,6 @@ var TrackSelect = React.createClass({displayName: 'TrackSelect',
 		return LinkedSelect({url: config.apiURL + 'tracks/index.json?key=' + config.apiKey, 
 			listProperty: "tracks", valueProperty: "id", labelProperty: "name", 
 			selectedId: this.props.selectedId, onFunnelEvent: this.toFunnel, bound: this.props.bound});
-	},
-	componentDidMount: function(){
-		console.log('track props', this.props);
 	}
 });
 
@@ -329,17 +325,11 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				return false;
 			}
 			
-			console.log('race of booking', raceOfBooking);
 			var raceStart = moment(raceOfBooking.starts_at, 'YYYY-MM-DD H:mm:ss.SSS');
-			//console.log(raceStart.format());
 			
 			return (!this.state.filterByTrackId || raceOfBooking.track_id == this.state.filterByTrackId)
 				&& ((raceStart.isAfter(start) || raceStart.isSame(start)) && raceStart.isBefore(end));
 		}.bind(this));
-		/*return _.pick(this.state.bookings, id => {
-			console.log(this.state.raceDetails[id]);
-			return this.state.raceDetails[id];
-		});*/
 	},
 	render: function(){
 		return React.DOM.div({className: "container-fluid"}, 
@@ -556,7 +546,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		}
 		
 		var requestUrl = config.apiURL + 'races/races.json?' + $.param(params);
-		console.log(requestUrl);
 		
 		$.get(requestUrl,
 			function(body, msg, res)  {
@@ -566,7 +555,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 					: body.races;
 			
 				var bookingRequests = races.map(function(race)  {
-					var requestUrl = config.apiURL + 'booking.json?' + $.param({ key: config.apiKey, heatId: race.HeatNo });
+					var requestUrl = config.apiURL + 'booking.json?' + $.param({ key: config.privateKey, heatId: race.HeatNo });
 					return $.get(requestUrl);
 				});
 				
@@ -711,7 +700,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			change.quantityTotal = this.parseRef('qtyAvail');
 		}
 		
-		console.log('change', change);
 		this.putChange(change);
 	},
 	putChange: function(change){
@@ -729,9 +717,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		var errorMessage = 'An error occurred while trying to save changes.';
 		
-		$.when.apply($, putRequests).then(function()  {var all=Array.prototype.slice.call(arguments,0);
-			console.log('put response', all);
-			
+		$.when.apply($, putRequests).then(function()  {var all=Array.prototype.slice.call(arguments,0);			
 			var popupMessage = 'Booking for ' + this.getBookingTitle() + ' successfully saved! ('
 				+ moment().format('h:mm:ss a') + ')';
 			this.setState({ popupMessage:popupMessage });
