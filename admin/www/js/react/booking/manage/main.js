@@ -189,7 +189,7 @@ var ProductSelect = React.createClass({displayName: 'ProductSelect',
 	mixins: [EventFunnel],
 	render: function(){
 		return LinkedSelect({
-			url: config.apiURL + 'products.json?key=' + config.apiKey + '&select=productId,description', 
+			url: config.apiURL + 'products.json?key=' + config.privateKey + '&select=productId,description', 
 			listProperty: "products", valueProperty: "productId", labelProperty: "description", 
 			selectedId: this.props.selectedId, onFunnelEvent: this.toFunnel});
 	}
