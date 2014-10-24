@@ -286,7 +286,7 @@ class Step1Controller extends BaseController
         {
             $settings['Reg_CaptureProfilePic'] = false;
         }
-        
+
         //TESTING - Forces every field to be visible
         /*$settings['Reg_CaptureProfilePic'] = true; //Replaced showPicture config setting
         $settings['CfgRegAddShow'] = true;

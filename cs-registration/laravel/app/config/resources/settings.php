@@ -68,6 +68,7 @@ class Settings {
             'CfgRegDrvrLicShow' => false,
             'BusinessName' => '',
             'AgeNeedParentWaiver' => '18',
+            'CfgRegUseMsign' => true,
 
             'states' => array('' => '','Alaska' => 'Alaska',
                 'Alabama' => 'Alabama',
