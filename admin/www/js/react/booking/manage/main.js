@@ -4,7 +4,6 @@
 /*** CONSTANTS AND CONFIG ***/
 
 config.apiURL = config.apiURL + '/';
-//config.apiURL = 'http://192.168.111.122/api/index.php/';
 
 /*** STYLES ***/
 
@@ -143,7 +142,7 @@ var LinkedSelect = React.createClass({displayName: 'LinkedSelect',
 	mixins: [EventFunnel],
 	getDefaultProps: function(){
 		return {
-			url: 'http://192.168.111.122/api/index.php/products.json?key=cs-dev&select=productId,description',
+			url: '',
 			list: [],
 			listProperty: 'products',
 			valueProperty: 'productId',
@@ -586,7 +585,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 					
 					// pull race details for each found booking
 					var raceDetailRequests = bookings.map(function(booking)  {
-						var requestUrl = config.apiURL + 'races/' + booking.heatId + '.json?key=cs-dev';
+						var requestUrl = config.apiURL + 'races/' + booking.heatId + '.json?key=' + config.apiKey;
 						return $.get(requestUrl);
 					});
 					
@@ -724,7 +723,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			return $.ajax({
 				url: config.apiURL + 'booking/' + id + '?key=' + config.privateKey,
 				type: 'PUT',
-				headers: { 'Authorization': 'Basic c3VwcG9ydDpjMGQzcmVk' },
 				data: change				
 			});
 		});
