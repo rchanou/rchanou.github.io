@@ -62,8 +62,19 @@
                 <a href="#"><i class="fa fa-desktop"></i> <span>Speed Screens</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/channel','Channels')}}</li>
-                    <li>{{link_to('/channelSettings','Settings')}}</li>
+                    <li>{{link_to('/channelSettings','Settings')}}</li> <!-- TODO: Rename to channel/settings -->
                     <li>{{link_to('/docs/Club Speed - Speed Screen Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
+                </ul>
+            </li>
+            @if (@$controller == 'BookingController')
+            <li class="active open submenu">
+            @else
+            <li class="submenu">
+            @endif
+                <a href="#"><i class="fa fa-calendar"></i> <span>Online Bookings</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <ul>
+                    <li>{{link_to('/booking','Manage Bookings')}}</li>
+                    <li>{{link_to('/booking/settings','Settings')}}</li>
                 </ul>
             </li>
         </ul>
@@ -111,6 +122,7 @@
 {{ HTML::script('js/unicorn.js') }}
 {{ HTML::script('js/unicorn.form_common.js') }}
 {{ HTML::script('js/unicorn.dashboard.js') }}
+{{ HTML::script('js/config.js')}}
 @show
 <!-- END JAVASCRIPT INCLUDES -->
 
