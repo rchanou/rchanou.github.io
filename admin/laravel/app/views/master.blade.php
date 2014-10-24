@@ -122,7 +122,15 @@
 {{ HTML::script('js/unicorn.js') }}
 {{ HTML::script('js/unicorn.form_common.js') }}
 {{ HTML::script('js/unicorn.dashboard.js') }}
-{{ HTML::script('js/config.js')}}
+<script>
+var config =
+{
+    apiURL: '{{Config::get('config.apiURL')}}',
+    apiKey: '{{Config::get('config.apiKey')}}',
+    privateKey: '{{Config::get('config.privateKey')}}'
+
+};
+</script>
 @show
 <!-- END JAVASCRIPT INCLUDES -->
 
