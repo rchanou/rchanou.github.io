@@ -585,7 +585,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 					
 					// pull race details for each found booking
 					var raceDetailRequests = bookings.map(function(booking)  {
-						var requestUrl = config.apiURL + 'races/' + booking.heatId + '.json?key=' + config.apiKey;
+						var requestUrl = config.apiURL + 'races/' + booking.heatId + '.json?key=' + config.privateKey;
 						return $.get(requestUrl);
 					});
 					
