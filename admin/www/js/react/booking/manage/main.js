@@ -516,7 +516,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		);
 		
 		// load products
-		var params = { key: config.apiKey, select: 'productId,description' };
+		var params = { key: config.privateKey, select: 'productId,description' };
 		$.get(
 			config.apiURL + 'products.json?' + $.param(params),
 			function(body)  {
