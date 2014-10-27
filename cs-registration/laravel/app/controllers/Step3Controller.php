@@ -107,6 +107,10 @@ class Step3Controller extends BaseController {
         $session = Session::all();
         $settings = $session['settings'];
 
+        if (!isset($formInput["cameraInput"]))
+        {
+            $formInput["cameraInput"] = "";
+        }
         if ($formInput["cameraInput"] == null && $settings['Reg_CaptureProfilePic'] && array_key_exists("facebookProfileURL",$formInput) && $formInput["facebookProfileURL"] != "#" && $formInput["facebookProfileURL"] != "")
         {
             $base64 = $this->convertPathToImage($formInput["facebookProfileURL"]);
