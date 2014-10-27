@@ -474,7 +474,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			}.bind(this))
 			.value();
 		
-		return React.DOM.div({style: { overflowY: 'scroll'}, ref: "table"}, 
+		return React.DOM.div({style: { overflowY: 'auto'}, ref: "table"}, 
 			React.DOM.table({className: "table"}, 
 				React.DOM.thead({className: "text-left"}, React.DOM.tr(null, 
 					React.DOM.th({key: "editing"}, 
@@ -649,13 +649,13 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		this.loadBookings();
 		
-		if (this.refs.table){
-			var tableElem = $(this.refs.table.getDOMNode());
-			$(window).resize(function(_)  {
-				console.log('resize');
-				tableElem.height($(window).height() - tableElem.top());
-			});
-		}
+		$(window).resize(function(_)  {
+			console.log('resize');
+			if (this.refs.table){
+				var tableElem = $(this.refs.table.getDOMNode());
+					tableElem.height($(window).height() - tableElem.offset().top - 40);
+			}
+		}.bind(this));
 	},
 	
 	loadBookings:function(filterByTrackId){
@@ -695,14 +695,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				$.when.apply($, bookingRequests).done(function()  {var responses=Array.prototype.slice.call(arguments,0);
 					// each response is an array and first element of each array is response body (refer to jQuery deferred API)
 					var bookings = _(responses)
+						.tap(function(res)  { return _.isArray(res[0])? res: [res]; })
 						.map(function(res)  { return res[0]; })
-						.tap(function(val)  { console.log('responses before pluck', val); })
 						.pluck('bookings')
-						.tap(function(bookings)  {
-							if (bookings.length == 0){
-								
-							}
-						})
 						.flatten()
 						.concat(this.state.bookings)
 						.uniq('onlineBookingsId')
@@ -718,6 +713,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				});
 				
 				$.when.apply($, raceDetailRequests).done(function()  {var responses=Array.prototype.slice.call(arguments,0);
+					console.log('before rezzy', responses);
 					var returnedDetails = _(responses)
 						.map(function(res)  { return res[0].race; /*_.pick(res[0].race, ['id', 'starts_at', 'race_name']);*/ })
 						.indexBy('id')
