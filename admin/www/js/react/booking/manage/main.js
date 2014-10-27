@@ -521,14 +521,18 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	},
 	
 	renderEditForm:function(creating){
-		if (this.state.loading || this.filterBookings(this.parseRef('date')).length == 0){
+		if (this.filterBookings(this.parseRef('date')).length == 0){
 			return null;
 		}
 		
 		if (this.state.selectedBookingIds.length == 0){
-			return React.DOM.div({className: "col-md-6"}, 
-				"Select one or more activities to edit them."
-			);
+			if (this.state.loading){
+				return null;
+			} else {
+				return React.DOM.div({className: "col-md-6"}, 
+					"Select one or more activities to edit them."
+				);
+			}
 		}
 	
 		var title = this.state.selectedBookingIds.length > 0 && 
