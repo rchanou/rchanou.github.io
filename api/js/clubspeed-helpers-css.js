@@ -16,6 +16,9 @@
     // var c = clubspeed.helpers.css = clubspeed.helpers.css || {}; // implement or collect pointer for clubspeed.helpers.css
 
     var log = z.log;
+    var check = z.check;
+    var arrays = z.arrays;
+    var equals = z.equals;
 
     /**
         Container for all CSS helper methods.
@@ -27,7 +30,9 @@
     // maintain a set of constants
     var KEYS = {
         CSS: {
-            NO_TRANSITION: '.noTransition'
+            NO_TRANSITION: '.noTransition',
+            TRANSITION_END: 'transitionend MSTransitionEnd webkitTransitionEnd oTransitionEnd',
+            ANIMATION_END: 'animationend webkitAnimationEnd oanimationend MSAnimationEnd'
         }
     };
 
@@ -117,7 +122,8 @@
                 maxDelay,
                 numElems,
                 slideTimeout,
-                wait;
+                wait,
+                complete;
 
             // ensure that the delay is never longer than 2/3 of the slideTimeout, but dont go over options.maxDelay
             maxDelay = options.maxDelay || 350; // default to 350ms
@@ -128,6 +134,18 @@
                 classes = makeClassString(x.classes.defaults, x.classes.animations);
                 delay = (d = (slideTimeout) / (numElems * 1.5)) > maxDelay ? maxDelay : d;
                 wait = x.wait > 0 ? delay * x.wait : 0;
+                if (check.isFunction(x.onAnimationEnd)) {
+                    elems.on(KEYS.CSS.ANIMATION_END + ' ' + KEYS.CSS.TRANSITION_END, function(e) {
+                        if(z.getType(e.originalEvent) === 'TransitionEvent')
+                            x.onAnimationEnd.apply(this, e); // super hacky, why is chrome firing off TransitEvent AND WebKitAnimationEvent here?
+                    });
+                }
+                if (check.isFunction(x.onAllAnimationsEnd)) {
+                    $(arrays.last(elems)).one(KEYS.CSS.ANIMATION_END + ' ' + KEYS.CSS.TRANSITION_END, function(e) {
+                        if(z.getType(e.originalEvent) === 'TransitionEvent')
+                            x.onAllAnimationsEnd.apply(elems);
+                    });
+                }
                 (function(elems, classes, delay, wait) {
                     setTimeout(function() {
                         applyHtmlClass(elems, classes, delay);
