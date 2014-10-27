@@ -44,7 +44,7 @@ class TranslationsLogic extends BaseLogic {
         foreach($mapped['batch'] as $key => $map) {
             // $map = $this->map('server', $val);
             if (!isset($map['Culture']))
-                $map['Culture'] = \Enums::DB_NULL; // for searching purposes, nulls should be matched(!!!)
+                $map['Culture'] = Enums::DB_NULL; // for searching purposes, nulls should be matched(!!!)
 
             // check to see if the resource set already exists,
             // by combination of ResourceSetName and ResourceName
