@@ -20,13 +20,13 @@ var NO_SELECT = {
 
 var EventFunnel = {
 	// mixin providing event-handling sugar based on an opinionated way of handling React component parent-child communication
-	getDefaultProps: function(){
-		return { onFunnelEvent: function(){} };
+	getDefaultProps:function(){
+		return { onFunnelEvent:function(){} };
 	},
-	toFunnel: function(event){
+	toFunnel:function(event){
 		this.props.onFunnelEvent(event, this.props, this.state);
 	},
-	funnelJQueryEvents: function(){var events=Array.prototype.slice.call(arguments,0);
+	funnelJQueryEvents:function(){var events=Array.prototype.slice.call(arguments,0);
 		events.forEach(function(event)  {
 			$(this.getDOMNode()).on(
 				event, function(e)  { this.toFunnel(e); }.bind(this)
@@ -36,7 +36,7 @@ var EventFunnel = {
 }
 
 var jQuerify = {
-	jQuerify: function(ref){
+	jQuerify:function(ref){
 		if ($){
 			if (ref){
 				return $(this.refs[ref].getDOMNode());
@@ -54,12 +54,12 @@ var jQuerify = {
 }
 
 var ClubSpeedApi = {
-	getInitialState: function(){
+	getInitialState:function(){
 		return {
 			//race: { starts_at: '?', race_name: '?' }
 		}
 	},
-	loadRaceById: function(raceId){
+	loadRaceById:function(raceId){
 		$.get(
 			config.apiURL + 'races/' + raceId + '.json?key=' + config.apiKey,
 			function(body)  {
@@ -70,7 +70,7 @@ var ClubSpeedApi = {
 };
 
 var ParseRef = {
-	parseRef: function(refName){	
+	parseRef:function(refName){	
 		if (!this.isMounted() || !this.refs[refName]){
 			return null;
 		}
@@ -91,7 +91,7 @@ var ParseRef = {
 
 var Select = React.createClass({displayName: 'Select',
 	mixins: [EventFunnel, jQuerify],
-	getDefaultProps: function(){
+	getDefaultProps:function(){
 		return {
 			list: [], // list: [{value: 1, label: 'Apples'}, 'Bananas', 'Cherries'],
 			selectedId: null,
@@ -99,7 +99,7 @@ var Select = React.createClass({displayName: 'Select',
 			bound: true
 		};
 	},
-	render: function(){
+	render:function(){
 		var optionsFromList = this.props.list.map(function(item)  {
 			return React.DOM.option({key: item.value, value: item.value}, 
 				item.label
@@ -112,7 +112,7 @@ var Select = React.createClass({displayName: 'Select',
 			this.props.children
 		);
 	},
-	componentDidMount: function(){
+	componentDidMount:function(){
 		this.jQuerify()
 			.select2({
 				placeholder: this.props.placeholder || (this.props.bound? '(none selected)': '(any)'),
@@ -122,24 +122,24 @@ var Select = React.createClass({displayName: 'Select',
 		
 		this.setFromProps();
 	},
-	componentDidUpdate: function(){
+	componentDidUpdate:function(){
 		this.setFromProps();
 	},
-	setFromProps: function(){
+	setFromProps:function(){
 		if (!this.props.bound){
 			return;
 		}
 	
 		this.jQuerify().val(this.props.selectedId).trigger('change');
 	},
-	componentWillUnmount: function(){
+	componentWillUnmount:function(){
 		this.jQuerify().select2('destroy');
 	}
 });
 
 var LinkedSelect = React.createClass({displayName: 'LinkedSelect',
 	mixins: [EventFunnel],
-	getDefaultProps: function(){
+	getDefaultProps:function(){
 		return {
 			url: '',
 			list: [],
@@ -149,25 +149,25 @@ var LinkedSelect = React.createClass({displayName: 'LinkedSelect',
 			bound: true
 		};
 	},
-	getInitialState: function(){
+	getInitialState:function(){
 		return {
 			list: this.props.list
 		}
 	},
-	renderOptions: function(){
+	renderOptions:function(){
 		return this.state.list.map(function(item)  {
 			return React.DOM.option({value: item[this.props.valueProperty], key: item[this.props.valueProperty]}, 
 				item[this.props.labelProperty]
 			);
 		}.bind(this));
 	},
-	render: function(){
+	render:function(){
 		var props = this.props;
 		return React.DOM.div(null, Select({onFunnelEvent: this.toFunnel, selectedId: this.props.selectedId, bound: this.props.bound}, 
 			this.renderOptions()
 		));
 	},
-	componentWillMount: function(){
+	componentWillMount:function(){
 		if (this.props.url){
 			$.get(this.props.url, function(body)  {
 				this.setState({ list: _.sortBy(body[this.props.listProperty], this.props.labelProperty) });
@@ -178,7 +178,7 @@ var LinkedSelect = React.createClass({displayName: 'LinkedSelect',
 
 var TrackSelect = React.createClass({displayName: 'TrackSelect',
 	mixins: [EventFunnel],
-	render: function(){
+	render:function(){
 		return LinkedSelect({url: config.apiURL + 'tracks/index.json?key=' + config.apiKey, 
 			listProperty: "tracks", valueProperty: "id", labelProperty: "name", 
 			selectedId: this.props.selectedId, onFunnelEvent: this.toFunnel, bound: this.props.bound});
@@ -187,7 +187,7 @@ var TrackSelect = React.createClass({displayName: 'TrackSelect',
 
 var ProductSelect = React.createClass({displayName: 'ProductSelect',
 	mixins: [EventFunnel],
-	render: function(){
+	render:function(){
 		return LinkedSelect({
 			url: config.apiURL + 'products.json?key=' + config.privateKey + '&select=productId,description', 
 			listProperty: "products", valueProperty: "productId", labelProperty: "description", 
@@ -197,10 +197,10 @@ var ProductSelect = React.createClass({displayName: 'ProductSelect',
 
 iCheck = React.createClass({displayName: 'iCheck',
 	mixins: [EventFunnel, jQuerify],
-	render: function(){
+	render:function(){
 		return React.DOM.input({defaultChecked: this.props.checked, type: "checkbox"});
 	},
-	componentDidMount: function(){
+	componentDidMount:function(){
 		this.jQuerify().iCheck({
     	checkboxClass: 'icheckbox_flat-blue',
     	radioClass: 'iradio_flat-blue'
@@ -208,10 +208,10 @@ iCheck = React.createClass({displayName: 'iCheck',
 		this.setFromProps();
 		this.funnelJQueryEvents('ifIndeterminate', 'ifChecked', 'ifUnchecked');
 	},
-	componentDidUpdate: function(){
+	componentDidUpdate:function(){
 		this.setFromProps();
 	},
-	setFromProps: function(){
+	setFromProps:function(){
 		if (this.props.checked == null){
 			this.jQuerify().iCheck('indeterminate');
 		} else if (this.props.checked) {
@@ -220,7 +220,7 @@ iCheck = React.createClass({displayName: 'iCheck',
 			this.jQuerify().iCheck('uncheck');
 		}
 	},
-	componentWillUnmount: function(){
+	componentWillUnmount:function(){
 		this.jQuerify().iCheck('destroy');
 	}
 });
@@ -228,22 +228,48 @@ iCheck = React.createClass({displayName: 'iCheck',
 
 var DatePicker = React.createClass({displayName: 'DatePicker',
 	mixins: [EventFunnel],
-	render: function(){
+	render:function(){
 		// TODO: update to latest React and use spread operators
 		//return <input defaultValue={this.props.defaultValue} className={this.props.className} />;
 		return this.transferPropsTo(React.DOM.input(null));
 	},
-	componentDidMount: function(){	
+	componentDidMount:function(){	
 		$(this.getDOMNode()).datepicker();
 		this.funnelJQueryEvents('change');
 	}
 });
 
+
+var CheckPropChange = {
+	checkPropChange:function(otherProps ){var keys=Array.prototype.slice.call(arguments,1);
+		keys.forEach(function(key)  {
+			if (Array.isArray(key)){
+				var thisTraverser = this.props;
+				var otherTraverser = otherProps;			
+				for (var i = 0; i < key.length; i++){
+					thisTraverser = thisTraverser[key[i]];
+					otherTraverser = otherTraverser[key[i]];					
+					var definedForThis = typeof thisTraverser != 'undefined';
+					var definedForOther = typeof otherTraverser != 'undefined';
+					if (!definedForThis && !definedForOther){
+						return false;
+					} else if ((definedForThis && !definedForOther) || (definedForOther && !definedForThis) || (thisTraverser !== otherTraverser)){
+						return true;
+					}
+				}
+			} else if (this.props[key] !== otherProps[key]){
+				return true;
+			}
+		}.bind(this));		
+		return false;
+	}
+};
+
 /*** CHILD COMPONENT(S) ***/
 
 var BookingRow = React.createClass({displayName: 'BookingRow',
-	mixins: [EventFunnel, ClubSpeedApi],
-	getDefaultProps: function(){
+	mixins: [EventFunnel, CheckPropChange],
+	getDefaultProps:function(){
 		return {
 			race: {
 				race_name: 'Loading...',
@@ -251,12 +277,12 @@ var BookingRow = React.createClass({displayName: 'BookingRow',
 			}
 		};
 	},
-	getInitialState: function(){
+	getInitialState:function(){
 		return {
 			hovering: false
 		};
 	},
-	render: function(){
+	render:function(){
 		var booking = this.props.booking;
 		var start = moment(this.props.race.starts_at);
 		var style = {}; //{ cursor: 'pointer' };
@@ -271,25 +297,32 @@ var BookingRow = React.createClass({displayName: 'BookingRow',
 			), 
 			React.DOM.td(null, start.isValid()? start.format('h:mm a'): '?'), 
 			React.DOM.td(null, this.props.race.race_name), 
-			React.DOM.td(null, this.props.product? this.props.product.description: null), 
-			React.DOM.td(null, booking.isPublic? React.DOM.i({className: "fa fa-globe", title: "This booking is public."})
-										 : React.DOM.i({className: "fa fa-lock", title: "This booking is private."})
+			React.DOM.td(null, this.props.product && this.props.product.description), 
+			React.DOM.td(null, booking.isPublic == null? null :
+						booking.isPublic? React.DOM.i({className: "fa fa-globe", title: "This booking is public."}) :
+										 React.DOM.i({className: "fa fa-lock", title: "This booking is private."})
 			), 
 			React.DOM.td(null, booking.quantityTotal)
 		);
 	}
+	/*shouldComponentUpdate(nextProps,nextState){
+		return true;
+	}*/
 });
 
 
 /*** TOP LEVEL/ROOT/MAIN/PARENT COMPONENT ***/
 
 BookingAdmin = React.createClass({displayName: 'BookingAdmin',
-	mixins: [EventFunnel, ClubSpeedApi, ParseRef, jQuerify],
+	mixins: [EventFunnel, ClubSpeedApi, ParseRef, jQuerify, React.addons.PureRenderMixin],
+	
 	timeoutHandle: null,
-	getDefaultProps: function(){
+	
+	getDefaultProps:function(){
 		return { popupTime: 3000 };
 	},
-	getInitialState: function(){	
+	
+	getInitialState:function(){	
 		return {
 			bookings: [],
 			tracks: [],
@@ -304,11 +337,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			loading: false
 		};
 	},
-	filterBookings: function(start){
-		//if (this.state.bookings.length == 0){
-		//	return [];
-		//}
 	
+	isRaceInDate:function(race, start){
 		if (!start){
 			start = moment();
 		} else {
@@ -318,8 +348,27 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		var end = moment(start);
 		end.add(1, 'd');
+		
+		var raceStart = moment(race.starts_at, 'YYYY-MM-DD H:mm:ss.SSS');		
+		return (raceStart.isAfter(start) || raceStart.isSame(start)) && raceStart.isBefore(end);
+	},
 	
-		return _.filter(this.state.bookings, function(booking)  {
+	filterBookings:function(start){
+		//if (this.state.bookings.length == 0){
+		//	return [];
+		//}
+	
+		/*if (!start){
+			start = moment();
+		} else {
+			start = moment(start, 'M/DD/YYYY');
+		}
+		start.startOf('d');
+		
+		var end = moment(start);
+		end.add(1, 'd');*/
+	
+		/*var filteredBookings = _.filter(this.state.bookings, booking => {
 			var raceOfBooking = this.state.raceDetails[booking.heatId];
 			if (typeof raceOfBooking == 'undefined'){
 				return false;
@@ -328,10 +377,35 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			var raceStart = moment(raceOfBooking.starts_at, 'YYYY-MM-DD H:mm:ss.SSS');
 			
 			return (!this.state.filterByTrackId || raceOfBooking.track_id == this.state.filterByTrackId)
-				&& ((raceStart.isAfter(start) || raceStart.isSame(start)) && raceStart.isBefore(end));
-		}.bind(this));
+				&& this.isRaceInDate(raceOfBooking, start);
+			//	&& ((raceStart.isAfter(start) || raceStart.isSame(start)) && raceStart.isBefore(end));
+		});*/
+		
+		var relatedBookings = _(this.state.raceDetails)
+			.pick(function(race)  {
+				return (!this.state.filterByTrackId || race.track_id == this.state.filterByTrackId)
+				&& this.isRaceInDate(race, start);
+			}.bind(this))
+			.mapValues(function(race)  {
+				var raceBookings = _.filter(this.state.bookings, function(booking)  {
+					return booking.heatId == race.id;
+				});
+				
+				if (raceBookings.length > 0){
+					return raceBookings;
+				} else {
+					var newBookingPlaceholder = {
+						heatId: race.id, onlineBookingsId: null, productsId: null, isPublic: null, quantityTotal: null
+					};
+					return newBookingPlaceholder;
+				}
+			}.bind(this))
+			.values().flatten().value();
+			
+		return relatedBookings;
 	},
-	render: function(){
+	
+	render:function(){
 		return React.DOM.div({className: "container-fluid"}, 
 			this.renderPopup(), 
 			React.DOM.div({className: "row"}, 
@@ -340,7 +414,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			)
 		);
 	},
-	renderPopup: function(){
+	
+	renderPopup:function(){
 		if (!this.state.popupMessage){
 			return null;
 		}
@@ -351,19 +426,22 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			this.state.popupMessage
 		);
 	},
-	renderTrackOptions: function(){	
+	
+	renderTrackOptions:function(){	
 		return this.state.tracks.map(function(track)  {
 			return React.DOM.option({value: track.id, key: track.id}, track.name);
 		});
 	},
-	renderProductSelectOptions: function(){
+	
+	renderProductSelectOptions:function(){
 		return _.map(this.state.products, function(product)  {
 			return React.DOM.option({value: product.productId, key: product.productId}, 
 				product.description
 			);
 		});
 	},
-	renderBookingTable: function(){
+	
+	renderBookingTable:function(){
 		var foundBookings = this.filterBookings(this.parseRef('date'));
 	
 		if (foundBookings.length == 0){
@@ -371,14 +449,18 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				return 'Getting bookings for selected date and/or track...'
 			}
 	
-			return 'No bookings found for this date and/or track.';
+			return 'No activities found for this date and/or track.';
 		}
-	
+		
 		var bookingRows = foundBookings.map(function(booking)  {
+			console.log('rend row', this.state.selectedBookingIds, booking);
 			return BookingRow({
-				key: booking.onlineBookingsId, 
+				key: booking.onlineBookingsId || 'race.' + booking.heatId, 
 				booking: booking, race: this.state.raceDetails[booking.heatId], product: this.state.products[booking.productsId], 
-				selected: _.contains(this.state.selectedBookingIds, booking.onlineBookingsId), 
+				selected: 
+					_.contains(this.state.selectedBookingIds, booking.onlineBookingsId)
+					|| _.find(this.state.selectedBookingIds, { heatId: booking.heatId }), 
+				
 				onFunnelEvent: this.handleBookingRowEvent}
 			);
 		}.bind(this));
@@ -386,27 +468,31 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		return React.DOM.div(null, 
 			React.DOM.table({className: "table"}, 
 				React.DOM.thead({className: "text-left"}, React.DOM.tr(null, 
-					React.DOM.th(null, 
+					React.DOM.th({key: "editing"}, 
 						"Editing"
 					), 
-					React.DOM.th(null, "Time"), 
-					React.DOM.th(null, "Name"), 
-					React.DOM.th(null, "Product"), 
-					React.DOM.th(null, "Public?"), 
-					React.DOM.th(null, "Qty")
+					React.DOM.th({key: "time"}, "Time"), 
+					React.DOM.th({key: "name"}, "Name"), 
+					React.DOM.th({key: "product"}, "Product"), 
+					React.DOM.th({key: "public"}, "Public?"), 
+					React.DOM.th({key: "qty"}, "Qty")
 				)), 
 				React.DOM.tbody(null, 
 					bookingRows
 				)
 			), 
 			this.state.selectedBookingIds.length > 0 &&
-				React.DOM.input({type: "button", className: "btn btn-info", onClick: this.handleDeselectClick, value: "De-select All"})
+				React.DOM.span(null, 
+					React.DOM.input({type: "button", className: "btn btn-info", onClick: this.handleDeselectClick, value: "De-select All"})
+					/*<input type='button' className='btn btn-danger' onClick={this.handleDeleteClick} value='Delete Selected' />*/
+				)
 		);
 	},
-	renderBookingNav: function(){
+	
+	renderBookingNav:function(){
 		return React.DOM.div({className: "col-md-6"}, 
 			React.DOM.div({className: "row"}, 
-				React.DOM.h3(null, "All Races")
+				React.DOM.h3(null, "All Activities")
 			), 
 			
 			React.DOM.div({className: "row form-inline"}, 
@@ -431,17 +517,25 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			)
 		);		
 	},
-	renderEditForm: function(creating){
-		if (this.state.selectedBookingIds.length == 0 && !creating){
+	
+	renderEditForm:function(creating){
+		if (this.state.loading || this.filterBookings(this.parseRef('date')).length == 0){
+			return null;
+		}
+		
+		if (this.state.selectedBookingIds.length == 0){
 			return React.DOM.div({className: "col-md-6"}, 
-				"Select one or more bookings to edit them."
+				"Select one or more activities to edit them."
 			);
 		}
+	
+		var title = this.state.selectedBookingIds.length > 0 && 
+			React.DOM.span(null, "Editing ", this.getBookingTitle(true));
 	
 		return React.DOM.div({className: "col-md-6"}, 
 			React.DOM.form({className: "form-horizontal"}, 
 					React.DOM.legend({className: "row form-group"}, 
-						"Editing ", this.getBookingTitle(true)
+						title
 					), 
 				
 				React.DOM.div({className: "row form-group"}, 
@@ -485,28 +579,42 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			)
 		);
 	},
-	getBookingById: function(id){
+	
+	getBookingById:function(id){
 		return _.findWhere(this.state.bookings, { onlineBookingsId: id });
 	},
+	
 	getBookingTitle: function(asHTML){
 		var bookingTitles = [];
 		
-		this.state.selectedBookingIds.forEach(function(id)  {
-			var booking = this.getBookingById(id);
-			
-			var raceOfBooking = this.state.raceDetails[booking.heatId];
-			var bookingText = moment(raceOfBooking.starts_at).format('M/D h:mm a ') + raceOfBooking.race_name;
-			
-			if (asHTML){
-				bookingTitles.push(React.DOM.span(null, bookingText, React.DOM.br(null)));
+		this.state.selectedBookingIds.forEach(function(item)  {
+			if (item.heatId){
+				var raceName = this.state.raceDetails[item.heatId].race_name;
+				if (asHTML){
+					bookingTitles.push(React.DOM.span(null, raceName, React.DOM.br(null)));
+				} else {
+					bookingTitles.push(raceName);
+				}
 			} else {
-				bookingTitles.push(bookingText);
-			}
+				var booking = this.getBookingById(item);
+				
+				var raceOfBooking = this.state.raceDetails[booking.heatId];
+				var bookingText = moment(raceOfBooking.starts_at).format('M/D h:mm a ') + raceOfBooking.race_name;
+				
+				if (asHTML){
+					bookingTitles.push(React.DOM.span(null, bookingText, React.DOM.br(null)));
+				} else {
+					bookingTitles.push(bookingText);
+				}
+			}			
 		}.bind(this));
 		
 		return asHTML? bookingTitles: bookingTitles.join(', ');
 	},
-	componentDidMount: function(){
+	
+	
+	
+	componentDidMount:function(){
 		// load tracks for Track Select
 		$.get(
 			config.apiURL + 'tracks/index.json?key=' + config.apiKey,
@@ -526,7 +634,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		this.loadBookings();
 	},
-	loadBookings: function(filterByTrackId){
+	
+	loadBookings:function(filterByTrackId){
 		this.setState({ selectedBookingIds: [], loading: true });
 	
 		var inputDate = this.parseRef('date');
@@ -548,64 +657,78 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		var requestUrl = config.apiURL + 'races/races.json?' + $.param(params);
 		
 		$.get(requestUrl,
-			function(body, msg, res)  {
-				var races =
-					this.state.filterByTrackId?
+			function(body)  {
+				var races = body.races;
+					/*this.state.filterByTrackId?
 						_.filter(body.races, { TrackNo: this.state.filterByTrackId })
-					: body.races;
+					: body.races;*/
 			
+				// find all bookings for races on that day
 				var bookingRequests = races.map(function(race)  {
 					var requestUrl = config.apiURL + 'booking.json?' + $.param({ key: config.privateKey, heatId: race.HeatNo });
 					return $.get(requestUrl);
 				});
 				
-				// find all bookings for heats on that day
 				$.when.apply($, bookingRequests).done(function()  {var responses=Array.prototype.slice.call(arguments,0);
 					// each response is an array and first element of each array is response body (refer to jQuery deferred API)
 					var bookings = _(responses)
 						.map(function(res)  { return res[0]; })
+						.tap(function(val)  { console.log('responses before pluck', val); })
 						.pluck('bookings')
+						.tap(function(bookings)  {
+							if (bookings.length == 0){
+								
+							}
+						})
 						.flatten()
 						.concat(this.state.bookings)
 						.uniq('onlineBookingsId')
 						.value();
 						
 					this.setState({ bookings:bookings });
-					
-					// pull race details for each found booking
-					var raceDetailRequests = bookings.map(function(booking)  {
-						var requestUrl = config.apiURL + 'races/' + booking.heatId + '.json?key=' + config.privateKey;
-						return $.get(requestUrl);
-					});
-					
-					$.when.apply($, raceDetailRequests).done(function()  {var responses=Array.prototype.slice.call(arguments,0);
-						var returnedDetails = _(responses)
-							.map(function(res)  { return res[0].race; /*_.pick(res[0].race, ['id', 'starts_at', 'race_name']);*/ })
-							.indexBy('id')
-							.value();
-						
-						var raceDetails = React.addons.update(
-							this.state.raceDetails,
-							{ $merge: returnedDetails }
-						);
-						this.setState({ raceDetails:raceDetails, loading: false });
-					}.bind(this));
 				}.bind(this));				
+
+				// get details for all races on that day
+				var raceDetailRequests = races.map(function(race)  {
+					var requestUrl = config.apiURL + 'races/' + race.HeatNo + '.json?key=' + config.privateKey;
+					return $.get(requestUrl);
+				});
+				
+				$.when.apply($, raceDetailRequests).done(function()  {var responses=Array.prototype.slice.call(arguments,0);
+					var returnedDetails = _(responses)
+						.map(function(res)  { return res[0].race; /*_.pick(res[0].race, ['id', 'starts_at', 'race_name']);*/ })
+						.indexBy('id')
+						.value();
+					
+					var raceDetails = React.addons.update(
+						this.state.raceDetails,
+						{ $merge: returnedDetails }
+					);
+					this.setState({ raceDetails:raceDetails, loading: false });
+				}.bind(this));
 			}.bind(this)
 		);		
 	},
-	componentDidUpdate: function(prevProps, prevState){
+	
+	componentDidUpdate:function(prevProps, prevState){
 		if (prevState.selectedBookingIds.length <= 1 && this.state.selectedBookingIds.length > 1){
 			this.setState({ newProductId: null, newChecked: null });
 			this.refs.qtyAvail.getDOMNode().value = '';
 		} else if (prevState.selectedBookingIds.length != 1 && this.state.selectedBookingIds.length == 1){
 			var firstBooking = _.findWhere(this.state.bookings, { onlineBookingsId: this.state.selectedBookingIds[0] });
-			this.setState({
-				newProductId: firstBooking.productsId,
-				newChecked: firstBooking.isPublic
-			});
-			//this.setState({ newChecked: firstBooking.isPublic });
-			this.refs.qtyAvail.getDOMNode().value = firstBooking.quantityTotal || 0;
+			if (typeof firstBooking == 'undefined'){
+				this.setState({
+					newProductId: null,
+					newChecked: true
+				});			
+				this.refs.qtyAvail.getDOMNode().value = 1;			
+			} else {
+				this.setState({
+					newProductId: firstBooking.productsId,
+					newChecked: firstBooking.isPublic
+				});			
+				this.refs.qtyAvail.getDOMNode().value = firstBooking.quantityTotal || 0;
+			}
 		}
 		
 		if (prevState.popupMessage != this.state.popupMessage){
@@ -617,37 +740,50 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			this.setState({ saveEnabled: false });
 		}*/
 	},
-	handleDateChange: function(e){
+	
+	handleDateChange:function(e){
 		this.loadBookings();
 	},
+	
 	handleTrackSelectEvent: function(event, props){
 		if (event.added){
 			this.setState({ filterByTrackId: event.val || false });
 			this.loadBookings(event.val);
 		}
 	},
-	handleBookingRowEvent: function(e, rowProps){
+	
+	handleBookingRowEvent:function(e, rowProps){
 		switch (e.type) {
 			case 'click':
-				var clickedBookingId = rowProps.booking.onlineBookingsId;
-				var selectedBookingIds;
+				var clickedBookingId = rowProps.booking.onlineBookingsId;				
 				
-				if (_.contains(this.state.selectedBookingIds, clickedBookingId)){
-					selectedBookingIds = _.without(this.state.selectedBookingIds, clickedBookingId);
+				var selectedBookingIds = [];
+				if (clickedBookingId){				
+					if (_.contains(this.state.selectedBookingIds, clickedBookingId)){
+						selectedBookingIds = _.without(this.state.selectedBookingIds, clickedBookingId);
+					} else {
+						selectedBookingIds = React.addons.update(
+							this.state.selectedBookingIds,
+							{ $push: [clickedBookingId] }
+						);
+					}
 				} else {
-					selectedBookingIds = React.addons.update(
-						this.state.selectedBookingIds,
-						{ $push: [clickedBookingId] }
-					);
+					if (typeof _.findWhere(this.state.selectedBookingIds, { heatId: rowProps.booking.heatId }) == 'undefined'){
+						selectedBookingIds = React.addons.update(
+							this.state.selectedBookingIds,
+							{ $push: [{ heatId: rowProps.race.id }] }
+						);
+					} else {
+						console.log('win');
+						selectedBookingIds = _.reject(this.state.selectedBookingIds, { heatId: rowProps.booking.heatId });
+					}
 				}
-				this.setState({ selectedBookingIds:selectedBookingIds });				
-				break;
-				
-			default:
+				this.setState({ selectedBookingIds:selectedBookingIds });
 				break;
 		}		
 	},
-	handlePublicCheckEvent: function(e){		
+	
+	handlePublicCheckEvent:function(e){		
 		switch (e.type){
 			case 'ifChecked':
 				this.setState({ newChecked: true, saveEnabled: true });
@@ -657,14 +793,15 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				break;
 		}
 	},
+	
 	handleProductSelectEvent: function(e, props, state){
 		//this.setState({ saveEnabled: true });
-		
 		if (e.added){
 			this.setState({ newProductId: e.val });
 		}
 	},
-	handleQtyAvailableChange: function(){
+	
+	handleQtyAvailableChange:function(){
 		var elem = this.jQuerify('qtyAvail');
 		
 		elem.val(parseInt(elem.val()));
@@ -673,7 +810,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			elem.val(elem.attr('min'));
 		}		
 	},
-	handleSaveClick: function(e){
+	
+	handleSaveClick:function(e){
 		e.preventDefault();
 		
 		var editCount = this.state.selectedBookingIds.length;
@@ -702,35 +840,53 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		this.putChange(change);
 	},
-	putChange: function(change){
+	
+	putChange:function(change){
 		if (this.state.selectedBookingIds.length == 0){
 			return;
 		}
 		
 		var putRequests = this.state.selectedBookingIds.forEach(function(id)  {
-			return $.ajax({
-				url: config.apiURL + 'booking/' + id + '?key=' + config.privateKey,
-				type: 'PUT',
-				data: change				
-			});
+			if (id.heatId){
+				return $.ajax({
+					url: config.apiURL + 'booking?key=' + config.privateKey,
+					type: 'POST',
+					data: _.extend(change, { heatId: id.heatId })
+				});
+			} else {
+				return $.ajax({
+					url: config.apiURL + 'booking/' + id + '?key=' + config.privateKey,
+					type: 'PUT',
+					data: change				
+				});
+			}
 		});
 		
-		var errorMessage = 'An error occurred while trying to save changes.';
-		
-		$.when.apply($, putRequests).then(function()  {var all=Array.prototype.slice.call(arguments,0);			
-			var popupMessage = 'Booking for ' + this.getBookingTitle() + ' successfully saved! ('
-				+ moment().format('h:mm:ss a') + ')';
-			this.setState({ popupMessage:popupMessage });
-			this.loadBookings();
-		}.bind(this), function()  {var all=Array.prototype.slice.call(arguments,0);
-			alert(errorMessage);
-		});
+		$.when.apply($, putRequests).then(
+			function()  {var all=Array.prototype.slice.call(arguments,0);			
+				var popupMessage = 'Booking for ' + this.getBookingTitle() + ' successfully saved! ('
+					+ moment().format('h:mm:ss a') + ')';
+				this.setState({ popupMessage:popupMessage });
+				this.loadBookings();
+			}.bind(this),
+			function()  {var all=Array.prototype.slice.call(arguments,0);
+				var errorMessage = 'An error occurred while trying to save changes.';
+				alert(errorMessage);
+			}
+		);
 	},
-	handlePopupClick: function(){
+	
+	handlePopupClick:function(){
 		this.setState({ popupMessage: null });
 	},
-	handleDeselectClick: function(){
+	
+	handleDeselectClick:function(){
 		this.setState({ selectedBookingIds: [] });
+	},
+	
+	handleDeleteClick:function(){
+		var confirmed = confirm('You are about to delete ');
+		// TODO: finish
 	}
 });
 
