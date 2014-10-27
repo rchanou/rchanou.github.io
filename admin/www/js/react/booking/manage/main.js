@@ -468,7 +468,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			);
 		}.bind(this));
 		
-		return React.DOM.div(null, 
+		return React.DOM.div({style: { overflowY: 'scroll'}, ref: "table"}, 
 			React.DOM.table({className: "table"}, 
 				React.DOM.thead({className: "text-left"}, React.DOM.tr(null, 
 					React.DOM.th({key: "editing"}, 
@@ -642,6 +642,14 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		);
 		
 		this.loadBookings();
+		
+		if (this.refs.table){
+			var tableElem = $(this.refs.table.getDOMNode());
+			$(window).resize(function(_)  {
+				console.log('resize');
+				tableElem.height($(window).height() - tableElem.top());
+			});
+		}
 	},
 	
 	loadBookings:function(filterByTrackId){
@@ -860,11 +868,11 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				return $.ajax({
 					url: config.apiURL + 'booking?key=' + config.privateKey,
 					type: 'POST',
-					data: _.extend(change, { heatId: id.heatId })
+					data: _.extend(change, { heatId: id.heatId, quantityTotal: change.quantityTotal || 1 })
 				});
 			} else {
 				return $.ajax({
-					url: config.apiURL + 'booking/' + id + '?key=' + config.privateKey,
+					url: config.apiURL + 'booking/' + id,
 					type: 'PUT',
 					data: change				
 				});
