@@ -512,6 +512,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				)
 			), 				
 			
+			React.DOM.br(null), 
+			
 			React.DOM.div({className: "row form-group"}, 
 				this.renderBookingTable()
 			)
