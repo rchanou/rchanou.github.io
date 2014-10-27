@@ -474,20 +474,22 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			}.bind(this))
 			.value();
 		
-		return React.DOM.div({style: { overflowY: 'auto'}, ref: "table"}, 
-			React.DOM.table({className: "table"}, 
-				React.DOM.thead({className: "text-left"}, React.DOM.tr(null, 
-					React.DOM.th({key: "editing"}, 
-						"Editing"
-					), 
-					React.DOM.th({key: "time"}, "Time"), 
-					React.DOM.th({key: "name"}, "Name"), 
-					React.DOM.th({key: "product"}, "Product"), 
-					React.DOM.th({key: "public"}, "Public?"), 
-					React.DOM.th({key: "qty"}, "Qty")
-				)), 
-				React.DOM.tbody(null, 
-					bookingRows
+		return React.DOM.div(null, 
+			React.DOM.div({style: { overflowY: 'auto'}, ref: "table"}, 
+				React.DOM.table({className: "table"}, 
+					React.DOM.thead({className: "text-left"}, React.DOM.tr(null, 
+						React.DOM.th({key: "editing"}, 
+							"Editing"
+						), 
+						React.DOM.th({key: "time"}, "Time"), 
+						React.DOM.th({key: "name"}, "Name"), 
+						React.DOM.th({key: "product"}, "Product"), 
+						React.DOM.th({key: "public"}, "Public?"), 
+						React.DOM.th({key: "qty"}, "Qty")
+					)), 
+					React.DOM.tbody(null, 
+						bookingRows
+					)
 				)
 			), 
 			this.state.selectedBookingIds.length > 0 &&
