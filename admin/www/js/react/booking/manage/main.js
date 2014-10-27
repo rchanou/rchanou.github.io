@@ -4,6 +4,9 @@
 /*** CONSTANTS AND CONFIG ***/
 
 config.apiURL = config.apiURL + '/';
+if (window.location.hostname != '192.168.111.165') {
+	console.log = function(){};
+}
 
 /*** STYLES ***/
 
