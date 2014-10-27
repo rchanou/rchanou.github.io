@@ -33,7 +33,7 @@ class Races
         if($race_id == 'lap_number') return $this->lap_number($sub);
         if($race_id == 'scoreboard') return $this->scoreboard(@$_GET['track_id'], @$_GET['heat_id']);
         if($race_id == 'copy') return $this->copy(@$_GET['from'], @$_GET['to'], @$_GET['track_id']);
-        if($race_id == 'races') return $this->races();
+        if($race_id == 'races') return $this->races(@$_GET['track_id']);
         if($race_id == 'since') return $this->since();
         if($race_id == 'final_positions') return $this->final_positions();
         if($race_id == 'matching') return $this->matching();
@@ -980,9 +980,11 @@ EOD;
         }
         //$tsql_params = array(&$track_id);
         $rowsRace = $this->run_query($tsql);
+        if (empty($rowsRace))
+            throw new RestException(412, 'Unable to find any racing data for track: ' . $track_id . ', heat: ' . $heatId);
 
         $output['race'] = $rowsRace[0];
-                $output['race']['race_number'] = substr($output['race']['id'], -2); // Race Number is the last two digits of the ID
+        $output['race']['race_number'] = substr($output['race']['id'], -2); // Race Number is the last two digits of the ID
 
         //$tsql = 'GetNextHeatRacersInfo';
         $tsql_params = array(&$heatId);
@@ -990,29 +992,28 @@ EOD;
         $rowsRacers = $this->run_query($tsql, $tsql_params);
         $output['race']['racers'] = $rowsRacers;
 
-                foreach($output['race']['racers'] as $key => $racer) {
-                    $racerInfo = $this->run_query('GetRacerProfile '.(int)$racer['id'].', ' . (int)$heatId, array());
-                    $output['race']['racers'][$key]['total_customers'] = $racerInfo[0]['TotalCustomers'];
-                    $output['race']['racers'][$key]['ranking_by_rpm'] = $racerInfo[0]['RankingByRPM'];
-                    $output['race']['racers'][$key]['group_id'] = $racerInfo[0]['GroupID'];
-                    $output['race']['racers'][$key]['total_visits'] = $racerInfo[0]['TotalVisits'];
-                    $output['race']['racers'][$key]['total_races'] = $racerInfo[0]['TotalRaces'];
-                    $output['race']['racers'][$key]['photo_url'] = $this->getCustomerPhoto($racer['id']);
-
-                }
+        foreach($output['race']['racers'] as $key => $racer) {
+            $racerInfo = $this->run_query('GetRacerProfile '.(int)$racer['id'].', ' . (int)$heatId, array());
+            $output['race']['racers'][$key]['total_customers'] = $racerInfo[0]['TotalCustomers'];
+            $output['race']['racers'][$key]['ranking_by_rpm'] = $racerInfo[0]['RankingByRPM'];
+            $output['race']['racers'][$key]['group_id'] = $racerInfo[0]['GroupID'];
+            $output['race']['racers'][$key]['total_visits'] = $racerInfo[0]['TotalVisits'];
+            $output['race']['racers'][$key]['total_races'] = $racerInfo[0]['TotalRaces'];
+            $output['race']['racers'][$key]['photo_url'] = $this->getCustomerPhoto($racer['id']);
+        }
 
         if (is_numeric($heatId)) //TODO: Document and explain the SQL 2005 hacks
         {
             $tsql = "SELECT * FROM RacingData WHERE HeatNo = " . $heatId . " AND IsBadTime = 0";
             $laps = $this->run_query($tsql);
             
-                        // Build mapping between customer id and the key in the array
-                        $racersToKeys = array();
-                        foreach($output['race']['racers'] as $key => $racer) {
-                            $racersToKeys[$racer['id']] = $key;
-                        }
-                        
-                        foreach($laps as $lap) {
+            // Build mapping between customer id and the key in the array
+            $racersToKeys = array();
+            foreach($output['race']['racers'] as $key => $racer) {
+                $racersToKeys[$racer['id']] = $key;
+            }
+
+            foreach($laps as $lap) {
                 $currentLap = array(
                     'id' => $lap['ID'],
                     'kart_number' => $lap['AutoNo'],
@@ -1021,10 +1022,10 @@ EOD;
                     'lap_number' => $lap['LapNum'],
                     'racer_id' => $lap['CustID']
                 );
-                                
-                                $key = $racersToKeys[$currentLap['racer_id']];
-                                $output['race']['racers'][$key]['laps'][] = $currentLap;
-                                $output['race']['laps'][] = $currentLap;
+                
+                $key = $racersToKeys[$currentLap['racer_id']];
+                $output['race']['racers'][$key]['laps'][] = $currentLap;
+                $output['race']['laps'][] = $currentLap;
             }
 
             if(isset($output['race']['laps'])) {
