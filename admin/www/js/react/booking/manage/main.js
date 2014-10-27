@@ -455,18 +455,24 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			return 'No activities found for this date and/or track.';
 		}
 		
-		var bookingRows = foundBookings.map(function(booking)  {
-			console.log('rend row', this.state.selectedBookingIds, booking);
-			return BookingRow({
-				key: booking.onlineBookingsId || 'race.' + booking.heatId, 
-				booking: booking, race: this.state.raceDetails[booking.heatId], product: this.state.products[booking.productsId], 
-				selected: 
-					_.contains(this.state.selectedBookingIds, booking.onlineBookingsId)
-					|| _.find(this.state.selectedBookingIds, { heatId: booking.heatId }), 
-				
-				onFunnelEvent: this.handleBookingRowEvent}
-			);
-		}.bind(this));
+		var bookingRows = _(foundBookings)
+			.map(function(booking)  {
+				return { booking:booking, race: this.state.raceDetails[booking.heatId] };
+			}.bind(this))
+			.sortBy(function(bookingAndRace)  { return moment(bookingAndRace.race.starts_at).unix(); })
+			.map(function(bookingAndRace)  {
+				booking = bookingAndRace.booking;
+				return BookingRow({
+					key: booking.onlineBookingsId || 'race.' + booking.heatId, 
+					booking: booking, race: bookingAndRace.race, /*this.state.raceDetails[booking.heatId]*/product: this.state.products[booking.productsId], 
+					selected: 
+						_.contains(this.state.selectedBookingIds, booking.onlineBookingsId)
+						|| _.find(this.state.selectedBookingIds, { heatId: booking.heatId }), 
+					
+					onFunnelEvent: this.handleBookingRowEvent}
+				);
+			}.bind(this))
+			.value();
 		
 		return React.DOM.div({style: { overflowY: 'scroll'}, ref: "table"}, 
 			React.DOM.table({className: "table"}, 
