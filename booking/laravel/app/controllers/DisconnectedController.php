@@ -14,11 +14,24 @@ class DisconnectedController extends BaseController
     {
         //TODO: Enhance with error codes.
 
-        return View::make('/errorpages/disconnected',
-            array(
-                'images' => Images::getImageAssets(),
-                'errorInfo' => json_encode(Session::get('errorInfo'))
-            )
-        );
+        try
+        {
+            return View::make('/errorpages/disconnected',
+                array(
+                    'images' => Images::getImageAssets(),
+                    'errorInfo' => json_encode(Session::get('errorInfo'))
+                )
+            );
+        }
+        catch(Exception $e)
+        {
+            return View::make('/errorpages/disconnected',
+                array(
+                    'images' => Images::getImageAssets(),
+                    'errorInfo' => Session::get('errorInfo')
+                )
+            );
+        }
+
     }
 }
