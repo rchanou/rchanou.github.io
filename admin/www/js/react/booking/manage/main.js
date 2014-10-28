@@ -432,34 +432,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		return (raceStart.isAfter(start) || raceStart.isSame(start)) && raceStart.isBefore(end);
 	},
 	
-	filterBookings:function(start){
-		//if (this.state.bookings.length == 0){
-		//	return [];
-		//}
-	
-		/*if (!start){
-			start = moment();
-		} else {
-			start = moment(start, 'M/DD/YYYY');
-		}
-		start.startOf('d');
-		
-		var end = moment(start);
-		end.add(1, 'd');*/
-	
-		/*var filteredBookings = _.filter(this.state.bookings, booking => {
-			var raceOfBooking = this.state.raceDetails[booking.heatId];
-			if (typeof raceOfBooking == 'undefined'){
-				return false;
-			}
-			
-			var raceStart = moment(raceOfBooking.starts_at, 'YYYY-MM-DD H:mm:ss.SSS');
-			
-			return (!this.state.filterByTrackId || raceOfBooking.track_id == this.state.filterByTrackId)
-				&& this.isRaceInDate(raceOfBooking, start);
-			//	&& ((raceStart.isAfter(start) || raceStart.isSame(start)) && raceStart.isBefore(end));
-		});*/
-		
+	filterBookings:function(start){		
 		var relatedBookings = _(this.state.raceDetails)
 			.pick(function(race)  {
 				return (!this.state.filterByTrackId || race.track_id == this.state.filterByTrackId)
@@ -792,6 +765,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			
 		$.get(requestUrl)
 		.then(function(body)  {
+			// KEEP: WILL BE RE-IMPLEMENTED ONCE MAIN API BOOKING FILTERING IS FIXED
 			/*var bookingRequests = body.races.map(race => {
 				var requestUrl = config.apiURL + 'booking.json?' + $.param({ key: config.privateKey, heatId: race.HeatNo });			
 				return $.get(requestUrl);
@@ -824,6 +798,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				}.bind(this));
 			}.bind(this));
 			
+			$.when.apply($, raceDetailRequests).done(function(_)  {
+				this.setState({ loading: false });
+			}.bind(this));			
 		}.bind(this));
 	},
 	
