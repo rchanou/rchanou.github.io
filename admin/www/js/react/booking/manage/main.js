@@ -709,7 +709,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		return asHTML? bookingTitles: bookingTitles.join(', ');
 	},
 	
-	componentDidMount:function(){
+	componentDidMount:function(){	
 		// load tracks for Track Select
 		$.get(
 			config.apiURL + 'tracks/index.json?key=' + config.apiKey,
@@ -782,20 +782,28 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		var requestUrl = config.apiURL + 'races/races.json?' + $.param(params);
 
+		// workaround until main branch booking filtering gets fixed
+		$.get(
+			config.apiURL + 'booking.json?key=' + config.apiKey,
+			function(body)  {
+				console.log('first bookings', body.bookings);
+			}
+		);
+			
 		$.get(requestUrl)
 		.then(function(body)  {
-			var bookingRequests = body.races.map(function(race)  {
+			/*var bookingRequests = body.races.map(race => {
 				var requestUrl = config.apiURL + 'booking.json?' + $.param({ key: config.privateKey, heatId: race.HeatNo });			
 				return $.get(requestUrl);
 			});
 			
-			bookingRequests.forEach(function(req)  {
-				req.then(function(body)  {
-					body.bookings.forEach(function(booking)  {
+			bookingRequests.forEach(req => {
+				req.then(body => {
+					body.bookings.forEach(booking => {
 						this.upsertListInState('bookings', booking, { onlineBookingsId: booking.onlineBookingsId });			
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
+					});
+				});
+			});*/
 						
 			var raceDetailRequests = body.races.map(function(race)  {
 				var requestUrl = config.apiURL + 'races/' + race.HeatNo + '.json?key=' + config.privateKey;
