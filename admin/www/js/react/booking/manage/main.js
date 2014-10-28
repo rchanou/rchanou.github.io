@@ -8,6 +8,7 @@ if (window.location.hostname != '192.168.111.165') {
 	console.log = function(){};
 }
 
+
 /*** STYLES ***/
 
 var NO_SELECT = {
@@ -18,6 +19,20 @@ var NO_SELECT = {
 	MsUserSelect: 'none',
 	userSelect: 'none'
 }
+
+
+/*** HELPERS ***/
+
+function generateUUID(){
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
+    return uuid;
+};
+
 
 /*** REACT MIXINS ***/
 
@@ -89,6 +104,7 @@ var ParseRef = {
 		}
 	}
 };
+
 
 /*** REACTIFIED JQUERY PLUGINS ***/
 
@@ -198,7 +214,7 @@ var ProductSelect = React.createClass({displayName: 'ProductSelect',
 	}
 });
 
-iCheck = React.createClass({displayName: 'iCheck',
+var iCheck = React.createClass({displayName: 'iCheck',
 	mixins: [EventFunnel, jQuerify],
 	render:function(){
 		return React.DOM.input({defaultChecked: this.props.checked, type: "checkbox"});
@@ -228,6 +244,56 @@ iCheck = React.createClass({displayName: 'iCheck',
 	}
 });
 
+var iRadio = React.createClass({displayName: 'iRadio',
+	mixins: [EventFunnel],
+	getDefaultProps:function(){
+		return {
+			inline: false,
+			name: 'test',
+			list: [{ label: 'A', value: 1 }, { label: 'b', value: 2 }],
+			selected: 1,
+			bound: true
+		};
+	},
+	getInitialState:function(){
+		return { name: generateUUID() };
+	},
+	render:function(){
+		var listNodes = [];
+		
+		this.props.list.forEach(function(item, i)  {
+			listNodes.push(React.DOM.label(null, 
+				React.DOM.input({type: "radio", key: i, ref: i, name: this.state.name, 
+					defaultChecked: this.props.selected == item.value, onChange: this.handleChange, onClick: this.toFunnel}), 
+				item.label
+			));
+			if (!this.props.inline){
+				listNodes.push(React.DOM.br(null));
+			}
+		}.bind(this));
+		
+		return React.DOM.span(null, 
+			listNodes
+		);
+	},
+	handleChange:function(e){
+		console.log(e);
+	},
+	componentDidMount:function(){
+		this.setFromProps();
+	},
+	componentDidUpdate:function(){
+		this.setFromProps();
+	},
+	setFromProps:function(){
+		for (var i = 0; i < this.props.list.length; i++){
+			if (this.props.list[i].value == this.props.selected){
+				this.refs[i].getDOMNode().checked = true;
+				break;
+			}
+		}
+	}
+});
 
 var DatePicker = React.createClass({displayName: 'DatePicker',
 	mixins: [EventFunnel],
@@ -241,7 +307,6 @@ var DatePicker = React.createClass({displayName: 'DatePicker',
 		this.funnelJQueryEvents('change');
 	}
 });
-
 
 var CheckPropChange = {
 	checkPropChange:function(otherProps ){var keys=Array.prototype.slice.call(arguments,1);
@@ -416,6 +481,10 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				this.renderEditForm()
 			)
 		);
+	},
+	
+	handleRadio:function(){var all=Array.prototype.slice.call(arguments,0);
+		console.log(all);
 	},
 	
 	renderPopup:function(){
@@ -629,8 +698,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		return asHTML? bookingTitles: bookingTitles.join(', ');
 	},
 	
-	
-	
 	componentDidMount:function(){
 		// load tracks for Track Select
 		$.get(
@@ -660,6 +727,29 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		}.bind(this));
 	},
 	
+	upsertListInState:function(listName, item, match){
+		var list = this.state[listName];
+		var currentIndex = _.findIndex(list, match);
+		var newList;
+		if (currentIndex == -1){
+			newList = React.addons.update(
+				list,
+				{ $push: [item] }
+			);
+		} else {
+			var change = {};
+			change[currentIndex] = { $set: item };
+			newList = React.addons.update(
+				list,
+				change
+			);
+		}		
+		var newState = {};
+		newState[listName] = newList;
+		console.log('new state', newState);
+		this.setState(newState);
+	},
+	
 	loadBookings:function(filterByTrackId){
 		this.setState({ selectedBookingIds: [], loading: true });
 	
@@ -680,55 +770,42 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		}
 		
 		var requestUrl = config.apiURL + 'races/races.json?' + $.param(params);
-		
-		$.get(requestUrl,
-			function(body)  {
-				var races = body.races;
-					/*this.state.filterByTrackId?
-						_.filter(body.races, { TrackNo: this.state.filterByTrackId })
-					: body.races;*/
-			
-				// find all bookings for races on that day
-				var bookingRequests = races.map(function(race)  {
-					var requestUrl = config.apiURL + 'booking.json?' + $.param({ key: config.privateKey, heatId: race.HeatNo });
-					return $.get(requestUrl);
-				});
-				
-				$.when.apply($, bookingRequests).done(function()  {var responses=Array.prototype.slice.call(arguments,0);
-					// each response is an array and first element of each array is response body (refer to jQuery deferred API)
-					var bookings = _(responses)
-						.tap(function(res)  { return _.isArray(res[0])? res: [res]; })
-						.map(function(res)  { return res[0]; })
-						.pluck('bookings')
-						.flatten()
-						.concat(this.state.bookings)
-						.uniq('onlineBookingsId')
-						.value();
-						
-					this.setState({ bookings:bookings });
-				}.bind(this));				
 
-				// get details for all races on that day
-				var raceDetailRequests = races.map(function(race)  {
-					var requestUrl = config.apiURL + 'races/' + race.HeatNo + '.json?key=' + config.privateKey;
-					return $.get(requestUrl);
-				});
-				
-				$.when.apply($, raceDetailRequests).done(function()  {var responses=Array.prototype.slice.call(arguments,0);
-					console.log('before rezzy', responses);
-					var returnedDetails = _(responses)
-						.map(function(res)  { return res[0].race; /*_.pick(res[0].race, ['id', 'starts_at', 'race_name']);*/ })
-						.indexBy('id')
-						.value();
-					
+		$.get(requestUrl)
+		.then(function(body)  {
+			var bookingRequests = body.races.map(function(race)  {
+				var requestUrl = config.apiURL + 'booking.json?' + $.param({ key: config.privateKey, heatId: race.HeatNo });			
+				return $.get(requestUrl);
+			});
+			
+			bookingRequests.forEach(function(req)  {
+				req.then(function(body)  {
+					body.bookings.forEach(function(booking)  {
+						this.upsertListInState('bookings', booking, { onlineBookingsId: booking.onlineBookingsId });			
+					}.bind(this));
+				}.bind(this));
+			}.bind(this));
+						
+			var raceDetailRequests = body.races.map(function(race)  {
+				var requestUrl = config.apiURL + 'races/' + race.HeatNo + '.json?key=' + config.privateKey;
+				return $.get(requestUrl);
+			});
+			
+			raceDetailRequests.forEach(function(req)  {
+				req.then(function(body)  {
+					console.log('race detail', body);
+					var change = {};
+					change[body.race.id] = { $set: body.race };
 					var raceDetails = React.addons.update(
 						this.state.raceDetails,
-						{ $merge: returnedDetails }
+						change
 					);
-					this.setState({ raceDetails:raceDetails, loading: false });
+					console.log(raceDetails);
+					this.setState({ raceDetails:raceDetails });
 				}.bind(this));
-			}.bind(this)
-		);		
+			}.bind(this));
+			
+		}.bind(this));
 	},
 	
 	componentDidUpdate:function(prevProps, prevState){
@@ -760,6 +837,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		/*if (this.state.selectedBookingIds.length == 0 && this.state.saveEnabled){
 			this.setState({ saveEnabled: false });
 		}*/
+		$(window).resize();
 	},
 	
 	handleDateChange:function(e){
