@@ -381,7 +381,7 @@ var BookingRow = React.createClass({displayName: 'BookingRow',
 			), 
 			React.DOM.td(null, start.isValid()? start.format('h:mm a'): '?'), 
 			React.DOM.td(null, this.props.race.race_name), 
-			React.DOM.td(null, this.props.product && this.props.product.description), 
+			React.DOM.td(null, this.props.product? this.props.product.description: '(no booking)'), 
 			React.DOM.td(null, booking.isPublic == null? null :
 						booking.isPublic? React.DOM.i({className: "fa fa-globe", title: "This booking is public."}) :
 										 React.DOM.i({className: "fa fa-lock", title: "This booking is private."})
@@ -535,16 +535,16 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		return React.DOM.div(null, 
 			React.DOM.div({style: { overflowY: 'auto'}, ref: "table"}, 
 				React.DOM.table({className: "table"}, 
-					React.DOM.thead({className: "text-left"}, React.DOM.tr(null, 
-						React.DOM.th({key: "editing"}, 
-							"Editing"
-						), 
-						React.DOM.th({key: "time"}, "Time"), 
-						React.DOM.th({key: "name"}, "Name"), 
-						React.DOM.th({key: "product"}, "Product"), 
-						React.DOM.th({key: "public"}, "Public?"), 
-						React.DOM.th({key: "qty"}, "Qty")
-					)), 
+					React.DOM.thead({className: "text-left"}, 
+						React.DOM.tr(null, 
+							React.DOM.th({key: "editing"}, "Editing"), 
+							React.DOM.th({key: "time"}, "Time"), 
+							React.DOM.th({key: "name"}, "Name"), 
+							React.DOM.th({key: "product"}, "Product"), 
+							React.DOM.th({key: "public"}, "Public?"), 
+							React.DOM.th({key: "qty"}, "Qty")
+						)
+					), 
 					React.DOM.tbody(null, 
 						bookingRows
 					)
@@ -938,11 +938,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			}
 		}
 		
-		/*var change = {
-			isPublic: this.parseRef('publicCheck'),
-			quantityTotal: this.parseRef('qtyAvail'),
-			productsId: this.state.newProductId
-		};*/
 		var change = {};
 		if (this.state.newChecked != null){
 			change.isPublic = this.state.newChecked;
@@ -1010,8 +1005,14 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			' Click OK to continue.';
 		var confirmed = confirm(message);		
 		if (confirmed){
+			// remove booking placeholders for activities w/o booking (can't delete what doesn't exist)
 			var bookingsToDelete = _.reject(this.state.selectedBookingIds, 'heatId');
 			
+			// remove bookings to be deleted from local booking cache in state
+			var bookings = _.reject(this.state.bookings, function(booking)  {return _.contains(bookingsToDelete, booking.onlineBookingsId);});
+			this.setState({ bookings:bookings, selectedBookingIds: [] });	
+			
+			// delete requests
 			var deleteRequests = bookingsToDelete.map(function(id)  {
 				return $.ajax({
 					url: config.apiURL + 'booking/' + id + '?key=' + config.privateKey,
@@ -1019,27 +1020,20 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				});			
 			});
 			
-			var bookings = _.reject(this.state.bookings, function(booking)  {return _.contains(bookingsToDelete, booking.onlineBookingsId);});
-			console.log('bookings with old deleted', bookings);
-			this.setState({ bookings:bookings, selectedBookingIds: [] });
-			
+			// handle responses
 			$.when.apply($, deleteRequests).then(
-				function()  {var all=Array.prototype.slice.call(arguments,0);
-					console.log('success', all);
-					
+				function()  {var all=Array.prototype.slice.call(arguments,0);					
 					var popupMessage = 'Booking(s) successfully deleted! ('
 						+ moment().format('h:mm:ss a') + ')';
 					this.setState({ popupMessage:popupMessage });
 					this.loadBookings();
 				}.bind(this),
 				function()  {var all=Array.prototype.slice.call(arguments,0);
-					console.log('fail', all);
 					var errorMessage = 'An error occurred while trying to delete bookings.';
 					alert(errorMessage);
 				}
 			);			
 		}
-		// TODO: finish
 	}
 });
 
