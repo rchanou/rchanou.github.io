@@ -552,8 +552,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			), 
 			this.state.selectedBookingIds.length > 0 &&
 				React.DOM.span(null, 
-					React.DOM.input({type: "button", className: "btn btn-info", onClick: this.handleDeselectClick, value: "De-select All"})
-					/*<input type='button' className='btn btn-danger' onClick={this.handleDeleteClick} value='Delete Selected' />*/
+					React.DOM.input({type: "button", className: "btn btn-info", onClick: this.handleDeselectClick, value: "De-select All"}), 
+					React.DOM.input({type: "button", className: "btn btn-danger pull-right", onClick: this.handleDeleteClick, value: "Delete Selected"})
 				)
 		);
 	},
@@ -621,7 +621,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 						/*<ProductSelect onFunnelEvent={this.handleProductSelectEvent} selectedId={this.state.newProductId} />*/
 						Select({onFunnelEvent: this.handleProductSelectEvent, selectedId: this.state.newProductId}, 
 							this.renderProductSelectOptions()
-						)
+						), 
+						this.state.selectedBookingIds.length > 1 && this.state.newProductId == null && '(multiple)'
 					)
 				), 
 				
@@ -640,7 +641,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 						"Qty. Available Online"
 					), 
 					React.DOM.div({className: "col-sm-6 col-md-6 col-lg-7"}, 
-						React.DOM.input({className: "form-control", type: "number", min: "0", onBlur: this.handleQtyAvailableChange, ref: "qtyAvail"})
+						React.DOM.input({className: "form-control", type: "number", min: "0", ref: "qtyAvail", 
+						  onBlur: this.handleQtyAvailableChange}), 
+						this.state.selectedBookingIds.length > 1 && this.refs.qtyAvail && (this.refs.qtyAvail.getDOMNode().value == '') && '(multiple)'
 					)
 				), 
 				
@@ -919,7 +922,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		if (elem.val() < elem.attr('min')){
 			elem.val(elem.attr('min'));
-		}		
+		}
+		
+		this.forceUpdate();
 	},
 	
 	handleSaveClick:function(e){
@@ -1001,7 +1006,39 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	},
 	
 	handleDeleteClick:function(){
-		var confirmed = confirm('You are about to delete ');
+		var message = 'You are about to delete ' + this.state.selectedBookingIds.length + ' booking(s).' +
+			' Click OK to continue.';
+		var confirmed = confirm(message);		
+		if (confirmed){
+			var bookingsToDelete = _.reject(this.state.selectedBookingIds, 'heatId');
+			
+			var deleteRequests = bookingsToDelete.map(function(id)  {
+				return $.ajax({
+					url: config.apiURL + 'booking/' + id + '?key=' + config.privateKey,
+					type: 'DELETE'	
+				});			
+			});
+			
+			var bookings = _.reject(this.state.bookings, function(booking)  {return _.contains(bookingsToDelete, booking.onlineBookingsId);});
+			console.log('bookings with old deleted', bookings);
+			this.setState({ bookings:bookings, selectedBookingIds: [] });
+			
+			$.when.apply($, deleteRequests).then(
+				function()  {var all=Array.prototype.slice.call(arguments,0);
+					console.log('success', all);
+					
+					var popupMessage = 'Booking(s) successfully deleted! ('
+						+ moment().format('h:mm:ss a') + ')';
+					this.setState({ popupMessage:popupMessage });
+					this.loadBookings();
+				}.bind(this),
+				function()  {var all=Array.prototype.slice.call(arguments,0);
+					console.log('fail', all);
+					var errorMessage = 'An error occurred while trying to delete bookings.';
+					alert(errorMessage);
+				}
+			);			
+		}
 		// TODO: finish
 	}
 });
