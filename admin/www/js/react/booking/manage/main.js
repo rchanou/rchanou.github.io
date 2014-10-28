@@ -257,27 +257,42 @@ var iCheck = React.createClass({displayName: 'iCheck',
 
 var iRadio = React.createClass({displayName: 'iRadio',
 	mixins: [EventFunnel],
+	render:function(){
+		return React.DOM.label(null, 
+			React.DOM.input({type: "radio", name: this.props.name, bound: this.props.bound, ref: "radio", 
+				defaultChecked: this.props.checked}), 
+			this.props.item.label
+		);
+	},
+	componentDidMount:function(){
+		this.funnelJQueryEvents('ifChanged');
+	},
+	componentDidUpdate:function(){
+		this.refs.radio.getDOMNode().checked = this.props.checked;
+	}
+});
+
+var iRadioGroup = React.createClass({displayName: 'iRadioGroup',
+	mixins: [EventFunnel, jQuerify],
 	getDefaultProps:function(){
 		return {
 			inline: false,
 			name: 'test',
 			list: [{ label: 'A', value: 1 }, { label: 'b', value: 2 }],
-			selected: 1,
-			bound: true
+			defaultSelected: 1
 		};
 	},
 	getInitialState:function(){
-		return { name: generateUUID() };
+		return { selected: this.props.defaultSelected, name: generateUUID() };
 	},
 	render:function(){
 		var listNodes = [];
 		
 		this.props.list.forEach(function(item, i)  {
-			listNodes.push(React.DOM.label(null, 
-				React.DOM.input({type: "radio", key: i, ref: i, name: this.state.name, 
-					defaultChecked: this.props.selected == item.value, onChange: this.handleChange, onClick: this.toFunnel}), 
-				item.label
-			));
+			listNodes.push(
+				iRadio({key: i, item: item, name: this.state.name, checked: this.state.selected == item.value, 
+					onFunnelEvent: this.handleRadioChange})
+			);
 			if (!this.props.inline){
 				listNodes.push(React.DOM.br(null));
 			}
@@ -287,22 +302,12 @@ var iRadio = React.createClass({displayName: 'iRadio',
 			listNodes
 		);
 	},
-	handleChange:function(e){
-		console.log(e);
-	},
-	componentDidMount:function(){
-		this.setFromProps();
-	},
-	componentDidUpdate:function(){
-		this.setFromProps();
-	},
-	setFromProps:function(){
-		for (var i = 0; i < this.props.list.length; i++){
-			if (this.props.list[i].value == this.props.selected){
-				this.refs[i].getDOMNode().checked = true;
-				break;
-			}
-		}
+	handleRadioChange:function(e, props, state){
+		console.log('child radio event', e, props, state);
+		this.setState(
+			{ selected: props.item.value },
+			function(_)  {return this.toFunnel(e);}.bind(this)
+		);
 	}
 });
 
@@ -467,7 +472,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		);
 	},
 	
-	handleRadio:function(){var all=Array.prototype.slice.call(arguments,0);
+	handleRadioChange:function(){var all=Array.prototype.slice.call(arguments,0);
 		console.log(all);
 	},
 	
@@ -734,7 +739,21 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		this.setState(newState);
 	},
 	
-	loadBookings:function(filterByTrackId){
+	loadBookings:function(filterByTrackId){	
+		// workaround until main branch booking filtering gets fixed
+		$.get(
+			config.apiURL + 'booking.json?key=' + config.privateKey,
+			function(body)  {
+				var bookings = _(body.bookings)
+				.concat(this.state.bookings)
+				.uniq('onlineBookingsId')
+				.value();
+				
+				this.setState({ bookings:bookings });
+			}.bind(this)
+		);
+		// end workaround
+	
 		this.setState({ selectedBookingIds: [], loading: true });
 	
 		var inputDate = this.parseRef('date');
@@ -755,14 +774,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		var requestUrl = config.apiURL + 'races/races.json?' + $.param(params);
 
-		// workaround until main branch booking filtering gets fixed
-		$.get(
-			config.apiURL + 'booking.json?key=' + config.privateKey,
-			function(body)  {
-				this.setState({ bookings: body.bookings });
-			}.bind(this)
-		);
-			
 		$.get(requestUrl)
 		.then(function(body)  {
 			// KEEP: WILL BE RE-IMPLEMENTED ONCE MAIN API BOOKING FILTERING IS FIXED
@@ -961,13 +972,15 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		});
 		
 		$.when.apply($, putRequests).then(
-			function()  {var all=Array.prototype.slice.call(arguments,0);			
+			function()  {var all=Array.prototype.slice.call(arguments,0);
+				//console.log('success', all);
 				var popupMessage = 'Booking for ' + this.getBookingTitle() + ' successfully saved! ('
 					+ moment().format('h:mm:ss a') + ')';
 				this.setState({ popupMessage:popupMessage });
 				this.loadBookings();
 			}.bind(this),
 			function()  {var all=Array.prototype.slice.call(arguments,0);
+				//console.log('fail', all);
 				var errorMessage = 'An error occurred while trying to save changes.';
 				alert(errorMessage);
 			}
