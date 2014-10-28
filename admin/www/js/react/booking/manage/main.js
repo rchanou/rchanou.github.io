@@ -122,11 +122,11 @@ var Select = React.createClass({displayName: 'Select',
 		return { open: false };
 	},
 	render:function(){
-		var optionsFromList = this.props.list.map(function(item)  {
-			return React.DOM.option({key: item.value, value: item.value}, 
+		var optionsFromList = this.props.list.map(function(item) 
+			{return React.DOM.option({key: item.value, value: item.value}, 
 				item.label
-			);
-		});
+			);}
+		);
 		
 		return React.DOM.select({name: "product"}, 
 			React.DOM.option({key: -1}), 
@@ -141,12 +141,8 @@ var Select = React.createClass({displayName: 'Select',
 			allowClear: true
 		})
 		.on('change', function(e)  { this.toFunnel(e); }.bind(this))
-		.on('select2-open', function(_)  {
-			this.setState({ open: true });
-		}.bind(this))
-		.on('select2-close', function(_)  {
-			this.setState({ open: false });
-		}.bind(this));
+		.on('select2-open', function(_)  	{ this.setState({ open: true }) }.bind(this))
+		.on('select2-close', function(_)  {	this.setState({ open: false }); }.bind(this));
 		
 		this.setFromProps();
 	},
@@ -185,11 +181,11 @@ var LinkedSelect = React.createClass({displayName: 'LinkedSelect',
 		}
 	},
 	renderOptions:function(){
-		return this.state.list.map(function(item)  {
-			return React.DOM.option({value: item[this.props.valueProperty], key: item[this.props.valueProperty]}, 
+		return this.state.list.map(function(item) 
+			{return React.DOM.option({value: item[this.props.valueProperty], key: item[this.props.valueProperty]}, 
 				item[this.props.labelProperty]
-			);
-		}.bind(this));
+			);}.bind(this)
+		);
 	},
 	render:function(){
 		var props = this.props;
@@ -439,14 +435,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	
 	filterBookings:function(start){		
 		var relatedBookings = _(this.state.raceDetails)
-			.pick(function(race)  {
-				return (!this.state.filterByTrackId || race.track_id == this.state.filterByTrackId)
-				&& this.isRaceInDate(race, start);
-			}.bind(this))
+			.pick(function(race)  {return (!this.state.filterByTrackId || race.track_id == this.state.filterByTrackId) && this.isRaceInDate(race, start);}.bind(this))
 			.mapValues(function(race)  {
-				var raceBookings = _.filter(this.state.bookings, function(booking)  {
-					return booking.heatId == race.id;
-				});
+				var raceBookings = _.filter(this.state.bookings, function(booking)  {return booking.heatId == race.id;});
 				
 				if (raceBookings.length > 0){
 					return raceBookings;
@@ -489,17 +480,15 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	},
 	
 	renderTrackOptions:function(){	
-		return this.state.tracks.map(function(track)  {
-			return React.DOM.option({value: track.id, key: track.id}, track.name);
-		});
+		return this.state.tracks.map(function(track)  {return React.DOM.option({value: track.id, key: track.id}, track.name);});
 	},
 	
 	renderProductSelectOptions:function(){
-		return _.map(this.state.products, function(product)  {
-			return React.DOM.option({value: product.productId, key: product.productId}, 
+		return _.map(this.state.products, function(product) 
+			{return React.DOM.option({value: product.productId, key: product.productId}, 
 				product.description
-			);
-		});
+			);}
+		);
 	},
 	
 	renderBookingTable:function(){
@@ -514,10 +503,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		}
 		
 		var bookingRows = _(foundBookings)
-			.map(function(booking)  {
-				return { booking:booking, race: this.state.raceDetails[booking.heatId] };
-			}.bind(this))
-			.sortBy(function(bookingAndRace)  { return moment(bookingAndRace.race.starts_at).unix(); })
+			.map(function(booking)  {return { booking:booking, race: this.state.raceDetails[booking.heatId] };}.bind(this) )
+			.sortBy(function(bookingAndRace)  {return moment(bookingAndRace.race.starts_at).unix();} )
 			.map(function(bookingAndRace)  {
 				booking = bookingAndRace.booking;
 				return BookingRow({
@@ -712,7 +699,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		this.loadBookings();
 		
 		$(window).resize(function(_)  {
-			console.log('resize');
 			if (this.refs.table){
 				var tableElem = $(this.refs.table.getDOMNode());
 					tableElem.height($(window).height() - tableElem.offset().top - 40);
@@ -747,15 +733,11 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		// workaround until main branch booking filtering gets fixed
 		$.get(
 			config.apiURL + 'booking.json?key=' + config.privateKey,
-			function(body)  {
-				console.log('old', this.state.bookings);
-				
+			function(body)  {				
 				var bookings = _(body.bookings)
 				.concat(this.state.bookings)
 				.uniq('onlineBookingsId')
-				.value();
-				console.log('new', bookings);
-				
+				.value();				
 				
 				this.setState({ bookings:bookings });
 			}.bind(this)
@@ -805,7 +787,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			
 			raceDetailRequests.forEach(function(req)  {
 				req.then(function(body)  {
-					console.log('race detail', body);
 					var change = {};
 					change[body.race.id] = { $set: body.race };
 					var raceDetails = React.addons.update(
@@ -1013,12 +994,12 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			this.setState({ bookings:bookings, selectedBookingIds: [] });	
 			
 			// delete requests
-			var deleteRequests = bookingsToDelete.map(function(id)  {
-				return $.ajax({
+			var deleteRequests = bookingsToDelete.map(function(id) 
+				{return $.ajax({
 					url: config.apiURL + 'booking/' + id + '?key=' + config.privateKey,
 					type: 'DELETE'	
-				});			
-			});
+				});}		
+			);
 			
 			// handle responses
 			$.when.apply($, deleteRequests).then(
