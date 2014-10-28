@@ -744,10 +744,14 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		$.get(
 			config.apiURL + 'booking.json?key=' + config.privateKey,
 			function(body)  {
+				console.log('old', this.state.bookings);
+				
 				var bookings = _(body.bookings)
 				.concat(this.state.bookings)
 				.uniq('onlineBookingsId')
 				.value();
+				console.log('new', bookings);
+				
 				
 				this.setState({ bookings:bookings });
 			}.bind(this)
@@ -952,7 +956,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			return;
 		}
 		
-		var putRequests = this.state.selectedBookingIds.forEach(function(id)  {
+		var putRequests = this.state.selectedBookingIds.map(function(id)  {
 			if (id.heatId){
 				return $.ajax({
 					url: config.apiURL + 'booking?key=' + config.privateKey,
@@ -973,14 +977,14 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		$.when.apply($, putRequests).then(
 			function()  {var all=Array.prototype.slice.call(arguments,0);
-				//console.log('success', all);
+				console.log('success', all);
 				var popupMessage = 'Booking for ' + this.getBookingTitle() + ' successfully saved! ('
 					+ moment().format('h:mm:ss a') + ')';
 				this.setState({ popupMessage:popupMessage });
 				this.loadBookings();
 			}.bind(this),
 			function()  {var all=Array.prototype.slice.call(arguments,0);
-				//console.log('fail', all);
+				console.log('fail', all);
 				var errorMessage = 'An error occurred while trying to save changes.';
 				alert(errorMessage);
 			}
