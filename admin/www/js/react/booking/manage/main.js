@@ -630,7 +630,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 						"Show To Public?"
 					), 
 					React.DOM.div({className: "col-sm-6 col-md-6 col-lg-7"}, 
-						iCheck({ref: "publicCheck", onFunnelEvent: this.handlePublicCheckEvent, checked: this.state.newChecked}	)					
+						iCheck({ref: "publicCheck", onFunnelEvent: this.handlePublicCheckEvent, checked: this.state.newChecked}	), 
+						this.state.selectedBookingIds.length > 1 && this.state.newChecked == null && '(multiple)'
 					)
 				), 
 				
