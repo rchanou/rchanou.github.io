@@ -786,8 +786,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		$.get(
 			config.apiURL + 'booking.json?key=' + config.privateKey,
 			function(body)  {
-				console.log('first bookings', body.bookings);
-			}
+				this.setState({ bookings: body.bookings });
+			}.bind(this)
 		);
 			
 		$.get(requestUrl)
