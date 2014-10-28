@@ -784,7 +784,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 
 		// workaround until main branch booking filtering gets fixed
 		$.get(
-			config.apiURL + 'booking.json?key=' + config.apiKey,
+			config.apiURL + 'booking.json?key=' + config.privateKey,
 			function(body)  {
 				console.log('first bookings', body.bookings);
 			}
