@@ -698,12 +698,12 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		this.loadBookings();
 		
-		$(window).resize(function(_)  {
+		/*$(window).resize(_ => {
 			if (this.refs.table){
 				var tableElem = $(this.refs.table.getDOMNode());
 					tableElem.height($(window).height() - tableElem.offset().top - 40);
 			}
-		}.bind(this));
+		});*/
 	},
 	
 	upsertListInState:function(listName, item, match){
@@ -833,8 +833,11 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		/*if (this.state.selectedBookingIds.length == 0 && this.state.saveEnabled){
 			this.setState({ saveEnabled: false });
 		}*/
-		$(window).resize();
 	},
+	
+	/*areExistingBookingsSelected(){
+		return _.contains(this.state.selectedBookingIds, );
+	},*/
 	
 	handleDateChange:function(e){
 		this.loadBookings();
