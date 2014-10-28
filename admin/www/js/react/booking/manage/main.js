@@ -118,6 +118,9 @@ var Select = React.createClass({displayName: 'Select',
 			bound: true
 		};
 	},
+	getInitialState:function(){
+		return { open: false };
+	},
 	render:function(){
 		var optionsFromList = this.props.list.map(function(item)  {
 			return React.DOM.option({key: item.value, value: item.value}, 
@@ -133,16 +136,24 @@ var Select = React.createClass({displayName: 'Select',
 	},
 	componentDidMount:function(){
 		this.jQuerify()
-			.select2({
-				placeholder: this.props.placeholder || (this.props.bound? '(none selected)': '(any)'),
-				allowClear: true
-			})
-			.on('change', function(e)  { this.toFunnel(e); }.bind(this));
+		.select2({
+			placeholder: this.props.placeholder || (this.props.bound? '(none selected)': '(any)'),
+			allowClear: true
+		})
+		.on('change', function(e)  { this.toFunnel(e); }.bind(this))
+		.on('select2-open', function(_)  {
+			this.setState({ open: true });
+		}.bind(this))
+		.on('select2-close', function(_)  {
+			this.setState({ open: false });
+		}.bind(this));
 		
 		this.setFromProps();
 	},
-	componentDidUpdate:function(){
-		this.setFromProps();
+	componentDidUpdate:function(prevProps){
+		if (!this.state.open && prevProps.selectedId != this.props.selectedId){
+			this.setFromProps();
+		}
 	},
 	setFromProps:function(){
 		if (!this.props.bound){
@@ -223,7 +234,7 @@ var iCheck = React.createClass({displayName: 'iCheck',
 		this.jQuerify().iCheck({
     	checkboxClass: 'icheckbox_flat-blue',
     	radioClass: 'iradio_flat-blue'
-		});
+		});		
 		this.setFromProps();
 		this.funnelJQueryEvents('ifIndeterminate', 'ifChecked', 'ifUnchecked');
 	},
