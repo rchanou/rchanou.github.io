@@ -411,7 +411,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			products: {},
 			selectedBookingIds: [],
 			newProductId: null,
-			newChecked: null,
+			newIsPublic: null,
 			popupMessage: null,
 			raceDetails: {},
 			creating: false,
@@ -627,8 +627,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 						"Show To Public?"
 					), 
 					React.DOM.div({className: "col-sm-6 col-md-6 col-lg-7"}, 
-						iCheck({ref: "publicCheck", onFunnelEvent: this.handlePublicCheckEvent, checked: this.state.newChecked}	), 
-						this.state.selectedBookingIds.length > 1 && this.state.newChecked == null  && !this.areOnlyNewBookingsSelected()
+						iCheck({ref: "publicCheck", onFunnelEvent: this.handlePublicCheckEvent, checked: this.state.newIsPublic}	), 
+						this.state.selectedBookingIds.length > 1 && this.state.newIsPublic == null  && !this.areOnlyNewBookingsSelected()
 							&& '(multiple)'
 					)
 				), 
@@ -815,39 +815,39 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	},
 	
 	componentDidUpdate:function(prevProps, prevState){
-		if (this.areOnlyNewBookingsSelected()){
-			if (this.state.selectedBookingIds.length == 1){
-				this.setState({ newProductId: null, newChecked: true });
+		if (this.state.selectedBookingIds.length > 0 && this.areOnlyNewBookingsSelected()){
+			//if (this.state.selectedBookingIds.length == 1){
+				this.setState({ newProductId: null, newIsPublic: true });
 				this.refs.qtyAvail.getDOMNode().value = 1;
-			}
-		} else if (prevState.selectedBookingIds.length <= 1 && this.state.selectedBookingIds.length > 1){
-			console.log('warmer');
+			//}
+		} else if (this.state.selectedBookingIds.length > 1 && prevState.selectedBookingIds.length != this.state.selectedBookingIds.length){
 			if (_.countBy(this.state.selectedBookingIds, 'heatId')['undefined'] == 1){
 				// only one existing booking selected and the rest are placeholders for uncreated bookings,
 				// so fill form data from the one existing booking
-				console.log('there is one');
 				var existingBookingId = _.findWhere(this.state.selectedBookingIds, function(id)  {return typeof id.heatId == 'undefined';});
 				var existingBooking = _.findWhere(this.state.bookings, { onlineBookingsId: existingBookingId });
+				console.log('existing booking', existingBooking);
 				this.setState({
 					newProductId: existingBooking.productsId,
-					newChecked: existingBooking.isPublic
+					newIsPublic: existingBooking.isPublic
 				});
 				this.refs.qtyAvail.getDOMNode().value = existingBooking.quantityTotal;
+			} else {
+				this.setState({ newProductId: null, newIsPublic: null });
+				this.refs.qtyAvail.getDOMNode().value = '';
 			}
-			this.setState({ newProductId: null, newChecked: null });
-			this.refs.qtyAvail.getDOMNode().value = '';
 		} else if (prevState.selectedBookingIds.length != 1 && this.state.selectedBookingIds.length == 1){
 			var firstBooking = _.findWhere(this.state.bookings, { onlineBookingsId: this.state.selectedBookingIds[0] });
 			if (typeof firstBooking == 'undefined'){
 				this.setState({
 					newProductId: null,
-					newChecked: true
+					newIsPublic: true
 				});			
 				this.refs.qtyAvail.getDOMNode().value = 1;			
 			} else {
 				this.setState({
 					newProductId: firstBooking.productsId,
-					newChecked: firstBooking.isPublic
+					newIsPublic: firstBooking.isPublic
 				});			
 				this.refs.qtyAvail.getDOMNode().value = firstBooking.quantityTotal || 0;
 			}
@@ -911,10 +911,10 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	handlePublicCheckEvent:function(e){		
 		switch (e.type){
 			case 'ifChecked':
-				this.setState({ newChecked: true, saveEnabled: true });
+				this.setState({ newIsPublic: true, saveEnabled: true });
 				break;
 			case 'ifUnchecked':
-				this.setState({ newChecked: false, saveEnabled: true });			
+				this.setState({ newIsPublic: false, saveEnabled: true });			
 				break;
 		}
 	},
@@ -950,8 +950,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		}
 		
 		var change = {};
-		if (this.state.newChecked != null){
-			change.isPublic = this.state.newChecked;
+		if (this.state.newIsPublic != null){
+			change.isPublic = this.state.newIsPublic;
 		}
 		if(this.state.newProductId != null){
 			change.productsId = this.state.newProductId;
