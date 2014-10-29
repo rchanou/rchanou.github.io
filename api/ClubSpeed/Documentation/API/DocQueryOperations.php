@@ -33,15 +33,10 @@ class DocQueryOperations Extends DocAPIBase {
 EOS
             , 'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/booking?debug=1&select=heatId,%20productsId,%20productType HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/booking?debug=1&select=heatId,%20productsId,%20productType HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Tue, 16 Sep 2014 16:58:28 GMT
-Content-Length: 262
-Content-Type: application/json
 {
   "bookings": [
     {
@@ -74,7 +69,10 @@ EOS
   for <span class="glyphicon glyphicon-save"></span>&nbsp;GET operations.
   If only certain records from the database are desired, the client
   may filter out those records by appending any of the following query strings
-  to any <span class="glyphicon glyphicon-save"></span>&nbsp;GET operation:
+  to any <span class="glyphicon glyphicon-save"></span>&nbsp;GET operation.
+  This type of call can be used in tandem with <a href=#query-operations-column-selection>Column Selection</a> 
+  but may <i>not</i> be used at the same time as <a href=#query-operations-property-matching>Property Matching</a>.
+  The syntax is as below:
 </p>
 <code class="prettyprint">/api/index.php/resource?filter=column1 {comparator} value1</code><br>
 <code class="prettyprint">/api/index.php/resource?filter=column1 {comparator} column2</code><br>
@@ -124,14 +122,10 @@ EOS
 EOS
         , 'examples' => array(
             'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkTotals?&filter=checkTax%20%3E%2017.00%20AND%20openedDate%20%3E%3D%202014-09-24&select=checkId,%20openedDate,%20checkTotal,%20checkTax,%20checkSubtotal,%20checkDetailId,%20checkDetailSubtotal,%20checkDetailTax,%20checkDetailTotal HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals?&filter=checkTax%20%3E%2017.00%20AND%20openedDate%20%3E%3D%202014-09-24&select=checkId,%20openedDate,%20checkTotal,%20checkTax,%20checkSubtotal,%20checkDetailId,%20checkDetailSubtotal,%20checkDetailTax,%20checkDetailTotal HTTP/1.1
 EOS
             , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Wed, 24 Sep 2014 23:44:06 GMT
-Content-Length: 1014
-Content-Type: application/json
 {
   "checks": [
     {
@@ -189,8 +183,8 @@ EOS
             , 'header_icon' => 'info-sign'
             , 'usage'       => <<<EOS
 <p>
-  Property matching is a simpler version of this API's record filtering.
-  The functionality is the same, but can only be used for matching property values exactly.
+  Property matching is a shortcut version of this API's record filtering.
+  The functionality is the same, but can only be used for matching property values by equivalence.
   This type of call may be used on <span class="glyphicon glyphicon-save"></span>&nbsp;GET operations,
   and can be used in tandem with <a href=#query-operations-column-selection>Column Selection</a> 
   but may <i>not</i> be used at the same time as <a href=#query-operations-record-filtering>Record Filtering</a>.
@@ -207,14 +201,10 @@ EOS
 EOS
         , 'examples' => array(
             'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/screenTemplateDetail?screenTemplateId=3&select=screenTemplateId,screenTemplateDetailId,trackNo,timeInSecond,seq HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/screenTemplateDetail?screenTemplateId=3&select=screenTemplateId,screenTemplateDetailId,trackNo,timeInSecond,seq HTTP/1.1
 EOS
             , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Fri, 26 Sep 2014 16:34:27 GMT
-Content-Length: 305
-Content-Type: application/json
 {
   "channelDetail": [
     {

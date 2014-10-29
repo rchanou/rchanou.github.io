@@ -1,0 +1,27 @@
+{
+    "id": "booking",
+    "route": "/booking",
+    "model": "booking",
+    "calls": [
+        {
+            "name": "create",
+            "verb": "POST",
+            "required": [
+                "quantityTotal"
+            ],
+            "available": [
+                "isPublic"
+            ],
+            "description": [
+                "some description over here"
+            ]
+        },
+        {
+            "name": "update",
+            "verb": "PUT",
+            "description": [
+                "some other description"
+            ]
+        }
+    ]
+}

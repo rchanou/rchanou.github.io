@@ -7,14 +7,15 @@ class DocScreenTemplate Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id = 'screen-template';
-        $this->header = 'Screen Template';
-        $this->url = 'screenTemplate';
-        $this->info = $this->info();
+        $this->id              = 'screen-template';
+        $this->header          = 'Screen Template';
+        $this->url             = 'screenTemplate';
+        $this->info            = $this->info();
         $this->calls['create'] = $this->create();
+        $this->calls['list']   = $this->all();
         $this->calls['single'] = $this->single();
-        $this->calls['match']  = $this->match(); // leave match out for now?
-        $this->calls['search'] = $this->search(); // leave search out for now?
+        $this->calls['match']  = $this->match();
+        $this->calls['search'] = $this->search();
         $this->calls['update'] = $this->update();
         $this->calls['delete'] = $this->delete();
         $this->expand();
@@ -26,15 +27,13 @@ class DocScreenTemplate Extends DocAPIBase {
                   'name'        => 'screenTemplateId'
                 , 'type'        => 'Integer'
                 , 'default'     => '{Generated}'
-                , 'create'      => 'unavailable'
-                , 'update'      => 'unavailable'
                 , 'description' => 'The ID for the ScreenTemplate record.'
             )
             , array(
                   'name'        => 'screenTemplateName'
                 , 'type'        => 'String'
                 , 'default'     => ''
-                , 'create'      => 'available'
+                , 'create'      => 'required'
                 , 'update'      => 'available'
                 , 'description' => 'The name of the ScreenTemplate record.'
             )
@@ -101,24 +100,68 @@ class DocScreenTemplate Extends DocAPIBase {
         return array(
             'examples' => array(
                 'request' => <<<EOS
-POST https://mytrack.clubspeedtiming.com/api/index.php/checkDetails HTTP/1.1
-Content-Length: 79
-Content-Type: application/json
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/screenTemplate HTTP/1.1
 {
-    "checkId": 2288,
-    "type": 1,
-    "productId": 8,
-    "qty": 5
+    "screenTemplateName": "TestScreen1"
 }
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 20:27:02 GMT
-Content-Length: 27
-Content-Type: application/json
 {
-    "checkDetailId": 7558
+  "screenTemplateId": 19
+}
+EOS
+            )
+        );
+    }
+
+    private function all() {
+        return array(
+            'info' => array(
+                'access' => 'private'
+            ),
+            'examples' => array(
+                'request' => <<<EOS
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/screenTemplate HTTP/1.1
+EOS
+                , 'response' => <<<EOS
+HTTP/1.1 200 OK
+{
+  "channels": [
+    {
+      "screenTemplateId": 15,
+      "screenTemplateName": "TestScreenFromAPI1",
+      "showScoreboard": null,
+      "postRaceIdleTime": 45,
+      "trackId": null,
+      "deleted": false,
+      "startPosition": 1,
+      "sizeX": 1024,
+      "sizeY": 768
+    },
+    {
+      "screenTemplateId": 17,
+      "screenTemplateName": "TestScreenFromAPI1",
+      "showScoreboard": null,
+      "postRaceIdleTime": null,
+      "trackId": null,
+      "deleted": false,
+      "startPosition": 1,
+      "sizeX": 800,
+      "sizeY": 600
+    },
+    {
+      "screenTemplateId": 19,
+      "screenTemplateName": "TestScreen1",
+      "showScoreboard": false,
+      "postRaceIdleTime": null,
+      "trackId": null,
+      "deleted": false,
+      "startPosition": 1,
+      "sizeX": 800,
+      "sizeY": 600
+    }
+  ]
 }
 EOS
             )
@@ -129,29 +172,24 @@ EOS
         return array(
             'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7556 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/screenTemplate/19 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 20:33:32 GMT
-Content-Length: 245
-Content-Type: application/json
 {
-    "checkDetails": [
-        {
-            "checkDetailId": 7556,
-            "checkId": 2288,
-            "status": 1,
-            "type": 1,
-            "productId": 8,
-            "productName": "",
-            "createdDate": "2014-09-15",
-            "qty": 5,
-            "cadetQty": 0
-        }
-    ]
+  "channels": [
+    {
+      "screenTemplateId": 19,
+      "screenTemplateName": "TestScreen1",
+      "showScoreboard": false,
+      "postRaceIdleTime": null,
+      "trackId": null,
+      "deleted": false,
+      "startPosition": 1,
+      "sizeX": 800,
+      "sizeY": 600
+    }
+  ]
 }
 EOS
             )
@@ -165,40 +203,35 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails?qty=5&productId=43 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/screenTemplate?sizeX=800 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 21:03:01 GMT
-Content-Length: 521
-Content-Type: application/json
 {
-    "checkDetails": [
-        {
-            "checkDetailId": 2564,
-            "checkId": 645,
-            "status": 3,
-            "type": 4,
-            "productId": 43,
-            "productName": "Online 20 Min Arrive n Drive",
-            "createdDate": "2014-01-23",
-            "qty": 5,
-            "cadetQty": 0
-        },
-        {
-            "checkDetailId": 5254,
-            "checkId": 1537,
-            "status": 3,
-            "type": 4,
-            "productId": 43,
-            "productName": "Online 20 Min Arrive n Drive",
-            "createdDate": "2014-04-25",
-            "qty": 5,
-            "cadetQty": 0
-        }
-    ]
+  "channels": [
+    {
+      "screenTemplateId": 17,
+      "screenTemplateName": "TestScreenFromAPI1",
+      "showScoreboard": null,
+      "postRaceIdleTime": null,
+      "trackId": null,
+      "deleted": false,
+      "startPosition": 1,
+      "sizeX": 800,
+      "sizeY": 600
+    },
+    {
+      "screenTemplateId": 19,
+      "screenTemplateName": "TestScreen1",
+      "showScoreboard": false,
+      "postRaceIdleTime": null,
+      "trackId": null,
+      "deleted": false,
+      "startPosition": 1,
+      "sizeX": 800,
+      "sizeY": 600
+    }
+  ]
 }
 EOS
             )
@@ -212,40 +245,24 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails?filter=3%3CqtyANDqty%3C%3D5ANDcreatedDate%3E2014-08-01 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails?filter=postRaceIdleTime IS NOT NULL HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 21:22:00 GMT
-Content-Length: 683
-Content-Type: application/json
 {
-    "checkDetails": [
-        {
-            "checkDetailId": 7556,
-            "checkId": 2288,
-            "status": 1,
-            "type": 1,
-            "productId": 8,
-            "productName": "",
-            "createdDate": "2014-09-15",
-            "qty": 5,
-            "cadetQty": 0
-        },
-        {
-            "checkDetailId": 7557,
-            "checkId": 2288,
-            "status": 1,
-            "type": 1,
-            "productId": 8,
-            "productName": "",
-            "createdDate": "2014-09-15",
-            "qty": 5,
-            "cadetQty": 0
-        }
-    ]
+  "channels": [
+    {
+      "screenTemplateId": 15,
+      "screenTemplateName": "TestScreenFromAPI1",
+      "showScoreboard": null,
+      "postRaceIdleTime": 45,
+      "trackId": null,
+      "deleted": false,
+      "startPosition": 1,
+      "sizeX": 1024,
+      "sizeY": 768
+    }
+  ]
 }
 EOS
             )
@@ -259,22 +276,14 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-PUT https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7564 HTTP/1.1
-Content-Length: 86
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/screenTemplate/19 HTTP/1.1
 {
-    "status": 2,
-    "type": 2, 
-    "productId": 11,
-    "qty": 0,
-    "cadetQty": 3
+    "sizeX": 1920,
+    "sizeY": 1080
 }
 EOS
           , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 22:42:24 GMT
-Content-Length: 0
-Content-Type: text/html
 EOS
             )
         );
@@ -287,15 +296,10 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-DELETE https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7560 HTTP/1.1
-Content-Length: 0
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+DELETE https://{$_SERVER['SERVER_NAME']}/api/index.php/screenTemplate/19 HTTP/1.1
 EOS
           , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 23:35:16 GMT
-Content-Length: 0
-Content-Type: text/html
 EOS
             )
         );

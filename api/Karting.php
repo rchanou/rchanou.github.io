@@ -4,27 +4,27 @@
  * Club Speed API Documentation template builder
  */
 require_once(__DIR__.'/vendors/autoload.php');
-require_once(__DIR__.'/ClubSpeed/Documentation/API/DocAPIContainer.php');
+// require_once(__DIR__.'/ClubSpeed/Documentation/API/DocAPIContainer.php');
+
+use ClubSpeed\Documentation\Api\DocAPIContainer;
+use ClubSpeed\Templates\TemplateService as Templates;
 
 class Karting {
 
     public $restler;
     
 	function __construct() {
-		header('Access-Control-Allow-Origin: *'); //Here for all /say
+		// header('Access-Control-Allow-Origin: *'); //Here for all /say
 	}
 
 	public function index() {
     	// API Docs I Like: http://openbeerdatabase.com/
     	// http://hurl.it/
     	$daily_key = SimpleAuth::daily_key();
-
-        $loader = new Twig_Loader_Filesystem('./views');
-        $twig = new Twig_Environment($loader);
-        $template = $twig->loadTemplate('karting.html'); // functions need to be defined before loading template
-        $data = \ClubSpeed\Documentation\API\DocAPIContainer::getData();
+        DocAPIContainer::init();
+        $data = DocAPIContainer::getData();
         $data['daily_key'] = $daily_key;
-        echo $template->render($data);
+        echo Templates::build('karting.html', $data);
         die();
 	}
 }

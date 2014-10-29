@@ -130,19 +130,21 @@
             slideTimeout = z.convert.toNumber(parameters.slideTimeout) || 15000; // default to 15000ms to match sp_admin default time selection, whenever parameters.slideTimeout is not available
             z.forEach(options.elems, function(x, key, obj) {
                 elems = $(x.selector);
+                if (x.items)
+                    elems = x.items;
                 numElems = elems.length;
                 classes = makeClassString(x.classes.defaults, x.classes.animations);
                 delay = (d = (slideTimeout) / (numElems * 1.5)) > maxDelay ? maxDelay : d;
                 wait = x.wait > 0 ? delay * x.wait : 0;
                 if (check.isFunction(x.onAnimationEnd)) {
-                    elems.on(KEYS.CSS.ANIMATION_END + ' ' + KEYS.CSS.TRANSITION_END, function(e) {
-                        if(z.getType(e.originalEvent) === 'TransitionEvent')
+                    elems.one(KEYS.CSS.ANIMATION_END + ' ' + KEYS.CSS.TRANSITION_END, function(e) {
+                        if (e.type === 'transitionend')
                             x.onAnimationEnd.apply(this, e); // super hacky, why is chrome firing off TransitEvent AND WebKitAnimationEvent here?
                     });
                 }
                 if (check.isFunction(x.onAllAnimationsEnd)) {
                     $(arrays.last(elems)).one(KEYS.CSS.ANIMATION_END + ' ' + KEYS.CSS.TRANSITION_END, function(e) {
-                        if(z.getType(e.originalEvent) === 'TransitionEvent')
+                        if (e.type === 'transitionend')
                             x.onAllAnimationsEnd.apply(elems);
                     });
                 }
@@ -174,6 +176,7 @@
                         (function(index) {
                             setTimeout(function() {
                                 var elem = $(elems[index]);
+                                elem.visible(); // hard coded -- bad idea(?) may need a refactor if we ever don't want to make items visible
                                 elem.addClass(cssClasses);
                             }, delay*index);
                         })(i); // use an iife to maintain the correct index for setTimeout
@@ -210,6 +213,14 @@
             }
         });
         return r.distinct().join(" ");
+    };
+
+    $.fn.visible = function() {
+        return this.css('visibility', 'visible');
+    };
+
+    $.fn.invisible = function() {
+        return this.css('visibility', 'hidden');
     };
 
     // set clubspeed.helpers.css to the new CSSHelper(), also return it

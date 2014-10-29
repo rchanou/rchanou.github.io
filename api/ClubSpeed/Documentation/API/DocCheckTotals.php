@@ -7,17 +7,14 @@ class DocCheckTotals Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id = 'check-totals';
-        $this->header = 'Check Totals';
-        $this->url = 'checkTotals';
-        $this->info = $this->info();
-        // $this->calls['virtual'] = $this->virtual();
-        $this->calls['create'] = $this->create();
-        // $this->calls['single'] = $this->single();
-        // $this->calls['match']  = $this->match(); // leave match out for now?
-        // $this->calls['search'] = $this->search(); // leave search out for now?
-        // $this->calls['update'] = $this->update();
-        // $this->calls['delete'] = $this->delete();
+        $this->id                  = 'check-totals';
+        $this->header              = 'Check Totals';
+        $this->url                 = 'checkTotals';
+        $this->info                = $this->info();
+        $this->calls['create']     = $this->create();
+        $this->calls['single']     = $this->single();
+        // $this->calls['match']   = $this->match(); // leave match out for now?
+        // $this->calls['search']  = $this->search(); // leave search out for now?
         $this->expand();
     }
 
@@ -33,7 +30,7 @@ class DocCheckTotals Extends DocAPIBase {
         $virtual['info']['url'] .= '/virtual';
         $virtual['usage'] = <<<EOS
 <p>
-    The virtual namespaced checkTotals POST does not create a check in the database.
+    The virtual checkTotals call does <strong>not</strong> create a check in the database.
 </p>
 <p>
     Instead, the virtual call is a way to determine subtotals, taxes, and totals
@@ -41,14 +38,17 @@ class DocCheckTotals Extends DocAPIBase {
     data structure for <a href="#check-totals-create">Create</a> to the /virtual route.
 </p>
 <p>
+    If you are unable to map the return data by productId due to a repeat in product,
+    then the details array will also accept fake and temporary checkDetailIds
+    to assist with mapping the return data.
+</p>
+<p>
     Please note that the Query Operations for <a href="#query-operations-column-selection">Column Selection</a>
     are available for this query.
 </p>
 EOS;
         $virtual['examples']['request'] = <<<EOS
-POST https://mytrack.clubspeedtiming.com/api/index.php/checkTotals/virtual?select=customerId,%20checkSubtotal,%20checkTax,%20checkTotal,%20checkDetailSubtotal,%20checkDetailTax,%20checkDetailTotal HTTP/1.1
-Content-Length: 220
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals/virtual?select=customerId,%20checkSubtotal,%20checkTax,%20checkTotal,%20checkDetailSubtotal,%20checkDetailTax,%20checkDetailTotal HTTP/1.1
 {
   "checks": [
     {
@@ -69,9 +69,6 @@ Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
 EOS;
         $virtual['examples']['response'] = <<<EOS
 HTTP/1.1 200 OK
-Date: Thu, 25 Sep 2014 22:05:28 GMT
-Content-Length: 443
-Content-Type: application/json
 {
   "checks": [
     {
@@ -269,85 +266,6 @@ EOS;
                 , 'description' => 'The calculated total for the CheckDetails items. Note that this calculation will use <i>live</i> tax and product values.'
                 , 'create'      => 'unavailable'
             )
-            // , array(
-            //       'name'        => 'detail.MORE_TO_DO'
-            //     , 'type'        => 'Integer'
-            //     , 'description' => 'TODO: DETERMINE WHICH OTHER COLUMNS TO SHOWO SHOW HERE'
-            //     , 'create'      => 'required'
-            // )
-            
-            // , array(
-            //       'name'        => 'checks.details.checkDetailsId'
-            //     , 'type'        => 'Integer'
-            //     , 'default'     => ''
-            //     , 'description' => 'The ID of the CheckDetails record.'
-            //     , 'update'      => 'unavailable'
-            //     , 'create'      => 'unavailable'
-            // )
-            // , array(
-            //       'name'        => 'checkId'
-            //     , 'type'        => 'Integer'
-            //     , 'default'     => ''
-            //     , 'description' => 'The ID of the Checks record.'
-            // )
-            // , array(
-            //       'name'        => 'productName'
-            //     , 'type'        => 'String'
-            //     , 'default'     => '{Calculated}'
-            //     , 'description' => 'The name for the underlying product.'
-            // )
-            // , array(
-            //       'name'        => 'status'
-            //     , 'type'        => 'Integer'
-            //     , 'default'     => '1'
-            //     , 'description' => ""
-            //         ."\n<span>"
-            //         ."\n  The status of the CheckDetails."
-            //         ."\n</span>"
-            //         ."\n<ol>"
-            //         ."\n  <li>IsNew</li>"
-            //         ."\n  <li>HasVoided</li>"
-            //         ."\n  <li>CannotDeleted</li>"
-            //         ."\n</ol>"
-            //         ."\n<span>Note that when creating a new CheckDetails record, this will always be set to 1.</span>"
-            // )
-            // , array(
-            //       'name'        => 'type'
-            //     , 'type'        => 'Integer'
-            //     , 'default'     => '1'
-            //     , 'description' => ''
-            //         ."\n<span>"
-            //         ."\n  The type for the CheckDetails."
-            //         ."\n</span>"
-            //         ."\n<ol>"
-            //         ."\n  <li>RegularItem</li>"
-            //         ."\n  <li>PointItem</li>"
-            //         ."\n  <li>FoodItem</li>"
-            //         ."\n  <li>ReservationItem</li>"
-            //         ."\n  <li>GameCardItem</li>"
-            //         ."\n  <li>MembershipItem</li>"
-            //         ."\n  <li>GiftCardItem</li>"
-            //         ."\n  <li>EntitleItem</li>"
-            //         ."\n</ol>"
-            // )
-            // , array(
-            //       'name'        => 'qty'
-            //     , 'type'        => 'Integer'
-            //     , 'icon'        => 'warning-sign orange'
-            //     , 'description' => 'The quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero.'
-            // )
-            // , array(
-            //       'name'        => 'cadetQty'
-            //     , 'type'        => 'Integer'
-            //     , 'icon'        => 'warning-sign orange'
-            //     , 'description' => 'The cadet quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero.'
-            // )
-            // , array(
-            //       'name'        => 'createdDate'
-            //     , 'type'        => 'DateTime'
-            //     , 'default'     => '{Date.Now}'
-            //     , 'description' => 'The timestamp indicating when the CheckDetails record was created.'
-            // )
         );
     }
 
@@ -369,9 +287,7 @@ EOS;
 EOS
             , 'examples' => array(
                 'request' => <<<EOS
-POST https://mytrack.clubspeedtiming.com/api/index.php/checkTotals?debug=1 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Content-Length: 239
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals?debug=1 HTTP/1.1
 {
   "checks": [
     {
@@ -393,9 +309,6 @@ Content-Length: 239
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Thu, 25 Sep 2014 21:52:34 GMT
-Content-Length: 21
-Content-Type: application/json
 {
   "checkId": 2361
 }
@@ -411,29 +324,94 @@ EOS
             ),
             'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7556 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals/123 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 20:33:32 GMT
-Content-Length: 245
-Content-Type: application/json
 {
-    "checkDetails": [
+  "checks": [
+    {
+      "customerId": 0,
+      "checkId": 123,
+      "checkType": "1",
+      "checkStatus": 1,
+      "name": "",
+      "userId": 6,
+      "checkTotalApplied": 3,
+      "broker": "",
+      "notes": "",
+      "gratuity": 0,
+      "fee": 0,
+      "openedDate": "2013-12-01T11:59:54",
+      "closedDate": "2013-12-01T12:00:19",
+      "isTaxExempt": false,
+      "discount": 0,
+      "checkSubtotal": 3,
+      "checkTax": 0,
+      "checkTotal": 3,
+      "checkPaidTax": 0,
+      "checkPaidTotal": 3,
+      "checkRemainingTax": 0,
+      "checkRemainingTotal": 0,
+      "details": [
         {
-            "checkDetailId": 7556,
-            "checkId": 2288,
-            "status": 1,
-            "type": 1,
-            "productId": 8,
-            "productName": "",
-            "createdDate": "2014-09-15",
-            "qty": 5,
-            "cadetQty": 0
+          "checkDetailId": 464,
+          "checkDetailStatus": 3,
+          "checkDetailType": 1,
+          "productId": 7,
+          "productName": "Balaclava",
+          "createdDate": "2013-12-01T11:59:54",
+          "qty": 1,
+          "unitPrice": 3,
+          "unitPrice2": 0,
+          "discountApplied": 0,
+          "taxId": 1,
+          "taxPercent": 0,
+          "voidNotes": "",
+          "cId": null,
+          "vId": null,
+          "bonusValue": null,
+          "paidValue": null,
+          "comValue": null,
+          "entitle1": null,
+          "entitle2": null,
+          "entitle3": null,
+          "entitle4": null,
+          "entitle5": null,
+          "entitle6": null,
+          "entitle7": null,
+          "entitle8": null,
+          "m_Points": null,
+          "m_CustId": null,
+          "m_OldMembershiptypeId": null,
+          "m_NewMembershiptypeId": null,
+          "m_Days": null,
+          "m_PrimaryMembership": null,
+          "p_PointTypeId": null,
+          "p_Points": null,
+          "p_CustId": null,
+          "r_Points": null,
+          "discountUserId": null,
+          "discountDesc": null,
+          "calculateType": null,
+          "discountId": null,
+          "discountNotes": null,
+          "g_Points": null,
+          "g_CustId": null,
+          "gst": 0,
+          "m_DaysAdded": null,
+          "s_SaleBy": null,
+          "s_NoOfLapsOrSeconds": null,
+          "s_CustId": null,
+          "s_Vol": null,
+          "cadetQty": 0,
+          "checkDetailSubtotal": 3,
+          "checkDetailTax": 0,
+          "checkDetailTotal": 3
         }
-    ]
+      ]
+    }
+  ]
 }
 EOS
             )
@@ -447,15 +425,10 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails?qty=5&productId=43 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails?qty=5&productId=43 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 21:03:01 GMT
-Content-Length: 521
-Content-Type: application/json
 {
     "checkDetails": [
         {
@@ -494,15 +467,10 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails?filter=3%3CqtyANDqty%3C%3D5ANDcreatedDate%3E2014-08-01 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails?filter=3%3CqtyANDqty%3C%3D5ANDcreatedDate%3E2014-08-01 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 21:22:00 GMT
-Content-Length: 683
-Content-Type: application/json
 {
     "checkDetails": [
         {
@@ -552,9 +520,7 @@ EOS
             // )
             , 'examples' => array(
                 'request' => <<<EOS
-PUT https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7564 HTTP/1.1
-Content-Length: 86
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7564 HTTP/1.1
 {
     "status": 2,
     "type": 2, 
@@ -565,9 +531,6 @@ Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
 EOS
           , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 22:42:24 GMT
-Content-Length: 0
-Content-Type: text/html
 EOS
             )
         );
@@ -580,15 +543,10 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-DELETE https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7560 HTTP/1.1
-Content-Length: 0
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+DELETE https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7560 HTTP/1.1
 EOS
           , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 23:35:16 GMT
-Content-Length: 0
-Content-Type: text/html
 EOS
             )
         );

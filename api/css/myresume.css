@@ -205,6 +205,7 @@ button:hover {
 }
 .nav > li > a {
   font-size: 16px;
+  padding: 3px 5px; /* for spacing compression */
 }
 .nav > li > ul > li > a {
   padding-top: 0px;

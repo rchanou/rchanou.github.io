@@ -104,6 +104,7 @@
                                 <li><strong>Most Improved RPM (range: (month or year); month; year):</strong> <code>/racers/most_improved_rpm?range=month&month=6&year=2014&limit=5</code> (<a href="index.php/racers/most_improved_rpm.json?range=month&month=6&year=2014&limit=5&key={{daily_key}}">JSON</a>, <a href="index.php/racers/most_improved_rpm.js?range=month&month=6&year=2014&limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/most_improved_rpm.xml?range=month&month=6&year=2014&limit=5&key={{daily_key}}">XML</a>)</code></li>
                             </ul>
                         </li>
+                        <li><strong>Find by last updated:</strong> <code>/racers/last_updated?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999</code> (<a href="index.php/racers/last_updated.json?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999&key={{daily_key}}">JSON</a>, <a href="index.php/racers/last_updated.js?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/last_updated.xml?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999&key={{daily_key}}">XML</a>)</li>
                     </ul>
 
                     <h4><i class="glyphicon glyphicon-plus"></i> Races - Race Results</h4>
@@ -238,7 +239,7 @@
 <!-- ------------------------------------------------------------------------------------ -->
 <!-- ------------------------------------------------------------------------------------ -->
 
-                    <div class="call-group" id="queues">
+<!--                     <div class="call-group" id="queues">
                         <div class="row call-header background-header rounded">
                             <div class="col-xs-12">
                                 <h2><i class="glyphicon glyphicon-chevron-right"></i> Queues <i class="glyphicon glyphicon-lock"></i></h2>
@@ -335,583 +336,7 @@ Content-Type: text/html
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-
-
-
-
-<!-- ------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------ -->
-                    <!-- onine booking section -->
-<!-- ------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------ -->
-                    <div class="call-group" id="booking">
-                        <div class="row call-header background-header rounded">
-                            <div class="col-xs-12">
-                                <h2><i class="glyphicon glyphicon-chevron-right"></i> Booking <i class="glyphicon glyphicon-lock"></i></h2>
-                            </div>
-                        </div>
-                        <div class="call-section" id="booking-calls">
-                            <div class="row background-even" id="booking-create">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-plus"></span> Create</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-warning">
-                                                    <span class="glyphicon glyphicon-export"></span> POST /booking
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/booking HTTP/1.1
-Content-Length: 61
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-{
-    "heatId": 2,
-    "productsId": 8,
-    "quantityTotal": 5
-}
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Wed, 03 Sep 2014 22:11:20 GMT
-Content-Length: 27
-Content-Type: application/json
-{
-    "onlineBookingsId": 1
-}
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row background-odd" id="booking-list">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-th-list"></span> List</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-export"></span> GET /booking
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-GET http://{$_SERVER['SERVER_NAME']}/api/index.php/booking HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Wed, 03 Sep 2014 22:19:11 GMT
-Content-Length: 743
-Content-Type: application/json
-{
-  "bookings": [
-    {
-      "heatId": 2,
-      "heatDescription": "AnD 10 Min",
-      "heatStartsAt": null,
-      "heatEndsAt": null,
-      "heatSpotsTotalActual": 16,
-      "heatSpotsAvailableCombined": 12,
-      "heatSpotsAvailableOnline": 8,
-      "products": [
-        {
-          "onlineBookingsId": 1,
-          "productsId": 8,
-          "productDescription": "Adult Member",
-          "price": 15,
-          "productSpotsAvailableOnline": 5,
-          "productSpotsTotal": 5
-        },
-        {
-          "onlineBookingsId": 2,
-          "productsId": 11,
-          "productDescription": "Cadet Member",
-          "price": 5,
-          "productSpotsAvailableOnline": 3,
-          "productSpotsTotal": 3
-        }
-      ]
-    }
-  ]
-}
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row background-even" id="booking-single">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-save"></span> Single</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-export"></span> GET /booking/:id
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-GET http://{$_SERVER['SERVER_NAME']}/api/index.php/booking/1 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Wed, 03 Sep 2014 22:23:03 GMT
-Content-Length: 514
-Content-Type: application/json
-{
-  "bookings": [
-    {
-      "heatId": 2,
-      "heatDescription": "AnD 10 Min",
-      "heatStartsAt": null,
-      "heatEndsAt": null,
-      "heatSpotsTotalActual": 16,
-      "heatSpotsAvailableCombined": 12,
-      "heatSpotsAvailableOnline": 8,
-      "products": [
-        {
-          "onlineBookingsId": 1,
-          "productsId": 8,
-          "productDescription": "Adult Member",
-          "price": 15,
-          "productSpotsAvailableOnline": 5,
-          "productSpotsTotal": 5
-        }
-      ]
-    }
-  ]
-}
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row background-odd" id="booking-match">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-search"></span> Match</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-success">
-                                                    <span class="glyphicon glyphicon-export"></span> GET /booking?price=15
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-GET http://{$_SERVER['SERVER_NAME']}/api/index.php/booking?quantityTotal=3 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Wed, 03 Sep 2014 22:25:54 GMT
-Content-Length: 743
-Content-Type: application/json
-{
-  "bookings": [
-    {
-      "heatId": 2,
-      "heatDescription": "AnD 10 Min",
-      "heatStartsAt": null,
-      "heatEndsAt": null,
-      "heatSpotsTotalActual": 16,
-      "heatSpotsAvailableCombined": 12,
-      "heatSpotsAvailableOnline": 8,
-      "products": [
-        {
-          "onlineBookingsId": 1,
-          "productsId": 8,
-          "productDescription": "Adult Member",
-          "price": 15,
-          "productSpotsAvailableOnline": 5,
-          "productSpotsTotal": 5
-        },
-        {
-          "onlineBookingsId": 2,
-          "productsId": 11,
-          "productDescription": "Cadet Member",
-          "price": 5,
-          "productSpotsAvailableOnline": 3,
-          "productSpotsTotal": 3
-        }
-      ]
-    }
-  ]
-}
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row background-even" id="booking-update">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-pencil"></span> Update</h3>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-primary">
-                                                    <span class="glyphicon glyphicon-export"></span> PUT /booking/:id
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-PUT http://{$_SERVER['SERVER_NAME']}/api/index.php/booking/1 HTTP/1.1
-Content-Length: 27
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-{
-    "quantityTotal": 12
-}
-</pre>
-                                            </div>
-                                        </div>
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Wed, 03 Sep 2014 22:28:56 GMT
-Content-Length: 0
-Content-Type: text/html
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row background-odd" id="booking-delete">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-remove"></span> Delete</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-danger">
-                                                    <span class="glyphicon glyphicon-export"></span> DELETE /booking/:id
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-DELETE http://{$_SERVER['SERVER_NAME']}/api/index.php/booking/1 HTTP/1.1
-Content-Length: 0
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Content-Type: text/plain;charset=UTF-8
-</pre>
-                                            </div>
-                                        </div>
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Wed, 03 Sep 2014 22:31:52 GMT
-Content-Length: 0
-Content-Type: text/html
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-<!-- ------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------ -->
-                    <!-- onine booking reservations section -->
-<!-- ------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------ -->
-                    <div class="call-group" id="reservations">
-                      <div class="row call-header background-header rounded">
-                        <div class="col-xs-12">
-                            <h3><span class="glyphicon glyphicon-chevron-down"></span> Reservations <span class="glyphicon glyphicon-lock"></span></h2>
-                        </div>
-                      </div>
-                      <div class="call-section">
-                        <div class="panel panel-primary" id="reservations-create">
-                          <div class="panel-heading">
-                            <h4 class="panel-title"><span class="glyphicon glyphicon-plus"></span> Create</h4>
-                          </div> <!-- panel-heading -->
-                          <div class="panel-body">
-                            <div class="row">
-                              <div class="col-xs-6">
-                                <h4> Information </h4>
-                                  <ul class="list-group">
-                                    <li class="list-group-item">
-                                      <span>Url</span>
-                                      <span class="pull-right"> index.php/reservations </span>
-                                    </li>
-                                    <li class="list-group-item">
-                                      <span>Verb</span>
-                                      <span class="pull-right"> POST </span>
-                                    </li>
-                                  </ul>
-                              </div>
-                              <div class="col-xs-12 call-examples">
-                                <h4> Parameters </h4>
-                                <table class="table">
-                                  <thead>
-                                    <tr>
-                                      <th>Name</th>
-                                      <th>Type</th>
-                                      <th>Default</th>
-                                      <th>Required</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr>
-                                      <td>onlineBookingsId</td>
-                                      <td>Integer</td>
-                                      <td></td>
-                                      <td><span class="glyphicon glyphicon-ok-sign green"></span></td>
-                                    </tr>
-                                    <tr>
-                                      <td>sessionId</td>
-                                      <td>Integer</td>
-                                      <td></td>
-                                      <td><span class="glyphicon glyphicon-ok-sign green"></span></td>
-                                    </tr>
-                                    <tr>
-                                      <td>quantity</td>
-                                      <td>Integer</td>
-                                      <td></td>
-                                      <td><span class="glyphicon glyphicon-ok-sign green"></span></td>
-                                    </tr>
-                                    <tr>
-                                      <td>customersId</td>
-                                      <td>Integer</td>
-                                      <td>{NULL}</td>
-                                      <td></td>
-                                    </tr>
-                                    <tr>
-                                      <td>createdAt</td>
-                                      <td>DateTime</td>
-                                      <td>{Now}</td>
-                                      <td></td>
-                                    </tr>
-                                    <tr>
-                                      <td>expiresAt</td>
-                                      <td>DateTime</td>
-                                      <td>{Now + 30m}</td>
-                                      <td></td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-                              <div class="col-xs-12">
-                                <h4> Examples </h4>
-                                <button class="btn btn-warning">
-                                  <span class="glyphicon glyphicon-export"></span> POST /reservations
-                                </button>
-<pre class="prettyprint">
-POST http://localhost/clubspeed/api/index.php/reservations HTTP/1.1
-Content-Length: 79
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-{
-    "onlineBookingsId": 1,
-    "quantity": 5,
-    "sessionId": "my_session_id"
-}
-</pre>
-                                <button class="btn btn-info">
-                                    <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                </button>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Wed, 03 Sep 2014 23:14:06 GMT
-Content-Length: 38
-Content-Type: application/json
-{
-    "onlineBookingReservationsId": 1
-}
-</pre>
-                              </div> <!-- call-examples -->
-                            </div> <!-- reservations-create -->
-                          </div> <!-- panel-body -->
-                        </div> <!-- panel -->
-                      </div> <!-- call-section -->
-                    </div> <!-- reservations -->
-
-<!-- ------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------ -->
-                    <!-- passwords section -->
-<!-- ------------------------------------------------------------------------------------ -->
-<!-- ------------------------------------------------------------------------------------ -->
-
-                    <div class="call-group" id="passwords">
-                        <div class="row call-header background-header rounded">
-                            <div class="col-xs-12">
-                                <h2><i class="glyphicon glyphicon-chevron-right"></i> Passwords <i class="glyphicon glyphicon-lock"></i></h2>
-                            </div>
-                        </div>
-                        <div class="call-section">
-                            <div class="row background-even" id="passwords-generate-reset-token">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-plus"></span> Generate Reset Token</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-warning">
-                                                    <span class="glyphicon glyphicon-export"></span> POST /passwords
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-POST http://localhost/clubspeed/api/index.php/passwords HTTP/1.1
-Content-Length: 29
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-{
-  "email": "bob@gmail.com"
-}
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Tue, 09 Sep 2014 16:29:47 GMT
-Content-Length: 0
-Content-Type: text/html
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row background-odd" id="passwords-consume-reset-token">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <h3><span class="glyphicon glyphicon-th-list"></span> Consume Reset Token</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <div>
-                                                <button class="btn btn-primary">
-                                                    <span class="glyphicon glyphicon-export"></span> PUT /passwords
-                                                </button>
-                                            </div>
-                                            <div>
-<pre class="prettyprint">
-PUT http://localhost/clubspeed/api/index.php/passwords HTTP/1.1
-Content-Length: 120
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-{
-    "email": "bob@gmail.com",
-    "token": "81f6fde27692402fb2139f971b8accb29b1b20c6",
-    "password": "some_new_password"
-}
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-xs-12">
-                                            <button class="btn btn-info">
-                                                <span class="glyphicon glyphicon-save"></span> RESPONSE
-                                            </button>
-                                            <div>
-<pre class="prettyprint">
-HTTP/1.1 200 OK
-Date: Tue, 09 Sep 2014 16:33:36 GMT
-Content-Length: 0
-Content-Type: text/html
-</pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </div> -->
 
 
 <!-- ------------------------------------------------------------------------------------ -->
@@ -979,20 +404,20 @@ Content-Type: text/html
                               <div class="panel-body">
                                 {% if call.info %}
                                   <div class="row call-information">
-                                    <div class="col-xs-8">
+                                    <div class="col-xs-12">
                                       <h4> Information </h4>
                                       <div class="panel panel-default"> <!-- wrap in panel as hackish way to give table rounded corners -->
                                         <table class="table table-hover table-bordered">
                                           <tbody>
                                             <tr>
-                                              <td class="col-xs-3 text-right">Url</td>
-                                              <td class="col-xs-9">
+                                              <td class="col-xs-2 text-right">Url</td>
+                                              <td class="col-xs-10">
                                                 <span>{{call.info.url}}</span>
                                               </td>
                                             </tr>
                                             <tr>
-                                              <td class="col-xs-3 text-right">Verb</td>
-                                              <td class="col-xs-9">
+                                              <td class="col-xs-2 text-right">Verb</td>
+                                              <td class="col-xs-10">
                                                   <span>
                                                     {% if call.info.verb_icon %}
                                                       <span class="glyphicon glyphicon-{{call.info.verb_icon}}"></span>
@@ -1002,8 +427,8 @@ Content-Type: text/html
                                               </td>
                                             </tr>
                                             <tr>
-                                              <td class="col-xs-3 text-right">Access</td>
-                                              <td class="col-xs-9">
+                                              <td class="col-xs-2 text-right">Access</td>
+                                              <td class="col-xs-10">
                                                   <span>
                                                     {% if call.info.access_icon %}
                                                       <span class="glyphicon glyphicon-{{call.info.access_icon}}"></span>
@@ -1014,8 +439,8 @@ Content-Type: text/html
                                             </tr>
                                             {% if call.info.required %}
                                               <tr>
-                                                <td class="col-xs-3 text-right">Required</td>
-                                                <td class="col-xs-9">
+                                                <td class="col-xs-2 text-right">Required</td>
+                                                <td class="col-xs-10">
                                                   {% for required in call.info.required %}
                                                     <div>
                                                         <span><span class="glyphicon glyphicon-ok-sign green"></span> {{required}}</span>
@@ -1026,8 +451,8 @@ Content-Type: text/html
                                             {% endif %}
                                             {% if call.info.available %}
                                               <tr>
-                                                <td class="col-xs-3 text-right">Available</td>
-                                                <td class="col-xs-9">
+                                                <td class="col-xs-2 text-right">Available</td>
+                                                <td class="col-xs-10">
                                                   {% for available in call.info.available %}
                                                     <div>
                                                       <span><span class="glyphicon glyphicon-asterisk blue"></span> {{available}}</span>
@@ -1038,8 +463,8 @@ Content-Type: text/html
                                             {% endif %}
                                             {% if call.info.unavailable %}
                                               <tr>
-                                                <td class="col-xs-3 text-right">Unavailable</td>
-                                                <td class="col-xs-9">
+                                                <td class="col-xs-2 text-right">Unavailable</td>
+                                                <td class="col-xs-10">
                                                   {% for unavailable in call.info.unavailable %}
                                                     <div>
                                                         <span><span class="glyphicon glyphicon-ban-circle red"></span> {{unavailable}}</span>
@@ -1105,49 +530,6 @@ Content-Type: text/html
                     </ul>
                   </li>
                 {% endfor %}
-
-                <!-- <li class="nav-group">
-                    <a class="nav-group-header" href="#query-operations">Query Operations</a>
-                    <ul class="nav">
-                        <li class="nav-group-item"><a href="#query-operations-select">Column Selection</a></li>
-                    </ul>
-                </li>
-                <li class="nav-group">
-                    <a class="nav-group-header" href="#queues">Queues</a>
-                    <ul class="nav">
-                        <li class="nav-group-item"><a href="#queues-event">Add to Event</a></li>
-                        <li class="nav-group-item"><a href="#queues-standard">Add To Standard</a></li>
-                    </ul>
-                </li>
-                <li class="nav-group">
-                    <a class="nav-group-header" href="#booking">Booking</a>
-                    <ul class="nav">
-                        <li class="nav-group-item"><a href="#booking-create">Create</a></li>
-                        <li class="nav-group-item"><a href="#booking-list">List</a></li>
-                        <li class="nav-group-item"><a href="#booking-single">Single</a></li>
-                        <li class="nav-group-item"><a href="#booking-match">Match</a></li>
-                        <li class="nav-group-item"><a href="#booking-update">Update</a></li>
-                        <li class="nav-group-item"><a href="#booking-delete">Delete</a></li>
-                    </ul>
-                </li>
-                <li class="nav-group">
-                    <a class="nav-group-header" href="#reservations">Reservations</a>
-                    <ul class="nav">
-                        <li class="nav-group-item"><a href="#reservations-create">Create</a></li>
-                        <li class="nav-group-item"><a href="#reservations-list">List</a></li>
-                        <li class="nav-group-item"><a href="#reservations-single">Single</a></li>
-                        <li class="nav-group-item"><a href="#reservations-match">Match</a></li>
-                        <li class="nav-group-item"><a href="#reservations-update">Update</a></li>
-                        <li class="nav-group-item"><a href="#reservations-delete">Delete</a></li>
-                    </ul>
-                </li>
-                <li class="nav-group">
-                    <a class="nav-group-header" href="#passwords">Passwords</a>
-                    <ul class="nav">
-                        <li class="nav-group-item"><a href="#passwords-generate-reset-token">Generate Reset Token</a></li>
-                        <li class="nav-group-item"><a href="#passwords-consume-reset-token">Consume Reset Token</a></li>
-                    </ul>
-                </li> -->
               </ul>
             </div> <!--well bs-sidebar affix-->
         </div>

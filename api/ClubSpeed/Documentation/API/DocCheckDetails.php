@@ -7,10 +7,10 @@ class DocCheckDetails Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id = 'check-details';
-        $this->header = 'Check Details';
-        $this->url = 'checkDetails';
-        $this->info = $this->info();
+        $this->id              = 'check-details';
+        $this->header          = 'Check Details';
+        $this->url             = 'checkDetails';
+        $this->info            = $this->info();
         $this->calls['create'] = $this->create();
         $this->calls['single'] = $this->single();
         $this->calls['match']  = $this->match(); // leave match out for now?
@@ -128,10 +128,7 @@ class DocCheckDetails Extends DocAPIBase {
             )
             , 'examples' => array(
                 'request' => <<<EOS
-POST https://mytrack.clubspeedtiming.com/api/index.php/checkDetails HTTP/1.1
-Content-Length: 79
-Content-Type: application/json
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails HTTP/1.1
 {
     "checkId": 2288,
     "type": 1,
@@ -141,9 +138,6 @@ Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 20:27:02 GMT
-Content-Length: 27
-Content-Type: application/json
 {
     "checkDetailId": 7558
 }
@@ -159,15 +153,10 @@ EOS
             ),
             'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7556 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7556 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 20:33:32 GMT
-Content-Length: 245
-Content-Type: application/json
 {
     "checkDetails": [
         {
@@ -195,15 +184,10 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails?qty=5&productId=43 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails?qty=5&productId=43 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 21:03:01 GMT
-Content-Length: 521
-Content-Type: application/json
 {
     "checkDetails": [
         {
@@ -242,15 +226,10 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checkDetails?filter=3%3CqtyANDqty%3C%3D5ANDcreatedDate%3E2014-08-01 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails?filter=3%3CqtyANDqty%3C%3D5ANDcreatedDate%3E2014-08-01 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 21:22:00 GMT
-Content-Length: 683
-Content-Type: application/json
 {
     "checkDetails": [
         {
@@ -289,9 +268,7 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-PUT https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7564 HTTP/1.1
-Content-Length: 86
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7564 HTTP/1.1
 {
     "status": 2,
     "type": 2, 
@@ -302,9 +279,6 @@ Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
 EOS
           , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 22:42:24 GMT
-Content-Length: 0
-Content-Type: text/html
 EOS
             )
         );
@@ -317,15 +291,10 @@ EOS
             )
             , 'examples' => array(
                 'request' => <<<EOS
-DELETE https://mytrack.clubspeedtiming.com/api/index.php/checkDetails/7560 HTTP/1.1
-Content-Length: 0
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
+DELETE https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7560 HTTP/1.1
 EOS
           , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Mon, 15 Sep 2014 23:35:16 GMT
-Content-Length: 0
-Content-Type: text/html
 EOS
             )
         );

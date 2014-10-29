@@ -192,10 +192,7 @@ class DocChecks Extends DocAPIBase {
             )
             , 'examples' => array(
                 'request' => <<<EOS
-POST https://mytrack.clubspeedtiming.com/api/index.php/checks HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Content-Length: 345
-Accept-Language: en-US,en;q=0.8
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checks HTTP/1.1
 {
     "broker": "My Broker Name",
     "customerId": 1000001,
@@ -214,9 +211,6 @@ Accept-Language: en-US,en;q=0.8
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Thu, 18 Sep 2014 16:27:12 GMT
-Content-Length: 21
-Content-Type: application/json
 {
     "checkId": 2304
 }
@@ -232,15 +226,10 @@ EOS
             ),
             'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checks/2260 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checks/2260 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Thu, 18 Sep 2014 16:44:42 GMT
-Content-Length: 483
-Content-Type: application/json
 {
     "checks": [
         {
@@ -278,14 +267,10 @@ EOS
             ),
             'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checks?broker=some%20broker%20name! HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checks?broker=some%20broker%20name! HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Thu, 18 Sep 2014 17:39:38 GMT
-Content-Type: application/json
 {
     "checks": [
         {
@@ -344,14 +329,10 @@ EOS
             ),
             'examples' => array(
                 'request' => <<<EOS
-GET https://mytrack.clubspeedtiming.com/api/index.php/checks?filter=total%3E800.00 HTTP/1.1
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checks?filter=total%3E800.00 HTTP/1.1
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Thu, 18 Sep 2014 17:46:45 GMT
-Content-Type: application/json
 {
     "checks": [
         {
@@ -431,19 +412,13 @@ EOS
             ),
             'examples' => array(
                 'request' => <<<EOS
-PUT https://mytrack.clubspeedtiming.com/api/index.php/checks/2260 HTTP/1.1
-Content-Length: 24
-Authorization: Basic c29tZXVzZXI6c29tZXBhc3N3b3Jk
-Accept-Language: en-US,en;q=0.8
+PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/checks/2260 HTTP/1.1
 {
     "gratuity": 5.00
 }
 EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
-Date: Thu, 18 Sep 2014 16:58:04 GMT
-Content-Length: 0
-Content-Type: text/html
 EOS
             )
         );
