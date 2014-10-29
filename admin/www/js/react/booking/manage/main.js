@@ -392,9 +392,59 @@ var BookingRow = React.createClass({displayName: 'BookingRow',
 });
 
 
+var FadeOut = React.createClass({displayName: 'FadeOut',
+	timeout: null,
+	getDefaultProps:function (){
+		return { rate: 0.01, delay: 3000, onFadeComplete:function (){}, fading: false };
+	},
+	getInitialState:function (){
+		return { fading: false, opacity: 1 };
+	},
+	render:function (){
+		var change = this.props.style?
+			{ $merge: { opacity: this.state.opacity } }
+			: { $set: { opacity: this.state.opacity } };
+	
+		var newProps = React.addons.update(this.props, { style: change });
+		return React.createElement(this.props.element || 'div', newProps, this.props.children);
+	},
+	componentDidMount:function (){
+		this.resetTimeout();
+	},
+	resetTimeout:function (){
+		if (this.timeout){
+			clearTimeout(this.timeout);
+		}
+		
+		this.timeout = setTimeout(
+			function(_)  {
+				if (this.isMounted()){
+					this.setState({ fading: true });
+				}
+			}.bind(this),
+			this.props.delay
+		);		
+	},
+	componentDidUpdate:function (){
+		if (this.state.fading){
+			if (this.state.opacity <= 0){
+				console.log('good');
+				this.props.onFadeComplete(this.props);
+			} else {
+				requestAnimationFrame(function(_)  {
+					if (this.isMounted()){
+						this.setState({ opacity: this.state.opacity - this.props.rate });
+					}
+				}.bind(this));
+			}
+		}
+	}
+});
+
+
 /*** TOP LEVEL/ROOT/MAIN/PARENT COMPONENT ***/
 
-BookingAdmin = React.createClass({displayName: 'BookingAdmin',
+var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	mixins: [EventFunnel, ClubSpeedApi, ParseRef, jQuerify, React.addons.PureRenderMixin],
 	
 	timeoutHandle: null,
@@ -414,7 +464,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			newIsPublic: null,
 			popupMessage: null,
 			raceDetails: {},
-			creating: false,
 			loading: false
 		};
 	},
@@ -473,15 +522,11 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			return null;
 		}
 		
-		return React.DOM.div({
+		return FadeOut({element: "div", onFadeComplete: this.handlePopupClick, onClick: this.handlePopupClick, key: this.state.popupMessage, 
 			style: { position: 'fixed', top: 0, left: 0, width: '100%', cursor: 'pointer', zIndex: 9999, textAlign: 'center'}, 
-			className: "alert alert-success", onClick: this.handlePopupClick}, 
+			className: "alert alert-success"}, 
 			this.state.popupMessage
 		);
-	},
-	
-	renderTrackOptions:function(){	
-		return this.state.tracks.map(function(track)  {return React.DOM.option({value: track.id, key: track.id}, track.name);});
 	},
 	
 	renderProductSelectOptions:function(){
@@ -525,7 +570,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	
 	renderBookingTable:function(){
 		var foundBookings = this.filterBookings(this.parseRef('date'));
-		var loadingMessage = 'Getting activities for selected date and/or track...';
+		var loadingMessage = 'Getting/refreshing activities for selected date and/or track...';
 	
 		if (foundBookings.length == 0){
 			if (this.state.loading){
@@ -584,7 +629,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		);
 	},
 	
-	renderEditForm:function(creating){
+	renderEditForm:function(){
 		if (this.filterBookings(this.parseRef('date')).length == 0){
 			return null;
 		}
@@ -853,10 +898,10 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			}
 		}
 		
-		if (prevState.popupMessage != this.state.popupMessage){
+		/*if (prevState.popupMessage != this.state.popupMessage){
 			clearTimeout(this.timeoutHandle);
-			this.timeoutHandle = setTimeout(function(_)  { this.setState({ popupMessage: null }); }.bind(this), this.props.popupTime);
-		}
+			this.timeoutHandle = setTimeout(_ => { this.setState({ popupMessage: null }); }, this.props.popupTime);
+		}*/
 		
 		/*if (this.state.selectedBookingIds.length == 0 && this.state.saveEnabled){
 			this.setState({ saveEnabled: false });
@@ -1005,6 +1050,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	},
 	
 	handlePopupClick:function(){
+		console.log('poup event');
 		this.setState({ popupMessage: null });
 	},
 	
@@ -1038,10 +1084,10 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 					var popupMessage = 'Booking(s) successfully deleted! ('
 						+ moment().format('h:mm:ss a') + ')';
 					this.setState({ popupMessage:popupMessage });
-					this.loadBookings();
+					//this.loadBookings();
 				}.bind(this),
 				function()  {var all=Array.prototype.slice.call(arguments,0);
-					var errorMessage = 'An error occurred while trying to delete bookings.';
+					var errorMessage = 'An error occurred while trying to delete booking(s).';
 					alert(errorMessage);
 				}
 			);			
