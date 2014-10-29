@@ -515,6 +515,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				)
 			), 
 			
+			React.DOM.br(null), 
+			
 			React.DOM.div({className: "row form-group"}, 
 				this.renderBookingTable()
 			)
@@ -523,7 +525,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	
 	renderBookingTable:function(){
 		var foundBookings = this.filterBookings(this.parseRef('date'));
-		var loadingMessage = 'Getting bookings for selected date and/or track...';
+		var loadingMessage = 'Getting activities for selected date and/or track...';
 	
 		if (foundBookings.length == 0){
 			if (this.state.loading){
@@ -552,7 +554,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		return React.DOM.div(null, 
 			React.DOM.div(null, 
-				this.state.loading && loadingMessage, React.DOM.br(null)
+				this.state.loading?
+					loadingMessage
+				: foundBookings.length + (foundBookings.length > 1? ' activities': ' activity') + ' found.', React.DOM.br(null)
 			), 
 			React.DOM.div({style: { overflowY: 'auto'}, ref: "table"}, 
 				React.DOM.table({className: "table"}, 
