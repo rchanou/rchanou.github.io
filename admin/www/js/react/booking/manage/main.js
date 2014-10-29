@@ -540,7 +540,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			this.state.selectedBookingIds.length > 0 &&
 				React.DOM.span(null, 
 					React.DOM.input({type: "button", className: "btn btn-info", onClick: this.handleDeselectClick, value: "De-select All"}), 
-					React.DOM.input({type: "button", className: "btn btn-danger pull-right", onClick: this.handleDeleteClick, value: "Delete Selected"})
+					!this.areOnlyNewBookingsSelected() &&
+						 React.DOM.input({type: "button", className: "btn btn-danger pull-right", onClick: this.handleDeleteClick, value: "Delete Selected"})
 				)
 		);
 	},
@@ -609,7 +610,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 						Select({onFunnelEvent: this.handleProductSelectEvent, selectedId: this.state.newProductId}, 
 							this.renderProductSelectOptions()
 						), 
-						this.state.selectedBookingIds.length > 1 && this.state.newProductId == null && '(multiple)'
+						this.state.selectedBookingIds.length > 1 && this.state.newProductId == null && !this.areOnlyNewBookingsSelected()
+							&& '(multiple)'
 					)
 				), 
 				
@@ -619,7 +621,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 					), 
 					React.DOM.div({className: "col-sm-6 col-md-6 col-lg-7"}, 
 						iCheck({ref: "publicCheck", onFunnelEvent: this.handlePublicCheckEvent, checked: this.state.newChecked}	), 
-						this.state.selectedBookingIds.length > 1 && this.state.newChecked == null && '(multiple)'
+						this.state.selectedBookingIds.length > 1 && this.state.newChecked == null  && !this.areOnlyNewBookingsSelected()
+							&& '(multiple)'
 					)
 				), 
 				
@@ -630,7 +633,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 					React.DOM.div({className: "col-sm-6 col-md-6 col-lg-7"}, 
 						React.DOM.input({className: "form-control", type: "number", min: "0", ref: "qtyAvail", 
 						  onBlur: this.handleQtyAvailableChange}), 
-						this.state.selectedBookingIds.length > 1 && this.refs.qtyAvail && (this.refs.qtyAvail.getDOMNode().value == '') && '(multiple)'
+						this.state.selectedBookingIds.length > 1 && this.refs.qtyAvail && (this.refs.qtyAvail.getDOMNode().value == '')
+							 && !this.areOnlyNewBookingsSelected() && '(multiple)'
 					)
 				), 
 				
@@ -805,7 +809,25 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	},
 	
 	componentDidUpdate:function(prevProps, prevState){
-		if (prevState.selectedBookingIds.length <= 1 && this.state.selectedBookingIds.length > 1){
+		if (this.areOnlyNewBookingsSelected()){
+			if (this.state.selectedBookingIds.length == 1){
+				this.setState({ newProductId: null, newChecked: true });
+				this.refs.qtyAvail.getDOMNode().value = 1;
+			}
+		} else if (prevState.selectedBookingIds.length <= 1 && this.state.selectedBookingIds.length > 1){
+			console.log('warmer');
+			if (_.countBy(this.state.selectedBookingIds, 'heatId')['undefined'] == 1){
+				// only one existing booking selected and the rest are placeholders for uncreated bookings,
+				// so fill form data from the one existing booking
+				console.log('there is one');
+				var existingBookingId = _.findWhere(this.state.selectedBookingIds, function(id)  {return typeof id.heatId == 'undefined';});
+				var existingBooking = _.findWhere(this.state.bookings, { onlineBookingsId: existingBookingId });
+				this.setState({
+					newProductId: existingBooking.productsId,
+					newChecked: existingBooking.isPublic
+				});
+				this.refs.qtyAvail.getDOMNode().value = existingBooking.quantityTotal;
+			}
 			this.setState({ newProductId: null, newChecked: null });
 			this.refs.qtyAvail.getDOMNode().value = '';
 		} else if (prevState.selectedBookingIds.length != 1 && this.state.selectedBookingIds.length == 1){
@@ -834,10 +856,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			this.setState({ saveEnabled: false });
 		}*/
 	},
-	
-	/*areExistingBookingsSelected(){
-		return _.contains(this.state.selectedBookingIds, );
-	},*/
+	areOnlyNewBookingsSelected:function(){
+		return _.every(this.state.selectedBookingIds, 'heatId');
+	},
 	
 	handleDateChange:function(e){
 		this.loadBookings();
