@@ -377,7 +377,8 @@ var BookingRow = React.createClass({displayName: 'BookingRow',
 			), 
 			React.DOM.td(null, start.isValid()? start.format('h:mm a'): '?'), 
 			React.DOM.td(null, this.props.race.race_name), 
-			React.DOM.td(null, this.props.product? this.props.product.description: '(no booking)'), 
+			this.props.product? React.DOM.td(null, this.props.product.description)
+				:	React.DOM.td({style: { color: 'gray'}}, "(no booking)"), 
 			React.DOM.td(null, booking.isPublic == null? null :
 						booking.isPublic? React.DOM.i({className: "fa fa-globe", title: "This booking is public."}) :
 										 React.DOM.i({className: "fa fa-lock", title: "This booking is private."})
@@ -490,16 +491,46 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			);}
 		);
 	},
+		
+	renderBookingNav:function(){
+		return React.DOM.div({className: "col-md-6"}, 
+			React.DOM.div({className: "row"}, 
+				React.DOM.h3(null, "All Activities")
+			), 
+			
+			React.DOM.div({className: "row form-inline"}, 
+				React.DOM.div({className: "form-group col-md-6"}, 
+					React.DOM.label({className: 'control-label' || 'control-label col-md-1' || "col-sm-1 col-md-1 control-label"}, 
+						"Date"
+					), 
+					DatePicker({ref: "date", className: "form-control", 
+						defaultValue: moment().format('MM/DD/YYYY'), onFunnelEvent: this.handleDateChange})
+				), 
+				
+				React.DOM.div({className: 'form-group col-md-6' || 'form-group col-md-7' || "col-sm-7 col-md-8"}, 
+					React.DOM.label({className: 'control-label' || "col-sm-1 col-md-1"}, 
+						"Track"
+					), 
+					TrackSelect({className: "form-control", onFunnelEvent: this.handleTrackSelectEvent, bound: false})
+				)
+			), 
+			
+			React.DOM.div({className: "row form-group"}, 
+				this.renderBookingTable()
+			)
+		);		
+	},
 	
 	renderBookingTable:function(){
 		var foundBookings = this.filterBookings(this.parseRef('date'));
+		var loadingMessage = 'Getting bookings for selected date and/or track...';
 	
 		if (foundBookings.length == 0){
 			if (this.state.loading){
-				return 'Getting bookings for selected date and/or track...'
+				return loadingMessage;
+			} else {	
+				return 'No activities found for this date and/or track.';
 			}
-	
-			return 'No activities found for this date and/or track.';
 		}
 		
 		var bookingRows = _(foundBookings)
@@ -520,6 +551,9 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			.value();
 		
 		return React.DOM.div(null, 
+			React.DOM.div(null, 
+				this.state.loading && loadingMessage, React.DOM.br(null)
+			), 
 			React.DOM.div({style: { overflowY: 'auto'}, ref: "table"}, 
 				React.DOM.table({className: "table"}, 
 					React.DOM.thead({className: "text-left"}, 
@@ -544,37 +578,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 						 React.DOM.input({type: "button", className: "btn btn-danger pull-right", onClick: this.handleDeleteClick, value: "Delete Selected"})
 				)
 		);
-	},
-	
-	renderBookingNav:function(){
-		return React.DOM.div({className: "col-md-6"}, 
-			React.DOM.div({className: "row"}, 
-				React.DOM.h3(null, "All Activities")
-			), 
-			
-			React.DOM.div({className: "row form-inline"}, 
-				React.DOM.div({className: "form-group col-md-6"}, 
-					React.DOM.label({className: 'control-label' || 'control-label col-md-1' || "col-sm-1 col-md-1 control-label"}, 
-						"Date"
-					), 
-					DatePicker({ref: "date", className: "form-control", 
-						defaultValue: moment().format('MM/DD/YYYY'), onFunnelEvent: this.handleDateChange})
-				), 
-				
-				React.DOM.div({className: 'form-group col-md-6' || 'form-group col-md-7' || "col-sm-7 col-md-8"}, 
-					React.DOM.label({className: 'control-label' || "col-sm-1 col-md-1"}, 
-						"Track"
-					), 
-					TrackSelect({className: "form-control", onFunnelEvent: this.handleTrackSelectEvent, bound: false})
-				)
-			), 				
-			
-			React.DOM.br(null), 
-			
-			React.DOM.div({className: "row form-group"}, 
-				this.renderBookingTable()
-			)
-		);		
 	},
 	
 	renderEditForm:function(creating){
@@ -797,7 +800,6 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 						this.state.raceDetails,
 						change
 					);
-					console.log(raceDetails);
 					this.setState({ raceDetails:raceDetails });
 				}.bind(this));
 			}.bind(this));
