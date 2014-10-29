@@ -817,8 +817,8 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	componentDidUpdate:function(prevProps, prevState){
 		if (this.state.selectedBookingIds.length > 0 && this.areOnlyNewBookingsSelected()){
 			//if (this.state.selectedBookingIds.length == 1){
-				this.setState({ newProductId: null, newIsPublic: true });
-				this.refs.qtyAvail.getDOMNode().value = 1;
+				//this.setState({ newProductId: null, newIsPublic: true });
+				//this.refs.qtyAvail.getDOMNode().value = 1;
 			//}
 		} else if (this.state.selectedBookingIds.length > 1 && prevState.selectedBookingIds.length != this.state.selectedBookingIds.length){
 			if (_.countBy(this.state.selectedBookingIds, 'heatId')['undefined'] == 1){
@@ -949,6 +949,7 @@ BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			}
 		}
 		
+		console.log('new prod', this.state.newProductId);
 		var change = {};
 		if (this.state.newIsPublic != null){
 			change.isPublic = this.state.newIsPublic;
