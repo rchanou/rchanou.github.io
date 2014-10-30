@@ -330,6 +330,11 @@
         .visible {
             visibility: visible;
         }
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         /* animations */
 
@@ -452,13 +457,30 @@
         return this.style;
     };
     GridSizes.prototype.determineSizes = function(numElems) {
+        var self = this;
         // var rowDividend = Math.ceil(Math.sqrt(numElems)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
         var rowDividend = Math.ceil(Math.sqrt(numElems)) + (numElems > 4 && (Math.sqrt(numElems) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
-        this.numRows = Math.ceil(numElems / rowDividend);
-        this.numCols = numElems.roundUp(this.numRows) / this.numRows;
-        this.height = this.heightMax / this.numRows;
-        this.width = this.widthMax / this.numCols;
-        this.fontSize = 20 / ((this.numRows > 1 ? this.numRows : 2) + 6) + "vh";
+        self.numRows = Math.ceil(numElems / rowDividend);
+        self.numCols = numElems.roundUp(self.numRows) / self.numRows;
+        self.height = self.heightMax / self.numRows;
+        self.width = self.widthMax / self.numCols;
+        var baseFontSize = 20 / ((self.numRows > 1 ? self.numRows : 2) + 6);
+        self.labelFontSize = baseFontSize + "vh";
+        self.dataFontSize = (function() {
+            // note that 1, 2, and 3 are all single row items
+            // but have an extremely varied amount of space to work with.
+            // handle their returns specially
+            switch(numElems) {
+                case 1:
+                    return baseFontSize * 4.6;
+                case 2:
+                    return baseFontSize * 4.6 / 1.5;
+                case 3:
+                    return baseFontSize * 4.6 / 2;
+                default:
+                    return baseFontSize * 6.0 / (self.numCols * 1.05);
+            }
+        }()) + "vh"; // make sure vh is appended for css
     };
 </script>
 <script>
@@ -492,7 +514,6 @@
             cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
             var race = data.race;
             var racers = race.racers;
-
             if (racers.length > 0) {
 
                 // prepend the race.racers[].kart_number with a "#", if it exists
@@ -522,7 +543,7 @@
             }
 
             // calculate the grid widths, heights, and column/row counts
-            data.gridSizes = new GridSizes(racers.length || 0);
+            data.gridSizes = new GridSizes(data.race.racers.length || 0);
 
             // prepend race.race_number with a "#" if it exists
             race.race_number = z.check.exists(race.race_number) ? "(#" + race.race_number + ")" : "";
@@ -672,9 +693,9 @@
         +   '               <img class="fill roundAll" src="../img/clubspeed_logo.svg"></img>' // svg works much better with img tag
         +   '           </div>'
         +   '           <div class="back face fill roundAll">'
-        +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{../gridSizes.fontSize}}">'
+        +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{../gridSizes.dataFontSize}}">'
         +   '                   <div class="portraitHeaderWrapper roundTop">'
-        +   '                       <div class="portraitHeaderText fill vMiddle hCenter">{{getName @index}}</div>'
+        +   '                       <div class="portraitHeaderText fill vMiddle hCenter truncate">{{getName @index}}</div>'
         +   '                   </div>'
         +   '                   <div class="portraitBodyWrapper">'
         +   '                       <div class="portraitBodyTextWrapper lFloat">'
@@ -696,7 +717,7 @@
     var labelSrc = '' +
             '   <div class="labelsRacerWrapper lFloat" style="{{../gridSizes.heightStyle}}">' // apply lFloat for margin spacing purposes, to match racer elements
         +   '       <div class="portraitHeaderWrapper"></div>'
-        +   '       <div class="portraitBodyWrapper" style="font-size:{{../gridSizes.fontSize}};">'
+        +   '       <div class="portraitBodyWrapper" style="font-size:{{../gridSizes.labelFontSize}};">'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">START POSITION:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">KART NUMBER:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
