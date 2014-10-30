@@ -514,11 +514,6 @@
             cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
             var race = data.race;
             var racers = race.racers;
-
-            data.race.racers = data.race.racers.concat(data.race.racers);
-            data.race.racers = data.race.racers.concat(data.race.racers);
-            data.race.racers = data.race.racers.take(24);
-
             if (racers.length > 0) {
 
                 // prepend the race.racers[].kart_number with a "#", if it exists
