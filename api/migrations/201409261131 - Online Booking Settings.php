@@ -6,6 +6,7 @@
 
 $settings = array(
 	'onlineBookingPaymentProcessorSettings' => '{"name": "Dummy","options": {}}',
+    'onlineBookingPaymentProcessorSavedSettings' => '["Dummy": {"name": "Dummy","options": {}}]',
 	'emailShown' => true,
 	'emailRequired' => true,
 	'passwordShown' => true,
