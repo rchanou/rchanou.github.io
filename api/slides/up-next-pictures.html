@@ -457,15 +457,30 @@
         return this.style;
     };
     GridSizes.prototype.determineSizes = function(numElems) {
+        var self = this;
         // var rowDividend = Math.ceil(Math.sqrt(numElems)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
         var rowDividend = Math.ceil(Math.sqrt(numElems)) + (numElems > 4 && (Math.sqrt(numElems) % 1 === 0) ? 2 : 1); // add 2 when perfect square - skip ahead to the next number of rows
-        this.numRows = Math.ceil(numElems / rowDividend);
-        this.numCols = numElems.roundUp(this.numRows) / this.numRows;
-        this.height = this.heightMax / this.numRows;
-        this.width = this.widthMax / this.numCols;
-        var baseFontSize = 20 / ((this.numRows > 1 ? this.numRows : 2) + 6);
-        this.labelFontSize = baseFontSize + "vh";
-        this.dataFontSize = baseFontSize * 1.7 + "vh";
+        self.numRows = Math.ceil(numElems / rowDividend);
+        self.numCols = numElems.roundUp(self.numRows) / self.numRows;
+        self.height = self.heightMax / self.numRows;
+        self.width = self.widthMax / self.numCols;
+        var baseFontSize = 20 / ((self.numRows > 1 ? self.numRows : 2) + 6);
+        self.labelFontSize = baseFontSize + "vh";
+        self.dataFontSize = (function() {
+            // note that 1, 2, and 3 are all single row items
+            // but have an extremely varied amount of space to work with.
+            // handle their returns specially
+            switch(numElems) {
+                case 1:
+                    return baseFontSize * 4.6;
+                case 2:
+                    return baseFontSize * 4.6 / 1.5;
+                case 3:
+                    return baseFontSize * 4.6 / 2;
+                default:
+                    return baseFontSize * 6.0 / (self.numCols * 1.05);
+            }
+        }()) + "vh"; // make sure vh is appended for css
     };
 </script>
 <script>
@@ -477,7 +492,8 @@
     // then use a fallback for api root (in this case, ftikcincinnati)
     // otherwise, default to the current origin
     var api = new clubspeed.classes.ApiService({
-        url: (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/api/index.php/",
+        // url: (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/api/index.php/",
+        url: "http://localhost/clubspeed/api/index.php/",
         key: 'cs-dev',
     });
     var cache = {}; // for use with polling comparison
@@ -499,6 +515,10 @@
             cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
             var race = data.race;
             var racers = race.racers;
+
+            data.race.racers = data.race.racers.concat(data.race.racers);
+            data.race.racers = data.race.racers.concat(data.race.racers);
+            data.race.racers = data.race.racers.take(24);
 
             if (racers.length > 0) {
 
