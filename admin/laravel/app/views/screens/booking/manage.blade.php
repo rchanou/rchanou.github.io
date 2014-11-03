@@ -8,14 +8,15 @@ Manage Bookings
     @parent
     {{ HTML::style('css/jquery.ui.ie.css') }}
     {{ HTML::style('css/jquery-ui.css') }}
+		{{ HTML::style('css/select2-bootstrap.css') }}
 @stop
 
 @section('pageHeader')
-Dashboard
+Manage Bookings
 @stop
 
 @section('breadcrumb')
-<a href="dashboard" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
+<a href="{{URL::to('dashboard')}}" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
 <a href="#" class="current">Online Bookings</a>
 <a href="#" class="current">Manage Bookings</a>
 @stop
