@@ -18,7 +18,7 @@ $server_version = php_uname();
 
 if(strpos($server_version, 'Windows Server 2003')) {
 
-	echo '<p>This appears to be a Windows 2003 Server -- ALL HTTP Verbs should be enabled by default for .php in the /api project.';
+	echo '<p>This appears to be a Windows 2003 Server -- ALL HTTP Verbs should be enabled by default for .php in the /api project.</p>';
 
 } else {
 
