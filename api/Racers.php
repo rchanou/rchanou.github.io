@@ -786,6 +786,21 @@ class Racers
         );
     }
 
+		public function pprfind() {
+			// '&email=' + record.email + '&fname=' + record.f_name + '&lname=' + record.l_name + '&totalvisits=' + record.total_visits + '&racername=' + record.racer_name
+			$tsql = "SELECT TOP (1) * FROM Customers WHERE EmailAddress = ? AND FName = ? AND LName = ? AND TotalVisits = ? AND RacerName = ? AND Custom4 = ''";
+			$params = array(&$_GET['email'], &$_GET['fname'], &$_GET['lname'], &$_GET['totalvisits'], &$_GET['racername']);
+			$rows = $this->run_query($tsql, $params);
+			return $rows;
+		}
+		
+		public function pprupdate() {
+			$tsql_params = array(&$_GET['custom4'], &$_GET['custid']);
+			$tsql = "UPDATE Customers SET Custom4 = ? WHERE CustID = ?";
+			$rows = $this->run_query($tsql, $tsql_params);
+			return true;
+		}
+
     public function index($racer_id, $sub = null) {
         if($racer_id == 'valid') return $this->valid($_REQUEST['email'], $_REQUEST['racerName']);
         if($racer_id == 'create') return $this->postCreate($_REQUEST);
