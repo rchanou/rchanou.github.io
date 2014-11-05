@@ -6,7 +6,7 @@
 // Check if php_intl is loaded
 if(!extension_loaded('intl')) {
 	echo '<h1 style="color: red;">No php_intl.dll loaded! Action Required!</h1>';
-	echo '<p>Please edit "C:\Program Files\PHP\php.ini" and add the following line at the bottom:</p>';
+	echo '<p>Please edit "C:\Program Files (x86)\PHP\5.3\php.ini" and add the following line <strong>at the bottom</strong>:</p>';
 	echo '<p><strong>extension=php_intl.dll</strong></p>';
 } else {
 	echo '<p style="color: green;">php_intl.dll IS loaded, no further action is necessary.</p>';
