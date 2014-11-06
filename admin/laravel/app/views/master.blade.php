@@ -14,6 +14,7 @@
     {{ HTML::style('css/icheck/flat/blue.css') }}
     {{ HTML::style('css/select2.css') }}
     {{ HTML::style('css/unicorn.css') }}
+    {{ HTML::style('css/admin.css') }}
     <!--[if lt IE 9]>
     {{ HTML::script('js/respond.min.js')}}
     <![endif]-->
@@ -28,7 +29,7 @@
 <!-- BEGIN MAIN PAGE CONTAINER -->
 <div id="wrapper">
     <div id="header">
-        <h1><a href="dashboard">@yield('pageHeader','REPLACE_PAGE_TITLE')</a></h1>
+        <h1><a href="{{URL::to('dashboard')}}">@yield('pageHeader','REPLACE_PAGE_TITLE')</a></h1>
         <a id="menu-trigger" href="#"><i class="fa fa-bars"></i></a>
     </div>
 
@@ -44,7 +45,7 @@
             <input type="text" placeholder="Search here..."/><button type="submit" class="tip-right" title="Search"><i class="fa fa-search"></i></button>
         </div>-->
         <ul>
-            <li><a href="dashboard"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
+            <li><a href="{{URL::to('dashboard')}}"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
             <!--<li class="submenu">
                 <a href="#"><i class="fa fa-flask"></i> <span>Sub-Menu 1</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
@@ -75,6 +76,8 @@
                 <ul>
                     <li>{{link_to('/booking','Manage Bookings')}}</li>
                     <li>{{link_to('/booking/settings','Settings')}}</li>
+                    <li>{{link_to('/booking/payments','Payment Processors')}}</li>
+                    <li>{{link_to('/booking/emailTemplates','E-mail Templates')}}</li>
                 </ul>
             </li>
         </ul>
@@ -125,10 +128,10 @@
 <script>
 var config =
 {
-    apiURL: '{{Config::get('config.apiURL')}}',
+    apiURL: '/api/index.php',
     apiKey: '{{Config::get('config.apiKey')}}',
-    privateKey: '{{Config::get('config.privateKey')}}'
-
+    privateKey: '{{Config::get('config.privateKey')}}',
+    dateFormat: '{{Config::get('config.dateFormat')}}'
 };
 </script>
 @show
