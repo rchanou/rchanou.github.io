@@ -8,6 +8,6 @@ var config =
     disableNextRacersTab: true,
     pollingRateMs: 1000,
     nextRacersPollingRateMs: 5000,
-    disablePurpleText: false,
+    disablePurpleText: true,
     dataSource: 'pollingAPI'
 };
