@@ -7,7 +7,7 @@ config.apiURL = config.apiURL + '/';
 if (window.location.hostname != '192.168.111.165') {
 	console.log = function(){};
 }
-
+console.log(config.apiURL);
 /*var global = {
 	momentFormat: config.dateFormat.replace('Y', 'YYYY').replace('m', 'M').replace('d', 'D'),
 	datepickerFormat: config.dateFormat.replace('Y', 'yy')
@@ -377,7 +377,7 @@ var Select = React.createClass({displayName: 'Select',
 		);
 		
 		return React.createElement("select", null, 
-			React.createElement("option", {key: -1}), 
+			React.createElement("option", {key: -1, value: null}), 
 			optionsFromList, 
 			this.props.children
 		);
@@ -452,7 +452,7 @@ var TrackSelect = React.createClass({displayName: 'TrackSelect',
 	mixins: [EventFunnel],
 	render:function(){
 		return React.createElement(LinkedSelect, {url: config.apiURL + 'tracks/index.json?key=' + config.apiKey, 
-			listProperty: "tracks", valueProperty: "id", labelProperty: "name", placeholder: " ", 
+			listProperty: "tracks", valueProperty: "id", labelProperty: "name", 
 			selectedId: this.props.selectedId, onFunnelEvent: this.toFunnel});
 	}
 });
@@ -734,7 +734,8 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			popupMessage: null,
 			raceDetails: {},
 			loading: false,
-			filterByDate: moment()
+			filterByDate: moment(),
+			requestCount: 0
 		};
 	},
 	
@@ -810,7 +811,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 			), 
 			
 			React.createElement("div", {className: "row form-inline"}, 
-				React.createElement("div", {className: "form-group col-xs-6 col-sm-4 col-md-7 col-lg-3", style: { paddingLeft: 0, paddingBottom: 15}}, 
+				React.createElement("div", {className: "form-group col-xs-10 col-sm-4 col-md-7 col-lg-5", style: { paddingLeft: 0, paddingBottom: 15}}, 
 					React.createElement("label", {className: "control-label"}, 
 						"Date"
 					), 
@@ -836,7 +837,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		var loadingMessage = 'Getting/refreshing activities for selected date and/or track...';
 	
 		if (foundBookings.length == 0){
-			if (this.state.loading){
+			if (this.state.requestCount > 0){ // if (this.state.loading){
 				return loadingMessage;
 			} else {	
 				return 'No activities found for this date and/or track.';
@@ -862,7 +863,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		
 		return React.createElement("div", null, 
 			React.createElement("div", null, 
-				this.state.loading?
+				this.state.requestCount > 0?
 					loadingMessage
 				: foundBookings.length + (foundBookings.length > 1? ' activities': ' activity') + ' found.', React.createElement("br", null)
 			), 
@@ -898,7 +899,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		}
 		
 		if (this.state.selectedBookingIds.length == 0){
-			if (this.state.loading){
+			if (this.state.requestCount > 0){
 				return null;
 			} else {
 				return React.createElement("div", {className: "col-md-6"}, 
@@ -949,7 +950,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 					React.createElement("label", {className: "col-xs-4 control-label"}, 
 						"Qty. Available Online"
 					), 
-					React.createElement("div", {className: "col-xs-2"}, 
+					React.createElement("div", {className: "col-xs-3"}, 
 						React.createElement("input", {className: "form-control", type: "number", min: "0", ref: "qtyAvail", 
 						  onBlur: this.handleQtyAvailableChange}), 
 						React.createElement("span", {className: "text-info"}, 
@@ -1017,7 +1018,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		);
 		
 		// load products
-		var params = { key: config.privateKey, select: 'productId,description' };
+		var params = { key: config.privateKey, select: 'productId, description', deleted: false };
 		$.get(
 			config.apiURL + 'products.json?' + $.param(params),
 			function(body)  {
@@ -1058,7 +1059,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 	},
 	
 	loadBookings:function(filterByTrackId){	
-		this.setState({ selectedBookingIds: [], loading: true });
+		this.setState({ selectedBookingIds: [], loading: true, requestCount: this.state.requestCount + 1 });
 	
 		var inputDate = this.state.filterByDate;
 		var start = moment(inputDate);
@@ -1097,7 +1098,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				var requestUrl = config.apiURL + 'races/' + race.HeatNo + '.json?key=' + config.privateKey;
 				return $.get(requestUrl);
 			});
-			
+						
 			raceDetailRequests.forEach(function(req)  {
 				req.then(function(body)  {
 					var change = {};
@@ -1110,10 +1111,12 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 				}.bind(this));
 			}.bind(this));
 			
+			this.setState({ requestCount: this.state.requestCount + bookingRequests.length + raceDetailRequests.length - 1 });
+			
 			var allRequests = bookingRequests.concat(raceDetailRequests);
 			$.when.apply($, allRequests).done(function(_)  {
-				this.setState({ loading: false });
-			}.bind(this));			
+				this.setState({ loading: false, requestCount: this.state.requestCount - allRequests.length });
+			}.bind(this));
 		}.bind(this));
 	},
 	
