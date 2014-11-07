@@ -157,7 +157,7 @@ var delay = function(callback, wait) {
 function Channel(opts) {
   var self = this;
   if (!opts) opts = {};
-  self.url = opts.url || location.protocol+'//'+location.hostname+(location.port ? ':' + location.port: '') + '/cs-speedscreen/#/' + opts.channelId;
+  self.url = opts.url || 'http://'+location.hostname+(location.port ? ':' + location.port: '') + '/cs-speedscreen/#/' + opts.channelId;
   self.disableAnimations = opts.disableAnimations || false;
   self.elems = opts.elems || {};
 
