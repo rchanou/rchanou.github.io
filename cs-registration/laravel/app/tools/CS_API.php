@@ -376,8 +376,13 @@ class CS_API
                         $parsedParameters = array();
                         $urlParts = parse_url($result["url"]); //Break the URL into its components
                         parse_str($urlParts['query'],$parsedParameters); //Parse the 'query' component and put the results in $parsedParameters
+												
+                        // Make a lowercased copy of the keys. This resolves inconsistent casing: CamIP, CamIp, CaMiP, et al
+                        foreach($parsedParameters as $key => $value) {
+                          $parsedParameters[strtolower($key)] = $value;
+                        }
 
-                        return $parsedParameters[$urlParameterLabel]; //Return the URL parameter we're looking for: the URL of the IP Camera
+                        return !array_key_exists(strtolower($urlParameterLabel), $parsedParameters) ? null : $parsedParameters[strtolower($urlParameterLabel)]; //Return the URL parameter we're looking for (the URL of the IP Camera) or null if not found
                     }
                     else
                     {
