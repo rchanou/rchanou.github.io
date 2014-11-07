@@ -450,14 +450,31 @@
         return this.style;
     };
     GridSizes.prototype.determineSizes = function(numElems) {
+        var self = this;
         // var len = (data && data.length ? data.length : 1);
         // var rowDividend = Math.ceil(Math.sqrt(numElems)) +  1; // will result in MxM matrices for perfect squares -- throws off the aspect ratio?
         var rowDividend = Math.ceil(Math.sqrt(numElems)) + (numElems > 4 && (Math.sqrt(numElems) % 1 === 0) ? 2 : 1); // add 2 when perfect square larger than 4 - skip ahead to the next number of rows
-        this.numRows = Math.ceil(numElems / rowDividend);
-        this.numCols = numElems.roundUp(this.numRows) / this.numRows; // round up to the nearest numRows, then divide by numRows to get numCols
-        this.height = this.heightMax / this.numRows; // determine the height by 
-        this.width = this.widthMax / this.numCols;
-        this.fontSize = 20 / (this.numRows + 6);
+        self.numRows = Math.ceil(numElems / rowDividend);
+        self.numCols = numElems.roundUp(self.numRows) / self.numRows; // round up to the nearest numRows, then divide by numRows to get numCols
+        self.height = self.heightMax / self.numRows; // determine the height by 
+        self.width = self.widthMax / self.numCols;
+        var baseFontSize = 20 / ((self.numRows > 1 ? self.numRows : 2) + 6);
+        self.labelFontSize = baseFontSize + "vh";
+        self.dataFontSize = (function() {
+            // note that 1, 2, and 3 are all single row items
+            // but have an extremely varied amount of space to work with.
+            // handle their returns specially
+            switch(numElems) {
+                case 1:
+                    return baseFontSize * 4.6;
+                case 2:
+                    return baseFontSize * 4.6 / 1.5;
+                case 3:
+                    return baseFontSize * 4.6 / 2;
+                default:
+                    return baseFontSize * 6.0 / (self.numCols * 1.05);
+            }
+        }()) + "vh"; // make sure vh is appended for css
     };
 </script>
 <script>
@@ -521,15 +538,6 @@
                     if (z.check.isNumber(tempRpm)) {
                         x.rpm = tempRpm.toLocaleString(z.location.locale);
                     }
-
-                    // check for photo existence, set css classes and url
-                    if (z.check.exists(x.photo_url) && clubspeed.helpers.css.imageExists(x.photo_url)) {
-                        x.photo_type = "racerPhoto";
-                    }
-                    else {
-                        x.photo_type = "defaultPhoto";
-                        x.photo_url = defaultPhotoUri;
-                    }
                 });
 
                 // collect track_name from the first racer, instead of making another api call to tracks (?)
@@ -545,6 +553,37 @@
         }));
 
         return deferred;
+    }
+
+    function setPictures(data, callback) {
+        var fastest = data.fastest;
+        if (fastest.length > 0) {
+            var counter = fastest.length;
+            z.forEach(fastest, function(racer, key) {
+                if (z.check.exists(racer.photo_url)) {
+                    clubspeed.helpers.css.imageExists(
+                        racer.photo_url,
+                        function() {
+                            racer.photo_type = "racerPhoto";
+                            if (--counter <= 0)
+                                callback(data);
+                        },
+                        function() {
+                            racer.photo_type = "defaultPhoto"
+                            racer.photo_url = defaultPhotoUri;
+                            if (--counter <= 0)
+                                callback(data);
+                        }
+                    );
+                }
+                else {
+                    racer.photo_type = "defaultPhoto"
+                    racer.photo_url = defaultPhotoUri;
+                    if (--counter <= 0)
+                       callback(data);
+                }
+            });
+        }
     }
 
     /**
@@ -670,7 +709,7 @@
     var labelSrc = '' +
             '   <div class="labelsRacerWrapper lFloat" style="{{../gridSizes.heightStyle}}">' // apply lFloat for margin spacing purposes, to match racer elements
         +   '       <div class="portraitHeaderWrapper"></div>'
-        +   '       <div class="portraitBodyWrapper" style="font-size:{{../gridSizes.fontSize}};">'
+        +   '       <div class="portraitBodyWrapper" style="font-size:{{../gridSizes.labelFontSize}};">'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">LAP TIME:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">NUMBER OF RACES:&nbsp;&nbsp;</div></div>'
@@ -685,7 +724,7 @@
         +   '               <img class="fill roundAll" src="../img/clubspeed_logo.svg"></img>' // svg works much better with img tag
         +   '           </div>'
         +   '           <div class="back face fill roundAll">'
-        +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{../gridSizes.fontSize}};">'
+        +   '               <div class="portraitWrapper fill roundAll" style="font-size:{{../gridSizes.dataFontSize}};">'
         +   '                   <div class="portraitHeaderWrapper roundTop">'
         +   '                       <div class="portraitHeaderText fill vMiddle hCenter truncate ">{{nickname}}</div>'
         +   '                   </div>'
@@ -820,8 +859,10 @@
             function() {
                 // success pipe
                 var data = smashArgs.apply(this, arguments);
-                log.debug(data);
-                buildPage(data);
+                setPictures(data, function(dataWithPictures) {
+                    log.debug(dataWithPictures);
+                    buildPage(dataWithPictures);
+                });
             }, function() {
                 // failure pipe -- grab fallback data
                 $.when.apply($, getFallbackData()).then(function() {

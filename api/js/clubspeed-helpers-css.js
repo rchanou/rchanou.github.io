@@ -40,19 +40,24 @@
         Checks for the existence of an image based on a provided uri.
 
         @param {string} imageUri The uri to check for existence.
-        @returns {boolean} True if found, false if not found.
+        @param {function} success The callback to be executed after onload.
+        @param {function} fail The callback to be executed after onerror.
     */
-    var imageExists = function(imageUri) {
+    var imageExists = function(imageUri, success, fail) {
         var image = new Image();
-        image.src = imageUri;
-        var doesImageExist = (image.width > 0);
-        image = null; // make sure GC runs, so we dont have Image objects floating around
-        return doesImageExist;
+        image.onload = function(e) {
+            image = null; // ensure GC works
+            success();
+        };
+        image.onerror = function(e) {
+            image = null; // ensure GC works
+            fail();
+        };
+        image.src = imageUri; // start the load
     }
     
     /**
         Looks for an existing class on any appended stylesheets,
-
     */
     var addToStyleSheet = function(cssClassName, cssClassDefinition) {
         var hasStyle = false,
