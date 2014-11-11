@@ -207,6 +207,30 @@ EOS;
                 , 'create'      => 'unavailable'
             )
             , array(
+                  'name'        => 'check.checkPaidTax'
+                , 'type'        => 'Double'
+                , 'description' => 'The amount of tax which has already been paid for this Check.'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'check.checkPaidTotal'
+                , 'type'        => 'Double'
+                , 'description' => 'The amount of tax which has already been paid for this Check.'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'check.checkRemainingTax'
+                , 'type'        => 'Double'
+                , 'description' => 'The remaining tax to be paid for this Check.'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'check.checkRemainingTotal'
+                , 'type'        => 'Double'
+                , 'description' => 'The remaining total to be paid for this Check.'
+                , 'create'      => 'unavailable'
+            )
+            , array(
                   'name'        => 'check.details'
                 , 'type'        => 'Array<CheckDetails>'
                 , 'description' => 'The container for CheckDetails objects.'

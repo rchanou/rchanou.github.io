@@ -8,29 +8,39 @@ class Comparator {
     public $operator;
     public $right;
 
-    protected static $pattern = '/(<=?|>=?|(?: )IS(?: NOT)?(?: )|<>|!?=|(?:(?=.*;)%|(?:(?!.*;)\$))(?:[N]?EQ|LT[E]?|GT[E]?)(?:;?))/i'; // note case-insensitivity
+    // general rundown of the pattern:
+    // 1. accept standard symbol operators, don't require spaces on either side
+    // 2. accept standard sql keywords, require spaces on both sides
+    // 3. accept operator abbreviations starting with a % and ending with a ;
+    // 4. accept operator abbreviations starting with a $
+    // 5. all letters are case-insensitive
+    protected static $pattern = '/((?: )?<=?|>=?|<>|!?=(?: )?|(?: )IS(?: NOT)?|(?:NOT )?LIKE|IN(?: )|(?:(?=.*;)%|(?:(?!.*;)\$))(?:[N]?EQ|LT[E]?|GT[E]?)(?:;?))/i'; // note case-insensitivity
     protected static $operators = array(
-          '<'      => '<'
-        , '<='     => '<='
-        , '>'      => '>'
-        , '>='     => '>='
-        , '='      => '='
-        , '!='     => '!='
-        , '<>'     => '<>'
-        , 'is'     => 'IS'
-        , 'is not' => 'IS NOT'
-        , '%lt;'   => '<'
-        , '%lte;'  => '<='
-        , '%gt;'   => '>'
-        , '%gte;'  => '>='
-        , '%eq;'   => '='
-        , '%neq;'  => '!='
-        , '$lt'    => '<'
-        , '$lte'   => '<='
-        , '$gt'    => '>'
-        , '$gte'   => '>='
-        , '$eq'    => '='
-        , '$neq'   => '!='
+          '<'           => '<'
+        , '<='          => '<='
+        , '>'           => '>'
+        , '>='          => '>='
+        , '='           => '='
+        , '!='          => '!='
+        , '<>'          => '<>'
+        , 'is'          => 'IS'
+        , 'is'          => 'IS'
+        , 'is not'      => 'IS NOT'
+        , 'like'        => 'LIKE'
+        , 'not like'    => 'NOT LIKE'
+        , 'in'          => 'IN'
+        , '%lt;'        => '<'
+        , '%lte;'       => '<='
+        , '%gt;'        => '>'
+        , '%gte;'       => '>='
+        , '%eq;'        => '='
+        , '%neq;'       => '!='
+        , '$lt'         => '<'
+        , '$lte'        => '<='
+        , '$gt'         => '>'
+        , '$gte'        => '>='
+        , '$eq'         => '='
+        , '$neq'        => '!='
     );
 
     public function __construct($data) {
@@ -39,17 +49,27 @@ class Comparator {
     }
 
     public function parse($string) {
-        $groups = preg_split(self::$pattern, $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $groups = preg_split(self::$pattern, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
         foreach($groups as $key => $group) {
             $groups[$key] = trim($group);
         }
         if (count($groups) === 3) {
-            $this->left         = $groups[0];
-            $this->operator     = @self::$operators[strtolower($groups[1])];
-            $this->right        = $groups[2];
+            $this->left     = $groups[0];
+            $this->operator = @self::$operators[strtolower($groups[1])];
+            $this->right    = $groups[2];
+
+            // IN is its own strange beast.. modify into an array now for later usage, or allow sql builder to do it (?)
+            if (stristr($this->operator, "IN") !== false && !empty($this->right)) {
+                $this->right = explode(',', $this->right);
+                $this->right = str_replace('(', '', $this->right);
+                $this->right = str_replace(')', '', $this->right);
+                $this->right = array_map(function($x) {
+                    return trim($x);
+                }, $this->right);
+            }
         }
         else {
-            throw new \CSException("Grouped comparator was unable to parse the provided string! Received: " . $string);
+            throw new \CSException("Comparator was unable to parse the provided string! Received: " . $string);
         }
     }
 

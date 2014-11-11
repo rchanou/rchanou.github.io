@@ -35,10 +35,13 @@ class VersionLogic extends BaseLogic {
         return $val; // or throw error? unexpected type !!!
     }
 
-    public function current() {
+    public function current($expand = true) {
         $versions = parent::all();
         $current = end($versions); // note that this isn't really necessary -- all rows in the Version_CS table contain the correct CurrentVersion
-        $current = $this->_expand($current->CurrentVersion);
+        $current = $current->CurrentVersion;
+        if ($expand)
+            $current = $this->_expand($current); // turn into an array for comparison purposes
+        // else, return as a string for whatever reason (logging, etc)
         return $current;
     }
 

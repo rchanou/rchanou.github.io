@@ -1,8 +1,14 @@
 <?php
 
-class Settings
+class Settings extends BaseApi
 {
-    public $restler;
+    // public $restler;
+
+    function __construct() {
+        parent::__construct();
+        $this->mapper = new \ClubSpeed\Mappers\SettingsMapper();
+        $this->interface = $this->logic->settings;
+    }
         
     /**
      * Whitelist of groups/settings. Set setting (or group) to "true" if it is whitelisted.

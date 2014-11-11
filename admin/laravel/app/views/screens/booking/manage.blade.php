@@ -8,7 +8,7 @@ Manage Bookings
     @parent
     {{ HTML::style('css/jquery.ui.ie.css') }}
     {{ HTML::style('css/jquery-ui.css') }}
-		{{ HTML::style('css/select2-bootstrap.css') }}
+	{{ HTML::style('css/select2-bootstrap.css') }}
 @stop
 
 @section('pageHeader')

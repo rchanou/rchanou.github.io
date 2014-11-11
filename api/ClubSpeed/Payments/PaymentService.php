@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Payments;
+use Omnipay\Omnipay;
 
 /**
  * The database interface class
@@ -11,11 +12,35 @@ class PaymentService {
     private $logic;
     public $handlers;
     private $_lazy;
+    private $allowed;
 
     public function __construct(&$CSLogic) {
         $this->logic = $CSLogic;
         $this->handlers = new \ClubSpeed\Payments\ProductHandlers\ProductHandlerService($this, $this->logic);
         $this->_lazy = array();
+        $this->allowed = array(
+            'Dummy',
+            'SagePay_Direct',
+            'Payflow_Pro',
+            'PayPal_Pro',
+            'PCCharge',
+            'WorldPay',
+            'WorldPayXML'
+            // add processors as we test/support them -- dummy should ABSOLUTELY be removed before going live
+        );
+    }
+
+    public function available() {
+        $processors = array_intersect(Omnipay::find(), $this->allowed); // necessary? we could just use the allowed array, too.
+        $available = array();
+        $stuff = array_walk($processors, function($val, $key) use (&$available) {
+            $processor = Omnipay::create($val);
+            $available[] = array(
+                "name"      => $val,
+                "options"   => array_keys($processor->getParameters())
+            );
+        });
+        return $available;
     }
 
     function __get($prop) {
@@ -25,7 +50,7 @@ class PaymentService {
     private function load($prop) {
         $prop = '\ClubSpeed\Payments\\' . ucfirst($prop) . 'Payment';
         if (!isset($this->_lazy[$prop])) {
-            $this->_lazy[$prop] = new $prop($this->logic, $this->handlers);
+            $this->_lazy[$prop] = new $prop($this->logic, $this->handlers, $this);
         }
         return $this->_lazy[$prop];
     }

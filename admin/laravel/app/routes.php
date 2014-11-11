@@ -14,5 +14,12 @@ Route::post('channel/deploy','DeployController@deploy');
 
 Route::get('booking', 'BookingController@index');
 Route::get('booking/settings', 'BookingController@settings');
+Route::post('booking/settings/update', 'BookingController@updateSettings');
+Route::post('booking/payments/settings/update', 'BookingController@updatePaymentSettings');
+
+Route::get('booking/payments', 'BookingController@payments');
+
+Route::get('booking/emailTemplates', 'BookingController@emailTemplates');
+Route::post('booking/emailTemplates', 'BookingController@updateEmailTemplates');
 
 Route::get('/disconnected', 'DisconnectedController@entry');

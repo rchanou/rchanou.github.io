@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Utility\Convert;
 
 /**
  * The business logic class
@@ -26,18 +27,18 @@ class BookingAvailabilityLogic extends BaseLogic {
         throw new \CSException("Attempted a BookingAvailabilityLogic create!");
     }
 
-    public final function update($onlineBookingsId, $params = array()) {
+    public final function update() {
         throw new \CSException("Attempted a BookingAvailabilityLogic create!");
     }
 
-    public final function delete($id) {
+    public final function delete() {
         throw new \CSException("Attempted a BookingAvailabilityLogic create!");
     }
 
     private function getPublicDates() {
         $beginningName = 'bookingAvailabilityWindowBeginningInSeconds';
         $endName = 'bookingAvailabilityWindowEndingInSeconds';
-        $now = \ClubSpeed\Utility\Convert::getDate();
+        $now = Convert::getDate();
         $settings = $this->logic->controlPanel->find(
                 'SettingName = ' . $beginningName
             .   ' OR SettingName = ' . $endName
@@ -56,10 +57,10 @@ class BookingAvailabilityLogic extends BaseLogic {
             throw new \CSException("Unable to find the ControlPanel setting for Booking." . $beginningName . "!");
         if (is_null($end))
             throw new \CSException("Unable to find the ControlPanel setting for Booking." . $endName . "!");
-        $beginningSetting = \ClubSpeed\Utility\Convert::toNumber($beginning->SettingValue ?: $beginning->DefaultSetting);
-        $endSetting = \ClubSpeed\Utility\Convert::toNumber($end->SettingValue ?: $end->DefaultSetting);
-        $beginning = \ClubSpeed\Utility\Convert::getDate(time() + $beginningSetting);
-        $end = \ClubSpeed\Utility\Convert::getDate(time() + $endSetting);
+        $beginningSetting = Convert::toNumber($beginning->SettingValue ?: $beginning->DefaultSetting);
+        $endSetting = Convert::toNumber($end->SettingValue ?: $end->DefaultSetting);
+        $beginning = Convert::getDate(time() + $beginningSetting);
+        $end = Convert::getDate(time() + $endSetting);
         return array(
             'beginning' => $beginning,
             'end' => $end
@@ -88,7 +89,7 @@ class BookingAvailabilityLogic extends BaseLogic {
         if (!isset($params['end'])) {
             $timeformat = 'Y-m-d H:i:s';
             $dayformat = 'Y-m-d';
-            $params['end'] = \ClubSpeed\Utility\Convert::toDateForServer(date($timeformat, strtotime(date($dayformat) . ' + 1 day')), $timeformat);
+            $params['end'] = Convert::toDateForServer(date($timeformat, strtotime($params['start'] . ' + 1 day')), $timeformat);
         }
         else {
             $passedEndTime = strtotime($params['end']);
@@ -112,6 +113,7 @@ class BookingAvailabilityLogic extends BaseLogic {
             ."\n        @StartRange <= obav.HeatStartsAt"
             ."\n    AND obav.HeatStartsAt < @EndRange"
             ;
+
         $records = $this->db->onlineBookingAvailability_V->query($sql, $sqlParams);
         return $records;
     }

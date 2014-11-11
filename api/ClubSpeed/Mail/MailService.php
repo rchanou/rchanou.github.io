@@ -44,9 +44,8 @@ class MailService {
     }
 
     public static function send(MailBuilder $mail) {
-        if (!self::$ready) {
+        if (!self::$ready)
             self::load(); // don't actually load until we need to send a message
-        }
         return self::$interface->send($mail);
     }
 }

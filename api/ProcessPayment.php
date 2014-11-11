@@ -8,17 +8,17 @@ class ProcessPayment {
     private $webapi;
     
     function __construct() {
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = $GLOBALS['logic'];
         $this->payments = new \ClubSpeed\Payments\PaymentService($this->logic);
         $this->webapi = $GLOBALS['webapi'];
     }
 
     public function get($request_data = null) {
-        // for testing purposes, we can post back here as the server payment callback URL
-        pr('inside processPayment get');
-        pr($request_data);
-        die();
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        return $this->payments->available();
     }
 
     public function post($id, $request_data = null) {

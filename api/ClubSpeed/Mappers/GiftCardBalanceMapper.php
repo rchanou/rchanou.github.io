@@ -6,7 +6,7 @@ class GiftCardBalanceMapper extends BaseMapper {
 
     public function __construct() {
         parent::__construct();
-        $this->namespace = 'checks';
+        $this->namespace = 'cards';
         $this->register(array(
               'CustID'          => 'customerId'
             , 'CrdID'           => 'cardId'

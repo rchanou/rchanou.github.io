@@ -12,11 +12,11 @@ abstract class BaseReadOnlyLogic extends BaseLogic {
         throw new \CSException("Attempted a create on a read-only resource!");
     }
 
-    public function update($onlineBookingsId, $params = array()) {
+    public function update() {
         throw new \CSException("Attempted an update on a read-only resource!");
     }
 
-    public function delete($id) {
+    public function delete() {
         throw new \CSException("Attempted a delete on a read-only resource!");
     }
 }

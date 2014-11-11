@@ -54,11 +54,11 @@ class CheckTotalsLogic extends BaseLogic {
         return $checkCreateData;
     }
 
-    public final function update($id, $params = array()) {
+    public final function update() {
         throw new \CSException("Attempted a CheckTotals update!");
     }
 
-    public final function delete($id) {
+    public final function delete() {
         throw new \CSException("Attempted a CheckTotals delete!");
     }
 
@@ -161,6 +161,12 @@ class CheckTotalsLogic extends BaseLogic {
                 $check->CheckTotal = $check->CheckSubtotal;
             }
             $check->CheckTotal -= $check->Discount;
+
+            // for virtual, assume there are no outstanding payments
+            $check->CheckPaidTax = 0;
+            $check->CheckPaidTotal = 0;
+            $check->CheckRemainingTax = $check->CheckTax;
+            $check->CheckRemainingTotal = $check->CheckTotal;
         }
         return $checks;
     }

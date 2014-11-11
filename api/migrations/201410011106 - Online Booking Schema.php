@@ -7,14 +7,15 @@ require_once('../vendors/autoload.php');
 require_once('../ClubSpeed/ClubSpeedLoader.php');
 $_REQUEST['debug'] = true;
 
-$files = scandir('.');
+$resourceDir = './resources/';
+$files = scandir($resourceDir);
 $date = '201410011106'; // only grab sql files with this exact date
-$sql_files = array_filter(scandir('.'), function($x) use ($date) {
-    return ((strpos($x, $date) === 0) && (substr($x, -4) === '.sql'));
+$sql_files = array_filter($files, function($file) use ($date) {
+    return ((strpos($file, $date) === 0) && (substr($file, -4) === '.sql'));
 });
 
 foreach($sql_files as $sql_file) {
-    $sql = file_get_contents($sql_file);
+    $sql = file_get_contents($resourceDir . $sql_file);
     try {
         $db->exec($sql);
         echo $sql_file . ' executed successfully!';
@@ -25,4 +26,5 @@ foreach($sql_files as $sql_file) {
         echo '<br>';
     }
 }
+echo 'All schema updates complete!';
 die();

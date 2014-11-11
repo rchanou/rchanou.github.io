@@ -53,7 +53,8 @@ $settings = array(
 	'enableFacebook' => true,
 	'bookingAvailabilityWindowBeginningInSeconds' => 30*60,
 	'bookingAvailabilityWindowEndingInSeconds' => 90*24*60*60,
-	'reservationTimeout' => 30*60
+	'reservationTimeout' => 30*60,
+	'autoAddRacerToHeat' => true
 	);
 
 error_reporting(E_ALL);

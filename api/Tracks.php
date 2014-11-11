@@ -16,7 +16,7 @@ class Tracks
     public $restler;
     
     function __construct(){
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
     }
     
     /**

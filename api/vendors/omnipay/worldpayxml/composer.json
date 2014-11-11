@@ -1,0 +1,39 @@
+{
+    "name": "tea-and-code/worldpay-xml",
+    "type": "library",
+    "description": "WorldPay XML driver for the Omnipay payment processing library",
+    "keywords": [
+        "gateway",
+        "merchant",
+        "omnipay",
+        "pay",
+        "worldpay",
+        "payment"
+    ],
+    "homepage": "https://github.com/teaandcode/worldpay-xml",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dave Nash",
+            "email": "dave.nash@teaandcode.com"
+        },
+        {
+            "name": "Adrian Macneil",
+            "email": "adrian@adrianmacneil.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "TeaAndCode\\WorldPayXML\\" : "src/" }
+    },
+    "require": {
+        "omnipay/common": "~2.0"
+    },
+    "require-dev": {
+        "omnipay/tests": "~2.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}

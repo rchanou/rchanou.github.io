@@ -1,0 +1,15 @@
+<div class="call-group" id="{{section.id}}">
+  <div class="call-header row background-header rounded">
+    <div class="col-xs-12">
+        <h3><span class="glyphicon glyphicon-chevron-down"></span> {{section.header}} </span></h2>
+    </div>
+  </div> <!-- call-header -->
+  <div class="call-section">
+    {% include 'section-info.twig' %}
+    {% if section.calls and section.calls|length > 0 %}
+      {% for call in section.calls %}
+        {% include 'section-calls.twig' %}
+      {% endfor %} <!-- for call in section.calls -->
+    {% endif %} <!-- if section.calls and section.calls|length > 0 -->
+  </div> <!-- call-section -->
+</div> <!-- call-group -->

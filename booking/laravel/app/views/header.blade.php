@@ -1,8 +1,10 @@
 
         <div class="header">
-            <img src="{{asset($images['header'])}}">
+            <a href="{{URL::to('step1')}}"><img src="{{asset($images['header'])}}"></a>
         </div>
         @yield('steps')
-        {{--<div class="extras">
+        @if(Session::has('debug'))
+        <div class="extras">
         Extras: {{link_to('#','Buy Gift Cards')}} - {{link_to('login','Login (TEST)')}}
-        </div>--}}
+        </div>
+        @endif

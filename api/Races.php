@@ -18,7 +18,7 @@ class Races
     private $webapi;
 
     function __construct(){
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->webapi = @$GLOBALS['webapi'];
     }
 

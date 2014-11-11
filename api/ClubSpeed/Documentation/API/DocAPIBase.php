@@ -18,7 +18,7 @@ abstract class DocAPIBase {
         $this->calls    = array();
         $this->examples = array();
         $this->usage    = '';
-        $this->root = '/api/index.php/';
+        $this->root     = '/api/index.php/';
     }
 
     private function parseJson($file) {

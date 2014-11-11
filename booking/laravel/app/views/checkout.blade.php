@@ -43,6 +43,31 @@ Checkout
 
             <div class="formHeader">Payment Information</div>
 
+            @if(Session::has('debug'))
+            <a href="#" id="testdata">Populate with test data</a><p/>
+
+            <script>
+                $(document).ready(function() {
+                    $('#testdata').click(function () {
+                        $('#firstName').val('TestFirstName');
+                        $('#lastName').val('TestLastName');
+                        $('#number').val('4111111111111111');
+                        $('#cvv').val('162');
+                        $('#expiryMonth').val('7');
+                        $('#expiryYear').val('2015');
+                        $('#address1').val('123 Billing St');
+                        $('#address2').val('Billpartment 1');
+                        $('#city').val('Billstown');
+                        $('#state').val('CA');
+                        $('#postcode').val('12345');
+                        $('#country').val('US');
+                        $('#phone').val('(555) 1234567');
+                        $('#email').val('test@example.com');
+                    });
+                });
+            </script>
+            @endif
+
             <!-- First name -->
             <label for="firstName">
                 <strong>
@@ -162,7 +187,7 @@ Checkout
                         <th><strong>Race Name</strong></th>
                         <th><strong>Racers</strong></th>
                         <th><strong>Start Time</strong></th>
-                        <th><strong>Price (Each)</strong></th>
+                        <th><strong>Price</strong></th>
                         <th><strong>Subtotal</strong></th>
                         <th><strong>Tax</strong></th>
                         <th><strong>Total</strong></th>
@@ -172,20 +197,20 @@ Checkout
                     <tr>
                         <td>{{$cartItem['name']}}</td>
                         <td>{{$cartItem['quantity']}}</td>
-                        <td>{{date('Y/m/d H:i',strtotime($cartItem['startTime']))}}</td>
-                        <td>${{number_format($virtualCheckDetails[$cartItemId]->unitPrice,2)}}</td>
-                        <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailSubtotal,2)}}</td>
-                        <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailTax,2)}}</td>
-                        <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailTotal,2)}}</td>
+                        <td>{{date(Config::get('config.dateFormat') . ' H:i',strtotime($cartItem['startTime']))}}</td>
+                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->unitPrice, $currency)}}</td>
+                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailSubtotal, $currency)}}</td>
+                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTax, $currency)}}</td>
+                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTotal, $currency)}}</td>
                     </tr>
                 @endforeach
                 </table>
             @endif
 
             <div class="rightAligned">
-                <strong>Subtotal:</strong> ${{number_format($virtualCheck->checkSubtotal,2)}}<br/>
-                <strong>Tax:</strong> ${{number_format($virtualCheck->checkTax,2)}}<br/>
-                <strong>Total:</strong> ${{number_format($virtualCheck->checkTotal,2)}}<br/>
+            <strong>Order Subtotal:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkSubtotal, $currency)}}<br/>
+            <strong>Order Tax:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTax, $currency)}}<br/>
+            <strong>Order Total:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTotal, $currency)}}<br/>
             </div>
 
             <input type="hidden" name="expectedSubtotal" value="{{$virtualCheck->checkSubtotal}}">

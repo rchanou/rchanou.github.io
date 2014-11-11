@@ -72,8 +72,10 @@ class DbCollection {
         return $all;
     }
 
-    public function get($id) {
-        $get = \ClubSpeed\Database\Helpers\SqlBuilder::buildGet($this->definition->newInstance($id));
+    public function get() {
+        $ids = func_get_args();
+        $instance = $this->definition->newInstanceArgs($ids);
+        $get = \ClubSpeed\Database\Helpers\SqlBuilder::buildGet($instance);
         $results = $this->conn->query($get['statement'], $get['values']);
         $get = array();
         foreach($results as $result) {
@@ -137,21 +139,31 @@ class DbCollection {
         // return $affected;
     }
 
+    // note that $args could contain any one of the following:
+    //  1. object of the proper instance
+    //  2. array representation of the underlying object
+    //  3. variable number of primary keys
     public function delete($data) {
+        $args = func_get_args();
+        $data = reset($args);
         if (is_object($data) && $this->definition->isInstance($data))
             $record = $data;
+        // else if (is_array($data))
+            // $record = $this->definition->newInstance($data);
         else
-            $record = $this->definition->newInstance($data);
+            $record = $this->definition->newInstanceArgs($args);
         $delete = \ClubSpeed\Database\Helpers\SqlBuilder::buildDelete($record);
         $affected = $this->conn->exec($delete['statement'], $delete['values']);
         // return $affected;
     }
 
-    public function exists($data) {
+    public function exists() {
+        $args = func_get_args();
+        $data = reset($args);
         if (is_object($data) && $this->definition->isInstance($data))
-            $record = $data;
+            $record = $data; // if the first arg is already the right instance, just use it
         else
-            $record = $this->definition->newInstance($data);
+            $record = $this->definition->newInstanceArgs($args); // otherwise, pass the stuff on -- note that this may be multiple ids (hence, the arg issues)
         $exists = \ClubSpeed\Database\Helpers\SqlBuilder::buildExists($record);
         $results = $this->conn->query($exists['statement'], $exists['values']);
         if (!is_null($results) && !empty($results) && isset($results[0])) {

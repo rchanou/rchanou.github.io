@@ -38,7 +38,8 @@ class SwiftMailer implements MailerInterface {
             ->setSubject($mail->subject)
             ->setFrom($mail->from)
             ->setTo($mail->to)
-            ->setBody($mail->body, 'text/html'); // default to html? is this sufficient?
+            ->setBody($mail->body, 'text/html')
+            ->addPart($mail->alternate, 'text/plain');
         $this->mailer->send($message);
     }
 }

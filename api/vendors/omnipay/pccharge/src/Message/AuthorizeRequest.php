@@ -12,15 +12,17 @@ class AuthorizeRequest extends AbstractRequest
         $this->validate('amount', 'transactionId');
 
         $data = $this->getCardData(); // card data at the root level
-        $data['AmountToCharge'] = $this->getAmount();
+        // $data['AmountToCharge'] = $this->getAmount();
         $data['TaxAmount'] = $this->getTaxAmount();
         $data['CheckID'] = $this->getTransactionId();
+        
+        $data['AmountToCharge'] = 0.01; // FOR TESTING PURPOSES
         
         return $data;
     }
 
-    public function getEndpoint()
-    {
-        return $this->endpoint.'/charges';
-    }
+    // public function getEndpoint()
+    // {
+    //     return $this->endpoint.'/charges';
+    // }
 }

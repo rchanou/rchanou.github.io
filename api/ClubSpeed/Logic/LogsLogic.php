@@ -36,17 +36,17 @@ class LogsLogic extends BaseLogic implements \ClubSpeed\Logging\LogInterface {
     public function debug($message) {
         if (filter_var(@$_REQUEST['debug'], FILTER_VALIDATE_BOOLEAN)) {
             // pr($message);
-            return $this->log("DEBUG   :: " . $message);
+            return $this->log("DEBUG :: " . $message);
         }
     }
 
-    public function warning($message) {
+    public function warn($message) {
         return $this->log("WARNING :: " . $message);
     }
 
     public function error($message, \Exception $exception = null) {
         if (isset($exception) && $exception instanceof \Exception)
             $message .= ' :: Exception at ' . $exception->getFile() . ':' . $exception->getLine() . ' - ' . $exception->getMessage();
-        return $this->log("ERROR   :: " . $message); // just use function log for now -- consider sending emails on true errors
+        return $this->log("ERROR :: " . $message); // just use function log for now -- consider sending emails on true errors
     }
 }

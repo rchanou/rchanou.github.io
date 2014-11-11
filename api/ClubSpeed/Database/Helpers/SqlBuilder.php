@@ -2,10 +2,47 @@
 
 namespace ClubSpeed\Database\Helpers;
 use ClubSpeed\Enums\Enums;
+use ClubSpeed\Utility\Objects;
 
 class SqlBuilder {
 
     private function __construct() {} // prevent creation of "static" class
+
+    private static function getRecordIdentity($record) {
+        return self::mutateByRecordKeys($record, function($key, $keys) {
+            return (!in_array($key, $keys));
+        });
+    }
+
+    private static function stripRecordIdentity($record) {
+        return self::mutateByRecordKeys($record, function($key, $keys) {
+            return (in_array($key, $keys));
+        });
+    }
+
+    private static function mutateByRecordKeys($record, $callback) {
+        // return a copy of the record only containing everything BUT primary keys and their values
+        $tempRecord = clone $record;
+        $keys = $tempRecord::$key;
+        if (!is_array($keys))
+            $keys = array($keys);
+        foreach($tempRecord as $key => $val) {
+            if ($callback($key, $keys))
+                $tempRecord->$key = null;
+        }
+        return $tempRecord;
+    }
+
+    private static function allKeysSet($record) {
+        $keys = $record::$key;
+        if (!is_array($keys))
+            $keys = array($keys);
+        foreach($keys as $key) {
+            if (is_null($record->{$key}))
+                return false;
+        }
+        return true;
+    }
 
     public static function buildInsert($record = array()) {
         if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
@@ -60,17 +97,13 @@ class SqlBuilder {
     public static function buildGet($record = array()) {
         if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
             throw new \InvalidArgumentException("Attempted to get from a non BaseRecord! Received: " . $record);
-        $get = array(
-            "key"       => $record::$key
-            , "param"   => ":" . $record::$key
-        );
-        $get['values'][$get['param']] = $record->{$record::$key};
         $select = self::buildSelect($record);
+        $identity = self::getRecordIdentity($record);
+        $where = self::buildWhere($identity);
         $get['statement'] = ""
             ."\n" . $select['statement']
-            ."\nWHERE"
-            ."\n    " . $record::$tableAlias . '.' . $get['key'] . " = " . $get['param']
-            ;
+            ."\n" . $where['statement'];
+        $get['values'] = $where['values'];
         return $get;
     }
 
@@ -106,6 +139,7 @@ class SqlBuilder {
 
     public static function buildWhere($record, $groupedComparators = null) {
         $where = array();
+        $valueCounter = 0; // switching to value counter, since a count is no longer sufficient with support for the IN keyword
         if (is_null($groupedComparators))
             $groupedComparators = new \ClubSpeed\Database\Helpers\GroupedComparator($record); // build if null?
         $comparators = $groupedComparators->comparators;
@@ -117,7 +151,7 @@ class SqlBuilder {
             // and value vs column determination be moved to a validation method elsewhere (?)
             if (!property_exists($record, $comparator->left)) {
                 // left is a value
-                $param = ':p' . (count(@$where['values']) ?: 0);
+                $param = ':p' . $valueCounter++;
                 $where['columns'][] = array(
                       'left'        => $param
                     , 'operator'    => ' '. $comparator->operator . ' '
@@ -126,18 +160,32 @@ class SqlBuilder {
                 );
                 $where['values'][$param] = $comparator->left; // alias it to protect against injection
             }
-            else if (!property_exists($record, $comparator->right)) {
-                // right is a value
+            else if (is_array($comparator->right) || !property_exists($record, $comparator->right)) {
+                // right is a value or an array for IN
+                // check for IS(?: NOT) NULL special case
                 if ($comparator->right != 'NULL') { // convert to DB_NULL at some point -- make map do the conversion (?)
-                    // check for IS(?: NOT) NULL special case
-                    $param = ':p' . (count(@$where['values']) ?: 0);
-                    $where['columns'][] = array(
-                          'left'        => $record::$tableAlias . '.' . $comparator->left
+                    $tempColumn = array(
+                        'left'        => $record::$tableAlias . '.' . $comparator->left
                         , 'operator'    => ' '. $comparator->operator . ' '
-                        , 'right'       => $param
                         , 'connector'   => isset($connector) ? $connector . ' ' : null
                     );
-                    $where['values'][$param] = $comparator->right;
+                    // if we allow "IN" statements, we can have arrays here
+                    // and then each array item should be parameterized
+                    if (is_array($comparator->right)) {
+                        $tempParams = array();
+                        foreach($comparator->right as $rightVal) {
+                            $param = ':p' . $valueCounter++;
+                            $where['values'][$param] = $rightVal;
+                            $tempParams[] = $param;
+                        }
+                        $tempColumn['right'] = '(' . implode(', ', $tempParams) . ')';
+                    }
+                    else {
+                        $param = ':p' . $valueCounter++;
+                        $where['values'][$param] = $comparator->right;
+                        $tempColumn['right'] = $param;
+                    }
+                    $where['columns'][] = $tempColumn;
                 }
                 else {
                     // don't alias the right, if it is supposed to be a NULL comparison
@@ -172,21 +220,14 @@ class SqlBuilder {
         if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
             throw new \InvalidArgumentException("Attempted to update using a non BaseRecord! Received: " . $record);
 
-        // get a copy of the record
-        // clean all parameters but the id
-        // check this for efficiency (!!!)
-        $tempRecord = clone $record;
-        foreach($tempRecord as $key => $val) {
-            if ($key !== $tempRecord::$key) {
-                $tempRecord->$key = null;
-            }
-        }
-        $where = self::buildWhere($tempRecord);
+        $identity = self::getRecordIdentity($record);
+        if (Objects::isEmpty($identity)) // just to be safe -- updates still only designed to be a single update by primary keys
+            throw new \CSException("Attempted to update using a record which did not contain any primary keys!");
+        if (!self::allKeysSet($identity)) // is empty is not sufficient -- what if we have part of a primary key?
+            throw new \CSException("Attempted to update using a record which did not contain a full set of primary keys! Received: " . print_r($record, true)); // possible security risk?
 
-        // chop the id out of the non-cloned record
-        $id = $record->{$record::$key};
-        $record->{$record::$key} = null;
-
+        $where = self::buildWhere($identity);
+        $record = self::stripRecordIdentity($record); // more testing required
         $update = array(
               'values'  => array()
             , 'columns'  => array()
@@ -223,9 +264,9 @@ class SqlBuilder {
     public static function buildDelete($record = array()) {
         if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
             throw new \InvalidArgumentException("Attempted to delete from a non BaseRecord! Received: " . $record);
-        if (is_null($record->{$record::$key}))
-            throw new \InvalidArgumentException("Attempted to delete a BaseRecord without providing an id! Received: " . $record);
-        
+        $identity = self::getRecordIdentity($record);
+        if (!self::allKeysSet($identity)) // is empty is not sufficient -- what if we have part of a primary key?
+            throw new \CSException("Attempted to delete using a record which did not contain a full set of primary keys! Received: " . print_r($record, true)); // possible security risk?
         $where = self::buildWhere($record);
         $delete['statement'] = ""
             ."\nDELETE " . $record::$tableAlias
@@ -239,23 +280,22 @@ class SqlBuilder {
     public static function buildExists($record = array()) {
         if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
             throw new \InvalidArgumentException("Attempted to check existence from a non BaseRecord! Received: " . $record);
-        if (is_null($record->{$record::$key}))
-            throw new \InvalidArgumentException("Attempted to check existence of a BaseRecord without providing an id! Received: " . $record);
-        
+        $identity = self::getRecordIdentity($record);
+        if (!self::allKeysSet($identity)) // is empty is not sufficient -- what if we have part of a primary key?
+            throw new \CSException("Attempted to check for existence of a record which did not contain a full set of primary keys! Received: " . print_r($record, true)); // possible security risk?
+        $where = self::buildWhere($identity);
         $exists = array();
         $exists['statement'] = ''
             ."\nSELECT"
             ."\n    CASE WHEN EXISTS ("
-            ."\n        SELECT " . $record::$tableAlias . ".*"
+            ."\n        SELECT TOP 1 " . $record::$tableAlias . ".*"
             ."\n        FROM " . $record::$table . " " . $record::$tableAlias
-            ."\n        WHERE " . $record::$tableAlias . "." . $record::$key . " = :" . $record::$key
+            ."\n        " . $where['statement'] // $record::$tableAlias . "." . $record::$key . " = :" . $record::$key
             ."\n    )"
             ."\n    THEN 1"
             ."\n    ELSE 0"
             ."\n    END AS [Exists]";
-        $exists['values'] = array(
-            ":" . $record::$key => $record->{$record::$key}
-        );
+        $exists['values'] = $where['values'];
         return $exists;
     }
 }

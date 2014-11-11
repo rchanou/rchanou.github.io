@@ -1,0 +1,21 @@
+Order #{{checkId}} Confirmation
+
+Hello {{customer}},
+Thank you for shopping with {{business}}!
+We have received payment for order #{{checkId}}.
+The details for this order are indicated below.
+
+Order Details
+
+{{details}}
+
+Subtotal:
+Estimated Tax: {{checkTax}}
+{{giftCard}}
+Total: {{checkTotal}}
+
+If any gift cards were ordered with this purchase,
+please check your email for gift card confirmations
+as well as card numbers.
+
+Thank you for shopping with us!

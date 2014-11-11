@@ -30,4 +30,5 @@ return array(
     'Omnipay\\CardSave\\' => array($vendorDir . '/omnipay/cardsave/src'),
     'Omnipay\\AuthorizeNet\\' => array($vendorDir . '/omnipay/authorizenet/src'),
     'Omnipay\\PCCharge\\' => array($vendorDir . '/omnipay/pccharge/src'),
+    'Omnipay\\WorldPayXML\\' => array($vendorDir . '/omnipay/worldpayxml/src'),
 );

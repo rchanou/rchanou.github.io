@@ -51,7 +51,7 @@ class Hasher {
      * @return bool If the newly hashed password matches the provided hash, then true. Else, false.
      */
     public static function verify($password, $hash) {
-        return password_verify($password, $hash);
+        return password_verify($password, $hash); // ~ 129ms
     }
 
     /**

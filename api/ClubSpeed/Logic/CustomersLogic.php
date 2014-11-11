@@ -133,7 +133,7 @@ class CustomersLogic extends BaseLogic {
         if (!isset($password) || !is_string($password))
             throw new \InvalidArgumentException("Customer login requires password to be a string!");
 
-        $primaryCustomer = $this->find_primary_account($email);
+        $primaryCustomer = $this->find_primary_account($email); // ~ 143ms
         if(empty($primaryCustomer)) {
             // Customer email could not be found in the database
             throw new \InvalidEmailException("Invalid credentials!");
@@ -164,7 +164,7 @@ class CustomersLogic extends BaseLogic {
             throw new \InvalidArgumentException("find_primary_account requires email to be a string! Received: " . $email);
 
         // cheat! point this to PrimaryCustomersLogic, as a temporary fix
-        $primaryCustomer = $this->logic->primaryCustomers->match(array('EmailAddress' => $email));
+        $primaryCustomer = $this->logic->primaryCustomers->match(array('EmailAddress' => $email)); // ~ 147ms
         if (empty($primaryCustomer)) {
             return array();
         }
@@ -255,28 +255,6 @@ class CustomersLogic extends BaseLogic {
         $results = $this->db->query($sql, $params);
         $count = $results[0]['Count']; // results should always contain 1 row (no more, no less)
         return ($count > 0);
-    }
-
-    /**
-     * Deletes a customer from the database by a provided customer id.
-     *
-     * @param int $customerId The id of the customer to delete.
-     * @return int The quantity of deleted customers.
-     * @throws InvalidArgumentException If the customer id provided is not an integer.
-     */
-    public final function delete($customerId) {
-        if (!isset($customerId) || !is_int($customerId))
-            throw new \InvalidArgumentException("Customer delete requires customerId to be an integer! Received: $customerId");
-
-        $sql = array(
-            "DELETE c"
-            , "FROM CUSTOMERS c"
-            , "WHERE c.CustID = ?"
-        );
-        $sql = implode("\n", $sql);
-        $params = array($customerId);
-        $affected = $this->db->trans($sql, $params); // expected to delete 1 record
-        return $affected;
     }
 
     /**
@@ -418,7 +396,7 @@ class CustomersLogic extends BaseLogic {
      *
      * @throws RequiredParameterMissingException if any of the required parameters are either not set or empty in $params.
      */
-    public final function create($params = array()) {
+    public final function create_v0($params = array()) {
 
         //----------------
         // Business logic
@@ -474,10 +452,9 @@ class CustomersLogic extends BaseLogic {
                 throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
             $customer->Password = \ClubSpeed\Security\Hasher::hash($customer->Password);
         }
-
         // convert the gender to the expected gender "id" on the database
-        if (isset($customer->Gender) && !empty($customer->Gender)) {
-            $gender = strtolower($customer->Gender);
+        if (isset($params['Gender']) && !empty($params['Gender'])) {
+            $gender = strtolower($params['Gender']);
             $genderChar = $gender[0];
             switch ($genderChar) {
                 case "m": // male
@@ -548,15 +525,127 @@ class CustomersLogic extends BaseLogic {
         $this->db->exec($sql, $params);
     }
 
-    // public final function all() {
-    //     return $this->db->customers->all();
-    // }
+    // todo, if necessary
+    public function create($params = array()) {
+        $newCustId = $this->getNextCustId(); // get out here for scoping issues
+        $settings = $this->getSettings(); // get out here for scoping issues
+        
+        $db =& $this->db;
+        $createReturn = parent::_create($params, function($customer) use (&$db, &$params, &$settings, &$newCustId) {
+            
+            // // validate email
+            if (isset($customer->EmailAddress) && !empty($customer->EmailAddress)) {
 
-    // public final function get($customerId) {
-    //     return $this->db->customers->get($customerId);
-    // }
+                // check the email formatting
+                if (!\ClubSpeed\Security\Authenticate::isValidEmailFormat($customer->EmailAddress))
+                    throw new \InvalidEmailException("Customer create found an invalid EmailAddress! Received: " . $customer->EmailAddress);
+                
+                // check AllowDuplicateEmail settings
+                // $settings = $self->getSettings(); // collect kiosk settings
+                $allowDuplicateEmail = \ClubSpeed\Utility\Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
+                if (!$allowDuplicateEmail) {
+                    $customersWithEmail = $db->customers->match(array(
+                        'EmailAddress' => $customer->EmailAddress
+                    ));
+                    if (!empty($customersWithEmail))
+                        throw new \EmailAlreadyExistsException("Customer create found an email which already exists! Received: " . $customer->EmailAddress);
+                }
+            }
 
-    // public final function update($params = array()) {
-    //     return $this->db->customers->update($params);
-    // }
+            // use $params for gender, since creating the customer record will have already converted gender to some sort of int
+            if (isset($params['Gender']) && !empty($params['Gender'])) {
+                $gender = strtolower($params['Gender']);
+                $genderChar = $gender[0];
+                switch ($genderChar) {
+                    case "m": // male
+                        $customer->Gender = 1;
+                        break;
+                    case "f": // female
+                        $customer->Gender = 2;
+                        break;
+                    case "o": // other
+                        $customer->Gender = 0;
+                        break;
+                }
+            }
+
+            // validate password strength, then hash it
+            if (isset($customer->Password) && !empty($customer->Password)) {
+                if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Password))
+                    throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
+                $customer->Password = \ClubSpeed\Security\Hasher::hash($customer->Password);
+            }
+
+            // if RacerName is missing, use FName + " " + LName
+            if (!isset($customer->RacerName) || empty($customer->RacerName)) {
+                $customer->RacerName = $customer->FName . " " . $customer->LName;
+            }
+            $customer->TotalVisits = 1;
+
+            $customer->CustID = $newCustId;
+
+            // check for duplicate emails, or just let it through?
+            return $customer;
+        });
+        if ($this->logic->replication->isReplicationEnabled()) {
+            $this->logic->replication->insertReplicationLogs($newCustId, 'Customers', 'insert');
+        }
+        return array(
+            'CustID' => $newCustId
+        );
+    }
+
+    public function update(/*$id, $params = array()*/) {
+        $args = func_get_args();
+        $id = $args[0]; // hack it, since we need to use params inside the update closure
+        $params = $args[1] ?: array();
+        $db =& $this->db;
+        $closure = function($old, $new) use (&$db, &$params) {
+
+
+            // // validate email
+            if (isset($new->EmailAddress) && !empty($new->EmailAddress) && $new->EmailAddress != $old->EmailAddress) {
+
+                // check the email formatting
+                if (!\ClubSpeed\Security\Authenticate::isValidEmailFormat($new->EmailAddress))
+                    throw new \InvalidEmailException("Customer update found an invalid EmailAddress! Received: " . $new->EmailAddress);
+                
+                // check AllowDuplicateEmail settings
+                // $settings = $self->getSettings(); // collect kiosk settings
+                $allowDuplicateEmail = \ClubSpeed\Utility\Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
+                if (!$allowDuplicateEmail) {
+                    $customersWithEmail = $db->customers->match(array(
+                        'EmailAddress' => $new->EmailAddress
+                    ));
+                    if (!empty($customersWithEmail))
+                        throw new \EmailAlreadyExistsException("Customer update found an email which already exists! Received: " . $new->EmailAddress);
+                }
+            }
+
+            // use $params for gender, since creating the dummy customer record will have already converted gender to some sort of int
+            if (isset($params['Gender']) && !empty($params['Gender'])) {
+                $gender = strtolower($params['Gender']);
+                $genderChar = $gender[0];
+                switch ($genderChar) {
+                    case "m": // male
+                        $new->Gender = 1;
+                        break;
+                    case "f": // female
+                        $new->Gender = 2;
+                        break;
+                    case "o": // other
+                        $new->Gender = 0;
+                        break;
+                }
+            }
+            if (isset($new->Password) && !empty($new->Password)) {
+                if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($new->Password))
+                    throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
+                $new->Password = \ClubSpeed\Security\Hasher::hash($new->Password);
+            }
+            return $new;
+        };
+        array_push($args, $closure);
+        return call_user_func_array(array("parent", "update"), $args);
+    }
 }

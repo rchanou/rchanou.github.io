@@ -1,0 +1,107 @@
+<div class="panel panel-{{call.type}}" id="{{section.id}}-{{call.id}}">
+  <div class="panel-heading">
+    <h4 class="panel-title"><span class="glyphicon glyphicon-{{call.header_icon}}"></span> {{call.header}}</h4>
+  </div> <!-- panel-heading -->
+  <div class="panel-body">
+    {% if call.info %}
+    <div class="row call-information">
+      <div class="col-xs-12">
+        <h4> Information </h4>
+        <div class="panel panel-default"> <!-- wrap in panel as hackish way to give table rounded corners -->
+          <table class="table table-hover table-bordered">
+            <tbody>
+              <tr>
+                <td class="col-xs-2 text-right">Url</td>
+                <td class="col-xs-10">
+                  <span>{{section.url ? "/" ~ section.url : section.route ~ call.subroute ?: ''}}</span> <!-- twig's string concat is ~ -->
+                </td>
+              </tr>
+              <tr>
+                <td class="col-xs-2 text-right">Verb</td>
+                <td class="col-xs-10">
+                    <span>
+                      {% if call.info.verb_icon %}
+                        <span class="glyphicon glyphicon-{{call.info.verb_icon}}"></span>
+                      {% endif %}
+                      {{call.info.verb}}
+                    </span>
+                </td>
+              </tr>
+              <tr>
+                <td class="col-xs-2 text-right">Access</td>
+                <td class="col-xs-10">
+                    <span>
+                      {% if call.info.access_icon %}
+                        <span class="glyphicon glyphicon-{{call.info.access_icon}}"></span>
+                      {% endif %}
+                      {{call.info.access}}
+                    </span>
+                </td>
+              </tr>
+              {% if call.info.required %}
+                <tr>
+                  <td class="col-xs-2 text-right">Required</td>
+                  <td class="col-xs-10">
+                    {% for required in call.info.required %}
+                      <div>
+                          <span><span class="glyphicon glyphicon-ok-sign green"></span> {{required}}</span>
+                      </div>
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endif %}
+              {% if call.info.available %}
+                <tr>
+                  <td class="col-xs-2 text-right">Available</td>
+                  <td class="col-xs-10">
+                    {% for available in call.info.available %}
+                      <div>
+                        <span><span class="glyphicon glyphicon-asterisk blue"></span> {{available}}</span>
+                      </div>
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endif %}
+              {% if call.info.unavailable %}
+                <tr>
+                  <td class="col-xs-2 text-right">Unavailable</td>
+                  <td class="col-xs-10">
+                    {% for unavailable in call.info.unavailable %}
+                      <div>
+                          <span><span class="glyphicon glyphicon-ban-circle red"></span> {{unavailable}}</span>
+                      </div>
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- call-information -->
+    {% endif %} <!-- if call.info -->
+    {% if call.usage %}
+      <h4>Usage</h4>
+      <div>{{call.usage | raw }}</div>
+    {% endif %} <!-- if call.usage -->
+    {% if call.examples %}
+      <div class="row call-example">
+        <div class="col-xs-12">
+          <h4> Example</h4>
+          {% if call.examples.request %}
+            <button class="btn btn-default">
+              <span class="glyphicon glyphicon-export"></span> REQUEST
+            </button>
+            <pre class="prettyprint">{{call.examples.request}}</pre>
+          {% endif %}
+          {% if call.examples.response %}
+            <button class="btn btn-info">
+              <span class="glyphicon glyphicon-save"></span> RESPONSE
+            </button>
+            <pre class="prettyprint">{{call.examples.response}}</pre>
+          {% endif %}
+        </div>
+      </div> <!-- call-example -->
+    {% endif %} <!-- if call.examples -->
+  </div> <!-- panel-body -->
+</div> <!-- panel -->

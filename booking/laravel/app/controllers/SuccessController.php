@@ -17,7 +17,7 @@ class SuccessController extends BaseController
 
         //Clear the session...
         Session::flush();
-        Session::regenerate();
+        //Session::regenerate();
 
         //...but keep the user logged in
         Session::put('authenticated',$authenticatedUserId);

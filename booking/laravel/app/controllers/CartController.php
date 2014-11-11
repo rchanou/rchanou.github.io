@@ -30,12 +30,12 @@ class CartController extends BaseController
                 $this->recordProductInfo($races); //Remember every race and its details and store them in the session
                 $productInfo = Session::get('productInfo');
             }
-            if ($action == "add" && Input::has('heatId') && Input::has('quantity')) //Adding item to cart TODO: Implement non-heat additions
+            if ($action == "add" && Input::has('heatId') && Input::has('quantity')) //Adding heat item to cart TODO: Implement non-heat additions
             {
                 $heatId = Input::get('heatId');
                 $quantity = Input::get('quantity');
 
-                if (array_key_exists($heatId,$productInfo)) //If the item exists
+                if (array_key_exists($heatId,$productInfo)) //If the item exists in our handy list of available products and their information
                 {
                     //Package all of the item's relevant data
                     $name = $productInfo[$heatId]->heatDescription;
@@ -171,6 +171,11 @@ class CartController extends BaseController
 
         $cart = Session::get('cart'); //Update the cart one last time
 
+        $settings = Session::get('settings');
+        $locale = $settings['locale'];
+        $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
+        $currency = $settings['currency'];
+
         return View::make('/cart',
             array(
                 'images' => Images::getImageAssets(),
@@ -181,7 +186,9 @@ class CartController extends BaseController
                 'failureToAddToCart' => $failureToAddToCart,
                 'localCartHasExpiredItem' => $localCartHasExpiredItem,
                 'virtualCheck' => $virtualCheck,
-                'virtualCheckDetails' => $virtualCheckDetails
+                'virtualCheckDetails' => $virtualCheckDetails,
+                'moneyFormatter' => $moneyFormatter,
+                'currency' => $currency
             )
         );
     }

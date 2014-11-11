@@ -66,6 +66,7 @@ class LoginController extends BaseController
         return Redirect::to('/login');
     }
 
+    //TODO: I don't think this pattern works in Laravel. The redirect may never happen as it needs to chain up.
     private function validateLoginInput($input)
     {
         $rules = array(

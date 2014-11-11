@@ -6,7 +6,7 @@ class Queues
     private $logic;
 
     function __construct(){
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
     }
 
@@ -15,12 +15,9 @@ class Queues
             throw new RestException(401, "Invalid authorization!");
         }
         try {
-            // there isn't a queues logic class, or underlying ORM definitions yet -- put logic here for now
-            if (
-                (isset($GLOBALS['cacheClearOverride']) && $GLOBALS['cacheClearOverride']) // global override is set and is truthy
-                ||
-                ($this->logic->version->compareToCurrent("15.4") > -1) // current club speed version is greater than or equal to 15.4
-            ) {
+            // note that in order to add a user to the queue without messing up the front end / intake,
+            // we MUST have the capability to clear the cache through the webapi remoting services
+            if ($GLOBALS['webapi']->canUse()) {
                 // we can use the queues logic!
                 $eventId    = (int)@$request_data['eventId'];
                 $customerId = (int)@$request_data['customerId'];

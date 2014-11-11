@@ -1,0 +1,43 @@
+{% if section.info %}
+<div class="panel panel-info" id="{{section.id}}-info">
+  <div class="panel-heading">
+    <h4 class="panel-title"><span class="glyphicon glyphicon-info-sign"></span> Info</h4>
+  </div> <!-- panel-heading -->
+  <div class="panel-body">
+    <div class="row call-info">
+      <div class="col-xs-12">
+        <h4> Fields </h4>
+        <div class="panel panel-default">
+          <table class="table table-hover table-bordered">
+            <thead>
+              <tr class="success">
+                <th class="col-xs-1">Name</th>
+                <th class="col-xs-1">Type</th>
+                <th class="col-xs-2">Default</th>
+                <th class="col-xs-8">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for col in section.info %}
+                <tr>
+                  <td class="col-xs-1">{{col.name}}</td>
+                  <td class="col-xs-1">{{col.type}}</td>
+                  <td class="col-xs-2 text-center">
+                    {% if col.icon %}
+                      <span class="glyphicon glyphicon-{{col.icon}}"></span>
+                    {% endif %}
+                    {% if col.default or col.default == 0 %}
+                      <span>{{col.default}}</span>
+                    {% endif %}
+                  </td>
+                  <td class="col-xs-8">{{col.description | raw}}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> <!-- panel-info -->
+{% endif %}

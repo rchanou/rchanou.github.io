@@ -1,5 +1,6 @@
 <?php
 
+require_once(app_path().'/util/util.php');
 require_once(app_path().'/api/CS_API.php');
 require_once(app_path().'/cart/Cart.php');
 require_once(app_path().'/config/resources/images.php');

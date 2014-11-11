@@ -12,7 +12,7 @@ abstract class BaseApi {
     protected $logic;
 
     function __construct() {
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = $GLOBALS['logic'];
         $this->access = array(
             'post'   => Enums::API_PRIVATE_ACCESS,
@@ -32,17 +32,17 @@ abstract class BaseApi {
                     throw new RestException(404);
                 case Enums::API_PUBLIC_ACCESS:
                     if (!\ClubSpeed\Security\Authenticate::publicAccess())
-                        throw new RestException(401, "Invalid authorization!");
+                        throw new RestException(403, "Invalid authorization!");
                     break;
                 case Enums::API_PRIVATE_ACCESS:
                 default:
                     if (!\ClubSpeed\Security\Authenticate::privateAccess())
-                        throw new RestException(401, "Invalid authorization!");
+                        throw new RestException(403, "Invalid authorization!");
                     break;
             }
         }
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) // or throw 404?
-            throw new RestException(401, "Invalid authorization!");
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(403, "Invalid authorization!");
     }
 
     public function post($id, $request_data = null) {
@@ -64,37 +64,34 @@ abstract class BaseApi {
         }
     }
 
-    public function get($id, $request_data = null) {
+    /**
+     * @url GET /
+     */
+    public function get($request_data = null) {
+        // no routing id was passed
+        // figure out which call the user actually wants - all, match, or filter
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            if (isset($id)) {
-                $this->validate('get');
-                return $this->mapper->mutate($id, $request_data, function($id) use (&$interface) {
-                    return $interface->get($id);
-                });
-            }
-            else {
-                if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
-                    if (\ClubSpeed\Utility\Params::isFilter($request_data)) {
-                        $this->validate('filter');
-                        return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
-                            return $interface->find($mapped);
-                        });
-                    }
-                    else {
-                        $this->validate('match');
-                        return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
-                            return $interface->match($mapped);
-                        });
-                    }
+            if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
+                if (\ClubSpeed\Utility\Params::isFilter($request_data)) {
+                    $this->validate('filter');
+                    return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
+                        return $interface->find($mapped);
+                    });
                 }
                 else {
-                    $this->validate('all');
+                    $this->validate('match');
                     return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
-                        return $interface->all();
+                        return $interface->match($mapped);
                     });
                 }
             }
+            else {
+                $this->validate('all');
+                return $this->mapper->mutate($request_data, function() use (&$interface) {
+                    return $interface->all();
+                });
+            }
         }
         catch (RestException $e) {
             throw $e;
@@ -107,13 +104,57 @@ abstract class BaseApi {
         }
     }
 
-    public function put($id, $request_data = null) {
+    /**
+     * The function to be used by all route extensions of get, 
+     * and works regardless of the number of routing ids passed.
+     */
+    protected function _get() {
+        $this->validate('get');
+        try {
+            $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
+            $callback = function() use (&$interface) {
+                return call_user_func_array(array($interface, 'get'), func_get_args());
+            };
+            $mutateArgs = func_get_args();
+            array_push($mutateArgs, $callback);
+            return call_user_func_array(array($this->mapper, 'mutate'), $mutateArgs);
+        }
+        catch (RestException $e) {
+            throw $e;
+        }
+        catch (CSException $e) {
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        }
+        catch (Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
+    }
+
+    /**
+     * @url GET /:id
+     *
+     * Note: Restler expects route params to be explicitly set in the parameter list.
+     *       For this reason, we are using get1 and mapping it to _get,
+     *       which can be used by any number of ids.
+     *
+     *       This convention can be used to interface with multiple ids
+     *       following get1, get2, get3, etc.
+     */
+    public function get1($id, $request_data) {
+        return call_user_func_array(array($this, '_get'), func_get_args()); // ~ 9ms
+    }
+
+    protected function _put() {
         $this->validate('put');
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            return $this->mapper->mutate($id, $request_data, function($id, $mapped) use (&$interface) {
-                return $interface->update($id, $mapped);
-            });
+            $callback = function() use (&$interface) {
+                $closureArgs = func_get_args();
+                return call_user_func_array(array($interface, 'update'), $closureArgs);
+            };
+            $mutateArgs = func_get_args();
+            array_push($mutateArgs, $callback);
+            return call_user_func_array(array($this->mapper, 'mutate'), $mutateArgs);
         }
         catch (RestException $e) {
             throw $e;
@@ -126,13 +167,28 @@ abstract class BaseApi {
         }
     }
 
-    public function delete($id) {
+    /**
+     * @url PUT /:id1
+     *
+     * Note: Restler expects route params to be explicitly set in the parameter list.
+     *       For this reason, we are using put and mapping it to _put,
+     *       which can be used by any number of ids.
+     */
+    public function put1($id1, $request_data) {
+        return call_user_func_array(array($this, '_put'), func_get_args());
+    }
+
+    protected function _delete() {
         $this->validate('delete');
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            return $this->mapper->mutate($id, function($id) use (&$interface) {
-                return $interface->delete($id);
-            });
+            $callback = function() use (&$interface) {
+                $closureArgs = func_get_args();
+                return call_user_func_array(array($interface, 'delete'), $closureArgs);
+            };
+            $mutateArgs = func_get_args();
+            array_push($mutateArgs, $callback);
+            return call_user_func_array(array($this->mapper, 'mutate'), $mutateArgs);
         }
         catch (RestException $e) {
             throw $e;
@@ -145,37 +201,11 @@ abstract class BaseApi {
         }
     }
 
-    // public function index($request_data = null) {
-    //     // if (!$this->validateAccess(__FUNCTION__))
-    //     //     throw new RestException(401, "Invalid authorization!");
-    //     try {
-    //         $interface =& $this->interface; // PHP 5.3 hack
-    //         if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
-    //             if (\ClubSpeed\Utility\Params::isFilter($request_data)) {
-    //                 return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
-    //                     return $interface->find($mapped);
-    //                 });
-    //             }
-    //             else {
-    //                 return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
-    //                     return $interface->match($mapped);
-    //                 });
-    //             }
-    //         }
-    //         else {
-    //             return $this->mapper->mutate(function() use (&$interface) {
-    //                 return $interface->all();
-    //             });
-    //         }
-    //     }
-    //     catch (RestException $e) {
-    //         throw $e;
-    //     }
-    //     catch (CSException $e) {
-    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
-    //     }
-    //     catch (Exception $e) {
-    //         throw new RestException(500, $e->getMessage());
-    //     }
-    // }
+    /**
+     * @url DELETE /:id1
+     */
+    public function delete1($id1) {
+        $this->validate('delete');
+        return call_user_func_array(array($this, '_delete'), func_get_args());
+    }
 }

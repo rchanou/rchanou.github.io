@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Database\Records;
+use ClubSpeed\Utility\Convert;
 
 class OnlineBookingReservations extends BaseRecord {
 
@@ -36,7 +37,7 @@ class OnlineBookingReservations extends BaseRecord {
                 }
             }
             else {
-                $this->{self::$key} = \ClubSpeed\Utility\Convert::toNumber($data);
+                $this->{self::$key} = Convert::toNumber($data);
             }
         }
     }

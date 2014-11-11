@@ -1,12 +1,13 @@
 <?php
 
 namespace ClubSpeed\Database\Helpers;
+use ClubSpeed\Database\Records\BaseRecord;
 
 class GroupedComparator { // could implement iterator aggregate, but we need to modify the values during a foreach for JSON map functionality
 
     public $comparators = array();
 
-    protected static $pattern = '/( AND|OR )/i'; // handle parentheses? 
+    protected static $pattern = '/ (AND|OR) /i'; // handle parentheses? 
     protected static $connectors = array(
           'AND' => 'AND'
         , 'OR'  => 'OR'

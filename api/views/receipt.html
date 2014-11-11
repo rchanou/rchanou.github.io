@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Your order confirmation from {{businessName}} for order #{{checkId}}</title>
+    <style type="text/css">
+        /* Client-specific Styles */
+        #outlook a{padding:0;} /* Force Outlook to provide a "view in browser" button. */
+        body{width:100% !important;} .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */
+        body{-webkit-text-size-adjust:none;} /* Prevent Webkit platforms from changing default text sizes. */
+        
+        /* Reset Styles */
+        body{margin:0; padding:0;}
+        img{border:0; height:auto; line-height:100%; outline:none; text-decoration:none;}
+
+        #wrapper {
+            margin: 0 auto;
+            width: 640px;
+        }
+        h3 {
+            color: #008AE6;
+        }
+        .pull-right {
+            float: right !important;
+        }
+        .pull-left {
+            float: left !important;
+        }
+        .col-12 .col-6 .col-4 .col-3 .col-2 .col-1 {
+            position: relative;
+            min-height: 1px;
+            padding-right: 15px;
+            padding-left: 15px;
+            float: left;
+        }
+        .row {
+            width: 100%;
+        }
+        .col-12 {
+            width: 100%;
+        }
+        .col-9 {
+            width: 75%;
+        }
+        .col-6 {
+            width: 50%;
+        }
+        .col-4 {
+            width: 33%;
+        }
+        .col-3 {
+            width: 25%;
+        }
+        .col-2 {
+            width: 16.66%;
+        }
+        .col-1 {
+            width: 8.33%;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .no-wrap {
+            white-space: nowrap;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .width-100 {
+            width: 100%;
+        }
+        table {
+            border-collapse: collapse; /* remove spacing */
+        }
+        #order-table tr > *:first-child {
+            text-align: left;
+        }
+        #balance-table tr > *:first-child {
+            text-align: right;
+        }
+        #order-table, #balance-table tr > *:last-child {
+            text-align:right;
+        }
+        th {
+            /*border: 1px solid black;*/
+        }
+        .border-bottom {
+            border-bottom: 1px solid black;
+        }
+    </style>
+</head>
+<body style="-webkit-text-size-adjust: none;margin: 0;padding: 0;width: 100% !important;">
+    <div id="wrapper" style="margin: 0 auto;width: 640px;">
+        <div id="header" style="overflow: auto;">
+            <div class="pull-right bold" style="font-weight: bold;float: right !important;">
+                <div>Order #{{checkId}} Confirmation</div>
+            </div>
+        </div>
+        <div id="greeting">
+            <h3 style="color: #008AE6;">Hello {{customer}},</h3>
+            <p>
+                Thank you for shopping with {{business}}!
+                We have received payment for <span class="no-wrap" style="white-space: nowrap;">order #{{checkId}}</span>.
+                The details for this order are indicated below.
+            </p>
+        </div>
+        <div id="details">
+            <h3 style="color: #008AE6;">Order Details</h3>
+            <table id="order-table" class="width-100" style="border-collapse: collapse;width: 100%;text-align: right;">
+                <thead class="bold border-bottom" style="font-weight: bold;border-bottom: 1px solid black;">
+                    <tr>
+                        <th class="col-8" style="text-align: left;">Item Description</th> <!-- item quantity? -->
+                        <th class="col-1" style="width: 8.33%;">Quantity</th>
+                        <th class="col-3" style="width: 25%;">Item Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in details %}
+                    <tr>
+                        <td style="text-align: left;">{{detail.name}}</td>
+                        <td>{{detail.quantity}}</td>
+                        <td>{{detail.price}}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="border-bottom" style="border-bottom: 1px solid black;">
+                        <td style="text-align: left;"></td> <!-- for the border -->
+                        <td></td> <!-- for the border -->
+                        <td></td> <!-- for the border -->
+                    </tr>
+                </tbody>
+            </table>
+            <table id="balance-table" class="width-100" style="border-collapse: collapse;width: 100%;">
+                <tbody>
+                    <tr>
+                        <td class="col-9" style="width: 75%;text-align: right;">Subtotal:</td>
+                        <td class="col-3" style="width: 25%;text-align: right;">{{checkSubtotal}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;">Estimated Tax:</td>
+                        <td style="text-align: right;">{{checkTax}}</td>
+                    </tr>
+                    {% if giftCardTotal %}
+                    <tr>
+                        <td style="text-align: right;">Gift Card:</td>
+                        <td style="text-align: right;">-{{giftCardTotal}}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td style="text-align: right;"></td>
+                        <td class="border-bottom" style="border-bottom: 1px solid black;text-align: right;"></td>
+                    </tr>
+                    <tr class="bold" style="font-weight: bold;">
+                        <td style="text-align: right;">Total:</td>
+                        <td style="text-align: right;">{{checkTotal}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="remarks">
+            <p>
+                If any gift cards were ordered with this purchase,
+                please check your email for gift card confirmations
+                as well as card numbers.
+            </p>
+            <h3 style="color: #008AE6;">Thank you for shopping with us!</h3>
+        </div>
+    </div>
+</body>
+</html>

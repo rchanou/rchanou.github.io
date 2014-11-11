@@ -1,6 +1,8 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Enums\Enums;
+use ClubSpeed\Utility\Convert;
 
 /**
  * The business logic class
@@ -83,9 +85,9 @@ class ChecksLogic extends BaseLogic {
             $user = $db->users->get($check->UserID);
             if (is_null($user))
                 throw new \RecordNotFoundException("Check create could not find user in the database for the given userId! Received: " . $check->UserID);
-            
-            $check->CheckStatus = 0; // check status should be overridden/defaulted to 0 (matches CheckStatus.OPEN from VB)
-            $check->OpenedDate = \ClubSpeed\Utility\Convert::getDate();
+            $check->CheckType = Enums::CHECK_TYPE_REGULAR;
+            $check->CheckStatus = Enums::CHECK_STATUS_OPEN;
+            $check->OpenedDate = Convert::getDate();
             
             return $check; // use reference instead of return?
         });

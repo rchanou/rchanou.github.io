@@ -6,7 +6,7 @@ class Events
     private $logic;
 
     function __construct(){
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
     }
 

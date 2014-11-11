@@ -10,7 +10,7 @@ use ClubSpeed\Logging\LogService as LogService;
 use ClubSpeed\Mail\MailService as MailService;
 
 // ensure the Composer AutoLoader is included
-require_once(__DIR__.'/../vendors/autoload.php');
+require_once(__DIR__.'/../vendors/autoload.php'); // ~ 4-5ms
 
 // for debugging purposes - can be removed after first pass at testing
 $sw = $GLOBALS['sw'] = new Utility\StopwatchStack();
@@ -18,18 +18,18 @@ $sw = $GLOBALS['sw'] = new Utility\StopwatchStack();
 // contains exception definitions for use throughout the application
 require_once(__DIR__.'/Exceptions/Exceptions.php'); // STILL NEED TO FIX THIS FOR AUTOLOADER USE
 
-$conn           = $GLOBALS['conn']          = new Connection\ClubSpeedConnection();
-$connResource   = $GLOBALS['connResource']  = new Connection\ClubSpeedConnection("(local)", "ClubSpeedResource");
-$connLogs       = $GLOBALS['connLogs']      = new Connection\ClubSpeedConnection("(local)", "ClubspeedLog");
-$db             = $GLOBALS['db']            = new Database\DbService($conn, $connResource, $connLogs); // sort of hacky to inject all 3 -- if time allows, separate into 3 explicit contexts/services
-$logic          = $GLOBALS['logic']         = new Logic\LogicService($db);
-$webapi         = $GLOBALS['webapi']        = new Remoting\WebApiRemoting($logic);
+$conn           = $GLOBALS['conn']          = new Connection\ClubSpeedConnection(); // ~ 1ms
+$connResource   = $GLOBALS['connResource']  = new Connection\ClubSpeedConnection("(local)", "ClubSpeedResource"); // ~ 0ms
+$connLogs       = $GLOBALS['connLogs']      = new Connection\ClubSpeedConnection("(local)", "ClubspeedLog"); // ~ 0ms
+$db             = $GLOBALS['db']            = new Database\DbService($conn, $connResource, $connLogs); // ~ 0ms -- sort of hacky to inject all 3 -- if time allows, separate into 3 explicit contexts/services
+$logic          = $GLOBALS['logic']         = new Logic\LogicService($db);  // ~ 1ms
+$webapi         = $GLOBALS['webapi']        = new Remoting\WebApiRemoting($logic, $db);
 
 // inject the LogicService into the static Authenticate class
-Authenticate::initialize($logic);
+Authenticate::initialize($logic); // ~ 0ms
 
 // inject the LogicService->Logs interface into the static LogService class
-LogService::initialize($logic->logs);
+LogService::initialize($logic->logs); // ~ 2-3ms
 
 // inject the LogicService into the static MailService class, and name the desired MailInterface (lazy-loading)
-MailService::initialize($logic, 'Swift');
+MailService::initialize($logic, 'Swift'); // ~ 1ms

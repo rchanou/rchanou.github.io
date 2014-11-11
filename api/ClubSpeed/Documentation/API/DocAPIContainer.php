@@ -17,8 +17,6 @@ class DocAPIContainer {
         self::$_lazy = array(); // necessary? we always want everything
         self::$data = self::loadData();
         self::expand();
-        // print_r(self::$data);
-        // die();
     }
 
     private static function parseJson($file) {
@@ -49,11 +47,10 @@ class DocAPIContainer {
     }
 
     private static function expandCalls() {
+        // not yet complete: more to do, when time allows
         $resources =& self::$data['resources'];
         foreach($resources as &$resource) {
             foreach($resource['calls'] as $callKey => &$call) {
-
-
                 if (!isset($call['access']) || empty($call['access']))
                     $call['access'] = 'private';
                 $call['access'] = ucfirst(strtolower($call['access']));
@@ -63,15 +60,27 @@ class DocAPIContainer {
                       (isset($call['required'])  ? is_array($call['required'])  ? $call['required']  : array($call['required'])  : array())
                     , (isset($call['available']) ? is_array($call['available']) ? $call['available'] : array($call['available']) : array())
                 );
-                if(!isset($call['verb_icon'])) {
-                    $call['verb_icon'] = call_user_func(function() use ($call) {
-                        switch(strtoupper($call['verb'])) {
-                            case 'DELETE':  return 'remove';
-                            case 'GET':     return 'save';
-                            case 'POST':    return 'export';
-                            case 'PUT':     return 'pencil';
-                        }
-                    });
+
+                switch(strtoupper($call['verb'])) {
+                    case 'DELETE':
+                        $call['verb_icon'] = 'remove';
+                        $call['header'] = 'Delete';
+                        $call['header_icon'] = 'remove';
+                        $call['type'] = 'remove'; // for css
+                        break;
+                    case 'POST':
+                        $call['verb_icon'] = 'export';
+                        $call['header'] = 'Create'; // more logic needed
+                        $call['header_icon'] = 'plus';
+                        $call['type'] = 'create'; // for css
+                        break;
+                    case 'PUT':
+                        $call['header'] = 'Update';
+                        $call['header_icon'] = 'pencil';
+                        $call['verb_icon'] = 'pencil';
+                        $call['type'] = 'update';
+                        break;
+                    // more todo
                 }
                 $call['request'] = array();
                 foreach($callPropertyNames as $propertyName) {
@@ -86,8 +95,6 @@ class DocAPIContainer {
                         , $property['type']
                     );
                 }
-                $resource['calls'][$call['name']] = array_merge(array(), $call); // shallow copy
-                // unset($resource['calls'][$callKey]); // this unsets both! NOOOOO!
             }
         }
     }
@@ -100,7 +107,8 @@ class DocAPIContainer {
         $data['sections'][] = new DocTypicalUsage();
         $data['sections'][] = new DocQueryOperations();
 
-        // $data['sections'][] = self::$data['resources'][0];
+        // $data['sections'][] = self::$data['resources'][0]; // not yet complete: to be used in the future
+        
         $data['sections'][] = new DocBooking();
 
         $data['sections'][] = new DocBookingAvailability();

@@ -63,7 +63,7 @@ Shopping Cart - Online Booking
                     <th><strong>Race Name</strong></th>
                     <th><strong>Racers</strong></th>
                     <th><strong>Start Time</strong></th>
-                    <th><strong>Price (Each)</strong></th>
+                    <th><strong>Price</strong></th>
                     <th><strong>Subtotal</strong></th>
                     <th><strong>Tax</strong></th>
                     <th><strong>Total</strong></th>
@@ -71,22 +71,22 @@ Shopping Cart - Online Booking
                     </tr>
                 </thead>
             @foreach($cart as $cartItemId => $cartItem)
-                <tr>
+                <tr> {{-- TODO: Filter by type --}}
                     <td>{{$cartItem['name']}}</td>
                     <td>{{$cartItem['quantity']}}</td>
-                    <td>{{date('Y/m/d H:i',strtotime($cartItem['startTime']))}}</td>
-                    <td>${{number_format($virtualCheckDetails[$cartItemId]->unitPrice,2)}}</td>
-                    <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailSubtotal,2)}}</td>
-                    <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailTax,2)}}</td>
-                    <td>${{number_format($virtualCheckDetails[$cartItemId]->checkDetailTotal,2)}}</td>
+                    <td>{{date(Config::get('config.dateFormat') . ' H:i',strtotime($cartItem['startTime']))}}</td>
+                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->unitPrice, $currency)}}</td>
+                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailSubtotal, $currency)}}</td>
+                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTax, $currency)}}</td>
+                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTotal, $currency)}}</td>
                     <td><a href="cart?action=delete&item={{$cartItemId}}">X</a></td>
                 </tr>
             @endforeach
             </table>
 
-            <strong>Order Subtotal:</strong> ${{number_format($virtualCheck->checkSubtotal,2)}}<br/>
-            <strong>Order Tax:</strong> ${{number_format($virtualCheck->checkTax,2)}}<br/>
-            <strong>Order Total:</strong> ${{number_format($virtualCheck->checkTotal,2)}}<br/>
+            <strong>Order Subtotal:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkSubtotal, $currency)}}<br/>
+            <strong>Order Tax:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTax, $currency)}}<br/>
+            <strong>Order Total:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTotal, $currency)}}<br/>
 
             <form action="{{URL::action('CheckoutController@entry')}}">
                 <button class="formButton">Proceed to Checkout</button>

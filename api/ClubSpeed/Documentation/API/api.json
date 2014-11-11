@@ -10,7 +10,7 @@
             "model": "booking",
             "calls": [
                 {
-                    "name": "create",
+                    "id": "create",
                     "verb": "POST",
                     "parameters": [
                         {
@@ -29,7 +29,7 @@
                     ]
                 },
                 {
-                    "name": "update",
+                    "id": "update",
                     "subroute": "/:onlineBookingsId",
                     "verb": "PUT",
                     "parameters": [

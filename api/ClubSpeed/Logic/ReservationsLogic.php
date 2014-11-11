@@ -26,6 +26,7 @@ class ReservationsLogic extends BaseLogic {
             , 'OnlineBookingsID'
             , 'Quantity'
             , 'SessionID'
+            , 'CustomersID'
         );
 
         $this->updatable = array(
@@ -33,7 +34,10 @@ class ReservationsLogic extends BaseLogic {
             , 'OnlineBookingsID'
             , 'Quantity'
             , 'OnlineBookingReservationStatusID'
+            , 'CustomersID'
         );
+
+        $this->expire(); // call expire on any reservations construct (note: construct will not be hit unless reservations is attempted to be used)
     }
 
     public function create($params = array()) {
@@ -57,9 +61,10 @@ class ReservationsLogic extends BaseLogic {
         });
     }
 
-    public function update($id, $params = array()) {
+    public function update(/* $id, $params = array() */) {
+        $args = func_get_args();
         $db =& $this->db;
-        return parent::_update($id, $params, function($old, $new) use (&$db) {
+        $closure = function($old, $new) use (&$db) {
             $new->validate('update');
             $availability = $db->onlineBookingAvailability_V->get($new->OnlineBookingsID);
             if (is_null($availability))
@@ -76,7 +81,24 @@ class ReservationsLogic extends BaseLogic {
             }
             if ($new->OnlineBookingReservationStatusID === 2) // permanent -- MAKE THIS A LOOKUP LATER
                 $new->ExpiresAt = \ClubSpeed\Utility\Convert::toDateForServer('2038-01-18');
+            
             return $new;
-        });
+        };
+        array_push($args, $closure);
+        return call_user_func_array(array("parent", "update"), $args);
+    }
+
+    public function expire() {
+        // cheat and just use a sql statement for performance purposes
+        $sql = ""
+            ."\nDELETE obr"
+            ."\nFROM dbo.OnlineBookingReservations obr"
+            ."\nINNER JOIN dbo.OnlineBookingReservationStatus obrs"
+            ."\n    ON obr.OnlineBookingReservationStatusID = obrs.OnlineBookingReservationStatusID"
+            ."\nWHERE"
+            ."\n    obr.ExpiresAt < GETDATE()"
+            ."\n    AND obrs.Status = 'TEMPORARY'"
+            ;
+        $this->db->exec($sql);
     }
 }

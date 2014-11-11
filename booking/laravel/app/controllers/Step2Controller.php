@@ -91,6 +91,10 @@ class Step2Controller extends BaseController
         $nextDayDisplay = new DateTime($start);
         $nextDayDisplay = $nextDayDisplay->modify('+1 day')->format($dateFormat);
 
+        $settings = Session::get('settings');
+        $locale = $settings['locale'];
+        $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
+        $currency = $settings['currency'];
 
         return View::make('/steps/step2',
             array(
@@ -106,8 +110,10 @@ class Step2Controller extends BaseController
                 'authenticated' => Session::get('authenticated'),
                 'loginToAccountErrors' => Session::get('loginToAccountErrors'),
                 'createAccountErrors' => Session::get('createAccountErrors'),
-                'settings' => Session::get('settings'),
-                'strings' => $strings
+                'settings' => $settings,
+                'strings' => $strings,
+                'moneyFormatter' => $moneyFormatter,
+                'currency' => $currency
             )
         );
     }

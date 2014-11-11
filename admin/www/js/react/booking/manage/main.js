@@ -4,10 +4,7 @@
 /*** CONSTANTS AND CONFIG ***/
 
 config.apiURL = config.apiURL + '/';
-if (window.location.hostname != '192.168.111.165') {
-	console.log = function(){};
-}
-console.log(config.apiURL);
+
 /*var global = {
 	momentFormat: config.dateFormat.replace('Y', 'YYYY').replace('m', 'M').replace('d', 'D'),
 	datepickerFormat: config.dateFormat.replace('Y', 'yy')
@@ -1018,7 +1015,7 @@ var BookingAdmin = React.createClass({displayName: 'BookingAdmin',
 		);
 		
 		// load products
-		var params = { key: config.privateKey, select: 'productId, description', deleted: false };
+		var params = { key: config.privateKey, select: 'productId, description', filter: 'deleted$eqfalse' };
 		$.get(
 			config.apiURL + 'products.json?' + $.param(params),
 			function(body)  {

@@ -8,6 +8,7 @@ class MailBuilder {
     public $from;
     public $to;
     public $body;
+    public $alternate;
 
     public function __construct() {
 
@@ -30,6 +31,11 @@ class MailBuilder {
 
     public function body($body) {
         $this->body = $body;
+        return $this;
+    }
+
+    public function alternate($alternate) {
+        $this->alternate = $alternate;
         return $this;
     }
 

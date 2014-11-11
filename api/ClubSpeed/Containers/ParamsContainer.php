@@ -58,4 +58,16 @@ class ParamsContainer extends BaseContainer {
     public function hasSelect() {
         return isset($this->select) && !empty($this->select);
     }
+
+    public function hasFilter() {
+        return isset($this->filter) && !empty($this->filter);
+    }
+
+    public function hasParams() {
+        return isset($this->params) && !empty($this->params);
+    }
+
+    public function isEmpty() {
+        return !($this->hasSelect() || $this->hasFilter() || $this->hasParams());
+    }
 }

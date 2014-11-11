@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Mappers;
+use ClubSpeed\Utility\Arrays;
 
 class CheckTotalsMapper extends BaseMapper {
 
@@ -9,78 +10,80 @@ class CheckTotalsMapper extends BaseMapper {
         $this->namespace = 'checks';
         $this->register(array(
               'CheckID'                 => '' // check items start here
-            , 'CustID'                  => 'customerId'
-            , 'CheckType'               => ''
-            , 'CheckStatus'             => ''
-            , 'CheckName'               => 'name'
-            , 'UserID'                  => ''
-            , 'CheckTotalApplied'       => ''
-            , 'BrokerName'              => 'broker'
-            , 'Notes'                   => ''
-            , 'Gratuity'                => ''
-            , 'Fee'                     => ''
-            , 'OpenedDate'              => ''
-            , 'ClosedDate'              => ''
-            , 'IsTaxExempt'             => ''
-            , 'Discount'                => ''
-            , 'CheckSubtotal'           => ''
-            , 'CheckTax'                => ''
-            , 'CheckTotal'              => ''
-            , 'CheckDetailID'           => '' // check detail items start here
-            , 'CheckDetailStatus'       => ''
-            , 'CheckDetailType'         => ''
-            , 'ProductID'               => ''
-            , 'ProductName'             => ''
-            , 'CreatedDate'             => ''
-            , 'Qty'                     => ''
-            , 'UnitPrice'               => ''
-            , 'UnitPrice2'              => ''
-            , 'DiscountApplied'         => ''
-            , 'TaxID'                   => ''
-            , 'TaxPercent'              => ''
-            , 'VoidNotes'               => ''
-            , 'CID'                     => ''
-            , 'VID'                     => ''
-            , 'BonusValue'              => ''
-            , 'PaidValue'               => ''
-            , 'ComValue'                => ''
-            , 'Entitle1'                => ''
-            , 'Entitle2'                => ''
-            , 'Entitle3'                => ''
-            , 'Entitle4'                => ''
-            , 'Entitle5'                => ''
-            , 'Entitle6'                => ''
-            , 'Entitle7'                => ''
-            , 'Entitle8'                => ''
-            , 'M_Points'                => ''
-            , 'M_CustID'                => ''
-            , 'M_OldMembershiptypeID'   => ''
-            , 'M_NewMembershiptypeID'   => ''
-            , 'M_Days'                  => ''
-            , 'M_PrimaryMembership'     => ''
-            , 'P_PointTypeID'           => ''
-            , 'P_Points'                => ''
-            , 'P_CustID'                => ''
-            , 'R_Points'                => ''
-            , 'DiscountUserID'          => ''
-            , 'DiscountDesc'            => ''
-            , 'CalculateType'           => ''
-            , 'DiscountID'              => ''
-            , 'DiscountNotes'           => ''
-            , 'G_Points'                => ''
-            , 'G_CustID'                => ''
-            , 'GST'                     => 'gst'
-            , 'M_DaysAdded'             => ''
-            , 'S_SaleBy'                => ''
-            , 'S_NoOfLapsOrSeconds'     => ''
-            , 'S_CustID'                => ''
-            , 'S_Vol'                   => ''
-            , 'CadetQty'                => ''
-            , 'CheckDetailSubtotal'     => ''
-            , 'CheckDetailTax'          => ''
-            , 'CheckDetailTotal'        => ''
-            , 'PaidAmount'              => ''
-            , 'PaidTax'                 => ''
+            , 'CustID'                => 'customerId'
+            , 'CheckType'             => ''
+            , 'CheckStatus'           => ''
+            , 'CheckName'             => 'name'
+            , 'UserID'                => ''
+            , 'CheckTotalApplied'     => ''
+            , 'BrokerName'            => 'broker'
+            , 'Notes'                 => ''
+            , 'Gratuity'              => ''
+            , 'Fee'                   => ''
+            , 'OpenedDate'            => ''
+            , 'ClosedDate'            => ''
+            , 'IsTaxExempt'           => ''
+            , 'Discount'              => ''
+            , 'CheckSubtotal'         => ''
+            , 'CheckTax'              => ''
+            , 'CheckTotal'            => ''
+            , 'CheckPaidTax'          => ''
+            , 'CheckPaidTotal'        => ''
+            , 'CheckRemainingTax'     => ''
+            , 'CheckRemainingTotal'   => ''
+            , 'CheckDetailID'         => '' // check detail items start here
+            , 'CheckDetailStatus'     => ''
+            , 'CheckDetailType'       => ''
+            , 'ProductID'             => ''
+            , 'ProductName'           => ''
+            , 'CreatedDate'           => ''
+            , 'Qty'                   => ''
+            , 'UnitPrice'             => ''
+            , 'UnitPrice2'            => ''
+            , 'DiscountApplied'       => ''
+            , 'TaxID'                 => ''
+            , 'TaxPercent'            => ''
+            , 'VoidNotes'             => ''
+            , 'CID'                   => ''
+            , 'VID'                   => ''
+            , 'BonusValue'            => ''
+            , 'PaidValue'             => ''
+            , 'ComValue'              => ''
+            , 'Entitle1'              => ''
+            , 'Entitle2'              => ''
+            , 'Entitle3'              => ''
+            , 'Entitle4'              => ''
+            , 'Entitle5'              => ''
+            , 'Entitle6'              => ''
+            , 'Entitle7'              => ''
+            , 'Entitle8'              => ''
+            , 'M_Points'              => ''
+            , 'M_CustID'              => ''
+            , 'M_OldMembershiptypeID' => ''
+            , 'M_NewMembershiptypeID' => ''
+            , 'M_Days'                => ''
+            , 'M_PrimaryMembership'   => ''
+            , 'P_PointTypeID'         => ''
+            , 'P_Points'              => ''
+            , 'P_CustID'              => ''
+            , 'R_Points'              => ''
+            , 'DiscountUserID'        => ''
+            , 'DiscountDesc'          => ''
+            , 'CalculateType'         => ''
+            , 'DiscountID'            => ''
+            , 'DiscountNotes'         => ''
+            , 'G_Points'              => ''
+            , 'G_CustID'              => ''
+            , 'GST'                   => 'gst'
+            , 'M_DaysAdded'           => ''
+            , 'S_SaleBy'              => ''
+            , 'S_NoOfLapsOrSeconds'   => ''
+            , 'S_CustID'              => ''
+            , 'S_Vol'                 => ''
+            , 'CadetQty'              => ''
+            , 'CheckDetailSubtotal'   => ''
+            , 'CheckDetailTax'        => ''
+            , 'CheckDetailTotal'      => ''
         ));
     }
 
@@ -129,10 +132,9 @@ class CheckTotalsMapper extends BaseMapper {
         $return = array(
             $this->namespace => array()
         );
-        $checks =& $return[$this->namespace];
+        $inner =& $return[$this->namespace];
         if (isset($data) && !is_array($data))
             $data = array($data); // convert a single record to an array for the foreach syntax to function
-
         if (!is_null($data)) {
             if ($this->is_assoc($data)) { // for the id => {id} arrays coming from create calls. this seems hacky -- consider another option
                 foreach($data as $key => $value) {
@@ -141,103 +143,99 @@ class CheckTotalsMapper extends BaseMapper {
                 return $compressed;
             }
             else {
-
-                // we need to split check and checkdetails into their own arrays of keys for this type of compress
-                // and take into account the select filters passed in by the client (if any)
-                $checkKeys = array(
-                      'CheckID'
-                    , 'CustID'
-                    , 'CheckType'
-                    , 'CheckStatus'
-                    , 'CheckName'
-                    , 'UserID'
-                    , 'CheckTotalApplied'
-                    , 'BrokerName'
-                    , 'Notes'
-                    , 'Gratuity'
-                    , 'Fee'
-                    , 'OpenedDate'
-                    , 'ClosedDate'
-                    , 'IsTaxExempt'
-                    , 'Discount'
-                    , 'CheckSubtotal'
-                    , 'CheckTax'
-                    , 'CheckTotal'
-                    , 'PaidAmount'
-                    , 'PaidTax'
-                );
-                $detailKeys = array(
-                      'CheckDetailID'
-                    , 'CheckDetailStatus'
-                    , 'CheckDetailType'
-                    , 'ProductID'
-                    , 'ProductName'
-                    , 'CreatedDate'
-                    , 'Qty'
-                    , 'UnitPrice'
-                    , 'UnitPrice2'
-                    , 'DiscountApplied'
-                    , 'TaxID'
-                    , 'TaxPercent'
-                    , 'VoidNotes'
-                    , 'CID'
-                    , 'VID'
-                    , 'BonusValue'
-                    , 'PaidValue'
-                    , 'ComValue'
-                    , 'Entitle1'
-                    , 'Entitle2'
-                    , 'Entitle3'
-                    , 'Entitle4'
-                    , 'Entitle5'
-                    , 'Entitle6'
-                    , 'Entitle7'
-                    , 'Entitle8'
-                    , 'M_Points'
-                    , 'M_CustID'
-                    , 'M_OldMembershiptypeID'
-                    , 'M_NewMembershiptypeID'
-                    , 'M_Days'
-                    , 'M_PrimaryMembership'
-                    , 'P_PointTypeID'
-                    , 'P_Points'
-                    , 'P_CustID'
-                    , 'R_Points'
-                    , 'DiscountUserID'
-                    , 'DiscountDesc'
-                    , 'CalculateType'
-                    , 'DiscountID'
-                    , 'DiscountNotes'
-                    , 'G_Points'
-                    , 'G_CustID'
-                    , 'GST'
-                    , 'M_DaysAdded'
-                    , 'S_SaleBy'
-                    , 'S_NoOfLapsOrSeconds'
-                    , 'S_CustID'
-                    , 'S_Vol'
-                    , 'CadetQty'
-                    , 'CheckDetailSubtotal'
-                    , 'CheckDetailTax'
-                    , 'CheckDetailTotal'
-                );
-                $map = $this->_map['client']; // pull the map here to cut down on function calls
-                $checkKeys = array_values(array_intersect(array_keys($map), $checkKeys)); // get the filtered list of columns for checks
-                $detailKeys = array_values(array_intersect(array_keys($map), $detailKeys)); // get the filtered list of columns for checkdetails
-                foreach($data as $row) {
-                    $existingCheck =& self::findExisting($checks, $map['CheckID'], $row->CheckID);
-                    if ($existingCheck == null) {
-                        $existingCheck = array();
-                        foreach($checkKeys as $key)
-                            $existingCheck[$map[$key]] = $row->{$key};
-                        $existingCheck['details'] = array();
-                        $checks[] =& $existingCheck;
-                    }
-                    foreach($detailKeys as $key)
-                        $details[$map[$key]] = $row->{$key};
-                    if (!empty($details) && !\ClubSpeed\Utility\Objects::isEmpty($details)) {
-                        $existingCheck['details'][] = $details;
-                    }
+                $inner = Arrays::group($data, function($val) {
+                    return array(
+                        'CheckID' => $val->CustID
+                    );
+                });
+                foreach($inner as $key => $group) {
+                    $self =& $this; // php 5.3 nonsense
+                    $inner[$key] = array_reduce($group, function($carry, $current) use (&$self) {
+                        if (!is_array($carry)) {
+                            $carry = $self->map('client', array(
+                                'CustID'              => $current->CustID,
+                                'CheckID'             => $current->CheckID,
+                                'CustID'              => $current->CustID,
+                                'CheckType'           => $current->CheckType,
+                                'CheckStatus'         => $current->CheckStatus,
+                                'CheckName'           => $current->CheckName,
+                                'UserID'              => $current->UserID,
+                                'CheckTotalApplied'   => $current->CheckTotalApplied,
+                                'BrokerName'          => $current->BrokerName,
+                                'Notes'               => $current->Notes,
+                                'Gratuity'            => $current->Gratuity,
+                                'Fee'                 => $current->Fee,
+                                'OpenedDate'          => $current->OpenedDate,
+                                'ClosedDate'          => $current->ClosedDate,
+                                'IsTaxExempt'         => $current->IsTaxExempt,
+                                'Discount'            => $current->Discount,
+                                'CheckSubtotal'       => $current->CheckSubtotal,
+                                'CheckTax'            => $current->CheckTax,
+                                'CheckTotal'          => $current->CheckTotal,
+                                'CheckPaidTax'        => $current->CheckPaidTax,
+                                'CheckPaidTotal'      => $current->CheckPaidTotal,
+                                'CheckRemainingTax'   => $current->CheckRemainingTax,
+                                'CheckRemainingTotal' => $current->CheckRemainingTotal,
+                                'details'             => array()
+                            ));
+                        }
+                        $carry['details'][] = $self->map('client', array(
+                            'CheckDetailID'         => $current->CheckDetailID,
+                            'CheckDetailStatus'     => $current->CheckDetailStatus,
+                            'CheckDetailType'       => $current->CheckDetailType,
+                            'ProductID'             => $current->ProductID,
+                            'ProductName'           => $current->ProductName,
+                            'CreatedDate'           => $current->CreatedDate,
+                            'Qty'                   => $current->Qty,
+                            'UnitPrice'             => $current->UnitPrice,
+                            'UnitPrice2'            => $current->UnitPrice2,
+                            'DiscountApplied'       => $current->DiscountApplied,
+                            'TaxID'                 => $current->TaxID,
+                            'TaxPercent'            => $current->TaxPercent,
+                            'VoidNotes'             => $current->VoidNotes,
+                            'CID'                   => $current->CID,
+                            'VID'                   => $current->VID,
+                            'BonusValue'            => $current->BonusValue,
+                            'PaidValue'             => $current->PaidValue,
+                            'ComValue'              => $current->ComValue,
+                            'Entitle1'              => $current->Entitle1,
+                            'Entitle2'              => $current->Entitle2,
+                            'Entitle3'              => $current->Entitle3,
+                            'Entitle4'              => $current->Entitle4,
+                            'Entitle5'              => $current->Entitle5,
+                            'Entitle6'              => $current->Entitle6,
+                            'Entitle7'              => $current->Entitle7,
+                            'Entitle8'              => $current->Entitle8,
+                            'M_Points'              => $current->M_Points,
+                            'M_CustID'              => $current->M_CustID,
+                            'M_OldMembershiptypeID' => $current->M_OldMembershiptypeID,
+                            'M_NewMembershiptypeID' => $current->M_NewMembershiptypeID,
+                            'M_Days'                => $current->M_Days,
+                            'M_PrimaryMembership'   => $current->M_PrimaryMembership,
+                            'P_PointTypeID'         => $current->P_PointTypeID,
+                            'P_Points'              => $current->P_Points,
+                            'P_CustID'              => $current->P_CustID,
+                            'R_Points'              => $current->R_Points,
+                            'DiscountUserID'        => $current->DiscountUserID,
+                            'DiscountDesc'          => $current->DiscountDesc,
+                            'CalculateType'         => $current->CalculateType,
+                            'DiscountID'            => $current->DiscountID,
+                            'DiscountNotes'         => $current->DiscountNotes,
+                            'G_Points'              => $current->G_Points,
+                            'G_CustID'              => $current->G_CustID,
+                            'GST'                   => $current->GST,
+                            'M_DaysAdded'           => $current->M_DaysAdded,
+                            'S_SaleBy'              => $current->S_SaleBy,
+                            'S_NoOfLapsOrSeconds'   => $current->S_NoOfLapsOrSeconds,
+                            'S_CustID'              => $current->S_CustID,
+                            'S_Vol'                 => $current->S_Vol,
+                            'CadetQty'              => $current->CadetQty,
+                            'CheckDetailSubtotal'   => $current->CheckDetailSubtotal,
+                            'CheckDetailTax'        => $current->CheckDetailTax,
+                            'CheckDetailTotal'      => $current->CheckDetailTotal
+                        ));
+                        return $carry;
+                    });
                 }
             }
         }

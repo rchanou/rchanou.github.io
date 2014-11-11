@@ -34,7 +34,7 @@ class Racers
     private $queues;
 
     function __construct(){
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
         $this->queues = new Queues();
     }
@@ -145,7 +145,8 @@ class Racers
         // to the expected database names
         $params = $this->mapCreateParams($request_data);
         try {
-            $customerId = $this->logic->customers->create($params['Standard']);
+            $customerId = $this->logic->customers->create_v0($params['Standard']); // use the old, non restful version of the call
+            return array('customerId' => $customerId);
         }
         catch(\CSException $e) {
             throw new RestException(412, $e->getMessage());
@@ -156,8 +157,6 @@ class Racers
         catch (Exception $e) {
             throw new RestException(500, $e->getMessage());
         }
-
-        return array('customerId' => $customerId);
     }
 
     /**
@@ -785,21 +784,6 @@ class Racers
             "used" => $this->logic->customers->email_is_claimed(@$request_data['email'])
         );
     }
-
-		public function pprfind() {
-			// '&email=' + record.email + '&fname=' + record.f_name + '&lname=' + record.l_name + '&totalvisits=' + record.total_visits + '&racername=' + record.racer_name
-			$tsql = "SELECT TOP (1) * FROM Customers WHERE EmailAddress = ? AND FName = ? AND LName = ? AND TotalVisits = ? AND RacerName = ? AND Custom4 = ''";
-			$params = array(&$_GET['email'], &$_GET['fname'], &$_GET['lname'], &$_GET['totalvisits'], &$_GET['racername']);
-			$rows = $this->run_query($tsql, $params);
-			return $rows;
-		}
-		
-		public function pprupdate() {
-			$tsql_params = array(&$_GET['custom4'], &$_GET['custid']);
-			$tsql = "UPDATE Customers SET Custom4 = ? WHERE CustID = ?";
-			$rows = $this->run_query($tsql, $tsql_params);
-			return true;
-		}
 
     public function index($racer_id, $sub = null) {
         if($racer_id == 'valid') return $this->valid($_REQUEST['email'], $_REQUEST['racerName']);

@@ -21,4 +21,14 @@ class BookingLogic extends BaseLogic {
         parent::__construct($logic, $db);
         $this->interface = $this->db->onlineBookings;
     }
+
+    public final function create($params = array()) {
+        return $this->_create($params, function($booking) {
+            if (!isset($booking->IsPublic))
+                $booking->IsPublic = true; // default to public visibility
+            if ($booking->QuantityTotal <= 0)
+                $booking->QuantityTotal = 0; // disallow negatives
+            return $booking;
+        });
+    }
 }

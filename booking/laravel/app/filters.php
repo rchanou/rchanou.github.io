@@ -60,8 +60,18 @@ Route::filter('checkIfDisabled', function ()
 {
     if (Request::segment(1) != "disabled") //Prevents redirect loops
     {
-        $settings = Settings::getSettings(); //Update website settings
-        if (!$settings['registrationEnabled'])
+        $key = Input::get('key'); //Check for a key that may override the disabled state
+
+        if ($key == md5(Config::get('config.privateKey'))) //If the key is correct
+        {
+            Session::put('disabledOverride',true); //Inform the session not to allow the site to be disabled
+        }
+
+        $settings = Settings::getSettings(); //Get website settings and check if we should be disabled
+        $paymentProcessor = ($settings['onlineBookingPaymentProcessorSettings']);
+        $paymentProcessor = $paymentProcessor->name;
+        if (!$settings['registrationEnabled'] && Session::get('disabledOverride') != true
+            || ($settings['registrationEnabled'] && $paymentProcessor == "Dummy" && Session::get('disabledOverride') != true))
         {
             return Redirect::to('/disabled');
         }

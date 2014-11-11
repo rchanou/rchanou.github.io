@@ -66,7 +66,7 @@ class Payment extends BaseRecord {
                     if (isset($data['Shift']))                  $this->Shift                 = \ClubSpeed\Utility\Convert::toNumber         ($data['Shift']);
                     if (isset($data['PayType']))                $this->PayType               = \ClubSpeed\Utility\Convert::toNumber         ($data['PayType']);
                     if (isset($data['PayDate']))                $this->PayDate               = \ClubSpeed\Utility\Convert::toDateForServer  ($data['PayDate']);
-                    if (isset($data['PayStatus']))              $this->PayStatus             = \ClubSpeed\Utility\Convert::toString         ($data['PayStatus']);
+                    if (isset($data['PayStatus']))              $this->PayStatus             = \ClubSpeed\Utility\Convert::toNumber         ($data['PayStatus']);
                     if (isset($data['PayAmount']))              $this->PayAmount             = \ClubSpeed\Utility\Convert::toNumber         ($data['PayAmount']);
                     if (isset($data['PayTax']))                 $this->PayTax                = \ClubSpeed\Utility\Convert::toNumber         ($data['PayTax']);
                     if (isset($data['VoidDate']))               $this->VoidDate              = \ClubSpeed\Utility\Convert::toDateForServer  ($data['VoidDate']);

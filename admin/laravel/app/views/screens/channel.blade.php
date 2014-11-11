@@ -9,7 +9,7 @@ Speed Screen Channels
 @stop
 
 @section('breadcrumb')
-    <a href="dashboard" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
+    <a href="{{URL::to('dashboard')}}" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
     <a href="#" class="current">Speed Screen Channels</a>
 @stop
 
@@ -157,7 +157,7 @@ var delay = function(callback, wait) {
 function Channel(opts) {
   var self = this;
   if (!opts) opts = {};
-  self.url = opts.url || location.protocol+'//'+location.hostname+(location.port ? ':' + location.port: '') + '/cs-speedscreen/#/' + opts.channelId;
+  self.url = opts.url || 'http://'+location.hostname+(location.port ? ':' + location.port: '') + '/cs-speedscreen/#/' + opts.channelId;
   self.disableAnimations = opts.disableAnimations || false;
   self.elems = opts.elems || {};
 

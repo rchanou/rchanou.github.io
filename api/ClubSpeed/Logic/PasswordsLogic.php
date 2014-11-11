@@ -40,7 +40,7 @@ class PasswordsLogic extends BaseLogic {
         }
 
         $authentication = $this->db->authenticationTokens->dummy();
-        $authentication->CustomersID = $customer['CustID'];
+        $authentication->CustomersID = $customer->CustID;
         $authentication->TokenType = 'PasswordReset';
         $existingAuthentications = $this->db->authenticationTokens->find($authentication);
 
@@ -59,7 +59,7 @@ class PasswordsLogic extends BaseLogic {
             $this->db->authenticationTokens->create($authentication);
         }
 
-        $emailTo = array($email => $customer['FName'] . ' ' . $customer['LName']);
+        $emailTo = array($email => $customer->FName . ' ' . $customer->LName);
 
         $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
         if (empty($emailFrom))
@@ -69,33 +69,43 @@ class PasswordsLogic extends BaseLogic {
         $emailFrom = explode('@', $emailFrom);
         $emailFrom = array('no-reply@' . $emailFrom[1] => "No Reply"); // safe way to do this? we don't really have a fallback value, other than clubspeed..
         
-        $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
-        if (empty($businessName))
+        $business = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
+        if (empty($business))
             throw new \CSException("Password token create was unable to find the ControlPanel setting for MainEngine.BusinessName!");
-        $businessName = $businessName[0];
-        $businessName = $businessName->SettingValue;
-
-        $html = $this->logic->controlPanel->find("TerminalName = Templates AND SettingName = resetPasswordHTML");
+        $business = $business[0];
+        $business = $business->SettingValue;
+        $html = $this->logic->settings->match(array(
+            "Namespace" => "Main",
+            "Name" => "resetEmailBodyHtml"
+        ));
         if (empty($html))
-            throw new \CSException("Password token create was unable to find the ControlPanel setting for Templates.resetPasswordHTML!");
+            throw new \CSException("Password token create was unable to find the setting setting for Main.resetEmailBodyHtml!");
 
         $html = $html[0];
-        $html = $html->SettingValue;
+        $html = $html->Value;
         $url = 'https://' . $_SERVER['SERVER_NAME'] . '/booking/resetpassword/form?token=' . urlencode($authentication->Token);
         $html = str_replace("{{url}}", $url, $html);
-        $html = str_replace("{{business}}", $businessName, $html);
+        $html = str_replace("{{business}}", $business, $html);
+
+        $html = strtr($html, array(
+            "{{url}}" => $url,
+            "{{business}}" => $business
+        ));
+
+        $text = 'TODOTODOTODO';
 
         $mail = Mail::builder()
-            ->subject("Password Reset for " . $businessName)
+            ->subject("Password Reset for " . $business)
             ->from($emailFrom)
             ->to($emailTo)
-            ->body($html);
+            ->body($html)
+            ->alternate($text);
         try {
             Mail::send($mail);
-            Log::debug("Sent password reset email to: " . $customer['EmailAddress']);
+            Log::debug("Sent password reset email to: " . $customer->EmailAddress);
         }
         catch(\Exception $e) {
-            Log::error("Unable to send password reset email to: " . $customer['EmailAddress'], $e); 
+            Log::error("Unable to send password reset email to: " . $customer->EmailAddress, $e); 
             throw $e; // catch the exception to log it, then rethrow / consider this a fatal error
         }
     }
@@ -153,7 +163,9 @@ class PasswordsLogic extends BaseLogic {
         // success - return anything other than 200?
     }
 
-    public final function delete($authenticationId) {
+    public final function delete(/* authenticationId */) {
+        $args = func_get_args();
+        $authenticationId = $args[0];
         $affected = $this->db->authenticationTokens->delete($authenticationId);
     }
 }

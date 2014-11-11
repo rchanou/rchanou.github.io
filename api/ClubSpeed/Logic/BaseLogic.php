@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Database\Records\BaseRecord;
 
 /**
  * The base class for ClubSpeed API logic classes.
@@ -54,19 +55,24 @@ abstract class BaseLogic {
         if (!is_null($callback) && is_callable($callback))
             $dummy = $callback($dummy);
         $id = $this->interface->create($dummy);
-        return array(
-            $this->interface->key => $id
-        );
+        $key = $this->interface->key;
+        if (!is_array($key)) {
+            return array(
+                $key => $id
+            );
+        }
+        return array(); // what to do with composite primary keys? just leaving blank for now.
     }
 
     public function all($params = array()) {
         return $this->interface->all();
     }
 
-    public function get($id) {
-        $get = $this->interface->get($id);
+    public function get(/* id1, id2, ...*/) {
+        $args = func_get_args();
+        $get = call_user_func_array(array($this->interface, 'get'), $args);
         if (is_null($get) || empty($get))
-            throw new \RecordNotFoundException("Unable to find record -- " . $this->interface->table . ".[" . $this->interface->key . "] = " . $id);
+            throw new \RecordNotFoundException("Unable to find record on " . $this->interface->table . " with key: (" . implode(",", $args) . ")");
         return $get;
     }
 
@@ -78,29 +84,47 @@ abstract class BaseLogic {
         return $this->interface->find($comparators);
     }
 
-    public function update($id, $params = array()) {
-        return $this->_update($id, $params, null);
-    }
-
-    protected function _update($id, $params = array(), $callback = null) {
-        $get = $this->get($id);
+    public function update() {
+        $callback = null;
+        $params = array();
+        $args = func_get_args();
+        $getArgs = array();
+        $data = array_pop($args);
+        if (is_callable($data)) {
+            $callback = $data;
+            $data = array_pop($args);
+        }
+        if ($data instanceof BaseRecord || is_array($data))
+            $params = $data;
+        else {
+            // always problematic? no params received
+            // if we use the code below, then the keys will be flipped
+            $getArgs[] = $data; // is this always a problematic path? no params received
+        }
+        while($data = array_pop($args))
+            array_unshift($getArgs, $data);
+        $updatable = $this->updatable($params); // throw exception if updatable is empty?
+        if (empty($updatable))
+            throw new \InvalidArgumentValueException("Update on " . $this->interface->table . " did not receive any allowed updatable values!");
+        $get = call_user_func_array(array($this, 'get'), $getArgs);
         $old = $get[0];
         $new = $this->interface->dummy((array)$old);
-        $updatable = $this->updatable($params); // throw exception if updatable is empty?
         $new->load($updatable);
         if (!is_null($callback) && is_callable($callback))
             $new = $callback($old, $new);
         $this->interface->update($new);
     }
 
-    public function delete($id) {
-        if (!$this->exists($id))
-            throw new \RecordNotFoundException("Looking for record -- " . $this->interface->table . ".[" . $this->interface->key . "] = " . $id);
-        return $this->interface->delete($id);
+    public function delete() {
+        $args = func_get_args();
+        if (!call_user_func_array(array($this, 'exists'), $args))
+            throw new \RecordNotFoundException("Unable to find record on " . $this->interface->table . " with key: (" . implode(",", $args) . ")");
+        call_user_func_array(array($this->interface, 'delete'), $args); // just call, don't return?
     }
 
-    public function exists($id) {
-        return $this->interface->exists($id);
+    public function exists() {
+        $args = func_get_args();
+        return call_user_func_array(array($this->interface, "exists"), $args);
     }
 
     protected function insertable($mapped) {

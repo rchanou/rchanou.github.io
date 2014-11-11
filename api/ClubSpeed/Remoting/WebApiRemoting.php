@@ -1,9 +1,10 @@
 <?php
 
 namespace ClubSpeed\Remoting;
+use ClubSpeed\Logging\LogService as Log;
 
 // Grab httpful -- necessary with autoloader?
-require_once(__DIR__.'../../../httpful/httpful.phar');
+require_once(__DIR__.'../../../httpful/httpful.phar'); // ~ 6 ms
 
 /**
  * The CSWebApi class which contains references to remote methods
@@ -23,12 +24,14 @@ class WebApiRemoting {
     private $apiBase;
 
     protected $logic;
+    protected $db;
 
     /**
      * Creates a new instance of the CSWebApi class.
      */
-    public function __construct(&$logic) {
+    public function __construct(&$logic, &$db) {
         $this->logic = $logic;
+        $this->db = $db;
         $this->apiInfo = array(
             // 'protocol'  => ($this->isSecure() ? 'https' : 'http').'://'
             'protocol'  => 'https://' // https is required for WebAPI -- isSecure() may not actually be required
@@ -38,6 +41,55 @@ class WebApiRemoting {
             , 'version' => '/v1.5'
         );
         $this->apiBase = implode($this->apiInfo);
+    }
+
+    public function canUse() {
+        // items to check for:
+        // 1. existence of username / password
+        // 2. username / password match in the database
+        // 3. existence of override, or correct version number
+        // 4. server is accessible (check with 400 timeout, without username password?)
+        // 5. (more?)
+
+        if (!isset($GLOBALS['apiUsername']) || empty($GLOBALS['apiUsername'])) {
+            Log::warn("Attempted to use WebAPI Remoting, but apiUsername was not set in config.php!");
+            return false;
+        }
+        if (!isset($GLOBALS['apiPassword']) || empty($GLOBALS['apiPassword'])) {
+            Log::warn("Attempted to use WebAPI Remoting, but apiPassword was not set in config.php!");
+            return false;
+        }
+        if ($this->logic->version->compareToCurrent("15.4") < 0) {
+            // current version is less than 15.4
+            // check for the override, as we have a shim which works with older versions,
+            // but is selectively installed
+            if (!isset($GLOBALS['cacheClearOverride']) || !$GLOBALS['cacheClearOverride']) {
+                Log::warn("Attempted to use WebAPI Remoting, but the current version is too low and cacheClearOverride is not set! Current version: " . $this->logic->version->current(false)); // pass false to keep as string
+                return false;
+            }
+        }
+        $users = $this->db->users->match(array(
+            "UserName" => $GLOBALS['apiUsername'],
+            "Password" => $GLOBALS['apiPassword']
+        ));
+        if (empty($users)) {
+            // invalid credentials!
+            Log::warn("Attempted to use WebAPI Remoting, but the provided username/password from config.php was invalid!");
+            return false;
+        }
+        // weird part: try to make a call to /ClubSpeedCache/clear without credentials
+        // if we get a 401 back, then we know the server/shim is available for sure.
+        // if we get a timeout, 404, 500, etc then it is not available.
+        $callName = '/ClubSpeedCache/clear';
+        $apiUrl = $this->getApiUrl($callName);
+        $response = \Httpful\Request::get($apiUrl)
+            ->timeoutIn(3) // timeout after 3 seconds
+            ->send();
+        if($response->code != '401') {
+            Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Received status code: " . $response->code);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -90,9 +142,10 @@ class WebApiRemoting {
      */
     private function handleResponse(&$response) {
         if ($response->code != 200) {
-            // commented out for now
+            Log::error("Received status code " . $response->code . " back from WebAPI! Raw body: " . $response->raw_body);
             throw new \Exception($response->raw_body, $response->code); // find a better way to handle this??
         }
+        Log::debug("Made a successful call to: " . $response->request->uri);
     }
 
     public function startRace($heatId) {

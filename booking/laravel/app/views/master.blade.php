@@ -21,6 +21,14 @@
     <?php $customStylesURL = '/css/custom-styles.css?' . time() //To prevent caching ?>
     {{ ((remoteFileExists(Config::get('config.assetsURL') . $customStylesURL)) ? HTML::style(Config::get('config.assetsURL') . $customStylesURL) : '') }}
     @show
+
+    @if(remoteFileExists(Config::get('config.assetsURL') . '/images/background.jpg'))
+        <style>
+        body {
+            background-image:url('{{Config::get('config.assetsURL')}}/images/background.jpg');
+        }
+        </style>
+    @endif
     <!-- END CSS INCLUDES -->
 
     <title>@yield('title', 'Club Speed Online Booking')</title>
@@ -112,22 +120,3 @@
 </body>
 
 </HTML>
-
-<?php
-//Returns true if a remote file exists, false otherwise
-function remoteFileExists($url) {
-    $curl = curl_init($url);
-    curl_setopt($curl, CURLOPT_NOBODY, true);
-    $result = curl_exec($curl);
-    $ret = false;
-    if ($result !== false) {
-        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        if ($statusCode == 200) {
-            $ret = true;
-        }
-    }
-    curl_close($curl);
-    return $ret;
-}
-
-?>

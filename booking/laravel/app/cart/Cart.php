@@ -11,7 +11,7 @@
  *
  * TODO: Still being fleshed out:
  *
- * $itemToAdd = array('itemId' => $heatId,'name' => $name,'quantity' => $quantity, 'type' => "heat", 'startTime' => $startTime, 'price' => $price,
+ * $itemToAdd = array('itemId' => $heatId (or $productId),'name' => $name,'quantity' => $quantity, 'type' => "heat", 'startTime' => $startTime, 'price' => $price,
     'onlineBookingsId' => $onlineBookingsId, 'data' => $productInfo[$heatId]);
  */
 class Cart

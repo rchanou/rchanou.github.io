@@ -26,6 +26,10 @@ class CheckTotals_V extends BaseRecord {
     public $CheckSubtotal;
     public $CheckTax;
     public $CheckTotal;
+    public $CheckPaidTax;
+    public $CheckPaidTotal;
+    public $CheckRemainingTax;
+    public $CheckRemainingTotal;
     public $CheckDetailID; // Check Detail fields
     public $CheckDetailStatus;
     public $CheckDetailType;
@@ -79,8 +83,6 @@ class CheckTotals_V extends BaseRecord {
     public $CheckDetailSubtotal;
     public $CheckDetailTax;
     public $CheckDetailTotal;
-    public $PaidAmount;
-    public $PaidTax;
 
     public function __construct($data = array()) {
         $this->load($data);
@@ -100,6 +102,10 @@ class CheckTotals_V extends BaseRecord {
                     if (isset($data['CheckSubtotal']))              $this->CheckSubtotal            = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckSubtotal']);
                     if (isset($data['CheckTax']))                   $this->CheckTax                 = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckTax']);
                     if (isset($data['CheckTotal']))                 $this->CheckTotal               = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckTotal']);
+                    if (isset($data['CheckPaidTax']))               $this->CheckPaidTax             = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckPaidTax']);
+                    if (isset($data['CheckPaidTotal']))             $this->CheckPaidTotal           = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckPaidTotal']);
+                    if (isset($data['CheckRemainingTax']))          $this->CheckRemainingTax        = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckRemainingTax']);
+                    if (isset($data['CheckRemainingTotal']))        $this->CheckRemainingTotal      = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckRemainingTotal']);
                     if (isset($data['BrokerName']))                 $this->BrokerName               = \ClubSpeed\Utility\Convert::toString          ($data['BrokerName']);
                     if (isset($data['Notes']))                      $this->Notes                    = \ClubSpeed\Utility\Convert::toString          ($data['Notes']);
                     if (isset($data['Gratuity']))                   $this->Gratuity                 = \ClubSpeed\Utility\Convert::toNumber          ($data['Gratuity']);
@@ -161,8 +167,6 @@ class CheckTotals_V extends BaseRecord {
                     if (isset($data['CheckDetailSubtotal']))        $this->CheckDetailSubtotal      = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckDetailSubtotal']);
                     if (isset($data['CheckDetailTax']))             $this->CheckDetailTax           = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckDetailTax']);
                     if (isset($data['CheckDetailTotal']))           $this->CheckDetailTotal         = \ClubSpeed\Utility\Convert::toNumber          ($data['CheckDetailTotal']);
-                    if (isset($data['PaidAmount']))                 $this->PaidAmount               = \ClubSpeed\Utility\Convert::toNumber          ($data['PaidAmount']);
-                    if (isset($data['PaidTax']))                    $this->PaidTax                  = \ClubSpeed\Utility\Convert::toNumber          ($data['PaidTax']);
                 }
             }
             else {

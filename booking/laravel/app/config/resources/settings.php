@@ -1,5 +1,7 @@
 <?php
 
+require_once(app_path().'/includes/includes.php');
+
 /**
  * Class Settings
  *
@@ -87,7 +89,9 @@ class Settings
             'custom4Required' => false,
             'forceRegistrationIfAuthenticatingViaThirdParty' => false,
             'registrationEnabled' => true,
-            'enableFacebook' => true
+            'enableFacebook' => true,
+            'locale' => 'en_US',
+            'currency' => 'USD'
         );
 
         self::$currentSettings = self::$defaultSettings;
@@ -120,6 +124,10 @@ class Settings
         }
 
         self::$currentSettings['dropdownOptions'] = $dropdownOptions;
+
+        self::$currentSettings['locale'] = Config::get('config.locale') != null ? Config::get('config.locale') : self::$currentSettings['locale'];
+        self::$currentSettings['currency'] = Config::get('config.currency') != null ? Config::get('config.currency') : self::$currentSettings['currency'];
+
         self::$initialized = true;
     }
 }

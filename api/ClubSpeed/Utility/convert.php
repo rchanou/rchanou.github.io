@@ -77,6 +77,24 @@ class Convert {
         return false;
     }
 
+    public static function convert($val, $type) {
+        if(isset($type) && is_string($type)) {
+            switch(strtolower($type)) {
+                case 'number':
+                case 'integer':
+                case 'double':
+                case 'identifier':
+                    return self::toNumber($val);
+                case 'boolean':
+                case 'bit':
+                    return self::toBoolean($val);
+                case 'string':
+                    return self::toString($val);
+            }
+        }
+        return $val; // unknown type, just return the original
+    }
+
     public static function toBoolean($val) {
         if (self::is_null_or_db_null($val))
             return $val;

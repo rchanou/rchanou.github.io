@@ -18,8 +18,8 @@ class LogService {
         return self::$logger->log($message);
     }
 
-    public static function warning($message) {
-        return self::$logger->warning($message);
+    public static function warn($message) {
+        return self::$logger->warn($message);
     }
 
     public static function debug($message) {

@@ -10,7 +10,7 @@ class Translations extends BaseApi
 
     function __construct() {
         parent::__construct();
-        header('Access-Control-Allow-Origin: *'); //Here for all /say
+        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
         $this->mapper = new \ClubSpeed\Mappers\TranslationsMapper();
         $this->interface = $this->logic->translations;
@@ -43,7 +43,7 @@ class Translations extends BaseApi
             case 'translate':
                 return $this->translate(@$_GET['names'], @$_GET['language'], @$_GET['namespace']);
             default:
-                return $this->get($desiredData, $request_data); // $desiredData should be an integer (or a string representation of an integer) in this case
+                return $this->get1($desiredData, $request_data); // $desiredData should be an integer (or a string representation of an integer) in this case
             /*case 'add': // Wes's method to bulk load in strings. This would be done from installer
                 $translations = array(
                     'strWelcomeMessage' => 'Welcome to our track!'
@@ -179,23 +179,4 @@ class Translations extends BaseApi
             throw new RestException(500, $e->getMessage());
         }
     }
-
-    // public function get($id, $request_data = null) {
-    //     if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
-    //         throw new RestException(401, "Invalid authorization!");
-    //     }
-    //     try {
-    //         $logic =& $this->logic;
-    //         return $this->mapper->mutate($id, $request_data, function($id) use (&$interface) {
-    //             return $interface->get($id);
-    //         });
-    //         return $this->logic->translations->get($id);
-    //     }
-    //     catch (CSException $e) {
-    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
-    //     }
-    //     catch (Exception $e) {
-    //         throw new RestException(500, $e->getMessage());
-    //     }
-    // }
 }

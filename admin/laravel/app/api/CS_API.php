@@ -38,7 +38,7 @@ class CS_API
      * @param string $verb Whether the call is a 'GET' or 'POST'.
      * @return [ 'response': data, 'error': data ]
      */
-    private static function call($url, $params = null, $verb = 'GET') //TODO: Getting a little messy. Rename output.
+    private static function call($url, $params = null, $verb = 'GET')
     {
         self::initialize();
 
@@ -52,6 +52,30 @@ class CS_API
         {
             try {
                 $response = \Httpful\Request::post($url)
+                    ->body($params)
+                    ->sendsJson()
+                    ->send();
+            }
+            catch (Exception $e)
+            {
+                //If there was an error, store debugging information in the session
+                $errorInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $e->getMessage());
+                Session::put('errorInfo', $errorInfo);
+
+                if ($response !== null && property_exists($response, 'body') && property_exists($response->body, 'error'))
+                {
+                    $errorMessage = $response->body->error;
+                }
+
+                $response = null;
+                return array('response' => $response,
+                    'error' => $errorMessage);
+            }
+        }
+        else if ($verb == 'PUT')
+        {
+            try {
+                $response = \Httpful\Request::put($url)
                     ->body($params)
                     ->sendsJson()
                     ->send();
@@ -144,6 +168,91 @@ class CS_API
         self::initialize();
         $urlVars = array('key' => self::$apiKey);
         $url = self::$apiURL . "/channel/$channelId.json?" . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function getBookingSettings()
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey, 'group' => 'Booking');
+        $url = self::$apiURL . "/settings/get.json?" . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private static function updateBookingSetting($newSettingName,$newSettingValue)
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey);
+        $url = self::$apiURL . "/controlPanel/Booking/$newSettingName?" . http_build_query($urlVars);
+        $params = array('value' => $newSettingValue);
+
+        $result = self::call($url,$params,'PUT');
+
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if (isset($response->code) && $response->code == 200)
+        {
+            return true;
+        }
+        else if ($response !== null)
+        {
+            return false;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function updateBookingSettings($newSettings)
+    {
+        self::initialize();
+        foreach($newSettings as $newSettingName => $newSettingValue)
+        {
+            $result = self::updateBookingSetting($newSettingName,$newSettingValue);
+
+            if ($result === false)
+            {
+                return false;
+            }
+            if ($result === null)
+            {
+                return null;
+            }
+        }
+        return true;
+    }
+
+    public static function getSupportedPaymentTypes()
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey);
+        $url = self::$apiURL . "/processPayment.json?" . http_build_query($urlVars);
 
         $result = self::call($url);
         $response = $result['response'];

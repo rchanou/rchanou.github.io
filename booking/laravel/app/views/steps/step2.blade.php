@@ -43,14 +43,15 @@
         <div class="raceResult" id="{{$race->heatId}}">
             <div class="raceResultHeader">
                 <div class="raceName ellipsis">{{$race->heatDescription}}</div>
-                <div class="raceDate">{{date('Y/m/d H:i',strtotime($race->heatStartsAt))}}</div>
+                <div class="raceDate">{{date(Config::get('config.dateFormat') . ' H:i',strtotime($race->heatStartsAt))}}</div>
             </div>
 
             <div class="spotsAvailable">{{$race->heatSpotsAvailableOnline}} spots available online</div>
 
             <div class="raceResultFooter">
                 <div class="racePrices ellipsis">{{$numberOfParticipants}} Driver(s)
-                     x ${{number_format($race->products[0]->price1,2)}} each = ${{number_format($numberOfParticipants * $race->products[0]->price1,2)}}
+
+                     x {{$moneyFormatter->formatCurrency($race->products[0]->price1, $currency)}} each = {{$moneyFormatter->formatCurrency($numberOfParticipants * $race->products[0]->price1, $currency)}}
                 </div>
                 <div class="raceBookButtonArea">
                     @if($authenticated != null)
@@ -226,7 +227,6 @@
                         @endif
                     @endif
 
-                    <!-- TODO: Move away from fixed inline margin-lefts as it will look different on different devices, if sticking to this template -->
                     <!-- Birth Date -->
                     @if($settings['birthDateShown'])
 
@@ -392,7 +392,10 @@
                     <input type="hidden" name="numberOfParticipants" value="{{$numberOfParticipants}}">
                     <input type="hidden" name="source" value="step2">
                     <div class="rightAligned">
-                        {{link_to('resetpassword','Reset My Password')}} <button type="submit" class="formButton">Login</button>
+                        {{link_to('resetpassword','Claim My Account / Reset My Password')}} <button type="submit" class="formButton">Login</button>
+                    </div>
+                    <div class="alert alert-info">
+                        Already registered at a track but don't have a password, or don't remember your password? No problem! Just head on over to {{link_to('resetpassword','Claim My Account / Reset My Password')}} and get yourself a new password!
                     </div>
                 </form>
             </div>

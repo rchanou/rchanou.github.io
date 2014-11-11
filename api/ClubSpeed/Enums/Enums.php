@@ -95,4 +95,36 @@ class Enums {
     // See UserDataType.vb at Enum PayStatus
     const PAY_STATUS_PAID = 1;
     const PAY_STATUS_VOID = 2;
+
+    // See UserDataType.vb at Enum GiftCardHistoryType
+    const GIFT_CARD_HISTORY_VOID_SELL = 9;
+    const GIFT_CARD_HISTORY_PAY_BY_GIFT_CARD = 10;
+    const GIFT_CARD_HISTORY_VOID_PAY_BY_GIFT_CARD = 11;
+    const GIFT_CARD_HISTORY_REFUND_TO_GIFT_CARD = 12;
+
+    // See UserDataType.vb at Enum CheckStatus
+    const CHECK_STATUS_OPEN = 0;
+    const CHECK_STATUS_CLOSED = 1;
+
+    // See UserDataType.vb at Enum SearchCheckType
+    const CHECK_TYPE_SHOW_ALL = 0;
+    const CHECK_TYPE_REGULAR = 1;
+    const CHECK_TYPE_EVENT = 2;
+
+    // GiftCardHistoryType
+    //     ' gift card transaction
+    //     SellGiftCard = 0 ' 
+    //     VoidSell = 9
+    //     PayByGiftCard = 10
+    //     VoidPayByGiftCard = 11
+    //     RefundToGiftCard = 12
+    //     InvoicePaid = 18
+
+    //     TransferIn = 1
+    //     ' External Account
+    //     SellGiftCardExternal = 13
+    //     VoidSellExternal = 14
+    //     PayByGiftCardExternal = 15
+    //     VoidPayByGiftCardExternal = 16
+    //     RefundToGiftCardExternal = 17
 }

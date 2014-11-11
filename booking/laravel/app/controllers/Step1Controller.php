@@ -31,6 +31,10 @@ class Step1Controller extends BaseController
 
         $heatTypesAvailable = CS_API::filterDropdownHeatsByAvailableSpots($heatTypesAvailable,1); //Only list the ones with at least one spot
 
+        if (Input::has('debug'))
+        {
+            Session::put('debug',true);
+        }
         //Render the page
         return View::make('/steps/step1',
             array(

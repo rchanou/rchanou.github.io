@@ -32,7 +32,7 @@ Reset My Password - Online Booking
 @section('content')
 <div class="mainBodyContent">
     <div class="mainBodyHeader">
-        Password Reset
+        Password Reset / Claim Account
     </div>
     <!-- PASSWORD RESET REQUEST FORM-->
         @if(!isset($resetRequestSuccessful))

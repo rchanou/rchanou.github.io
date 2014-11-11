@@ -103,9 +103,9 @@ class Authenticate {
      */
     private static function getCredentials() {
         return array(
-              'username'    => @$_SERVER['PHP_AUTH_USER']
-            , 'password'    => @$_SERVER['PHP_AUTH_PW']
-            , 'key'         => @$_REQUEST['key']
+              'username'    => @$_SERVER['PHP_AUTH_USER'] // basic auth decoded user
+            , 'password'    => @$_SERVER['PHP_AUTH_PW'] // basic auth decoded password
+            , 'key'         => @$_REQUEST['key'] // query string key
         );
     }
 

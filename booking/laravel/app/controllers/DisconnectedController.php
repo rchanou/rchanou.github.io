@@ -12,8 +12,6 @@ class DisconnectedController extends BaseController
 {
     public function entry()
     {
-        //TODO: Enhance with error codes.
-
         try
         {
             return View::make('/errorpages/disconnected',

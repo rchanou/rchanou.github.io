@@ -515,18 +515,9 @@
             var race = data.race;
             var racers = race.racers;
             if (racers.length > 0) {
-
                 // prepend the race.racers[].kart_number with a "#", if it exists
                 z.forEach(racers, function(x, key) {
                     x.kart_number = (z.check.exists(x.kart_number) ? "#" + x.kart_number : "");
-                    if (z.check.exists(x.photo_url) && clubspeed.helpers.css.imageExists(x.photo_url)) {
-                        x.photo_type = "racerPhoto";
-                    }
-                    else {
-                        x.photo_type = "defaultPhoto";
-                        x.photo_url = defaultPhotoUri;
-                    }
-
                     var rpm = z.convert.toNumber(x.rpm);
                     if (z.check.isNumber(rpm)) {
                         x.rpm = rpm.toLocaleString(z.location.locale);
@@ -553,6 +544,38 @@
         }));
 
         return deferred;
+    }
+
+    function setPictures(data, callback) {
+        var race = data.race;
+        var racers = race.racers;
+        if (racers.length > 0) {
+            var counter = racers.length;
+            z.forEach(racers, function(racer, key) {
+                if (z.check.exists(racer.photo_url)) {
+                    clubspeed.helpers.css.imageExists(
+                        racer.photo_url,
+                        function() {
+                            racer.photo_type = "racerPhoto";
+                            if (--counter <= 0)
+                                callback(data);
+                        },
+                        function() {
+                            racer.photo_type = "defaultPhoto"
+                            racer.photo_url = defaultPhotoUri;
+                            if (--counter <= 0)
+                                callback(data);
+                        }
+                    );
+                }
+                else {
+                    racer.photo_type = "defaultPhoto"
+                    racer.photo_url = defaultPhotoUri;
+                    if (--counter <= 0)
+                       callback(data);
+                }
+            });
+        }
     }
 
     /**
@@ -839,8 +862,10 @@
             function() {
                 // success pipe
                 var data = smashArgs.apply(this, arguments);
-                log.debug(data);
-                buildPage(data);
+                setPictures(data, function(dataWithPictures) {
+                    log.debug(dataWithPictures);
+                    buildPage(dataWithPictures);
+                });
             }, function() {
                 // failure pipe -- grab fallback data
                 $.when.apply($, getFallbackData()).then(function() {

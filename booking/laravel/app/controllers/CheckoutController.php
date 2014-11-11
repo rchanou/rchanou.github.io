@@ -80,13 +80,20 @@ class CheckoutController extends BaseController
             }
         }
 
+        $settings = Session::get('settings');
+        $locale = $settings['locale'];
+        $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
+        $currency = $settings['currency'];
+
         return View::make('/checkout',
             array(
                 'images' => Images::getImageAssets(),
                 'localCartHasExpiredItem' => $localCartHasExpiredItem,
                 'virtualCheck' => $virtualCheck,
                 'virtualCheckDetails' => $virtualCheckDetails,
-                'cart' => $cart
+                'cart' => $cart,
+                'moneyFormatter' => $moneyFormatter,
+                'currency' => $currency
             )
         );
     }
