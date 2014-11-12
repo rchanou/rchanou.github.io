@@ -189,39 +189,34 @@ class CheckoutController extends BaseController
             }
         }
 
-        //STEP 3: Create the real check if it doesn't exist yet
+        //STEP 3: Create the real check (a new one is created for each payment attempt)
 
         $checkId = null;
-        if (!Session::has('checkId'))
-        {
-            //Package the data in the format expected by the API
-            $checkDetails = array('checks' => array());
-            $checkDetails['checks'][] = array(
-                'userId' => 1, //support user in Club Speed
-                'customerId' => Session::get('authenticated'),
-                'details' => array()
-            );
-            foreach($cart as $cartItemIndex => $cartItem)
-            {
-                $newItem = array();
-                $newItem['productId'] = $cartItem['data']->products[0]->productsId;
-                $newItem['qty'] = $cartItem['quantity'];
-                $checkDetails['checks'][0]['details'][] = $newItem;
-            }
 
-            //Create the actual check
-            $checkId = CS_API::createCheck($checkDetails);
-            if ($checkId === null || !is_numeric($checkId))
-            {
-                return Redirect::to('/disconnected');
-            }
-
-            Session::put('checkId',$checkId);
-        }
-        else
+        //Package the data in the format expected by the API
+        $checkDetails = array('checks' => array());
+        $checkDetails['checks'][] = array(
+            'userId' => 1, //support user in Club Speed
+            'customerId' => Session::get('authenticated'),
+            'details' => array()
+        );
+        foreach($cart as $cartItemIndex => $cartItem)
         {
-            $checkId = Session::get('checkId');
+            $newItem = array();
+            $newItem['productId'] = $cartItem['data']->products[0]->productsId;
+            $newItem['qty'] = $cartItem['quantity'];
+            $checkDetails['checks'][0]['details'][] = $newItem;
         }
+
+        //Create the actual check
+        $checkId = CS_API::createCheck($checkDetails);
+        if ($checkId === null || !is_numeric($checkId))
+        {
+            return Redirect::to('/disconnected');
+        }
+
+        Session::put('checkId',$checkId);
+
 
         $check = CS_API::getCheck($checkId);
         if ($check === null || !property_exists($check,'checks'))

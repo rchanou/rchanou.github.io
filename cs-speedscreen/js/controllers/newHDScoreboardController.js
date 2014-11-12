@@ -30,6 +30,7 @@
         globalVars.setFirstTimeScoreboardLoaded(false);
         var disableNextRacers = defaultFor(config.disableNextRacers, true);
         var disableNextRacersTab = defaultFor(config.disableNextRacersTab, false);
+        var scoreboardEventSource = null;
 
         // ##################################
         // # HD SCOREBOARD MODEL DEFINITION #
@@ -53,6 +54,7 @@
             this.finalResultsScreenTimeMs = 0;
             this.finalResultsTimeStartedMs = 0;
             this.slidePanelVisible = false;
+            this.dataSource = defaultFor(config.dataSource,'pollingAPI');
 
             $scope.disablePurpleText = defaultFor(config.disablePurpleText, false);
 
@@ -130,8 +132,48 @@
 
                 intervalsToReturn.push($interval( function()
                 {
-                    HDScoreboard.getNextRacerDataAndFinalResults();
+                    HDScoreboard.getNextRacerData();
+                },defaultFor(config.nextRacersPollingRateMs,5000)));
+
+                intervalsToReturn.push($interval( function()
+                {
+                    HDScoreboard.getFinalResults();
                 },1000));
+
+                if (this.dataSource == 'EventSource')
+                {
+                    function connect()
+                    {
+                        scoreboardEventSource = new EventSource("http://192.168.111.171/webapi/v1.5/ScoreBoard/Feed/" + globalVars.getCurrentTrack()); //EventSource("http://192.168.111.141:8080/api/EventSource");//("http://192.168.111.140/webapi/v1.5/ScoreBoard/Feed/1");//("http://192.168.111.167:8081/api/scoreboard?trackNo=1"); //TODO: Use better URL ("http://localhost:8080/api/EventSource"); http://192.168.111.167:8081/api/scoreboard?trackNo=1
+
+                        scoreboardEventSource.addEventListener("error", function (event) {
+                            if (event.target.readyState === EventSource.CLOSED) {
+                                if (scoreboardEventSource != null)
+                                {
+                                    scoreboardEventSource.close();
+                                }
+                                console.log("Connection closed to Club Speed. Going to try to connect.");
+                                connect(); //TODO: Set a timeout for this
+                            } else if (event.target.readyState === EventSource.CONNECTING) {
+                                console.log("Reconnecting to Club Speed...");
+                            } else {
+                                console.log("Connection closed. Unknown error!");
+                            }
+                        }, false);
+
+                        scoreboardEventSource.addEventListener("open", function (event) {
+                            console.log("Connected to Club Speed!");
+                        }, false);
+
+                        scoreboardEventSource.addEventListener("message", function (event) {
+                            $scope.currentScoreboard = JSON.parse(event.data);
+                            //$scope.lastHeatScoreboard = JSON.parse(event.data); //TODO: Figure this out
+                            console.log("Received scoreboard data from Club Speed!");
+                            console.log(event.data);
+                        }, false);
+                    }
+                    connect();
+                }
 
                 // #####################
                 // # BOTTOM STATUS BAR #
@@ -237,16 +279,19 @@
             HDScoreboardModel.prototype.getLatestScoreboardData = function()
             {
                 //console.log("HD Scoreboard is getting data for track " + globalVars.getCurrentTrack());
-                speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
-                    $scope.currentScoreboard = data;
-                    //console.log(data);
-                }).error(function (data, status, headers, config) {
-                    $scope.currentScoreboard = data;
-                });
+                if (this.dataSource == 'pollingAPI')
+                {
+                    speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
+                        $scope.currentScoreboard = data;
+                        //console.log(data);
+                    }).error(function (data, status, headers, config) {
+                        $scope.currentScoreboard = data;
+                    });
+                }
             };
 
 
-            HDScoreboardModel.prototype.getNextRacerDataAndFinalResults = function()
+            HDScoreboardModel.prototype.getNextRacerData = function()
             {
                 speedScreenServices.getNextHeat(globalVars.getCurrentTrack()).success(function (data) {
                     $scope.currentNextRace = data;
@@ -254,16 +299,22 @@
                 }).error(function (data, status, headers, config) {
                     $scope.currentNextRace = data;
                 });
+            };
 
-                if (this.lastHeatID != -1)
-                {
-                    speedScreenServices.getScoreboardDataByHeatID(this.lastHeatID).success(function (data) {
-                        $scope.lastHeatScoreboard = data;
+            HDScoreboardModel.prototype.getFinalResults = function()
+            {
+                //if (this.dataSource == 'pollingAPI')
+                //{
+                    if (this.lastHeatID != -1)
+                    {
+                        speedScreenServices.getScoreboardDataByHeatID(this.lastHeatID).success(function (data) {
+                            $scope.lastHeatScoreboard = data;
 
-                    }).error(function (data, status, headers, config) {
-                        $scope.lastHeatScoreboard = data;
-                    });
-                }
+                        }).error(function (data, status, headers, config) {
+                            $scope.lastHeatScoreboard = data;
+                        });
+                    }
+                //}
             };
 
             /** processLatestScoreboardData()
@@ -284,6 +335,10 @@
                     this.determineScoreboardState();
                     this.processRacerData();
                     this.updateScoreboardView();
+                    console.log('lastHeatsHistory: ' + this.lastHeatsHistory.length)
+                    console.log(this.lastHeatsHistory);
+                    console.log('nextRacersHistory: ' + this.nextRacersHistory.length)
+                    console.log(this.nextRacersHistory);
                 }
             };
 

@@ -129,7 +129,7 @@
                 var onlineBookings = data["bookings"];
 
                 $.each(onlineBookings, function(index, currentOnlineBooking) {
-                    if(currentOnlineBooking['heatSpotsAvailableOnline'] >= numOfRacers)
+                    if(currentOnlineBooking['heatSpotsAvailableOnline'] >= numOfRacers && currentOnlineBooking['isPublic'])
                     {
                         $('#heatTypeDropdown')
                             .append($("<option></option>")

@@ -92,9 +92,12 @@ class CS_API
                            "heatSpotsAvailableOnline" => "999");
             foreach($result->body->bookings as $currentAvailableBooking)
             {
-                $heatTypes[] = array("heatTypeId" => $currentAvailableBooking->heatTypeId,
-                    "name" => $currentAvailableBooking->heatDescription,
-                    "heatSpotsAvailableOnline" => $currentAvailableBooking->heatSpotsAvailableOnline);
+                if ($currentAvailableBooking->isPublic)
+                {
+                    $heatTypes[] = array("heatTypeId" => $currentAvailableBooking->heatTypeId,
+                        "name" => $currentAvailableBooking->heatDescription,
+                        "heatSpotsAvailableOnline" => $currentAvailableBooking->heatSpotsAvailableOnline);
+                }
             }
             return $heatTypes;
         }
@@ -132,6 +135,8 @@ class CS_API
 
         $result = self::call($url);
 
+
+
         $result = $result['response'];
         if ($result !== null && isset($result->body->bookings))
         {
@@ -152,7 +157,7 @@ class CS_API
         {
             foreach($heats as $currentHeat)
             {
-                if ($currentHeat->heatSpotsAvailableOnline >= $minNumberOfSpots)
+                if ($currentHeat->heatSpotsAvailableOnline >= $minNumberOfSpots && $currentHeat->isPublic)
                 {
                     $heatsFiltered[] = $currentHeat;
                 }

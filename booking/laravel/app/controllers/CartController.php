@@ -12,6 +12,9 @@ class CartController extends BaseController
 {
     public function entry()
     {
+        $settings = Settings::getSettings(); //Update website settings (since step 1 and step 2 can be skipped)
+        Session::put('settings',$settings);
+
         $itemAddedToCart = null;
         $itemRemovedFromCart = null;
         $failureToAddToCart = null;

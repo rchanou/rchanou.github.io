@@ -25,8 +25,6 @@
  * a channel configuration and will instead just permanently stay on the scoreboard.
  */
 
-//TODO: Before release, get the stored procedure fixed for sorting racers by position in position races
-
 speedScreenDemoApp.controller('channelController', function($scope, $timeout, $interval, $routeParams, speedScreenServices, globalVars, $sce) {
 
     //#################
@@ -38,6 +36,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
     $scope.showHeatNumberInsteadOfRaceTime = defaultFor(config.showHeatNumberInsteadOfRaceTime, false);
     $scope.disableNextRacers = defaultFor(config.disableNextRacers, true);
     $scope.disableNextRacersTab = defaultFor(config.disableNextRacersTab, false);
+    $scope.channelError = null;
 
 //    If testing a specific track is desired:
 /*    var apiURL = 'http://ftikcincinnati.clubspeedtiming.com/api/index.php';
@@ -94,6 +93,7 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
         this.currentTrack = 1;
         this.apiKey = apiKey;
         this.apiURL = apiURL;
+        this.dataSource = defaultFor(config.dataSource,'pollingAPI');
 
         //Notify all slides of the current API URL and API key
         globalVars.setApiKey(this.apiKey);
@@ -420,10 +420,21 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
 
                 //console.log("Slides:");
                 //console.log(slides);
+                $scope.channelError = null;
 
-            }).error(function (data) { //In case of any error fetching channel data, at least make the Speed Screen show the scoreboard for track 1
-                console.log(data);
-                //slides.push(new Slide("html","pages/newhdscoreboard.html",86400000,"",this.apiURL,this.apiKey, 1));
+            }).error(function (data, status, headers, config) { //Error reporting
+                if (status == 0)
+                {
+                    $scope.channelError = "Unable to connect to Club Speed at " + globalVars.getApiURL() + " - Network or DNS problem";
+                }
+                else if (status == 404)
+                {
+                    $scope.channelError = "Unable to reach the Club Speed API at " + globalVars.getApiURL() + " - Error 404";
+                }
+                else
+                {
+                    $scope.channelError = "Unable to connect to Club Speed at " + globalVars.getApiURL() + " - Error " + status;
+                }
             });
             $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
         };
@@ -590,69 +601,70 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
      */
     function pollForRaces()
     {
-/*        console.log("Polling for races...");
-        console.log("Number of tracks: " + scoreboardTracks.length);
-        //TODO: Some of these may not be firing.
-        console.log("Has scoreboard: " + hasScoreboard);*/
-        if (hasScoreboard && scoreboardTracks.length <= 1)
-        {
-            //console.log("Channel is polling the only track " + globalVars.getCurrentTrack() + " for races...");
-            speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
-                //console.log(data);
-                if (!data.hasOwnProperty("race")) //Old method: if (Object.size(data.scoreboard) === 0)
-                {
-                    globalVars.setRaceIsOnGoing(false);
-                }
-                else
-                {
-                    globalVars.setRaceIsOnGoing(true);
-                }
-            });
-        }
-        else if (hasScoreboard && scoreboardTracks.length > 1)
-        {
-            for (var i = 0; i < scoreboardTracks.length; ++i)
+
+            /*        console.log("Polling for races...");
+             console.log("Number of tracks: " + scoreboardTracks.length);
+             //TODO: Some of these may not be firing.
+             console.log("Has scoreboard: " + hasScoreboard);*/
+            if (hasScoreboard && scoreboardTracks.length <= 1)
             {
-                //console.log("Channel is polling track " + scoreboardTracks[i] + " for races...");
-
-                speedScreenServices.getScoreboardData(scoreboardTracks[i]).success(function (data, status, headers, config) {
-                    //var track_id = getUrlParam(config.url,"track_id");
-
+                //console.log("Channel is polling the only track " + globalVars.getCurrentTrack() + " for races...");
+                speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
                     //console.log(data);
-
-                    if (!data.hasOwnProperty("race"))//Old method: if (Object.size(data.scoreboard) === 0)
+                    if (!data.hasOwnProperty("race")) //Old method: if (Object.size(data.scoreboard) === 0)
                     {
-                        var track_id = getUrlParam(config.url,"track_id");
-                        //console.log("No race on-going on track " + track_id);
-/*                        console.log("track_id = " + track_id);
-                        console.log("globalVars.getCurrentTrack() = " + globalVars.getCurrentTrack())
-                        console.log("globalVars.isRaceOnGoing() = " + globalVars.isRaceOnGoing());
-
-                        console.log(typeof globalVars.getCurrentTrack());
-                        console.log(typeof track_id);
-                        console.log(globalVars.getCurrentTrack() == track_id);*/
-                        if (parseInt(globalVars.getCurrentTrack()) == parseInt(track_id) && globalVars.isRaceOnGoing())
-                        {
-                            globalVars.setRaceIsOnGoing(false);
-                            //console.log("setRaceIsOnGoing being set to FALSE");
-
-                        }
-
-                        //console.log("setRaceIsOnGoing = " + globalVars.isRaceOnGoing());
+                        globalVars.setRaceIsOnGoing(false);
                     }
                     else
                     {
-                        var track_id = getUrlParam(config.url,"track_id");
-                        //console.log("Race on-going on track " + track_id);
-                        //console.log("setRaceIsOnGoing being set to TRUE");
-                        globalVars.setCurrentTrack(track_id);
                         globalVars.setRaceIsOnGoing(true);
-
-                        //console.log("setRaceIsOnGoing = " + globalVars.isRaceOnGoing());
                     }
                 });
             }
-        }
+            else if (hasScoreboard && scoreboardTracks.length > 1)
+            {
+                for (var i = 0; i < scoreboardTracks.length; ++i)
+                {
+                    //console.log("Channel is polling track " + scoreboardTracks[i] + " for races...");
+
+                    speedScreenServices.getScoreboardData(scoreboardTracks[i]).success(function (data, status, headers, config) {
+                        //var track_id = getUrlParam(config.url,"track_id");
+
+                        //console.log(data);
+
+                        if (!data.hasOwnProperty("race"))//Old method: if (Object.size(data.scoreboard) === 0)
+                        {
+                            var track_id = getUrlParam(config.url,"track_id");
+                            //console.log("No race on-going on track " + track_id);
+                            /*                        console.log("track_id = " + track_id);
+                             console.log("globalVars.getCurrentTrack() = " + globalVars.getCurrentTrack())
+                             console.log("globalVars.isRaceOnGoing() = " + globalVars.isRaceOnGoing());
+
+                             console.log(typeof globalVars.getCurrentTrack());
+                             console.log(typeof track_id);
+                             console.log(globalVars.getCurrentTrack() == track_id);*/
+                            if (parseInt(globalVars.getCurrentTrack()) == parseInt(track_id) && globalVars.isRaceOnGoing())
+                            {
+                                globalVars.setRaceIsOnGoing(false);
+                                //console.log("setRaceIsOnGoing being set to FALSE");
+
+                            }
+
+                            //console.log("setRaceIsOnGoing = " + globalVars.isRaceOnGoing());
+                        }
+                        else
+                        {
+                            var track_id = getUrlParam(config.url,"track_id");
+                            //console.log("Race on-going on track " + track_id);
+                            //console.log("setRaceIsOnGoing being set to TRUE");
+                            globalVars.setCurrentTrack(track_id);
+                            globalVars.setRaceIsOnGoing(true);
+
+                            //console.log("setRaceIsOnGoing = " + globalVars.isRaceOnGoing());
+                        }
+                    });
+                }
+            }
     }
 
     /**
