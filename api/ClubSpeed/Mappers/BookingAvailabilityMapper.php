@@ -58,7 +58,8 @@ class BookingAvailabilityMapper extends BaseMapper {
                             'HeatSpotsAvailableCombined' => $current->HeatSpotsAvailableCombined,
                             'HeatSpotsAvailableOnline'   => $current->HeatSpotsAvailableOnline,
                             'HeatTypeNo'                 => $current->HeatTypeNo,
-                            'products'                    => array()
+                            'IsPublic'                   => $current->IsPublic,
+                            'products'                   => array()
                         ));
                     }
                     $product = array( // map later
