@@ -203,6 +203,26 @@ class CS_API
         }
     }
 
+    public static function getSettingsFor($terminalName)
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey, 'group' => $terminalName);
+        $url = self::$apiURL . "/settings/get.json?" . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     private static function updateBookingSetting($newSettingName,$newSettingValue)
     {
         self::initialize();
@@ -246,6 +266,51 @@ class CS_API
             }
         }
         return true;
+    }
+
+    public static function updateSettingsFor($terminalName,$newSettings)
+    {
+        self::initialize();
+        foreach($newSettings as $newSettingName => $newSettingValue)
+        {
+            $result = self::updateSettingFor($terminalName,$newSettingName,$newSettingValue);
+
+            if ($result === false)
+            {
+                return false;
+            }
+            if ($result === null)
+            {
+                return null;
+            }
+        }
+        return true;
+    }
+
+    private static function updateSettingFor($terminalName,$newSettingName,$newSettingValue)
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey);
+        $url = self::$apiURL . "/controlPanel/$terminalName/$newSettingName?" . http_build_query($urlVars);
+        $params = array('value' => $newSettingValue);
+
+        $result = self::call($url,$params,'PUT');
+
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if (isset($response->code) && $response->code == 200)
+        {
+            return true;
+        }
+        else if ($response !== null)
+        {
+            return false;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public static function getSupportedPaymentTypes()

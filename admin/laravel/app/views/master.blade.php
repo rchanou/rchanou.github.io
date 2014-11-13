@@ -80,6 +80,16 @@
                     <li>{{link_to('/booking/emailTemplates','E-mail Templates')}}</li>
                 </ul>
             </li>
+            @if (@$controller == 'RegistrationController')
+            <li class="active open submenu">
+            @else
+            <li class="submenu">
+            @endif
+                <a href="#"><i class="fa fa-tablet"></i> <span>Registrations</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <ul>
+                    <li>{{link_to('/registration/settings','Settings')}}</li>
+                </ul>
+            </li>
         </ul>
 
     </div>
@@ -129,6 +139,7 @@
 var config =
 {
     apiURL: '/api/index.php',
+    //apiURL: '{{Config::get('config.apiURL')}}', //For local dev testing
     apiKey: '{{Config::get('config.apiKey')}}',
     privateKey: '{{Config::get('config.privateKey')}}',
     dateFormat: '{{Config::get('config.dateFormat')}}'

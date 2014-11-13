@@ -137,7 +137,7 @@ class Step3Controller extends BaseController {
             "donotemail" => isset($formInput["consenttoemail"]) ? (!$formInput["consenttoemail"]) : "",
             "profilephoto" => isset($formInput["cameraInput"]) ? $formInput["cameraInput"] : "",
             "signaturephoto" => isset($formInput["signature"]) ? $formInput["signature"] : "",
-            "gender" => isset($formInput["gender"]) ? $formInput["gender"] : "",
+            "gender" => isset($formInput["gender"]) ? $formInput["gender"] : "other",
             "BusinessName" => isset($settings["BusinessName"]) ? $settings["BusinessName"] : "",
             "Waiver1" => isset($settings["Waiver1"]) ? $settings["Waiver1"] : "",
             "Waiver2" => isset($settings["Waiver2"]) ? $settings["Waiver2"] : "",

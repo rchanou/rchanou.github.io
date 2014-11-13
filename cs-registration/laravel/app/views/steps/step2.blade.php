@@ -325,13 +325,15 @@
                 @endif
             </div>
             <div class="col-sm-6">
+                @if ($settings['genderShown'])
                 <div class="centered">
-                    {{ Form::label('gender', $strings['str_gender'] . ':') }} <span class="requiredAsterisk">*</span><br/>
+                    {{ Form::label('gender', $strings['str_gender'] . ':') }} @if ($settings['genderRequired'])<span class="requiredAsterisk">*</span>@endif<br/>
 
                     {{ $strings['str_Male'] }} {{ Form::radio('gender', 'male', true,array('id'=>'male')) }}
                     {{ $strings['str_Female'] }} {{ Form::radio('gender', 'female',false, array('id'=>'female')) }}
                     {{ $strings['str_Other'] }} {{ Form::radio('gender', 'other',false, array('id'=>'other')) }}<p/>
                 </div>
+                @endif
             </div>
         </div>
 

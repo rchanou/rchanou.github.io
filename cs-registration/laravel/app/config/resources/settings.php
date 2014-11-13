@@ -69,6 +69,8 @@ class Settings {
             'BusinessName' => '',
             'AgeNeedParentWaiver' => '18',
             'CfgRegUseMsign' => true,
+            'genderShown' => true,
+            'genderRequired' => true,
 
             'states' => array('' => '','Alaska' => 'Alaska',
                 'Alabama' => 'Alabama',
@@ -335,54 +337,7 @@ class Settings {
                 'Yemen' => 'Al Yaman',
                 'Zambia' => 'Zambia',
                 'Zimbabwe' => 'Zimbabwe')
-            //TODO: Add and handle unique e-mail option.
         );
-
-        /* //TODO: Analysis of current settings and how they fit into the current app
-         {
-           "CfgRegType":false, //TODO: Unknown. Unused.
-           "CfgRegAddReq":true, //TODO: USED!
-           "CfgRegAddShow":true, //TODO: USED!
-           "CfgRegCityReq":true, //TODO: Unused.
-           "CfgRegCityShow":true, //TODO: Unused.
-           "CfgRegCntryReq":true, //TODO: Unused.
-           "CfgRegCntryShow":true, //TODO: Unused.
-           "CfgRegDrvrLicReq":false, //TODO: Unused.
-           "CfgRegDrvrLicShow":false, //TODO: Unused.
-           "CfgRegEmailShow":true, //TODO: USED!
-           "CfgRegEmailReq":false, //TODO: USED!
-           "CfgRegHotelReq":false, //TODO: Unused.
-           "CfgRegHotelShow":false, //TODO: Unused.
-           "CfgRegPhoneReq":true, //TODO: USED!
-           "CfgRegPhoneShow":true, //TODO: USED!
-           "CfgRegRcrNameShow":true, //TODO: USED!
-           "CfgRegRcrNameReq":true, //TODO: USED!
-           "CfgRegSrcReq":false, //TODO: How did you hear about us? USED!
-           "CfgRegSrcShow":true, //TODO: How did you hear about us? USED!
-           "CfgRegStateReq":false, //TODO: Unused.
-           "CfgRegStateShow":false, //TODO: Unused.
-           "CfgRegZipReq":true, //TODO: Unused.
-           "CfgRegZipShow":true, //TODO: Unused.
-           "CfgRegWaiverTrmsInstrcns":"Read Waiver and Accept Terms at the Bottom of the Page", //TODO: This isn't a setting! Someone cheated!
-           "CfgRegPrntWaiver":true, //TODO: Unused.
-           "CfgRegUseEsign":false, //TODO: ?
-           "CfgRegUseMsign":false, //TODO: ?
-           "CfgRegValidateGrp":true, //TODO: ?
-           "CfgRegWaiverPrntrName":"", //TODO: Okay, I can consider this a setting.
-           "CfgRegWlcmeTxt":"Welcome...", //TODO: This isn't a setting, you cheaters!
-           "CfgRegDisblEmlForMinr":false, //TODO: Unused.
-           "cfgRegCustTxt1req":false, //TODO: USED!
-           "cfgRegCustTxt1Show":false, //TODO: USED!
-           "cfgRegCustTxt2req":false, //TODO: USED!
-           "cfgRegCustTxt2Show":false, //TODO: USED!
-           "cfgRegCustTxt3req":false, //TODO: USED!
-           "cfgRegCustTxt3Show":false, //TODO: USED!
-           "cfgRegCustTxt4req":false, //TODO: USED!
-           "cfgRegCustTxt4Show":false, //TODO: USED!
-           "cfgRegAllowMinorToSign":false,
-           "cfgRegShowBeenHereBefr":true //TODO: Unused. Need to implement?
-         }
-         */
 
         self::$initialized = true;
     }

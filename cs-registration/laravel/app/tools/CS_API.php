@@ -328,13 +328,20 @@ class CS_API
             case 'getSettings':
                 $url = $url . '/settings/get.json' . '?group=kiosk&key=' .self::$privateKey;
                 $resultBeforeProcessing = self::callApi($url);
-
                 if ($resultBeforeProcessing === null || (is_array($resultBeforeProcessing) && array_key_exists("error",$resultBeforeProcessing)))
                 {
                     $result = null;
                 }
                 else
                 {
+                    $url = self::$baseAPIURL . '/settings/get.json' . '?group=Registration&key=' .self::$privateKey;
+                    $resultBeforeProcessingRegistration = self::callApi($url);
+
+                    if (!($resultBeforeProcessingRegistration === null || (is_array($resultBeforeProcessingRegistration) && array_key_exists("error",$resultBeforeProcessingRegistration))))
+                    {
+                        $resultBeforeProcessing['settings'] = array_merge($resultBeforeProcessing['settings'],$resultBeforeProcessingRegistration['settings']);
+                    }
+
                     $result = array();
 
                     foreach($resultBeforeProcessing["settings"] as $currentSettingKey => $currentSettingValue)

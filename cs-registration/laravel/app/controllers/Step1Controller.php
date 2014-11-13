@@ -287,32 +287,6 @@ class Step1Controller extends BaseController
             $settings['Reg_CaptureProfilePic'] = false;
         }
 
-        //TESTING - Forces every field to be visible
-        /*$settings['Reg_CaptureProfilePic'] = true; //Replaced showPicture config setting
-        $settings['CfgRegAddShow'] = true;
-        $settings['CfgRegCntryShow'] = true;
-        $settings['CfgRegCityShow'] = true;
-        $settings['CfgRegStateShow'] = true;
-        $settings['CfgRegZipShow'] = true;
-        $settings['CfgRegRcrNameShow'] = true;
-        $settings['showBirthDate'] = true;
-        $settings['CfgRegPhoneShow'] = true;
-        $settings['CfgRegSrcShow'] = true;
-        $settings['CfgRegEmailShow'] = true;
-        $settings['CfgRegEmailReq'] = true;
-
-        $settings['cfgRegCustTxt1Show'] = true;
-        $settings['cfgRegCustTxt1req'] = true;
-        $settings['cfgRegCustTxt2Show'] = true;
-        $settings['cfgRegCustTxt3Show'] = true;
-        $settings['cfgRegCustTxt4Show'] = true;
-        $settings['CfgRegValidateGrp'] = true;
-        $settings['CfgRegDrvrLicShow'] = true;
-        $settings['CfgRegDrvrLicReq'] = true;
-        $settings['Reg_CaptureProfilePic'] = true;  //This is replacing showPicture in config.php
-        $settings['CfgRegUseMsign'] = true;*/
-        //END TESTING
-
         return $settings;
     }
 
@@ -342,13 +316,9 @@ class Step1Controller extends BaseController
                                                               'language' => null,
                                                               'comment' => '');
             }
-            //var_dump($stringsClubSpeedIsMissingFormatted);
-            //die();
 
             //Send Club Speed the missing strings
             $result = CS_API::call("sendMissingStrings",array($stringsClubSpeedIsMissingFormatted));
-            //var_dump($result);
-            //die();
         }
     }
 } 

@@ -22,4 +22,8 @@ Route::get('booking/payments', 'BookingController@payments');
 Route::get('booking/emailTemplates', 'BookingController@emailTemplates');
 Route::post('booking/emailTemplates', 'BookingController@updateEmailTemplates');
 
+
+Route::get('registration/settings', 'RegistrationController@settings');
+Route::post('registration/settings/update', 'RegistrationController@updateSettings');
+
 Route::get('/disconnected', 'DisconnectedController@entry');
