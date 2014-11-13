@@ -115,7 +115,7 @@ order by p.paydate
 EOD;
         $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
 				$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat']);
+				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
 				$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
 				$params = array(&$start, &$end);
         $data = $this->run_query($tsql, $params);
