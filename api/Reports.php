@@ -68,6 +68,61 @@ GROUP BY CheckDetails.ProductID
 ORDER BY Total DESC
 */
 
+		public function payments() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+				
+				$tsql = <<<EOD
+select
+
+case
+when c.checkstatus = 0 then 'Open' else 'Closed' end AS 'Check Status',
+c.OpenedDate AS 'Opened On',
+c.ClosedDate AS 'Closed On',
+c.CheckID AS 'Check ID',
+c.CustID as 'Customer ID',
+cust.LName AS 'Customer Last Name',
+cust.FName AS 'Customer First Name',
+u.UserName AS 'Created By',
+c.checktotal AS 'Check Total',
+p.PayAmount AS 'Pay Amount',
+p.Shift AS 'Shift',
+u2.username AS 'Cashed By', 
+
+case 
+when p.paytype = 1 then 'Cash' 
+when p.PayType = 2 then 'Credit Card' 
+when p.PayType = 3 then 'External Payment' 
+when p.PayType = 4 then 'Gift Card' 
+when p.PayType = 5 then 'Voucher' 
+when p.PayType = 6 then 'Complimentary' 
+when p.PayType = 7 then 'Check' 
+when p.PayType = 8 then 'Game Card' 
+when p.PayType = 9 then 'Debit Card' 
+end as Tender,
+
+p.PayTerminal AS 'Pay Terminal', p.PayDate AS 'Paid On'
+
+from Checks c
+left join Customers cust on c.CustID = cust.CustID
+left join Payment p on p.CheckID = c.checkid
+left join Users u on u.UserID = c.userid
+left join Users u2 on u2.UserID = p.userid
+where p.paydate between ? and ?
+and p.paystatus = 1
+order by p.paydate
+EOD;
+        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+				$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat']);
+				$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+				$params = array(&$start, &$end);
+        $data = $this->run_query($tsql, $params);
+				
+				return $data;
+		}
+
     public function report() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
