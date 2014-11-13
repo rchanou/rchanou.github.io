@@ -8,10 +8,24 @@ if($debugging == true) {
 	ini_set('display_errors', '1');
 }
 
+/*
+    Handle CORS at the root index.php level.
+
+    If we see OPTIONS make it through IIS, which requires
+    that web.config contains the OPTIONS verb at the PHP level,
+    then set the headers and return the pre-flight request immediately.
+
+    If not, allow the request to continue through with the CORS headers set.  
+*/
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: DELETE,GET,OPTIONS,POST,PUT');
+header('Access-Control-Allow-Headers: Authorization');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS')
+    die();
+
 set_include_path(get_include_path() . PATH_SEPARATOR . './restler');
 spl_autoload_register('spl_autoload');
 
-// Init ClubSpeed modules after autoloader has been loaded
 require_once('./ClubSpeed/ClubSpeedLoader.php');
 
 $r = new Restler();
