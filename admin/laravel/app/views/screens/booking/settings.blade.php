@@ -223,6 +223,15 @@ Online Bookings Settings
                             @endif
                       </div>
                       <div class="col-sm-6">
+                          @if(isset($isChecked['showTermsAndConditions']))
+                          <div class="form-group">
+                              <label class="col-sm-4 col-md-4 col-lg-4 control-label">Show Terms & Conditions</label>
+                              <div class="col-sm-8 col-md-8 col-lg-8">
+                                  <input type="checkbox" id="showTermsAndConditions" name="showTermsAndConditions" {{$isChecked['showTermsAndConditions']}}>
+                                  <span class="help-block text-left">If checked, Terms & Conditions are shown and the user must check an "I agree" checkbox to place an order.</span>
+                              </div>
+                          </div>
+                          @endif
                             <div class="form-group">
                                 <label class="col-sm-4 col-md-4 col-lg-4 control-label">Reservation Timeout</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">

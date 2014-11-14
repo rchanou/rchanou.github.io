@@ -4,19 +4,44 @@ require_once(app_path().'/includes/includes.php');
 
 class BookingController extends BaseController
 {
-    private $emailTemplates = null;
+    private $templates = null;
 
     public function __construct() {
-      $this->emailTemplates = array(
-        (object)array('displayName' => 'Online Booking Receipt (HTML)', 'settingNamespace' => 'Booking', 'settingName' => 'receiptBodyHtml', 'value' => '<b>I\'m bold!</b>', 'isHtml' => true,
+      // Booking Templates
+      $this->templates = array(
+        (object)array(
+          'displayName' => 'Online Booking E-mail Receipt',
+          'templateNamespace' => 'Templates',
+          'templateName' => 'receiptBodyHtml',
+          'isHtml' => true,
           'note' => 'Insert these special placeholders to personalize the e-mail for each customer:<br/><br/>'
                   . '<b>First Name:</b> {{FIRST_NAME}}<br/>'
                   . '<b>Last Name:</b> {{LAST_NAME}}<br/>'
                   . '<b>Racer Name:</b> {{RACER_NAME}}<br/>'
                   . '<b>Birthday:</b> {{BIRTHDAY}}<br/>'
-                  . '<b>Location:</b> {{LOCATION}}'),
-        (object)array('displayName' => 'Online Booking Receipt (TEXT)', 'settingNamespace' => 'Booking', 'settingName' => 'receiptBodyText', 'value' => 'Simple body text', 'isHtml' => false, 'note' => ''),
-        (object)array('displayName' => 'Online Booking Subject Line', 'settingNamespace' => 'Booking', 'settingName' => 'receiptSubject', 'value' => '', 'isHtml' => false, 'note' => ''),
+                  . '<b>Location:</b> {{LOCATION}}'
+        ),
+        (object)array(
+          'displayName' => 'Online Booking E-mail Receipt',
+          'templateNamespace' => 'Templates',
+          'templateName' => 'receiptBodyText',
+          'isHtml' => false,
+          'note' => ''
+        ),
+        (object)array(
+          'displayName' => 'Online Booking E-mail Subject Line',
+          'templateNamespace' => 'Templates',
+          'templateName' => 'receiptSubject',
+          'isHtml' => false,
+          'note' => ''
+        ),
+        (object)array(
+          'displayName' => 'Terms & Conditions',
+          'templateNamespace' => 'Templates',
+          'templateName' => 'termsAndConditions',
+          'isHtml' => true,
+          'note' => ''
+        )
        );
     }
 
@@ -127,6 +152,7 @@ class BookingController extends BaseController
         $newSettings['registrationEnabled'] = isset($input['registrationEnabled']) ? 1 : 0;
         $newSettings['enableFacebook'] = isset($input['enableFacebook']) ? 1 : 0;
         $newSettings['forceRegistrationIfAuthenticatingViaThirdParty'] = isset($input['forceRegistrationIfAuthenticatingViaThirdParty']) ? 1 : 0;
+        $newSettings['showTermsAndConditions'] = isset($input['showTermsAndConditions']) ? 1 : 0;
 
         if (isset($input['reservationTimeout']))
         {
@@ -336,7 +362,7 @@ class BookingController extends BaseController
         return Redirect::to('booking/payments')->with( array('message' => 'Settings updated successfully!'));
     }
 
-    public function emailTemplates()
+    public function templates()
     {
         $session = Session::all();
         if (!(isset($session["authenticated"]) && $session["authenticated"]))
@@ -348,41 +374,77 @@ class BookingController extends BaseController
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
 
-        foreach($this->emailTemplates as $id => $template) {
-          // Make API call using $template['settingNamespace'] & $template['settingName']. Populate $this->emailTemplates[$id]['value'] with result
-          $template->name = $id; // $template->settingNamespace . '_' . $template->settingName;
+        // callback boolean function to be used to filter for booking templates in template array
+        // templates from API that share a name with a template in this controller are booking templates
+        $isBookingTemplate = function($templateFromApi){
+          $bookingTemplateNames = array_map(function($template){
+            return $template->templateName;
+          }, $this->templates);
+
+          return in_array($templateFromApi->SettingName, $bookingTemplateNames);
+        };
+
+        // get all templates from API and filter for booking ones
+        $allTemplates = (array)CS_API::getSettingsFor('Templates')->settings;
+        $bookingTemplates = array_filter($allTemplates, $isBookingTemplate);
+
+
+        // merge this controller's booking template settings with booking template values from API
+        // into array to be used to populate editor form
+        $templateFormData = array();
+
+        foreach($this->templates as $id => $template) {
+          $templateFormData[$id] = $template;
+          $templateFormData[$id]->name = $id; // form looks for name property instead of $id. todo: leave as $id and use $id in form?
+          $apiTemplateNames = array_map(function($template){
+            return $template->SettingName;
+          }, $bookingTemplates);
+
+          $matchingApiTemplateKey = array_search($template->templateName, $apiTemplateNames);
+          $templateFormData[$id]->value = $bookingTemplates[$matchingApiTemplateKey]->SettingValue;
         }
 
+        Session::put('templates', $templateFormData);
+				
         return View::make(
-          '/screens/booking/emailTemplates',
-          array('controller' => 'BookingController',
-            'emailTemplates' => $this->emailTemplates,
-            'currentEmailTemplate' => 0 // unused; will possibly be removed
+          '/screens/booking/templates',
+          array(
+            'controller' => 'BookingController',
+            'templates' => $templateFormData,
+            'currentTemplate' => 0 // unused; will possibly be removed
           )
         );
     }
 
-    public function updateEmailTemplates()
+    public function updateTemplates()
     {
       $input = Input::all();
       unset($input['_token']);
       unset($input['_wysihtml5_mode']); // remove this one weird hidden input field used by the wysihtml widget
       $newValues = $input;
 
-      // Make API call to update each email template
-      $output = '';
+      // Make and send API calls to update all changed templates
+      $currentTemplates = Session::get('templates', array());
+      $newTemplates = array();
+
       foreach($newValues as $id => $newValue)
       {
-        $this->emailTemplates[$id]->value = $newValue;
-        $output .= $id . ': ' . $this->emailTemplates[$id]->value . '<br/>';
+        if ($currentTemplates[$id]->value != $newValue){
+          $newTemplates[$currentTemplates[$id]->templateName] = $newValue;
+        }
       }
 
-      return Redirect::to('booking/emailTemplates')->with(
-        array('message' => $output,
-          'controller' => 'BookingController',
-          'emailTemplates' => $this->emailTemplates,
-          'currentEmailTemplate' => 0 // unused; will possibly be removed
-        )
-      );
+      $result = CS_API::updateSettingsFor('Templates', $newTemplates);
+
+      if ($result === false)
+      {
+        return Redirect::to('booking/templates')->with( array('error' => 'One or more templates could not be updated. Please try again.'));
+      }
+      else if ($result === null)
+      {
+        return Redirect::to('/disconnected');
+      }
+
+      return Redirect::to('booking/templates')->with( array('message' => 'Template(s) updated successfully!'));
     }
 }

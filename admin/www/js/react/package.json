@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "jsx": "jsx -w --harmony --no-cache-dir ./ ../",
+    "build": "watchify -t [reactify --es6] -t es6ify -t uglifyify src/booking/manage/main.js -o build/booking/manage/main.min.js -dv",
+    "test": "watchify -t [reactify --es6] -t es6ify -t uglifyify src/test/test.js -o test/test.js -dv | mocha -w",
+		"build-test": "watchify -t [reactify --es6] -t es6ify -t -g uglifyify src/booking/manage/main.js -o build/booking/manage/main.min.js -dv | watchify -t [reactify --es6] -t es6ify src/test/test.js -o test/test.js -v | mocha -w",
+    "old-build": "watchify -t [reactify --es6] -t es6ify src/booking/manage/main.js -o build/booking/manage/main.js -dv | watchify -g uglifyify build/booking/manage/main.js -o build/booking/manage/main.min.js -dv"
+  },
+  "devDependencies": {
+    "es6ify": "^1.5.1",
+    "lodash": "^2.4.1",
+    "moment": "^2.8.3",
+    "react": "^0.12.0",
+    "reactify": "^0.16.0",
+    "uglifyify": "^2.6.0"
+  }
+}

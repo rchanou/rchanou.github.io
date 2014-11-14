@@ -19,11 +19,27 @@ Route::post('booking/payments/settings/update', 'BookingController@updatePayment
 
 Route::get('booking/payments', 'BookingController@payments');
 
-Route::get('booking/emailTemplates', 'BookingController@emailTemplates');
-Route::post('booking/emailTemplates', 'BookingController@updateEmailTemplates');
-
+Route::get('booking/templates', 'BookingController@templates');
+Route::post('booking/templates', 'BookingController@updateTemplates');
 
 Route::get('registration/settings', 'RegistrationController@settings');
 Route::post('registration/settings/update', 'RegistrationController@updateSettings');
+
+/* Reports */
+
+Route::get('reports', 'ReportsController@index');
+Route::get('reports/payments', 'PaymentsReportController@index');
+Route::post('reports/payments', 'PaymentsReportController@index');
+Route::get('reports/payments/export/csv', 'PaymentsReportController@exportToCSV');
+
+Route::get('reports/summary-payments', 'SummaryPaymentsReportController@index');
+Route::post('reports/summary-payments', 'SummaryPaymentsReportController@index');
+Route::get('reports/summary-payments/export/csv', 'SummaryPaymentsReportController@exportToCSV');
+
+Route::get('reports/detailed-sales', 'DetailedSalesReportController@index');
+Route::post('reports/detailed-sales', 'DetailedSalesReportController@index');
+Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@exportToCSV');
+
+/* End Reports */
 
 Route::get('/disconnected', 'DisconnectedController@entry');

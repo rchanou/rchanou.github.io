@@ -16,7 +16,7 @@ Registrations Settings
 
 @section('breadcrumb')
 <a href="{{URL::to('dashboard')}}" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
-<a href="#" class="current">Registrations</a>
+<a href="#">Registrations</a>
 <a href="#" class="current">Settings</a>
 @stop
 

@@ -332,4 +332,75 @@ class CS_API
             return null;
         }
     }
+
+    public static function getReport_Payments($start = null, $end = null)
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey);
+        if ($start != null) { $urlVars['start'] = $start; }
+        if ($end != null) { $urlVars['end'] = $end; }
+
+        $url = self::$apiURL . "/reports/payments.json?" . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function getReport_SummaryPayments($start = null, $end = null)
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey);
+        if ($start != null) { $urlVars['start'] = $start; }
+        if ($end != null) { $urlVars['end'] = $end; }
+
+        $url = self::$apiURL . "/reports/payments_summary.json?" . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function getReport_DetailedSales($start = null, $end = null, $show_by_opened_date = false)
+    {
+        self::initialize();
+        $urlVars = array('key' => self::$privateKey);
+        if ($start != null) { $urlVars['start'] = $start; }
+        if ($end != null) { $urlVars['end'] = $end; }
+        $urlVars['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
+
+        $url = self::$apiURL . "/reports/sales.json?" . http_build_query($urlVars);
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response,'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
 }

@@ -5270,11 +5270,15 @@ wysihtml5.dom.copyAttributes = function(attributesToCopy) {
     }
   };
 
-  dom.copyStyles = function(stylesToCopy) {
+  dom.copyStyles = function(stylesToCopy, keepHeight) {
     return {
       from: function(element) {
         if (shouldIgnoreBoxSizingBorderBox(element)) {
           stylesToCopy = wysihtml5.lang.array(stylesToCopy).without(BOX_SIZING_PROPERTIES);
+        }
+
+        if (keepHeight){
+          stylesToCopy = wysihtml5.lang.array(stylesToCopy).without(['height']);
         }
 
         var cssText = "",
@@ -12662,12 +12666,12 @@ wysihtml5.views.View = Base.extend(
 
     // --------- Sync focus/blur styles ---------
     this.parent.on("focus:composer", function() {
-      dom.copyStyles(boxFormattingStyles) .from(that.focusStylesHost).to(that.editableArea);
+      dom.copyStyles(boxFormattingStyles, true) .from(that.focusStylesHost).to(that.editableArea);
       dom.copyStyles(TEXT_FORMATTING)     .from(that.focusStylesHost).to(that.element);
     });
 
     this.parent.on("blur:composer", function() {
-      dom.copyStyles(boxFormattingStyles) .from(that.blurStylesHost).to(that.editableArea);
+      dom.copyStyles(boxFormattingStyles, true) .from(that.blurStylesHost).to(that.editableArea);
       dom.copyStyles(TEXT_FORMATTING)     .from(that.blurStylesHost).to(that.element);
     });
 
@@ -13945,7 +13949,10 @@ wysihtml5.views.View = Base.extend(
               }
           });
           editor.on("tableunselect:composer", function() {
-              that.container.querySelectorAll('[data-wysihtml5-hiddentools="table"]')[0].style.display = "none";
+              var firstEl = that.container.querySelectorAll('[data-wysihtml5-hiddentools="table"]')[0];
+              if (firstEl){
+                that.container.querySelectorAll('[data-wysihtml5-hiddentools="table"]')[0].style.display = "none";
+              }
           });
       }
 

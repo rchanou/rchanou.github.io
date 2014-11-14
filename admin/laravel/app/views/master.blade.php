@@ -77,7 +77,7 @@
                     <li>{{link_to('/booking','Manage Bookings')}}</li>
                     <li>{{link_to('/booking/settings','Settings')}}</li>
                     <li>{{link_to('/booking/payments','Payment Processors')}}</li>
-                    <li>{{link_to('/booking/emailTemplates','E-mail Templates')}}</li>
+                    <li>{{link_to('/booking/templates','Templates')}}</li>
                 </ul>
             </li>
             @if (@$controller == 'RegistrationController')
@@ -89,6 +89,13 @@
                 <ul>
                     <li>{{link_to('/registration/settings','Settings')}}</li>
                 </ul>
+            </li>
+            @if (@$controller == 'ReportsController')
+            <li class="active open">
+            @else
+            <li>
+            @endif
+                <a href="{{URL::to('reports')}}"><i class="fa fa-file-o"></i> <span>Reports</span></a>
             </li>
         </ul>
 
@@ -135,6 +142,17 @@
 {{ HTML::script('js/unicorn.js') }}
 {{ HTML::script('js/unicorn.form_common.js') }}
 {{ HTML::script('js/unicorn.dashboard.js') }}
+{{ HTML::script('js/modernizr-latest.js') }}
+<script> //Convert all HTML5 date input boxes to jQuery date pickers if there are compatibility issues
+    if (!Modernizr.inputtypes.date) {
+        $('input[type=date]').datepicker({
+            // Consistent format with the HTML5 picker
+            dateFormat: 'yy-mm-dd',
+            changeYear: true
+        });
+    }
+</script>
+
 <script>
 var config =
 {
