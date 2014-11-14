@@ -68,6 +68,12 @@ GROUP BY CheckDetails.ProductID
 ORDER BY Total DESC
 */
 
+		/**
+		 * DETAILED PAYMENTS REPORT
+		 *
+		 * Show the detailed breakdown of the payments taken in a date range for each check
+		 */
+
 		public function payments() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
@@ -122,6 +128,123 @@ EOD;
 				
 				return $data;
 		}
+
+
+		/**
+		 * SUMMARY PAYMENTS REPORT
+		 *
+		 * Show the summary of the payments in a date range by tender
+		 */
+
+		public function payments_summary() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+				
+				$tsql = "SELECT dbo.PayType.TypeDescription AS 'Tender', SUM(dbo.Payment.PayAmount) AS 'Total Amount' FROM dbo.Payment INNER JOIN dbo.PayType ON dbo.Payment.PayType = dbo.PayType.ID WHERE (dbo.Payment.PayStatus = 1) AND (dbo.Payment.PayDate BETWEEN ? AND ?) GROUP BY dbo.PayType.TypeDescription";
+				
+				$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+				$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+				$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+				$params = array(&$start, &$end);
+        $data = $this->run_query($tsql, $params);
+				
+				return $data;
+		}
+
+
+		/**
+		 * DETAILED SALES REPORT
+		 *
+		 * Shows the line items of every check in a date range.
+		 * 
+		 * Depending on the country, some will want to see items by either the check *closing* or *opening* date. In UK and
+		 * most of Europe, taxes are owed when the service is provided (open date), not when the check is paid (closed date).
+		 *
+		 * We default to US-style, showing by check *closed* date. The "show_by_open_date=true" flag will show checks
+		 * by their opening date instead.
+		 */
+		public function sales() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+				
+				$opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+				
+				$tsql = <<<EOD
+select
+
+c.CheckID AS 'Check ID',
+cd.ProductID AS "Product ID",
+cd.ProductName AS "Product Name",
+cd.UnitPrice AS "Unit Price",
+cd.Qty AS "Quantity",
+cd.DiscountApplied AS "Total Discount",
+cd.TaxPercent AS "Tax Percent",
+cd.TaxID AS "Tax ID",
+CASE
+WHEN cd.Status = 2 THEN 'Voided'
+ELSE ''
+END
+AS "Void Status",
+products.ProductClassID AS "Product Class ID",
+pc.Description AS "Product Class Description",
+pc.ExportName AS "Product Class Export",
+case
+when c.checkstatus = 0 then 'Open' else 'Closed' end AS 'Check Status',
+c.OpenedDate AS 'Check Opened On',
+c.ClosedDate AS 'Check Closed On',
+c.CustID as 'Customer ID',
+cust.LName AS 'Customer Last Name',
+cust.FName AS 'Customer First Name',
+u.UserName AS 'Created By',
+c.checktotal AS 'Check Total',
+p.PayAmount AS 'Pay Amount',
+p.Shift AS 'Shift',
+u2.username AS 'Cashed By', 
+
+case 
+when p.paytype = 1 then 'Cash' 
+when p.PayType = 2 then 'Credit Card' 
+when p.PayType = 3 then 'External Payment' 
+when p.PayType = 4 then 'Gift Card' 
+when p.PayType = 5 then 'Voucher' 
+when p.PayType = 6 then 'Complimentary' 
+when p.PayType = 7 then 'Check' 
+when p.PayType = 8 then 'Game Card' 
+when p.PayType = 9 then 'Debit Card' 
+end as Tender,
+
+p.PayTerminal AS 'Pay Terminal', p.PayDate AS 'Paid On',
+CASE
+WHEN p.PayStatus = 1 THEN 'Paid'
+WHEN p.PayStatus = 2 THEN 'Voided'
+END
+AS "Payment Status"
+
+FROM CheckDetails cd
+left join Checks c ON c.CheckID = cd.CheckID
+left join Customers cust on c.CustID = cust.CustID
+left join Payment p on p.CheckID = c.checkid
+left join Users u on u.UserID = c.userid
+left join Users u2 on u2.UserID = p.userid
+left join Products ON Products.ProductID = cd.ProductID
+left join ProductClasses pc ON pc.ProductClassID = products.ProductClassID
+WHERE {$opened_or_closed_date} BETWEEN ? AND ?
+ORDER BY {$opened_or_closed_date}
+EOD;
+				
+				$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+				$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+				$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+				$params = array(&$start, &$end);
+        $data = $this->run_query($tsql, $params);
+				
+				return $data;
+		}
+
 
     public function report() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
