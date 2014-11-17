@@ -26,14 +26,14 @@ class OnlineBookingReservations extends BaseRecord {
         if (isset($data)) {
             if (is_array($data)) {
                 if (!empty($data)) {
-                    if (isset($data['OnlineBookingReservationsID']))        $this->OnlineBookingReservationsID      = \ClubSpeed\Utility\Convert::toNumber($data['OnlineBookingReservationsID']);
-                    if (isset($data['OnlineBookingsID']))                   $this->OnlineBookingsID                 = \ClubSpeed\Utility\Convert::toNumber($data['OnlineBookingsID']);
-                    if (isset($data['CustomersID']))                        $this->CustomersID                      = \ClubSpeed\Utility\Convert::toNumber($data['CustomersID']);
-                    if (isset($data['SessionID']))                          $this->SessionID                        = \ClubSpeed\Utility\Convert::toString($data['SessionID']);
-                    if (isset($data['Quantity']))                           $this->Quantity                         = \ClubSpeed\Utility\Convert::toNumber($data['Quantity']);
-                    if (isset($data['CreatedAt']))                          $this->CreatedAt                        = \ClubSpeed\Utility\Convert::toString($data['CreatedAt']);
-                    if (isset($data['ExpiresAt']))                          $this->ExpiresAt                        = \ClubSpeed\Utility\Convert::toString($data['ExpiresAt']);
-                    if (isset($data['OnlineBookingReservationStatusID']))   $this->OnlineBookingReservationStatusID = \ClubSpeed\Utility\Convert::toNumber($data['OnlineBookingReservationStatusID']);
+                    if (isset($data['OnlineBookingReservationsID']))        $this->OnlineBookingReservationsID      = \ClubSpeed\Utility\Convert::toNumber          ($data['OnlineBookingReservationsID']);
+                    if (isset($data['OnlineBookingsID']))                   $this->OnlineBookingsID                 = \ClubSpeed\Utility\Convert::toNumber          ($data['OnlineBookingsID']);
+                    if (isset($data['CustomersID']))                        $this->CustomersID                      = \ClubSpeed\Utility\Convert::toNumber          ($data['CustomersID']);
+                    if (isset($data['SessionID']))                          $this->SessionID                        = \ClubSpeed\Utility\Convert::toString          ($data['SessionID']);
+                    if (isset($data['Quantity']))                           $this->Quantity                         = \ClubSpeed\Utility\Convert::toNumber          ($data['Quantity']);
+                    if (isset($data['CreatedAt']))                          $this->CreatedAt                        = \ClubSpeed\Utility\Convert::toDateForServer   ($data['CreatedAt']);
+                    if (isset($data['ExpiresAt']))                          $this->ExpiresAt                        = \ClubSpeed\Utility\Convert::toDateForServer   ($data['ExpiresAt']);
+                    if (isset($data['OnlineBookingReservationStatusID']))   $this->OnlineBookingReservationStatusID = \ClubSpeed\Utility\Convert::toNumber          ($data['OnlineBookingReservationStatusID']);
                 }
             }
             else {
