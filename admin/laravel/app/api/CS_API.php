@@ -146,7 +146,7 @@ class CS_API
     public static function getJSON($resource, $queryParams = array())
     {
         self::initialize();
-        $queryParams['key'] = self::$apiKey;        
+        $queryParams['key'] = self::$privateKey;        
         $url = self::$apiURL . '/' . $resource . '.json?' . http_build_query($queryParams);
         
         $result = self::call($url);
