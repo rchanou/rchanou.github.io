@@ -7,40 +7,47 @@ class BookingController extends BaseController
     private $templates = null;
 
     public function __construct() {
-      // Booking Templates
+      $standardNote = 'The following can be inserted into this template:<br/><br/>'
+                    . '<b>Order #:</b> {{checkId}}<br/>'
+                    . '<b>Customer\'s First Name:</b> {{customer}}<br/>'
+                    . '<b>Your Business Name:</b> {{business}}<br/>'
+                    . '<b>Item Description:</b> {{detail.name}}<br/>'
+                    . '<b>Item Quantity:</b> {{detail.quantity}}<br/>'
+                    . '<b>Item Price:</b> {{detail.price}}<br/>'
+                    . '<b>Subtotal:</b> {{checkSubtotal}}<br/>'
+                    . '<b>Estimated Tax:</b> {{checkTax}}<br/>'
+                    . '<b>Gift Card Deduction:</b> {{giftCardTotal}}<br/>'
+                    . '<b>Total:</b> {{checkTotal}}';
+      
+      // Booking Templates   
       $this->templates = array(
         (object)array(
-          'displayName' => 'Online Booking E-mail Receipt',
-          'templateNamespace' => 'Templates',
-          'templateName' => 'receiptBodyHtml',
+          'displayName' => 'Online Booking E-mail Receipt (HTML)',
+          'templateNamespace' => 'Booking',
+          'templateName' => 'receiptEmailBodyHtml',
           'isHtml' => true,
-          'note' => 'Insert these special placeholders to personalize the e-mail for each customer:<br/><br/>'
-                  . '<b>First Name:</b> {{FIRST_NAME}}<br/>'
-                  . '<b>Last Name:</b> {{LAST_NAME}}<br/>'
-                  . '<b>Racer Name:</b> {{RACER_NAME}}<br/>'
-                  . '<b>Birthday:</b> {{BIRTHDAY}}<br/>'
-                  . '<b>Location:</b> {{LOCATION}}'
+          'note' => $standardNote
         ),
         (object)array(
-          'displayName' => 'Online Booking E-mail Receipt',
-          'templateNamespace' => 'Templates',
-          'templateName' => 'receiptBodyText',
+          'displayName' => 'Online Booking E-mail Receipt (TEXT)',
+          'templateNamespace' => 'Booking',
+          'templateName' => 'receiptEmailBodyText',
           'isHtml' => false,
-          'note' => ''
+          'note' => $standardNote
         ),
         (object)array(
           'displayName' => 'Online Booking E-mail Subject Line',
-          'templateNamespace' => 'Templates',
-          'templateName' => 'receiptSubject',
+          'templateNamespace' => 'Booking',
+          'templateName' => 'receiptEmailSubject',
           'isHtml' => false,
-          'note' => ''
+          'note' => $standardNote
         ),
         (object)array(
           'displayName' => 'Terms & Conditions',
-          'templateNamespace' => 'Templates',
+          'templateNamespace' => 'Booking',
           'templateName' => 'termsAndConditions',
           'isHtml' => true,
-          'note' => ''
+          'note' => $standardNote
         )
        );
     }
@@ -374,35 +381,63 @@ class BookingController extends BaseController
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
 
-        // callback boolean function to be used to filter for booking templates in template array
-        // templates from API that share a name with a template in this controller are booking templates
-        $isBookingTemplate = function($templateFromApi){
-          $bookingTemplateNames = array_map(function($template){
-            return $template->templateName;
-          }, $this->templates);
-
-          return in_array($templateFromApi->SettingName, $bookingTemplateNames);
-        };
-
-        // get all templates from API and filter for booking ones
-        $allTemplates = (array)CS_API::getSettingsFor('Templates')->settings;
-        $bookingTemplates = array_filter($allTemplates, $isBookingTemplate);
-
+        $bookingTemplates = CS_API::getJSON('settings', array('namespace' => 'booking'))->settings;
 
         // merge this controller's booking template settings with booking template values from API
         // into array to be used to populate editor form
         $templateFormData = array();
 
-        foreach($this->templates as $id => $template) {
-          $templateFormData[$id] = $template;
-          $templateFormData[$id]->name = $id; // form looks for name property instead of $id. todo: leave as $id and use $id in form?
-          $apiTemplateNames = array_map(function($template){
-            return $template->SettingName;
-          }, $bookingTemplates);
-
-          $matchingApiTemplateKey = array_search($template->templateName, $apiTemplateNames);
-          $templateFormData[$id]->value = $bookingTemplates[$matchingApiTemplateKey]->SettingValue;
+        $apiTemplateNames = array_map(
+          function($template){
+            return $template->name;
+          },
+          $bookingTemplates
+        );
+        
+        /*
+        $localTemplateNames = array_map(
+          function($template)
+          {
+            return $template->templateName;
+          },
+          $this->templates
+        );*/
+        
+        /*
+        $templateFormData = $bookingTemplates;
+        foreach($templateFormData as $id => $template)
+        {
+          $templateFormData[$id]->name = $id;
+          $templateFormData[$id]->isHtml = $templateFormData[$id]->type == 'HTML'? true: false;
+            
+          $matchingLocalTemplateKey = array_search($template->name, $localTemplateNames);
+          if ($matchingLocalTemplateKey !== false)
+          {
+            $templateFormData[$id]->displayName = $this->templates[$matchingLocalTemplateKey]->displayName;
+            $templateFormData[$id]->note = $this->templates[$matchingLocalTemplateKey]->note;
+          }
+          else
+          {
+            $templateFormData[$id]->displayName = $templateFormData[$id]->description;
+            $templateFormData[$id]->note = '';
+          }
         }
+        */
+        
+        foreach($this->templates as $id => $template) {        
+          $matchingApiTemplateKey = array_search($template->templateName, $apiTemplateNames);
+          if ($matchingApiTemplateKey !== false){
+            $templateToPush = $template;
+            $templateToPush->name = $id;  // form looks for name property instead of $id. todo: leave as $id and use $id in form?
+            $templateToPush->settingsId = $bookingTemplates[$matchingApiTemplateKey]->settingsId;
+            $templateToPush->value = $bookingTemplates[$matchingApiTemplateKey]->value;
+            array_push($templateFormData, $templateToPush);
+            //$templateFormData[$id] = $template;          
+            //$templateFormData[$id]->name = $id; 
+            //$templateFormData[$id]->value = $bookingTemplates[$matchingApiTemplateKey]->value;
+          }
+        }
+         
 
         Session::put('templates', $templateFormData);
 				
@@ -425,16 +460,22 @@ class BookingController extends BaseController
 
       // Make and send API calls to update all changed templates
       $currentTemplates = Session::get('templates', array());
-      $newTemplates = array();
+      //$newTemplates = array();
 
+      $result = true; // default case of saving without making any changes is a successful result, so default $result to true
+      // if even a single update request fails, reported result becomes false
       foreach($newValues as $id => $newValue)
       {
         if ($currentTemplates[$id]->value != $newValue){
-          $newTemplates[$currentTemplates[$id]->templateName] = $newValue;
+          $thisResult = CS_API::update('settings', $currentTemplates[$id]->settingsId, array('value' => $newValue));
+          if (!$thisResult){
+            $result = false;
+          }
         }
       }
 
-      $result = CS_API::updateSettingsFor('Templates', $newTemplates);
+      //$result = CS_API::update('settings', )
+      //$result = CS_API::updateSettingsFor('Templates', $newTemplates);
 
       if ($result === false)
       {

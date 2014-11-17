@@ -143,6 +143,26 @@ class CS_API
         }
     }
 
+    public static function getJSON($resource, $queryParams = array())
+    {
+        self::initialize();
+        $queryParams['key'] = self::$apiKey;        
+        $url = self::$apiURL . '/' . $resource . '.json?' . http_build_query($queryParams);
+        
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response, 'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }     
+    }
+    
     public static function getListOfChannels()
     {
         self::initialize();
@@ -223,6 +243,27 @@ class CS_API
         }
     }
 
+    public static function update($resource, $id, $params)
+    {
+      self::initialize();
+      $url = self::$apiURL . "/" . $resource . "/" . $id . "?" . http_build_query(array('key' => self::$privateKey));
+      $result = self::call($url, $params, 'PUT');
+      $response = $result['response'];
+
+      if (isset($response->code) && $response->code == 200)
+      {
+        return true;
+      }
+      else if ($response !== null)
+      {
+        return false;
+      }
+      else
+      {
+        return null;
+      }
+    }
+    
     private static function updateBookingSetting($newSettingName,$newSettingValue)
     {
         self::initialize();
@@ -379,7 +420,7 @@ class CS_API
         }
     }
 
-    public static function getReport_DetailedSales($start = null, $end = null, $show_by_opened_date = false)
+    public static function getReport_DetailedSales($start = null, $end = null, $show_by_opened_date = 'false')
     {
         self::initialize();
         $urlVars = array('key' => self::$privateKey);
