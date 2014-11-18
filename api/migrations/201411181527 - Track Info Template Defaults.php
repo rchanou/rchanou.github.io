@@ -10,7 +10,7 @@ $subject = 'Track Info';
 $settings = array(
     array(
         'Namespace'    => 'MobileApp',
-        'Name'         => 'receiptEmailBodyHtml',
+        'Name'         => 'trackInfoHtml',
         'Type'         => 'HTML',
         'DefaultValue' => $html,
         'Value'        => $html,
@@ -38,4 +38,4 @@ foreach($settings as $setting) {
         echo '<br>';
     }
 }
-die('Successfully imported receipt email templates.');
+die('Successfully imported track info template.');
