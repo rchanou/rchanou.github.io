@@ -97,6 +97,17 @@
             @endif
                 <a href="{{URL::to('reports')}}"><i class="fa fa-file-o"></i> <span>Reports</span></a>
             </li>
+            @if (@$controller == 'MobileAppController')
+            <li class="active open">
+            @else
+            <li class="submenu">
+            @endif
+                <a href="#"><i class="fa fa-mobile"></i> <span>Mobile App</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <ul>
+                    <li>{{link_to('/mobileApp/settings','Settings')}}</li>
+                    <li>{{link_to('/mobileApp/templates','Templates')}}</li>
+                </ul>
+            </li>
         </ul>
 
     </div>
@@ -162,6 +173,17 @@ var config =
     privateKey: '{{Config::get('config.privateKey')}}',
     dateFormat: '{{Config::get('config.dateFormat')}}'
 };
+</script>
+
+<script>
+    $(document).ready(function () {
+
+        window.setTimeout(function() {
+          $(".fadeAway").fadeTo(500, 0).slideUp(500, function(){
+              $(this).remove();
+          });
+        }, 5000);
+    });
 </script>
 @show
 <!-- END JAVASCRIPT INCLUDES -->

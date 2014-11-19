@@ -42,4 +42,9 @@ Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@e
 
 /* End Reports */
 
+Route::get('mobileApp/settings', 'MobileAppController@settings');
+Route::post('mobileApp/settings', 'MobileAppController@updateSettings');
+Route::get('mobileApp/templates', 'MobileAppController@templates');
+Route::post('mobileApp/templates', 'MobileAppController@updateTemplates');
+
 Route::get('/disconnected', 'DisconnectedController@entry');
