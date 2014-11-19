@@ -1,0 +1,34 @@
+{
+  "menuItems": [
+    {
+      "label": "Club Speed",
+      "url": "http://www.clubspeed.com",
+      "iconUrl": "/assets/MobileApp/icons/tachometer.png"
+    },
+    {
+      "label": "Member Card",
+      "id": "profile",
+      "iconUrl": "/assets/mobile/icons/credit-card.png"
+    },
+    {
+      "label": "Track Information",
+      "id": "trackInformation",
+      "iconUrl": "/assets/mobile/icons/map-marker.png"
+    },
+    {
+      "label": "My Results",
+      "url": "/mobile/#/racersearch/{{customerId}}/",
+      "iconUrl": "/assets/MobileApp/icons/chart.png"
+    },
+		{
+      "label": "Top Times",
+      "url": "/mobile/#/livetiming/fastestTimeByWeek",
+      "iconUrl": "http://vm-122.clubspeedtiming.com/assets/MobileApp/icons/trophy.png"
+    },
+    {
+      "label": "Online Booking",
+      "url": "/booking/?login={{authToken}}",
+      "iconUrl": "/assets/mobile/icons/MISSING-IMAGE-DOES-NOT-EXIST.png"
+    }
+  ]
+}
