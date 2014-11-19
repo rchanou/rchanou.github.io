@@ -20,30 +20,9 @@ class MobileAppController extends BaseController
       // Mobile App Templates   
       $this->templates = array(
         (object)array(
-          'displayName' => 'Online MobileApp E-mail Receipt (HTML)',
+          'displayName' => 'Track Info (HTML)',
           'templateNamespace' => 'MobileApp',
-          'templateName' => 'receiptEmailBodyHtml',
-          'isHtml' => true,
-          'note' => $standardNote
-        ),
-        (object)array(
-          'displayName' => 'Online MobileApp E-mail Receipt (TEXT)',
-          'templateNamespace' => 'MobileApp',
-          'templateName' => 'receiptEmailBodyText',
-          'isHtml' => false,
-          'note' => $standardNote
-        ),
-        (object)array(
-          'displayName' => 'Online MobileApp E-mail Subject Line',
-          'templateNamespace' => 'MobileApp',
-          'templateName' => 'receiptEmailSubject',
-          'isHtml' => false,
-          'note' => $standardNote
-        ),
-        (object)array(
-          'displayName' => 'Terms & Conditions',
-          'templateNamespace' => 'MobileApp',
-          'templateName' => 'termsAndConditions',
+          'templateName' => 'trackInfoHtml',
           'isHtml' => true,
           'note' => $standardNote
         )
