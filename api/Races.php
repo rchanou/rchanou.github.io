@@ -589,6 +589,7 @@ class Races
             ."\n    , hm.ScheduledTime"
             ."\n    , hm.HeatTypeNo"
             ."\n    , hm.LapsOrMinutes"
+						."\n    , hm.PointsNeeded"
             ."\n    , hm.RacersPerHeat"
             ."\n    , hm.TrackNo"
             ."\n    , hm.WinBy"
@@ -599,7 +600,7 @@ class Races
             ."\nFROM HeatMain AS hm"
             ."\nLEFT OUTER JOIN HeatDetails AS hd ON hm.HeatNo = hd.HeatNo"
             ."\nWHERE (hm.ScheduledTime BETWEEN ? AND ?) $trackWhere"
-            ."\nGROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel"
+            ."\nGROUP BY hm.HeatNo, hm.HeatStatus, hm.ScheduledTime, hm.HeatTypeNo, hm.LapsOrMinutes, hm.RacersPerHeat, hm.TrackNo, hm.WinBy, hm.RaceBy, hm.ScheduleDuration, hm.SpeedLevel, hm.PointsNeeded"
             ."\nORDER BY hm.ScheduledTime";
 
         // If no start date given, default to today
