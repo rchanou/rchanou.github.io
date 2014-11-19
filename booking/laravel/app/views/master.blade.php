@@ -4,6 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1">
 
     <!-- BEGIN CSS INCLUDES -->
     @section('css_includes')
@@ -110,9 +111,22 @@
             $('input[type=date]').datepicker({
                 // Consistent format with the HTML5 picker
                 dateFormat: 'yy-mm-dd',
-                changeYear: true
+                changeYear: true,
+                yearRange: "-100:+0"
             });
         }
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            window.setTimeout(function() {
+              $(".fadeAway").fadeTo(500, 0).slideUp(500, function(){
+                  $(this).remove();
+              });
+            }, 5000);
+        });
     </script>
     @show
     <!-- END JAVASCRIPT INCLUDES -->

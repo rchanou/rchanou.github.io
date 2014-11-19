@@ -25,15 +25,13 @@ Shopping Cart - Online Booking
     <div class="mainBodyHeader">Shopping Cart</div><p/>
 
     @if($itemAddedToCart !== null)
-        <div class="alert alert-success alert-dismissable" role="alert">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <div class="alert alert-success fadeAway" role="alert">
             {{$itemAddedToCart}} has been added to your shopping cart.
         </div>
     @endif
 
     @if($itemRemovedFromCart !== null)
-        <div class="alert alert-success alert-dismissable" role="alert">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <div class="alert alert-success fadeAway" role="alert">
             {{$itemRemovedFromCart}} has been removed from your shopping cart.
         </div>
     @endif
@@ -108,9 +106,6 @@ Shopping Cart - Online Booking
 <!-- BEGIN JAVASCRIPT INCLUDES -->
 @section('js_includes')
 @parent
-<script>
-console.log({{json_encode($cart)}}) //TODO: Remove
-</script>
 @stop
 <!-- END JAVASCRIPT INCLUDES -->
 

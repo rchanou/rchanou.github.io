@@ -91,19 +91,32 @@ class Settings
             'registrationEnabled' => true,
             'enableFacebook' => true,
             'locale' => 'en_US',
-            'currency' => 'USD'
+            'currency' => 'USD',
+            'termsAndConditions' => '<strong>Please contact our facility for our latest Terms & Conditions.</strong>'
         );
 
         self::$currentSettings = self::$defaultSettings;
 
         $settings = CS_API::getSettings(); //Kiosk settings
         $bookingSettings = CS_API::getBookingSettings(); //Online booking settings
-        if ($settings === null || $bookingSettings === null)
+        $templates = CS_API::getTemplates(); //Online booking templates
+
+        $templatesByName = array();
+        if ($templates != null)
         {
-            return Redirect::to('/disconnected');
+            foreach($templates as $currentTemplate)
+            {
+                $templatesByName[$currentTemplate->name] = $currentTemplate->value;
+            }
+
+            if ($settings === null || $bookingSettings === null)
+            {
+                return Redirect::to('/disconnected');
+            }
         }
 
         self::$currentSettings = array_merge(self::$currentSettings,$bookingSettings);
+        self::$currentSettings = array_merge(self::$currentSettings,$templatesByName);
 
         //Fetch the custom text labels and store them in the session - for whatever reason CS treats them as settings
         self::$currentSettings['CustomText1'] = isset($settings->settings->CustomText1->SettingValue) ? $settings->settings->CustomText1->SettingValue : 'CustomText1';

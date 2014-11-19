@@ -1,3 +1,9 @@
+html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
 body {
     padding: 0px;
     padding-top: 40px;
@@ -5,7 +11,7 @@ body {
     background-color: #eee;
     color: black;
     background-image:url('../images/background.jpg');
-    background-attachment: fixed;
+    background-size: 1920px 1080px;
 }
 
 footer {
@@ -95,6 +101,19 @@ footer {
     font-size: 20px;
 }
 
+.formButtonDisabled {
+    background: #bbbbbb; /* Old browsers */
+    background: -moz-linear-gradient(top,  #bbbbbb 0%, #999999 44%, #444444 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#bbbbbb), color-stop(44%,#999999), color-stop(100%,#444444)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #bbbbbb 0%,#999999 44%,#444444 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #bbbbbb 0%,#999999 44%,#444444 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #bbbbbb 0%,#999999 44%,#444444 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #bbbbbb 0%,#999999 44%,#444444 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bbbbbb', endColorstr='#444444',GradientType=0 ); /* IE6-9 */
+    color: white;
+    font-size: 20px;
+}
+
 .rightAligned {
     text-align: right;
 }
@@ -122,20 +141,17 @@ footer {
 
 .raceName {
     font-size: 20px;
-    width: 48%;
-    display: inline-block;
     vertical-align: middle;
     font-weight: bold;
-
+    padding-left: 0px;
 }
 
 .raceDate {
     font-size: 20px;
-    width: 51%;
     display: inline-block;
     vertical-align: middle;
-    text-align: right;
     font-weight: bold;
+    padding-right: 0px;
 }
 
 .noRaceResults {
@@ -226,18 +242,15 @@ footer {
 
 .racePrices {
     font-size: 16px;
-    width: 48%;
-    display: inline-block;
     vertical-align: middle;
     font-weight: bold;
+    padding-left: 0px;
 }
 
 
 .raceBookButtonArea {
-    width: 51%;
-    display: inline-block;
     vertical-align: middle;
-    text-align: right;
+    padding-right: 0px;
 }
 
 .bookingError {
@@ -287,7 +300,6 @@ label {
 }
 
 .yesterdayArrow {
-    float: left;
     font-size: 18px;
     height: 41px;
     line-height: 41px;
@@ -295,7 +307,6 @@ label {
 }
 
 .tomorrowArrow {
-    float: right;
     font-size: 18px;
     height: 41px;
     line-height: 41px;

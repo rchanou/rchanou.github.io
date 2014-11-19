@@ -22,6 +22,22 @@ Manage Bookings
 @stop
 
 @section('content')
+<div class="row">
+    <div class="col-xs-12">
+        @if ($currentOnlineBookingState == 'disabled_manually')
+        <div class="alert alert-warning">
+            <p>(Note: Online Booking is <strong>current disabled</strong> because the "Enable Online Booking" setting is not checked.</p>
+            To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+        </div>
+        @endif
+        @if ($currentOnlineBookingState == 'disabled_dummypayments')
+        <div class="alert alert-warning">
+            <p>(Note: Online Booking is <strong>current disabled</strong> because the site is using the Dummy payment processor.)</p>
+            To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+        </div>
+        @endif
+    </div>
+</div>
   <div id="main">Loading Booking Admin...</div>
 @stop
 

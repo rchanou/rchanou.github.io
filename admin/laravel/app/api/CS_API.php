@@ -31,11 +31,11 @@ class CS_API
     }
 
     /**
-     * This function performs a GET or POST call via the Club Speed PHP API.
+     * This function performs a GET, POST, or PUT call via the Club Speed PHP API using Httpful.
      * It returns null if there is any sort of error, or the results if successful.
      * @param $url The URL to call, with all GET parameters included.
      * @param null $params POST parameters to include, if any.
-     * @param string $verb Whether the call is a 'GET' or 'POST'.
+     * @param string $verb Whether the call is a 'GET', 'POST', 'PUT', etc.
      * @return [ 'response': data, 'error': data ]
      */
     private static function call($url, $params = null, $verb = 'GET')
@@ -110,14 +110,68 @@ class CS_API
             $response = null;
         }
 
-
-
         return array('response' => $response,
                      'error' => $errorMessage);
     }
 
+    /**
+     * Generic way of doing a simple GET on the Club Speed API. Returns the body of the response if present.
+     * Does no other special handling, but is useful for straightforward GET calls.
+     *
+     * @param $resource The URL (without the '/' prefix or .json suffix) to hit.
+     * @param array $queryParams An associative array of URL get parameters that the call expects, if needed.
+     * @return mixed Returns the body of the response if present, or null otherwise.
+     */
+    public static function getJSON($resource, $queryParams = array())
+    {
+        self::initialize();
+        $queryParams['key'] = self::$privateKey;
+        $url = self::$apiURL . '/' . $resource . '.json?' . http_build_query($queryParams);
 
-    //TODO: Documentation
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && property_exists($response, 'body'))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Generic way of doing a simple PUT on the Club Speed API. Returns true if successful, false if not, null if the
+     * call had a catastrophic failure. Does no other special handling, but is useful for straightforward PUT calls.
+     *
+     * @param $resource The URL (without the '/' prefix, '/' suffix, or item ID) to hit.
+     * @param $id The ID of the item to perform the put to. It gets appended to the resource URL.
+     * @param $params An associative array of any necessary URL parameters.
+     * @return mixed Returns true if successful, false if there's a failure, and null if there's a catastrophic failure.
+     */
+    public static function update($resource, $id, $params)
+    {
+        self::initialize();
+        $url = self::$apiURL . "/" . $resource . "/" . $id . "?" . http_build_query(array('key' => self::$privateKey));
+        $result = self::call($url, $params, 'PUT');
+        $response = $result['response'];
+
+        if (isset($response->code) && $response->code == 200)
+        {
+            return true;
+        }
+        else if ($response !== null)
+        {
+            return false;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public static function login($username,$password)
     {
         self::initialize();
@@ -143,170 +197,23 @@ class CS_API
         }
     }
 
-    public static function getJSON($resource, $queryParams = array())
-    {
-        self::initialize();
-        $queryParams['key'] = self::$privateKey;        
-        $url = self::$apiURL . '/' . $resource . '.json?' . http_build_query($queryParams);
-        
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response, 'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }     
-    }
-    
     public static function getListOfChannels()
     {
         self::initialize();
-        $urlVars = array('key' => self::$apiKey);
-        $url = self::$apiURL . '/channel/all.json?' . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
+        return self::getJSON('channel/all'); //So the user of CS_API doesn't need to know the URL details, which may change
     }
 
     public static function getDetailsOnChannel($channelId)
     {
         self::initialize();
-        $urlVars = array('key' => self::$apiKey);
-        $url = self::$apiURL . "/channel/$channelId.json?" . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    public static function getBookingSettings()
-    {
-        self::initialize();
-        $urlVars = array('key' => self::$privateKey, 'group' => 'Booking');
-        $url = self::$apiURL . "/settings/get.json?" . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
+        return self::getJSON("channel/$channelId");
     }
 
     public static function getSettingsFor($terminalName)
     {
         self::initialize();
-        $urlVars = array('key' => self::$privateKey, 'group' => $terminalName);
-        $url = self::$apiURL . "/settings/get.json?" . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    public static function update($resource, $id, $params)
-    {
-      self::initialize();
-      $url = self::$apiURL . "/" . $resource . "/" . $id . "?" . http_build_query(array('key' => self::$privateKey));
-      $result = self::call($url, $params, 'PUT');
-      $response = $result['response'];
-
-      if (isset($response->code) && $response->code == 200)
-      {
-        return true;
-      }
-      else if ($response !== null)
-      {
-        return false;
-      }
-      else
-      {
-        return null;
-      }
-    }
-    
-    private static function updateBookingSetting($newSettingName,$newSettingValue)
-    {
-        self::initialize();
-        $urlVars = array('key' => self::$privateKey);
-        $url = self::$apiURL . "/controlPanel/Booking/$newSettingName?" . http_build_query($urlVars);
-        $params = array('value' => $newSettingValue);
-
-        $result = self::call($url,$params,'PUT');
-
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if (isset($response->code) && $response->code == 200)
-        {
-            return true;
-        }
-        else if ($response !== null)
-        {
-            return false;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    public static function updateBookingSettings($newSettings)
-    {
-        self::initialize();
-        foreach($newSettings as $newSettingName => $newSettingValue)
-        {
-            $result = self::updateBookingSetting($newSettingName,$newSettingValue);
-
-            if ($result === false)
-            {
-                return false;
-            }
-            if ($result === null)
-            {
-                return null;
-            }
-        }
-        return true;
+        $params = array('group' => $terminalName);
+        return self::getJSON("settings/get", $params);
     }
 
     public static function updateSettingsFor($terminalName,$newSettings)
@@ -314,7 +221,8 @@ class CS_API
         self::initialize();
         foreach($newSettings as $newSettingName => $newSettingValue)
         {
-            $result = self::updateSettingFor($terminalName,$newSettingName,$newSettingValue);
+            $params = array('value' => $newSettingValue);
+            $result = self::update("controlPanel/$terminalName",$newSettingName,$params);
 
             if ($result === false)
             {
@@ -328,120 +236,40 @@ class CS_API
         return true;
     }
 
-    private static function updateSettingFor($terminalName,$newSettingName,$newSettingValue)
-    {
-        self::initialize();
-        $urlVars = array('key' => self::$privateKey);
-        $url = self::$apiURL . "/controlPanel/$terminalName/$newSettingName?" . http_build_query($urlVars);
-        $params = array('value' => $newSettingValue);
-
-        $result = self::call($url,$params,'PUT');
-
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if (isset($response->code) && $response->code == 200)
-        {
-            return true;
-        }
-        else if ($response !== null)
-        {
-            return false;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     public static function getSupportedPaymentTypes()
     {
         self::initialize();
-        $urlVars = array('key' => self::$privateKey);
-        $url = self::$apiURL . "/processPayment.json?" . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
+        return self::getJSON("processPayment");
     }
 
     public static function getReport_Payments($start = null, $end = null)
     {
         self::initialize();
-        $urlVars = array('key' => self::$privateKey);
-        if ($start != null) { $urlVars['start'] = $start; }
-        if ($end != null) { $urlVars['end'] = $end; }
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
 
-        $url = self::$apiURL . "/reports/payments.json?" . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    public static function getReport_SummaryPayments($start = null, $end = null)
-    {
-        self::initialize();
-        $urlVars = array('key' => self::$privateKey);
-        if ($start != null) { $urlVars['start'] = $start; }
-        if ($end != null) { $urlVars['end'] = $end; }
-
-        $url = self::$apiURL . "/reports/payments_summary.json?" . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
+        return self::getJSON("reports/payments", $params);
     }
 
     public static function getReport_DetailedSales($start = null, $end = null, $show_by_opened_date = 'false')
     {
         self::initialize();
-        $urlVars = array('key' => self::$privateKey);
-        if ($start != null) { $urlVars['start'] = $start; }
-        if ($end != null) { $urlVars['end'] = $end; }
-        $urlVars['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+        $params['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
 
-        $url = self::$apiURL . "/reports/sales.json?" . http_build_query($urlVars);
-
-        $result = self::call($url);
-        $response = $result['response'];
-        $error = $result['error'];
-
-        if ($response !== null && property_exists($response,'body'))
-        {
-            return $response->body;
-        }
-        else
-        {
-            return null;
-        }
+        return self::getJSON("reports/sales", $params);
     }
 
+    public static function getReport_SummaryPayments($start = null, $end = null)
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+
+        return self::getJSON("reports/payments_summary", $params);
+    }
 }

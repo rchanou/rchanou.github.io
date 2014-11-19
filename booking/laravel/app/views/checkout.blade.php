@@ -213,13 +213,31 @@ Checkout
             <strong>Order Total:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTotal, $currency)}}<br/>
             </div>
 
+            <!-- TODO: Check if enabled, add jQuery functionality -->
+            @if(isset($settings['showTermsAndConditions']) && $settings['showTermsAndConditions'])
+            <div class="formHeader">Terms and Conditions</div>
+
+            <div class="well" style="height: 200px; overflow: auto;">
+            {{nl2br($settings['termsAndConditions'])}}
+            </div>
+            <div class="text-right">
+            <input type="checkbox" name="iAgree" id="iAgree"> I agree to the Terms & Conditions.
+            </div>
+            @endif
+
             <input type="hidden" name="expectedSubtotal" value="{{$virtualCheck->checkSubtotal}}">
             <input type="hidden" name="expectedTax" value="{{$virtualCheck->checkTax}}">
             <input type="hidden" name="expectedTotal" value="{{$virtualCheck->checkTotal}}">
 
+            @if(isset($settings['showTermsAndConditions']) && $settings['showTermsAndConditions'])
+            <div class="rightAligned">
+                <button type="submit" class="formButton formButtonDisabled" disabled id="makePaymentButton">Please agree to the Terms & Conditions</button>
+            </div>
+            @else
             <div class="rightAligned">
                 <button type="submit" class="formButton" id="makePaymentButton">Make Payment</button>
             </div>
+            @endif
 
         </form>
     </div>
@@ -249,6 +267,25 @@ $().ready( function() {
 
     });
 });
+</script>
+
+<!-- Terms & Conditions checkbox -->
+<script>
+    $('#iAgree').click(function()
+    {
+        if (this.checked)
+        {
+            $('#makePaymentButton').removeClass('formButtonDisabled');
+            $('#makePaymentButton').prop('disabled',false);
+            $('#makePaymentButton').text('Make Payment');
+        }
+        else
+        {
+            $('#makePaymentButton').addClass('formButtonDisabled');
+            $('#makePaymentButton').prop('disabled',true);
+            $('#makePaymentButton').text('Please agree to the Terms & Conditions');
+        }
+    });
 </script>
 @stop
 <!-- END PAGE CONTENT -->

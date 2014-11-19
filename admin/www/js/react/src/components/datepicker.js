@@ -1,3 +1,5 @@
+// React wrapper for jQuery UI Datepicker
+
 var React = require('react/addons');
 var moment = require('moment');
 
@@ -248,8 +250,7 @@ module.exports = React.createClass({
 		$(this.refs.picker.getDOMNode())
 		.datepicker({
 			constrainInput: false,
-			dateFormat: this.getFormat(),
-			showButtonPanel: true
+			dateFormat: this.getFormat()
 		})
 		.datepicker('setDate', '+0')
 		.datepicker('option', 'onSelect',
@@ -265,7 +266,10 @@ module.exports = React.createClass({
 		$(this.refs.picker.getDOMNode()).datepicker('show');
 	},
 	componentWillReceiveProps(nextProps){
-		$(this.refs.picker.getDOMNode()).datepicker('setDate', nextProps.date.format(this.getLocaleFormat()));
+	  var inputEl = $(this.refs.picker.getDOMNode());
+	  if (!inputEl.is(':focus')){
+	    inputEl.datepicker('setDate', nextProps.date.format(this.getLocaleFormat()));
+	  }
 	},
 	handlePreviousClick(){
 		this.iterateDate(-1);

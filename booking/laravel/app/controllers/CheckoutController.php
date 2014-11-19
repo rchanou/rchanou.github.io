@@ -93,7 +93,8 @@ class CheckoutController extends BaseController
                 'virtualCheckDetails' => $virtualCheckDetails,
                 'cart' => $cart,
                 'moneyFormatter' => $moneyFormatter,
-                'currency' => $currency
+                'currency' => $currency,
+                'settings' => $settings
             )
         );
     }

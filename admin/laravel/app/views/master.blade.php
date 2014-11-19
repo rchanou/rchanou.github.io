@@ -97,17 +97,6 @@
             @endif
                 <a href="{{URL::to('reports')}}"><i class="fa fa-file-o"></i> <span>Reports</span></a>
             </li>
-            @if (@$controller == 'MobileAppController')
-            <li class="active open">
-            @else
-            <li class="submenu">
-            @endif
-                <a href="#"><i class="fa fa-mobile"></i> <span>Mobile App</span> <i class="arrow fa fa-chevron-right"></i></a>
-                <ul>
-                    <li>{{link_to('/mobileApp/settings','Settings')}}</li>
-                    <li>{{link_to('/mobileApp/templates','Templates')}}</li>
-                </ul>
-            </li>
         </ul>
 
     </div>
@@ -159,7 +148,8 @@
         $('input[type=date]').datepicker({
             // Consistent format with the HTML5 picker
             dateFormat: 'yy-mm-dd',
-            changeYear: true
+            changeYear: true,
+            yearRange: "-100:+0"
         });
     }
 </script>

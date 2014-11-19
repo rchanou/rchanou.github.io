@@ -715,6 +715,27 @@ class CS_API
         }
     }
 
+    public static function getTemplates()
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/settings.json?namespace=booking&key=' . self::$privateKey;;
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && isset($response->body->settings))
+        {
+            return $response->body->settings;
+        }
+        else
+        {
+            return null;
+        }
+
+    }
+
     /*
     #################
     # CORE API CALL #

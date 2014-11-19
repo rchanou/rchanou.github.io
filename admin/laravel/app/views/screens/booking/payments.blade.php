@@ -34,12 +34,18 @@ Payment Processors
                   <p>{{ Session::get("error") }}</p>
               </div>
               @endif
-              @if ($currentPaymentType == "Dummy")
-              <div class="alert alert-warning">
-                  <p>(Note: Online Booking is <strong>not accessible by the public</strong> while using the Dummy payment processor.)</p>
-                  To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
-              </div>
-              @endif
+            @if ($currentOnlineBookingState == 'disabled_manually')
+            <div class="alert alert-warning">
+                <p>(Note: Online Booking is <strong>current disabled</strong> because the "Enable Online Booking" setting is not checked.</p>
+                To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+            </div>
+            @endif
+            @if ($currentOnlineBookingState == 'disabled_dummypayments')
+            <div class="alert alert-warning">
+                <p>(Note: Online Booking is <strong>current disabled</strong> because the site is using the Dummy payment processor.)</p>
+                To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+            </div>
+            @endif
                  <div class="col-sm-12">
                      <div class="widget-box">
                             <div class="widget-title">

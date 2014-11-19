@@ -26,10 +26,19 @@
 @section('content')
 <div class="mainBodyContent">
 
-    <div class="mainBodyHeader">
-        <span class="yesterdayArrow"><a href="?start={{$previousDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}"><-- {{$previousDayDisplay}}</a></span>
+    <div class="mainBodyHeader row">
+        <div class="col-xs-3 yesterdayArrow text-left">
+            <a href="?start={{$previousDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}"><-- {{$previousDayDisplay}}</a>
+        </div>
+        <div class="col-xs-6">
+            <em>Available Races</em>
+        </div>
+        <div class="col-xs-3 tomorrowArrow text-right">
+            <a href="?start={{$nextDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}">{{$nextDayDisplay}} --></a>
+        </div>
+{{--        <span class="yesterdayArrow"><a href="?start={{$previousDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}"><-- {{$previousDayDisplay}}</a></span>
         <span><em>Available Races</em></span>
-        <span class="tomorrowArrow"><a href="?start={{$nextDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}">{{$nextDayDisplay}} --></a></span>
+        <span class="tomorrowArrow"><a href="?start={{$nextDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}">{{$nextDayDisplay}} --></a></span>--}}
     </div>
 
     <!-- Race results -->
@@ -41,19 +50,19 @@
         @endif
         @foreach($races as $race)
         <div class="raceResult" id="{{$race->heatId}}">
-            <div class="raceResultHeader">
-                <div class="raceName ellipsis">{{$race->heatDescription}}</div>
-                <div class="raceDate">{{date(Config::get('config.dateFormat') . ' H:i',strtotime($race->heatStartsAt))}}</div>
+            <div class="raceResultHeader row">
+                <div class="raceName ellipsis col-xs-6">{{$race->heatDescription}}</div>
+                <div class="raceDate col-xs-6 text-right">{{date(Config::get('config.dateFormat') . ' H:i',strtotime($race->heatStartsAt))}}</div>
             </div>
 
             <div class="spotsAvailable">{{$race->heatSpotsAvailableOnline}} spots available online</div>
 
-            <div class="raceResultFooter">
-                <div class="racePrices ellipsis">{{$numberOfParticipants}} Driver(s)
+            <div class="raceResultFooter row">
+                <div class="racePrices ellipsis col-xs-6">{{$numberOfParticipants}} Driver(s)
 
                      x {{$moneyFormatter->formatCurrency($race->products[0]->price1, $currency)}} each = {{$moneyFormatter->formatCurrency($numberOfParticipants * $race->products[0]->price1, $currency)}}
                 </div>
-                <div class="raceBookButtonArea">
+                <div class="raceBookButtonArea col-xs-6 text-right">
                     @if($authenticated != null)
                         <a href="cart?action=add&heatId={{$race->heatId}}&quantity={{$numberOfParticipants}}"><button type="button" class="formButton">Book It!</button></a>
                     @else

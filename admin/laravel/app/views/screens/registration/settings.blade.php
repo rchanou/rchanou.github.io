@@ -110,12 +110,6 @@ Registrations Settings
 
     $(document).ready(function () {
 
-        window.setTimeout(function() {
-          $(".fadeAway").fadeTo(500, 0).slideUp(500, function(){
-              $(this).remove();
-          });
-        }, 5000);
-
         //If a customer field is not shown, make sure it is not required
     
         $('#genderShown').on('ifUnchecked',function (event) {

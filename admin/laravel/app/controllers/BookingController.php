@@ -4,8 +4,6 @@ require_once(app_path().'/includes/includes.php');
 
 class BookingController extends BaseController
 {
-    private $templates = null;
-
     public function __construct() {
       $standardNote = 'The following can be inserted into this template:<br/><br/>'
                     . '<b>Order #:</b> {{checkId}}<br/>'
@@ -47,7 +45,7 @@ class BookingController extends BaseController
           'templateNamespace' => 'Booking',
           'templateName' => 'termsAndConditions',
           'isHtml' => true,
-          'note' => $standardNote
+          'note' => ''
         )
        );
     }
@@ -63,7 +61,10 @@ class BookingController extends BaseController
             //Redirect to the previous page with an appropriate error message
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
-        return View::make('/screens/booking/manage',array('controller' => 'BookingController'));
+        return View::make('/screens/booking/manage',array(
+            'controller' => 'BookingController',
+            'currentOnlineBookingState' => $this->currentOnlineBookingState()
+        ));
     }
 
     public function settings()
@@ -78,7 +79,7 @@ class BookingController extends BaseController
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
 
-        $bookingSettings = CS_API::getBookingSettings();
+        $bookingSettings = CS_API::getSettingsFor('Booking');
         if ($bookingSettings === null)
         {
             return Redirect::to('/disconnected');
@@ -96,8 +97,49 @@ class BookingController extends BaseController
         return View::make('/screens/booking/settings',
             array('controller' => 'BookingController',
                   'isChecked' => $bookingSettingsCheckedData,
-                  'bookingSettings' => $bookingSettingsData
+                  'bookingSettings' => $bookingSettingsData,
+                  'currentOnlineBookingState' => $this->currentOnlineBookingState()
             ));
+    }
+
+    private function currentOnlineBookingState()
+    {
+        $bookingSettings = CS_API::getSettingsFor('Booking');
+
+        //Check if online booking is disabled
+        if ($bookingSettings !== null)
+        {
+            $bookingSettingsData = array();
+            foreach($bookingSettings->settings as $setting)
+            {
+                $bookingSettingsData[$setting->SettingName] = $setting->SettingValue;
+            }
+            if (isset($bookingSettingsData['registrationEnabled']) && !$bookingSettingsData['registrationEnabled'])
+            {
+                return 'disabled_manually';
+            }
+        }
+
+        //Check if the payment processor is the dummy driver
+        if (isset($bookingSettingsData['onlineBookingPaymentProcessorSettings'])
+            && $bookingSettingsData['onlineBookingPaymentProcessorSettings'] != null)
+        {
+            $currentPaymentType = json_decode($bookingSettingsData['onlineBookingPaymentProcessorSettings']);
+            if (isset($currentPaymentType->name))
+            {
+                $currentPaymentType = $currentPaymentType->name;
+            }
+            else
+            {
+                $currentPaymentType = "";
+            }
+            if ($currentPaymentType == "Dummy")
+            {
+                return 'disabled_dummypayments';
+            }
+        }
+
+        return 'enabled';
     }
 
     public function updateSettings()
@@ -187,7 +229,7 @@ class BookingController extends BaseController
             }
         }
 
-        $result = CS_API::updateBookingSettings($newSettings);
+        $result = CS_API::updateSettingsFor('Booking',$newSettings);
 
         if ($result === false)
         {
@@ -219,7 +261,7 @@ class BookingController extends BaseController
             return Redirect::to('/disconnected');
         }
 
-        $bookingSettings = CS_API::getBookingSettings();
+        $bookingSettings = CS_API::getSettingsFor('Booking');
         if ($bookingSettings === null)
         {
             return Redirect::to('/disconnected');
@@ -263,7 +305,8 @@ class BookingController extends BaseController
             array('controller' => 'BookingController',
                   'supportedPaymentTypes' => $supportedPaymentTypes,
                   'currentPaymentType' => $currentPaymentType,
-                  'currentSavedSettings' => $currentSavedSettings
+                  'currentSavedSettings' => $currentSavedSettings,
+                  'currentOnlineBookingState' => $this->currentOnlineBookingState()
             )
         );
     }
@@ -286,7 +329,7 @@ class BookingController extends BaseController
         }
 
         //Get current booking settings
-        $bookingSettings = CS_API::getBookingSettings();
+        $bookingSettings = CS_API::getSettingsFor('Booking');
         if ($bookingSettings === null)
         {
             return Redirect::to('/disconnected');
@@ -339,7 +382,7 @@ class BookingController extends BaseController
 
         //Update the saved settings in the database
         $settingsToUpdate = array('onlineBookingPaymentProcessorSavedSettings' => json_encode($newSavedSettings));
-        $result = CS_API::updateBookingSettings($settingsToUpdate);
+        $result = CS_API::updateSettingsFor('Booking',$settingsToUpdate);
         if ($result === false)
         {
             return Redirect::to('booking/payments')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
@@ -355,7 +398,7 @@ class BookingController extends BaseController
         //Switch to that processor's settings
         $settingsToUpdate = array('onlineBookingPaymentProcessorSettings' => json_encode($paymentProcessorSettings));
 
-        $result = CS_API::updateBookingSettings($settingsToUpdate);
+        $result = CS_API::updateSettingsFor('Booking',$settingsToUpdate);
         if ($result === false)
         {
             return Redirect::to('booking/payments')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
@@ -394,36 +437,6 @@ class BookingController extends BaseController
           $bookingTemplates
         );
         
-        /*
-        $localTemplateNames = array_map(
-          function($template)
-          {
-            return $template->templateName;
-          },
-          $this->templates
-        );*/
-        
-        /*
-        $templateFormData = $bookingTemplates;
-        foreach($templateFormData as $id => $template)
-        {
-          $templateFormData[$id]->name = $id;
-          $templateFormData[$id]->isHtml = $templateFormData[$id]->type == 'HTML'? true: false;
-            
-          $matchingLocalTemplateKey = array_search($template->name, $localTemplateNames);
-          if ($matchingLocalTemplateKey !== false)
-          {
-            $templateFormData[$id]->displayName = $this->templates[$matchingLocalTemplateKey]->displayName;
-            $templateFormData[$id]->note = $this->templates[$matchingLocalTemplateKey]->note;
-          }
-          else
-          {
-            $templateFormData[$id]->displayName = $templateFormData[$id]->description;
-            $templateFormData[$id]->note = '';
-          }
-        }
-        */
-        
         foreach($this->templates as $id => $template) {        
           $matchingApiTemplateKey = array_search($template->templateName, $apiTemplateNames);
           if ($matchingApiTemplateKey !== false){
@@ -432,12 +445,8 @@ class BookingController extends BaseController
             $templateToPush->settingsId = $bookingTemplates[$matchingApiTemplateKey]->settingsId;
             $templateToPush->value = $bookingTemplates[$matchingApiTemplateKey]->value;
             array_push($templateFormData, $templateToPush);
-            //$templateFormData[$id] = $template;          
-            //$templateFormData[$id]->name = $id; 
-            //$templateFormData[$id]->value = $bookingTemplates[$matchingApiTemplateKey]->value;
           }
         }
-         
 
         Session::put('templates', $templateFormData);
 				
@@ -446,7 +455,8 @@ class BookingController extends BaseController
           array(
             'controller' => 'BookingController',
             'templates' => $templateFormData,
-            'currentTemplate' => 0 // unused; will possibly be removed
+            'currentTemplate' => 0, // unused; will possibly be removed
+            'currentOnlineBookingState' => $this->currentOnlineBookingState()
           )
         );
     }
@@ -460,7 +470,6 @@ class BookingController extends BaseController
 
       // Make and send API calls to update all changed templates
       $currentTemplates = Session::get('templates', array());
-      //$newTemplates = array();
 
       $result = true; // default case of saving without making any changes is a successful result, so default $result to true
       // if even a single update request fails, reported result becomes false
@@ -473,10 +482,7 @@ class BookingController extends BaseController
           }
         }
       }
-
-      //$result = CS_API::update('settings', )
-      //$result = CS_API::updateSettingsFor('Templates', $newTemplates);
-
+      
       if ($result === false)
       {
         return Redirect::to('booking/templates')->with( array('error' => 'One or more templates could not be updated. Please try again.'));

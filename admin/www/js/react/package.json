@@ -1,9 +1,12 @@
 {
   "scripts": {
+    "build": "watchify -t [reactify --es6] -t es6ify -t -g uglifyify src/booking/manage/main.js -o build/booking/manage/main.min.js -dv",
+    "test": "watchify -t [reactify --es6] -t es6ify -t -g uglifyify src/test/test.js -o test/test.js -dv | mocha -w",
+    "build-test": "npm run build | npm run test",
+    "deploy": "watchify -t [reactify --es6] -t es6ify -t -g uglifyify src/booking/manage/main.js -o ../../../../clubspeedapps/admin/www/js/react/build/booking/manage/main.min.js -v",
+    "build-deploy": "npm run build | npm run deploy",
     "jsx": "jsx -w --harmony --no-cache-dir ./ ../",
-    "build": "watchify -t [reactify --es6] -t es6ify -t uglifyify src/booking/manage/main.js -o build/booking/manage/main.min.js -dv",
-    "test": "watchify -t [reactify --es6] -t es6ify -t uglifyify src/test/test.js -o test/test.js -dv | mocha -w",
-		"build-test": "watchify -t [reactify --es6] -t es6ify -t -g uglifyify src/booking/manage/main.js -o build/booking/manage/main.min.js -dv | watchify -t [reactify --es6] -t es6ify src/test/test.js -o test/test.js -v | mocha -w",
+		"old-build-test": "watchify -t [reactify --es6] -t es6ify -t -g uglifyify src/booking/manage/main.js -o build/booking/manage/main.min.js -dv | watchify -t [reactify --es6] -t es6ify src/test/test.js -o test/test.js -v | mocha -w",
     "old-build": "watchify -t [reactify --es6] -t es6ify src/booking/manage/main.js -o build/booking/manage/main.js -dv | watchify -g uglifyify build/booking/manage/main.js -o build/booking/manage/main.min.js -dv"
   },
   "devDependencies": {
