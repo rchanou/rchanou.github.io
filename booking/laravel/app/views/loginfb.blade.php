@@ -9,7 +9,6 @@ Facebook Login - Online Booking
 <!-- PAGE CONTENT -->
 <!-- BEGIN FACEBOOK INTEGRATION -->
 @section('facebook_integration')
-@parent
     <script>
         //Loads Facebook SDK
         (function(d, s, id) {
