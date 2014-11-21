@@ -55,7 +55,8 @@ $settings = array(
 	'bookingAvailabilityWindowEndingInSeconds' => 90*24*60*60,
 	'reservationTimeout' => 30*60,
 	'autoAddRacerToHeat' => true,
-    'showTermsAndConditions' => true
+    'showTermsAndConditions' => true,
+    'sendReceiptCopyTo' => ''
 	);
 
 error_reporting(E_ALL);
