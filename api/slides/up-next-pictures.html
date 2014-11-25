@@ -472,7 +472,7 @@
             // handle their returns specially
             switch(numElems) {
                 case 1:
-                    return baseFontSize * 4.6;
+                    return baseFontSize * 4.1;
                 case 2:
                     return baseFontSize * 4.6 / 1.5;
                 case 3:
@@ -532,6 +532,11 @@
                     nickname: "NICKNAME"
                 }
             }
+            else {
+                racers.push({
+                    nickname: "All spots still available!"
+                });
+            }
 
             // calculate the grid widths, heights, and column/row counts
             data.gridSizes = new GridSizes(data.race.racers.length || 0);
@@ -576,6 +581,8 @@
                 }
             });
         }
+        else
+            callback(data); // no racers, just return
     }
 
     /**
@@ -624,7 +631,9 @@
             return (z.convert(parameters.useRealName, z.types.boolean) ? racer.first_name + " " + racer.last_name.charAt(0) : racer.nickname);
         });
         Handlebars.registerHelper('getBoolAsYesOrNo', function(item, options) {
-            return (z.convert(item, z.types.boolean) ? "YES" : "NO");
+            if (z.check.exists(item)) // don't convert null or undefined values
+                return (z.convert(item, z.types.boolean) ? "YES" : "NO");
+            return '';
         });
         Handlebars.registerHelper('repeat', function(count, options) {
             var src = '';
@@ -737,7 +746,7 @@
         +   '   </div>'
         +   '</div>';
 
-    var labelSrc = '' +
+        var labelSrc = '' +
             '   <div class="labelsRacerWrapper lFloat" style="{{../gridSizes.heightStyle}}">' // apply lFloat for margin spacing purposes, to match racer elements
         +   '       <div class="portraitHeaderWrapper"></div>'
         +   '       <div class="portraitBodyWrapper" style="font-size:{{../gridSizes.labelFontSize}};">'
@@ -746,9 +755,9 @@
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">PROSKILL:&nbsp;&nbsp;</div></div>'
         +   '           <div class="labelTextWrapper roundRight hidden"><div class="labelText vMiddle hRight fill">FIRST TIME:&nbsp;&nbsp;</div></div>'
         +   '       </div>'
-        +   '   </div>'
+        +   '   </div>';
 
-    var src = '' +
+        var src = '' +
             '<div id="wrapper" class="fill" style="background-image:url({{backgroundUrl}}); background-repeat: no-repeat; background-position: center center; background-size: cover;">'
         +   '   <div class="spacing"></div>'
         +   '   <div id="labelsWrapper" class="lFloat">'
@@ -867,9 +876,11 @@
                     buildPage(dataWithPictures);
                 });
             }, function() {
+                log.info('Unable to successfully grab standard data! ')
                 // failure pipe -- grab fallback data
                 $.when.apply($, getFallbackData()).then(function() {
                     var data = smashArgs.apply(this, arguments);
+                    log.debug(data);
                     buildPage(data);
                 });
             }
