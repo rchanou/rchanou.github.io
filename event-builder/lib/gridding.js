@@ -339,7 +339,7 @@ exports.create = function(method, participantsToGrid, opts) {
 		
 		case 'balanced': // Legacy call
 			if(method == 'balanced') {
-				method = 'finishingPosition';
+				method = 'mostPoints';
 				opts.gridType = 'balanced';
 			}
 			
