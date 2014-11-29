@@ -640,7 +640,7 @@
                         {
                             $scope.mostLaps = $scope.currentScoreboard.race.duration;
                         }
-                        var lapsRemaining = $scope.currentScoreboard.race.duration - $scope.mostLaps;
+                        var lapsRemaining = $scope.currentScoreboard.race.duration - ($scope.mostLaps < 0 ? 0 : $scope.mostLaps);
                         if (lapsRemaining < 0)
                         {
                             lapsRemaining = 0;
