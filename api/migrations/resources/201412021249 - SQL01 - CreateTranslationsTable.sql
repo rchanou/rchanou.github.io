@@ -17,14 +17,15 @@ IF NOT EXISTS (
 BEGIN
     CREATE TABLE dbo.Translations (
           [TranslationsID]  INT IDENTITY(1,1)   NOT NULL
-        , [Namespace]       NVARCHAR(255)       NOT NULL
+        , [Namespace]       NVARCHAR(50)        NOT NULL
         , [Name]            NVARCHAR(255)       NOT NULL
-        , [Culture]         NVARCHAR(50)        NOT NULL
+        , [Culture]         NVARCHAR(10)        NOT NULL
         , [DefaultValue]    NVARCHAR(MAX)
         , [Value]           NVARCHAR(MAX)
         , [Description]     NVARCHAR(MAX)
         , [Created]         DATETIME            DEFAULT (GETDATE())
-        , CONSTRAINT        PK_Translations         PRIMARY KEY CLUSTERED (TranslationsID)
+        , CONSTRAINT        PK_Translations PRIMARY KEY CLUSTERED (TranslationsID)
+        , CONSTRAINT        IX_Translations_Namespace_Culture_Name UNIQUE NONCLUSTERED (Namespace, Culture, Name)
     )
     EXEC sp_addextendedproperty
         @name = 'MS_Description'
