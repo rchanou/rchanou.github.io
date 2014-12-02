@@ -760,7 +760,7 @@ class Races
         $tsql_weight= '';
         $tsql_gender= '';
         $tsql_speed_level = '';
-        $tsql_exclude_employees = isset($_GET['exclude_employees']) && $_GET['exclude_employees'] == 1 ? true : false;
+        $tsql_exclude_employees = isset($_GET['exclude_employees']) && $_GET['exclude_employees'] == 0 ? false : true;
         $tsql_birthdate = '';
 
         if(isset($_GET['limit']) && is_numeric($_GET['limit'])) {
