@@ -268,6 +268,11 @@
             height: 100%;
             vertical-align: middle;
         }
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         /* animations */
 
@@ -565,7 +570,7 @@
         +   '   <div id="headerSpacing"></div>'
         +   '   <div id="headerWrapper">'
         +   '       <div id="headerTop" class="parallelogram">'
-        +   '           <div class="headerText unskew shadows vMiddle hCenter">{{getHeaderText}}</div>'
+        +   '           <div class="headerText unskew shadows vMiddle hCenter truncate">{{getHeaderText}}</div>'
         +   '       </div>'
         +   '       <div id="headerBottom" class="parallelogram">'
         +   '           <div class="unskew">'
