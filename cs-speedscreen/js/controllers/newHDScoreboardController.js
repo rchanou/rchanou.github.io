@@ -56,6 +56,8 @@
             this.slidePanelVisible = false;
             this.dataSource = defaultFor(config.dataSource,'pollingAPI');
 
+            $scope.numberOfPendingScoreboardCalls = 0;
+
             $scope.disablePurpleText = defaultFor(config.disablePurpleText, false);
 
 
@@ -64,21 +66,21 @@
                         url:'http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg',
                         type:'HEAD',
                         error: function(){
-                            console.log('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg does not exist');
+                            //console.log('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg does not exist');
                             $.ajax({
                                 url:'http://' + window.location.hostname + '/privatewww/speedscreen.gif',
                                 type:'HEAD',
                                 error: function(){
-                                    console.log('http://' + window.location.hostname + '/privatewww/speedscreen.gif does not exist');
+                                    //console.log('http://' + window.location.hostname + '/privatewww/speedscreen.gif does not exist');
                                 },
                                 success: function(){
-                                    console.log('http://' + window.location.hostname + '/privatewww/speedscreen.gif exists');
+                                    //console.log('http://' + window.location.hostname + '/privatewww/speedscreen.gif exists');
                                     $scope.backgroundImageURL = 'http://' + window.location.hostname + '/privatewww/speedscreen.gif';
                                 }
                             });
                         },
                         success: function(){
-                            console.log('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg exists');
+                            //console.log('http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg exists');
                             $scope.backgroundImageURL = 'http://' + window.location.hostname + '/assets/cs-speedscreen/images/background_1080p.jpg';
                             }
                         });
@@ -117,6 +119,7 @@
                 intervalsToReturn.push($interval( function()
                 {
                     //console.log("MAIN HD SCOREBOARD LOOP");
+
                     HDScoreboard.getLatestScoreboardData();
                     HDScoreboard.processLatestScoreboardData();
 
@@ -152,24 +155,24 @@
                                 {
                                     scoreboardEventSource.close();
                                 }
-                                console.log("Connection closed to Club Speed. Going to try to connect.");
+                                //console.log("Connection closed to Club Speed. Going to try to connect.");
                                 connect(); //TODO: Set a timeout for this
                             } else if (event.target.readyState === EventSource.CONNECTING) {
-                                console.log("Reconnecting to Club Speed...");
+                                //console.log("Reconnecting to Club Speed...");
                             } else {
-                                console.log("Connection closed. Unknown error!");
+                                //console.log("Connection closed. Unknown error!");
                             }
                         }, false);
 
                         scoreboardEventSource.addEventListener("open", function (event) {
-                            console.log("Connected to Club Speed!");
+                            //console.log("Connected to Club Speed!");
                         }, false);
 
                         scoreboardEventSource.addEventListener("message", function (event) {
                             $scope.currentScoreboard = JSON.parse(event.data);
                             //$scope.lastHeatScoreboard = JSON.parse(event.data); //TODO: Figure this out
-                            console.log("Received scoreboard data from Club Speed!");
-                            console.log(event.data);
+                            //console.log("Received scoreboard data from Club Speed!");
+                            //console.log(event.data);
                         }, false);
                     }
                     connect();
@@ -281,12 +284,33 @@
                 //console.log("HD Scoreboard is getting data for track " + globalVars.getCurrentTrack());
                 if (this.dataSource == 'pollingAPI')
                 {
-                    speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
-                        $scope.currentScoreboard = data;
-                        //console.log(data);
-                    }).error(function (data, status, headers, config) {
-                        $scope.currentScoreboard = data;
-                    });
+                    //console.log("-----------------------------");
+                    //console.log("Attempting to poll the API...");
+                    //console.log("$scope.numberOfPendingScoreboardCalls = " + $scope.numberOfPendingScoreboardCalls);
+                    if ($scope.numberOfPendingScoreboardCalls == 0)
+                    {
+                        //console.log("Polling has begun.");
+                        $scope.numberOfPendingScoreboardCalls++;
+                        speedScreenServices.getScoreboardData(globalVars.getCurrentTrack()).success(function (data) {
+                            $scope.currentScoreboard = data;
+                            //console.log('#################');
+                            //console.log("Polling complete.");
+                            $scope.numberOfPendingScoreboardCalls--;
+                            //console.log('#################');
+                            //console.log(data);
+                        }).error(function (data, status, headers, config) {
+                            $scope.currentScoreboard = data;
+                            //console.log('#################');
+                            //console.log("Polling complete - error case");
+                            $scope.numberOfPendingScoreboardCalls--;
+                            //console.log('#################');
+                        });
+                    }
+                    else
+                    {
+                        //console.log("Not polling for now.");
+                        //console.log("-----------------------------");
+                    }
                 }
             };
 
@@ -335,10 +359,10 @@
                     this.determineScoreboardState();
                     this.processRacerData();
                     this.updateScoreboardView();
-                    console.log('lastHeatsHistory: ' + this.lastHeatsHistory.length)
+/*                    console.log('lastHeatsHistory: ' + this.lastHeatsHistory.length)
                     console.log(this.lastHeatsHistory);
                     console.log('nextRacersHistory: ' + this.nextRacersHistory.length)
-                    console.log(this.nextRacersHistory);
+                    console.log(this.nextRacersHistory);*/
                 }
             };
 
