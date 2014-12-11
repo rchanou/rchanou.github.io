@@ -15,7 +15,6 @@ require_once(app_path().'/includes/includes.php');
 class LoginController extends BaseController
 {
 
-    //TODO: Description. Just a normal login, with perhaps a source. Need to check session variable for intent.
     //People can get here trying to add an item to cart.
     //Either an actual heat or a merchandise product or a gift card.
     //They can also just visit it directly via a link, like trying to visit the cart page without any specific intent.
@@ -38,7 +37,8 @@ class LoginController extends BaseController
             array(
                 'images' => Images::getImageAssets(),
                 'settings' => Session::get('settings'),
-                'intent' => $intent
+                'intent' => $intent,
+                'strings' => Strings::getStrings()
             )
         );
     }
@@ -53,6 +53,7 @@ class LoginController extends BaseController
     public function login()
     {
         $input = Input::all();
+        $strings = Strings::getStrings();
         $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
         $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
         $source = isset($input['source']) ? $input['source'] : 'step1';
@@ -63,9 +64,9 @@ class LoginController extends BaseController
         $rules['Password'] = 'required';
 
         $messages = array(
-            'EmailAddress.required' => 'Your e-mail address is required for login.',
-            'EmailAddress.email' => 'Please enter a valid e-mail address.',
-            'Password.required' => 'Your password is required for login.'
+            'EmailAddress.required' => $strings['str_email.required'],
+            'EmailAddress.email' => $strings['str_email.email'],
+            'Password.required' => $strings['str_password.required']
         );
 
         //Create the validator
@@ -122,19 +123,19 @@ class LoginController extends BaseController
                 if (array_key_exists('source',$input) && $input['source'] == "step2")
                 {
                     $loginToAccountErrors = array();
-                    $loginToAccountErrors[$input['heatId']] = array("Incorrect username or password.");
+                    $loginToAccountErrors[$input['heatId']] = array($strings['str_incorrectUsernameOrPassword']);
                     return Redirect::to("/step2?login=$heatId#$heatId")->with(array('loginToAccountErrors' => $loginToAccountErrors));
                 }
                 else if (array_key_exists('source',$input) && $input['source'] == "login")
                 {
                     $messages = new Illuminate\Support\MessageBag;
-                    $messages->add('errors', "Incorrect username or password.");
+                    $messages->add('errors', $strings['str_incorrectUsernameOrPassword']);
                     return Redirect::to('/login')->withErrors($messages);
                 }
                 else
                 {
                     $messages = new Illuminate\Support\MessageBag;
-                    $messages->add('errors', "Incorrect username or password.");
+                    $messages->add('errors', $strings['str_incorrectUsernameOrPassword']);
                     return Redirect::to('/step1')->withErrors($messages)->withInput();
                 }
             }
@@ -167,7 +168,8 @@ class LoginController extends BaseController
                 array(
                     'images' => Images::getImageAssets(),
                     'heatId' => $heatId,
-                    'quantity' => $quantity
+                    'quantity' => $quantity,
+                    'strings' => Strings::getStrings()
                 )
             );
         }
@@ -184,6 +186,7 @@ class LoginController extends BaseController
     public function loginFacebookConfirm()
     {
         $input = Input::all();
+        $strings = Strings::getStrings();
         $customerData = array(
             'facebookId' => $input['facebookId'],
             'facebookToken' => $input['facebookToken'],
@@ -214,18 +217,18 @@ class LoginController extends BaseController
             {
                 return Redirect::to('/disconnected');
             }
-            if (is_bool($isAccountClaimedYet) && !$isAccountClaimedYet) //TODO: Need to handle the case where they are reaching this point via the login page and not step2, check intent, maybe
+            if (is_bool($isAccountClaimedYet) && !$isAccountClaimedYet)
             {
                 if (Session::has('intent'))
                 {
                     $messages = new Illuminate\Support\MessageBag;
-                    $messages->add('errors', "This track requires you to create an account before using Facebook login. Please create one below using the same e-mail address as your Facebook account.");
+                    $messages->add('errors', $strings['str_accountCreationForced']);
                     return Redirect::to('/login')->withErrors($messages);
                 }
                 else
                 {
                     $createAccountErrors = array();
-                    $createAccountErrors[$input['heatId']] = array("This track requires you to create an account before using Facebook login. Please create one below using the same e-mail address as your Facebook account.");
+                    $createAccountErrors[$input['heatId']] = array($strings['str_accountCreationForced']);
                     return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
                 }
             }

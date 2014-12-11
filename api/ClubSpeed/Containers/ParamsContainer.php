@@ -34,9 +34,16 @@ class ParamsContainer extends BaseContainer {
         foreach($data as $key => $val) {
             // move the limit for insert/update to here? then we have to use json styled-names, instead of database styled-names
             if (
-                !in_array($key, self::$reserved)
-                && !in_array($key, self::$special)
-                && (!empty($limit) ? in_array($key, $limit) : true)
+                    is_array($val) // batch -- assume its non-reserved, non-special?
+                ||  (
+                        !in_array($key, self::$reserved)
+                    &&  !in_array($key, self::$special)
+                    &&  (
+                        !empty($limit)
+                            ? in_array($key, $limit)
+                            : true
+                    )
+                )
             ) {
                 $this->params[$key] = $val;
             }

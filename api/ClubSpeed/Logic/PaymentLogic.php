@@ -30,6 +30,10 @@ class PaymentLogic extends BaseLogic {
 
             if (is_null($payment->VoidTerminal))
                 $payment->VoidTerminal = '';
+            if (is_null($payment->ExternalAccountNumber))
+                $payment->ExternalAccountNumber = ''; // front end logs error if this is set to null
+            if (is_null($payment->ExternalAccountName))
+                $payment->ExternalAccountName = ''; // front end logs error if this is set to null, and payment type is 3 -- just default to empty
 
             return $payment;
         });

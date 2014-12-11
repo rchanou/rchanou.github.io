@@ -14,21 +14,27 @@ class SuccessController extends BaseController
 
         $authenticatedUserId = Session::get('authenticated');
         $authenticatedEmail = Session::get('authenticatedEmail');
+        $currentCulture = Session::get('currentCulture');
+        $translations = Session::get('translations');
+        $strings = Strings::getStrings();
 
         //Clear the session...
         Session::flush();
-        //Session::regenerate();
 
-        //...but keep the user logged in
+        //...but keep the user logged in and basic string data intact
         Session::put('authenticated',$authenticatedUserId);
         Session::put('authenticatedEmail',$authenticatedEmail);
+        Session::put('currentCulture',$currentCulture);
+        Session::put('translations',$translations);
+        Strings::setStrings($strings);
 
         return View::make('/success',
             array(
                 'images' => Images::getImageAssets(),
                 'check' => $successResults['check'],
                 'checkId' => $successResults['checkId'],
-                'paymentInformation' => $successResults['paymentInformation']
+                'paymentInformation' => $successResults['paymentInformation'],
+                'strings' => Strings::getStrings()
             )
         );
     }

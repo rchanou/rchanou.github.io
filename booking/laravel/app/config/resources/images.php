@@ -26,7 +26,7 @@ class Images
         if (self::$initialized) return;
 
         self::$imageAssets = array(
-            'header' => 'images/header.png',
+            'header' => 'images/header.jpg',
             'background' => 'images/background.jpg', //Needs to be overwritten in the CSS file
             'disconnected' => 'images/disconnected.png',
             'success' => 'images/success.png',
@@ -38,6 +38,7 @@ class Images
         {
             $assetsURL = Config::get('config.assetsURL');
         }
+        $assetsURL = str_replace('http://','https://',$assetsURL);
 
         if (self::urlExists($assetsURL . '/images/'))
         {

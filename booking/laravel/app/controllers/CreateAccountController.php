@@ -14,6 +14,7 @@ class CreateAccountController extends BaseController
     public function entry()
     {
         $input = Input::all();
+        $strings = Strings::getStrings();
 
         $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
         $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
@@ -31,101 +32,101 @@ class CreateAccountController extends BaseController
             {
                 $rules['EmailAddress'] = 'required|email';
                 $rules['EmailAddressConfirmation']  = 'required|email';
-                $messages['EmailAddress.required'] = 'Your e-mail address is required.';
-                $messages['EmailAddress.email'] = 'Please enter a valid e-mail address.';
-                $messages['EmailAddressConfirmation.required'] = 'Your e-mail address is required.';
-                $messages['EmailAddressConfirmation.email'] = 'Please enter a valid e-mail address.';
+                $messages['EmailAddress.required'] = $strings['str_email.required'];
+                $messages['EmailAddress.email'] = $strings['str_email.email'];
+                $messages['EmailAddressConfirmation.required'] = $strings['str_email.required'];
+                $messages['EmailAddressConfirmation.email'] = $strings['str_email.email'];
             }
             else
             {
                 $rules['EmailAddress'] = 'email';
                 $rules['EmailAddressConfirmation']  = 'email';
-                $messages['EmailAddress.email'] = 'Please enter a valid e-mail address.';
-                $messages['EmailAddressConfirmation.email'] = 'Please enter a valid e-mail address.';
+                $messages['EmailAddress.email'] = $strings['str_email.required'];
+                $messages['EmailAddressConfirmation.email'] = $strings['str_email.email'];
             }
         }
         if ($settings['passwordRequired'])
         {
             $rules['Password'] = 'required';
             $rules['PasswordConfirmation'] = 'required';
-            $messages['Password.required'] = 'The Password field is required.';
-            $messages['PasswordConfirmation.required'] = 'The Password field is required.';
+            $messages['Password.required'] = $strings['str_password.required'];
+            $messages['PasswordConfirmation.required'] = $strings['str_password.required'];
 
         }
         if ($settings['companyRequired'])
         {
             $rules['Company'] = 'required';
-            $messages['Company.required'] = 'The Company field is required.';
+            $messages['Company.required'] = $strings['str_company.required'];
         }
         if ($settings['firstNameRequired'])
         {
             $rules['FName'] = 'required';
-            $messages['FName.required'] = 'The First Name field is required.';
+            $messages['FName.required'] = $strings['str_firstName.required'];
         }
         if ($settings['lastNameRequired'])
         {
             $rules['LName'] = 'required';
-            $messages['LName.required'] = 'The Last Name field is required.';
+            $messages['LName.required'] = $strings['str_lastName.required'];
         }
         if ($settings['racerNameRequired'])
         {
             $rules['RacerName'] = 'required';
-            $messages['RacerName.required'] = 'The Racer Name field is required.';
+            $messages['RacerName.required'] = $strings['str_racerName.required'];
         }
         if ($settings['addressRequired'])
         {
             $rules['Address'] = 'required';
-            $messages['Address.required'] = 'The Address field is required.';
+            $messages['Address.required'] = $strings['str_address.required'];
         }
         if ($settings['cityRequired'])
         {
             $rules['City'] = 'required';
-            $messages['City.required'] = 'The City field is required.';
+            $messages['City.required'] = $strings['str_city.required'];
         }
         if ($settings['stateRequired'])
         {
             $rules['State'] = 'required';
-            $messages['State.required'] = 'The State field is required.';
+            $messages['State.required'] = $strings['str_state.required'];
         }
         if ($settings['zipRequired'])
         {
             $rules['Zip'] = 'required';
-            $messages['Zip.required'] = 'The Zip field is required.';
+            $messages['Zip.required'] = $strings['str_postcode.required'];
         }
         if ($settings['countryRequired'])
         {
             $rules['Country'] = 'required';
-            $messages['Country.required'] = 'The Country field is required.';
+            $messages['Country.required'] = $strings['str_country.required'];
         }
         if ($settings['cellRequired'])
         {
             $rules['Cell'] = 'required';
-            $messages['Cell.required'] = 'The Phone field is required.';
+            $messages['Cell.required'] = $strings['str_phone.required'];
         }
         if ($settings['licenseNumberRequired'])
         {
             $rules['LicenseNumber'] = 'required';
-            $messages['LicenseNumber.required'] = 'The License Number field is required.';
+            $messages['LicenseNumber.required'] = $strings['str_licenseNumber.required'];
         }
         if ($settings['custom1Required'])
         {
             $rules['Custom1'] = 'required';
-            $messages['Custom1.required'] = 'Please fill out the missing field(s).';
+            $messages['Custom1.required'] = $strings['str_genericField.required'];
         }
         if ($settings['custom2Required'])
         {
             $rules['Custom2'] = 'required';
-            $messages['Custom2.required'] = 'Please fill out the missing field(s).';
+            $messages['Custom2.required'] = $strings['str_genericField.required'];
         }
         if ($settings['custom3Required'])
         {
             $rules['Custom3'] = 'required';
-            $messages['Custom3.required'] = 'Please fill out the missing field(s).';
+            $messages['Custom3.required'] = $strings['str_genericField.required'];
         }
         if ($settings['custom4Required'])
         {
             $rules['Custom4'] = 'required';
-            $messages['Custom4.required'] = 'Please fill out the missing field(s).';
+            $messages['Custom4.required'] = $strings['str_genericField.required'];
         }
 
         //Create the validator
@@ -156,7 +157,7 @@ class CreateAccountController extends BaseController
 
         if ($customerData['birthdate'] == "") //Enforce birthdate requirement
         {
-            $createAccountErrors[$heatId][] = 'Your birth date is required.';
+            $createAccountErrors[$heatId][] = $strings['str_birthDate.required'];
 
             if (array_key_exists('source',$input) && $input['source'] == "step2")
             {
@@ -165,19 +166,19 @@ class CreateAccountController extends BaseController
             else if (array_key_exists('source',$input) && $input['source'] == "login")
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', 'Your birth date is required.');
+                $messages->add('errors', $strings['str_birthDate.required']);
                 return Redirect::to('/login')->withErrors($messages);
             }
             else
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', 'Your birth date is required.');
+                $messages->add('errors', $strings['str_birthDate.required']);
                 return Redirect::to('/step1')->withErrors($messages);
             }
         }
         if ($input['Password'] != $input['PasswordConfirmation'] ) //Enforce password matching requirement
         {
-            $createAccountErrors[$heatId][] = 'Your passwords must match.';
+            $createAccountErrors[$heatId][] = $strings['str_passwordsDoNotMatch'];
 
             if (array_key_exists('source',$input) && $input['source'] == "step2")
             {
@@ -186,19 +187,19 @@ class CreateAccountController extends BaseController
             else if (array_key_exists('source',$input) && $input['source'] == "login")
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', 'Your passwords must match.');
+                $messages->add('errors', $strings['str_passwordsDoNotMatch']);
                 return Redirect::to('/login')->withErrors($messages);
             }
             else
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', 'Your passwords must match.');
+                $messages->add('errors', $strings['str_passwordsDoNotMatch']);
                 return Redirect::to('/step1')->withErrors($messages);
             }
         }
         if ($input['EmailAddress'] != $input['EmailAddressConfirmation'] ) //Enforce password matching requirement
         {
-            $createAccountErrors[$heatId][] = 'Your emails must match.';
+            $createAccountErrors[$heatId][] = $strings['str_emailsMustMatch'];
 
             if (array_key_exists('source',$input) && $input['source'] == "step2")
             {
@@ -207,13 +208,13 @@ class CreateAccountController extends BaseController
             else if (array_key_exists('source',$input) && $input['source'] == "login")
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', 'Your emails must match.');
+                $messages->add('errors', $strings['str_emailsMustMatch']);
                 return Redirect::to('/login')->withErrors($messages);
             }
             else
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', 'Your emails must match.');
+                $messages->add('errors', $strings['str_emailsMustMatch']);
                 return Redirect::to('/step1')->withErrors($messages);
             }
         }
@@ -232,14 +233,13 @@ class CreateAccountController extends BaseController
             $createAccountErrors = array();
             $createAccountErrors[$heatId] = array();
 
-            if (str_contains($response,$errorCodes['emailAlreadyExists'])) //If the creation failed because an account already existed, let the user know
+            if (str_contains($response,$errorCodes['emailAlreadyExists']) || str_contains($response,'Precondition Failed: Customer create found an email which already exists!')) //If the creation failed because an account already existed, let the user know
             {
-                $createAccountErrors[$heatId][] = 'This e-mail has already been registered.';
-
+                $createAccountErrors[$heatId][] = $strings['str_emailAlreadyRegistered'] . ' <br/>' . $strings['str_toResetYourPassword'] . ' ' . link_to('resetpassword',$strings['str_clickHere']) . '.';
             }
             else
             {
-                $createAccountErrors[$heatId][] = 'This was an error creating your account. Please try again later.';
+                $createAccountErrors[$heatId][] = $strings['str_errorCreatingAccount'];
 
             }
             if ($source == "step2")
@@ -249,7 +249,7 @@ class CreateAccountController extends BaseController
             else
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', 'This was an error creating your account or your e-mail has already been registered. Please try again later.');
+                $messages->add('errors', $strings['str_errorCreatingAccountUnknown'] . ' <br/>' . $strings['str_toResetYourPassword'] . ' ' . link_to('resetpassword',$strings['str_clickHere']) . '.');
                 return Redirect::to('/login')->withErrors($messages);
             }
         }

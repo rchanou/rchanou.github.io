@@ -2,6 +2,7 @@
 
 use ClubSpeed\Enums\Enums as Enums;
 use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Security\Authenticate as Authenticate;
 
 abstract class BaseApi {
 
@@ -12,7 +13,6 @@ abstract class BaseApi {
     protected $logic;
 
     function __construct() {
-        // header('Access-Control-Allow-Origin: *'); //Here for all /say
         $this->logic = $GLOBALS['logic'];
         $this->access = array(
             'post'   => Enums::API_PRIVATE_ACCESS,
@@ -25,31 +25,41 @@ abstract class BaseApi {
         );
     }
 
-    protected function validate($call) {
+    protected function validate(/* $call, $id */) {
+        $args = func_get_args();
+        $call = array_shift($args);
         if (isset($call) && isset($this->access[$call]) && !empty($this->access[$call])) {
             switch ($this->access[$call]) {
                 case Enums::API_NO_ACCESS:
                     throw new RestException(404);
+                case Enums::API_FREE_ACCESS:
+                    break;
                 case Enums::API_PUBLIC_ACCESS:
-                    if (!\ClubSpeed\Security\Authenticate::publicAccess())
+                    if (!Authenticate::publicAccess())
                         throw new RestException(403, "Invalid authorization!");
                     break;
-                case Enums::API_PRIVATE_ACCESS:
+                case Enums::API_CUSTOMER_ACCESS:
+                    if (!Authenticate::customerAccess(array_shift($args)))
+                        throw new RestException(403, "Invalid authorization");
+                    break;
+                case Enums::API_PRIVATE_ACCESS: // fall-through to default
                 default:
-                    if (!\ClubSpeed\Security\Authenticate::privateAccess())
+                    if (!Authenticate::privateAccess())
                         throw new RestException(403, "Invalid authorization!");
                     break;
             }
         }
-        if (!\ClubSpeed\Security\Authenticate::privateAccess())
-            throw new RestException(403, "Invalid authorization!");
+        else {
+            if (!\ClubSpeed\Security\Authenticate::privateAccess())
+                throw new RestException(403, "Invalid authorization!");
+        }
     }
 
     public function post($id, $request_data = null) {
         $this->validate('post');
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
+            return $this->mapper->mutate($request_data, function($mapped = array()) use (&$interface) {
                 return $interface->create($mapped);
             });
         }
@@ -75,13 +85,13 @@ abstract class BaseApi {
             if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
                 if (\ClubSpeed\Utility\Params::isFilter($request_data)) {
                     $this->validate('filter');
-                    return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
+                    return $this->mapper->mutate($request_data, function($mapped = array()) use (&$interface) {
                         return $interface->find($mapped);
                     });
                 }
                 else {
                     $this->validate('match');
-                    return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
+                    return $this->mapper->mutate($request_data, function($mapped = array()) use (&$interface) {
                         return $interface->match($mapped);
                     });
                 }
@@ -109,7 +119,9 @@ abstract class BaseApi {
      * and works regardless of the number of routing ids passed.
      */
     protected function _get() {
-        $this->validate('get');
+        $getArgs = func_get_args();
+        $validateId = @$getArgs[0] ?: null; // only look for the first one, for the bandaid customer authentication
+        $this->validate('get', $validateId);
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
             $callback = function() use (&$interface) {
@@ -145,7 +157,9 @@ abstract class BaseApi {
     }
 
     protected function _put() {
-        $this->validate('put');
+        $putArgs = func_get_args();
+        $validateId = @$putArgs[0] ?: null; // only look for the first one, for the bandaid customer authentication
+        $this->validate('put', $validateId);
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
             $callback = function() use (&$interface) {

@@ -17,7 +17,7 @@
             margin: 0 auto;
             width: 640px;
         }
-        h3 {
+        h1, h2, h3, h4 {
             color: #008AE6;
         }
         .pull-right {
@@ -72,92 +72,102 @@
         .bold {
             font-weight: bold;
         }
-        .width-100 {
-            width: 100%;
-        }
+
+        /* hijacked bootstrap table styling, since we can't include style headers or links */
         table {
-            border-collapse: collapse; /* remove spacing */
+            border-spacing: 0;
+            border-collapse: collapse;
         }
-        #order-table tr > *:first-child {
-            text-align: left;
-        }
-        #balance-table tr > *:first-child {
-            text-align: right;
-        }
-        #order-table, #balance-table tr > *:last-child {
-            text-align:right;
-        }
+        td,
         th {
-            /*border: 1px solid black;*/
+            padding: 0;
         }
-        .border-bottom {
-            border-bottom: 1px solid black;
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse !important;
+        }
+        .table > thead > tr > th,
+        .table > tbody > tr > th,
+        .table > tfoot > tr > th,
+        .table > thead > tr > td,
+        .table > tbody > tr > td,
+        .table > tfoot > tr > td {
+            padding: 8px;
+            line-height: 1.42857143;
+            vertical-align: top;
+            border-top: 1px solid #ddd;
+        }
+        .table > thead > tr > th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #ddd;
+        }
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #ddd !important;
         }
     </style>
 </head>
-<body style="-webkit-text-size-adjust: none;margin: 0;padding: 0;width: 100% !important;">
+<body style="-webkit-text-size-adjust: none;margin: 0;padding: 0;width: 100% !important;font-family: sans-serif;-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;">
     <div id="wrapper" style="margin: 0 auto;width: 640px;">
-        <div id="header" style="overflow: auto;">
+        <div id="header">
             <div class="pull-right bold" style="font-weight: bold;float: right !important;">
                 <div>Order #{{checkId}} Confirmation</div>
             </div>
         </div>
         <div id="greeting">
-            <h3 style="color: #008AE6;">Hello {{customer}},</h3>
+            <h3>Hello {{customer}},</h3>
             <p>
                 Thank you for shopping with {{business}}!
-                We have received payment for <span class="no-wrap" style="white-space: nowrap;">order #{{checkId}}</span>.
+                We have received payment for <span class="no-wrap">order #{{checkId}}</span>.
                 The details for this order are indicated below.
             </p>
         </div>
         <div id="details">
             <h3 style="color: #008AE6;">Order Details</h3>
-            <table id="order-table" class="width-100" style="border-collapse: collapse;width: 100%;text-align: right;">
-                <thead class="bold border-bottom" style="font-weight: bold;border-bottom: 1px solid black;">
+            <table class="table" id="order-table" style="border-spacing: 0;border-collapse: collapse !important;width: 100%;max-width: 100%;margin-bottom: 20px;">
+                <thead>
                     <tr>
-                        <th class="col-8" style="text-align: left;">Item Description</th> <!-- item quantity? -->
-                        <th class="col-1" style="width: 8.33%;">Quantity</th>
-                        <th class="col-3" style="width: 25%;">Item Total</th>
+                        <th style="padding: 8px;line-height: 1.42857143;vertical-align: bottom;border-top: 1px solid #ddd;border-bottom: 2px solid #ddd;border: 1px solid #ddd !important">Item Description</th> <!-- item quantity? -->
+                        <th style="padding: 8px;line-height: 1.42857143;vertical-align: bottom;border-top: 1px solid #ddd;border-bottom: 2px solid #ddd;border: 1px solid #ddd !important">Quantity</th>
+                        <th style="padding: 8px;line-height: 1.42857143;vertical-align: bottom;border-top: 1px solid #ddd;border-bottom: 2px solid #ddd;border: 1px solid #ddd !important">Price</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for detail in details %}
+                <tbody class="text-right" style="text-align: right;">
+                    <!-- {% for detail in details %} -->
                     <tr>
-                        <td style="text-align: left;">{{detail.name}}</td>
-                        <td>{{detail.quantity}}</td>
-                        <td>{{detail.price}}</td>
+                        <td class="text-left" style="padding: 8px;text-align: left;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">{{detail.description}}</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">{{detail.quantity}}</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">{{detail.price}}</td>
                     </tr>
-                    {% endfor %}
-                    <tr class="border-bottom" style="border-bottom: 1px solid black;">
-                        <td style="text-align: left;"></td> <!-- for the border -->
-                        <td></td> <!-- for the border -->
-                        <td></td> <!-- for the border -->
-                    </tr>
-                </tbody>
-            </table>
-            <table id="balance-table" class="width-100" style="border-collapse: collapse;width: 100%;">
-                <tbody>
+                    <!-- {% endfor %} -->
                     <tr>
-                        <td class="col-9" style="width: 75%;text-align: right;">Subtotal:</td>
-                        <td class="col-3" style="width: 25%;text-align: right;">{{checkSubtotal}}</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important"></td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important"></td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">-------------</td>
                     </tr>
                     <tr>
-                        <td style="text-align: right;">Estimated Tax:</td>
-                        <td style="text-align: right;">{{checkTax}}</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important"></td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">Subtotal:</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">{{checkSubtotal}}</td>
                     </tr>
-                    {% if giftCardTotal %}
                     <tr>
-                        <td style="text-align: right;">Gift Card:</td>
-                        <td style="text-align: right;">-{{giftCardTotal}}</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important"></td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">Tax:</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">{{checkTax}}</td>
                     </tr>
-                    {% endif %}
+                    <!-- {% if giftCardTotal %} -->
                     <tr>
-                        <td style="text-align: right;"></td>
-                        <td class="border-bottom" style="border-bottom: 1px solid black;text-align: right;"></td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important"></td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">Gift Card:</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">-{{giftCardTotal}}</td>
                     </tr>
+                    <!-- {% endif %} -->
                     <tr class="bold" style="font-weight: bold;">
-                        <td style="text-align: right;">Total:</td>
-                        <td style="text-align: right;">{{checkTotal}}</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important"></td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">Total:</td>
+                        <td style="padding: 8px;line-height: 1.42857143;vertical-align: top;border-top: 1px solid #ddd;border: 1px solid #ddd !important">{{checkTotal}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -165,8 +175,7 @@
         <div id="remarks">
             <p>
                 If any gift cards were ordered with this purchase,
-                please check your email for gift card confirmations
-                as well as card numbers.
+                please check your email for additional gift card confirmations.
             </p>
             <h3 style="color: #008AE6;">Thank you for shopping with us!</h3>
         </div>

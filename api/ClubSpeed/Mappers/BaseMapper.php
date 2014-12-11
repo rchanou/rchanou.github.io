@@ -92,9 +92,9 @@ class BaseMapper {
             return $mapped;
         }
         else {
+            // return isset($currentMap[$data]) ? $currentMap[$data] : $data; // safer, but we might want to catch these errors and fix, not let them through
             return $currentMap[$data];
         }
-        return $data;
     }
 
     protected function limit($type, $select = array()) {

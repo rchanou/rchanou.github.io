@@ -38,6 +38,8 @@ class SwiftMailer implements MailerInterface {
             ->setSubject($mail->subject)
             ->setFrom($mail->from)
             ->setTo($mail->to)
+            ->setCc($mail->cc)
+            ->setBcc($mail->bcc)
             ->setBody($mail->body, 'text/html')
             ->addPart($mail->alternate, 'text/plain');
         $this->mailer->send($message);

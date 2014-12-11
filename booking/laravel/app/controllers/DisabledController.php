@@ -13,7 +13,8 @@ class DisabledController extends BaseController
     {
         return View::make('/errorpages/disabled',
             array(
-                'images' => Images::getImageAssets()
+                'images' => Images::getImageAssets(),
+                'strings' => Strings::getStrings()
             )
         );
     }

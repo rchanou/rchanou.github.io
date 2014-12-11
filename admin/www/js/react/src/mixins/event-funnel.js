@@ -6,9 +6,8 @@ module.exports = {
     return { onFunnelEvent(){} };
   },
 
-  toFunnel(event, ...other){	
+  toFunnel(event, ...other){
 		this.props.onFunnelEvent.apply(this, [event, this.props, this.state].concat(other));
-    //this.props.onFunnelEvent(event, this.props, this.state);
   },
 
   funnelJQueryEvents(...events){

@@ -10,7 +10,9 @@ var React = require('react/addons');
 var DatePicker = require('../../components/datepicker');
 
 
-/*** STYLES ***/
+/*** CONSTANTS ***/
+
+var PRODUCT_TYPE_RESERVATION = 4;
 
 var NO_SELECT = {
 	WebkitTouchCallout: 'none',
@@ -34,17 +36,19 @@ function generateUUID(){
     return uuid;
 };
 
+
+// note: the following function is broken and unused
 var CheckPropChange = {
 	checkPropChange(otherProps, ...keys){
 		keys.forEach(key => {
 			if (Array.isArray(key)){
 				var thisTraverser = this.props;
-				var otherTraverser = otherProps;			
+				var otherTraverser = otherProps;
 				for (var i = 0; i < key.length; i++){
 					thisTraverser = thisTraverser[key[i]];
-					otherTraverser = otherTraverser[key[i]];					
-					var definedForThis = typeof thisTraverser != 'undefined';
-					var definedForOther = typeof otherTraverser != 'undefined';
+					otherTraverser = otherTraverser[key[i]];
+					var definedForThis = typeof thisTraverser !== 'undefined';
+					var definedForOther = typeof otherTraverser !== 'undefined';
 					if (!definedForThis && !definedForOther){
 						return false;
 					} else if ((definedForThis && !definedForOther) || (definedForOther && !definedForThis) || (thisTraverser !== otherTraverser)){
@@ -54,7 +58,7 @@ var CheckPropChange = {
 			} else if (this.props[key] !== otherProps[key]){
 				return true;
 			}
-		});		
+		});
 		return false;
 	}
 };
@@ -62,23 +66,7 @@ var CheckPropChange = {
 
 /*** REACT MIXINS ***/
 
-var EventFunnel = {
-	// mixin providing event-handling sugar based on an opinionated way of handling React component parent-child communication
-	getDefaultProps(){
-		return { onFunnelEvent(){} };
-	},
-	toFunnel(event, ...other){	
-		this.props.onFunnelEvent.apply(this, [event, this.props, this.state].concat(other));
-		//this.props.onFunnelEvent(event, this.props, this.state);
-	},
-	funnelJQueryEvents(...events){
-		events.forEach(event => {
-			$(this.getDOMNode()).on(
-				event, e => { this.toFunnel(e); }
-			);
-		});
-	}
-}
+var EventFunnel = require('../../mixins/event-funnel');
 
 var jQuerify = {
 	jQuerify(ref){
@@ -99,16 +87,16 @@ var jQuerify = {
 }
 
 var ParseRef = {
-	parseRef(refName){	
+	parseRef(refName){
 		if (!this.isMounted() || !this.refs[refName]){
 			return null;
 		}
-		
+
 		var elem = this.refs[refName].getDOMNode();
-		
-		if (elem.getAttribute('type') == 'number' && !elem.value){
+
+		if (elem.getAttribute('type') === 'number' && !elem.value){
 			return elem.getAttribute('defaultValue') || elem.getAttribute('min') || 0;
-		} else if (elem.getAttribute('type') == 'checkbox') {
+		} else if (elem.getAttribute('type') === 'checkbox') {
 			return elem.checked;
 		} else {
 			return elem.value;
@@ -118,6 +106,74 @@ var ParseRef = {
 
 
 /*** REACTIFIED JQUERY PLUGINS ***/
+
+var Popup = require('../../components/popup.js');
+
+var ICheck = require('../../components/icheck.js')
+
+var IRadio = React.createClass({
+	mixins: [EventFunnel],
+	render(){
+		return <input type='radio' />;
+	},
+	componentDidMount(){
+		$(this.getDOMNode()).iCheck({
+			checkboxClass: 'icheckbox_flat-blue',
+			radioClass: 'iradio_flat-blue'
+		})
+		.on('ifClicked', this.toFunnel);
+		this.setFromProps();
+		//this.funnelJQueryEvents('ifChecked','ifUnchecked');
+	},
+	componentDidUpdate(){
+		this.setFromProps();
+	},
+	setFromProps(){
+		if (this.props.selected) {
+			$(this.getDOMNode()).iCheck('check');
+		} else {
+			$(this.getDOMNode()).iCheck('uncheck');
+		}
+	}
+});
+
+var IRadioGroup = React.createClass({
+	mixins: [EventFunnel],
+	getDefaultProps(){
+		return {
+			inline: true,
+			list: [{ label: 'A', value: 1 }, { label: 'b', value: 2 }],
+			selected: null
+		};
+	},
+	getInitialState(){
+		// note: name is set by generateUUID here and should never be changed after,
+		// but it is in initial state instead of default props so that a new UUID is generated for each IRadioGroup instance
+		return { selected: this.props.selected, name: generateUUID() };
+	},
+	render(){
+		var listNodes = [];
+
+		this.props.list.forEach((item, i) => {
+			listNodes.push(
+				<div key={i}>
+					<IRadio item={item} name={this.props.name || this.state.name} selected={this.props.selected === item.value}
+						onFunnelEvent={this.handleRadioChange} />
+					<label style={{ position: 'relative', top: -5, left: 10 }} >
+						{item.label}
+					</label>
+				</div>
+			);
+		});
+
+		return <span>
+			{listNodes}
+		</span>;
+	},
+	handleRadioChange(e, optionProps, state){
+		this.toFunnel(e, optionProps);
+	}
+});
 
 var Select = React.createClass({
 	mixins: [EventFunnel],
@@ -138,8 +194,8 @@ var Select = React.createClass({
 				{item.label}
 			</option>
 		);
-		
-		return <select>
+
+		return <select style={this.props.style}>
 			<option key={-1} value={null}></option>
 			{optionsFromList}
 			{this.props.children}
@@ -153,13 +209,13 @@ var Select = React.createClass({
 		var data = this.props.list.map(item => (
 			{ id: item.value, text: item.label }
 		));
-		
+
 		$(this.getDOMNode())
-		.select2(this.getSelectOptions())
-		.on('change', this.toFunnel)
-		.on('select2-open', _ => 	{ this.setState({ open: true }) })
-		.on('select2-close', _ => {	this.setState({ open: false }); });
-		
+			.select2(this.getSelectOptions())
+			.on('change', this.toFunnel)
+			.on('select2-open', _ => 	{ this.setState({ open: true }) })
+			.on('select2-close', _ => {	this.setState({ open: false }); });
+
 		this.setFromProps();
 	},
 	componentDidUpdate(prevProps){
@@ -230,75 +286,13 @@ var ProductSelect = React.createClass({
 	}
 });
 
-var ICheck = require('../../components/icheck.js')
-
-var IRadio = React.createClass({
-	mixins: [EventFunnel],
-	render(){
-		return <input type='radio' />;
-	},
-	componentDidMount(){
-		$(this.getDOMNode()).iCheck({
-    	checkboxClass: 'icheckbox_flat-blue',
-    	radioClass: 'iradio_flat-blue'
-		})
-		.on('ifClicked', this.toFunnel);
-		this.setFromProps();
-		//this.funnelJQueryEvents('ifChecked','ifUnchecked');
-	},
-	componentDidUpdate(){
-		this.setFromProps();
-	},
-	setFromProps(){
-		if (this.props.selected) {
-			$(this.getDOMNode()).iCheck('check');
-		} else {
-			$(this.getDOMNode()).iCheck('uncheck');
-		}
-	}
-});
-
-var IRadioGroup = React.createClass({
-	mixins: [EventFunnel],
-	getDefaultProps(){
-		return {
-			inline: true,
-			list: [{ label: 'A', value: 1 }, { label: 'b', value: 2 }],
-			selected: null
-		};
-	},
-	getInitialState(){
-		// note: name is set by generateUUID here and should never be changed after,
-		// but it is in initial state instead of default props so that a new UUID is generated for each IRadioGroup instance
-		return { selected: this.props.selected, name: generateUUID() };
-	},
-	render(){
-		var listNodes = [];
-		
-		this.props.list.forEach((item, i) => {
-			listNodes.push(<div key={i}>
-				<IRadio item={item} name={this.props.name || this.state.name} selected={this.props.selected === item.value}
-					onFunnelEvent={this.handleRadioChange} />
-				<label style={{ position: 'relative', top: -5, left: 10 }} >
-					{item.label}
-				</label>
-			</div>);
-		});
-		
-		return <span>
-			{listNodes}
-		</span>;
-	},
-	handleRadioChange(e, optionProps, state){
-		this.toFunnel(e, optionProps);
-	}
-});
-
 
 /*** CHILD COMPONENT(S) ***/
 
 var BookingRow = React.createClass({
+
 	mixins: [EventFunnel, CheckPropChange],
+
 	getDefaultProps(){
 		return {
 			race: {
@@ -307,44 +301,53 @@ var BookingRow = React.createClass({
 			}
 		};
 	},
-	getInitialState(){
-		return {
-			hovering: false
-		};
-	},
+
 	render(){
 		var booking = this.props.booking;
 		var start = moment(this.props.race.starts_at);
-		var style = {}; //{ cursor: 'pointer' };
+
+		var style = {};
 		if (this.props.selected){
 			style.backgroundColor = 'lightblue';
 		}
-	
-		var editBoxStyle = { cursor: 'pointer' };
+
 		return <tr style={style}>
-			<td onClick={this.toFunnel}>
+
+			<td onClick={this.toFunnel} className='text-center'>
 				<ICheck checked={this.props.selected} onFunnelEvent={this.toFunnel} />
 			</td>
-			<td>{start.isValid()? start.format('h:mm a'): '?'}</td>
-			<td>{this.props.race.race_name}</td>
-			{this.props.product? <td>{this.props.product.description}</td>
-				:	<td style={{ color: 'gray' }}>(no booking)</td>}
-			<td>{booking.isPublic == null? null :
-						booking.isPublic? <i className="fa fa-globe" title="This booking is public."></i> :
-										 <i className="fa fa-lock" title="This booking is private."></i>
+
+			<td className='text-right'>
+				{start.isValid()? start.format('h:mm a'): '?'}
+			</td>
+
+			<td>
+				{this.props.race.race_name}
+			</td>
+
+			{ this.props.product? <td>{this.props.product.description}</td>
+				:	<td style={{ color: 'gray' }}>(no booking)</td> }
+
+			<td className='text-center'>{
+				booking.isPublic == null? null :
+				booking.isPublic? <i className="fa fa-globe" title="This booking is public."></i> :
+					<i className="fa fa-lock" title="This booking is private."></i>
 			}</td>
-			<td>{booking.quantityTotal}</td>
+
+			<td className='text-right'>
+				{booking.quantityTotal}
+			</td>
+
 		</tr>;
 	}
+
 });
-
-
-var FadeOut = require('../../components/fadeout.js');
 
 
 /*** TOP LEVEL/ROOT/MAIN/PARENT COMPONENT ***/
 
 var BookingAdmin = React.createClass({
+
 	mixins: [EventFunnel, ParseRef, jQuerify /*, React.addons.PureRenderMixin*/],
 
 	getDefaultProps(){
@@ -359,15 +362,15 @@ var BookingAdmin = React.createClass({
 			console.log = function(){};
 		}
 		thisConfig.apiURL += '/';
-		
+
 		return {
 			config: thisConfig,
 			language: 'en-US',
 			popupTime: 3000
 		};
 	},
-	
-	getInitialState(){	
+
+	getInitialState(){
 		return {
 			bookings: [],
 			tracks: [],
@@ -376,31 +379,30 @@ var BookingAdmin = React.createClass({
 			selectedBookingIds: [],
 			newProductId: null,
 			newIsPublic: null,
-			popupMessage: null,
+			popup: { message: null, alertClass: null },
 			raceDetails: {},
-			loading: false,
 			filterByDate: moment(),
 			requestCount: 0
 		};
 	},
-	
+
 	isRaceInDate(race, start){
 		start = moment(start);
-		start.startOf('d');		
-		
+		start.startOf('d');
+
 		var end = moment(start);
 		end.add(1, 'd');
-		
-		var raceStart = moment(race.starts_at, 'YYYY-MM-DD H:mm:ss.SSS');		
+
+		var raceStart = moment(race.starts_at, 'YYYY-MM-DD H:mm:ss.SSS');
 		return (raceStart.isAfter(start) || raceStart.isSame(start)) && raceStart.isBefore(end);
 	},
-	
+
 	filterBookings(start){
 		var relatedBookings = _(this.state.raceDetails)
 			.pick(race => (!this.state.filterByTrackId || race.track_id == this.state.filterByTrackId) && this.isRaceInDate(race, start))
 			.mapValues(race => {
 				var raceBookings = _.filter(this.state.bookings, booking => booking.heatId == race.id);
-				
+
 				if (raceBookings.length > 0){
 					return raceBookings;
 				} else {
@@ -411,22 +413,16 @@ var BookingAdmin = React.createClass({
 				}
 			})
 			.values().flatten().value();
-			
+
 		return relatedBookings;
 	},
-	
+
 	render(){
 		return <div className="container-fluid">
 			{this.renderPopup()}
 			<div className="row" key='main'>
 				<div className='col-xs-12'>
 					<div className='widget-box'>
-						<div className='widget-title'>
-							<span className='icon'>
-								<i className='fa fa-align-justify' />
-							</span>
-							<h5>Manage Bookings</h5>
-						</div>
 						<div className='widget-content'>
 							<div className='row'>
 								{this.renderBookingNav()}
@@ -438,19 +434,22 @@ var BookingAdmin = React.createClass({
 			</div>
 		</div>;
 	},
-		
+
 	renderPopup(){
-		if (!this.state.popupMessage){
+		if (!this.state.popup.message){
 			return null;
 		}
-		
-		return <FadeOut element='div' onFadeComplete={this.handlePopupClick} onClick={this.handlePopupClick} key={this.state.popupMessage}
-			style={{ position: 'fixed', top: 0, left: 0, width: '100%', cursor: 'pointer', zIndex: 9999, textAlign: 'center' }}
-			className='alert alert-success'>
-			{this.state.popupMessage}
-		</FadeOut>;
+
+		return <Popup
+			{...this.state.popup}
+			key={this.state.popup.message}
+			onFadeComplete={this.handlePopupClick}
+			onClick={this.handlePopupClick}
+		 />;
+		//	{this.state.popup.message}
+		//</FadeOut>;
 	},
-	
+
 	renderProductSelectOptions(){
 		return _.map(this.state.products, product =>
 			<option value={product.productId} key={product.productId}>
@@ -458,17 +457,49 @@ var BookingAdmin = React.createClass({
 			</option>
 		);
 	},
-	
-	getProductSelectList(){
-		return _.map(this.state.products, product => ({ value: product.productId, label: product.description }));
+
+	getProductSelectListByPoints(){
+		return _(this.state.products)
+			.filter(product => product.productType === PRODUCT_TYPE_RESERVATION)
+			.map(product => ({ value: product.productId, label: product.description }));
+
+		try {
+			if (this.state.selectedBookingIds.length == 0){
+				return _.map(this.state.products, product => ({ value: product.productId, label: product.description }));
+			}
+
+			var selectedRaces = _.map(this.state.selectedBookingIds, id => {
+				if (id.heatId){
+					return this.state.raceDetails[id.heatId];
+				} else {
+					var selectedBooking = _.findWhere(this.state.bookings, booking => booking.onlineBookingsId == id);
+					if (selectedBooking && selectedBooking.heatId){
+						return this.state.raceDetails[selectedBooking.heatId];
+					}
+				}
+			});
+
+			var minPointsNeeded = _(selectedRaces).pluck('PointsNeeded').compact().max().value();
+			var filterPredicate;
+			if (minPointsNeeded == 0){
+				filterPredicate = (product) => !product.p_Points;
+			} else {
+				filterPredicate = (product) => product.p_Points >= minPointsNeeded;
+			}
+			return _(this.state.products)
+				.filter(filterPredicate)
+				.map(product => ({ value: product.productId, label: product.description }));
+		} catch(ex){
+			return _.map(this.state.products, product => ({ value: product.productId, label: product.description }));
+		}
 	},
-	
+
 	renderBookingNav(){
 		return <div className='col-md-6' key='nav'>
 			<div className="row">
 				<h3>All Activities</h3>
 			</div>
-			
+
 			<div className='row form-inline'>
 				<div className='form-group col-xs-10 col-sm-4 col-md-7 col-lg-5' style={{ paddingLeft: 0, paddingBottom: 15 }}>
 					<label className='control-label'>
@@ -476,7 +507,7 @@ var BookingAdmin = React.createClass({
 					</label>
 					<DatePicker ref='date' className='form-control' onSelect={this.handleDateSelect} date={this.state.filterByDate} language={this.props.language} />
 				</div>
-				
+
 				<div className='form-group' style={{ paddingBottom: 15 }}>
 					<label className='control-label'>
 						Track
@@ -484,25 +515,25 @@ var BookingAdmin = React.createClass({
 					<TrackSelect className='form-control' onFunnelEvent={this.handleTrackSelectEvent} />
 				</div>
 			</div>
-			
+
 			<div className="row form-group">
 				{this.renderBookingTable()}
 			</div>
-		</div>;		
+		</div>;
 	},
-	
+
 	renderBookingTable(){
 		var foundBookings = this.filterBookings(this.state.filterByDate);
 		var loadingMessage = 'Getting/refreshing activities for selected date and/or track...';
-	
+
 		if (foundBookings.length == 0){
-			if (this.state.requestCount > 0){ // if (this.state.loading){
+			if (this.state.requestCount > 0){
 				return loadingMessage;
-			} else {	
+			} else {
 				return 'No activities found for this date and/or track.';
 			}
 		}
-		
+
 		var bookingRows = _(foundBookings)
 			.map(booking => ({ booking, race: this.state.raceDetails[booking.heatId] }) )
 			.sortBy(bookingAndRace => moment(bookingAndRace.race.starts_at).unix() )
@@ -519,14 +550,14 @@ var BookingAdmin = React.createClass({
 				/>;
 			})
 			.value();
-		
+
 		return <div key='table'>
 			<div>
 				{this.state.requestCount > 0 && loadingMessage}<br/>
 			</div>
 			<div style={{ overflowY: 'auto' }} ref='table'>
 				<table className='table table-bordered'>
-					<thead className='text-left'>
+					<thead>
 						<tr>
 							<th key='editing'>Editing</th>
 							<th key='time'>Time</th>
@@ -549,45 +580,45 @@ var BookingAdmin = React.createClass({
 				</span>}
 		</div>;
 	},
-	
+
 	renderEditForm(){
 		if (this.filterBookings(this.state.filterByDate).length == 0){
 			return null;
 		}
-		
+
 		if (this.state.selectedBookingIds.length == 0){
 			if (this.state.requestCount > 0){
 				return null;
 			} else {
-				return <div className='col-md-6'>
+				return <div className='col-md-6'><br/>
 					Select one or more activities to edit them.
 				</div>;
 			}
 		}
-	
-		var title = this.state.selectedBookingIds.length > 0 && 
+
+		var title = this.state.selectedBookingIds.length > 0 &&
 			<span>Editing {this.getBookingTitle(true)}</span>;
-					
+
 		return <div className='col-md-6' key='form'>
 			<form className="form-horizontal">
 					<legend className="row form-group">
 						{title}
 					</legend>
-				
+
 				<div className="row form-group">
 					<label className="col-xs-4 control-label">
 						Product Required
 					</label>
-					<div className="col-xs-4">
-						<Select onFunnelEvent={this.handleProductSelectEvent} selectedId={this.state.newProductId} placeholder=' ' 
-							list={this.getProductSelectList()} />
+					<div className="col-xs-8">
+						<Select onFunnelEvent={this.handleProductSelectEvent} selectedId={this.state.newProductId} placeholder=' '
+							list={this.getProductSelectListByPoints()} style={{width: '80%'}} />
 						<span className='text-info'>
 							{this.state.selectedBookingIds.length > 1 && this.state.newProductId == null && !this.areOnlyNewBookingsSelected()
 								&& '(multiple)'}
 						</span>
 					</div>
 				</div>
-				
+
 				<div className="row form-group">
 					<label className="col-xs-4 control-label">
 						Show To Public?
@@ -602,13 +633,13 @@ var BookingAdmin = React.createClass({
 						</span>
 					</div>
 				</div>
-				
+
 				<div className="row form-group">
 					<label className="col-xs-4 control-label">
 						Qty. Available Online
 					</label>
 					<div className="col-xs-3">
-						<input className='form-control' type="number" min="0" ref='qtyAvail'
+						<input className='form-control' type="number" min="0" ref='qtyAvail' max={this.calcMaxQty()}
 						  onBlur={this.handleQtyAvailableChange} />
 						<span className='text-info'>
 							{(this.state.selectedBookingIds.length > 1 && (this.refs.qtyAvail.getDOMNode().value === '')
@@ -617,7 +648,7 @@ var BookingAdmin = React.createClass({
 						</span>
 					</div>
 				</div>
-				
+
 				<div className="row form-group">
 					<div className="col-xs-4"></div>
 					<div className="col-xs-6">
@@ -632,14 +663,27 @@ var BookingAdmin = React.createClass({
 			</form>
 		</div>;
 	},
-	
+
+	calcMaxQty(){
+		return _(this.state.selectedBookingIds)
+			.map(id => {
+				if (id.heatId){
+					return this.state.raceDetails[id.heatId].RacersPerHeat;
+				} else {
+					var booking = _.findWhere(this.state.bookings, { onlineBookingsId: id });
+					return this.state.raceDetails[booking.heatId].RacersPerHeat;
+				}
+			})
+			.min().value();
+	},
+
 	getBookingById (id){
 		return _.findWhere(this.state.bookings, { onlineBookingsId: id });
 	},
-	
+
 	getBookingTitle(asHTML){
 		var bookingTitles = [];
-		
+
 		this.state.selectedBookingIds.forEach(item => {
 			if (item.heatId){
 				var raceName = this.state.raceDetails[item.heatId].race_name;
@@ -650,24 +694,24 @@ var BookingAdmin = React.createClass({
 				}
 			} else {
 				var booking = this.getBookingById(item);
-				
+
 				if (booking){
 				  var raceOfBooking = this.state.raceDetails[booking.heatId];
 				  var bookingText = moment(raceOfBooking.starts_at).format('MMM D h:mm a ') + raceOfBooking.race_name;
-				
+
 				  if (asHTML){
 				    bookingTitles.push(<span>{bookingText}<br/></span>);
 				  } else {
 				    bookingTitles.push(bookingText);
 				  }
 				}
-			}			
+			}
 		});
-		
+
 		return asHTML? bookingTitles: bookingTitles.join(', ');
 	},
-	
-	componentDidMount(){	
+
+	componentDidMount(){
 		// load tracks for Track Select
 		$.get(
 			this.props.config.apiURL + 'tracks/index.json?key=' + this.props.config.apiKey,
@@ -675,18 +719,23 @@ var BookingAdmin = React.createClass({
 				this.setState({ tracks: body.tracks });
 			}
 		);
-		
+
 		// load products
-		var params = { key: this.props.config.privateKey, select: 'productId, description', filter: 'deleted$eqfalse' };
+		var params = {
+				key: this.props.config.privateKey,
+				select: 'productId,description,p_Points,productType',
+				filter: 'deleted$eqfalse'
+		};
+
 		$.get(
 			this.props.config.apiURL + 'products.json?' + $.param(params),
 			body => {
 				this.setState({ products: _.indexBy(body.products, 'productId') });
 			}
 		);
-		
+
 		this.loadBookings();
-				
+
 		/*$(window).resize(_ => {
 			if (this.refs.table){
 				var tableElem = $(this.refs.table.getDOMNode());
@@ -694,7 +743,7 @@ var BookingAdmin = React.createClass({
 			}
 		});*/
 	},
-	
+
 	upsertListInState(listName, item, match){
 		var list = this.state[listName];
 		var currentIndex = _.findIndex(list, match);
@@ -711,20 +760,20 @@ var BookingAdmin = React.createClass({
 				list,
 				change
 			);
-		}		
+		}
 		var newState = {};
 		newState[listName] = newList;
 		this.setState(newState);
 	},
-	
-	loadBookings(filterByTrackId){	
-		this.setState({ selectedBookingIds: [], loading: true, requestCount: this.state.requestCount + 1 });
-	
+
+	loadBookings(filterByTrackId){
+		this.setState({ selectedBookingIds: [],	requestCount:	this.state.requestCount + 1	});
+
 		var inputDate = this.state.filterByDate;
 		var start = moment(inputDate);
 		var end = moment(inputDate);
 		end.add(1, 'd');
-		
+
 		var params = {
 			key: this.props.config.apiKey
 		};
@@ -735,31 +784,37 @@ var BookingAdmin = React.createClass({
 		if (filterByTrackId){
 			params.track_id = filterByTrackId;
 		}
-		
+
 		var requestUrl = this.props.config.apiURL + 'races/races.json?' + $.param(params);
 
 		$.get(requestUrl)
 		.then(body => {
 			var bookingRequests = body.races.map(race => {
-				var requestUrl = this.props.config.apiURL + 'booking.json?' + $.param({ key: this.props.config.privateKey, heatId: race.HeatNo });			
+				var requestUrl = this.props.config.apiURL + 'booking.json?' + $.param({ key: this.props.config.privateKey, heatId: race.HeatNo });
 				return $.get(requestUrl);
 			});
-			
+
 			bookingRequests.forEach(req => {
 				req.then(body => {
 					body.bookings.forEach(booking => {
-						this.upsertListInState('bookings', booking, { onlineBookingsId: booking.onlineBookingsId });			
+						this.upsertListInState('bookings', booking, { onlineBookingsId: booking.onlineBookingsId });
 					});
 				});
 			});
-						
-			var raceDetailRequests = body.races.map(race => {
+
+			var pointsNeededList = [];
+			var maxRacersList = [];
+			var raceDetailRequests = body.races.map((race, i) => {
+				pointsNeededList[i] = race.PointsNeeded;
+				maxRacersList[i] = race.RacersPerHeat;
 				var requestUrl = this.props.config.apiURL + 'races/' + race.HeatNo + '.json?key=' + this.props.config.privateKey;
 				return $.get(requestUrl);
 			});
-						
-			raceDetailRequests.forEach(req => {
+
+			raceDetailRequests.forEach((req, i) => {
 				req.then(body => {
+					body.race.PointsNeeded = pointsNeededList[i];
+					body.race.RacersPerHeat = maxRacersList[i];
 					var change = {};
 					change[body.race.id] = { $set: body.race };
 					var raceDetails = React.addons.update(
@@ -769,20 +824,20 @@ var BookingAdmin = React.createClass({
 					this.setState({ raceDetails });
 				});
 			});
-			
+
 			this.setState({ requestCount: this.state.requestCount + bookingRequests.length + raceDetailRequests.length - 1 });
-			
+
 			var allRequests = bookingRequests.concat(raceDetailRequests);
 			$.when.apply($, allRequests).done(_ => {
-				this.setState({ loading: false, requestCount: this.state.requestCount - allRequests.length });
+				this.setState({ requestCount: this.state.requestCount - allRequests.length });
 			});
 		});
 	},
-	
+
 	componentDidUpdate(prevProps, prevState){
-		if (prevState.selectedBookingIds.length != this.state.selectedBookingIds.length && this.state.selectedBookingIds.length > 0){
+		if (prevState.selectedBookingIds.length !== this.state.selectedBookingIds.length && this.state.selectedBookingIds.length > 0){
 			if (this.areOnlyNewBookingsSelected()){
-				if (!_.every(prevState.selectedBookingIds, 'heatId') || prevState.selectedBookingIds.length == 0){
+				if (!_.every(prevState.selectedBookingIds, 'heatId') || prevState.selectedBookingIds.length === 0){
 					this.setState({ newProductId: null, newIsPublic: true });
 					this.refs.qtyAvail.getDOMNode().value = 1;
 				}
@@ -792,27 +847,27 @@ var BookingAdmin = React.createClass({
 				var firstBooking = existingBookings[0];
 				var newProductId;
 				var newIsPublic;
-					
+
 				if (_.every(existingBookings, booking => booking.quantityTotal == firstBooking.quantityTotal)){
-					this.refs.qtyAvail.getDOMNode().value = firstBooking.quantityTotal;						
+					this.refs.qtyAvail.getDOMNode().value = firstBooking.quantityTotal;
 				} else {
 					this.refs.qtyAvail.getDOMNode().value = '';
-				}				
+				}
 				if (_.every(existingBookings, booking => firstBooking.productsId == booking.productsId)){
 					newProductId = firstBooking.productsId;
 				} else {
 					newProductId = null;
-				}					
+				}
 				if (_.every(existingBookings, booking => firstBooking.isPublic == booking.isPublic)){
 					newIsPublic = firstBooking.isPublic;
 				} else {
 					newIsPublic = null;
 				}
 				this.setState({ newProductId, newIsPublic });
-				
+
 			}
 		}
-		
+
 		if (this.refs.saveButton){
 			if (this.isFormValid()){
 				$(this.refs.saveButton.getDOMNode()).tooltip('destroy');
@@ -821,26 +876,26 @@ var BookingAdmin = React.createClass({
 			}
 		}
 	},
-	
+
 	areOnlyNewBookingsSelected(){
 		return _.every(this.state.selectedBookingIds, 'heatId');
 	},
-	
-	isFormValid (){	
+
+	isFormValid (){
 		if (_.some(this.state.selectedBookingIds, 'heatId')){
 			return this.state.newProductId != null && this.state.newIsPublic != null && this.parseRef('qtyAvail') != null;
 		} else {
 			return true;
 		}
 	},
-	
+
 	handleDateSelect(payload){
 		this.setState(
 			{ filterByDate: payload.date },
 			_ => { this.loadBookings(); }
 		);
 	},
-	
+
 	handleTrackSelectEvent (event, props){
 		if (event.added){
 			this.setState({ filterByTrackId: event.val || false });
@@ -849,14 +904,14 @@ var BookingAdmin = React.createClass({
 			this.setState({ filterByTrackId: false });
 		}
 	},
-	
+
 	handleBookingRowEvent (e, rowProps){
 		switch (e.type) {
 			case 'click': case 'ifChecked': case 'ifUnchecked':
-				var clickedBookingId = rowProps.booking.onlineBookingsId;				
-				
+				var clickedBookingId = rowProps.booking.onlineBookingsId;
+
 				var selectedBookingIds = [];
-				if (clickedBookingId){				
+				if (clickedBookingId){
 					if (_.contains(this.state.selectedBookingIds, clickedBookingId)){
 						selectedBookingIds = _.without(this.state.selectedBookingIds, clickedBookingId);
 					} else {
@@ -877,47 +932,53 @@ var BookingAdmin = React.createClass({
 				}
 				this.setState({ selectedBookingIds });
 				break;
-		}		
+		}
 	},
-	
-	handlePublicCheckEvent(e){		
+
+	handlePublicCheckEvent(e){
 		switch (e.type){
 			case 'ifChecked':
 				this.setState({ newIsPublic: true, saveEnabled: true });
 				break;
 			case 'ifUnchecked':
-				this.setState({ newIsPublic: false, saveEnabled: true });			
+				this.setState({ newIsPublic: false, saveEnabled: true });
 				break;
 		}
 	},
-	
+
 	handleRadioChange(e, props, state, optionProps){
 		this.setState({ newIsPublic: optionProps.item.value });
 	},
-	
-	handleProductSelectEvent: function(e, props, state){
+
+	handleProductSelectEvent(e, props, state){
 		if (e.added){
 			this.setState({ newProductId: e.val });
 		} else if (e.val == ''){
 			this.setState({ newProductId: null });
 		}
 	},
-	
+
 	handleQtyAvailableChange(){
-		var elem = this.jQuerify('qtyAvail');
-		
-		elem.val(parseInt(elem.val()));
-		
-		if (elem.val() < elem.attr('min')){
-			elem.val(elem.attr('min'));
+		var elem = $(this.refs.qtyAvail.getDOMNode());
+
+		var newVal = parseInt(elem.val());
+
+		if (newVal < elem.attr('min')){
+			newVal = elem.attr('min');
 		}
-		
+
+		if (newVal > this.calcMaxQty()){
+			newVal = this.calcMaxQty();
+		}
+
+		elem.val(newVal);
+
 		this.forceUpdate();
 	},
-	
+
 	handleSaveClick(e){
 		e.preventDefault();
-		
+
 		var editCount = this.state.selectedBookingIds.length;
 		if (editCount > 1){
 			var confirmed = confirm('Save changes for ' + editCount + ' bookings?');
@@ -925,7 +986,7 @@ var BookingAdmin = React.createClass({
 				return;
 			}
 		}
-		
+
 		var change = {};
 		if (this.state.newIsPublic != null){
 			change.isPublic = this.state.newIsPublic;
@@ -936,76 +997,102 @@ var BookingAdmin = React.createClass({
 		if(this.refs.qtyAvail.getDOMNode().value != ''){
 			change.quantityTotal = this.parseRef('qtyAvail');
 		}
-		
+
 		this.putChange(change);
 	},
-	
+
 	putChange(change){
 		if (this.state.selectedBookingIds.length == 0){
 			return;
 		}
-		
+
+		var errors = [];
+
 		var putRequests = this.state.selectedBookingIds.map(id => {
-			console.log('put request id', id);
+			var type, url, data;
+
 			if (id.heatId){
-				var url = this.props.config.apiURL + 'booking?key=' + this.props.config.privateKey;
-				var data = _.extend(change, {
+				type = 'POST';
+				url = this.props.config.apiURL + 'booking?key=' + this.props.config.privateKey;
+				data = _.extend(change, {
 					heatId: id.heatId,
 					quantityTotal: change.quantityTotal
-				});			
-				
-				return $.ajax({
-					type: 'POST',
-					url,
-					data
 				});
 			} else {
-				var url = this.props.config.apiURL + 'booking/' + id + '?key=' + this.props.config.privateKey;
-				var data = _.omit(change, 'heatId'); // omit is temp, prevent heatId from getting passed here in first place
-				
-				return $.ajax({
-					type: 'PUT',
-					url,
-					data				
-				});
+				type = 'PUT';
+				url = this.props.config.apiURL + 'booking/' + id + '?key=' + this.props.config.privateKey;
+				data = _.omit(change, 'heatId'); // omit is temp, prevent heatId from getting passed here in first place
 			}
+
+			var putRequest = $.ajax({ type,	url, data	});
+
+			putRequest.then(
+				_ => {},
+				error => {
+					try {
+						var race;
+						if (id.heatId){
+							race = this.state.raceDetails[id.heatId];
+						} else {
+							var booking = _.findWhere(this.state.bookings, booking => booking.onlineBookingsId == id);
+							race = this.state.raceDetails[booking.heatId];
+						}
+						var raceTitle = moment(race.starts_at, 'YYYY-MM-DD HH:mm:ss.SSS').format('MMM DD h:mm a') + ' ' + race.race_name;
+						var errorMessage = error.responseJSON.error.message.replace('Precondition Failed: ', '');
+						errors.push(raceTitle + ': ' + errorMessage);
+					} catch(ex){
+						errors.push('Error saving record.');
+					}
+				}
+			);
+
+			// return simple wrapper around PUT request deferred so it will resolve as "success"
+			// because $.when will break on first failure
+			// and we only care when all requests complete, regardless of success or failure,
+			// as we are tracking errors with the errors array
+			var wrappedRequest = $.Deferred();
+			putRequest.always(_ => { wrappedRequest.resolve(); });
+			return wrappedRequest;
 		});
-		
+
 		$.when.apply($, putRequests).then(
 			(...all) => {
-				var popupMessage = 'Booking for ' + this.getBookingTitle() + ' successfully saved! ('
-					+ moment().format('h:mm:ss a') + ')';
-				this.setState({ popupMessage });
-				this.loadBookings();
-			},
-		  (error) => {
-				var responseError;
-				var errorToDisplay;				
-				try {				
-					responseError = error.responseJSON.error.message;
-					if (responseError.indexOf('require points') !== -1){
-						errorToDisplay = 'Could not save record. This activity does not require points, so you cannot choose a points product.'
+				if (errors.length == 0){
+					var popup = {
+						message: 'Booking for ' + this.getBookingTitle()
+							+ ' successfully saved! (' + moment().format('h:mm:ss a') + ')',
+						alertClass: 'alert-success'
+					};
+				} else {
+					var errorStart = 'The following error(s) occurred while trying to save:';
+					var errorEnd, alertClass;
+					if (putRequests.length == errors.length){
+						errorEnd = 'No bookings were successfully saved.';
+						alertClass = 'alert-danger';
 					} else {
-						errorToDisplay = 'The following error occurred while trying to save:\n\n' + responseError;					
+						errorEnd = 'Only ' + (putRequests.length - errors.length) + ' of ' + putRequests.length + ' bookings successfully saved.';
+						alertClass = 'alert-warning';
 					}
-				} catch(_) {
-					errorToDisplay = 'An error occurred while trying to save the record.';
+					var popup = {
+						message: [errorStart].concat(errors).concat([errorEnd]).join('<br/><br/>'),
+						alertClass
+					};
 				}
-					
-				alert(errorToDisplay);
+
+				this.setState({ popup });
 				this.loadBookings();
 			}
 		);
 	},
-	
+
 	handlePopupClick(){
-		this.setState({ popupMessage: null });
+		this.setState({ popup: {message: null, alertClass: null} });
 	},
-	
+
 	handleDeselectClick(){
 		this.setState({ selectedBookingIds: [] });
 	},
-	
+
 	handleDeleteClick(){
 		var message = 'You are about to delete all bookings for the ';
 		if (this.state.selectedBookingIds.length > 1){
@@ -1014,46 +1101,53 @@ var BookingAdmin = React.createClass({
 			message += 'selected activity.'
 		}
 		message += ' Click OK to continue.';
-		
-		var confirmed = confirm(message);		
+
+		var confirmed = confirm(message);
 		if (confirmed){
 			// remove booking placeholders for activities w/o booking (can't delete what doesn't exist)
 			var bookingsToDelete = _.reject(this.state.selectedBookingIds, 'heatId');
-			
+
 			// start delete requests
 			var deleteRequests = [];
-			
+
 			bookingsToDelete.forEach(id => {
-					var request = $.ajax({
-						url: this.props.config.apiURL + 'booking/' + id + '?key=' + this.props.config.privateKey,
-						type: 'DELETE'	
-					});
-					
-					deleteRequests.push(request);
-					
-					// after delete successful, remove it from local bookings cache
-					request.then(response => {
-						var bookings = _.reject(this.state.bookings, booking => booking.onlineBookingsId == id);											
-						this.setState({ bookings });						
-					});
-				}
-			);
-			
+				var request = $.ajax({
+					url: this.props.config.apiURL + 'booking/' + id + '?key=' + this.props.config.privateKey,
+					type: 'DELETE'
+				});
+
+				deleteRequests.push(request);
+
+				// after delete successful, remove it from local bookings cache
+				request.then(response => {
+					var bookings = _.reject(this.state.bookings, booking => booking.onlineBookingsId == id);
+					this.setState({ bookings });
+				}, error => {
+					console.log('error yo', error);
+				});
+			});
+
 			// handle responses once all delete requests are completed
 			$.when.apply($, deleteRequests).then(
 				(...all) => {
-					var popupMessage = 'Booking(s) successfully deleted! ('
-						+ moment().format('h:mm:ss a') + ')';						
-											
-					this.setState({ popupMessage, selectedBookingIds: [] });
-					
+					var popup = {
+						message: 'Booking(s) successfully deleted! ('	+ moment().format('h:mm:ss a') + ')',
+						alertClass: 'alert-success'
+					};
+
+					this.setState({ popup, selectedBookingIds: [] });
 					this.loadBookings();
 				},
 				(...all) => {
-					var errorMessage = 'An error occurred while trying to delete booking(s).';
-					alert(errorMessage);
+					var popup = {
+						message: 'An error occurred while trying to delete booking(s).',
+						alertClass: 'alert-error'
+					};
+
+					this.setState({ popup });
+					this.loadBookings();
 				}
-			);		
+			);
 		}
 	}
 });

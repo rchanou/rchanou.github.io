@@ -20,19 +20,27 @@ class TranslationsLogic extends BaseLogic {
      */
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
-        $this->interface = $this->db->resourceSets;
+        $this->interface = $this->db->translations;
     }
 
     public final function create($params = array()) {
         $interface =& $this->interface;
         return parent::_create($params, function($translation) use (&$interface) {
             $find = $interface->match(array(
-                'ResourceSetName'   => $translation->ResourceSetName
-                , 'ResourceName'    => $translation->ResourceName
-                , 'Culture'         => $translation->Culture
+                  'Namespace' => $translation->Namespace
+                , 'Name'      => $translation->Name
+                , 'Culture'   => $translation->Culture
             ));
-            if (!empty($find))
-                throw new \RecordAlreadyExistsException('Translation create found a record which already exists! Received ResourceSetName: ' . $translation->ResourceSetName . ' and Resourcename: ' . $translation->ResourceName . ' and Culture: ' . $translation->Culture);
+            if (!empty($find)) {
+                throw new \RecordAlreadyExistsException(
+                    'Translation create found a record which already exists!'
+                    . ' Received Namespace: '   . $translation->Namespace
+                    . ' and Name: '             . $translation->Name
+                    . ' and Culture: '          . $translation->Culture
+                );
+            }
+            if (empty($translation->DefaultValue))
+                $translation->DefaultValue = $translation->Value; // or the other way around?
 
             return $translation; // use reference instead of return?
         });
@@ -41,50 +49,36 @@ class TranslationsLogic extends BaseLogic {
     public final function batchCreate($mapped = array()) {
         $new = array();
         $existing = array();
-        foreach($mapped['batch'] as $key => $map) {
-            // $map = $this->map('server', $val);
-            if (!isset($map['Culture']))
-                $map['Culture'] = Enums::DB_NULL; // for searching purposes, nulls should be matched(!!!)
-
+        foreach($mapped as $key => $data) {
+            $translation = $this->interface->dummy($data);
             // check to see if the resource set already exists,
             // by combination of ResourceSetName and ResourceName
-            $find = $this->interface->match(
-                array(
-                    'ResourceSetName'   => @$map['ResourceSetName'] // do it this way with the @ symbol?
-                    , 'ResourceName'    => @$map['ResourceName'] // or make dummy records and validate each insert that way?
-                    , 'Culture'         => @$map['Culture']
-                )
-            );
+            $find = $this->interface->match(array(
+                  'Namespace' => $translation->Namespace
+                , 'Name'      => $translation->Name
+                , 'Culture'   => $translation->Culture
+            ));
             if (empty($find)) {
                 // if the resource set does not already exist, 
                 // throw it on $new, to be used with the internal batchCreate method
-                $new[$key] = $map;
+                $new[$key] = $translation;
             }
             else {
-                // if the resource set does already exist,
-                // consider this a business logic error
+                // if the resource set does already exist, consider this a business logic error
                 $existing[$key] = array(
-                    "error" => 'Translation create found a record which already exists! Received ResourceSetName: ' . $map['ResourceSetName'] . ' and ResourceName: ' . $map['ResourceName'] . ' and Culture: ' . ($map['Culture'] === Enums::DB_NULL ? 'null' : $map['Culture'])
+                    "error" => 'Translation create found a record which already exists! Received Namespace: ' . $translation->Namespace . ' and Name: ' . $translation->Name . ' and Culture: ' . ($translation->Culture === Enums::DB_NULL ? 'null' : $translation->Culture)
                 );
             }
         }
         $return = array();
         if (!empty($new)) {
-
-            // run the batch create with any non-existing resource sets
             $batch = $this->interface->batchCreate($new);
-
             $pk = $this->interface->key;
             foreach($batch as $key => $val) {
-
-                if (is_int($val)) {
-                    // if we receive an int, assume it is the primary key and a successful create
+                if (is_int($val))
                     $new[$key] = array($pk => $val);
-                }
-                else {
-                    // if we receive anything other than an int, assume it is an error and needs to be sent back as-is
+                else // if we receive anything other than an int, assume it is an error and needs to be sent back as-is
                     $new[$key] = $val;
-                }
             }
         }
         $return = $new + $existing;
@@ -92,41 +86,49 @@ class TranslationsLogic extends BaseLogic {
         return $return;
     }
 
-    public final function getNamespace($params) {
-        // $params = $mapped->params;
-        // if culture is en-US or null, set it to DB_NULL to match the database data
-        if (is_null($params['ResourceSetName']) || empty($params['ResourceSetName']))
-            throw new \RequiredArgumentMissingException('TranslationsLogic getNamespace received a null or empty ResourceSetName!');
-        
-        // $language = $params['Culture']; // don't think we're even using culture for search anymore.
-
-        return $this->interface->match(
-            array(
-                'ResourceSetName' => $params['ResourceSetName']
-            )
-        );
-    }
-
-    public final function compress($data = array(), $limit = array()) {
-        // $this->limit('client', $limit);
-        $compressed = array(
-            $this->namespace => array()
-        );
-        $inner =& $compressed[$this->namespace];
-        if (isset($data)) {
-            if (!is_array($data))
-                $data = array($data);
-            foreach($data as $record) {
-                if (!empty($record)) {
-                    if (is_null($record->Culture))
-                        $record->Culture = 'en-US';
-                    if (!isset($inner[$record->Culture]) || !is_array($inner[$record->Culture])) {
-                        $inner[$record->Culture] = array();
-                    }
-                    $inner[$record->Culture][] = $this->map('client', $record);
-                }
+    public final function batchUpdate($mapped = array()) {
+        $errors = array();
+        foreach($mapped as $key => $data) {
+            try {
+                $record = $this->interface->dummy($data);
+                $this->update($record->{$record::$key}, $record);
+            }
+            catch(\Exception $e) {
+                $errors[] = $e->getMessage();
             }
         }
-        return $compressed;
+        if (!empty($errors))
+            return $errors;
+    }
+
+    public function update(/* $id, $params = array() */) {
+        $args = func_get_args();
+        $logic =& $this->logic;
+        $interface =& $this->interface;
+        $closure = function($old, $new) use (&$interface) {
+            if (
+                    $old->Namespace != $new->Namespace
+                ||  $old->Name      != $new->Name
+                ||  $old->Culture   != $new->Culture
+            ) {
+                // try to capture indexing errors before we make it to the insert
+                $find = $interface->match(array(
+                      'Namespace' => $new->Namespace
+                    , 'Name'      => $new->Name
+                    , 'Culture'   => $new->Culture
+                ));
+                if (!empty($find)) {
+                    throw new \RecordAlreadyExistsException(
+                        'Translation update found a record which already exists!'
+                        . ' Received Namespace: '   . $new->Namespace
+                        . ' and Name: '             . $new->Name
+                        . ' and Culture: '          . $new->Culture
+                    );
+                }
+            }
+            return $new;
+        };
+        array_push($args, $closure);
+        return call_user_func_array(array("parent", "update"), $args);
     }
 }

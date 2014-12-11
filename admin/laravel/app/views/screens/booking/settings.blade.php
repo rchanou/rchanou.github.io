@@ -31,13 +31,19 @@ Online Bookings Settings
             @if ($currentOnlineBookingState == 'disabled_manually')
             <div class="alert alert-warning">
                 <p>(Note: Online Booking is <strong>current disabled</strong> because the "Enable Online Booking" setting is not checked.</p>
-                To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+                To access Online Booking while it's disabled (for testing), <a href="{{'https://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
             </div>
             @endif
             @if ($currentOnlineBookingState == 'disabled_dummypayments')
             <div class="alert alert-warning">
                 <p>(Note: Online Booking is <strong>current disabled</strong> because the site is using the Dummy payment processor.)</p>
-                To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+                To access Online Booking while it's disabled (for testing), <a href="{{'https://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+            </div>
+            @endif
+            @if ($currentOnlineBookingState == 'missing_translations')
+            <div class="alert alert-warning">
+                <p>(Note: Online Booking is <strong>missing some translations</strong> for the current culture. They will default to English (US).)</p>
+                Please proceed to the <a href="{{URL::to('translations')}}">Translations section</a> and update those translations.
             </div>
             @endif
             @if (Session::has("message"))
@@ -205,7 +211,7 @@ Online Bookings Settings
                                     <input type="checkbox" id="registrationEnabled" name="registrationEnabled" {{$isChecked['registrationEnabled']}}>
                                     <span class="help-block text-left">If checked, Online Booking is turned on and available on the Internet (unless the payment processor isn't set up).
                                     @if(!$isChecked['registrationEnabled'])
-                                    <div class="alert alert-info">To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.</div>
+                                    <div class="alert alert-info">To access Online Booking while it's disabled (for testing), <a href="{{'https://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.</div>
                                     @endif
                                     </span>
                                 </div>
@@ -224,12 +230,187 @@ Online Bookings Settings
                                     <span class="help-block text-left">If checked, users are required to create a Club Speed account even if authenticating via a third party (ex. Facebook).</span>
                                 </div>
                             </div>
-                            @if(isset($isChecked['autoAddRacerToHeat']))
+                            @if(isset($isChecked['autoAddRacerToHeat']) && $bookingSettings['supportsCacheClearing'])
                             <div class="form-group">
                                 <label class="col-sm-4 col-md-4 col-lg-4 control-label">Auto Add Racers To Heat</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">
                                     <input type="checkbox" id="autoAddRacerToHeat" name="autoAddRacerToHeat" {{$isChecked['autoAddRacerToHeat']}}>
                                     <span class="help-block text-left">If checked, racers are automatically added to heats after placing an order online.</span>
+                                </div>
+                            </div>
+                            @elseif(isset($isChecked['autoAddRacerToHeat']) && !$bookingSettings['supportsCacheClearing'])
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Auto Add Racers To Heat</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">This setting is not currently supported by your server.</span>
+                                </div>
+                            </div>
+                            @endif
+                            @if(isset($bookingSettings['sendReceiptCopyTo']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Send Receipt Copies To</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <input type="text" style="width: 100%" id="sendReceiptCopyTo" name="sendReceiptCopyTo" value="{{$bookingSettings['sendReceiptCopyTo']}}">
+                                    <span class="help-block text-left">A comma-separated list of e-mail addresses to BCC a receipt to whenever an Online Booking order is placed.</span>
+                                </div>
+                            </div>
+                            @endif
+                            @if(isset($bookingSettings['showLanguageDropdown']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Show Language Dropdown</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <input type="checkbox" id="showLanguageDropdown" name="showLanguageDropdown" {{$isChecked['showLanguageDropdown']}}>
+                                    <span class="help-block text-left">If checked, a dropdown menu that allows changing the current language is shown at the top of the page. Only languages that have <a href="{{URL::to('booking/translations')}}">translations</a> available will be displayed as options.</span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Show Language Dropdown</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">This setting is not currently supported by your server.</span>
+                                </div>
+                            </div>
+                            @endif
+                            @if(isset($bookingSettings['dateDisplayFormat']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Date Display Format</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <input type="text" id="dateDisplayFormat" name="dateDisplayFormat" value="{{$bookingSettings['dateDisplayFormat']}}">
+                                    <i class="fa fa-question-circle tip"
+                                        data-container="body" data-toggle="popover" data-placement="top" data-html="true"
+                                        data-content="
+                                            <div class='text-center'><strong>Valid characters</strong></div>
+                                            <table class='table table-condensed table-mini'>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Character</th>
+                                                        <th>Description</th>
+                                                        <th>Example</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>d</td>
+                                                        <td>Day of the month, 2 digits with leading zeros</td>
+                                                        <td>01 to 31</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>D</td>
+                                                        <td>A textual representation of a day, three letters</td>
+                                                        <td>Mon through Sun</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>l (lowercase L)</td>
+                                                        <td>A full textual representation of the day of the week</td>
+                                                        <td>Sunday through Saturday</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>m</td>
+                                                        <td>Numeric representation of a month, with leading zeros</td>
+                                                        <td>01 through 12</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>M</td>
+                                                        <td>A short textual representation of a month, three letters</td>
+                                                        <td>Jan through Dec</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>F</td>
+                                                        <td>A full textual representation of a month, such as January or March</td>
+                                                        <td>January through December</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Y</td>
+                                                        <td>A full numeric representation of a year, 4 digits</td>
+                                                        <td>Examples: 1999 or 2003</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <div class='table-mini'>
+                                            Also usable: Spaces, dashes, commas, and forward slashes.
+                                            </div>
+                                        ">
+                                    </i>
+                                    <span class="help-block text-left">
+                                    Current format: {{date($bookingSettings['dateDisplayFormat'])}}
+                                    <br/>The format in which to display dates.
+                                    </span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Date Display Format</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">This setting is not currently supported by your server.</span>
+                                </div>
+                            </div>
+                            @endif
+                            @if(isset($bookingSettings['timeDisplayFormat']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Time Display Format</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <input type="text" id="timeDisplayFormat" name="timeDisplayFormat" value="{{$bookingSettings['timeDisplayFormat']}}">
+                                    <i class="fa fa-question-circle tip"
+                                        data-container="body" data-toggle="popover" data-placement="top" data-html="true"
+                                        data-content="
+                                            <div class='text-center'><strong>Valid characters</strong></div>
+                                            <table class='table table-condensed table-mini'>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Character</th>
+                                                        <th>Description</th>
+                                                        <th>Example</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>g</td>
+                                                        <td>12-hour format of an hour without leading zeros</td>
+                                                        <td>1 through 12</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>H</td>
+                                                        <td>24-hour format of an hour with leading zeros</td>
+                                                        <td>00 through 23</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>i</td>
+                                                        <td>Minutes with leading zeros</td>
+                                                        <td>00 to 59</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>s</td>
+                                                        <td>Seconds, with leading zeros</td>
+                                                        <td>00 through 59</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>a</td>
+                                                        <td>Lowercase Ante meridiem and Post meridiem</td>
+                                                        <td>am or pm</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>A</td>
+                                                        <td>Uppercase Ante meridiem and Post meridiem</td>
+                                                        <td>AM or PM</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <div class='table-mini'>
+                                            Also usable: Spaces, dashes, colons, commas, and forward slashes.
+                                            </div>
+                                        ">
+                                    </i>
+                                    <span class="help-block text-left">
+                                    Current format: {{date($bookingSettings['timeDisplayFormat'])}}
+                                    <br/>The format in which to display times.
+                                    </span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Time Display Format</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">This setting is not currently supported by your server.</span>
                                 </div>
                             </div>
                             @endif
@@ -247,24 +428,100 @@ Online Bookings Settings
                             <div class="form-group">
                                 <label class="col-sm-4 col-md-4 col-lg-4 control-label">Reservation Timeout</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">
-                                    <input type="text" id="reservationTimeout" name="reservationTimeout" value="{{$bookingSettings['reservationTimeout']}}">
-                                    <span class="help-block text-left">The time until an unpaid online reservation expires, in seconds.</span>
+                                    <input type="text" id="reservationTimeout" name="reservationTimeout" value="{{$bookingSettings['reservationTimeout']/60}}">
+                                    <span class="help-block text-left">The time until an unpaid online reservation expires, in minutes.</span>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-4 col-md-4 col-lg-4 control-label">Earliest Booking Time Window</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">
-                                    <input type="text" id="bookingAvailabilityWindowBeginningInSeconds" name="bookingAvailabilityWindowBeginningInSeconds" value="{{$bookingSettings['bookingAvailabilityWindowBeginningInSeconds']}}">
-                                    <span class="help-block text-left">The window of time that defines the earliest a booking may be available online, in seconds. (Example: If set to 7200, no booking may be made for a race happening in less than two hours.)</span>
+                                    <input type="text" id="bookingAvailabilityWindowBeginningInSeconds" name="bookingAvailabilityWindowBeginningInSeconds" value="{{$bookingSettings['bookingAvailabilityWindowBeginningInSeconds']/60}}">
+                                    <span class="help-block text-left">The window of time that defines the earliest a booking may be available online, in minutes. (Example: If set to 120, no booking may be made for a race happening in less than two hours.)</span>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-4 col-md-4 col-lg-4 control-label">Latest Booking Time Window</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">
-                                    <input type="text" id="bookingAvailabilityWindowEndingInSeconds" name="bookingAvailabilityWindowEndingInSeconds" value="{{$bookingSettings['bookingAvailabilityWindowEndingInSeconds']}}">
-                                    <span class="help-block text-left">The window of time that defines the latest a booking may be available online, in seconds. (Example: If set to 86400, no booking may be made for a race happening more than 24 hours from now.)</span>
+                                    <input type="text" id="bookingAvailabilityWindowEndingInSeconds" name="bookingAvailabilityWindowEndingInSeconds" value="{{$bookingSettings['bookingAvailabilityWindowEndingInSeconds']/86400}}">
+                                    <span class="help-block text-left">The window of time that defines the latest a booking may be available online, in days. (Example: If set to 90, no booking may be made for a race happening more than 90 days from now.)</span>
                                 </div>
                             </div>
+                            @if(isset($bookingSettings['maxRacersForDropdown']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Maximum Number of Racers</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <input type="text" id="maxRacersForDropdown" name="maxRacersForDropdown" value="{{$bookingSettings['maxRacersForDropdown']}}">
+                                    <span class="help-block text-left">The maximum number of racers that can selected in the dropdown on Step 1 of Online Booking.</span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Maximum Number of Racers</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">This setting is not currently supported by your server.</span>
+                                </div>
+                            </div>
+                            @endif
+                            @if(isset($bookingSettings['currency']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Currency</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    {{Form::select('currency',$supportedCurrencies,$bookingSettings['currency'])}}
+                                    <span class="help-block text-left">
+                                    <?php
+                                        if (isset($bookingSettings['numberFormattingLocale']) && isset($bookingSettings['currency']))
+                                        {
+                                             $locale = $bookingSettings['numberFormattingLocale'];
+                                             $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
+                                             $currency = $bookingSettings['currency'];
+                                             $currencyExample = $moneyFormatter->formatCurrency(1234.56, $currency);
+                                        }
+                                    ?>
+                                    Current format: {{$currencyExample}}
+                                    <br/>
+                                    The currency to be used when displaying prices.
+                                    </span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Currency</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">This setting is not currently supported by your server.</span>
+                                </div>
+                            </div>
+                            @endif
+                            @if(isset($bookingSettings['numberFormattingLocale']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Number Formatting Locale</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    {{Form::select('numberFormattingLocale',$supportedNumberLocales,$bookingSettings['numberFormattingLocale'])}}
+                                    <span class="help-block text-left">
+                                    <?php
+                                        if (isset($bookingSettings['numberFormattingLocale']) && isset($bookingSettings['currency']))
+                                        {
+                                             $locale = $bookingSettings['numberFormattingLocale'];
+                                             $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::DECIMAL);
+                                             $currency = $bookingSettings['currency'];
+                                             $numberFormattingExample = $moneyFormatter->formatCurrency(1234.56, $currency);
+                                        }
+                                    ?>
+                                    Current format: {{$numberFormattingExample}}
+                                    <br/>
+                                    The locale to use in order to format numbers.
+                                    </span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Number Formatting Locale</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">
+                                    This setting is not currently supported by your server.
+                                    </span>
+                                </div>
+                            </div>
+                            @endif
                       </div>
                       <div class="col-sm-12">
                            <div class="form-actions" style="margin-bottom: 10px;">
@@ -275,12 +532,149 @@ Online Bookings Settings
               </div>
             </div>
           </div>
+
+
      </div>
+
+    {{ Form::close() }}
+
+     <div class="row">
+        <div class="col-xs-12">
+            <div class="widget-box">
+              <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                <h5>Background Image</h5>
+              </div>
+              <div class="widget-content nopadding">
+                {{ Form::open(array('action'=>'BookingController@updateImage','files'=>true, 'class' => 'form-horizontal')) }}
+                    @if(!empty($background_image_url))
+                    <div class="row">
+                        <div class="col-sm-3 col-md-3 col-lg-2 control-label">Current Image</div><div class="col-sm-9 col-md-9 col-lg-10"><a href="{{$background_image_url}}" target="_blank"><img src="{{$background_image_url}}" width="192" height="108" style="border: 1px solid #ddd; padding: 5px; margin: 1em;" /></a></div>
+                    </div>
+                    @endif
+                    <div class="form-group">
+                        <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('image','Select an Image',array('id'=>'','class'=>'')) }}</label>
+                        <div class="col-sm-9 col-md-9 col-lg-10">
+                            {{ Form::file('image','',array('id'=>'','class'=>'')) }}
+                            <span class="help-block text-left">Image must be a JPG. Recommended size: 1920x1080 pixels.</span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <input type="hidden" name="filename" value="background.jpg">
+                        {{ Form::submit('Upload', array('class' => 'btn btn-info')) }}
+                    </div>
+                {{ Form::close() }}
+              </div>
+            </div>
+        </div>
+     </div>
+
+     <div class="row">
+        <div class="col-xs-12">
+            <div class="widget-box">
+              <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                <h5>Header Image</h5>
+              </div>
+              <div class="widget-content nopadding">
+                {{ Form::open(array('action'=>'BookingController@updateImage','files'=>true, 'class' => 'form-horizontal')) }}
+                    @if(!empty($header_image_url))
+                    <div class="row">
+                        <div class="col-sm-3 col-md-3 col-lg-2 control-label">Current Image</div><div class="col-sm-9 col-md-9 col-lg-10"><a href="{{$header_image_url}}" target="_blank"><img src="{{$header_image_url}}" width="305" height="45" style="border: 1px solid #ddd; padding: 5px; margin: 1em;" /></a></div>
+                    </div>
+                    @endif
+                    <div class="form-group">
+                        <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('image','Select an Image',array('id'=>'','class'=>'')) }}</label>
+                        <div class="col-sm-9 col-md-9 col-lg-10">
+                            {{ Form::file('image','',array('id'=>'','class'=>'')) }}
+                            <span class="help-block text-left">Image must be a JPG. Recommended size: 610x90 pixels.</span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <input type="hidden" name="filename" value="header.jpg">
+                        {{ Form::submit('Upload', array('class' => 'btn btn-info')) }}
+                    </div>
+                {{ Form::close() }}
+              </div>
+            </div>
+        </div>
+     </div>
+
+     <div class="row">
+        <div class="col-xs-12">
+            <div class="widget-box">
+              <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                <h5>Custom CSS</h5>
+              </div>
+              <div class="widget-content nopadding">
+                {{ Form::open(array('action'=>'BookingController@updateFile','files'=>true, 'class' => 'form-horizontal')) }}
+                    @if(!empty($custom_css_url))
+                    <div class="row">
+                        <div class="col-sm-3 col-md-3 col-lg-2 control-label">Current CSS</div><div class="col-sm-9 col-md-9 col-lg-10 control-label" style="text-align: left;"><a href="{{$custom_css_url}}" target="_blank">custom-styles.css</a></div>
+                    </div>
+                    @endif
+                    <div class="form-group">
+                        <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('customfile','Select a CSS file',array('id'=>'','class'=>'')) }}</label>
+                        <div class="col-sm-9 col-md-9 col-lg-10">
+                            {{ Form::file('customfile','',array('id'=>'','class'=>'')) }}
+                            <span class="help-block text-left">This CSS file will be added at the end of all other CSS files on the page.</span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <input type="hidden" name="filename" value="custom-styles.css">
+                        <input type="hidden" name="filetype" value="css">
+                        {{ Form::submit('Upload', array('class' => 'btn btn-info')) }}
+                    </div>
+                {{ Form::close() }}
+              </div>
+            </div>
+        </div>
+     </div>
+
+     <div class="row">
+        <div class="col-xs-12">
+            <div class="widget-box">
+              <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                <h5>Custom JS</h5>
+              </div>
+              <div class="widget-content nopadding">
+                {{ Form::open(array('action'=>'BookingController@updateFile','files'=>true, 'class' => 'form-horizontal')) }}
+                    @if(!empty($custom_js_url))
+                    <div class="row">
+                        <div class="col-sm-3 col-md-3 col-lg-2 control-label">Current JS</div><div class="col-sm-9 col-md-9 col-lg-10 control-label" style="text-align: left;"><a href="{{$custom_js_url}}" target="_blank">custom-js.js</a></div>
+                    </div>
+                    @endif
+                    <div class="form-group">
+                        <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('customfile','Select a JS file',array('id'=>'','class'=>'')) }}</label>
+                        <div class="col-sm-9 col-md-9 col-lg-10">
+                            {{ Form::file('customfile','',array('id'=>'','class'=>'')) }}
+                            <span class="help-block text-left">This JS file will be added at the end of all other JS files on the page.</span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <input type="hidden" name="filename" value="custom-js.js">
+                        <input type="hidden" name="filetype" value="js">
+                        {{ Form::submit('Upload', array('class' => 'btn btn-info')) }}
+                    </div>
+                {{ Form::close() }}
+              </div>
+            </div>
+        </div>
+     </div>
+
 
     </div>
 
-
-{{ Form::close() }}
 @stop
 
 <!-- BEGIN JAVASCRIPT INCLUDES -->

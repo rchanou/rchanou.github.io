@@ -281,7 +281,7 @@ class CS_API
                 break;
 
             case 'getTranslations':
-                $url = $url . '/translations/getNamespace.json' . '?namespace=Translations.Registration&key=' .self::$apiKey;
+                $url = $url . '/resourcesets/getNamespace.json' . '?namespace=Translations.Registration&key=' .self::$apiKey;
                 $result = self::callApi($url);
                 $resultFormatted = array();
                 if ($result == null || array_key_exists("error",$result) || !is_array($result))
@@ -318,7 +318,7 @@ class CS_API
                 }
                 break;
             case 'sendMissingStrings':
-                $url = $url . '/translations.json' . '?key=' . self::$privateKey;
+                $url = $url . '/resourcesets.json' . '?key=' . self::$privateKey;
                 $result = self::callApi($url,$params[0],'POST');
                 break;
             case 'getImages':

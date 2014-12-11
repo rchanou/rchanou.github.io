@@ -16,8 +16,13 @@ Route::get('booking', 'BookingController@index');
 Route::get('booking/settings', 'BookingController@settings');
 Route::post('booking/settings/update', 'BookingController@updateSettings');
 Route::post('booking/payments/settings/update', 'BookingController@updatePaymentSettings');
+Route::post('booking/images/update', 'BookingController@updateImage');
+Route::post('booking/files/update', 'BookingController@updateFile');
 
 Route::get('booking/payments', 'BookingController@payments');
+Route::get('booking/translations', 'BookingController@translations');
+Route::post('booking/translations/update', 'BookingController@updateTranslations');
+Route::get('booking/translations/update/culture/{cultureKey}', 'BookingController@updateCulture');
 
 Route::get('booking/templates', 'BookingController@templates');
 Route::post('booking/templates', 'BookingController@updateTemplates');
@@ -42,8 +47,8 @@ Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@e
 
 /* End Reports */
 
-Route::get('mobileApp/settings', 'MobileAppController@settings');
-Route::post('mobileApp/settings', 'MobileAppController@updateSettings');
+Route::get('mobileApp/menuItems', 'MobileAppController@menuItems');
+//Route::post('mobileApp/updateMenuItems', 'MobileAppController@updateMenuItems');
 Route::get('mobileApp/templates', 'MobileAppController@templates');
 Route::post('mobileApp/templates', 'MobileAppController@updateTemplates');
 

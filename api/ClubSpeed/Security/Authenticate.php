@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Security;
+use ClubSpeed\Enums\Enums as Enums;
 
 /**
  * The ClubSpeed validation class, used for determining whether or not
@@ -70,12 +71,21 @@ class Authenticate {
      */
     public static function publicAccess() {
         $credentials = self::getCredentials();
-        if (self::isValidPublicKey($credentials['key'])) {
+        if (self::isValidPublicKey($credentials['key']))
             return true;
-        }
-        if (self::isValiduser($credentials['username'], $credentials['password'])) {
+        if (self::isValidUser($credentials['username'], $credentials['password']))
             return true;
-        }
+        return false;
+    }
+
+    public static function customerAccess($customerId) {
+        $credentials = self::getCredentials();
+        if (self::isValidPrivateKey($credentials['key']))
+            return true;
+        if (self::isValidCustomerKey($credentials['key'], $customerId))
+            return true;
+        if (self::isValidUser($credentials['username'], $credentials['password']))
+            return true;
         return false;
     }
 
@@ -87,12 +97,10 @@ class Authenticate {
      */
     public static function privateAccess() {
         $credentials = self::getCredentials();
-        if (self::isValidPrivateKey($credentials['key'])) {
+        if (self::isValidPrivateKey($credentials['key']))
             return true;
-        }
-        if (self::isValiduser($credentials['username'], $credentials['password'])) {
+        if (self::isValidUser($credentials['username'], $credentials['password']))
             return true;
-        }
         return false;
     }
 
@@ -120,10 +128,8 @@ class Authenticate {
     private static function isValidUser(&$username, &$password) {
         if (!self::$isInitialized)
             throw new \LogicException("Error: attempted a call to \ClubSpeed\Security\Validate\isValidUser before initializing!");
-
-        if (isset($username) && isset($password)) {
+        if (isset($username) && isset($password))
             return self::$logic->users->validate($username, $password);
-        }
         return false;
     }
 
@@ -136,9 +142,9 @@ class Authenticate {
      * @return boolean True if the key has at least public access, false if not.
      */
     private static function isValidPublicKey(&$key) {
-        if (isset($key) && in_array($key, $GLOBALS['authentication_keys'])) {
+        if (isset($key) && in_array($key, $GLOBALS['authentication_keys']))
             return true;
-        }
+        // should we include customer logins (auth tokens) to be public keys too?
         return false;
     }
 
@@ -150,10 +156,25 @@ class Authenticate {
      * @param string $key The key to validate.
      * @return boolean True if the key has at least private access, false if not.
      */
-    private static function isValidPrivatekey(&$key) {
-        if (isset($key) && $key === $GLOBALS['privateKey']) {
+    private static function isValidPrivateKey(&$key) {
+        if (isset($key) && $key === $GLOBALS['privateKey'])
             return true;
-        }
+        return false;
+    }
+
+    private static function isValidCustomerKey(&$key, $customerId) {
+        // not super extendable, but sufficient for now.
+        if (empty($key))
+            return false;
+        if (empty($customerId))
+            return false;
+        $authenticationToken = self::$logic->authenticationTokens->match(array(
+              'CustomersID' => $customerId
+            , 'Token'       => $key
+            , 'TokenType'   => Enums::TOKEN_TYPE_CUSTOMER
+        ));
+        if (!empty($authenticationToken))
+            return true;
         return false;
     }
 

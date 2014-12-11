@@ -3,6 +3,8 @@
 namespace ClubSpeed\Logic;
 use ClubSpeed\Mail\MailService as Mail;
 use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Utility\Tokens as Tokens;
 
 /**
  * The business logic class
@@ -41,7 +43,7 @@ class PasswordsLogic extends BaseLogic {
 
         $authentication = $this->db->authenticationTokens->dummy();
         $authentication->CustomersID = $customer->CustID;
-        $authentication->TokenType = 'PasswordReset';
+        $authentication->TokenType = Enums::TOKEN_TYPE_PASSWORD_RESET;
         $existingAuthentications = $this->db->authenticationTokens->find($authentication);
 
         if (!empty($existingAuthentications)) {
@@ -49,12 +51,12 @@ class PasswordsLogic extends BaseLogic {
             // or consider this an error for security purposes?
             // probably update the existing token -- seems to be how most sites handle this
             $authentication = $existingAuthentications[0];
-            $authentication->Token = \ClubSpeed\Utility\Tokens::generate();
+            $authentication->Token = Tokens::generate();
             $authentication->RemoteUserID = "RemoteUserUPDATED";
             $affected = $this->db->authenticationTokens->update($authentication);
         }
         else {
-            $authentication->Token = \ClubSpeed\Utility\Tokens::generate();
+            $authentication->Token = Tokens::generate();
             $authentication->RemoteUserID = "RemoteUserINSERTED";
             $this->db->authenticationTokens->create($authentication);
         }
@@ -80,19 +82,26 @@ class PasswordsLogic extends BaseLogic {
         ));
         if (empty($html))
             throw new \CSException("Password token create was unable to find the setting setting for Main.resetEmailBodyHtml!");
-
         $html = $html[0];
         $html = $html->Value;
         $url = 'https://' . $_SERVER['SERVER_NAME'] . '/booking/resetpassword/form?token=' . urlencode($authentication->Token);
-        $html = str_replace("{{url}}", $url, $html);
-        $html = str_replace("{{business}}", $business, $html);
-
         $html = strtr($html, array(
             "{{url}}" => $url,
             "{{business}}" => $business
         ));
 
-        $text = 'TODOTODOTODO';
+        $text = $this->logic->settings->match(array(
+            "Namespace" => "Main",
+            "Name" => "resetEmailBodyText"
+        ));
+        if (empty($text))
+            throw new \CSException("Password token create was unable to find the setting setting for Main.resetEmailBodyHtml!");
+        $text = $text[0];
+        $text = $text->Value;
+        $text = strtr($text, array(
+            "{{url}}" => $url,
+            "{{business}}" => $business
+        ));
 
         $mail = Mail::builder()
             ->subject("Password Reset for " . $business)
@@ -109,23 +118,6 @@ class PasswordsLogic extends BaseLogic {
             throw $e; // catch the exception to log it, then rethrow / consider this a fatal error
         }
     }
-
-    // public final function get($id) {
-    //     // TODO (if necessary)
-    //     // $authentication = new \ClubSpeed\Database\Classes\AuthenticationTokens($id); // build dummy record with only an id
-    //     $get = $this->db->onlineBookingAvailability_V->get($onlineBookingsId);
-    //     return $get;
-    // }
-
-    // public final function find($params = array()) {
-    //     throw new \CSException("Attempted a Passwords find!");
-    //     // return $this->db->authenticationTokens->find($params);
-    // }
-
-    // public final function update($id, $params = array()) {
-    //     throw new \CSException("Attempted a Passwords update!");
-    //     // don't update directly - use reset
-    // }
 
     public final function reset($params = array()) {
         // if (is_null($params['email']) || empty($params['email']))

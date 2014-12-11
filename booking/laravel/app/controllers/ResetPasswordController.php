@@ -18,7 +18,8 @@ class ResetPasswordController extends BaseController
     {
         return View::make('/resetpassword',
             array(
-                'images' => Images::getImageAssets()
+                'images' => Images::getImageAssets(),
+                'strings' => Strings::getStrings()
             )
         );
     }
@@ -34,6 +35,8 @@ class ResetPasswordController extends BaseController
     public function resetPasswordRequest()
     {
         $input = Input::all();
+        $strings = Strings::getStrings();
+
         $emailAddress = Input::get('EmailAddress');
 
         //DATA VALIDATION
@@ -41,8 +44,8 @@ class ResetPasswordController extends BaseController
         $rules['EmailAddress'] = 'required|email';
 
         $messages = array(
-            'EmailAddress.required' => 'Your e-mail address is required.',
-            'EmailAddress.email' => 'Please enter a valid e-mail address.',
+            'EmailAddress.required' => $strings['str_email.required'],
+            'EmailAddress.email' => $strings['str_email.email'],
         );
 
         //Create the validator
@@ -63,7 +66,8 @@ class ResetPasswordController extends BaseController
                 return View::make('/resetpassword',
                     array(
                         'images' => Images::getImageAssets(),
-                        'resetRequestSuccessful' => true
+                        'resetRequestSuccessful' => true,
+                        'strings' => Strings::getStrings()
                     )
                 );
             }
@@ -72,7 +76,8 @@ class ResetPasswordController extends BaseController
                 return View::make('/resetpassword',
                     array(
                         'images' => Images::getImageAssets(),
-                        'resetRequestSuccessful' => false
+                        'resetRequestSuccessful' => false,
+                        'strings' => Strings::getStrings()
                     )
                 );
             }
@@ -97,7 +102,8 @@ class ResetPasswordController extends BaseController
                 'images' => Images::getImageAssets(),
                 'userNeedsToSubmitForm' => true,
                 'authToken' => $authToken,
-                'email' => $email
+                'email' => $email,
+                'strings' => Strings::getStrings()
             )
         );
     }
@@ -127,7 +133,8 @@ class ResetPasswordController extends BaseController
             array(
                 'images' => Images::getImageAssets(),
                 'userNeedsToSubmitForm' => false,
-                'resetSuccessful' => $resetPasswordResult
+                'resetSuccessful' => $resetPasswordResult,
+                'strings' => Strings::getStrings()
             )
         );
     }

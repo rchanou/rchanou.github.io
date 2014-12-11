@@ -10,7 +10,7 @@ class Arrays {
      */
     private function __construct() {} // prevent any initialization of this class
 
-    public static function contains(&$arr, $predicate) {
+    public static function contains($arr, $predicate) {
         if (count($arr) > 0) {
             foreach($arr as $key => $val) {
                 if (call_user_func($predicate, $val, $key, $arr)) {
@@ -111,9 +111,17 @@ class Arrays {
         return $arr; // copy or pointers?
     }
 
+    public static function select(&$arr, $selector) {
+        $return = array();
+        foreach($arr as $key => &$val) {
+            $return[] = call_user_func($selector, $val, $key, $arr);
+        }
+        return $return;
+    }
+
     public static function &where(&$arr, $predicate) {
         $return = array();
-        foreach($arr as &$val) {
+        foreach($arr as $key => &$val) {
             // if only we had the yield keyword..
             if (call_user_func($predicate, $val, $key, $arr)) {
                 $return[] =& $val;

@@ -112,6 +112,7 @@ class BookingAvailabilityLogic extends BaseLogic {
             ."\nWHERE"
             ."\n        @StartRange <= obav.HeatStartsAt"
             ."\n    AND obav.HeatStartsAt < @EndRange"
+            ."\nORDER BY obav.HeatStartsAt"
             ;
 
         $records = $this->db->onlineBookingAvailability_V->query($sql, $sqlParams);

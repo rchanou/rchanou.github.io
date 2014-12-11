@@ -1,16 +1,18 @@
 <!-- Footer -->
     @if(Session::has('authenticated'))
         <div id="loggedInAs">
-        You are logged in as <strong>{{Session::get('authenticatedEmail')}}</strong>.<br/><a href="logout">Logout</a><p/><p/>
+        {{$strings['str_youAreLoggedInAs']}} <strong>{{Session::get('authenticatedEmail')}}</strong>.<br/><a href="logout">{{$strings['str_logout']}}</a><p/><p/>
         </div>
     @endif
 
     <div class="well" style="margin: 20px;">
         Thanks for checking out the Online Booking beta!<p/>
 
-        It's currently set to <strong>test mode</strong>, and will not charge customers.<p/>
-
         Feedback or bug reports? Contact us at <a href="mailto:support@clubspeed.com">support@clubspeed.com</a>.
+    </div>
+
+    <div class="text-center" style="margin-bottom: 5px; font-size: 80%">
+    © CLUB SPEED, INC. 2006-{{date('Y')}}
     </div>
 
 <!-- BEGIN LOADING POP-UP -->

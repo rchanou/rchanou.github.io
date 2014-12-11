@@ -12,8 +12,9 @@ class CartController extends BaseController
 {
     public function entry()
     {
-        $settings = Settings::getSettings(); //Update website settings (since step 1 and step 2 can be skipped)
+        $settings = Settings::getSettings(true); //Force a refresh of website settings
         Session::put('settings',$settings);
+        checkForCultureChange();
 
         $itemAddedToCart = null;
         $itemRemovedFromCart = null;
@@ -175,7 +176,7 @@ class CartController extends BaseController
         $cart = Session::get('cart'); //Update the cart one last time
 
         $settings = Session::get('settings');
-        $locale = $settings['locale'];
+        $locale = $settings['numberFormattingLocale'];
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
         $currency = $settings['currency'];
 
@@ -191,7 +192,9 @@ class CartController extends BaseController
                 'virtualCheck' => $virtualCheck,
                 'virtualCheckDetails' => $virtualCheckDetails,
                 'moneyFormatter' => $moneyFormatter,
-                'currency' => $currency
+                'currency' => $currency,
+                'strings' => Strings::getStrings(),
+                'settings' => $settings
             )
         );
     }

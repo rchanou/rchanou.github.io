@@ -15,12 +15,11 @@ class Step1Controller extends BaseController
 {
     public function entry()
     {
-        $settings = Settings::getSettings(true); //Update website settings
-        Session::put('settings',$settings); //and record them in the session
+        $settings = Settings::getSettings(true); //Force a refresh of all settings
+        Session::put('settings',$settings);
+        checkForCultureChange();
 
-        $strings = Strings::getStrings(); //Update website strings
-
-        $maxRacers = Config::get('config.maxRacers'); //Used to determine "How many drivers?" dropdown max range
+        $maxRacers = $settings['maxRacersForDropdown']; //Used to determine "How many drivers?" dropdown max range
 
         $heatTypesAvailable = CS_API::getAvailableBookingsForDropdown(); //Get a list of all available booking types to choose from
 
@@ -41,7 +40,7 @@ class Step1Controller extends BaseController
                 'images' => Images::getImageAssets(),
                 'heatTypes' => $heatTypesAvailable,
                 'maxRacers' => $maxRacers,
-                'strings' => $strings
+                'strings' => Strings::getStrings()
             )
         );
     }

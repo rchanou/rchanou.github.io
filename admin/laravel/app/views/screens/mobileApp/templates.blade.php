@@ -10,7 +10,7 @@
 @stop
 
 @section('pageHeader')
-  Mobile App Templates (Under Construction)
+  Mobile App Templates
 @stop
 
 @section('breadcrumb')
@@ -20,7 +20,7 @@
 @stop
 
 @section('content')
-  <div class="container-fluid">
+  <div id="template-editor-main" class="container-fluid" style="display: none;">
     <div class="row">
       <div class="col-xs-12">
         @if (Session::has("message"))
@@ -135,6 +135,9 @@
 
                 // hide editor scrollbar
                 editor.css('overflow', 'hidden');
+
+                // show entire page after editor is loaded to avoid FOUC
+                $('#template-editor-main').css('display', 'block');
               },
               blur: function(){
                 resizeEditorByName('{{$template->name}}');

@@ -35,9 +35,12 @@ class LogsLogic extends BaseLogic implements \ClubSpeed\Logging\LogInterface {
 
     public function debug($message) {
         if (filter_var(@$_REQUEST['debug'], FILTER_VALIDATE_BOOLEAN)) {
-            // pr($message);
             return $this->log("DEBUG :: " . $message);
         }
+    }
+
+    public function info($message) {
+        return $this->log("INFO :: " . $message);
     }
 
     public function warn($message) {

@@ -8,6 +8,8 @@ use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Templates\TemplateService as Templates;
 use ClubSpeed\Utility\Arrays as Arrays;
 use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Payments\ProductHandlers\ProductHandlerService as Handlers;
+
 
 class BasePayment {
 
@@ -17,10 +19,10 @@ class BasePayment {
     protected $gateway;
     protected $intlCurrencySymbol;
     protected $logPrefix;
+    protected $webapi;
 
-    public function __construct(&$logic, &$handlers, &$paymentService) {
+    public function __construct(&$logic, &$paymentService) {
         $this->logic = $logic;
-        $this->handlers = $handlers;
         $this->paymentService = $paymentService;
     }
 
@@ -43,7 +45,7 @@ class BasePayment {
         $this->gateway = Omnipay::create(@$data['name']);
         $this->gateway->initialize(@$data['options']);
         $this->logPrefix = 'Check #' . @$data['check']['checkId'] . ": Base: ";
-        Log::debug($this->logPrefix . "Starting payment using processor: " . $name);
+        Log::info($this->logPrefix . "Starting payment using processor: " . $name);
     }
 
     protected function passthroughWrapper($params, $callback) {
@@ -63,7 +65,7 @@ class BasePayment {
         $this->init($params); // initialize omnipay library/driver 
         $checkId = Convert::toNumber(@$params['check']['checkId']);
         if (!isset($checkId) || is_null($checkId) || !is_int($checkId))
-            throw new \RequiredArgumentMissingException("Payment processor received an invalid format for checkId! Received: " . @$params['checkId']);
+            throw new \RequiredArgumentMissingException("Payment processor received an invalid format for checkId! Received: " . @$params['check']['checkId']);
         $check = $this->logic->checks->get($checkId);
         if (!isset($check) || is_null($check) || empty($check))
             throw new \InvalidArgumentValueException("Payment processor received a checkId which could not be found in the database! Received: " . $checkId);
@@ -225,7 +227,7 @@ class BasePayment {
                     $giftCardPaymentId = $this->logic->payment->create($giftCardPayment);
                     $giftCardPaymentId = $giftCardPaymentId[$giftCardPayment::$key];
                     $this->logic->giftCardHistory->create($giftCardHistory);
-                    Log::debug($this->logPrefix . "Applied payment #" . $giftCardPaymentId . " for " . $giftCardPayment->PayAmount . " from gift card #" . $giftCardBalance->CrdID);
+                    Log::info($this->logPrefix . "Applied payment #" . $giftCardPaymentId . " for " . $giftCardPayment->PayAmount . " from gift card #" . $giftCardBalance->CrdID);
 
                     // recollect checkTotals each time
                     // to allow database to handle the summations
@@ -277,7 +279,7 @@ class BasePayment {
 
     public function handleSuccess($checkId, &$params, &$response = null) {
 
-        Log::debug($this->logPrefix . "Payment was fully collected from Omnipay processor");
+        Log::info($this->logPrefix . "Payment was fully collected from Omnipay processor");
         // the customer's credit card has been processed at this point
         // or the credit card does not need to be processed (?) (as in, gift cards provided > than total required)
 
@@ -295,20 +297,23 @@ class BasePayment {
                 $params['checkSnapshot'] = clone $checkTotal;
                 // $params['finalCheckPayment'] = $checkTotal->CheckRemainingTotal;
 
-                $payment                  = $this->logic->payment->dummy();
-                $payment->CustID          = $checkTotal->CustID;
-                $payment->CheckID         = $checkTotal->CheckID;
-                $payment->PayAmount       = $checkTotal->CheckRemainingTotal; // we need this information in finalizeCheck
-                $payment->PayDate         = $now;
-                $payment->PayStatus       = Enums::PAY_STATUS_PAID;
-                $payment->PayTax          = $checkTotal->CheckRemainingTax;
-                $payment->PayTerminal     = 'api';// use this?
-                $payment->PayType         = Enums::PAY_TYPE_CREDIT_CARD;
-                $payment->TransactionDate = $now;
-                $payment->ReferenceNumber = $params['transactionReference'];
-                $payment->UserID          = 1; // probably should be non-nullable, onlinebooking userId?
+                $payment                        = $this->logic->payment->dummy();
+                $payment->CustID                = $checkTotal->CustID;
+                $payment->CheckID               = $checkTotal->CheckID;
+                $payment->ExtCardType           = $params['name'];
+                $payment->PayAmount             = $checkTotal->CheckRemainingTotal; // we need this information in finalizeCheck
+                $payment->PayDate               = $now;
+                $payment->PayStatus             = Enums::PAY_STATUS_PAID;
+                $payment->PayTax                = $checkTotal->CheckRemainingTax;
+                $payment->PayTerminal           = 'api';// use this?
+                $payment->PayType               = Enums::PAY_TYPE_EXTERNAL;
+                $payment->TransactionDate       = $now;
+                $payment->ReferenceNumber       = $params['transactionReference'];
+                $payment->ExternalAccountNumber = ''; // front end logs error if this is null
+                $payment->ExternalAccountName   = ''; // front end logs error if this is null
+                $payment->UserID                = 1; // probably should be non-nullable, onlinebooking userId?
                 $paymentId = $this->logic->payment->create($payment); // what if this fails? credit card will be charged, but payment record could not be created (!!!)
-                Log::debug($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId['PayID']);
+                Log::info($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId['PayID']);
             }
             else {
                 // is this an error? the check supposedly doesn't have anything left to be paid, but we are still trying to apply a payment
@@ -321,7 +326,7 @@ class BasePayment {
             // all line items will be processed (gift cards, etc),
             // and receipt email will be sent
         }
-        $this->finalizeCheck($checkId, $params); // should this be below the catch, or at the end of the try?
+        return $this->finalizeCheck($checkId, $params); // should this be below the catch, or at the end of the try?
     }
 
     public function finalizeCheck($checkId, $params) {
@@ -329,13 +334,19 @@ class BasePayment {
         // once all payments have been added to the database
         // update the check
         try {
+            $checkStatus = Enums::CHECK_STATUS_CLOSED;
+            $checkDetails = $this->logic->checkDetails->find(
+                'CheckID $eq ' . $checkId . ' AND R_Points IS NOT NULL'
+            );
+            if (!empty($checkDetails)) // if R_Points non-null, then LEAVE THE CHECK OPEN (!!!) -- requirement of front end
+                $checkStatus = Enums::CHECK_STATUS_OPEN;
             $check = $this->logic->checks->get($checkId);
             $check = $check[0];
-            $check->CheckStatus = 1; // CheckStatus.Closed from VB enum
+            $check->CheckStatus = $checkStatus; // CheckStatus.Closed from VB enum
             $check->Notes = (isset($params['transactionReference']) ? 'Transaction Reference #' . $params['transactionReference'] : 'No Transaction Reference');
             $check->ClosedDate = Convert::getDate();
             $this->logic->checks->update($check->CheckID, $check);
-            Log::debug($this->logPrefix . 'Closed Check');
+            Log::info($this->logPrefix . 'Closed Check');
         }
         catch (\Exception $e) {
             Log::error($this->logPrefix . 'Unable to update check!', $e);
@@ -350,35 +361,19 @@ class BasePayment {
                 $metadata = Arrays::first($checkData['details'], function($val, $key, $arr) use ($checkTotal) {
                     return isset($val['checkDetailId']) && $val['checkDetailId'] == $checkTotal->CheckDetailID;
                 });
-                // who handles the for loop for quantity? this, or the handler?
-                // note that these should really not be Qty, but should be their own CheckDetail records items
-                // handling here to represent an easier update if Qty ever gets deprecated
-
-                // changing this -- allow the handlers to do what they will with Qty
-                // since Qty can signify different actions based on the iteration count.
-                // for example: adding to heat - first iteration = new HeatDetails, 
-                // later iterations = incrementing the NumberOfReservations
-                $handle = $this->handlers->handle($checkTotal, $metadata);
+                $handle = Handlers::handle($checkTotal, $metadata);
                 if (isset($handle['error']))
                     $errored[] = $handle;
                 else
-                    $handled[] = $handle;
-
-
-                // for ($i = 0; $i < $checkTotal->Qty; $i++) {
-                //     $handle = $this->handlers->handle($checkTotal, $metadata);
-                //     if (isset($handle['error']))
-                //         $errored[] = $handle;
-                //     else
-                //         $handled[] = $handle;
-                // }
+                    $handled[$checkTotal->CheckDetailID] = $handle['success']; // what to do here? what if qty is greater than 1?
             }
             catch (\Exception $e) {
                 $errored[] = $e->getMessage(); // to be used for debugging purposes?
             }
         }
-        Log::debug($this->logPrefix . "Finished processing check details");
+        Log::info($this->logPrefix . "Finished processing check details");
 
+        $receiptData = array();
         try {
             $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
             $businessName = $businessName[0];
@@ -392,19 +387,6 @@ class BasePayment {
             $emailFrom = $emailFrom[0];
             $emailFrom = array($emailFrom->SettingValue => $businessName);
 
-            // <div>Order #{{checkId}}</div>
-            //     </div>
-            // </div>
-            // <div id="greeting">
-            //     <h3>Hello {{personName}},</h3>
-            //     <p>
-            //         Thank you for shopping with {{businessName}}!
-            //         We have received payment for <span class="no-wrap">order #{{checkId}}</span>.
-            // {% for detail in details %}
-            //     <tr>
-            //         <td>{{detail.name}}</td>
-            //         <td>{{detail.price}}</td>
-
             $snapshot = $params['checkSnapshot'];
             $receiptData = array(
                 'checkId'         => $checkTotal->CheckID
@@ -416,10 +398,17 @@ class BasePayment {
                 , 'details'       => array()
             );
             foreach($checkTotals as $checkTotal) {
+                if (isset($handled[$checkTotal->CheckDetailID]) && !empty($handled[$checkTotal->CheckDetailID]))
+                    $description = $handled[$checkTotal->CheckDetailID];
+                else if (!empty($checkTotal->ProductName))
+                    $description = $checkTotal->ProductName;
+                else
+                    $description = '(No product description!)';
+
                 $receiptData['details'][] = array(
-                    'name'       => $checkTotal->ProductName
-                    , 'quantity' => $checkTotal->Qty
-                    , 'price'    => sprintf('%0.2f', $checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
+                      'description' => $description // see above
+                    , 'quantity'    => $checkTotal->Qty
+                    , 'price'       => sprintf('%0.2f', $checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
                 );
             }
 
@@ -440,6 +429,9 @@ class BasePayment {
             ));
             $receiptEmailBodyHtml = $receiptEmailBodyHtml[0];
             $receiptEmailBodyHtml = $receiptEmailBodyHtml->Value;
+
+            // $receiptEmailBodyHtml = file_get_contents(__DIR__.'/../../migrations/resources/201411041100 - HTML01 - receipt.html'); // for testing purposes
+
             $receiptEmailBodyHtml = Templates::buildFromString($receiptEmailBodyHtml, $receiptData);
 
             $receiptEmailBodyText = $this->logic->settings->match(array(
@@ -460,17 +452,60 @@ class BasePayment {
                 array($businessName, $checkId),
                 $receiptEmailSubject
             );
-            $mail = Mail::builder()
-                ->subject($receiptEmailSubject)
-                ->from($emailFrom)
-                ->to($emailTo)
-                ->body($receiptEmailBodyHtml)
-                ->alternate('Text Body TODO TODO TODO');
-            Mail::send($mail);
-            Log::debug($this->logPrefix . "Receipt email has been sent to: " . $customer->EmailAddress);
+
+            // embed the email sending logic, as we can't really send an email if we can't build the template
+            try {
+                $sendCustomerReceiptEmail = isset($params['sendCustomerReceiptEmail']) ? Convert::toBoolean($params['sendCustomerReceiptEmail']) : true; // default to true
+                if (!$sendCustomerReceiptEmail)
+                    Log::info($this->logPrefix . 'API Call has opted out of sending the customer a receipt email!');
+                else
+                    Log::info($this->logPrefix . 'Receipt will be emailed to Customer #' . $customer->CustID . ' at ' . $customer->EmailAddress);
+
+                $sendReceiptCopyTo = $this->logic->controlPanel->match(array(
+                    'TerminalName' => 'Booking',
+                    'SettingName' => 'sendReceiptCopyTo'
+                ));
+                if (!empty($sendReceiptCopyTo)) {
+                    $sendReceiptCopyTo = $sendReceiptCopyTo[0];
+                    $sendReceiptCopyTo = $sendReceiptCopyTo->SettingValue; // this will default to an empty string
+                    if (!empty($sendReceiptCopyTo)) {
+                        $sendReceiptCopyTo = explode(",", $sendReceiptCopyTo); // we should be able to use this directly as the BCC
+                        array_walk($sendReceiptCopyTo, function(&$val) {
+                            $val = trim($val); // get rid of any additional whitespace in the comma-delimited list of emails
+                        });
+                    }
+                }
+                if (!empty($sendReceiptCopyTo)) // check again to see if its still empty
+                    Log::info($this->logPrefix . 'Receipt copies will be sent to the following addresses: ' . print_r($sendReceiptCopyTo, true));
+                else
+                    Log::info($this->logPrefix . 'No BCC list was found for receipt copies!');
+
+                // check to see if we have no override, or a BCC list
+                // if we have either or, then attempt to send the mail
+                if ($sendCustomerReceiptEmail || !empty($sendReceiptCopyTo)) {
+                    $mail = Mail::builder()
+                        ->subject($receiptEmailSubject)
+                        ->from($emailFrom)
+                        ->body($receiptEmailBodyHtml)
+                        ->alternate('Text Body TODO TODO TODO'); // STILL NEED TO DO THIS
+                    if ($sendCustomerReceiptEmail)
+                        $mail->to($emailTo);
+                    if (!empty($sendReceiptCopyTo))
+                        $mail->bcc($sendReceiptCopyTo);
+                    Mail::send($mail);
+
+                    // update this message - the email may or may not have been sent, should we signify this?
+                    Log::info($this->logPrefix . 'Receipt email was sent for Customer #' . $customer->CustID);
+                }
+                // else
+                    // Log::info($this->logPrefix . 'Receipt email was not sent, since no BCC list was found and the API opted out of sending the customer a receipt!');
+            }
+            catch (\Exception $e) {
+                Log::error($this->logPrefix . "Receipt email could not be sent to Customer #" . $customer->CustID . '!', $e);
+            }
         }
-        catch(\Exception $e) {
-            Log::error($this->logPrefix . "Receipt email could not be sent to: " . $customer->EmailAddress, $e);
+        catch (\Exception $e) {
+            Log::error($this->logPrefix . "Receipt email could not be built!", $e);
         }
 
         if (!empty($errored)) {
@@ -478,6 +513,8 @@ class BasePayment {
             die(print_r($errored));
             // TODO -- send off a support email if product handlers had errors?
         }
+
+        return $receiptData;
     }
 
     public function handleRedirect($check, $response) {
@@ -506,10 +543,64 @@ class BasePayment {
 
         Log::error($this->logPrefix . "Unable to finish processing check! Message: " . $message);
         $checkTotals = $this->refresh($checkId);
-        $giftCardPayments = $this->logic->payment->match(array(
-            'CheckID' => $checkTotals->CheckID
-            , 'PayType' => Enums::PAY_TYPE_GIFT_CARD
-        ));
+
+        $checkDetails = array();
+        try {
+            $checkDetails = $this->logic->checkDetails->match(array(
+                'CheckID' => $checkId
+            ));
+            Log::info($this->logPrefix . "Check Detail Count: " . count($checkDetails));
+        }
+        catch(\Exception $e) {
+            Log::error($this->logPrefix . "Unable to find any check details by CheckID!", $e);
+        }
+        foreach($checkDetails as $checkDetail) {
+            try {
+                $this->logic->checkDetails->update($checkDetail->CheckDetailID, array(
+                    'Status' => Enums::CHECK_DETAIL_STATUS_HAS_VOIDED,
+                    'VoidNotes' => $this->logPrefix . 'Voiding from purchase error: ' . $message
+                ));
+                Log::info($this->logPrefix . "Voided CheckDetail #" . $checkDetail->CheckDetailID);
+            }
+            catch(\Exception $e) {
+                Log::error($this->logPrefix . "Unable to void CheckDetail #" . $checkDetail->CheckDetailID, $e);
+            }
+        }
+        try {
+            $this->logic->checks->update($checkId, array(
+                'CheckStatus' => Enums::CHECK_STATUS_CLOSED
+            ));
+            Log::info($this->logPrefix . 'Closed check after failed payment!');
+        }
+        catch (\Exception $e) {
+            Log::error($this->logPrefix . "Unable to close check after failed payment!", $e);
+        }
+        try {
+            $this->logic->checks->applyCheckTotal($checkId);
+            Log::info($this->logPrefix . 'Called dbo.ApplyCheckTotal');
+        }
+        catch (\Exception $e) {
+            Log::error($this->logPrefix . 'Unable to call dbo.ApplyChecktotal!', $e);
+        }
+
+        // assume that the check will be re-created, not re-used on failure
+
+        // find all check details
+        // void all check details (cd.Status = 2)
+        // close the check record
+        // apply check totals
+
+        $giftCardPayments = array();
+        try {
+            $giftCardPayments = $this->logic->payment->match(array(
+                'CheckID' => $checkTotals->CheckID
+                , 'PayType' => Enums::PAY_TYPE_GIFT_CARD
+            ));
+            Log::info($this->logPrefix . "Gift card payment count: " . count($giftCardPayments));
+        }
+        catch(\Exception $e) {
+            Log::error($this->logPrefix . "Unable to search for gift card payments!", $e);            
+        }
         foreach($giftCardPayments as $giftCardPayment) {
             try {
                 $giftCardBalance = $this->logic->giftCardBalance->match(array(
@@ -518,7 +609,7 @@ class BasePayment {
                 $giftCardBalance = $giftCardBalance[0];
                 $giftCardPayment->PayStatus = Enums::PAY_STATUS_VOID;
                 $this->logic->payment->update($giftCardPayment->PayID, $giftCardPayment);
-                Log::debug($this->logPrefix . "Voided Payment #" . $giftCardPayment->PayID . " for gift card #" . $giftCardBalance->CrdID);
+                Log::info($this->logPrefix . "Voided Payment #" . $giftCardPayment->PayID . " for gift card #" . $giftCardBalance->CrdID);
             }
             catch (\Exception $e) {
                 Log::error($this->logPrefix . "Unable to void Payment #" . $giftCardPayment->PayID . " for gift card #" . $giftCardBalance->CrdID, $e);
@@ -532,10 +623,10 @@ class BasePayment {
                 $giftCardHistory->UserID        = 0; // support id for now?
                 $giftCardHistory->Points        = $giftCardPayment->PayAmount; // refund the gift card
                 $this->logic->giftCardHistory->create($giftCardHistory);
-                Log::debug($this->logPrefix . "Refunded " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " from check error");
+                Log::info($this->logPrefix . "Refunded " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " from check error");
             }
             catch (\Exception $e) {
-                Log::error($this->logPrefix . "Unable to refund " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " for original check error");
+                Log::error($this->logPrefix . "Unable to refund " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " for original check error", $e);
             }
         }
 

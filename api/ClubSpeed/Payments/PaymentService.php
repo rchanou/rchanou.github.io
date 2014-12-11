@@ -16,7 +16,6 @@ class PaymentService {
 
     public function __construct(&$CSLogic) {
         $this->logic = $CSLogic;
-        $this->handlers = new \ClubSpeed\Payments\ProductHandlers\ProductHandlerService($this, $this->logic);
         $this->_lazy = array();
         $this->allowed = array(
             'Dummy',
@@ -50,7 +49,7 @@ class PaymentService {
     private function load($prop) {
         $prop = '\ClubSpeed\Payments\\' . ucfirst($prop) . 'Payment';
         if (!isset($this->_lazy[$prop])) {
-            $this->_lazy[$prop] = new $prop($this->logic, $this->handlers, $this);
+            $this->_lazy[$prop] = new $prop($this->logic, $this);
         }
         return $this->_lazy[$prop];
     }

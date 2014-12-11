@@ -90,9 +90,14 @@ class Settings
             'forceRegistrationIfAuthenticatingViaThirdParty' => false,
             'registrationEnabled' => true,
             'enableFacebook' => true,
-            'locale' => 'en_US',
-            'currency' => 'USD',
-            'termsAndConditions' => '<strong>Please contact our facility for our latest Terms & Conditions.</strong>'
+            'termsAndConditions' => '<strong>Please contact our facility for our latest Terms & Conditions.</strong>',
+            'showLanguageDropdown' => false,
+            'dateDisplayFormat' => 'Y-m-d', //http://php.net/manual/en/function.date.php
+            'timeDisplayFormat' => 'H:i', //http://php.net/manual/en/function.date.php
+            'currency' => 'USD', //http://www.xe.com/iso4217.php
+            'numberFormattingLocale' => 'en_US', //http://www.oracle.com/technetwork/java/javase/javase7locales-334809.html
+            'maxRacersForDropdown' => 50,
+            'currentCulture' => 'en-US'
         );
 
         self::$currentSettings = self::$defaultSettings;
@@ -100,6 +105,11 @@ class Settings
         $settings = CS_API::getSettings(); //Kiosk settings
         $bookingSettings = CS_API::getBookingSettings(); //Online booking settings
         $templates = CS_API::getTemplates(); //Online booking templates
+
+        if ($settings === null || $bookingSettings === null || $templates === null)
+        {
+            return Redirect::to('/disconnected');
+        }
 
         $templatesByName = array();
         if ($templates != null)
@@ -137,9 +147,6 @@ class Settings
         }
 
         self::$currentSettings['dropdownOptions'] = $dropdownOptions;
-
-        self::$currentSettings['locale'] = Config::get('config.locale') != null ? Config::get('config.locale') : self::$currentSettings['locale'];
-        self::$currentSettings['currency'] = Config::get('config.currency') != null ? Config::get('config.currency') : self::$currentSettings['currency'];
 
         self::$initialized = true;
     }

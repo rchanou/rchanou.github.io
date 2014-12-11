@@ -13,6 +13,9 @@ class Tokens {
      * Document: TODO
      */
     public static function generate() {
-        return sha1(uniqid('', true)); // best practice? possibly seed with username?
+        // php allows us to check bool after the call 
+        // to see if a cryptographically secure algorithm was properly used.
+        // this shouldn't be a problem with any of our servers, though.
+        return bin2hex(openssl_random_pseudo_bytes(32, $bool)); // returns 64 character string
     }
 }

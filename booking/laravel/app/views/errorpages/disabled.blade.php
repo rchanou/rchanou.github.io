@@ -6,7 +6,7 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-Disabled! - Online Booking
+{{$strings['str_disabledTitle']}}
 @stop
 <!-- END PAGE TITLE -->
 
@@ -14,11 +14,11 @@ Disabled! - Online Booking
 <!-- PAGE CONTENT -->
 @section('steps')
 <div class="steps">
-    <div style="visibility: hidden">{{link_to('step1','See the Lineup')}} > Choose a Race > Review Your Order
+    <div style="visibility: hidden">{{link_to('step1',$strings['str_seeTheLineup'])}} > {{$strings['str_chooseARace']}} > {{$strings['str_reviewYourOrder']}}
         @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-        > {{link_to('checkout','Checkout')}}
+        > {{link_to('checkout',$strings['str_checkout'])}}
         @else
-        > Checkout
+        > {{$strings['str_checkout']}}
         @endif
     </div>
 </div>
@@ -28,10 +28,10 @@ Disabled! - Online Booking
 
 <div class="mainBodyContent">
     <div class="centered">
-        <h2>Online Registration Disabled!</h2>
+        <h2>{{$strings['str_onlineBookingDisabled']}}</h2>
         <img src="{{asset($images['disconnected'])}}"><p/>
-        <h4>Online registration has been temporarily disabled.<br/>
-            Please try again later!</h4>
+        <h4>{{$strings['str_temporarilyDisabled']}}<br/>
+            {{$strings['str_pleaseTryAgainLater']}}</h4>
     </div>
 </div>
 

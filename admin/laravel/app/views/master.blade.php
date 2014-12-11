@@ -78,6 +78,8 @@
                     <li>{{link_to('/booking/settings','Settings')}}</li>
                     <li>{{link_to('/booking/payments','Payment Processors')}}</li>
                     <li>{{link_to('/booking/templates','Templates')}}</li>
+                    <li>{{link_to('/booking/translations','Translations')}}</li>
+                    <li>{{link_to('/docs/Club Speed - Online Booking Guide.pdf','Documentation',array('target' => '_blank'))}}</li>
                 </ul>
             </li>
             @if (@$controller == 'RegistrationController')
@@ -97,6 +99,17 @@
             @endif
                 <a href="{{URL::to('reports')}}"><i class="fa fa-file-o"></i> <span>Reports</span></a>
             </li>
+            {{--@if (@$controller == 'MobileAppController')
+            <li class="active open">
+            @else
+            <li class="submenu">
+            @endif
+                <a href="#"><i class="fa fa-mobile"></i> <span>Mobile App</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <ul>
+                    <li>{{link_to('/mobileApp/menuItems','Menu Items')}}</li>
+                    <li>{{link_to('/mobileApp/templates','Templates')}}</li>
+                </ul>
+            </li>--}}
         </ul>
 
     </div>
@@ -173,6 +186,10 @@ var config =
               $(this).remove();
           });
         }, 5000);
+
+
+        $('[data-toggle="popover"]').popover()
+
     });
 </script>
 @show

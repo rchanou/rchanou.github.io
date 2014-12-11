@@ -112,16 +112,20 @@ class CS_API
         self::initialize();
 
         $heatsFiltered = array();
+        $heatNamesAddedSoFar = array();
+
         if ($heats != null)
         {
             foreach($heats as $currentHeat)
             {
-                if (isset($currentHeat['heatSpotsAvailableOnline']) && $currentHeat['heatSpotsAvailableOnline'] >= $minNumberOfSpots)
+                if (isset($currentHeat['heatSpotsAvailableOnline']) && $currentHeat['heatSpotsAvailableOnline'] >= $minNumberOfSpots && !in_array($currentHeat['name'],$heatNamesAddedSoFar))
                 {
                     $heatsFiltered[] = $currentHeat;
+                    $heatNamesAddedSoFar[] = $currentHeat['name'];
                 }
             }
         }
+
         return $heatsFiltered;
     }
 
@@ -686,7 +690,7 @@ class CS_API
     {
         self::initialize();
 
-        $url = self::$apiURL . "/settings/get.json?group=kiosk&key=" . self::$privateKey;
+        $url = self::$apiURL . "/settings/get.json?group=kiosk&key=" . self::$privateKey; //TODO: group=kiosk? Investigate.
 
         $result = self::call($url);
 
@@ -733,8 +737,80 @@ class CS_API
         {
             return null;
         }
-
     }
+
+    /*
+    ################
+    # TRANSLATIONS #
+    ################
+    */
+
+    public static function getTranslations()
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/translations?namespace=Booking&key=' . self::$privateKey;;
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null)
+        {
+            if (isset($response->body->translations))
+            {
+                $translationsByCulture = array();
+                foreach($response->body->translations as $currentTranslation)
+                {
+                    if ($currentTranslation->value != "")
+                    {
+                        $translationsByCulture[$currentTranslation->culture][$currentTranslation->name] = $currentTranslation->value;
+                    }
+                }
+                return $translationsByCulture;
+            }
+            else
+            {
+                return array();
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function updateEnglishStrings($defaultEnglishStrings)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/translations/batch?key=' . self::$privateKey;
+
+        $result = self::call($url,$defaultEnglishStrings,'POST');
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null)
+        {
+            if (isset($response->body->translation))
+            {
+                return $response->body->translation;
+            }
+            else if (isset($response->body->translations)) //Can differ based on API version
+            {
+                return $response->body->translations;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
 
     /*
     #################

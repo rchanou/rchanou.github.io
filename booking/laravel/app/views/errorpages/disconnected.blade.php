@@ -6,7 +6,7 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-Disconnected! - Online Booking
+{{$strings['str_disconnectedTitle']}}
 @stop
 <!-- END PAGE TITLE -->
 
@@ -14,12 +14,12 @@ Disconnected! - Online Booking
 <!-- PAGE CONTENT -->
 @section('steps')
 <div class="steps">
-    {{link_to('step1','See the Lineup')}} > Choose a Race > Review Your Order
-    @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-    > {{link_to('checkout','Checkout')}}
-    @else
-    > Checkout
-    @endif
+    {{link_to('step1',$strings['str_seeTheLineup'])}} > {{$strings['str_chooseARace']}} > {{$strings['str_reviewYourOrder']}}
+        @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
+        > {{link_to('checkout',$strings['str_checkout'])}}
+        @else
+        > {{$strings['str_checkout']}}
+        @endif
 </div>
 @stop
 
@@ -27,10 +27,10 @@ Disconnected! - Online Booking
 
 <div class="mainBodyContent">
     <div class="centered">
-        <h2>Disconnected!</h2>
+        <h2>{{$strings['str_disconnected']}}</h2>
         <img src="{{asset($images['disconnected'])}}"><p/>
-        <h4>Unable to reach the track's server.<br/>
-        Please try again later!</h4>
+        <h4>{{$strings['str_unableToReachServer']}}<br/>
+        {{$strings['str_pleaseTryAgainLater']}}</h4>
     </div>
 </div>
 

@@ -69,6 +69,7 @@ class SqlBuilder {
             ."\n    " . implode(", ", $insert['aliases'])
             ."\n)"
             ;
+
         return $insert;
     }
 
@@ -204,6 +205,12 @@ class SqlBuilder {
                 return null;
             }
         }
+        // if $where['columns'] is not set, throw an error?
+        // shouldn't ever happen unless we get a server error,
+        // or something sneaks by the logic classes.
+        if (empty($where['columns']))
+            throw new \CSException("Attempted to build a where clause for " . $record::$table . " without any columns!");
+
         foreach($where['columns'] as $key => $val) {
             $where['columns'][$key] = "\n    "
                 . @$val['connector'] . ''
@@ -221,10 +228,11 @@ class SqlBuilder {
             throw new \InvalidArgumentException("Attempted to update using a non BaseRecord! Received: " . $record);
 
         $identity = self::getRecordIdentity($record);
-        if (Objects::isEmpty($identity)) // just to be safe -- updates still only designed to be a single update by primary keys
+        if (Objects::isEmpty($identity))
             throw new \CSException("Attempted to update using a record which did not contain any primary keys!");
         if (!self::allKeysSet($identity)) // is empty is not sufficient -- what if we have part of a primary key?
             throw new \CSException("Attempted to update using a record which did not contain a full set of primary keys! Received: " . print_r($record, true)); // possible security risk?
+
 
         $where = self::buildWhere($identity);
         $record = self::stripRecordIdentity($record); // more testing required

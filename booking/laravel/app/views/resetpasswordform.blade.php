@@ -2,7 +2,7 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-Pick A New Password - Online Booking
+{{$strings['str_resetPasswordFormTitle']}}
 @stop
 <!-- END PAGE TITLE -->
 
@@ -10,21 +10,21 @@ Pick A New Password - Online Booking
 
 @section('steps')
 <div class="steps">
-    {{link_to('step1','See the Lineup')}} >
+    {{link_to('step1',$strings['str_seeTheLineup'])}} >
     @if(Session::has('lastSearch'))
-    {{link_to('step2','Choose a Race')}} >
+    {{link_to('step2',$strings['str_chooseARace'])}} >
     @else
-    Choose a Race >
+    {{$strings['str_chooseARace']}} >
     @endif
     @if(Session::has('authenticated'))
-    {{link_to('cart','Review Your Order')}}
+    {{link_to('cart',$strings['str_reviewYourOrder'])}}
     @else
-    Review Your Order
+    {{$strings['str_reviewYourOrder']}}
     @endif
     @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-    > {{link_to('checkout','Checkout')}}
+    > {{link_to('checkout',$strings['str_checkout'])}}
     @else
-    > Checkout
+    > {{$strings['str_checkout']}}
     @endif
 </div>
 @stop
@@ -32,17 +32,17 @@ Pick A New Password - Online Booking
 @section('content')
 <div class="mainBodyContent">
     <div class="mainBodyHeader">
-        Password Reset Form
+        {{$strings['str_passwordResetForm']}}
     </div>
     <!-- PASSWORD RESET FORM -->
         @if($userNeedsToSubmitForm)
             <div class="loginToAccount">
                 {{Form::open(array('action' => 'ResetPasswordController@resetPasswordSubmission','id' => 'requestPasswordResetForm'))}}
-                    <div class="formHeader">Please choose a new password</div>
-                    <label for="newpassword"><strong>New Password:</strong> <span class="requiredAsterisk">*</span></label> <input type="password" id="newpassword" name="newpassword" class="required validatePresence"><br/><br/>
-                    <label for="confirmnewpassword"><strong>Confirm New Password:</strong> <span class="requiredAsterisk">*</span></label> <input type="password" id="confirmnewpassword" name="confirmnewpassword" class="required validatePresence"><br/><br/>
+                    <div class="formHeader">{{$strings['str_pleaseChooseANewPassword']}}</div>
+                    <label for="newpassword"><strong>{{$strings['str_newPassword']}}:</strong> <span class="requiredAsterisk">*</span></label> <input type="password" id="newpassword" name="newpassword" class="required validatePresence"><br/><br/>
+                    <label for="confirmnewpassword"><strong>{{$strings['str_confirmNewPassword']}}:</strong> <span class="requiredAsterisk">*</span></label> <input type="password" id="confirmnewpassword" name="confirmnewpassword" class="required validatePresence"><br/><br/>
                     <div class="rightAligned">
-                        <button type="submit" id="resetMyPasswordButton" class="formButton">Reset My Password</button>
+                        <button type="submit" id="resetMyPasswordButton" class="formButton">{{$strings['str_resetMyPassword']}}</button>
                     </div>
                 <input type="hidden" name="email" value="{{$email}}">
                 <input type="hidden" name="token" value="{{$authToken}}">
@@ -52,16 +52,16 @@ Pick A New Password - Online Booking
         @endif
         @if(isset($resetSuccessful) && $resetSuccessful)
         <div class="alert alert-success alert-dismissable centered" role="alert">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            Success! Your password has been reset. <p/>Redirecting to the search page.
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">{{$strings['str_close']}}</span></button>
+            {{$strings['str_successPasswordResetFinal']}} <p/>{{$strings['str_redirectingToSearchPage']}}
             <script type="text/javascript">
                 var timer = setTimeout(function(){ window.location='{{action('Step1Controller@entry')}}';}, 5000);
             </script>
         </div>
         @elseif(isset($resetSuccessful) && !$resetSuccessful)
             <div class="alert alert-danger alert-dismissable centered" role="alert">
-                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                The authorization link you used is invalid or expired. <p/>Please {{link_to('resetpassword','request a new password link')}}.
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">{{$strings['str_close']}}</span></button>
+                {{$strings['str_invalidResetLink']}} <p/>{{$strings['str_please']}} {{link_to('resetpassword',$strings['str_requestANewPasswordLink'])}}.
             </div>
         @endif
 </div>
@@ -75,7 +75,7 @@ Pick A New Password - Online Booking
 <script>
 $().ready( function() {
 
-    $.validator.addMethod("requiredField",$.validator.methods.required,"This field is required.");
+    $.validator.addMethod("requiredField",$.validator.methods.required,"{{$strings['str_thisFieldIsRequired']}}");
     $.validator.addClassRules("required", {requiredField: true});
 
     $("#requestPasswordResetForm").validate({
@@ -97,7 +97,7 @@ $().ready( function() {
         messages:
         {
             confirmnewpassword: {
-                equalTo: 'Passwords do not match'
+                equalTo: '{{$strings['str_passwordsDoNotMatch']}}'
             }
         }
 

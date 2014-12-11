@@ -56,7 +56,14 @@ $settings = array(
 	'reservationTimeout' => 30*60,
 	'autoAddRacerToHeat' => true,
     'showTermsAndConditions' => true,
-    'sendReceiptCopyTo' => ''
+    'sendReceiptCopyTo' => '',
+    'showLanguageDropdown' => false,
+    'dateDisplayFormat' => 'Y-m-d', //http://php.net/manual/en/function.date.php
+    'timeDisplayFormat' => 'H:i', //http://php.net/manual/en/function.date.php
+    'currency' => 'USD', //http://www.xe.com/iso4217.php
+    'numberFormattingLocale' => 'en_US', //http://www.oracle.com/technetwork/java/javase/javase7locales-334809.html
+    'maxRacersForDropdown' => 50,
+    'currentCulture' => 'en-US'
 	);
 
 error_reporting(E_ALL);

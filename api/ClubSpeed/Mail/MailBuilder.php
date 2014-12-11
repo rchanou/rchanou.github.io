@@ -4,9 +4,13 @@ namespace ClubSpeed\Mail;
 
 class MailBuilder {
 
-    public $subject;
+    // potential weirdness with public properties the same names as public functions ?
+    // (php seems to handle this ok...)
+    public $subject; 
     public $from;
     public $to;
+    public $cc;
+    public $bcc;
     public $body;
     public $alternate;
 
@@ -26,6 +30,16 @@ class MailBuilder {
 
     public function to($to) {
         $this->to = $to;
+        return $this;
+    }
+
+    public function cc($cc) {
+        $this->cc = $cc;
+        return $this;
+    }
+
+    public function bcc($bcc) {
+        $this->bcc = $bcc;
         return $this;
     }
 

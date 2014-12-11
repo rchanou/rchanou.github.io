@@ -8,6 +8,7 @@ use ClubSpeed\Remoting as Remoting;
 use ClubSpeed\Security\Authenticate as Authenticate;
 use ClubSpeed\Logging\LogService as LogService;
 use ClubSpeed\Mail\MailService as MailService;
+use ClubSpeed\Payments\ProductHandlers\ProductHandlerService as ProductHandlerService;
 
 // ensure the Composer AutoLoader is included
 require_once(__DIR__.'/../vendors/autoload.php'); // ~ 4-5ms
@@ -25,6 +26,7 @@ $db             = $GLOBALS['db']            = new Database\DbService($conn, $con
 $logic          = $GLOBALS['logic']         = new Logic\LogicService($db);  // ~ 1ms
 $webapi         = $GLOBALS['webapi']        = new Remoting\WebApiRemoting($logic, $db);
 
+
 // inject the LogicService into the static Authenticate class
 Authenticate::initialize($logic); // ~ 0ms
 
@@ -33,3 +35,6 @@ LogService::initialize($logic->logs); // ~ 2-3ms
 
 // inject the LogicService into the static MailService class, and name the desired MailInterface (lazy-loading)
 MailService::initialize($logic, 'Swift'); // ~ 1ms
+
+// inject the LogicService into the static ProductHandlerService class
+ProductHandlerService::initialize($logic);

@@ -20,7 +20,7 @@
 @stop
 
 @section('content')
-  <div class="container-fluid">
+  <div id="template-editor-main" class="container-fluid" style="display: none;">
     <div class="row">
       <div class="col-xs-12">
         @if (Session::has("message"))
@@ -36,13 +36,19 @@
         @if ($currentOnlineBookingState == 'disabled_manually')
         <div class="alert alert-warning">
             <p>(Note: Online Booking is <strong>current disabled</strong> because the "Enable Online Booking" setting is not checked.</p>
-            To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+            To access Online Booking while it's disabled (for testing), <a href="{{'https://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
         </div>
         @endif
         @if ($currentOnlineBookingState == 'disabled_dummypayments')
         <div class="alert alert-warning">
             <p>(Note: Online Booking is <strong>current disabled</strong> because the site is using the Dummy payment processor.)</p>
-            To access Online Booking while it's disabled (for testing), <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+            To access Online Booking while it's disabled (for testing), <a href="{{'https://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
+        </div>
+        @endif
+        @if ($currentOnlineBookingState == 'missing_translations')
+        <div class="alert alert-warning">
+            <p>(Note: Online Booking is <strong>missing some translations</strong> for the current culture. They will default to English (US).)</p>
+            Please proceed to the <a href="{{URL::to('translations')}}">Translations section</a> and update those translations.
         </div>
         @endif
         <div class="widget-box">
@@ -81,7 +87,7 @@
                       </p>
                     @endif
                   </div>
-                </div>﻿
+                </div>
               @endforeach
             {{ Form::close() }}
           </div>
@@ -147,6 +153,9 @@
 
                 // hide editor scrollbar
                 editor.css('overflow', 'hidden');
+
+                // show entire page after editor is loaded to avoid FOUC
+                $('#template-editor-main').css('display', 'block');
               },
               blur: function(){
                 resizeEditorByName('{{$template->name}}');
@@ -164,10 +173,6 @@
           });
         } else {
           $('#editor_{{$template->name}}').autosize();
-          /*$('#editor_{{$template->name}}').keydown(function(){
-            console.log('inputi');
-            $(this).autosize();
-          });*/
         }
       @endforeach
 

@@ -6,7 +6,7 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-Success! - Online Booking
+{{$strings['str_successTitle']}}
 @stop
 <!-- END PAGE TITLE -->
 
@@ -14,11 +14,11 @@ Success! - Online Booking
 <!-- PAGE CONTENT -->
 @section('steps')
 <div class="steps">
-    <div>{{link_to('step1','See the Lineup')}} > Choose a Race > Review Your Order
+    <div>{{link_to('step1',$strings['str_seeTheLineup'])}} > {{$strings['str_chooseARace']}} > {{$strings['str_reviewYourOrder']}}
         @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-        > {{link_to('checkout','Checkout')}}
+        > {{link_to('checkout',$strings['str_checkout'])}}
         @else
-        > Checkout
+        > {{$strings['str_checkout']}}
         @endif
     </div>
 </div>
@@ -28,14 +28,14 @@ Success! - Online Booking
 
 <div class="mainBodyContent">
     <div class="centered">
-        <h2>Success!</h2>
+        <h2>{{$strings['str_success']}}</h2>
         <img src="{{asset($images['success'])}}"><p/>
-        <h4>Thank you for your order<br/>
-            We'll see you on the track!</h4>
+        <h4>{{$strings['str_thankYouForYourOrder']}}<br/>
+            {{$strings['str_weWillSeeYouOnTheTrack']}}</h4>
 
-            Your payment confirmation number is {{$checkId}}.<p/>
+            {{$strings['str_yourPaymentConfirmationNumberIs']}} {{$checkId}}.<p/>
 
-            Please print this page for your records.<br/>
+            {{$strings['str_pleasePrintThisPageForYourRecords']}}<br/>
     </div>
 
 

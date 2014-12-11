@@ -9,15 +9,15 @@ class MobileAppController extends BaseController
                     . '<b>Order #:</b> {{checkId}}<br/>'
                     . '<b>Customer\'s First Name:</b> {{customer}}<br/>'
                     . '<b>Your Business Name:</b> {{business}}<br/>'
-                    . '<b>Item Description:</b> {{detail.name}}<br/>'
+                    . '<b>Item Description:</b> {{detail.description}}<br/>'
                     . '<b>Item Quantity:</b> {{detail.quantity}}<br/>'
                     . '<b>Item Price:</b> {{detail.price}}<br/>'
                     . '<b>Subtotal:</b> {{checkSubtotal}}<br/>'
                     . '<b>Estimated Tax:</b> {{checkTax}}<br/>'
                     . '<b>Gift Card Deduction:</b> {{giftCardTotal}}<br/>'
                     . '<b>Total:</b> {{checkTotal}}';
-      
-      // Mobile App Templates   
+
+      // Mobile App Templates
       $this->templates = array(
         (object)array(
           'displayName' => 'Track Info (HTML)',
@@ -40,10 +40,10 @@ class MobileAppController extends BaseController
             //Redirect to the previous page with an appropriate error message
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
-        return View::make('/screens/mobileApp/manage',array('controller' => 'MobileAppController'));
+        return View::make('/screens/mobileApp/menuItems',array('controller' => 'MobileAppController'));
     }
 
-    public function settings()
+    public function menuItems()
     {
         $session = Session::all();
         if (!(isset($session["authenticated"]) && $session["authenticated"]))
@@ -55,27 +55,9 @@ class MobileAppController extends BaseController
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
 
-        $mobileAppSettings = CS_API::getJSON('settings/get', array('group' => 'mobileApp'));
-        
-        if ($mobileAppSettings === null)
-        {
-            return Redirect::to('/disconnected');
-        }
-        $mobileAppSettingsCheckedData = array();
-        $mobileAppSettingsData = array();
-        foreach($mobileAppSettings->settings as $setting)
-        {
-            $mobileAppSettingsCheckedData[$setting->SettingName] = ($setting->SettingValue ? 'checked' : '');
-            $mobileAppSettingsData[$setting->SettingName] = $setting->SettingValue;
-        }
-
-        Session::put('mobileAppSettings',$mobileAppSettingsData);
-
-        return View::make('/screens/mobileApp/settings',
-            array('controller' => 'MobileAppController',
-                  'isChecked' => $mobileAppSettingsCheckedData,
-                  'mobileAppSettings' => $mobileAppSettingsData
-            ));
+        return View::make('/screens/mobileApp/menuItems', array(
+          'controller' => 'MobileAppController'
+        ));
     }
 
     public function updateSettings()
@@ -88,7 +70,7 @@ class MobileAppController extends BaseController
 
         if ($result === false)
         {
-            return Redirect::to('mobileApp/settings')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
+            return Redirect::to('mobileApp/settings')->with( array('error' => 'One or more menu items could not be updated. Please try again.'));
         }
         else if ($result === null)
         {
@@ -122,8 +104,8 @@ class MobileAppController extends BaseController
           },
           $mobileAppTemplates
         );
-        
-        foreach($this->templates as $id => $template) {        
+
+        foreach($this->templates as $id => $template) {
           $matchingApiTemplateKey = array_search($template->templateName, $apiTemplateNames);
           if ($matchingApiTemplateKey !== false){
             $templateToPush = $template;
@@ -135,7 +117,7 @@ class MobileAppController extends BaseController
         }
 
         Session::put('templates', $templateFormData);
-				
+
         return View::make(
           '/screens/mobileApp/templates',
           array(
@@ -167,7 +149,7 @@ class MobileAppController extends BaseController
           }
         }
       }
-      
+
       if ($result === false)
       {
         return Redirect::to('mobileApp/templates')->with( array('error' => 'One or more templates could not be updated. Please try again.'));

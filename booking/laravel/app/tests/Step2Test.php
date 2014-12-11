@@ -14,7 +14,8 @@ class Step2Test extends TestCase
     //The step2 page should render and be passed its needed data if the user made a search
     public function testStep2View()
     {
-        $dateFormat = Config::get('config.dateFormat');
+        $settings = Settings::getSettings();
+        $dateFormat = $settings['dateDisplayFormat'];
         $currentDateTime = new DateTime();
         $today = $currentDateTime->format($dateFormat);
         $this->session(array('lastSearch' => array('start' => $today,'numberOfParticipants' => 1, 'heatType' => 1))); //Manually setting a user search

@@ -4,6 +4,11 @@ namespace ClubSpeed\Logic;
 require_once(__DIR__.'/../../Settings.php');
 require_once(__DIR__.'/../../Queues.php');
 
+use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Utility\Tokens as Tokens;
+use ClubSpeed\Security\Hasher as Hasher;
+
 /**
  * The business logic class
  * for ClubSpeed customers.
@@ -110,7 +115,7 @@ class CustomersLogic extends BaseLogic {
             ."\n    END AS CustomerExists";
         $params = array($customerId);
         $results = $this->db->query($sql, $params);
-        $customerExists = \ClubSpeed\Utility\Convert::toBoolean($results[0]['CustomerExists']);
+        $customerExists = Convert::toBoolean($results[0]['CustomerExists']);
         return $customerExists;
     }
 
@@ -141,14 +146,34 @@ class CustomersLogic extends BaseLogic {
         $customerId = $primaryCustomer->CustID; // password is not exposed on primaryCustomer -- grab the underlying customer record
         $customer = $this->interface->get($customerId);
         $customer = $customer[0];
-        if (!\ClubSpeed\Security\Hasher::verify($password, $customer->Password)) {
+        if (!Hasher::verify($password, $customer->Password)) {
             // note that $account['Password'] is a salted hash, not the actual password
             // Hasher::verify will handle the salted hash comparison to the provided password
             throw new \InvalidPasswordException("Invalid credentials!");
         }
+        $authentication = $this->db->authenticationTokens->match(array(
+              'CustomersID' => $primaryCustomer->CustID
+            , 'TokenType'   => Enums::TOKEN_TYPE_CUSTOMER
+        ));
+        if (empty($authentication)) {
+            // no record found - make a new one
+            $token = Tokens::generate();
+            $this->logic->authenticationTokens->create(array(
+                'CustomersID'       => $primaryCustomer->CustID
+                , 'TokenType'       => Enums::TOKEN_TYPE_CUSTOMER
+                , 'RemoteUserID'    => 1 // what to do with this?
+                , 'Token'           => $token
+            ));
+        }
+        else {
+            // record was found - update it
+            $authentication = $authentication[0];
+            $token = $authentication->Token; // don't update the token to satisfy the case where a user logs in on multiple devices
+            $this->logic->authenticationTokens->update($authentication->AuthenticationTokensID, $authentication); // logic class will update ExpiresAt automatically
+        }
         return array(
-            "customerId" => $primaryCustomer->CustID
-            , "firstName" => $primaryCustomer->FName
+              "customerId"  => $primaryCustomer->CustID
+            , "token"       => $token
         );
     }
 
@@ -169,12 +194,6 @@ class CustomersLogic extends BaseLogic {
             return array();
         }
         return $primaryCustomer[0];
-
-        // pr($primaryCustomer[0]);
-        // die();
-        // return $primaryCustomer[0];
-        // pr($primaryAccount);
-        // die();
 
         // $sql = "SELECT"
         //     ."\n    c.CustID"
@@ -422,7 +441,6 @@ class CustomersLogic extends BaseLogic {
         // we can assume that it was not required based on kiosk settings, and thus
         // does not need to be checked for specific validation.
 
-
         if (!isset($customer->FName) || empty($customer->FName))
             throw new \RequiredArgumentMissingException("Customer create received a null or empty FName!");
         if (!isset($customer->LName) || empty($customer->LName))
@@ -441,7 +459,7 @@ class CustomersLogic extends BaseLogic {
             
             // check AllowDuplicateEmail settings
             $settings = $this->getSettings(); // collect kiosk settings
-            $allowDuplicateEmail = \ClubSpeed\Utility\Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
+            $allowDuplicateEmail = Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
             if (!$allowDuplicateEmail && $this->email_exists($customer->EmailAddress))
                 throw new \EmailAlreadyExistsException("Customer create found an email which already exists! Received: " . $customer->EmailAddress);
         }
@@ -450,7 +468,7 @@ class CustomersLogic extends BaseLogic {
         if (isset($customer->Password) && !empty($customer->Password)) {
             if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Password))
                 throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
-            $customer->Password = \ClubSpeed\Security\Hasher::hash($customer->Password);
+            $customer->Password = Hasher::hash($customer->Password);
         }
         // convert the gender to the expected gender "id" on the database
         if (isset($params['Gender']) && !empty($params['Gender'])) {
@@ -542,7 +560,7 @@ class CustomersLogic extends BaseLogic {
                 
                 // check AllowDuplicateEmail settings
                 // $settings = $self->getSettings(); // collect kiosk settings
-                $allowDuplicateEmail = \ClubSpeed\Utility\Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
+                $allowDuplicateEmail = Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
                 if (!$allowDuplicateEmail) {
                     $customersWithEmail = $db->customers->match(array(
                         'EmailAddress' => $customer->EmailAddress
@@ -573,7 +591,7 @@ class CustomersLogic extends BaseLogic {
             if (isset($customer->Password) && !empty($customer->Password)) {
                 if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Password))
                     throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
-                $customer->Password = \ClubSpeed\Security\Hasher::hash($customer->Password);
+                $customer->Password = Hasher::hash($customer->Password);
             }
 
             // if RacerName is missing, use FName + " " + LName
@@ -612,7 +630,7 @@ class CustomersLogic extends BaseLogic {
                 
                 // check AllowDuplicateEmail settings
                 // $settings = $self->getSettings(); // collect kiosk settings
-                $allowDuplicateEmail = \ClubSpeed\Utility\Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
+                $allowDuplicateEmail = Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
                 if (!$allowDuplicateEmail) {
                     $customersWithEmail = $db->customers->match(array(
                         'EmailAddress' => $new->EmailAddress
@@ -641,7 +659,7 @@ class CustomersLogic extends BaseLogic {
             if (isset($new->Password) && !empty($new->Password)) {
                 if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($new->Password))
                     throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
-                $new->Password = \ClubSpeed\Security\Hasher::hash($new->Password);
+                $new->Password = Hasher::hash($new->Password);
             }
             return $new;
         };

@@ -115,9 +115,9 @@ class Users
         }
         $is_admin = empty($request_data['is_admin']) ? 0 : 1;
         if($is_admin == 1) {
-            $tsql = "select top(1) * from users u left join userroles ur on u.UserID = ur.userid WHERE (ur.roleid = 1 OR ur.roleid = 11) AND u.UserName = ? AND u.Password = ? AND u.Enabled = 1 AND u.Deleted = 0";
+            $tsql = "select top(1) * from users u left join userroles ur on u.UserID = ur.userid WHERE (ur.roleid = 1 OR ur.roleid = 11) AND u.UserName = ? AND u.WebPassword = ? AND u.Enabled = 1 AND u.Deleted = 0";
         } else {
-            $tsql = "SELECT * FROM Users WHERE UserName = ? AND Password = ? AND Enabled = 1 AND Deleted = 0";
+            $tsql = "SELECT * FROM Users WHERE UserName = ? AND WebPassword = ? AND Enabled = 1 AND Deleted = 0";
         }
 
         $rows = $this->run_query($tsql, array(&$request_data['username'], &$request_data['password']));

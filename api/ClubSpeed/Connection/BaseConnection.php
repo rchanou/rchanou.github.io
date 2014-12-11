@@ -32,8 +32,6 @@ abstract class BaseConnection {
      * @throws Exception by default.
      */
     protected final function handle($e) {
-        // pr($e);
-        // die($e);
         throw $e; // just re-throwing for now
     }
 

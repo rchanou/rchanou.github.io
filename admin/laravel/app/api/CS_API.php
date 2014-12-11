@@ -272,4 +272,135 @@ class CS_API
 
         return self::getJSON("reports/payments_summary", $params);
     }
+
+    public static function doesServerSupportCacheClearing()
+    {
+        self::initialize();
+        $result = self::getJSON("shim");
+        $result = isset($result) ? true : false;
+        return $result;
+    }
+
+    public static function getTranslations($namespace)
+    {
+        self::initialize();
+        $translationsUnformatted =  self::getJSON('translations', array('namespace' => $namespace));
+        if (isset($translationsUnformatted->translations))
+        {
+            $translationsByCulture = array();
+            foreach($translationsUnformatted->translations as $currentTranslation)
+            {
+                $translationsByCulture[$currentTranslation->culture][$currentTranslation->name] = array(
+                    'value' => $currentTranslation->value,
+                    'id' => $currentTranslation->translationsId);
+            }
+            return $translationsByCulture;
+        }
+        else
+        {
+            return null;
+        }
+
+    }
+
+    public static function updateTranslation($newTranslation)
+    {
+        self::initialize();
+
+        $result = self::update('translations',$newTranslation['translationsId'],$newTranslation['value']);
+        return $result;
+    }
+
+
+    public static function updateTranslations($newTranslations)
+    {
+        self::initialize();
+
+        $allCallsSuccessful = true;
+        foreach($newTranslations as $newTranslation)
+        {
+            $result = self::updateTranslation($newTranslation);
+            $callFailed = ($result != true);
+            if ($callFailed)
+            {
+                $allCallsSuccessful = false;
+            }
+        }
+        return $allCallsSuccessful;
+
+    }
+
+    public static function updateTranslationsBatch($newTranslations)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/translations/batch?key=' . self::$privateKey;
+
+        $result = self::call($url,$newTranslations,'PUT');
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null)
+        {
+            if (isset($response->body->translations))
+            {
+                return $response->body->translations;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function insertTranslationsBatch($newTranslations)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/translations/batch?key=' . self::$privateKey;
+
+        $result = self::call($url,$newTranslations,'POST');
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null)
+        {
+            if (isset($response->body->translations))
+            {
+                return $response->body->translations;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function getCurrentCultureForOnlineBooking()
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/settings/get.json?group=Booking&setting=currentCulture&key=' . self::$privateKey;
+
+        $result = self::call($url);
+        $result = $result['response'];
+
+        if ($result !== null && isset($result->body->settings->currentCulture))
+        {
+            return $result->body->settings->currentCulture->SettingValue;
+        }
+        else
+        {
+            return 'en-US';
+        }
+
+    }
 }

@@ -26,9 +26,10 @@ class Step2Controller extends BaseController
      */
     public function entry()
     {
-        $settings = Settings::getSettings(); //Update website settings (since step 1 can be skipped)
+        $strings = Strings::getStrings();
+        $settings = Settings::getSettings(true); //Force a refresh of all settings
         Session::put('settings',$settings);
-        $strings = Strings::getStrings(); //Update website strings (since step 1 can be skipped)
+        checkForCultureChange();
 
         //Gather up any GET or POST inputs for the race search
         $start = Input::get('start');
@@ -43,7 +44,7 @@ class Step2Controller extends BaseController
             if ($lastSearch == null)
             {
                 $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', "Please select a race date.");
+                $messages->add('errors', $strings['str_pleaseSelectARaceDate']);
                 return Redirect::to('/step1')->withErrors($messages)->withInput();
             }
             else //If there was a prior search, use that data
@@ -58,7 +59,7 @@ class Step2Controller extends BaseController
         Session::put('lastSearch',array('start'=>$start,'numberOfParticipants'=>$numberOfParticipants,'heatType'=>$heatType));
 
         //Determine today's date
-        $dateFormat = Config::get('config.dateFormat');
+        $dateFormat = $settings['dateDisplayFormat'];
         $currentDateTime = new DateTime();
         $today = $currentDateTime->format($dateFormat);
 
@@ -92,7 +93,7 @@ class Step2Controller extends BaseController
         $nextDayDisplay = $nextDayDisplay->modify('+1 day')->format($dateFormat);
 
         $settings = Session::get('settings');
-        $locale = $settings['locale'];
+        $locale = $settings['numberFormattingLocale'];
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
         $currency = $settings['currency'];
 
@@ -111,7 +112,7 @@ class Step2Controller extends BaseController
                 'loginToAccountErrors' => Session::get('loginToAccountErrors'),
                 'createAccountErrors' => Session::get('createAccountErrors'),
                 'settings' => $settings,
-                'strings' => $strings,
+                'strings' => Strings::getStrings(),
                 'moneyFormatter' => $moneyFormatter,
                 'currency' => $currency
             )

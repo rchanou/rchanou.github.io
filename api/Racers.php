@@ -33,8 +33,7 @@ class Racers
      */
     private $queues;
 
-    function __construct(){
-        // header('Access-Control-Allow-Origin: *'); //Here for all /say
+    function __construct() {
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
         $this->queues = new Queues();
     }
@@ -46,11 +45,7 @@ class Racers
      * @return mixed[string] An associative array containing customer information.
      */
     public function postlogin($request_data) {
-        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
-            throw new RestException(401, "Invalid authorization!");
-        }
-        // should we allow users to hit the login api using basic auth,
-        // or should we require the login call to come from the api user itself as well?
+        // ditch the public access entirely for racer login -- this needs to be wide open
         try {
             $username = $request_data['username'];
             $password = $request_data['password'];
@@ -58,6 +53,7 @@ class Racers
             return $account;
         }
         catch (\InvalidEmailException $e) {
+            // use 401, not 403 since we want the user to attempt re-authentication
             throw new RestException(401, "Invalid username or password!");
         }
         catch (\InvalidPasswordException $e) {
@@ -362,7 +358,6 @@ class Racers
         // Create photo
         // TODO -- Handle resize
         if(isset($request_data['profilephoto']) && !empty($request_data['profilephoto'])) {
-            pr("found a profilephoto");
             $picturePath = empty($GLOBALS['customerPictureImagePath']) ? 'C:\ClubSpeed\CustomerPictures' : $GLOBALS['customerPictureImagePath'];
             file_put_contents(
                 $picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg'

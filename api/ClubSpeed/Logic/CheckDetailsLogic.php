@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Enums\Enums as Enums;
 
 /**
  * The business logic class
@@ -80,6 +81,7 @@ class CheckDetailsLogic extends BaseLogic {
             , 'Qty'
             , 'Status'
             , 'Type'
+            , 'VoidNotes'
         );
     }
 
@@ -99,22 +101,17 @@ class CheckDetailsLogic extends BaseLogic {
                 $checkDetails->Qty = 0;
             if (isset($checkDetails->CadetQty) && $checkDetails->CadetQty < 0) // disallow negative quantities
                 $checkDetails->CadetQty = 0;
-            if (is_null($checkDetails->Type))
-                $checkDetails->Type = 1;
+            $checkDetails->TaxID = $tax->TaxID;
             $checkDetails->TaxPercent = $tax->Amount;
-            $checkDetails->Status = 1; // Enum for IsNew
+            $checkDetails->Status = Enums::CHECK_DETAIL_STATUS_IS_NEW;
             $checkDetails->CreatedDate = \ClubSpeed\Utility\Convert::getDate();
             $checkDetails->ProductName = $product->Description;
             $checkDetails->UnitPrice = $product->Price1;
             $checkDetails->UnitPrice2 = $product->Price2;
+            $checkDetails->Type = $product->ProductType; // seems to be the product type -- DOUBLE CHECK
             $checkDetails->GST = $tax->GST;
             $checkDetails->P_Points = ($product->P_Points ?: 0) * $checkDetails->Qty;
-            if (!empty($checkDetails->P_Points)) {
-                // apply the check's CustID to checkDetails.P_CustID
-                $checkDetails->P_CustID = $check->CustID;
-
-                // add PointHistory items here, or wait until the check is paid for?
-            }
+            $checkDetails->R_Points = $product->R_Points; // we want nulls to stay null, don't convert to 0
             return $checkDetails;
         });
     }

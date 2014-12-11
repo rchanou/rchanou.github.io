@@ -19,14 +19,15 @@
     {{ HTML::script('js/vendors/jquery-2.1.0.min.js')}} <!-- Needed earlier -->
 
     <!-- Custom CSS style if present in /assets -->
-    <?php $customStylesURL = '/css/custom-styles.css?' . time() //To prevent caching ?>
-    {{ ((remoteFileExists(Config::get('config.assetsURL') . $customStylesURL)) ? HTML::style(Config::get('config.assetsURL') . $customStylesURL) : '') }}
+    <?php $customStylesURL = str_replace('http://','https://', Config::get('config.assetsURL')) . '/css/custom-styles.css?' . time() //To prevent caching ?>
+    {{ (remoteFileExists(Config::get('config.assetsURL') . '/css/custom-styles.css?') ? HTML::style($customStylesURL) : '') }}
     @show
 
+    <?php $backgroundURL = str_replace('http://','https://', Config::get('config.assetsURL') . '/images/background.jpg'); ?>
     @if(remoteFileExists(Config::get('config.assetsURL') . '/images/background.jpg'))
         <style>
         body {
-            background-image:url('{{Config::get('config.assetsURL')}}/images/background.jpg');
+            background-image:url('{{$backgroundURL}}');
         }
         </style>
     @endif
@@ -73,8 +74,10 @@
 <!-- END FACEBOOK INTEGRATION -->
 
     <div class="container">
+        @include('languagedropdown')
         <div id="mainPageWrapper">
             <div>
+
         <!-- BEGIN GLOBAL HEADER INCLUDE -->
         @include('header')
         <!-- END GLOBAL HEADER INCLUDE -->
@@ -104,7 +107,8 @@
     {{ HTML::script('js/vendors/jquery-ui/jquery-ui.min.js') }}
 
     <!-- Custom JS if present in /assets -->
-    {{ ((remoteFileExists(Config::get('config.assetsURL') . '/js/custom-js.js')) ? HTML::script(Config::get('config.assetsURL') . '/js/custom-js.js') : '') }}
+    <?php $customJavaScriptURL = str_replace('http://','https://', Config::get('config.assetsURL')) . '/js/custom-js.js?' . time() //To prevent caching ?>
+    {{ ((remoteFileExists(Config::get('config.assetsURL') . '/js/custom-js.js?')) ? HTML::script($customJavaScriptURL) : '') }}
 
     <script>
         if (!Modernizr.inputtypes.date) {

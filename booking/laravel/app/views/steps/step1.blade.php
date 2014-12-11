@@ -2,29 +2,29 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-    Book a Race - Online Booking
+    {{$strings['str_step1Title']}}
 @stop
 <!-- END PAGE TITLE -->
 
 <!-- PAGE CONTENT -->
 @section('steps')
 <div class="steps">
-    <em>See the Lineup</em> >
+    <em>{{$strings['str_seeTheLineup']}}</em> >
         @if(Session::has('lastSearch'))
-            {{link_to('step2','Choose a Race')}} >
+            {{link_to('step2',$strings['str_chooseARace'])}} >
         @else
-            Choose a Race >
+            {{$strings['str_chooseARace']}} >
         @endif
 
         @if(Session::has('authenticated'))
-            {{link_to('cart','Review Your Order')}}
+            {{link_to('cart',$strings['str_reviewYourOrder'])}}
         @else
-            Review Your Order
+            {{$strings['str_reviewYourOrder']}}
         @endif
         @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-        > {{link_to('checkout','Checkout')}}
+        > {{link_to('checkout',$strings['str_checkout'])}}
         @else
-        > Checkout
+        > {{$strings['str_checkout']}}
         @endif
 </div>
 @stop
@@ -35,7 +35,7 @@
         <div class="step1form">
             <div class="inputRow">
                   <span class="inputLabel">
-                        Choose your date:
+                        {{$strings['str_chooseYourDate']}}
                   </span>
                   <span class="inputData">
                         <input type="date" name="start" id="raceDatePicker" onchange="updateRaceTypesAvailable()">
@@ -43,7 +43,7 @@
             </div>
             <div class="inputRow">
                   <span class="inputLabel">
-                        How many drivers?
+                        {{$strings['str_howManyDrivers']}}
                   </span>
                   <span class="inputData">
                         <select name="numberOfParticipants" id="numberOfParticipants" onchange="updateRaceTypesAvailable()">
@@ -59,7 +59,7 @@
             </div>
             <div class="inputRow">
                   <span class="inputLabel">
-                        What type of race?
+                        {{$strings['str_whatTypeOfRace']}}
                   </span>
                   <span class="inputData">
                       <select name="heatType" id="heatTypeDropdown">
@@ -72,7 +72,7 @@
                   </span>
             </div>
             <div class="rightAligned">
-                <button type="submit" class="formButton">Search</button>
+                <button type="submit" class="formButton">{{$strings['str_search']}}</button>
             </div>
         </div>
     </form>
@@ -119,7 +119,9 @@
         var today = new Date().yyyymmdd();
         var numOfRacers = parseInt($('#numberOfParticipants option:selected').val());
 
-        var apiURL = '{{Config::get('config.apiURL')}}/bookingavailability/range.json?key={{Config::get('config.privateKey')}}' + (newDate == today ? '' : '&start=' + newDate);
+        <?php $apiURL = str_replace('http://','https://', Config::get('config.apiURL')); ?>
+
+        var apiURL = '{{$apiURL}}/bookingavailability/range.json?key={{Config::get('config.privateKey')}}' + (newDate == today ? '' : '&start=' + newDate);
 
         jQuery.getJSON(apiURL, function(data){
 
@@ -129,7 +131,8 @@
                 var onlineBookings = data["bookings"];
 
                 $.each(onlineBookings, function(index, currentOnlineBooking) {
-                    if(currentOnlineBooking['heatSpotsAvailableOnline'] >= numOfRacers && currentOnlineBooking['isPublic'])
+                    var bookingType = currentOnlineBooking["heatTypeId"];
+                    if(currentOnlineBooking['heatSpotsAvailableOnline'] >= numOfRacers && currentOnlineBooking['isPublic'] && $("#heatTypeDropdown option[value='" + bookingType + "']").length == 0)
                     {
                         $('#heatTypeDropdown')
                             .append($("<option></option>")

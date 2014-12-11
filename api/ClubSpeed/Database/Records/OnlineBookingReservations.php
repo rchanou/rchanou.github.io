@@ -43,15 +43,15 @@ class OnlineBookingReservations extends BaseRecord {
     }
 
     public function validate($type = "") {
-        switch (strtolower($type)) {
-            case 'insert':
-                if (is_null($this->OnlineBookingsID))
-                    throw new \InvalidArgumentException("Create reservation for online booking requires an onlineBookingsId!");
-                if (is_null($this->Quantity) || !is_int($this->Quantity) || $this->Quantity < 1)
-                    throw new \InvalidArgumentException("Create reservation for online booking requires a quantity greater than 0! Received: " . $quantity);
-                if (is_null($this->SessionID) || empty($this->SessionID))
-                    throw new \InvalidArgumentException("Create reservation for online booking requires a sessionId!");
-                break;
-        }
+        // switch (strtolower($type)) {
+        //     case 'insert':
+        //         if (is_null($this->OnlineBookingsID))
+        //             throw new \InvalidArgumentException("Create reservation for online booking requires an onlineBookingsId!");
+        //         if (is_null($this->Quantity) || !is_int($this->Quantity) || $this->Quantity < 1)
+        //             throw new \InvalidArgumentException("Create reservation for online booking requires a quantity greater than 0! Received: " . $this->Quantity);
+        //         if (is_null($this->SessionID) || empty($this->SessionID))
+        //             throw new \InvalidArgumentException("Create reservation for online booking requires a sessionId!");
+        //         break;
+        // }
     }
 }

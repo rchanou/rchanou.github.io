@@ -2,25 +2,26 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-    Search Results - Online Booking
+    {{$strings['str_step2Title']}}
 @stop
 <!-- END PAGE TITLE -->
 
 <!-- PAGE CONTENT -->
 @section('steps')
 <div class="steps">
-    {{link_to('step1','See the Lineup')}} > <em>Choose a Race</em> >
+    {{link_to('step1',$strings['str_seeTheLineup'])}} > <em>{{$strings['str_chooseARace']}}</em> >
         @if(Session::has('authenticated'))
-            {{link_to('cart','Review Your Order')}}
+            {{link_to('cart',$strings['str_reviewYourOrder'])}}
         @else
-            Review Your Order
+            {{$strings['str_reviewYourOrder']}}
         @endif
     @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-        > {{link_to('checkout','Checkout')}}
+        > {{link_to('checkout',$strings['str_checkout'])}}
     @else
-        > Checkout
+        > {{$strings['str_checkout']}}
     @endif
 </div>
+
 @stop
 
 @section('content')
@@ -31,7 +32,7 @@
             <a href="?start={{$previousDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}"><-- {{$previousDayDisplay}}</a>
         </div>
         <div class="col-xs-6">
-            <em>Available Races</em>
+            <em>{{$strings['str_availableRaces']}}</em>
         </div>
         <div class="col-xs-3 tomorrowArrow text-right">
             <a href="?start={{$nextDay}}&heatType={{$heatType}}&numberOfParticipants={{$numberOfParticipants}}">{{$nextDayDisplay}} --></a>
@@ -45,50 +46,50 @@
     @if($races !== null)
         @if(count($races) == 0)
         <div class="noRaceResults centered">
-            No races found. Try another date!
+            {{$strings['str_noRacesFound']}}
         </div>
         @endif
         @foreach($races as $race)
         <div class="raceResult" id="{{$race->heatId}}">
             <div class="raceResultHeader row">
                 <div class="raceName ellipsis col-xs-6">{{$race->heatDescription}}</div>
-                <div class="raceDate col-xs-6 text-right">{{date(Config::get('config.dateFormat') . ' H:i',strtotime($race->heatStartsAt))}}</div>
+                <div class="raceDate col-xs-6 text-right">{{date($settings['dateDisplayFormat'] . ' ' . $settings['timeDisplayFormat'],strtotime($race->heatStartsAt))}}</div>
             </div>
 
-            <div class="spotsAvailable">{{$race->heatSpotsAvailableOnline}} spots available online</div>
+            <div class="spotsAvailable">{{$race->heatSpotsAvailableOnline}} {{$strings['str_spotsAvailableOnline']}}</div>
 
             <div class="raceResultFooter row">
-                <div class="racePrices ellipsis col-xs-6">{{$numberOfParticipants}} Driver(s)
+                <div class="racePrices ellipsis col-xs-6">{{$numberOfParticipants}} {{$strings['str_drivers']}}
 
-                     x {{$moneyFormatter->formatCurrency($race->products[0]->price1, $currency)}} each = {{$moneyFormatter->formatCurrency($numberOfParticipants * $race->products[0]->price1, $currency)}}
+                     x {{$moneyFormatter->formatCurrency($race->products[0]->price1, $currency)}} {{$strings['str_each']}} = {{$moneyFormatter->formatCurrency($numberOfParticipants * $race->products[0]->price1, $currency)}}
                 </div>
                 <div class="raceBookButtonArea col-xs-6 text-right">
                     @if($authenticated != null)
-                        <a href="cart?action=add&heatId={{$race->heatId}}&quantity={{$numberOfParticipants}}"><button type="button" class="formButton">Book It!</button></a>
+                        <a href="cart?action=add&heatId={{$race->heatId}}&quantity={{$numberOfParticipants}}"><button type="button" class="formButton">{{$strings['str_bookIt']}}</button></a>
                     @else
-                        <button type="button" class="formButton" data-toggle="collapse" data-target="#loginOptions_{{$race->heatId}}">Book It!</button>
+                        <button type="button" class="formButton" data-toggle="collapse" data-target="#loginOptions_{{$race->heatId}}">{{$strings['str_bookIt']}}</button>
                     @endif
                 </div>
             </div>
         </div>
         <div class="loginOptions collapse out centered" id="loginOptions_{{$race->heatId}}">
-            <em>You must be logged in to book a race. Please select one of the following options:</em><br/>
-            <button type="button" class="regularButton" data-toggle="collapse" data-target="#createAccount_{{$race->heatId}}" onclick="$('#loginToAccount_{{$race->heatId}}').collapse('hide')">Create A New Account</button>
+            <em>{{$strings['str_youMustBeLoggedIn']}}</em><br/>
+            <button type="button" class="regularButton" data-toggle="collapse" data-target="#createAccount_{{$race->heatId}}" onclick="$('#loginToAccount_{{$race->heatId}}').collapse('hide')">{{$strings['str_createANewAccount']}}</button>
 
                 @if($settings['enableFacebook'])
                 <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('step2','loginfb',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions&state={{$race->heatId}}!{{$numberOfParticipants}}">
-                    <button type="button" class="regularButton">Login with Facebook</button>
+                    <button type="button" class="regularButton">{{$strings['str_loginWithFacebook']}}</button>
                 </a>
                 @endif
 
-            <button type="button" class="regularButton" data-toggle="collapse" data-target="#loginToAccount_{{$race->heatId}}" onclick="$('#createAccount_{{$race->heatId}}').collapse('hide')">Login to Existing Account</button>
+            <button type="button" class="regularButton" data-toggle="collapse" data-target="#loginToAccount_{{$race->heatId}}" onclick="$('#createAccount_{{$race->heatId}}').collapse('hide')">{{$strings['str_loginToExistingAccount']}}</button>
 
             <!-- ACCOUNT CREATION FORM -->
             <div class="createAccount collapse out" data-toggle="false" id="createAccount_{{$race->heatId}}">
 
                 @if (isset($createAccountErrors) && array_key_exists($race->heatId,$createAccountErrors) && count( $createAccountErrors[$race->heatId] ) > 0 )
                 <div class="alert alert-danger alert-dismissable accountError" role="alert">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">{{$strings['str_close']}}</span></button>
                     @foreach ($createAccountErrors[$race->heatId] as $message)
                     {{ $message }}<br/>
                     @endforeach
@@ -121,10 +122,10 @@
                              messages:
                              {
                                  EmailAddressConfirmation: {
-                                     equalTo: 'Emails must match.'
+                                     equalTo: '{{$strings['str_emailsMustMatch']}}'
                                  },
                                    PasswordConfirmation: {
-                                       equalTo: 'Passwords must match'
+                                       equalTo: '{{$strings['str_passwordsMustMatch']}}'
                                    }
                              }
                          });
@@ -132,13 +133,13 @@
                 </script>
                 <form action="createaccount" class="accountCreationForm" id="accountCreationForm_{{$race->heatId}}" method="POST">
 
-                    <div class="formHeader">Account Information</div>
+                    <div class="formHeader">{{$strings['str_accountInformation']}}</div>
 
                     <!-- E-mail and e-mail confirmation -->
                     @if($settings['emailShown'])
                         <label for="EmailAddress_{{$race->heatId}}">
                             <strong>
-                                Email Address:
+                                {{$strings['str_emailAddress']}}:
                                 @if($settings['emailRequired']) <span class="requiredAsterisk">*</span> @endif
                             </strong>
                         </label>
@@ -149,7 +150,7 @@
                         @endif
                         <label for="EmailAddressConfirmation_{{$race->heatId}}">
                             <strong>
-                                Confirm Email:
+                                {{$strings['str_confirmEmail']}}:
                                 @if($settings['emailRequired']) <span class="requiredAsterisk">*</span> @endif
                             </strong>
                         </label>
@@ -162,9 +163,9 @@
 
                     <!-- Consent to e-mail marketing -->
                     @if($settings['emailShown'] && $settings['consentToMailShown'])
-                        <span class="emailConsent"> <!-- TODO: Tidy up inline styles if sticking to this template -->
+                        <span class="emailConsent">
                             <input type="checkbox" name="ConsentToMail" value="true">
-                            <strong>I want to receive race results and special offers via the e-mail provided.</strong>
+                            <strong>{{$strings['str_iWantToReceiveSpecialOffers']}}</strong>
                         </span>
                     @endif
 
@@ -172,7 +173,7 @@
                     @if($settings['passwordShown'])
                         <label for="Password_{{$race->heatId}}">
                                 <strong>
-                                    Password:
+                                    {{$strings['str_password']}}:
                                     @if($settings['passwordRequired']) <span class="requiredAsterisk">*</span> @endif
                                 </strong>
                         </label>
@@ -183,7 +184,7 @@
                         @endif
                         <label for="PasswordConfirmation_{{$race->heatId}}">
                             <strong>
-                                Confirm Password:
+                                {{$strings['str_confirmPassword']}}:
                                 @if($settings['passwordRequired']) <span class="requiredAsterisk">*</span> @endif
                             </strong>
                         </label>
@@ -194,11 +195,11 @@
                         @endif
                     @endif
 
-                    <div class="formHeader">Personal Information</div>
+                    <div class="formHeader">{{$strings['str_personalInformation']}}</div>
 
                     <!-- Company -->
                     @if($settings['companyShown'])
-                        <label for="Company_{{$race->heatId}}"><strong>Company: @if($settings['companyRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Company_{{$race->heatId}}"><strong>{{$strings['str_company']}}: @if($settings['companyRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['companyRequired'])
                             <input maxlength="50" type="text" id="Company_{{$race->heatId}}" name="Company" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -208,7 +209,7 @@
 
                     <!-- First Name -->
                     @if($settings['firstNameShown'])
-                        <label for="FName_{{$race->heatId}}"><strong>First Name: @if($settings['firstNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="FName_{{$race->heatId}}"><strong>{{$strings['str_firstName']}}: @if($settings['firstNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['firstNameRequired'])
                             <input maxlength="50" type="text" id="FName_{{$race->heatId}}" name="FName" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -218,7 +219,7 @@
 
                     <!-- Last Name -->
                     @if($settings['lastNameShown'])
-                        <label for="LName_{{$race->heatId}}"><strong>Last Name: @if($settings['lastNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="LName_{{$race->heatId}}"><strong>{{$strings['str_lastName']}}: @if($settings['lastNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['lastNameRequired'])
                             <input maxlength="50" type="text" id="LName_{{$race->heatId}}" name="LName" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -228,7 +229,7 @@
 
                     <!-- Racer Name -->
                     @if($settings['racerNameShown'])
-                    <label for="RacerName_{{$race->heatId}}"><strong>Racer Name: @if($settings['racerNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                    <label for="RacerName_{{$race->heatId}}"><strong>{{$strings['str_racerName']}}: @if($settings['racerNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['racerNameRequired'])
                             <input maxlength="100" type="text" id="RacerName_{{$race->heatId}}" name="RacerName" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -239,21 +240,21 @@
                     <!-- Birth Date -->
                     @if($settings['birthDateShown'])
 
-                        <label for="BirthDate_{{$race->heatId}}"><strong>Birth Date: @if($settings['birthDateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="BirthDate_{{$race->heatId}}"><strong>{{$strings['str_birthDate']}}: @if($settings['birthDateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         <span class="inputMarginAdjustment"><input class="inputLineHeightAdjustment" type="date" name="BirthDate" id="BirthDate_{{$race->heatId}}"><br/></span>
                     @endif
 
                     <!-- Gender -->
                     @if($settings['genderShown'])
-                        <label for=""><strong>Gender: @if($settings['genderRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
-                            <span class="inputGenderMarginAdjustment">Male <input type="radio" name="Gender" id="Gender_{{$race->heatId}}_male" value="male" checked="checked">
-                            Female <input type="radio" name="Gender" id="Gender_{{$race->heatId}}_male" value="female">
-                            Other <input type="radio" name="Gender" id="Gender_{{$race->heatId}}_male" value="other"></span>
+                        <label for=""><strong>{{$strings['str_gender']}}: @if($settings['genderRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                            <span class="inputGenderMarginAdjustment">{{$strings['str_male']}} <input type="radio" name="Gender" id="Gender_{{$race->heatId}}_male" value="male" checked="checked">
+                            {{$strings['str_female']}} <input type="radio" name="Gender" id="Gender_{{$race->heatId}}_male" value="female">
+                            {{$strings['str_other']}} <input type="radio" name="Gender" id="Gender_{{$race->heatId}}_male" value="other"></span>
                     @endif
 
                     <!-- SourceID -->
                     @if($settings['whereDidYouHearAboutUsShown'])
-                        <label for="SourceID_{{$race->heatId}}"><strong>Where did you hear about us? @if($settings['whereDidYouHearAboutUsRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="SourceID_{{$race->heatId}}"><strong>{{$strings['str_whereDidYouHearAboutUs']}} @if($settings['whereDidYouHearAboutUsRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['whereDidYouHearAboutUsRequired'])
                             {{ Form::select("SourceID", $settings['dropdownOptions'], Input::old("SourceID",'0'),array('style' => 'color: black', 'class'=>'required') ) }}<br/>
                         @else
@@ -263,18 +264,18 @@
 
                     <!-- Address and Address2 -->
                     @if($settings['addressShown'])
-                        <label for="Address_{{$race->heatId}}"><strong>Address line 1: @if($settings['addressRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Address_{{$race->heatId}}"><strong>{{$strings['str_addressLine1']}}: @if($settings['addressRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['addressRequired'])
                             <input maxlength="80" type="text" id="Address_{{$race->heatId}}" name="Address" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
                             <input maxlength="80" type="text" id="Address_{{$race->heatId}}" name="Address"><br/>
                         @endif
-                        <label for="Address2_{{$race->heatId}}"><strong>Address line 2:</strong></label> <input maxlength="255" type="text" id="Address2_{{$race->heatId}}" name="Address2"><br/>
+                        <label for="Address2_{{$race->heatId}}"><strong>{{$strings['str_addressLine2']}}:</strong></label> <input maxlength="255" type="text" id="Address2_{{$race->heatId}}" name="Address2"><br/>
                     @endif
 
                     <!-- City -->
                     @if($settings['cityShown'])
-                        <label for="City_{{$race->heatId}}"><strong>City: @if($settings['cityRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="City_{{$race->heatId}}"><strong>{{$strings['str_city']}}: @if($settings['cityRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['cityRequired'])
                             <input maxlength="80" type="text" id="City_{{$race->heatId}}" name="City" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -284,7 +285,7 @@
 
                     <!-- State -->
                     @if($settings['stateShown'])
-                        <label for="State_{{$race->heatId}}"><strong>State/Province/Territory: @if($settings['stateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="State_{{$race->heatId}}"><strong>{{$strings['str_state']}}: @if($settings['stateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['stateRequired'])
                             <input maxlength="50" type="text" id="State_{{$race->heatId}}" name="State" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -294,7 +295,7 @@
 
                     <!-- Zip -->
                     @if($settings['zipShown'])
-                        <label for="Zip_{{$race->heatId}}"><strong>Postal Code: @if($settings['zipRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Zip_{{$race->heatId}}"><strong>{{$strings['str_postalCode']}}: @if($settings['zipRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['zipRequired'])
                             <input maxlength="15" type="text" id="Zip_{{$race->heatId}}" name="Zip" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -304,7 +305,7 @@
 
                     <!-- Country -->
                     @if($settings['countryShown'])
-                        <label for="Country_{{$race->heatId}}"><strong>Country: @if($settings['countryRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Country_{{$race->heatId}}"><strong>{{$strings['str_country']}}: @if($settings['countryRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['countryRequired'])
                             <input maxlength="50" type="text" id="Country_{{$race->heatId}}" name="Country" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -314,7 +315,7 @@
 
                     <!-- Cell -->
                     @if($settings['cellShown'])
-                        <label for="Cell_{{$race->heatId}}"><strong>Cell: @if($settings['cellRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Cell_{{$race->heatId}}"><strong>{{$strings['str_cell']}}: @if($settings['cellRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['cellRequired'])
                             <input maxlength="50" type="text" id="Cell_{{$race->heatId}}" name="Cell" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -324,7 +325,7 @@
 
                     <!-- License Number -->
                     @if($settings['licenseNumberShown'])
-                        <label for="LicenseNumber_{{$race->heatId}}"><strong>License #: @if($settings['licenseNumberRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="LicenseNumber_{{$race->heatId}}"><strong>{{$strings['str_licenseNumber']}}: @if($settings['licenseNumberRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['licenseNumberRequired'])
                             <input maxlength="100" type="text" id="LicenseNumber_{{$race->heatId}}" name="LicenseNumber" class="required validatePresence_{{$race->heatId}}"><br/>
                         @else
@@ -376,7 +377,7 @@
                     <input type="hidden" name="numberOfParticipants" value="{{$numberOfParticipants}}">
                     <input type="hidden" name="source" value="step2">
                     <div class="rightAligned">
-                        <button type="submit" class="formButton">Create Account</button>
+                        <button type="submit" class="formButton">{{$strings['str_createAccount']}}</button>
                     </div>
                 </form>
             </div>
@@ -386,7 +387,7 @@
             <div class="loginToAccount collapse out" data-toggle="false" id="loginToAccount_{{$race->heatId}}">
                 @if (isset($loginToAccountErrors) && array_key_exists($race->heatId,$loginToAccountErrors) && count( $loginToAccountErrors[$race->heatId] ) > 0 )
                 <div class="alert alert-danger alert-dismissable accountError" role="alert">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">{{$strings['str_close']}}</span></button>
                     @foreach ($loginToAccountErrors[$race->heatId] as $message)
                     {{ $message }}<br/>
                     @endforeach
@@ -394,17 +395,17 @@
                 @endif
 
                 <form action="login" class="loginForm" method="POST">
-                    <div class="formHeader">Login to Your Existing Account</div>
-                    <label for="loginEmail_{{$race->heatId}}"><strong>Email Address: <span class="requiredAsterisk">*</span></strong></label> <input type="text" name="EmailAddress" id="loginEmail_{{$race->heatId}}" class="required mustBeValidEmail"><br/>
-                    <label for="loginPassword_{{$race->heatId}}"><strong>Password: <span class="requiredAsterisk">*</span></strong></label> <input type="password" name="Password" id="loginPassword_{{$race->heatId}}" class="required"><br/>
+                    <div class="formHeader">{{$strings['str_loginToYourExistingAccount']}}</div>
+                    <label for="loginEmail_{{$race->heatId}}"><strong>{{$strings['str_emailAddress']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="text" name="EmailAddress" id="loginEmail_{{$race->heatId}}" class="required mustBeValidEmail"><br/>
+                    <label for="loginPassword_{{$race->heatId}}"><strong>{{$strings['str_password']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="password" name="Password" id="loginPassword_{{$race->heatId}}" class="required"><br/>
                     <input type="hidden" name="heatId" value="{{$race->heatId}}">
                     <input type="hidden" name="numberOfParticipants" value="{{$numberOfParticipants}}">
                     <input type="hidden" name="source" value="step2">
                     <div class="rightAligned">
-                        {{link_to('resetpassword','Claim My Account / Reset My Password')}} <button type="submit" class="formButton">Login</button>
+                        {{link_to('resetpassword',$strings['str_resetPassword'])}} <button type="submit" class="formButton">{{$strings['str_login']}}</button>
                     </div>
                     <div class="alert alert-info">
-                        Already registered at a track but don't have a password, or don't remember your password? No problem! Just head on over to {{link_to('resetpassword','Claim My Account / Reset My Password')}} and get yourself a new password!
+                        {{$strings['str_alreadyRegisteredTextPart1']}} {{link_to('resetpassword',$strings['str_resetPassword'])}} {{$strings['str_alreadyRegisteredTextPart2']}}
                     </div>
                 </form>
             </div>
@@ -424,10 +425,10 @@
     <!-- Login form validation -->
     <script>
     $(document).ready(function() {
-        $.validator.addMethod("requiredField",$.validator.methods.required,"This field is required.");
+        $.validator.addMethod("requiredField",$.validator.methods.required,"{{$strings['str_thisFieldIsRequired']}}");
         $.validator.addClassRules("required", {requiredField: true});
 
-        $.validator.addMethod("mustBeValidEmail",$.validator.methods.email,"Must be a valid e-mail.");
+        $.validator.addMethod("mustBeValidEmail",$.validator.methods.email,"{{$strings['str_mustBeAValidEmail']}}");
         $.validator.addClassRules("emailFormElement", {mustBeValidEmail: true});
 
         var loginForms = $('.loginForm');

@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Utility\Convert as Convert;
 
 /**
  * The business logic class
@@ -50,7 +51,7 @@ class CheckTotalsLogic extends BaseLogic {
             $calc[$this->interface->key] = $actualCheckId; // tie the new details record back to the new CheckID
             $checkDetailId = $this->logic->checkDetails->create($calc);
         }
-        $this->logic->checks->applyCheckTotal($actualCheckId); // run the applyCheckTotal stored procedure, not the virtual one
+        // $this->logic->checks->applyCheckTotal($actualCheckId); // check create is now automatically running the applyCheckTotal stored proc
         return $checkCreateData;
     }
 
@@ -68,19 +69,21 @@ class CheckTotalsLogic extends BaseLogic {
         // and then that record's CustID should be used to find the GiftCardHistoryID
         // (odd, but this is the expectation for the database's data)
         $discount = 0;
-        foreach($giftCards as $giftCardId) {
-            $giftCardCustomer = $this->logic->customers->find("CrdID = " . $giftCardId . " AND IsGiftCard = True");
-            if (empty($giftCardCustomer))
-                throw new \RecordNotFoundException("Unable to find gift card: " . $giftCardId);
-            $giftCardCustomer = $giftCardCustomer[0];
-            $giftCardHistory = $this->logic->giftCardHistory->find("CustID = " . $giftCardCustomer->CustID);
-            if (empty($giftCardHistory))
-                throw new \RecordNotFoundException("Unable to find gift card by CustID: " . $giftCardCustomer->CustID);
-            $giftCardHistory = $giftCardHistory[0];
-            // consider the giftCardHistory Points to be part of a discount
-            // note that giftCardHistory->Points are not actually points,
-            // they are monetary currency (db field misnamed and never fixed?)
-            $discount += $giftCardHistory->Points;
+        if (!empty($giftCards)) {
+            foreach($giftCards as $giftCardId) {
+                $giftCardCustomer = $this->logic->customers->find("CrdID = " . $giftCardId . " AND IsGiftCard = True");
+                if (empty($giftCardCustomer))
+                    throw new \RecordNotFoundException("Unable to find gift card: " . $giftCardId);
+                $giftCardCustomer = $giftCardCustomer[0];
+                $giftCardHistory = $this->logic->giftCardHistory->find("CustID = " . $giftCardCustomer->CustID);
+                if (empty($giftCardHistory))
+                    throw new \RecordNotFoundException("Unable to find gift card by CustID: " . $giftCardCustomer->CustID);
+                $giftCardHistory = $giftCardHistory[0];
+                // consider the giftCardHistory Points to be part of a discount
+                // note that giftCardHistory->Points are not actually points,
+                // they are monetary currency (db field misnamed and never fixed?)
+                $discount += $giftCardHistory->Points;
+            }
         }
         if (!is_array($params))
             $params = array($params); // for foreach syntax
@@ -89,7 +92,7 @@ class CheckTotalsLogic extends BaseLogic {
             // consider the giftCard total a discount?
             // altering the checkTotal based on potential future gift card payments
             // is hacky no matter where we put it, may as well use this for now
-            $checkTotals->Discount = $discount; 
+            $checkTotals->Discount = $discount; // consider using CheckPaidTotal instead of Discount, now that the column is available
             $params[$key] = $checkTotals;
         }
         $calculated = $this->applyCheckTotal($params);
@@ -101,7 +104,15 @@ class CheckTotalsLogic extends BaseLogic {
         $products = array(); // keep track of products by productId
         $taxes = array(); // keep track of taxes by taxId
 
-        $useSalesTax =$this->logic->helpers->useSalesTax();
+        $useSalesTax = $this->logic->helpers->useSalesTax();
+        $discountBeforeTaxes = $this->logic->controlPanel->find("SettingName LIKE %DiscountBeforeTaxes%");
+        if (!empty($discountBeforeTaxes)) {
+            $discountBeforeTaxes = $discountBeforeTaxes[0];
+            $discountBeforeTaxes = Convert::toBoolean($discountBeforeTaxes->SettingValue);
+        }
+        else
+            $discountBeforeTaxes = false; // override to false if no records are found for DiscountBeforeTaxes
+
         foreach($checks as $check) {
             if (!isset($products[$check->ProductID])) {
                 if (!isset($check->ProductID))
@@ -128,24 +139,24 @@ class CheckTotalsLogic extends BaseLogic {
             $check->TaxPercent = $tax->Amount;
 
             // begin logic found in VB
-            $check->DiscountApplied = 0; // equivalent to cartDetail.Discount (?)
-            $check->UnitPrice = $product->Price1; // for the return's sake
-            $check->CheckDetailSubtotal = $check->Qty * $product->Price1 - $check->DiscountApplied; // equivalent to cartDetail.SubTotal
-            $compoundTaxRate = (((1 + $tax->GST / 100) * (1 + ($tax->Amount - $tax->GST) / 100)) - 1) * 100; // calculation taken from WebAPI
+            $check->DiscountApplied = 0; // just assume the DiscountApplied will be 0 with virtual/posted checks
+            $check->UnitPrice = $product->Price1;
+
+            $check->CheckDetailSubtotal = $check->UnitPrice * (($check->Qty ?: 0) + ($check->CadetQty ?: 0)) - ($discountBeforeTaxes ? $check->DiscountApplied : 0);
+            
             if ($useSalesTax) {
-                // totalGST = round(($check->CheckDetailSubtotal * $tax->GST) / (100.0), 2);
+                $compoundTaxRate = (((1 + $tax->GST / 100) * (1 + ($tax->Amount - $tax->GST) / 100)) - 1) * 100; // calculation taken from WebAPI
                 $check->CheckDetailTax = round((($check->CheckDetailSubtotal * $compoundTaxRate) / 100.0), 2);
                 $check->CheckDetailTotal = $check->CheckDetailSubtotal + $check->CheckDetailTax;
             }
             else { // assume VAT
-                // totalGST = round(($check->CheckDetailTotal * $tax->GST) / (100.0 + $tax->GST), 2);
                 $check->CheckDetailTax = round((($check->CheckDetailSubtotal * $tax->Amount) / (100 + $tax->Amount)), 2);
                 $check->CheckDetailTotal = $check->CheckDetailSubtotal;
             }
             if (!isset($running[$check->CheckID])) {
                 $running[$check->CheckID] = array(
-                    'subtotal' => 0,
-                    'tax' => 0
+                      'subtotal'    => 0
+                    , 'tax'         => 0
                 );
             }
             $running[$check->CheckID]['subtotal'] += $check->CheckDetailSubtotal;

@@ -30,7 +30,9 @@ class GiftCardProductHandler extends BaseProductHandler {
 
     public function handle($checkTotal, $metadata = array()) {
         $logPrefix = "Check #" . $checkTotal->CheckID . ": CheckDetail #" . $checkTotal->CheckDetailID . ": ";
-        $return = array();
+        $return = array(
+            'success' => array()
+        );
         for($i = 0; $i < $checkTotal->Qty; $i++) {
             // note: since the handler is now handling looping qty,
             // where should the loop end? on first error, or continue processing?
@@ -48,7 +50,8 @@ class GiftCardProductHandler extends BaseProductHandler {
                 $giftCardCustomer->BirthDate = \ClubSpeed\Utility\Convert::toDateForServer('1970-01-01 00:00:00'); // hack to satisfy customer interface logic
 
                 $customerId = $this->logic->customers->create_v0((array)$giftCardCustomer); // convert back to array for the params to be handled properly with the old customer interface
-                Log::debug($logPrefix . 'Created customer representation of gift card #' . $giftCardCustomer->CrdID);
+                $return['success'][] = '#' . $giftCardCustomer->CrdID; // use # to prevent tel: interpretation in html?
+                Log::info($logPrefix . 'Created customer representation of gift card #' . $giftCardCustomer->CrdID);
             }
             catch(\Exception $e) {
                 // note that we can't really add the giftCardHistory if we don't have this customerId -- break early (??)
@@ -68,7 +71,7 @@ class GiftCardProductHandler extends BaseProductHandler {
                 $giftCardHistory->CheckID = $checkTotal->CheckID;
                 $giftCardHistory->CheckDetailID = $checkTotal->CheckDetailID;
                 $giftCardHistoryId = $this->logic->giftCardHistory->create($giftCardHistory);
-                Log::debug($logPrefix . 'Added ' . $giftCardHistory->Points . ' points to gift card #' . $giftCardCustomer->CrdID);
+                Log::info($logPrefix . 'Added ' . $giftCardHistory->Points . ' points to gift card #' . $giftCardCustomer->CrdID);
             }
             catch(\Exception $e) {
                 $message = $logPrefix . 'Unable to create gift card history record for gift card #'. $giftCardCustomer->CrdID . '!' . $e->getMessage();
@@ -104,7 +107,7 @@ class GiftCardProductHandler extends BaseProductHandler {
                     ->to($emailTo)
                     ->body($receiptBody);
                 Mail::send($mail);
-                Log::debug($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID);
+                Log::info($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID);
             }
             catch(\Exception $e) {
                 $message = $logPrefix . 'Unable to send gift card email! ' . $e->getMessage();
@@ -113,12 +116,9 @@ class GiftCardProductHandler extends BaseProductHandler {
                     'error' => $message // or include more information?
                 );
             }
-            // can't return now on success, if qty is greater than 1?
-            return array(
-                'success' => $logPrefix . ': Gift Card #' . $giftCardCustomer->CrdID . ' has a balance of: ' . $giftCardHistory->Points
-            );
         }
 
-        return $success;
+        $return['success'] = 'Gift Cards: ' . implode(', ', $return['success']);
+        return $return;
     }
 }

@@ -30,3 +30,5 @@ Route::get('/logout','LogoutController@entry');
 
 Route::get('/disconnected', 'DisconnectedController@entry');
 Route::get('/disabled', 'DisabledController@entry');
+
+Route::get('/changeLanguage/{newLanguageCode}/{destination}','LocalizationController@changeLanguage');

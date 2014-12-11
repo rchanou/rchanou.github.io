@@ -2,7 +2,7 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-Facebook Login - Online Booking
+{{$strings['str_loginFacebookTitle']}}
 @stop
 <!-- END PAGE TITLE -->
 
@@ -71,16 +71,16 @@ Facebook Login - Online Booking
 
 @section('steps')
 <div class="steps">
-    {{link_to('step1','See the Lineup')}} > <em>Choose a Race</em> >
+    {{link_to('step1',$strings['str_seeTheLineup'])}} > <em>{{$strings['str_chooseARace']}}</em> >
     @if(Session::has('authenticated'))
-    {{link_to('cart','Review Your Order')}}
+    {{link_to('cart',$strings['str_reviewYourOrder'])}}
     @else
-    Review Your Order
+    {{$strings['str_reviewYourOrder']}}
     @endif
     @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-    > {{link_to('checkout','Checkout')}}
+    > {{link_to('checkout',$strings['str_checkout'])}}
     @else
-    > Checkout
+    > {{$strings['str_checkout']}}
     @endif
 </div>
 @stop
@@ -88,17 +88,17 @@ Facebook Login - Online Booking
 @section('content')
 <div class="mainBodyContent">
     <div class="mainBodyHeader">
-        Connecting to Facebook...
+        {{$strings['str_connectingToFacebook']}}
     </div>
 
     <div class="redirectHeader centered">
-        Redirecting in a moment...
+        {{$strings['str_redirectingInAMoment']}}
     </div>
 
     <div class="centered" id="facebookError" style="display: none">
         <div class="alert alert-danger alert-dismissable" role="alert">
             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            There was a problem connecting to your Facebook account. Please go back and try again, or <a href="step2?create={{$heatId}}#{{$heatId}}"">create a new account</a> to book your race.
+            {{$strings['str_problemConnectingToFacebookPart1']}} <a href="step2?create={{$heatId}}#{{$heatId}}">{{$strings['str_createANewAccount']}}</a> {{$strings['str_problemConnectingToFacebookPart2']}}.
         </div>
     </div>
 

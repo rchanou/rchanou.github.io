@@ -1,6 +1,6 @@
 CREATE VIEW dbo.OnlineBookingAvailability_V AS
 WITH
-ProductSpotsUsed AS (
+ProductSpotsUsed AS ( -- get the spots used, split by product and heat
     SELECT
         ob.HeatMainID AS HeatNo
         , ob.ProductsID
@@ -11,7 +11,7 @@ ProductSpotsUsed AS (
         ON ob.OnlineBookingsID = obr.OnlineBookingsID
     GROUP BY ob.HeatMainID, ob.ProductsID
 ),
-ProductSpotsUsedGroupSum AS (
+ProductSpotsUsedGroupSum AS ( -- get the spots used, split only by heat (multiple online booking containers for the same heat)
     SELECT
         ob.HeatMainID AS HeatNo
         , SUM(obr.Quantity) AS ProductSpotsUsedGroupSum
@@ -21,7 +21,23 @@ ProductSpotsUsedGroupSum AS (
         ON ob.OnlineBookingsID = obr.OnlineBookingsID
     GROUP BY ob.HeatMainID
 ),
-HeatSpotsUsedPhysical AS (
+ProductSpotsUsedNonPermanentGroupSum AS (
+    -- side note, when a status is set to permanent, it should NOT be used for calculations with the heat,
+    -- as it is technically a representation (and duplicate) of the dbo.HeatMain.NumberOfReservation increment or dbo.HeatDetails record.
+    -- awkward, but this must be done in order to determine that heat placement came from OnlineBooking, which is necessary to decrement available slots.
+    SELECT
+        ob.HeatMainID AS HeatNo
+        , SUM(obr.Quantity) AS ProductSpotsUsedNonPermanentGroupSum
+    FROM
+        dbo.OnlineBookingReservations obr
+    INNER JOIN dbo.OnlineBookings ob
+        ON ob.OnlineBookingsID = obr.OnlineBookingsID
+    INNER JOIN dbo.OnlineBookingReservationStatus obrs
+        ON obrs.OnlineBookingReservationStatusID = obr.OnlineBookingReservationStatusID
+    WHERE obrs.Status != 'PERMANENT'
+    GROUP BY ob.HeatMainID
+),
+HeatSpotsUsedPhysical AS ( -- get the heat spots used by sp_intake / purchased online bookings
     SELECT
         hd.HeatNo
         , COUNT(*) AS HeatSpotsUsedPhysical
@@ -30,18 +46,18 @@ HeatSpotsUsedPhysical AS (
         ON hd.HeatNo = hm.HeatNo
     GROUP BY hd.HeatNo
 ),
-HeatSpotsTotalOnline AS(
+HeatSpotsTotalOnline AS( -- get the total availability for bookings (including multiple booking containers)
     SELECT
         ob.HeatMainID
         , SUM(ob.QuantityTotal) AS HeatSpotsTotalOnline
     FROM dbo.OnlineBookings ob
     GROUP BY ob.HeatMainID
 ),
-HeatSpotsAvailableOnline AS (
+HeatSpotsAvailableOnline AS ( -- calculate how many spots are still available across all booking containers, DONT count permanent
     SELECT
         hm.HeatNo
-        , CASE WHEN ob.QuantityTotal - ISNULL(psugs.ProductSpotsUsedGroupSum, 0) < hm.RacersPerHeat - hsup.HeatSpotsUsedPhysical
-            THEN ob.QuantityTotal - ISNULL(psugs.ProductSpotsUsedGroupSum, 0)
+        , CASE WHEN ob.QuantityTotal - ISNULL(psugs.ProductSpotsUsedNonPermanentGroupSum, 0) < hm.RacersPerHeat - hsup.HeatSpotsUsedPhysical
+            THEN ob.QuantityTotal - ISNULL(psugs.ProductSpotsUsedNonPermanentGroupSum, 0)
             ELSE hm.RacersPerHeat - hsup.HeatSpotsUsedPhysical
         END AS HeatSpotsAvailableOnline
     FROM dbo.HeatMain hm
@@ -49,7 +65,7 @@ HeatSpotsAvailableOnline AS (
         ON hm.HeatNo = ob.HeatMainID
     LEFT OUTER JOIN HeatSpotsUsedPhysical hsup
         ON hm.HeatNo = hsup.HeatNo
-    LEFT OUTER JOIN ProductSpotsUsedGroupSum psugs
+    LEFT OUTER JOIN ProductSpotsUsedNonPermanentGroupSum psugs
         ON psugs.HeatNo = hm.HeatNo
 ),
 ReservationCalculations AS (
@@ -58,7 +74,8 @@ ReservationCalculations AS (
         , ob.OnlineBookingsID
         , ob.ProductsID -- could also used OnlineBookingReservationsID if we wanted
         , ISNULL(psu.ProductSpotsUsed, 0) AS ProductSpotsUsed
-        , ISNULL(psugs.ProductSpotsUsedGroupSum, 0) As ProductSpotsUsedGroupSum
+        , ISNULL(psugs.ProductSpotsUsedGroupSum, 0) AS ProductSpotsUsedGroupSum
+        , ISNULL(psunpgs.ProductSpotsUsedNonPermanentGroupSum, 0) AS ProductSpotsUsedNonPermanentGroupSum
         , ISNULL(ob.QuantityTotal, 0) AS ProductSpotsTotal
         , hm.NumberOfReservation AS HeatSpotsUsedTemporary
         , ISNULL(hsup.HeatSpotsUsedPhysical, 0) AS HeatSpotsUsedPhysical
@@ -72,6 +89,8 @@ ReservationCalculations AS (
         AND psu.ProductsID = ob.ProductsID
     LEFT OUTER JOIN ProductSpotsUsedGroupSum psugs
         ON psugs.HeatNo = ob.HeatMainID
+    LEFT OUTER JOIN ProductSpotsUsedNonPermanentGroupSum psunpgs
+        ON psunpgs.HeatNo = ob.HeatMainID
     LEFT OUTER JOIN dbo.Products p
         ON p.ProductID = ob.ProductsID
     LEFT OUTER JOIN HeatSpotsUsedPhysical hsup
@@ -84,16 +103,16 @@ ReservationCalculations2 AS (
         rc.HeatNo
         , rc.OnlineBookingsID
         , rc.ProductsID
-        , rc.HeatSpotsUsedTemporary
-        , (rc.HeatSpotsUsedPhysical + rc.HeatSpotsUsedTemporary) AS HeatSpotsUsedActual
-        , rc.HeatSpotsTotalActual
+        , rc.HeatSpotsUsedTemporary -- the NumberOfReservations 
+        , (rc.HeatSpotsUsedPhysical + rc.HeatSpotsUsedTemporary) AS HeatSpotsUsedActual -- the combination of HeatDetails and NumberOfReservations
+        , rc.HeatSpotsTotalActual -- the total spots defined on HeatMain
         , rc.ProductSpotsUsed
         , (rc.ProductSpotsTotal - rc.ProductSpotsUsed) AS ProductSpotsAvailable
         , rc.ProductSpotsTotal
         , rc.ProductSpotsUsedGroupSum
         , (rc.HeatSpotsTotalOnline - rc.ProductSpotsUsedGroupSum) AS HeatSpotsAvailableOnline
         , rc.HeatSpotsTotalOnline
-        , (rc.HeatSpotsTotalActual - rc.HeatSpotsUsedPhysical - rc.HeatSpotsUsedTemporary - rc.ProductSpotsUsedGroupSum) AS HeatSpotsAvailableCombined -- takes into account the current online reservations as well
+        , (rc.HeatSpotsTotalActual - rc.HeatSpotsUsedPhysical - rc.HeatSpotsUsedTemporary - rc.ProductSpotsUsedNonPermanentGroupSum) AS HeatSpotsAvailableCombined -- takes into account the current online reservations as well
     FROM ReservationCalculations rc
 ),
 ReservationCalculations3 AS (
@@ -104,11 +123,12 @@ ReservationCalculations3 AS (
         , rc.HeatSpotsUsedActual
         , rc.HeatSpotsAvailableCombined
         , rc.HeatSpotsTotalActual
-        , rc.HeatSpotsAvailableOnline
-        , CASE WHEN rc.HeatSpotsAvailableCombined < rc.HeatSpotsAvailableOnline
-            THEN rc.HeatSpotsAvailableCombined
+        , CASE 
+            WHEN rc.HeatSpotsAvailableCombined < 0 THEN 0   -- potential loss of data: if we must, keep this at the negative numbers
+            WHEN rc.HeatSpotsAvailableOnline < 0 THEN 0     -- both can be negative for when sp_intake directly modifies racers/reservations while online reservation is temporary (in the kart)
+            WHEN rc.HeatSpotsAvailableCombined < rc.HeatSpotsAvailableOnline THEN rc.HeatSpotsAvailableCombined
             ELSE rc.HeatSpotsAvailableOnline
-        END AS HeatSpotsAvailableByLessThanComparison
+        END AS HeatSpotsAvailableOnline -- ensure that the online availability is never greater than the physical availability
         , rc.HeatSpotsTotalOnline
         , rc.ProductSpotsUsed
         , rc.ProductSpotsAvailable
@@ -123,16 +143,20 @@ ReservationCalculations4 AS (
         , rc.HeatSpotsTotalActual
         , rc.HeatSpotsAvailableCombined
         , rc.HeatSpotsUsedActual AS HeatSpotsUsed
-        , rc.HeatSpotsAvailableOnline
+        , CASE WHEN rc.HeatSpotsAvailableOnline < 0
+            THEN 0
+            ELSE rc.HeatSpotsAvailableOnline
+        END AS HeatSpotsAvailableOnline
         , rc.ProductSpotsUsed
         -- ensure that we can never have productspotsavailable set to anything greater than the actual number of heat spots available
-        , CASE WHEN rc.ProductSpotsAvailable < rc.HeatSpotsAvailableByLessThanComparison
+        , CASE WHEN rc.ProductSpotsAvailable < rc.HeatSpotsAvailableOnline
             THEN rc.ProductSpotsAvailable
-            ELSE rc.HeatSpotsAvailableByLessThanComparison
+            ELSE rc.HeatSpotsAvailableOnline
         END AS ProductSpotsAvailableOnline
         , rc.ProductSpotsTotal
     FROM ReservationCalculations3 rc
 )
+
 SELECT
     hm.HeatNo
     , ht.HeatTypeNo

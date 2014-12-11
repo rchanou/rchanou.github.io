@@ -127,8 +127,6 @@ class MSSQLConnection extends \ClubSpeed\Connection\BaseConnection {
     //             die(print_r(sqlsrv_errors(), true));
     //         }
     //         $result = $this->getResult($resource);
-    //         pr($result);
-    //         die();
     //     }
     //     catch (Exception $e) {
     //         $this->handle($e);

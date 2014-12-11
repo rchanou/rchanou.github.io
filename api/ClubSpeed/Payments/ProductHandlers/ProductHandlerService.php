@@ -3,43 +3,41 @@
 namespace ClubSpeed\Payments\ProductHandlers;
 use ClubSpeed\Enums\Enums as Enums;
 
-/**
- * The database interface class
- * for ClubSpeed online booking.
- */
 class ProductHandlerService {
 
-    private $payments;
-    private $logic;
-    private $_lazy;
+    private static $logic;
+    private static $_lazy;
 
-    public function __construct(&$payments, &$logic) {
-        $this->payments = $payments;
-        $this->logic = $logic;
-        $this->_lazy = array();
+    /**
+     * Dummy constructor to prevent any initialization of this class
+     */
+    private function __construct() {}
+
+    public static function initialize(&$logic) {
+        self::$logic = $logic;
+        self::$_lazy = array();
     }
 
-    private function load($prop) {
-        $prop = '\ClubSpeed\Payments\ProductHandlers\\' . ucfirst($prop) . 'ProductHandler'; // hacky -- we can go back to the old way detailed below, if desired
-        if (!isset($this->_lazy[$prop])) {
-            $this->_lazy[$prop] = new $prop($this->logic);
+    private static function load($prop) {
+        $prop = '\ClubSpeed\Payments\ProductHandlers\\' . ucfirst($prop) . 'ProductHandler';
+        if (!isset(self::$_lazy[$prop])) {
+            self::$_lazy[$prop] = new $prop(self::$logic);
         }
-        return $this->_lazy[$prop];
+        return self::$_lazy[$prop];
     }
 
-    public function handle($checkDetail, $metadata = array()) {
-        $product = $this->logic->products->get($checkDetail->ProductID);
+    public static function handle($checkDetail, $metadata = array()) {
+        $product = self::$logic->products->get($checkDetail->ProductID);
         $product = $product[0];
         switch($product->ProductType) {
+            case Enums::PRODUCT_TYPE_REGULAR:
+                return self::load('Regular')->handle($checkDetail, $metadata);
             case Enums::PRODUCT_TYPE_POINT:
-                return $this->load('Point')->handle($checkDetail, $metadata);
-                // todo: shuffle off to handle points item? consider heatId in the metadata?
+                return self::load('Point')->handle($checkDetail, $metadata);
             case Enums::PRODUCT_TYPE_RESERVATION:
-                pr("found reservation item");
-                // $this->load('Reservation')->handle($checkDetail, $metadata);
-                break;
+                return self::load('Reservation')->handle($checkDetail, $metadata);
             case Enums::PRODUCT_TYPE_GIFT_CARD:
-                return $this->load('GiftCard')->handle($checkDetail, $metadata);
+                return self::load('GiftCard')->handle($checkDetail, $metadata);
             // other handlers/logic yet to be determined
             // see enums for other available product types
         }

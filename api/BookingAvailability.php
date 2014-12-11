@@ -17,7 +17,6 @@ class BookingAvailability extends BaseApi {
 
     /**
      * @url GET /range
-     * Note that the above is more than just a phpdoc -- it also handles routing
      */
     public function range($request_data = null) {
         $this->validate('range');
@@ -41,13 +40,12 @@ class BookingAvailability extends BaseApi {
 
     /**
      * @url GET /visible
-     * Note that the above is more than just a phpdoc -- it also handles routing
      */
     public function visible($request_data = null) {
         $this->validate('visible');
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            return $this->mapper->mutate($request_data, function($mapped) use (&$interface) {
+            return $this->mapper->mutate($request_data, function($mapped = array()) use (&$interface) {
                 return $interface->visible();
             });
         }

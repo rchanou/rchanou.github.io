@@ -2,7 +2,7 @@
 
 <!-- PAGE TITLE -->
 @section('title')
-Login - Online Booking
+{{$strings['str_loginTitle']}}
 @stop
 <!-- END PAGE TITLE -->
 
@@ -10,21 +10,21 @@ Login - Online Booking
 
 @section('steps')
 <div class="steps">
-    {{link_to('step1','See the Lineup')}} >
+    {{link_to('step1',$strings['str_seeTheLineup'])}} >
     @if(Session::has('lastSearch'))
-        {{link_to('step2','Choose a Race')}} >
+        {{link_to('step2',$strings['str_chooseARace'])}} >
     @else
-        Choose a Race >
+        {{$strings['str_chooseARace']}} >
     @endif
     @if(Session::has('authenticated'))
-    {{link_to('cart','Review Your Order')}}
+    {{link_to('cart',$strings['str_reviewYourOrder'])}}
     @else
-    Review Your Order
+    {{$strings['str_reviewYourOrder']}}
     @endif
     @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-    > {{link_to('checkout','Checkout')}}
+    > {{link_to('checkout',$strings['str_checkout'])}}
     @else
-    > Checkout
+    > {{$strings['str_checkout']}}
     @endif
 </div>
 @stop
@@ -32,21 +32,21 @@ Login - Online Booking
 @section('content')
 <div class="mainBodyContent">
     <div class="mainBodyHeader">
-        Login
+        {{$strings['str_login']}}
     </div>
 
 <div class="loginOptions centered" id="loginOptions">
 
-            <em>You must be logged in to place an order. Please select one of the following options:</em><br/>
-            <button type="button" class="regularButton" data-toggle="collapse" data-target="#createAccount" onclick="$('#loginToAccount').collapse('hide')">Create A New Account</button>
+            <em>{{$strings['str_youMustBeLoggedIn']}}</em><br/>
+            <button type="button" class="regularButton" data-toggle="collapse" data-target="#createAccount" onclick="$('#loginToAccount').collapse('hide')">{{$strings['str_createANewAccount']}}</button>
 
                 @if($settings['enableFacebook'])
                 <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('login','loginfb',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions&state={{$intent['heatId']}}!{{$intent['quantity']}}">
-                    <button type="button" class="regularButton">Login with Facebook</button>
+                    <button type="button" class="regularButton">{{$strings['str_loginWithFacebook']}}</button>
                 </a>
                 @endif
 
-            <button type="button" class="regularButton" data-toggle="collapse" data-target="#loginToAccount" onclick="$('#createAccount').collapse('hide')">Login to Existing Account</button>
+            <button type="button" class="regularButton" data-toggle="collapse" data-target="#loginToAccount" onclick="$('#createAccount').collapse('hide')">{{$strings['str_loginToExistingAccount']}}</button>
 
             <!-- ACCOUNT CREATION FORM -->
             <div class="createAccount collapse out" data-toggle="false" id="createAccount">
@@ -77,10 +77,10 @@ Login - Online Booking
                              messages:
                              {
                                  EmailAddressConfirmation: {
-                                     equalTo: 'Emails must match.'
+                                     equalTo: '{{$strings['str_emailsMustMatch']}}'
                                  },
                                    PasswordConfirmation: {
-                                       equalTo: 'Passwords must match'
+                                       equalTo: '{{$strings['str_passwordsMustMatch']}}'
                                    }
                              }
                          });
@@ -88,9 +88,8 @@ Login - Online Booking
                 </script>
                 <form action="createaccount" class="accountCreationForm" id="accountCreationForm" method="POST">
 
-                    <!-- TODO: REMOVE THE BELOW - JUST FOR TESTING -->
+                    @if(Session::has('debug'))
                     <a href="#" id="testdata">Populate with test data</a><p/>
-
                     <script>
                         $(document).ready(function() {
                             $('#testdata').click(function () {
@@ -114,15 +113,16 @@ Login - Online Booking
                             });
                         });
                     </script>
-                    <!-- TODO: REMOVE THE ABOVE - JUST FOR TESTING -->
+                    @endif
 
-                    <div class="formHeader">Account Information</div>
+
+                    <div class="formHeader">{{$strings['str_accountInformation']}}</div>
 
                     <!-- E-mail and e-mail confirmation -->
                     @if($settings['emailShown'])
                         <label for="EmailAddress">
                             <strong>
-                                Email Address:
+                                {{$strings['str_emailAddress']}}:
                                 @if($settings['emailRequired']) <span class="requiredAsterisk">*</span> @endif
                             </strong>
                         </label>
@@ -133,7 +133,7 @@ Login - Online Booking
                         @endif
                         <label for="EmailAddressConfirmation">
                             <strong>
-                                Confirm Email:
+                                {{$strings['str_confirmEmail']}}:
                                 @if($settings['emailRequired']) <span class="requiredAsterisk">*</span> @endif
                             </strong>
                         </label>
@@ -146,9 +146,9 @@ Login - Online Booking
 
                     <!-- Consent to e-mail marketing -->
                     @if($settings['emailShown'] && $settings['consentToMailShown'])
-                        <span class="emailConsent"> <!-- TODO: Tidy up inline styles if sticking to this template -->
+                        <span class="emailConsent">
                             <input type="checkbox" name="ConsentToMail" value="true">
-                            <strong>I want to receive race results and special offers via the e-mail provided.</strong>
+                            <strong>{{$strings['str_iWantToReceiveSpecialOffers']}}</strong>
                         </span>
                     @endif
 
@@ -156,7 +156,7 @@ Login - Online Booking
                     @if($settings['passwordShown'])
                         <label for="Password">
                                 <strong>
-                                    Password:
+                                    {{$strings['str_password']}}:
                                     @if($settings['passwordRequired']) <span class="requiredAsterisk">*</span> @endif
                                 </strong>
                         </label>
@@ -167,7 +167,7 @@ Login - Online Booking
                         @endif
                         <label for="PasswordConfirmation">
                             <strong>
-                                Confirm Password:
+                                {{$strings['str_confirmPassword']}}:
                                 @if($settings['passwordRequired']) <span class="requiredAsterisk">*</span> @endif
                             </strong>
                         </label>
@@ -178,11 +178,11 @@ Login - Online Booking
                         @endif
                     @endif
 
-                    <div class="formHeader">Personal Information</div>
+                    <div class="formHeader">{{$strings['str_personalInformation']}}</div>
 
                     <!-- Company -->
                     @if($settings['companyShown'])
-                        <label for="Company"><strong>Company: @if($settings['companyRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Company"><strong>{{$strings['str_company']}}: @if($settings['companyRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['companyRequired'])
                             <input maxlength="50" type="text" id="Company" name="Company" class="required validatePresence"><br/>
                         @else
@@ -192,7 +192,7 @@ Login - Online Booking
 
                     <!-- First Name -->
                     @if($settings['firstNameShown'])
-                        <label for="FName"><strong>First Name: @if($settings['firstNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="FName"><strong>{{$strings['str_firstName']}}: @if($settings['firstNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['firstNameRequired'])
                             <input maxlength="50" type="text" id="FName" name="FName" class="required validatePresence"><br/>
                         @else
@@ -202,7 +202,7 @@ Login - Online Booking
 
                     <!-- Last Name -->
                     @if($settings['lastNameShown'])
-                        <label for="LName"><strong>Last Name: @if($settings['lastNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="LName"><strong>{{$strings['str_lastName']}}: @if($settings['lastNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['lastNameRequired'])
                             <input maxlength="50" type="text" id="LName" name="LName" class="required validatePresence"><br/>
                         @else
@@ -212,7 +212,7 @@ Login - Online Booking
 
                     <!-- Racer Name -->
                     @if($settings['racerNameShown'])
-                    <label for="RacerName"><strong>Racer Name: @if($settings['racerNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                    <label for="RacerName"><strong>{{$strings['str_racerName']}}: @if($settings['racerNameRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['racerNameRequired'])
                             <input maxlength="100" type="text" id="RacerName" name="RacerName" class="required validatePresence"><br/>
                         @else
@@ -220,25 +220,24 @@ Login - Online Booking
                         @endif
                     @endif
 
-                    <!-- TODO: Move away from fixed inline margin-lefts as it will look different on different devices, if sticking to this template -->
                     <!-- Birth Date -->
                     @if($settings['birthDateShown'])
 
-                        <label for="BirthDate"><strong>Birth Date: @if($settings['birthDateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="BirthDate"><strong>{{$strings['str_birthDate']}}: @if($settings['birthDateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         <span class="inputMarginAdjustment"><input class="inputLineHeightAdjustment" type="date" name="BirthDate" id="BirthDate"><br/></span>
                     @endif
 
                     <!-- Gender -->
                     @if($settings['genderShown'])
-                        <label for=""><strong>Gender: @if($settings['genderRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
-                            <span class="inputGenderMarginAdjustment">Male <input type="radio" name="Gender" id="Gender_male" value="male" checked="checked">
-                            Female <input type="radio" name="Gender" id="Gender_male" value="female">
-                            Other <input type="radio" name="Gender" id="Gender_male" value="other"></span>
+                        <label for=""><strong>{{$strings['str_gender']}}: @if($settings['genderRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                            <span class="inputGenderMarginAdjustment">{{$strings['str_male']}} <input type="radio" name="Gender" id="Gender_male" value="male" checked="checked">
+                            {{$strings['str_female']}} <input type="radio" name="Gender" id="Gender_male" value="female">
+                            {{$strings['str_other']}} <input type="radio" name="Gender" id="Gender_male" value="other"></span>
                     @endif
 
                     <!-- SourceID -->
                     @if($settings['whereDidYouHearAboutUsShown'])
-                        <label for="SourceID"><strong>Where did you hear about us? @if($settings['whereDidYouHearAboutUsRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="SourceID"><strong>{{$strings['str_whereDidYouHearAboutUs']}} @if($settings['whereDidYouHearAboutUsRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['whereDidYouHearAboutUsRequired'])
                             {{ Form::select("SourceID", $settings['dropdownOptions'], Input::old("SourceID",'0'),array('style' => 'color: black', 'class'=>'required') ) }}<br/>
                         @else
@@ -248,18 +247,18 @@ Login - Online Booking
 
                     <!-- Address and Address2 -->
                     @if($settings['addressShown'])
-                        <label for="Address"><strong>Address line 1: @if($settings['addressRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Address"><strong>{{$strings['str_addressLine1']}}: @if($settings['addressRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['addressRequired'])
                             <input maxlength="80" type="text" id="Address" name="Address" class="required validatePresence"><br/>
                         @else
                             <input maxlength="80" type="text" id="Address" name="Address"><br/>
                         @endif
-                        <label for="Address2"><strong>Address line 2:</strong></label> <input maxlength="255" type="text" id="Address2" name="Address2"><br/>
+                        <label for="Address2"><strong>{{$strings['str_addressLine2']}}:</strong></label> <input maxlength="255" type="text" id="Address2" name="Address2"><br/>
                     @endif
 
                     <!-- City -->
                     @if($settings['cityShown'])
-                        <label for="City"><strong>City: @if($settings['cityRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="City"><strong>{{$strings['str_city']}}: @if($settings['cityRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['cityRequired'])
                             <input maxlength="80" type="text" id="City" name="City" class="required validatePresence"><br/>
                         @else
@@ -269,7 +268,7 @@ Login - Online Booking
 
                     <!-- State -->
                     @if($settings['stateShown'])
-                        <label for="State"><strong>State/Province/Territory: @if($settings['stateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="State"><strong>{{$strings['str_state']}}: @if($settings['stateRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['stateRequired'])
                             <input maxlength="50" type="text" id="State" name="State" class="required validatePresence"><br/>
                         @else
@@ -279,7 +278,7 @@ Login - Online Booking
 
                     <!-- Zip -->
                     @if($settings['zipShown'])
-                        <label for="Zip"><strong>Postal Code: @if($settings['zipRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Zip"><strong>{{$strings['str_postalCode']}}: @if($settings['zipRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['zipRequired'])
                             <input maxlength="15" type="text" id="Zip" name="Zip" class="required validatePresence"><br/>
                         @else
@@ -289,7 +288,7 @@ Login - Online Booking
 
                     <!-- Country -->
                     @if($settings['countryShown'])
-                        <label for="Country"><strong>Country: @if($settings['countryRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Country"><strong>{{$strings['str_country']}}: @if($settings['countryRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['countryRequired'])
                             <input maxlength="50" type="text" id="Country" name="Country" class="required validatePresence"><br/>
                         @else
@@ -299,7 +298,7 @@ Login - Online Booking
 
                     <!-- Cell -->
                     @if($settings['cellShown'])
-                        <label for="Cell"><strong>Cell: @if($settings['cellRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="Cell"><strong>{{$strings['str_cell']}}: @if($settings['cellRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['cellRequired'])
                             <input maxlength="50" type="text" id="Cell" name="Cell" class="required validatePresence"><br/>
                         @else
@@ -309,7 +308,7 @@ Login - Online Booking
 
                     <!-- License Number -->
                     @if($settings['licenseNumberShown'])
-                        <label for="LicenseNumber"><strong>License #: @if($settings['licenseNumberRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
+                        <label for="LicenseNumber"><strong>{{$strings['str_licenseNumber']}}: @if($settings['licenseNumberRequired'])<span class="requiredAsterisk">*</span> @endif</strong></label>
                         @if($settings['licenseNumberRequired'])
                             <input maxlength="100" type="text" id="LicenseNumber" name="LicenseNumber" class="required validatePresence"><br/>
                         @else
@@ -362,7 +361,7 @@ Login - Online Booking
                     <input type="hidden" name="numberOfParticipants" value="{{$intent['quantity']}}">
                     <input type="hidden" name="source" value="login">
                     <div class="rightAligned">
-                        <button type="submit" class="formButton">Create Account</button>
+                        <button type="submit" class="formButton">{{$strings['str_createAccount']}}</button>
                     </div>
                 </form>
             </div>
@@ -372,15 +371,15 @@ Login - Online Booking
             <div class="loginToAccount collapse out" data-toggle="false" id="loginToAccount">
 
                 <form action="login" class="loginForm" method="POST">
-                    <div class="formHeader">Login to Your Existing Account</div>
-                    <label for="loginEmail"><strong>Email Address: <span class="requiredAsterisk">*</span></strong></label> <input type="text" name="EmailAddress" id="loginEmail" class="required mustBeValidEmail"><br/>
-                    <label for="loginPassword"><strong>Password: <span class="requiredAsterisk">*</span></strong></label> <input type="password" name="Password" id="loginPassword" class="required"><br/>
+                    <div class="formHeader">{{$strings['str_loginToYourExistingAccount']}}</div>
+                    <label for="loginEmail"><strong>{{$strings['str_emailAddress']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="text" name="EmailAddress" id="loginEmail" class="required mustBeValidEmail"><br/>
+                    <label for="loginPassword"><strong>{{$strings['str_password']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="password" name="Password" id="loginPassword" class="required"><br/>
                     <input type="hidden" name="heatId" value="{{$intent['heatId']}}">
                     <input type="hidden" name="productId" value="{{$intent['productId']}}">
                     <input type="hidden" name="numberOfParticipants" value="{{$intent['quantity']}}">
                     <input type="hidden" name="source" value="login">
                     <div class="rightAligned">
-                        {{link_to('resetpassword','Reset My Password')}} <button type="submit" class="formButton">Login</button>
+                        {{link_to('resetpassword',$strings['str_resetPassword'])}} <button type="submit" class="formButton">{{$strings['str_login']}}</button>
                     </div>
                 </form>
             </div>

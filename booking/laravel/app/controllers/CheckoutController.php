@@ -81,7 +81,7 @@ class CheckoutController extends BaseController
         }
 
         $settings = Session::get('settings');
-        $locale = $settings['locale'];
+        $locale = $settings['numberFormattingLocale'];
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
         $currency = $settings['currency'];
 
@@ -94,7 +94,8 @@ class CheckoutController extends BaseController
                 'cart' => $cart,
                 'moneyFormatter' => $moneyFormatter,
                 'currency' => $currency,
-                'settings' => $settings
+                'settings' => $settings,
+                'strings' => Strings::getStrings()
             )
         );
     }
@@ -103,6 +104,7 @@ class CheckoutController extends BaseController
     {
         $input = Input::all();
 
+        $strings = Strings::getStrings();
         //STEP 1: Validate input server-side
 
         //Data validation
@@ -123,19 +125,19 @@ class CheckoutController extends BaseController
         $rules['email'] = 'required|email';
         
         $messages = array(
-            'email.required' => 'Your e-mail address is required.',
-            'email.email' => 'Please enter a valid e-mail address.',
-            'firstName.required' => 'First name is required.',
-            'lastName.required' => 'Last name is required.',
-            'number.required' => 'Your credit card number is required.',
-            'cvv.required' => 'Your CVV number is required.',
-            'expiryMonth.required' => 'Expiration month is required.',
-            'expiryYear.required' => 'Expiration year is required.',
-            'address1.required' => 'Address line 1 is required.',
-            'city.required' => 'City is required.',
-            'state.required' => 'State is required.',
-            'postcode.required' => 'Postal/zip code is required.',
-            'country.required' => 'Country is required.'
+            'email.required' => $strings['str_email.required'],
+            'email.email' => $strings['str_email.email'],
+            'firstName.required' => $strings['str_firstName.required'],
+            'lastName.required' => $strings['str_lastName.required'],
+            'number.required' => $strings['str_number.required'],
+            'cvv.required' => $strings['str_cvv.required'],
+            'expiryMonth.required' => $strings['str_expiryMonth.required'],
+            'expiryYear.required' => $strings['str_expiryYear.required'],
+            'address1.required' => $strings['str_address1.required'],
+            'city.required' => $strings['str_city.required'],
+            'state.required' => $strings['str_state.required'],
+            'postcode.required' => $strings['str_postcode.required'],
+            'country.required' => $strings['str_country.required']
         );
 
         //Create the validator
@@ -179,7 +181,7 @@ class CheckoutController extends BaseController
 
             $cart = Session::get('cart'); //Update the cart in memory
             $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "One or more items in your cart expired during payment.");
+            $messages->add('errors', $strings['str_oneOrMoreItemsExpiredDuringPayment']);
             if (count($cart) == 0) //If the last item in the cart was just removed
             {
                 return Redirect::to('/cart')->withErrors($messages)->withInput(); //Go to cart page
@@ -332,7 +334,7 @@ class CheckoutController extends BaseController
         else //STEP 7: If failure, redirect with error message
         {
             $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "Your payment was declined. Please try again."); //TODO: Enhance error messages
+            $messages->add('errors', $strings['str_paymentDeclined']); //TODO: Enhance error messages
             return Redirect::to('/checkout')->withErrors($messages)->withInput(); //Go to checkout page
         }
 
