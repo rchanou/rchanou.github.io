@@ -5,12 +5,6 @@
         </div>
     @endif
 
-    <div class="well" style="margin: 20px;">
-        Thanks for checking out the Online Booking beta!<p/>
-
-        Feedback or bug reports? Contact us at <a href="mailto:support@clubspeed.com">support@clubspeed.com</a>.
-    </div>
-
     <div class="text-center" style="margin-bottom: 5px; font-size: 80%">
     © CLUB SPEED, INC. 2006-{{date('Y')}}
     </div>
