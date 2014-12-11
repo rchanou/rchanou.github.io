@@ -14,7 +14,8 @@ class DisabledController extends BaseController
         return View::make('/errorpages/disabled',
             array(
                 'images' => Images::getImageAssets(),
-                'strings' => Strings::getStrings()
+                'strings' => Strings::getStrings(),
+                'errorInfo' => json_encode(var_export(Session::get('errorInfo'),true))
             )
         );
     }

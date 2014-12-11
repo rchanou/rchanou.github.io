@@ -45,7 +45,10 @@
 <!-- BEGIN JAVASCRIPT INCLUDES -->
 @section('js_includes')
 @parent
-
+    <script>
+        var errorInfo = {{$errorInfo}};
+        console.log("Error information:");
+        console.log(errorInfo);
+    </script>
 @stop
 <!-- END JAVASCRIPT INCLUDES -->
-

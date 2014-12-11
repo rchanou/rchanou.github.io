@@ -471,10 +471,17 @@ Online Bookings Settings
                                     <?php
                                         if (isset($bookingSettings['numberFormattingLocale']) && isset($bookingSettings['currency']))
                                         {
+                                            if (class_exists('NumberFormatter'))
+                                            {
                                              $locale = $bookingSettings['numberFormattingLocale'];
                                              $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
                                              $currency = $bookingSettings['currency'];
                                              $currencyExample = $moneyFormatter->formatCurrency(1234.56, $currency);
+                                            }
+                                            else
+                                            {
+                                                $currencyExample = '<strong>Your server needs an internationalization update.<br/>Please contact support</strong>.';
+                                            }
                                         }
                                     ?>
                                     Current format: {{$currencyExample}}
@@ -500,10 +507,17 @@ Online Bookings Settings
                                     <?php
                                         if (isset($bookingSettings['numberFormattingLocale']) && isset($bookingSettings['currency']))
                                         {
+                                            if (class_exists('NumberFormatter'))
+                                            {
                                              $locale = $bookingSettings['numberFormattingLocale'];
                                              $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::DECIMAL);
                                              $currency = $bookingSettings['currency'];
                                              $numberFormattingExample = $moneyFormatter->formatCurrency(1234.56, $currency);
+                                            }
+                                            else
+                                            {
+                                                $numberFormattingExample = '<strong>Your server needs an internationalization update.<br/>Please contact support</strong>.';
+                                            }
                                         }
                                     ?>
                                     Current format: {{$numberFormattingExample}}

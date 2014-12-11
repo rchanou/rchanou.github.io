@@ -69,6 +69,12 @@ Route::filter('checkIfDisabled', function ()
             Session::put('disabledOverride',true); //Inform the session not to allow the site to be disabled
         }
 
+        if (!class_exists('NumberFormatter'))
+        {
+            Session::put('errorInfo', 'Needs php_intl.dll migration run!');
+            return Redirect::to('/disabled');
+
+        }
         $settings = Settings::getSettings(); //Get website settings and check if we should be disabled
         $paymentProcessor = ($settings['onlineBookingPaymentProcessorSettings']);
         $paymentProcessor = $paymentProcessor->name;
