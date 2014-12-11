@@ -21,14 +21,14 @@ class BookingController extends BaseController
         $this->js_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'booking' . DIRECTORY_SEPARATOR . 'js';
         $this->css_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'booking' . DIRECTORY_SEPARATOR . 'css';
         $this->js_path = $this->js_directory . DIRECTORY_SEPARATOR . 'custom-js.js';
-        $this->js_url = Config::get('config.assetsURL') . '/../booking/js/' . 'custom-js.js';
+        $this->js_url = '/assets/booking/js/' . 'custom-js.js';
         $this->css_path = $this->css_directory . DIRECTORY_SEPARATOR . 'custom-styles.css';
-        $this->css_url = Config::get('config.assetsURL') . '/../booking/css/' . 'custom-styles.css';
+        $this->css_url = '/assets/booking/css/' . 'custom-styles.css';
 
         foreach($this->image_filenames as $currentFileName)
         {
             $this->image_paths[$currentFileName] = $this->image_directory . DIRECTORY_SEPARATOR . $currentFileName;
-            $this->image_urls[$currentFileName] = Config::get('config.assetsURL') . '/../booking/images/' . $currentFileName;
+            $this->image_urls[$currentFileName] = '/assets/booking/images/' . $currentFileName;
         }
 
       $standardNote = 'The following can be inserted into this template:<br/><br/>'

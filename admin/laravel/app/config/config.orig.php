@@ -6,6 +6,6 @@ return array(
     'privateKey' => 'INSERT_PRIVATE_KEY_HERE',
     'dateFormat' => 'Y-m-d',
     'debugging' => true,
-    'assetsURL' => 'http://' . $_SERVER['HTTP_HOST'] . '/assets/admin',
+    'assetsURL' => 'https://' . $_SERVER['HTTP_HOST'] . '/assets/admin',
     'numberOfMonitors' => 16
 );
