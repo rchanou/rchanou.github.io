@@ -426,24 +426,24 @@ Online Bookings Settings
                           </div>
                           @endif
                             <div class="form-group">
-                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Reservation Timeout</label>
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Reservation Timeout<br/>(minutes)</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">
                                     <input type="text" id="reservationTimeout" name="reservationTimeout" value="{{$bookingSettings['reservationTimeout']/60}}">
-                                    <span class="help-block text-left">The time until an unpaid online reservation expires, in minutes.</span>
+                                    <span class="help-block text-left">The time until an unpaid online reservation expires, in <strong>minutes</strong>.</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Earliest Booking Time Window</label>
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Earliest Booking Time Window<br/>(minutes)</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">
                                     <input type="text" id="bookingAvailabilityWindowBeginningInSeconds" name="bookingAvailabilityWindowBeginningInSeconds" value="{{$bookingSettings['bookingAvailabilityWindowBeginningInSeconds']/60}}">
-                                    <span class="help-block text-left">The window of time that defines the earliest a booking may be available online, in minutes. (Example: If set to 120, no booking may be made for a race happening in less than two hours.)</span>
+                                    <span class="help-block text-left">The window of time that defines the earliest a booking may be available online, in <strong>minutes</strong>. (Example: If set to 120, no booking may be made for a race happening in less than two hours.)</span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Latest Booking Time Window</label>
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Latest Booking Time Window<br/>(days)</label>
                                 <div class="col-sm-8 col-md-8 col-lg-8">
                                     <input type="text" id="bookingAvailabilityWindowEndingInSeconds" name="bookingAvailabilityWindowEndingInSeconds" value="{{$bookingSettings['bookingAvailabilityWindowEndingInSeconds']/86400}}">
-                                    <span class="help-block text-left">The window of time that defines the latest a booking may be available online, in days. (Example: If set to 90, no booking may be made for a race happening more than 90 days from now.)</span>
+                                    <span class="help-block text-left">The window of time that defines the latest a booking may be available online, in <strong>days</strong>. (Example: If set to 90, no booking may be made for a race happening more than 90 days from now.)</span>
                                 </div>
                             </div>
                             @if(isset($bookingSettings['maxRacersForDropdown']))
