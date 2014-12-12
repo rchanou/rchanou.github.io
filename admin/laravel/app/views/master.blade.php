@@ -90,6 +90,7 @@
                 <a href="#"><i class="fa fa-tablet"></i> <span>Registrations</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/registration/settings','Settings')}}</li>
+                    <li>{{link_to('/docs/Club Speed - iPad Registration Kiosk Guide - MokiTouch 2.pdf','Documentation', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
             @if (@$controller == 'ReportsController')
@@ -107,6 +108,7 @@
                 <a href="#"><i class="fa fa-mobile"></i> <span>Mobile App</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/mobileApp/menuItems','Menu Items')}}</li>
+                    <li>{{link_to('/mobileApp/settings','Settings')}}</li>
                     <li>{{link_to('/mobileApp/templates','Templates')}}</li>
                 </ul>
             </li>--}}
