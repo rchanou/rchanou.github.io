@@ -248,9 +248,26 @@ class ReservationProductHandler extends BaseProductHandler {
                     // return array('error' => $message); // ignore the error return during testing, pretend successful
                 }
 
+                try {
+                    $dateDisplayFormat = $this->logic->controlPanel->get('Booking', 'dateDisplayFormat'); // logic classes throw exceptions on failed gets
+                    $dateDisplayFormat = $dateDisplayFormat[0];
+                    $dateDisplayFormat = $dateDisplayFormat->SettingValue ?: $dateDisplayFormat->DefaultSetting;
+                }
+                catch (\Exception $e) {
+                    $dateDisplayFormat = 'Y-m-d';
+                }
+                try {
+                    $timeDisplayFormat = $this->logic->controlPanel->get('Booking', 'timeDisplayFormat');
+                    $timeDisplayFormat = $timeDisplayFormat[0];
+                    $timeDisplayFormat = $timeDisplayFormat->SettingValue ?: $timeDisplayFormat->DefaultSetting;
+                }
+                catch (\Exception $e) {
+                    $timeDisplayFormat = 'H.i'; // fallback!
+                }
+
                 $scheduledTime = new \DateTime($heatMain->ScheduledTime);
                 return array(
-                    'success' => 'Heat #' . $heatId . ' scheduled at ' . $scheduledTime->format($GLOBALS['dateFormat'] . ' H:i:s')
+                    'success' => 'Heat #' . $heatId . ' scheduled at ' . $scheduledTime->format($dateDisplayFormat . ' ' . $timeDisplayFormat)
                 );
             }
         }

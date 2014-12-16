@@ -89,7 +89,7 @@ class BookingAvailabilityLogic extends BaseLogic {
         if (!isset($params['end'])) {
             $timeformat = 'Y-m-d H:i:s';
             $dayformat = 'Y-m-d';
-            $params['end'] = Convert::toDateForServer(date($timeformat, strtotime($params['start'] . ' + 1 day')), $timeformat);
+            $params['end'] = Convert::toDateForServer(date($dayformat, strtotime($params['start'] . ' + 1 day')), $timeformat);
         }
         else {
             $passedEndTime = strtotime($params['end']);
