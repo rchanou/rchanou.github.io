@@ -101,6 +101,10 @@ footer {
     font-size: 20px;
 }
 
+.formButton:hover {
+    color: white;
+}
+
 .formButtonDisabled {
     background: #bbbbbb; /* Old browsers */
     background: -moz-linear-gradient(top,  #bbbbbb 0%, #999999 44%, #444444 100%); /* FF3.6+ */

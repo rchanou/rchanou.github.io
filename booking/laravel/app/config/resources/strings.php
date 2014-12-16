@@ -251,6 +251,7 @@ class Strings
             //Step2Controller strings
             'str_pleaseSelectARaceDate' => 'Please select a race date.',
 
+            'str_addMoreRaces' => 'Add More Races'
             //'str_' => '',
         );
 

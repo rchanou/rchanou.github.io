@@ -87,7 +87,8 @@
             <strong>{{$strings['str_order']}} {{$strings['str_total']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTotal, $currency)}}<br/>
 
             <form action="{{URL::action('CheckoutController@entry')}}">
-                <button class="formButton">{{$strings['str_proceedToCheckout']}}</button>
+                <a class="btn formButton" href="{{URL::to('step2')}}">{{$strings['str_addMoreRaces']}}</a>
+                <button class="btn formButton">{{$strings['str_proceedToCheckout']}}</button>
             </form>
             @else
                     {{$strings['str_yourCartIsEmpty']}}
