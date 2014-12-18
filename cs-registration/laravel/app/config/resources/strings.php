@@ -159,6 +159,7 @@ class Strings {
             'en-IE' => 'English (IE)',
             'en-CA' => 'English (CA)',
             'es-MX' => 'Español',
+            'es-CR' => 'Español (CR)',
             'es-ES' => 'Castellano',
             'es-PR' => 'Español (PR)',
             'ru-RU' => 'Pусский язык',
