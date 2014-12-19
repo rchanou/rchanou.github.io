@@ -748,6 +748,7 @@ class BookingController extends BaseController
             'en-IE',
             'en-CA',
             'es-MX',
+            'es-CR',
             'es-ES',
             'es-PR',
             'ru-RU',
