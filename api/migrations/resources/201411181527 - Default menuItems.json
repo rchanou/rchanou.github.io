@@ -8,12 +8,12 @@
     {
       "label": "Member Card",
       "id": "profile",
-      "iconUrl": "/assets/mobile/icons/credit-card.png"
+      "iconUrl": "/assets/MobileApp/icons/credit-card.png"
     },
     {
       "label": "Track Information",
       "id": "trackInformation",
-      "iconUrl": "/assets/mobile/icons/map-marker.png"
+      "iconUrl": "/assets/MobileApp/icons/map-marker.png"
     },
     {
       "label": "My Results",
@@ -28,7 +28,7 @@
     {
       "label": "Online Booking",
       "url": "/booking/?login={{authToken}}",
-      "iconUrl": "/assets/mobile/icons/MISSING-IMAGE-DOES-NOT-EXIST.png"
+      "iconUrl": "/assets/MobileApp/icons/MISSING-IMAGE-DOES-NOT-EXIST.png"
     }
   ]
 }
