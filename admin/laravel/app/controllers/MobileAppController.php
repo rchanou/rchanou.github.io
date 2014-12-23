@@ -11,7 +11,7 @@ class MobileAppController extends BaseController
 
     public function __construct() {
       //Image uploader data
-      if ($_SERVER['SERVER_ADDR'] == '192.168.111.165'){
+      if (getenv('SERVER_ADDR') == '192.168.111.165'){
         // Ronnie's debugging directory
         $this->image_directory = '\\\\192.168.111.122\\c$\\clubspeedapps\\assets\\MobileApp\\icons';
       } else {
