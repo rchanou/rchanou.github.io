@@ -4,7 +4,31 @@ require_once(app_path().'/includes/includes.php');
 
 class MobileAppController extends BaseController
 {
+    public $image_directory;
+    public $image_filenames;
+    public $image_paths;
+    public $image_urls;
+
     public function __construct() {
+      //Image uploader data
+      if ($_SERVER['SERVER_ADDR'] == '192.168.111.165'){
+        // Ronnie's debugging directory
+        $this->image_directory = '\\\\192.168.111.122\\c$\\clubspeedapps\\assets\\MobileApp\\icons';
+      } else {
+        $this->image_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'mobileApp' . DIRECTORY_SEPARATOR . 'icons';
+      }
+
+      $this->image_paths = array();
+      $this->image_urls = array();
+
+      //JS and CSS uploader data
+      $this->js_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'mobileApp' . DIRECTORY_SEPARATOR . 'js';
+      $this->css_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'mobileApp' . DIRECTORY_SEPARATOR . 'css';
+      $this->js_path = $this->js_directory . DIRECTORY_SEPARATOR . 'custom-js.js';
+      $this->js_url = '/assets/mobileApp/js/' . 'custom-js.js';
+      $this->css_path = $this->css_directory . DIRECTORY_SEPARATOR . 'custom-styles.css';
+      $this->css_url = '/assets/mobileApp/css/' . 'custom-styles.css';
+
       $standardNote = 'The following can be inserted into this template:<br/><br/>'
                     . '<b>Order #:</b> {{checkId}}<br/>'
                     . '<b>Customer\'s First Name:</b> {{customer}}<br/>'
@@ -60,17 +84,77 @@ class MobileAppController extends BaseController
         ));
     }
 
+
+    public function settings()
+    {
+        $session = Session::all();
+        if (!(isset($session["authenticated"]) && $session["authenticated"]))
+        {
+            $messages = new Illuminate\Support\MessageBag;
+            $messages->add('errors', "You must login before viewing the admin panel.");
+
+            return Redirect::to('/login')->withErrors($messages)->withInput();
+        }
+
+        $mobileSettings = CS_API::getSettingsFromNewTableFor('MobileApp');
+        if ($mobileSettings === null)
+        {
+            return Redirect::to('/disconnected');
+        }
+        $mobileSettingsCheckedData = array();
+        $mobileSettingsData = array();
+        $mobileSettingsIds = array();
+        foreach($mobileSettings->settings as $setting)
+        {
+            $mobileSettingsCheckedData[$setting->name] = ($setting->value ? 'checked' : '');
+            $mobileSettingsData[$setting->name] = $setting->value;
+            $mobileSettingsIds[$setting->name] = $setting->settingsId;
+        }
+
+        $listOfTracks = CS_API::getListOfTracks();
+
+        Session::put('mobileSettings',$mobileSettingsData);
+        Session::put('mobileSettingsIds',$mobileSettingsIds);
+
+        return View::make('/screens/mobileApp/settings',
+            array('controller' => 'MobileAppController',
+                'isChecked' => $mobileSettingsCheckedData,
+                'mobileSettings' => $mobileSettingsData,
+                'listOfTracks' => $listOfTracks
+            ));
+    }
+
     public function updateSettings()
     {
         $input = Input::all();
 
-        // TODO: INPUT VALIDATION AND PARSING TO CONSTRUCT API CALL
+        //Begin formatting form input for processing - defaults available for any missing settings
+        $newSettings = array();
+        $newSettings['enableFacebook'] = isset($input['enableFacebook']) ? 1 : 0;
+        $newSettings['forceLogin'] = isset($input['forceLogin']) ? 1 : 0;
+        $newSettings['defaultApiKey'] = isset($input['defaultApiKey']) ? $input['defaultApiKey'] : '';
+        $newSettings['defaultTrack'] = isset($input['defaultTrack']) ? $input['defaultTrack'] : 1;
+        //End formatting
 
-        $result = true; // TODO: REPLACE WITH API CALL
+        //Identify the settings that actually changed and need to be sent to Club Speed
+        $currentSettings = Session::get('mobileSettings',array());
+        foreach($currentSettings as $currentSettingName => $currentSettingValue)
+        {
+            if (isset($newSettings[$currentSettingName]))
+            {
+                if ($newSettings[$currentSettingName] == $currentSettingValue) //If the setting hasn't changed
+                {
+                    unset($newSettings[$currentSettingName]); //Remove it from the list of new settings
+                }
+            }
+        }
+
+        $mobileSettingsIds = Session::get('mobileSettingsIds',array());
+        $result = CS_API::updateSettingsInNewTableFor('mobileApp',$newSettings,$mobileSettingsIds);
 
         if ($result === false)
         {
-            return Redirect::to('mobileApp/settings')->with( array('error' => 'One or more menu items could not be updated. Please try again.'));
+            return Redirect::to('mobileApp/settings')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
         }
         else if ($result === null)
         {
@@ -160,5 +244,49 @@ class MobileAppController extends BaseController
       }
 
       return Redirect::to('mobileApp/templates')->with( array('message' => 'Template(s) updated successfully!'));
+    }
+
+    public function updateImage()
+    {
+      $session = Session::all();
+      if (!(isset($session["authenticated"]) && $session["authenticated"]))
+      {
+        $messages = new Illuminate\Support\MessageBag;
+        $messages->add('errors', "You must login before viewing the admin panel.");
+        return Redirect::to('/login')->withErrors($messages)->withInput();
+      }
+
+      // Build the input for our validation
+      $input = array('image' => Input::file('image'));
+      $filename = Input::get('filename');
+
+      // Within the ruleset, make sure we let the validator know that this
+      $rules = array(
+        'image' => 'required|max:10000',
+      );
+
+      // Now pass the input and rules into the validator
+      $validator = Validator::make($input, $rules);
+
+      // Check to see if validation fails or passes
+      if ($validator->fails()) {
+        // VALIDATION FAILED
+        return Response::json(array('error' => 'The provided file was not an image.'), 412);
+      } else {
+        // SAVE THE FILE...
+
+        // Ensure the directory exists, if not, create it!
+        if(!is_dir($this->image_directory)) mkdir($this->image_directory, null, true);
+
+        // Move the file, overwriting if necessary
+        Input::file('image')->move($this->image_directory, $filename);
+
+        // Fix permissions on Windows (works on 2003?). This is because by default the uploaded imaged
+        // does not inherit permissions from the folder it is moved to. Instead, it retains the
+        // permissions of the temporary folder.
+        exec('c:\windows\system32\icacls.exe ' . $this->image_directory . DIRECTORY_SEPARATOR . $filename . ' /inheritance:e');
+
+        return Response::json(array('message' => 'Image uploaded successfully!'), 200);
+      }
     }
 }

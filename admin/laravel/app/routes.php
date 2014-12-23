@@ -48,6 +48,7 @@ Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@e
 /* End Reports */
 
 Route::get('mobileApp/menuItems', 'MobileAppController@menuItems');
+Route::post('mobileApp/images/update', 'MobileAppController@updateImage');
 //Route::post('mobileApp/updateMenuItems', 'MobileAppController@updateMenuItems');
 Route::get('mobileApp/templates', 'MobileAppController@templates');
 Route::post('mobileApp/templates', 'MobileAppController@updateTemplates');
