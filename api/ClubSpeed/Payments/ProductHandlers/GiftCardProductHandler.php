@@ -20,7 +20,7 @@ class GiftCardProductHandler extends BaseProductHandler {
         $cardId = -1;
         while($cardId < 0) {
             // where does the venue id come from? -- it doesn't. just use a random number.
-            $tempCardId = mt_rand(1000000000, 2147483647); // get a random 10 digit number, up to the max unsigned int value
+            $tempCardId = mt_rand(1000000000, 2147483647); // get a random 10 digit number, up to the max signed int value
             $customer = $this->logic->customers->find("CrdID = " . $tempCardId);
             if (empty($customer))
                 $cardId = $tempCardId; // card id was not being used yet, we can use this one

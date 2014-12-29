@@ -589,7 +589,7 @@ class Races
             ."\n    , hm.ScheduledTime"
             ."\n    , hm.HeatTypeNo"
             ."\n    , hm.LapsOrMinutes"
-						."\n    , hm.PointsNeeded"
+            ."\n    , hm.PointsNeeded"
             ."\n    , hm.RacersPerHeat"
             ."\n    , hm.TrackNo"
             ."\n    , hm.WinBy"
@@ -618,6 +618,15 @@ class Races
         $tsql_params = array(&$start, &$end);
         $rows = $this->run_query($tsql, $tsql_params);
         $output = $rows;
+
+        foreach($output as $currentRaceIndex => $currentRace)
+        {
+            if (isset($currentRace['ScheduledTime']))
+            {
+                $output[$currentRaceIndex]['ScheduledTime'] = date($GLOBALS['dateFormat'] . " H:i:s", strtotime($currentRace['ScheduledTime']));
+            }
+        }
+
         return array('races' => $output);
     }
 
@@ -939,8 +948,8 @@ EOD;
             $output = array('id' => $row['HeatNo'],
                 'track_id' => $row['TrackNo'],
                 'track' => $row['t_Description'],
-                'starts_at' => $row['ScheduledTime'],
-                'finish_time' => $row['Finish'],
+                'starts_at' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['ScheduledTime'])),
+                'finish_time' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['Finish'])),
                 'heat_type_id' => $row['HeatTypeNo'],
                 'heat_status_id' => $row['HeatStatus'],
                 'speed_level_id' => $row['SpeedLevel'],
@@ -985,6 +994,10 @@ EOD;
             throw new RestException(412, 'Unable to find any racing data for track: ' . $track_id . ', heat: ' . $heatId);
 
         $output['race'] = $rowsRace[0];
+        if (isset($output['race']['starts_at']))
+        {
+            $output['race']['starts_at'] = date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($output['race']['starts_at']));
+        }
         $output['race']['race_number'] = substr($output['race']['id'], -2); // Race Number is the last two digits of the ID
 
         //$tsql = 'GetNextHeatRacersInfo';

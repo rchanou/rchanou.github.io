@@ -21,6 +21,10 @@ class BasePayment {
     protected $logPrefix;
     protected $webapi;
 
+    protected $currency;
+    protected $formatter;
+    protected $locale;
+
     public function __construct(&$logic, &$paymentService) {
         $this->logic = $logic;
         $this->paymentService = $paymentService;
@@ -46,6 +50,29 @@ class BasePayment {
         $this->gateway->initialize(@$data['options']);
         $this->logPrefix = 'Check #' . @$data['check']['checkId'] . ": Base: ";
         Log::info($this->logPrefix . "Starting payment using processor: " . $name);
+
+        // load all defaults
+        try {
+            $locale = $this->logic->controlPanel->get('Booking', 'numberFormattingLocale');
+            $locale = $locale[0];
+            $locale = $locale->SettingValue ?: \Locale::getDefault(); // safe?
+        }
+        catch(\Exception $e) {
+            $locale = \Locale::getDefault(); // and if this fails?
+        }
+        $formatter = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
+        try {
+            $currency = $this->logic->controlPanel->get('Booking', 'currency');
+            $currency = $currency[0];
+            $currency = $currency->SettingValue ?: $formatter->getSymbol(\NumberFormatter::INTL_CURRENCY_SYMBOL);
+        }
+        catch (\Exception $e) {
+            $currency = $formatter->getSymbol(\NumberFormatter::INTL_CURRENCY_SYMBOL);
+        }
+
+        $this->locale = $locale;
+        $this->formatter = $formatter;
+        $this->currency = $currency;
     }
 
     protected function passthroughWrapper($params, $callback) {
@@ -125,7 +152,7 @@ class BasePayment {
                     // pay the remaining total using omnipay
                     $options = array(
                         'amount'                 => $checkTotals->CheckRemainingTotal // note that this INCLUDES the tax -- the only reason tax is included below is for PCCharge
-                        , 'currency'             => $this->getIntlCurrencySymbol() // THIS REQUIRES php_intl.dll EXTENSION TURNED ON
+                        , 'currency'             => $this->currency
                         , 'description'          => "ClubSpeed payment for CheckID: " . $check->CheckID // build description manually?
                         , 'transactionId'        => $check->CheckID
                         , 'transactionReference' => 'some_transaction_reference' // use session id from laravel?
@@ -392,9 +419,9 @@ class BasePayment {
                 'checkId'         => $checkTotal->CheckID
                 , 'customer'      => $customer->FName . ' ' . $customer->LName
                 , 'business'      => $businessName
-                , 'checkSubtotal' => sprintf('%0.2f', $snapshot->CheckSubtotal)
-                , 'checkTotal'    => sprintf('%0.2f', $snapshot->CheckRemainingTotal) // total left to be paid after partial payments (ie - gift cards)
-                , 'checkTax'      => sprintf('%0.2f', $snapshot->CheckTax)
+                , 'checkSubtotal' => $this->getAsCurrency($snapshot->CheckSubtotal)
+                , 'checkTotal'    => $this->getAsCurrency($snapshot->CheckRemainingTotal)
+                , 'checkTax'      => $this->getAsCurrency($snapshot->CheckTax)
                 , 'details'       => array()
             );
             foreach($checkTotals as $checkTotal) {
@@ -408,7 +435,7 @@ class BasePayment {
                 $receiptData['details'][] = array(
                       'description' => $description // see above
                     , 'quantity'    => $checkTotal->Qty
-                    , 'price'       => sprintf('%0.2f', $checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
+                    , 'price'       => $this->getAsCurrency($checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
                 );
             }
 
@@ -429,18 +456,18 @@ class BasePayment {
             ));
             $receiptEmailBodyHtml = $receiptEmailBodyHtml[0];
             $receiptEmailBodyHtml = $receiptEmailBodyHtml->Value;
-
             // $receiptEmailBodyHtml = file_get_contents(__DIR__.'/../../migrations/resources/201411041100 - HTML01 - receipt.html'); // for testing purposes
-
             $receiptEmailBodyHtml = Templates::buildFromString($receiptEmailBodyHtml, $receiptData);
 
             $receiptEmailBodyText = $this->logic->settings->match(array(
                 'Namespace' => 'Booking',
                 'Name' => 'receiptEmailBodyText'
             ));
-            // this is empty for right now, until finished
-            // how to handle this? no templating engine. are we building the text email by hand in php???
-            
+            $receiptEmailBodyText = $receiptEmailBodyText[0];
+            $receiptEmailBodyText = $receiptEmailBodyText->Value;
+            // $receiptEmailBodyText = file_get_contents(__DIR__.'/../../migrations/resources/201411041100 - TEXT01 - receipt.txt'); // for testing purposes
+            $receiptEmailBodyText = Templates::buildFromString($receiptEmailBodyText, $receiptData); // use twig to build the text template -- hacky, but works fine (note: don't use HTML comments in the text file for the twig logic, it doesn't get parsed properly)
+
             $receiptEmailSubject = $this->logic->settings->match(array(
                 'Namespace' => 'Booking',
                 'Name' => 'receiptEmailSubject'
@@ -487,7 +514,7 @@ class BasePayment {
                         ->subject($receiptEmailSubject)
                         ->from($emailFrom)
                         ->body($receiptEmailBodyHtml)
-                        ->alternate('Text Body TODO TODO TODO'); // STILL NEED TO DO THIS
+                        ->alternate($receiptEmailBodyText);
                     if ($sendCustomerReceiptEmail)
                         $mail->to($emailTo);
                     if (!empty($sendReceiptCopyTo))
@@ -497,8 +524,8 @@ class BasePayment {
                     // update this message - the email may or may not have been sent, should we signify this?
                     Log::info($this->logPrefix . 'Receipt email was sent for Customer #' . $customer->CustID);
                 }
-                // else
-                    // Log::info($this->logPrefix . 'Receipt email was not sent, since no BCC list was found and the API opted out of sending the customer a receipt!');
+                else
+                    Log::info($this->logPrefix . 'Receipt email was not sent, since no valid BCC list was found and the API opted out of sending the customer a receipt!');
             }
             catch (\Exception $e) {
                 Log::error($this->logPrefix . "Receipt email could not be sent to Customer #" . $customer->CustID . '!', $e);
@@ -509,8 +536,8 @@ class BasePayment {
         }
 
         if (!empty($errored)) {
-            pr("found errors!");
-            die(print_r($errored));
+            // pr("found errors!");
+            // die($errored); // or should we attach this to receipt data? these are at least logged in the logs database.
             // TODO -- send off a support email if product handlers had errors?
         }
 
@@ -656,37 +683,8 @@ class BasePayment {
         return 'http://' . $this->getIp() . "/cancel/"; // TODO: get actual return url
     }
 
-    protected function getTestCard() {
-        return array(
-            'firstName'        => 'Example',
-            'lastName'         => 'User',
-            'number'           => '4111111111111111',
-            'expiryMonth'      => rand(1, 12),
-            'expiryYear'       => gmdate('Y') + rand(1, 5),
-            'cvv'              => rand(100, 999),
-            'billingAddress1'  => '123 Billing St',
-            'billingAddress2'  => 'Billsville',
-            'billingCity'      => 'Billstown',
-            'billingPostcode'  => '12345',
-            'billingState'     => 'CA',
-            'billingCountry'   => 'US',
-            'billingPhone'     => '(555) 123-4567',
-            'shippingAddress1' => '123 Shipping St',
-            'shippingAddress2' => 'Shipsville',
-            'shippingCity'     => 'Shipstown',
-            'shippingPostcode' => '54321',
-            'shippingState'    => 'NY',
-            'shippingCountry'  => 'US',
-            'shippingPhone'    => '(555) 987-6543'
-        );
-    }
-
-    protected function getIntlCurrencySymbol() {
-        if (is_null($this->intlCurrencySymbol)) {
-            $defaultLocale = \Locale::getDefault(); // REQUIRES extension=php_intl.dll TURNED ON
-            $formatter = new \NumberFormatter($defaultLocale, \NumberFormatter::CURRENCY);
-            $this->intlCurrencySymbol = $formatter->getSymbol(\NumberFormatter::INTL_CURRENCY_SYMBOL);
-        }
-        return $this->intlCurrencySymbol;
+    protected function getAsCurrency($number) {
+        // $this->formatter->format($number); // this also works
+        return $this->formatter->formatCurrency($number, $this->currency);
     }
 }

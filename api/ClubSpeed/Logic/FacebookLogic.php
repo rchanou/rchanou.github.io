@@ -1,6 +1,8 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Utility\Tokens as Tokens;
 
 /**
  * The business logic class
@@ -106,8 +108,30 @@ class FacebookLogic extends BaseLogic {
             , ':Enabled'        => $fbEnabled
         );
         $this->db->exec($sql, $params);
+
+        $authentication = $this->db->authenticationTokens->match(array(
+              'CustomersID' => $customerId
+            , 'TokenType'   => Enums::TOKEN_TYPE_CUSTOMER
+        ));
+        if (empty($authentication)) {
+            // no record found - make a new one
+            $token = Tokens::generate();
+            $this->logic->authenticationTokens->create(array(
+                'CustomersID'       => $customerId
+                , 'TokenType'       => Enums::TOKEN_TYPE_CUSTOMER
+                , 'RemoteUserID'    => 1 // what to do with this?
+                , 'Token'           => $token
+            ));
+        }
+        else {
+            // record was found - update it
+            $authentication = $authentication[0];
+            $token = $authentication->Token; // don't update the token to satisfy the case where a user logs in on multiple devices
+            $this->logic->authenticationTokens->update($authentication->AuthenticationTokensID, $authentication); // logic class will update ExpiresAt automatically
+        }
         return array(
-            "customerId" => $customerId
+              "customerId"  => $customerId
+            , "token"       => $token
         );
     }
 }

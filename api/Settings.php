@@ -1,5 +1,7 @@
 <?php
 
+use ClubSpeed\Enums\Enums as Enums;
+
 class Settings extends BaseApi
 {
     // public $restler;
@@ -8,8 +10,14 @@ class Settings extends BaseApi
         parent::__construct();
         $this->mapper = new \ClubSpeed\Mappers\SettingsMapper();
         $this->interface = $this->logic->settings;
+
+        // mobile app (client code) needs access to settings -- making public
+        $this->access['get']    = Enums::API_PUBLIC_ACCESS;
+        $this->access['match']  = Enums::API_PUBLIC_ACCESS;
+        $this->access['filter'] = Enums::API_PUBLIC_ACCESS;
+        $this->access['all']    = Enums::API_PUBLIC_ACCESS;
     }
-        
+    
     /**
      * Whitelist of groups/settings. Set setting (or group) to "true" if it is whitelisted.
      * By default, nothing is allowed.

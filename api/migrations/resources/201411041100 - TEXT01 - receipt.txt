@@ -7,11 +7,13 @@ The details for this order are indicated below.
 
 Order Details
 
-{{details}}
+{% for detail in details %}
+{{detail.description}} x {{detail.quantity}} @ {{detail.price}}
+{% endfor %}
 
-Subtotal:
+Subtotal: {{checkSubtotal}}
 Estimated Tax: {{checkTax}}
-{{giftCard}}
+{% if giftCardTotal %}Gift Card: -{{giftCardTotal}}{% endif %}
 Total: {{checkTotal}}
 
 If any gift cards were ordered with this purchase,

@@ -18,7 +18,7 @@ class Products extends BaseRecord {
     public $Price5;
     public $TaxID;
     public $ProductClassID;
-    public $LargeIcon;
+    // public $LargeIcon; // take this out - its just a huge performance sink for data we don't use
     public $IsSpecial;
     public $AvailableDay;
     public $AvailableFromTime;
@@ -77,7 +77,7 @@ class Products extends BaseRecord {
                     if (isset($data['Price5']))                 $this->Price5               = \ClubSpeed\Utility\Convert::toNumber          ($data['Price5']);
                     if (isset($data['TaxID']))                  $this->TaxID                = \ClubSpeed\Utility\Convert::toNumber          ($data['TaxID']);
                     if (isset($data['ProductClassID']))         $this->ProductClassID       = \ClubSpeed\Utility\Convert::toNumber          ($data['ProductClassID']);
-                    if (isset($data['LargeIcon']))              $this->LargeIcon            = \ClubSpeed\Utility\Convert::toString          ($data['LargeIcon']);
+                    // if (isset($data['LargeIcon']))              $this->LargeIcon            = \ClubSpeed\Utility\Convert::toString          ($data['LargeIcon']);
                     if (isset($data['IsSpecial']))              $this->IsSpecial            = \ClubSpeed\Utility\Convert::toBoolean         ($data['IsSpecial']);
                     if (isset($data['AvailableDay']))           $this->AvailableDay         = \ClubSpeed\Utility\Convert::toString          ($data['AvailableDay']);
                     if (isset($data['AvailableFromTime']))      $this->AvailableFromTime    = \ClubSpeed\Utility\Convert::toDateForServer   ($data['AvailableFromTime']);

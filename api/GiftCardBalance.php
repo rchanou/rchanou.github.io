@@ -8,16 +8,29 @@ class GiftCardBalance extends BaseApi {
         parent::__construct();
         $this->mapper               = new \ClubSpeed\Mappers\GiftCardBalanceMapper();
         $this->interface            = $this->logic->giftCardBalance;
-
-        // deny all access other than get by explicit id for security reasons
-        // note that get by id should absoltuely stay as API_PRIVATE_ACCESS
-        // so any gift card balance lookups must be done through an intermediate,
-        // and allowed application with a private key (such as the online booking php)
-        $this->access['all']        = Enums::API_NO_ACCESS;
         $this->access['delete']     = Enums::API_NO_ACCESS;
-        $this->access['filter']     = Enums::API_NO_ACCESS;
-        $this->access['match']      = Enums::API_NO_ACCESS;
         $this->access['post']       = Enums::API_NO_ACCESS;
         $this->access['put']        = Enums::API_NO_ACCESS;
+        $this->access['register']   = Enums::API_PRIVATE_ACCESS;
+    }
+
+    /**
+     * @url POST /register
+     */
+    function register($request_data) {
+        $this->validate('register');
+        try {
+            // do any mapping here?
+            $this->interface->register($request_data);
+        }
+        catch (RestException $e) {
+            throw $e;
+        }
+        catch (CSException $e) {
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        }
+        catch (Exception $e) {
+            throw new RestException(500, $e->getMessage());
+        }
     }
 }

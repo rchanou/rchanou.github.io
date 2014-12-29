@@ -130,6 +130,7 @@
             "id": "checkDetails", 
             "header": "Check Details",
             "route": "/checkDetails",
+            "model": "checkDetails",
             "calls": [
                 {
                     "id": "list",
@@ -293,10 +294,16 @@
             "id": "payments",
             "header": "Payments",
             "route": "/payments",
+            "model": "payment",
             "calls": [
                 {
                     "id": "list",
                     "verb": "GET"
+                },
+                {
+                    "id": "get",
+                    "verb": "GET",
+                    "subroute": "/:id"
                 },
                 {
                     "id": "update",
@@ -309,6 +316,7 @@
             "id": "pointHistory",
             "header": "Point History",
             "route": "/pointHistory",
+            "model": "pointHistory",
             "calls": [
                 {
                     "id": "create",
@@ -329,6 +337,7 @@
             "id": "products",
             "header": "Products",
             "route": "/products",
+            "model": "product",
             "calls": [
                 {
                     "id": "create",
@@ -518,6 +527,7 @@
             "id": "translations", 
             "header": "Translations",
             "route": "/translations",
+            "model": "translation",
             "calls": [
                 {
                     "id": "create",
@@ -527,7 +537,8 @@
                     "id": "batchCreate",
                     "header": "Batch Create",
                     "subroute": "/batch",
-                    "verb": "POST"
+                    "verb": "POST",
+                    "description": "A batch method for creating translations with one http call. To use, pass an array of translations to the method."
                 },
                 {
                     "id": "list",
@@ -542,6 +553,13 @@
                     "id": "update",
                     "subroute": "/:id",
                     "verb": "PUT"
+                },
+                {
+                    "id": "batchUpdate",
+                    "header": "Batch Update",
+                    "subroute": "/batch",
+                    "verb": "PUT",
+                    "description": "A batch method for updating translations with one http call. To use, pass an array of translation objects to the method, including the translationIds. Any properties contained in these objects will be updated. Any properties not contained in the object will retain their values."
                 },
                 {
                     "id": "delete",
@@ -582,53 +600,6 @@
                     , "type"        : "Integer"
                     , "description" : "The number of available bookings. This must be a positive integer."
                 }
-            ]
-        },
-        {
-            "id": "reservation",
-            "properties": [
-                {
-                      "name"        : "onlineBookingReservationsId"
-                    , "type"        : "Identifier"
-                    , "default"     : "{Generated}"
-                    , "description" : "The ID for the reservation."
-                }, 
-                {
-                      "name"        : "onlineBookingsId"
-                    , "type"        : "Integer"
-                    , "description" : "The ID of the booking for the reservation."
-                },
-                {
-                      "name"        : "quantity"
-                    , "type"        : "Integer"
-                    , "description" : "The quantity of reservations to hold. This number must be a positive integer."
-                },
-                {
-                      "name"        : "customersId"
-                    , "type"        : "Integer"
-                    , "description" : "The ID of the customer for the reservation."
-                },
-                {
-                      "name"        : "sessionId"
-                    , "type"        : "String"
-                    , "description" : "The session ID for the reservation, used for documentation and debugging purposes."
-                },
-                {
-                      "name"        : "onlineBookingReservationStatusId"
-                    , "type"        : "Integer"
-                    , "description" : "The ID for the status of the reservation. Statuses should be set to permanent while the underlying kart is open, and set to permanent after the purchase has been made."
-                    , "lookup"      : "ONLINE_BOOKING_RESERVATION_STATUS"
-                }
-            ]
-        },
-        {
-            "id": "heatMainTEMPORARY",
-            "properties": [
-                 {
-                      "name"        : "onlineBookingReservationsId"
-                    , "type"        : "Identifier"
-                    , "default"     : "{Generated}"
-                 }
             ]
         },
         {
@@ -705,12 +676,474 @@
                     , "description" : "The ID of the type for the product."
                 }
             ]
+        },
+        {
+            "id": "creditCard",
+            "properties": [
+                {
+                      "name"        : "firstName"
+                    , "type"        : "String"
+                    , "description" : "The first name on the credit card."
+                },
+                {
+                      "name"        : "lastName"
+                    , "type"        : "String"
+                    , "description" : "The last name on the credit card."
+                },
+                {
+                      "name"        : "number"
+                    , "type"        : "Integer"
+                    , "description" : "The credit card number."
+                },
+                {
+                      "name"        : "expiryMonth"
+                    , "type"        : "Integer"
+                    , "description" : "The expiration month for the credit card. Can be 1 or 2-digit."
+                },
+                {
+                      "name"        : "expiryYear"
+                    , "type"        : "Integer"
+                    , "description" : "The card's 4-digit expiration year."
+                },
+                {
+                      "name"        : "cvv"
+                    , "type"        : "Integer"
+                    , "description" : "The cvv for the credit card."
+                },
+                {
+                      "name"        : "address1"
+                    , "type"        : "Integer"
+                    , "description" : "The first address line for the credit card."
+                },
+                {
+                      "name"        : "address2"
+                    , "type"        : "Integer"
+                    , "description" : "The second address line for the credit card."
+                },
+                {
+                      "name"        : "city"
+                    , "type"        : "Integer"
+                    , "description" : "The city for the credit card."
+                },
+                {
+                      "name"        : "postcode"
+                    , "type"        : "Integer"
+                    , "description" : "The post/zip code for the credit card."
+                },
+                {
+                      "name"        : "state"
+                    , "type"        : "String"
+                    , "description" : "The state code for the credit card."
+                },
+                {
+                      "name"        : "country"
+                    , "type"        : "String"
+                    , "description" : "The country code for the credit card."
+                },
+                {
+                      "name"        : "phone"
+                    , "type"        : "String"
+                    , "description" : "The phone number for the credit card."
+                }
+            ]    
+        },
+        {
+            "id": "checkDetails",
+            "properties": [
+                {
+                      "name"        : "checkDetailsId"
+                    , "type"        : "Integer"
+                    , "default"     : "{Generated}"
+                    , "description" : "The ID for the CheckDetails record."
+                },
+                {
+                      "name"        : "checkId"
+                    , "type"        : "Integer"
+                    , "description" : "The ID of the parent Check. This CheckID must already exist."
+                },
+                {
+                      "name"        : "productId"
+                    , "type"        : "Integer"
+                    , "description" : "The ID of the product."
+                },
+                {
+                      "name"        : "productName"
+                    , "type"        : "String"
+                    , "description" : "The name for the underlying product."
+                    , "default"     : "{Lookup by productId}"
+                },
+                {
+                      "name"        : "status"
+                    , "type"        : "Integer"
+                    , "default"     : "1"
+                    , "description" : "The status of the CheckDetails."
+                    , "lookup"      : "CHECK_DETAIL_STATUS"
+                },
+                {
+                      "name"        : "type"
+                    , "type"        : "Integer"
+                    , "default"     : "1"
+                    , "description" : "The type of the CheckDetails."
+                    , "lookup"      : "CHECK_DETAIL_TYPE"
+                },
+                {
+                      "name"        : "qty"
+                    , "type"        : "Integer"
+                    , "icon"        : "warning-sign orange"
+                    , "default"     : "0"
+                    , "description" : "The quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero."
+                },
+                {
+                      "name"        : "cadetQty"
+                    , "type"        : "Integer"
+                    , "icon"        : "warning-sign orange"
+                    , "default"     : "0"
+                    , "description" : "The cadet quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero."
+                },
+                {
+                      "name"        : "createdDate"
+                    , "type"        : "DateTime"
+                    , "default"     : "{Date.Now}"
+                    , "description" : "The timestamp indicating when the CheckDetails record was created."
+                }
+            ]
+        },
+        {
+            "id": "payment",
+            "properties": [
+                {
+                      "name"        : "paymentId"
+                    , "type"        : "Identifier"
+                    , "default"     : "{Generated}"
+                    , "description" : "The identifier for the payment."
+                },
+                {
+                      "name"        : "checkId"
+                    , "type"        : "Identifier"
+                    , "description" : "The identifier for the check for the payment."
+                },
+                {
+                      "name"        : "userId"
+                    , "type"        : "Identifier"
+                    , "description" : "The identifier for the user who is accepting the payment."
+                },
+                {
+                      "name"        : "payType"
+                    , "type"        : "Integer"
+                    , "description" : "The type of the payment."
+                    , "lookup"      : "PAY_TYPE"
+                },
+                {
+                      "name"        : "payDate"
+                    , "type"        : "DateTime"
+                    , "default"     : "{Date.Now}"
+                    , "description" : "The timestamp at which the payment was accepted."
+                },
+                {
+                      "name"        : "payStatus"
+                    , "type"        : "Integer"
+                    , "description" : "The status of the payment."
+                    , "default"     : "1"
+                    , "lookup"      : "PAY_STATUS"
+                },
+                {
+                      "name"        : "payAmount"
+                    , "type"        : "Decimal"
+                    , "description" : "The monetary amount accepted as a payment."
+                },
+                {
+                      "name"        : "payTax"
+                    , "type"        : "Decimal"
+                    , "description" : "The monetary amount applied toward taxes."
+                },
+                {
+                      "name"        : "voidDate"
+                    , "type"        : "DateTime"
+                    , "description" : "The date at which the payment was voided."
+                },
+                {
+                      "name"        : "voidUser"
+                    , "type"        : "Identifier"
+                    , "description" : "The identifier for the user who has voided the payment."
+                },
+                {
+                      "name"        : "voidNotes"
+                    , "type"        : "String"
+                    , "description" : "The notes containing the reason why the payment was voided."
+                },
+                {
+                      "name"        : "voidTerminal"
+                    , "type"        : "String"
+                    , "description" : "The terminal from which the payment was voided."
+                },
+                {
+                      "name"        : "customerId"
+                    , "type"        : "String"
+                    , "description" : "The identifier for the customer."
+                }
+            ]
+        },
+        {
+            "id": "pointHistory",
+            "properties": [
+                {
+                      "name"        : "pointHistoryId"
+                    , "type"        : "Identifier"
+                    , "default"     : "{Generated}"
+                    , "description" : "The id for the point history."
+                },
+                {
+                      "name"        : "customerId"
+                    , "type"        : "Identifier"
+                    , "description" : "The customer id for the point history."
+                },
+                {
+                      "name"        : "checkId"
+                    , "type"        : "Identifier"
+                    , "description" : "The referenced check id for the point history."
+                },
+                {
+                      "name"        : "userId"
+                    , "type"        : "Identifier"
+                    , "description" : "The user id making the change for the point history."
+                },
+                {
+                      "name"        : "referenceId"
+                    , "type"        : "Identifier"
+                    , "description" : ""
+                },
+                {
+                      "name"        : "pointAmount"
+                    , "type"        : "Double"
+                    , "description" : "The change amount for the point history."
+                },
+                {
+                      "name"        : "type"
+                    , "type"        : "Integer"
+                    , "description" : "The type for the point history."
+                },
+                {
+                      "name"        : "pointDate"
+                    , "type"        : "Identifier"
+                    , "default"     : "{Date.Now}"
+                    , "description" : "The date of entry for the point history."
+                },
+                {
+                      "name"        : "pointExpDate"
+                    , "type"        : "DateTime"
+                    , "description" : "The date of expiration for the point history."
+                },
+                {
+                      "name"        : "notes"
+                    , "type"        : "String"
+                    , "description" : "The notes for the point history."
+                },
+                {
+                      "name"        : "refPointHistoryId"
+                    , "type"        : "Identifier"
+                    , "description" : "The previous point history id which is being referenced."
+                },
+                {
+                      "name"        : "ipAddress"
+                    , "type"        : "String"
+                    , "description" : "The ip address from where the point history originated"
+                },
+                {
+                      "name"        : "isManual"
+                    , "type"        : "Boolean"
+                    , "description" : "Flag indication as to whether or not the point history was entered manually."
+                },
+                {
+                      "name"        : "checkDetailId"
+                    , "type"        : "Identifier"
+                    , "description" : "The referenced check detail id for the point history."
+                },
+                {
+                      "name"        : "reservationId"
+                    , "type"        : "Identifier"
+                    , "description" : "The referenced reservation id for the point history."
+                },
+                {
+                      "name"        : "username"
+                    , "type"        : "String"
+                    , "description" : "The username for the user making the change for the point history."
+                },
+                {
+                      "name"        : "approvedByUserName"
+                    , "type"        : "String"
+                    , "description" : "The username for the user approving the change for the point history."
+                }
+            ]
+        },
+        {
+            "id": "product",
+            "properties": [
+                {
+                      "name"        : "productId"
+                    , "type"        : "Integer"
+                    , "default"     : "{Generated}"
+                    , "description" : "The identifier for the product."
+                },
+                {
+                      "name"        : "productType"
+                    , "type"        : "Integer"
+                    , "default"     : "1"
+                    , "description" : "The type of the product."
+                    , "lookup"      : "PRODUCT_TYPE"
+                },
+                {
+                      "name"        : "description"
+                    , "type"        : "String"
+                    , "description" : "The description of the product."
+                },
+                {
+                      "name"        : "price1"
+                    , "type"        : "Double"
+                    , "description" : "The default price for the product."
+                },
+                {
+                      "name"        : "taxId"
+                    , "type"        : "Identifier"
+                    , "description" : "The identifier for the tied tax record, if used."
+                },
+                {
+                      "name"        : "productClassId"
+                    , "type"        : "Identifier"
+                    , "description" : "The identifier for the relevant product class record, if used."
+                },
+                {
+                      "name"        : "enabled"
+                    , "type"        : "Boolean"
+                    , "default"     : "True"
+                    , "description" : "A flag indication of whether or not the product should be treated as enabled."
+                },
+                {
+                      "name"        : "deleted"
+                    , "type"        : "Boolean"
+                    , "default"     : "False"
+                    , "description" : "A flag indication of whether or not the product should be treated as deleted."
+                },
+                {
+                      "name"        : "p_Points"
+                    , "type"        : "Double"
+                    , "description" : "On a points product, the quantity of points this product provides."
+                },
+                {
+                      "name"        : "r_Points"
+                    , "type"        : "Double"
+                    , "description" : "On a reservation product, the quantity of points this reservation provides."
+                },
+                {
+                      "name"        : "priceCadet"
+                    , "type"        : "Double"
+                    , "description" : "The cadet price of the product."
+                },
+                {
+                      "name"        : "dateCreated"
+                    , "type"        : "DateTime"
+                    , "default"     : "{Date.Now}"
+                    , "description" : "The timestamp when the product was created."
+                }
+            ]
+        },
+        {
+            "id": "reservation",
+            "properties": [
+                {
+                      "name"        : "onlineBookingReservationsId"
+                    , "type"        : "Identifier"
+                    , "default"     : "{Generated}"
+                    , "description" : "The ID for the reservation."
+                }, 
+                {
+                      "name"        : "onlineBookingsId"
+                    , "type"        : "Integer"
+                    , "description" : "The ID of the booking for the reservation."
+                },
+                {
+                      "name"        : "quantity"
+                    , "type"        : "Integer"
+                    , "description" : "The quantity of reservations to hold. This number must be a positive integer."
+                },
+                {
+                      "name"        : "customersId"
+                    , "type"        : "Integer"
+                    , "description" : "The ID of the customer for the reservation."
+                },
+                {
+                      "name"        : "sessionId"
+                    , "type"        : "String"
+                    , "description" : "The session ID for the reservation, used for documentation and debugging purposes."
+                },
+                {
+                      "name"        : "onlineBookingReservationStatusId"
+                    , "type"        : "Integer"
+                    , "description" : "The ID for the status of the reservation. Statuses should be set to permanent while the underlying kart is open, and set to permanent after the purchase has been made."
+                    , "lookup"      : "ONLINE_BOOKING_RESERVATION_STATUS"
+                }
+            ]
+        },
+        {
+            "id": "translation",
+            "properties": [
+                {
+                      "name"        : "translationsId"
+                    , "type"        : "Identifier"
+                    , "default"     : "{Generated}"
+                    , "description" : "The ID for the translation."
+                },
+                {
+                      "name"        : "namespace"
+                    , "type"        : "String"
+                    , "description" : "The namespace / application for the translation."
+                },
+                {
+                      "name"        : "name"
+                    , "type"        : "String"
+                    , "description" : "The name of the translation."
+                },
+                {
+                      "name"        : "culture"
+                    , "type"        : "String"
+                    , "description" : "The culture of the translation."
+                },
+                {
+                      "name"        : "defaultValue"
+                    , "type"        : "String"
+                    , "description" : "The default value for the translation."
+                },
+                {
+                      "name"        : "value"
+                    , "type"        : "String"
+                    , "description" : "The current value for the translation."
+                },
+                {
+                      "name"        : "description"
+                    , "type"        : "String"
+                    , "description" : "The description for the translation."
+                },
+                {
+                      "name"        : "created"
+                    , "type"        : "DateTime"
+                    , "description" : "The timestamp of creation for the translation."
+                }
+            ]
         }
     ],
     "constants": {
         "CHECK_DETAIL_STATUS": {
             "NEW": 1,
             "VOID": 2
+        },
+        "CHECK_DETAIL_TYPE": {
+              "REGULAR_ITEM": 1
+            , "POINT_ITEM": 2
+            , "FOOD_ITEM": 3
+            , "RESERVATION_ITEM": 4
+            , "GAME_CARD_ITEM": 5
+            , "MEMBERSHIP_ITEM": 6
+            , "GIFT_CARD_ITEM": 7
+            , "ENTITLE_ITEM": 8
         },
         "CHECK_STATUS": {
             "OPEN": 0,

@@ -32,24 +32,6 @@ $settings = array(
     ),
 		array(
         'Namespace'    => 'MobileApp',
-        'Name'         => 'appId',
-        'Type'         => 'String',
-        'DefaultValue' => '',
-        'Value'        => '',
-        'Description'  => 'The JSON Object containing the menu items shown on the Main Menu of the mobile application',
-				'IsPublic'     => true
-    ),
-		array(
-        'Namespace'    => 'MobileApp',
-        'Name'         => 'appId',
-        'Type'         => 'String',
-        'DefaultValue' => '',
-        'Value'        => '',
-        'Description'  => 'The JSON Object containing the menu items shown on the Main Menu of the mobile application',
-				'IsPublic'     => true
-    ),
-		array(
-        'Namespace'    => 'MobileApp',
         'Name'         => 'forceLogin',
         'Type'         => 'Boolean',
         'DefaultValue' => true,
@@ -83,6 +65,15 @@ $settings = array(
         'Value'        => true,
         'Description'  => 'Enable Facebook login and other functionality',
 				'IsPublic'     => true
+    ),
+    array(
+        'Namespace'    => 'MobileApp',
+        'Name'         => 'defaultTrack',
+        'Type'         => 'Integer',
+        'DefaultValue' => 1,
+        'Value'        => 1,
+        'Description'  => 'The default track to show on the mobile app',
+        'IsPublic'     => true
     )
 );
 

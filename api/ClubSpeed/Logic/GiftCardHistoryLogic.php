@@ -1,6 +1,8 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Utility\Arrays as Arrays;
+use ClubSpeed\Utility\Strings as Strings;
 
 /**
  * The business logic class
