@@ -236,6 +236,37 @@ class CS_API
         return true;
     }
 
+    //This fetches settings from the Settings table, instead of the ControlPanel table
+    public static function getSettingsFromNewTableFor($namespace)
+    {
+        self::initialize();
+        $params = array('namespace' => $namespace);
+        return self::getJSON("settings", $params);
+    }
+
+    //This updates settings in the new Settings table, instead of the ControlPanel table
+    public static function updateSettingsInNewTableFor($namespace,$newSettings,$newSettingsIds)
+    {
+        self::initialize();
+        foreach($newSettings as $newSettingName => $newSettingValue)
+        {
+            $params = array('value' => $newSettingValue,
+                           'namespace' => $namespace,
+                            'name' => $newSettingName);
+            $result = self::update('settings',$newSettingsIds[$newSettingName],$params);
+
+            if ($result === false)
+            {
+                return false;
+            }
+            if ($result === null)
+            {
+                return null;
+            }
+        }
+        return true;
+    }
+
     public static function getSupportedPaymentTypes()
     {
         self::initialize();
@@ -279,6 +310,26 @@ class CS_API
         $result = self::getJSON("shim");
         $result = isset($result) ? true : false;
         return $result;
+    }
+
+    public static function getListOfTracks()
+    {
+        self::initialize();
+        $result = self::getJSON('tracks/index'); //'/tracks/index.json?&key=
+
+        if (isset($result->tracks))
+        {
+            $formattedTracks = array();
+            foreach($result->tracks as $currentTrack)
+            {
+                $formattedTracks[$currentTrack->id] = $currentTrack->name;
+            }
+            return $formattedTracks;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public static function getTranslations($namespace)
@@ -402,5 +453,49 @@ class CS_API
             return 'en-US';
         }
 
+    }
+
+    public static function updateGiftCardBalances($params)
+    {
+        self::initialize();
+
+        $userId = 1; //Hard-coded for now
+        $params['userId'] = $userId;
+
+        $url = self::$apiURL . '/giftcardbalance/register?key=' . self::$privateKey;
+
+        $result = self::call($url,$params,'POST');
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null)
+        {
+            if (isset($response->code) && $response->code == 200)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public static function getGiftCardBalances($listOfGiftCards)
+    {
+        self::initialize();
+        $params = array('cards' => $listOfGiftCards);
+        return self::getJSON("reports/gift_card_balance.json", $params);
+    }
+
+    public static function getGiftCardTransactions($listOfGiftCards)
+    {
+        self::initialize();
+        $params = array('cards' => $listOfGiftCards);
+        return self::getJSON("reports/gift_card_transactions.json", $params);
     }
 }

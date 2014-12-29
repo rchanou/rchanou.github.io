@@ -11,11 +11,10 @@ module.exports = {
   },
 
   funnelJQueryEvents(...events){
-    events.forEach(
-      event => {
-        $(this.getDOMNode()).on(
-          event, e => { this.toFunnel(e); }
-			  );
+    events.forEach(event => {
+      $(this.getDOMNode()).on(
+        event, e => { this.toFunnel(e); }
+		  );
     });
   }
 

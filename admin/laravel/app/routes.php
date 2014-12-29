@@ -1,16 +1,26 @@
 <?php
 
+/* Login */
+
 Route::get('/','LoginController@loginStart');
 Route::get('login','LoginController@loginStart');
 Route::post('login','LoginController@loginSubmit');
 Route::get('logout','LoginController@logout');
 
+/* Dashboard */
+
 Route::get('admin', 'AdminController@dashboard');
 Route::get('dashboard', 'AdminController@dashboard');
+
+/* Speed Screens */
+
 Route::get('channel', 'ChannelController@index');
 Route::get('channelSettings', 'ChannelController@settings');
 Route::post('channelSettingsSubmit', 'ChannelController@settingsSubmit');
 Route::post('channel/deploy','DeployController@deploy');
+Route::get('speedScreen', 'ChannelController@speedScreen');
+
+/* Booking */
 
 Route::get('booking', 'BookingController@index');
 Route::get('booking/settings', 'BookingController@settings');
@@ -18,14 +28,14 @@ Route::post('booking/settings/update', 'BookingController@updateSettings');
 Route::post('booking/payments/settings/update', 'BookingController@updatePaymentSettings');
 Route::post('booking/images/update', 'BookingController@updateImage');
 Route::post('booking/files/update', 'BookingController@updateFile');
-
 Route::get('booking/payments', 'BookingController@payments');
 Route::get('booking/translations', 'BookingController@translations');
 Route::post('booking/translations/update', 'BookingController@updateTranslations');
 Route::get('booking/translations/update/culture/{cultureKey}', 'BookingController@updateCulture');
-
 Route::get('booking/templates', 'BookingController@templates');
 Route::post('booking/templates', 'BookingController@updateTemplates');
+
+/* iPad Registration */
 
 Route::get('registration/settings', 'RegistrationController@settings');
 Route::post('registration/settings/update', 'RegistrationController@updateSettings');
@@ -45,12 +55,28 @@ Route::get('reports/detailed-sales', 'DetailedSalesReportController@index');
 Route::post('reports/detailed-sales', 'DetailedSalesReportController@index');
 Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@exportToCSV');
 
-/* End Reports */
+/* Mobile */
 
 Route::get('mobileApp/menuItems', 'MobileAppController@menuItems');
 Route::post('mobileApp/images/update', 'MobileAppController@updateImage');
 //Route::post('mobileApp/updateMenuItems', 'MobileAppController@updateMenuItems');
 Route::get('mobileApp/templates', 'MobileAppController@templates');
 Route::post('mobileApp/templates', 'MobileAppController@updateTemplates');
+Route::get('mobileApp/settings', 'MobileAppController@settings');
+Route::post('mobileApp/settings/update', 'MobileAppController@updateSettings');
+
+/* Gift Cards */
+
+Route::get('giftcards/manage', 'GiftCardsController@index');
+Route::post('giftcards/balance/update', 'GiftCardsController@updateBalance');
+Route::get('giftcards/reports', 'GiftCardsController@reports');
+Route::get('giftcards/reports/balance', 'GiftCardsController@balanceReport');
+Route::post('giftcards/reports/balance', 'GiftCardsController@getBalanceReport');
+Route::get('giftcards/reports/balance/csv', 'GiftCardsController@getBalanceReportCSV');
+Route::get('giftcards/reports/transactions', 'GiftCardsController@transactionReport');
+Route::post('giftcards/reports/transactions', 'GiftCardsController@getTransactionReport');
+Route::get('giftcards/reports/transactions/csv', 'GiftCardsController@getTransactionReportCSV');
+
+/* Disconnected */
 
 Route::get('/disconnected', 'DisconnectedController@entry');

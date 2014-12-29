@@ -64,7 +64,22 @@ class ChannelController extends BaseController
                 'numberOfMonitors' => $numberOfMonitors
             ));
     }
-		
+
+		public function speedScreen()
+		{
+			$session = Session::all();
+			if (!(isset($session["authenticated"]) && $session["authenticated"]))
+			{
+				$messages = new Illuminate\Support\MessageBag;
+				$messages->add('errors', "You must login before viewing the admin panel.");
+
+				//Redirect to the previous page with an appropriate error message
+				return Redirect::to('/login')->withErrors($messages)->withInput();
+			}
+
+			return View::make('/screens/speedScreen');
+		}
+
 		public function settings()
     {
         $session = Session::all();
@@ -92,18 +107,18 @@ class ChannelController extends BaseController
             //Redirect to the previous page with an appropriate error message
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
-				
+
 				// Build the input for our validation
 				$input = array('image' => Input::file('image'));
-		
+
 				// Within the ruleset, make sure we let the validator know that this
 				$rules = array(
 						'image' => 'required|max:10000',
 				);
-		
+
 				// Now pass the input and rules into the validator
 				$validator = Validator::make($input, $rules);
-		
+
 				// Check to see if validation fails or passes
 				if ($validator->fails()) {
 						// VALIDATION FAILED
@@ -113,18 +128,18 @@ class ChannelController extends BaseController
 
 						// Ensure the directory exists, if not, create it!
 						if(!is_dir($this->image_directory)) mkdir($this->image_directory, null, true);
-						
+
 						// Move the file, overwriting if necessary
 						Input::file('image')->move($this->image_directory, $this->image_filename);
-						
+
 						// Fix permissions on Windows (works on 2003?). This is because by default the uplaoded imaged
 						// does not inherit permissions from the folder it is moved to. Instead, it retains the
 						// permissions of the temporary folder.
 						exec('c:\windows\system32\icacls.exe ' . $this->image_path . ' /inheritance:e');
-				
+
 						return Redirect::to('/channelSettings')->with('message', 'Background uploaded successfully!');
 				}
-				
+
 		}
 
     private function getAllChannelLineups($channelIds)

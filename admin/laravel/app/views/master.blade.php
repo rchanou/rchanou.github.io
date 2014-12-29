@@ -112,6 +112,17 @@
                     <li>{{link_to('/mobileApp/templates','Templates')}}</li>
                 </ul>
             </li>--}}
+            @if (@$controller == 'GiftCardsController')
+                <li class="active open">
+            @else
+                <li class="submenu">
+            @endif
+                    <a href="#"><i class="fa fa-credit-card"></i> <span>Gift Cards</span> <i class="arrow fa fa-chevron-right"></i></a>
+                    <ul>
+                        <li>{{link_to('/giftcards/manage','Manage')}}</li>
+                        <li>{{link_to('/giftcards/reports','Reports')}}</li>
+                    </ul>
+                </li>
         </ul>
 
     </div>

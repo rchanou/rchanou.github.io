@@ -220,6 +220,7 @@ module.exports = React.createClass({
 
 		return formats[this.props.language] || 'DD-MM-YYYY';
 	},
+
 	getDefaultProps(){
 		return {
 			date: moment(),
@@ -227,11 +228,13 @@ module.exports = React.createClass({
 			language: 'en-US'
 		};
 	},
+
 	getInitialState(){
 		return { date: this.props.date };
 	},
-	render(){	
-		return <div className='row input-group' style={{ padding: 0 }} > 
+
+	render(){
+		return <div className='row input-group' style={{ padding: 0 }} >
 			<span className={'input-group-btn'}>
 				<button className={'btn btn-default'} type='button' ref='previousDay' onClick={this.handlePreviousClick}>{'<'}</button>
 			</span>
@@ -241,11 +244,13 @@ module.exports = React.createClass({
 			</span>
 		</div>;
 	},
+
 	getFormat(){
 		var momentFormat = this.getLocaleFormat();
 		return momentFormat.replace('YYYY', 'yy').replace('YY', 'y')
 			.replace('MM','mm').replace('M','m').replace('DD','dd').replace('D','d');
 	},
+
 	componentDidMount(){
 		$(this.refs.picker.getDOMNode())
 		.datepicker({
@@ -262,21 +267,26 @@ module.exports = React.createClass({
 			}
 		);
 	},
+
 	handleClick(){
 		$(this.refs.picker.getDOMNode()).datepicker('show');
 	},
+
 	componentWillReceiveProps(nextProps){
 	  var inputEl = $(this.refs.picker.getDOMNode());
 	  if (!inputEl.is(':focus')){
 	    inputEl.datepicker('setDate', nextProps.date.format(this.getLocaleFormat()));
 	  }
 	},
+
 	handlePreviousClick(){
 		this.iterateDate(-1);
 	},
+
 	handleNextClick(){
 		this.iterateDate(+1);
 	},
+
 	iterateDate(increment){
 		var newDate = moment(this.props.date, this.getLocaleFormat());
 		newDate.add(increment, 'd');

@@ -39,3 +39,10 @@ laravel/app/config/config.php
 .idea/*
 www/speedscreenCreation/generatedChannels
 www/speedscreenCreation/index.html
+www/js/config.js
+
+# npm-generated files
+node_modules/
+npm-debug.log
+tmp/
+*.min.js.map
