@@ -19,13 +19,6 @@ clubSpeedOnlineApp.controller('racerSearchController', function($scope, $routePa
         };
     })();
 
-    /*
-     $('input').keyup(function() {
-     delay(function(){
-     alert('Time elapsed!');
-     }, 1000 );
-     });
-     */
     //Once three characters are typed into the input text box, a search for the racer is initiated
     $scope.searchForRacer = function()
     {

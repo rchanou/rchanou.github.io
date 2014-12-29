@@ -4,22 +4,14 @@
 	// Routing for single page design
 	clubSpeedOnlineApp.config(function($routeProvider) {
 		$routeProvider
-			.when('/', {templateUrl : 'pages/home.html'})
+			.when('/', {redirectTo: '/livetiming/fastestTimeByWeek'})
 			.when('/racersearch', {templateUrl : 'pages/racersearch.html'})
 			.when('/racersearch/:racer_id', {templateUrl : 'pages/racersearch.html'})
 			.when('/racesummary/:race_id', {templateUrl : 'pages/racesummary.html'})
 			.when('/livetiming', {templateUrl : 'pages/livetiming.html'})
 			.when('/livetiming/:desiredTable', {templateUrl : 'pages/livetiming.html'})
-            .when('/livescoreboard', {templateUrl : 'pages/livescoreboard.html'})
-			.when('/aboutus', {templateUrl : 'pages/aboutus.html'})
-			.when('/signin', {templateUrl : 'pages/signin.html',
-                controller  : 'signInController'
-			});
-	});
-
-    //Stub controller
-	clubSpeedOnlineApp.controller('signInController', function($scope) {
-		$scope.message = 'Welcome to the Sign In page.';
+            .when('/livetiming/:desiredTable/:desiredTrack', {templateUrl : 'pages/livetiming.html'})
+			;
 	});
 
     clubSpeedOnlineApp.filter('orderObjectBy', function() {
@@ -67,49 +59,16 @@
 
     clubSpeedOnlineApp.factory('globalVars', function() {
         var globalVars = {};
-        var scoreboardUpdateTimeout = null;
-
-        globalVars.setScoreboardUpdateTimeout = function(newScoreboardUpdateTimeout) { scoreboardUpdateTimeout = newScoreboardUpdateTimeout; }
-        globalVars.resetScoreboardUpdateTimeout = function()
-        {
-            if (scoreboardUpdateTimeout !== null)
-            {
-                clearTimeout(scoreboardUpdateTimeout);
-                scoreboardUpdateTimeout = null;
-            }
-        }
 
         return globalVars;
     });
 
 //Scroll to the top of the page whenever a route is changed
-clubSpeedOnlineApp.run(function($rootScope, $location, $anchorScroll,SocketIOService,globalVars) {
+clubSpeedOnlineApp.run(function($rootScope, $location, $anchorScroll,globalVars) {
     $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
         $anchorScroll();
-        globalVars.resetScoreboardUpdateTimeout();
-        /*if ($location.path() !== "/livescoreboard")
-        {
-            SocketIOService.disconnect();
-        }
-        else
-        {
-            SocketIOService.connect();
-        }*/
     });
 
-    /*
-    //When changing route, disconnect from any Socket.io connections unless we're on a page that uses them
-    $rootScope.$on('$routeChangeStart', function(newRoute, oldRoute) {
-        if ($location.path() !== "/livescoreboard")
-        {
-            SocketIOService.disconnect();
-        }
-        else
-        {
-            SocketIOService.connect();
-        }
-    });
-    */
 });
 
 $( document ).ready(function() {

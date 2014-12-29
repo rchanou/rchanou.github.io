@@ -288,6 +288,9 @@ table.sortable thead {
     font-weight: bold;
 }
 
+.dataSubHeaderSmall {
+    font-size: 18px;
+}
 .dataWrapper {
     background-color: #1f1f1f;
     width: 90%;
@@ -303,6 +306,19 @@ table.sortable thead {
 {
     background-color:#FF0000;
     cursor: pointer;
+}
+
+.dataWrapperError {
+    background-color: #1f1f1f;
+    width: 90%;
+    min-width: 300px;
+    max-width: 600px;
+    margin: auto;
+    margin-top: 10px;
+    padding: 5px;
+    padding-top: 16px;
+    text-align: center;
+    font-size: 16px;
 }
 
 .dataTable {
@@ -448,4 +464,8 @@ body {
     -moz-animation:    racerJustEnteredRace 2s; /* Fx 5+ */
     -o-animation:      racerJustEnteredRace 2s; /* Opera 12+ */
     animation:         racerJustEnteredRace 2s; /* IE 10+ */
+}
+
+.darkDropdown {
+    color: white; background-color: black;
 }

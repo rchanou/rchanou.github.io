@@ -19,18 +19,16 @@ angular.module('clubSpeedOnlineApp.services', [])
         }
 
         return {
-            getFastestLapTimes_Day: function(limit) {
-                var limitString = '';
-                if (typeof limit !== 'undefined')
-                {
-                    limitString = '&limit=' + limit;
-                }
-                return $http.get(apiURL + '/races/fastest.json?range=day&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey + limitString);
+            getFastestLapTimes_Day: function(track) {
+                track = defaultFor(track,1);
+                return $http.get(apiURL + '/races/fastest.json?range=day&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey);
             },
-            getFastestLapTimes_Week: function() {
+            getFastestLapTimes_Week: function(track) {
+                track = defaultFor(track,1);
                 return $http.get(apiURL + '/races/fastest.json?range=week&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey) //TODO: Revert this, multitrack support
             },
-            getFastestLapTimes_Month: function() {
+            getFastestLapTimes_Month: function(track) {
+                track = defaultFor(track,1);
                 return $http.get(apiURL + '/races/fastest.json?range=month&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey);
             },
             getTopRPMScores: function() {
@@ -59,49 +57,15 @@ angular.module('clubSpeedOnlineApp.services', [])
             getTracks: function()
             {
                 return $http.get(apiURL + '/tracks/index.json?&key=' + apiKey);
+            },
+            getSettings: function()
+            {
+                return $http.get(apiURL + '/settings.json?namespace=MobileApp&key=' + apiKey);
             }
+
             //http://97.67.180.38:8080/api/index.php/tracks/index.json?key=9c55d6518880c1abf100a24da2546368
         };
-    }])
-
-    //TODO: Eliminate this is not going with socket.io
-    .factory('SocketIOService', function ($rootScope) {
-/*var socket = io.connect('http://192.168.111.142:8080');
-        return {
-            on: function (eventName, callback) {
-                socket.on(eventName, function () {
-                    var args = arguments;
-                    $rootScope.$apply(function () {
-                        callback.apply(socket, args);
-                    });
-                });
-            },
-            emit: function (eventName, data, callback) {
-                socket.emit(eventName, data, function () {
-                    var args = arguments;
-                    $rootScope.$apply(function () {
-                        if (callback) {
-                            callback.apply(socket, args);
-                        }
-                    });
-                })
-            },
-            disconnect: function()
-            {
-                if (socket.socket.connected)
-                {
-                    socket.disconnect();
-                }
-            },
-            connect: function()
-            {
-                if (socket.socket.connected == false)
-                {
-                    socket = io.connect('http://192.168.111.142:8080');
-                }
-            }
-        };*/
-    });
+    }]);
 
 /**
  * Adds default parameter functionality to JavaScript. Woohoo!

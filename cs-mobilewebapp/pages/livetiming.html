@@ -1,18 +1,17 @@
 <!-- This page displays all live timing tables. The table to display is determined by the parameter passed to the URL. -->
 <div class="jumbotron text-center">
-    <h4 style="margin-top: 2px;">Live Timing</h4>
+    <h4 style="margin-top: 2px;">Leaderboard</h4>
 
 	<div ng-controller="liveTimingController">
 
         <!-- Begin live timing menu options -->
         <select id="livetimingselector" style="color: white; background-color: black; min-width: 300px; max-width: 600px; width: 90%"
-                ng-model="desiredLiveTiming" ng-change="goToLiveTiming(desiredLiveTiming)">
+                ng-model="desiredLiveTiming" ng-change="goToLiveTiming(desiredLiveTiming,currentTrackId)">
             <option value="">Select one of the following options:</option>
             <option value="topRPMScores">Top ProSkill Scores</option>
             <option value="fastestTimeByDay">Top Lap Time (Today)</option>
             <option value="fastestTimeByWeek">Top Lap Time (This Week)</option>
             <option value="fastestTimeByMonth">Top Lap Time (This Month)</option>
-            <option value="liveScoreboard">Live Scoreboard</option>
         </select>
         <p/>
         <!-- End live timing menu options -->
@@ -25,14 +24,23 @@
 
     <!-- Begin fastest times table - can be by Day, Week, or Month -->
     <div ng-if="tableType == 'fastestTimesTable' && spinnerActive==0">
-        <span class="dataHeader">{{tableCaption}}</span>
+        <span class="dataHeader">
+            {{tableCaption}}
+            <br/>
+            <em class="dataSubHeaderSmall">{{currentTrackName}}</em>
+        </span>
+        <div ng-if="tracks != null">
+            <select class="darkDropdown" ng-model="desiredTrack" ng-change="goToLiveTimingTrack(desiredTrack)">
+                <option value="">Switch track:</option>
+                <option ng-repeat="track in tracks" value="{{track.id}}">{{track.name}}</option>
+            </select>
+        </div>
         <div class="dataWrapper" ng-repeat="racer in jsonData.fastest">
             <table class="dataTable">
                 <tr ng-click="go(racer.racer_id)">
                     <td>
                         <span class="dataSubHeader">{{racer.first_name}} {{racer.last_name}}</span><br/>
                         {{racer.nickname}}<br/>
-                        Track: {{racer.track_name}}
                     </td>
                     <td class="dataHighlightCell">
                         <span class="dataSubHeader">Lap Time</span><br/>
@@ -40,6 +48,9 @@
                     </td>
                 </tr>
             </table>
+        </div>
+        <div class="dataWrapperError" ng-if="jsonData.fastest.length == 0">
+            There were no results for the specified track and time.<p/>
         </div>
     </div>
     <!-- End fastest time table -->

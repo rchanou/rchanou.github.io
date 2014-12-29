@@ -8,7 +8,7 @@
 
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" />
-  <link rel="stylesheet" href="css/clubspeedstyle.css" />
+  <link rel="stylesheet" href="css/clubspeedstyle.css?v=1.1" />
 
     <!-- Hiding Safari GUI on iOS devices once site is "Added to Home Screen" -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -34,10 +34,7 @@
 	  <div class="collapse navbar-collapse" id="#topnavbar">
 		  <ul class="nav navbar-nav">
 			<li><a href="#racersearch"><i class="fa fa-search"></i>&nbsp;Find Racer</a></li>
-			<li><a href="#livetiming/fastestTimeByWeek"><i class="fa fa-trophy"></i>&nbsp;Top Times</a></li>
-            <li><a href="#livescoreboard"><i class="fa fa-clock-o"></i>&nbsp;Scoreboard</a></li>
-			<li><a href="#aboutus"><i class="fa fa-comment"></i>&nbsp;About</a></li>
-			<li><a href="#signin"><i class="fa fa-sign-in"></i>&nbsp;Sign In</a></li>
+			<li><a href="#livetiming/fastestTimeByWeek"><i class="fa fa-trophy"></i>&nbsp;Leaderboard</a></li>
 		  </ul>
 	  </div>
   </div>
@@ -53,10 +50,7 @@
   <!-- Begin bottom footer -->
 <div id="bottomfooter" class="btn-group btn-group-justified navbar-fixed-bottom text-center" style="margin-bottom: 0; position: fixed">
     <a href="#racersearch" role="button" class="btn btn-default"><i class="fa fa-search"></i><br/>Find Racer</a>
-    <a href="#livetiming/fastestTimeByWeek" role="button" class="btn btn-default"><i class="fa fa-trophy"></i><br/>Top Times</a>
-    <a href="#livescoreboard" role="button" class="btn btn-default"><i class="fa fa-clock-o"></i><br/>Scoreboard</a>
-    <a href="#aboutus" role="button" class="btn btn-default"><i class="fa fa-comment"></i><br/>About</a>
-    <a href="#signin" role="button" class="btn btn-default"><i class="fa fa-sign-in"></i><br/>Sign In</a>
+    <a href="#livetiming/fastestTimeByWeek" role="button" class="btn btn-default"><i class="fa fa-trophy"></i><br/>Leaderboard</a>
 </div>
   <!-- End bottom footer -->
 
@@ -74,28 +68,19 @@
       google.load("visualization", "1", {packages:["corechart"]});
   </script>
   <script src="js/utils/googleCharts.js"></script>
-  <script src="js/utils/carousel.js"></script>
-
-  <!-- Socket.io -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
 
   <!-- Angular scripts -->
-  <script src="js/app.js"></script>
-  <script src="js/services/ClubSpeedJSONService.js"></script>
-  <script src="js/controllers/liveTimingController.js"></script>
-  <script src="js/controllers/racerSearchController.js"></script>
-  <script src="js/controllers/raceSummaryController.js"></script>
-  <script src="js/controllers/homeController.js"></script>
-  <script src="js/controllers/liveScoreboardController.js"></script>
+  <script src="js/app.js?v=1.0"></script>
+  <script src="js/services/ClubSpeedJSONService.js?v=1.0"></script>
+  <script src="js/controllers/liveTimingController.js?v=1.0"></script>
+  <script src="js/controllers/racerSearchController.js?v=1.0"></script>
+  <script src="js/controllers/raceSummaryController.js?v=1.0"></script>
 
   <!-- AngularJS Bootstrap tools -->
   <script src="js/vendors/ui-bootstrap-tpls-0.7.0.js"></script>
 
   <!-- Modernizr for touch detection -->
   <script src="js/vendors/modernizr.js"></script>
-
-  <!-- Barcode generator -->
-  <script type="text/javascript" src="js/vendors/jquery-barcode.js"></script>
 
   <!-- Date formatting and internationalization -->
   <script src="js/vendors/moment-with-langs.js"></script>
