@@ -199,9 +199,9 @@
                 <div class="centered">
                     {{ Form::label('firstname', $strings['str_firstname'] . ':') }}
                     @if($settings['requireFirstName'])
-                    <span class="requiredAsterisk">*</span><br/>{{ Form::text('firstname',Input::old('firstname',''),array('class'=>'required','maxlength'=>'50')) }}<p/>
+                    <span class="requiredAsterisk">*</span><br/>{{ Form::text('firstname',Input::old('firstname',''),array('class'=>'required','maxlength'=>'50', 'autocapitalize'=>'words')) }}<p/>
                     @else
-                    <br/>{{ Form::text('firstname',Input::old('firstname',''),array('maxlength'=>'50')) }}<p/>
+                    <br/>{{ Form::text('firstname',Input::old('firstname',''),array('maxlength'=>'50', 'autocapitalize'=>'words')) }}<p/>
                     @endif
                 </div>
                 @endif
@@ -211,9 +211,9 @@
                 <div class="centered">
                     {{ Form::label('lastname', $strings['str_lastname'] . ':') }}
                     @if($settings['requireLastName'])
-                    <span class="requiredAsterisk">*</span><br/>{{ Form::text('lastname',Input::old('lastname',''),array('class'=>'required','maxlength'=>'50')) }}<p/>
+                    <span class="requiredAsterisk">*</span><br/>{{ Form::text('lastname',Input::old('lastname',''),array('class'=>'required','maxlength'=>'50', 'autocapitalize'=>'words')) }}<p/>
                     @else
-                    <br/>{{ Form::text('lastname',Input::old('lastname',''),array('maxlength'=>'50')) }}<p/>
+                    <br/>{{ Form::text('lastname',Input::old('lastname',''),array('maxlength'=>'50', 'autocapitalize'=>'words')) }}<p/>
                     @endif
                 </div>
                 @endif
