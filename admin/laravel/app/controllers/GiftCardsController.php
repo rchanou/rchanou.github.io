@@ -80,7 +80,7 @@ class GiftCardsController extends BaseController
 
         if ($result === false)
         {
-            return Redirect::to('/giftcards/manage')->with( array('error' => 'One or more gift card balances could not be updated. Please try again later.'))->withInput();
+            return Redirect::to('/giftcards/manage')->with( array('error' => 'One or more gift card balances could not be updated. Please try again later. It may help to reduce the number of gift cards being processed simultaneously.'))->withInput();
         }
         else if ($result === null)
         {
@@ -139,8 +139,15 @@ class GiftCardsController extends BaseController
         $listOfGiftCards = Input::get('listOfGiftCards');
         $listOfGiftCards = preg_replace('/\s+/', '', $listOfGiftCards);
         $result = CS_API::getGiftCardBalances($listOfGiftCards);
-
-        if (isset($result) && count($result) > 0)
+        if (is_string($result) && strpos($result,'Allowed memory size') !== false)
+        {
+            return Redirect::to('/giftcards/reports/balance')->with( array('error' => 'There was a problem generating the report due to the number of gift cards requested. Please try again with a smaller range.'))->withInput();
+        }
+        if (!is_array($result))
+        {
+            $result = false;
+        }
+        if (isset($result) && is_array($result) && count($result) > 0)
         {
             $result = $this->formatBalanceReport($result);
 
@@ -153,7 +160,7 @@ class GiftCardsController extends BaseController
 
         if ($result === false)
         {
-            return Redirect::to('/giftcards/reports/balance')->with( array('error' => 'There was a problem generating the report. Please try again.'));
+            return Redirect::to('/giftcards/reports/balance')->with( array('error' => 'There was a problem generating the report. Please try again. It may help to reduce the number of gift cards being processed.'))->withInput();
         }
         else if ($result === null)
         {
@@ -165,10 +172,11 @@ class GiftCardsController extends BaseController
         {
             $message = 'Report generation complete!';
         }
-        else
-        {
+        else {
             $message = 'Report generation complete, but there was no data for the card numbers entered.';
         }
+
+        Input::flash();
 
         return View::make('/screens/giftcards/reports/balance',array(
             'controller' => 'GiftCardsController',
@@ -252,7 +260,16 @@ class GiftCardsController extends BaseController
         $listOfGiftCards = preg_replace('/\s+/', '', $listOfGiftCards);
         $result = CS_API::getGiftCardTransactions($listOfGiftCards);
 
-        if (isset($result) && count($result) > 0)
+        if (is_string($result) && strpos($result,'Allowed memory size') !== false)
+        {
+            return Redirect::to('/giftcards/reports/transactions')->with( array('error' => 'There was a problem generating the report due to the number of gift cards requested. Please try again with a smaller range.'))->withInput();
+        }
+        if (!is_array($result))
+        {
+            $result = false;
+        }
+
+        if (isset($result) && is_array($result) && count($result) > 0)
         {
             $result = $this->formatTransactionReport($result);
 
@@ -265,7 +282,7 @@ class GiftCardsController extends BaseController
 
         if ($result === false)
         {
-            return Redirect::to('/giftcards/reports/transactions')->with( array('error' => 'There was a problem generating the report. Please try again.'));
+            return Redirect::to('/giftcards/reports/transactions')->with( array('error' => 'There was a problem generating the report. Please try again. It may help to reduce the number of gift cards being processed.'))->withInput();
         }
         else if ($result === null)
         {
@@ -281,6 +298,8 @@ class GiftCardsController extends BaseController
         {
             $message = 'Report generation complete, but there was no data for the card numbers entered.';
         }
+
+        Input::flash();
 
         return View::make('/screens/giftcards/reports/transactions',array(
             'controller' => 'GiftCardsController',
