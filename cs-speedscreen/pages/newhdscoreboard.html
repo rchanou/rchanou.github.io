@@ -19,7 +19,7 @@
 <div class="hdScoreboardHeader" id="clickMe">
     <div class="headerTextBox ellipsis">
         <span ng-if="scoreboardState == 'driver_lineup'">Racer Lineup - {{nextRace.race.race_name}} -
-            <span ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at | amDateFormat:'H:mm'}}</span>
+            <span ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at.split(" ")[1].substring(0,5)}}</span>
             <span ng-if="showHeatNumberInsteadOfRaceTime">#{{nextRace.race.id | formatHeatNumber}}</span>
         </span>
         <span ng-if="scoreboardState == 'race_ongoing'">{{currentScoreboard.race.race_name}}<span ng-if="showHeatNumberInsteadOfRaceTime"> - #{{currentScoreboard.race.id | formatHeatNumber}}</span></span>
@@ -222,7 +222,7 @@
     <div class="nextRacersHeader">Coming Up Next</div>
     <div class="nextRacersContentBig ellipsis">{{nextRace.race.race_name}}</div>
     <div class="nextRacersHeader" ng-if="!showHeatNumberInsteadOfRaceTime">Start Time</div>
-    <div class="nextRacersContentBig" ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at | amDateFormat:'H:mm'}}</div>
+    <div class="nextRacersContentBig" ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at.split(" ")[1].substring(0,5)}}</div>
     <div class="nextRacersHeader" ng-if="showHeatNumberInsteadOfRaceTime">Heat Number</div>
     <div class="nextRacersContentBig" ng-if="showHeatNumberInsteadOfRaceTime">{{nextRace.race.id | formatHeatNumber}}</div>
 
