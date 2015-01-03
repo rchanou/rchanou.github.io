@@ -4,12 +4,7 @@ require_once('../vendors/autoload.php');
 require_once('../ClubSpeed/ClubSpeedLoader.php');
 $_REQUEST['debug'] = true;
 
-$html = file_get_contents(__DIR__.'/resources/201411041100 - HTML01 - receipt.html');
-$text = file_get_contents(__DIR__.'/resources/201411041100 - TEXT01 - receipt.txt');
-$subject = 'Receipt for Check #{{checkNumber}}';
-
-$giftCardHtml = file_get_contents(__DIR__.'/resources/201501021500 - HTML01 - receipt.html');
-$giftCardSubject = file_get_contents(__DIR__.'/resources/201501021500 - TEXT01 - receipt.txt');
+$giftCardHtml = file_get_contents(__DIR__.'/resources/201501021500 - HTML01 - gift card.html');
 
 $settings = array(
     array(
@@ -24,11 +19,12 @@ $settings = array(
       'Namespace'    => 'Booking',
       'Name'         => 'giftCardEmailSubject',
       'Type'         => 'String',
-      'DefaultValue' => $giftCardSubject,
-      'Value'        => $giftCardSubject,
+      'DefaultValue' => '{{business}} Gift Card',
+      'Value'        => '{{business}} Gift Card',
       'Description'  => ''
     )
 );
+
 foreach($settings as $setting) {
     try {
         $existing = $db->settings->match(array(
