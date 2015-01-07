@@ -469,3 +469,7 @@ body {
 .darkDropdown {
     color: white; background-color: black;
 }
+
+.hiddenScoreboard {
+    display: none !important;
+}

@@ -50,7 +50,7 @@ angular.module('clubSpeedOnlineApp.services', [])
             {
                 return $http.get(apiURL + '/racers/' + racer_id + '/races.json?&key=' + apiKey);
             },
-            getScoreboardData: function()
+            getScoreboardData: function(track)
             {
                 return $http.get(apiURL + '/races/scoreboard.json?&track_id=' + track + '&key=' + apiKey);
             },

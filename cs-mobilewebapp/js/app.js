@@ -11,6 +11,8 @@
 			.when('/livetiming', {templateUrl : 'pages/livetiming.html'})
 			.when('/livetiming/:desiredTable', {templateUrl : 'pages/livetiming.html'})
             .when('/livetiming/:desiredTable/:desiredTrack', {templateUrl : 'pages/livetiming.html'})
+            .when('/livescoreboard', {templateUrl : 'pages/livescoreboard.html'})
+            .when('/livescoreboard/:desiredTrack', {templateUrl : 'pages/livescoreboard.html'})
 			;
 	});
 
@@ -53,20 +55,46 @@
         }
     });
 
+// Footer controller
+
+    //Just controls whether or not the scoreboard is enabled for the app - defaults to false
+    clubSpeedOnlineApp.controller('footerController', function($scope) {
+        if (typeof config !== "undefined")
+        {
+            $scope.enableScoreboard = defaultFor(config.enableScoreboard, false);
+        }
+        else //Backwards compatibility for installs that never had a config.js created
+        {
+            $scope.enableScoreboard = false;
+        }
+    });
+
 // ####################################################
 // ### Miscellaneous AngularJS Behavior Adjustments ###
 // ####################################################
 
     clubSpeedOnlineApp.factory('globalVars', function() {
         var globalVars = {};
+        var scoreboardUpdateTimeout = null;
+
+        globalVars.setScoreboardUpdateTimeout = function(newScoreboardUpdateTimeout) { scoreboardUpdateTimeout = newScoreboardUpdateTimeout; }
+        globalVars.resetScoreboardUpdateTimeout = function()
+        {
+            if (scoreboardUpdateTimeout !== null)
+            {
+                clearTimeout(scoreboardUpdateTimeout);
+                scoreboardUpdateTimeout = null;
+            }
+        }
 
         return globalVars;
     });
 
-//Scroll to the top of the page whenever a route is changed
+//Scroll to the top of the page whenever a route is changed, and also stop any scoreboards from being polled
 clubSpeedOnlineApp.run(function($rootScope, $location, $anchorScroll,globalVars) {
     $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
         $anchorScroll();
+        globalVars.resetScoreboardUpdateTimeout();
     });
 
 });

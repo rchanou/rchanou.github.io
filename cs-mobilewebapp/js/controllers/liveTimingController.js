@@ -12,7 +12,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routePar
             }
         }
 
-        $scope.currentTrackId = defaultFor($routeParams.desiredTrack,defaultFor($scope.defaultTrack,1)); //TODO: Get the default from API via settings
+        $scope.currentTrackId = defaultFor($routeParams.desiredTrack,defaultFor($scope.defaultTrack,1));
         $routeParams.desiredTable = defaultFor($routeParams.desiredTable,"fastestTimeByWeek");
 
         ClubSpeedJSONService.getTracks().success(function (data) {

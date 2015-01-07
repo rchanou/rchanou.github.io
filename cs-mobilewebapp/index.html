@@ -8,7 +8,7 @@
 
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" />
-  <link rel="stylesheet" href="css/clubspeedstyle.css?v=1.3" />
+  <link rel="stylesheet" href="css/clubspeedstyle.css?v=1.4" />
 
     <!-- Hiding Safari GUI on iOS devices once site is "Added to Home Screen" -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -48,9 +48,10 @@
   </div>
 
   <!-- Begin bottom footer -->
-<div id="bottomfooter" class="btn-group btn-group-justified navbar-fixed-bottom text-center" style="margin-bottom: 0; position: fixed">
+<div id="bottomfooter" class="btn-group btn-group-justified navbar-fixed-bottom text-center" style="margin-bottom: 0; position: fixed" ng-controller="footerController">
     <a href="#racersearch" role="button" class="btn btn-default"><i class="fa fa-search"></i><br/>Find Racer</a>
     <a href="#livetiming/fastestTimeByWeek" role="button" class="btn btn-default"><i class="fa fa-trophy"></i><br/>Leaderboard</a>
+    <a ng-cloak ng-class="{hiddenScoreboard: !enableScoreboard}" href="#livescoreboard" role="button" class="btn btn-default"><i class="fa fa-clock-o"></i><br/>Scoreboard</a>
 </div>
   <!-- End bottom footer -->
 
@@ -71,10 +72,11 @@
 
   <!-- Angular scripts -->
   <script src="js/app.js?v=1.0"></script>
-  <script src="js/services/ClubSpeedJSONService.js?v=1.0"></script>
-  <script src="js/controllers/liveTimingController.js?v=1.0"></script>
-  <script src="js/controllers/racerSearchController.js?v=1.0"></script>
-  <script src="js/controllers/raceSummaryController.js?v=1.0"></script>
+  <script src="js/services/ClubSpeedJSONService.js?v=1.1"></script>
+  <script src="js/controllers/liveTimingController.js?v=1.1"></script>
+  <script src="js/controllers/racerSearchController.js?v=1.1"></script>
+  <script src="js/controllers/raceSummaryController.js?v=1.1"></script>
+  <script src="js/controllers/liveScoreboardController.js?v=1.1"></script>
 
   <!-- AngularJS Bootstrap tools -->
   <script src="js/vendors/ui-bootstrap-tpls-0.7.0.js"></script>
