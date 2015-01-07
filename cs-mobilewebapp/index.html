@@ -51,7 +51,7 @@
 <div id="bottomfooter" class="btn-group btn-group-justified navbar-fixed-bottom text-center" style="margin-bottom: 0; position: fixed" ng-controller="footerController">
     <a href="#racersearch" role="button" class="btn btn-default"><i class="fa fa-search"></i><br/>Find Racer</a>
     <a href="#livetiming/fastestTimeByWeek" role="button" class="btn btn-default"><i class="fa fa-trophy"></i><br/>Leaderboard</a>
-    <a ng-cloak ng-class="{hiddenScoreboard: !enableScoreboard}" href="#livescoreboard" role="button" class="btn btn-default"><i class="fa fa-clock-o"></i><br/>Scoreboard</a>
+    <a ng-cloak ng-show="enableScoreboard" href="#livescoreboard" role="button" class="btn btn-default"><i class="fa fa-clock-o"></i><br/>Scoreboard</a>
 </div>
   <!-- End bottom footer -->
 
