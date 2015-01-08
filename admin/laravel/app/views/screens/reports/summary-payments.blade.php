@@ -58,7 +58,7 @@ Summary Payments Report
                 </div>
                   <div class="col-sm-12">
                        <button type="button" class="btn btn-danger" onclick="$(':input','#dateForm').not(':button, :submit, :reset, :hidden, :radio, :checkbox').val('');">Clear</button>
-                       {{ Form::submit('Change Date Range', array('class' => 'btn btn-info')) }}
+                       {{ Form::submit('Run Report', array('class' => 'btn btn-info')) }}
                        <span class="help-block text-left">Leaving both dates blank will generate a report for today. Leaving the end date blank will generate a report just for the start date.</span>
                   </div>
               </div>
