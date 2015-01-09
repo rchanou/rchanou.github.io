@@ -12,6 +12,14 @@ clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routePar
             }
         }
 
+        if (typeof config !== "undefined") //Check if the default track is overridden in the config file
+        {
+            if (typeof config.forceDefaultTrackIgnoreAdminPanel !== "undefined")
+            {
+                $scope.defaultTrack = config.forceDefaultTrackIgnoreAdminPanel;
+            }
+        }
+
         $scope.currentTrackId = defaultFor($routeParams.desiredTrack,defaultFor($scope.defaultTrack,1));
         $routeParams.desiredTable = defaultFor($routeParams.desiredTable,"fastestTimeByWeek");
 

@@ -8,6 +8,14 @@ clubSpeedOnlineApp.controller('liveScoreboardController', function($scope, $rout
             }
         }
 
+        if (typeof config !== "undefined") //Check if the default track is overridden in the config file
+        {
+            if (typeof config.forceDefaultTrackIgnoreAdminPanel !== "undefined")
+            {
+                $scope.defaultTrack = config.forceDefaultTrackIgnoreAdminPanel;
+            }
+        }
+
         $scope.currentTrackId = defaultFor($routeParams.desiredTrack, defaultFor($scope.defaultTrack, 1));
 
         ClubSpeedJSONService.getTracks().success(function (data) {
