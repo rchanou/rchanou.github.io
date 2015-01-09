@@ -6,8 +6,8 @@ class Version
 		
 		// Versions of various applications and modules
 		public $speedscreenVersion = '0.5.0';
-		public $apiVersion = '1.1.13-dev';
-		public $apiLastUpdatedAt = '11/11/2014 11:05';
+		public $apiVersion = '1.2';
+		public $apiLastUpdatedAt = '1/9/2015 14:30';
 
     function __construct(){
         // header('Access-Control-Allow-Origin: *'); //Here for all /say
@@ -18,17 +18,21 @@ class Version
             throw new RestException(401, "Invalid authorization!");
         }
         
-        if ($desiredData == 'current')
-        {
-            return $this->current();
-        }
-        if ($desiredData == 'api')
-        {
-            return $this->api();
-        }
-        if ($desiredData == 'os')
-        {
-            return $this->os();
+        switch($desiredData) {
+            case "current":
+                return $this->current();
+                break;
+            case "api":
+                return $this->api();
+                break;
+            case "os":
+                return $this->os();
+                break;
+            case "sql":
+                return $this->sql();
+                break;
+            default:
+                throw new RestException(401, "Invalid version parameter!");
         }
     }
 
@@ -79,6 +83,21 @@ class Version
         $output["OS"] = php_uname('s');
         $output["Version"] = php_uname('v');
         return $output;
+    }
+    
+    public function sql()
+    {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
+        $tsql = "SELECT @@version";
+        $tsql_params = array();
+
+        $rows = $this->run_query($tsql, $tsql_params);
+        
+        $output = count($rows) > 0 ? $rows[0][''] : null;
+        return array('SqlVersion' => $output);
     }
 
     private function run_query($tsql, $params = array()) {
