@@ -114,8 +114,6 @@ class CheckDetailsLogic extends BaseLogic {
             if (!is_null($checkDetails->P_Points) && $checkDetails->P_Points > 0)
                 $checkDetails->P_CustID = $check->CustID;
             $checkDetails->R_Points = $product->R_Points; // we want nulls to stay null, don't convert to 0
-            if (!is_null($checkDetails->R_Points) && $checkDetails->R_Points > 0)
-                $checkDetails->R_CustID = $check->CustID;
             $checkDetails->G_Points = $product->G_Points; // leave G_Points as null as well
             if (!is_null($checkDetails->G_Points) && $checkDetails->G_Points > 0)
                 $checkDetails->G_CustID = $check->CustID;
