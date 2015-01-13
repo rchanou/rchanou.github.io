@@ -404,14 +404,13 @@
                 racers.unshift(label);
             }
             else {
-                var tempStartsAt = z.convert.toDate(race.starts_at);
-                if (z.check.isDate(tempStartsAt)) {
-                    race.starts_at = tempStartsAt.toLocaleString(z.location.locale);
-                }
+                var tempStartsAt = z.convert.toDate(race.starts_at_iso);
+                if (z.check.isDate(tempStartsAt))
+                    race.starts_at_locale = tempStartsAt.toLocaleString(z.location.locale);
                 var labels = [
                     {
                         position_display: "TIME:",
-                        nickname: race.starts_at
+                        nickname: race.starts_at_locale || race.starts_at_iso // default to iso time if the locale fails?
                     },
                     {
                         position_display: "SPOTS:",

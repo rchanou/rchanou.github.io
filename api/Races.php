@@ -996,6 +996,7 @@ EOD;
         $output['race'] = $rowsRace[0];
         if (isset($output['race']['starts_at']))
         {
+            $output['race']['starts_at_iso'] = $output['race']['starts_at'];
             $output['race']['starts_at'] = date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($output['race']['starts_at']));
         }
         $output['race']['race_number'] = substr($output['race']['id'], -2); // Race Number is the last two digits of the ID
