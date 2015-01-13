@@ -63,7 +63,9 @@ $settings = array(
     'currency' => 'USD', //http://www.xe.com/iso4217.php
     'numberFormattingLocale' => 'en_US', //http://www.oracle.com/technetwork/java/javase/javase7locales-334809.html
     'maxRacersForDropdown' => 50,
-    'currentCulture' => 'en-US'
+    'currentCulture' => 'en-US',
+	'giftCardSalesEnabled' => false,
+	'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}'
 	);
 
 error_reporting(E_ALL);

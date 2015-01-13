@@ -56,7 +56,9 @@ class LoginController extends BaseController
         $strings = Strings::getStrings();
         $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
         $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
-        $source = isset($input['source']) ? $input['source'] : 'step1';
+        $source = isset($input['source']) ? $input['source'] : 'step1'; //Where the user came from and should be redirected to in the case of an error
+        $itemId = $heatId != null ? $heatId : $productId; //The heatId or productId being booked
+        $quantity = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : 1;
 
         //DATA VALIDATION
         $rules = array();
@@ -74,13 +76,19 @@ class LoginController extends BaseController
 
         if ($validator->fails())
         {
-            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            if ($source == "step2")
             {
                 $loginToAccountErrors = array();
-                $loginToAccountErrors[$input['heatId']] = $validator->errors()->all();
-                return Redirect::to("/step2?login=$heatId#$heatId")->with(array('loginToAccountErrors' => $loginToAccountErrors));
+                $loginToAccountErrors[$itemId] = $validator->errors()->all();
+                return Redirect::to("/step2?login=$itemId#$itemId")->with(array('loginToAccountErrors' => $loginToAccountErrors));
             }
-            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            else if ($source == "giftcards")
+            {
+                $loginToAccountErrors = array();
+                $loginToAccountErrors[$itemId] = $validator->errors()->all();
+                return Redirect::to("/giftcards?login=$itemId#$itemId")->with(array('loginToAccountErrors' => $loginToAccountErrors));
+            }
+            else if ($source == "login")
             {
                 return Redirect::to('/login')->withErrors($validator);
             }
@@ -105,13 +113,13 @@ class LoginController extends BaseController
                 Session::put('authenticated',$loginResults->customerId);
                 Session::put('authenticatedEmail',$input['EmailAddress']);
 
-                //Direct them to the URL that will add that item to their cart
-                $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
-                $numOfRacers = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : null; //Heat that the user intends to book after creating the account
-
-                if($numOfRacers != null && $heatId != null)
+                if ($heatId != null)
                 {
-                    return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$numOfRacers");
+                    return Redirect::to("/cart?action=add&heatId=$itemId&quantity=$quantity");
+                }
+                else if ($productId != null)
+                {
+                    return Redirect::to("/cart?action=add&productId=$itemId&quantity=$quantity");
                 }
                 else
                 {
@@ -120,17 +128,23 @@ class LoginController extends BaseController
             }
             else //If error, redirect backwards appropriately (return destination may vary)
             {
-                if (array_key_exists('source',$input) && $input['source'] == "step2")
+                if ($source == "step2")
                 {
                     $loginToAccountErrors = array();
-                    $loginToAccountErrors[$input['heatId']] = array($strings['str_incorrectUsernameOrPassword']);
-                    return Redirect::to("/step2?login=$heatId#$heatId")->with(array('loginToAccountErrors' => $loginToAccountErrors));
+                    $loginToAccountErrors[$itemId] = array($strings['str_incorrectUsernameOrPassword']);
+                    return Redirect::to("/step2?login=$itemId#$itemId")->with(array('loginToAccountErrors' => $loginToAccountErrors));
                 }
-                else if (array_key_exists('source',$input) && $input['source'] == "login")
+                else if ($source == "login")
                 {
                     $messages = new Illuminate\Support\MessageBag;
                     $messages->add('errors', $strings['str_incorrectUsernameOrPassword']);
                     return Redirect::to('/login')->withErrors($messages);
+                }
+                else if ($source == "giftcards")
+                {
+                    $loginToAccountErrors = array();
+                    $loginToAccountErrors[$itemId] = array($strings['str_incorrectUsernameOrPassword']);
+                    return Redirect::to("/giftcards?login=$itemId#$itemId")->with(array('loginToAccountErrors' => $loginToAccountErrors));
                 }
                 else
                 {
@@ -160,14 +174,42 @@ class LoginController extends BaseController
         }
         else
         {
-            $lastSearch = explode('!',Input::get('state')); //Extracting the desired heat and quantity from the return URL - state is a URL parameter Facebook provides for data transfer
-            $heatId = $lastSearch[0];
-            $quantity = $lastSearch[1];
+            $heatId = null;
+            $productId = null;
+            $quantity = 1;
+            $source = 'step2';
+
+
+            $action = Input::get('state'); //Extracting the desired heat and quantity from the return URL - state is a URL parameter Facebook provides for data transfer
+            //state=heatId!quantity OR state=productId|quantity - the ! or | determine the type of item
+
+            $isAHeatItem = false;
+            if (isset($action))
+            {
+                $isAHeatItem = strpos($action,'!') !== false;
+            }
+
+            if ($isAHeatItem)
+            {
+                $lastSearch = explode('!',$action);
+                $heatId = $lastSearch[0];
+                $quantity = $lastSearch[1];
+                $source = 'step2';
+            }
+            else
+            {
+                $lastSearch = explode('|',$action);
+                $productId = $lastSearch[0];
+                $quantity = $lastSearch[1];
+                $source = 'giftcards'; //Some day will need to be differentiated from other products
+            }
 
             return View::make('/loginfb',
                 array(
                     'images' => Images::getImageAssets(),
                     'heatId' => $heatId,
+                    'productId' => $productId,
+                    'source' => $source,
                     'quantity' => $quantity,
                     'strings' => Strings::getStrings()
                 )
@@ -205,7 +247,11 @@ class LoginController extends BaseController
             $input['facebookToken'] = CS_API::extendFacebookToken($customerData['facebookToken']); //Try to exchange it for the 60-day one
         }
 
-        $heatId = $input['heatId'];
+        $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
+        $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
+        $itemId = $heatId != null ? $heatId : $productId; //The heatId or productId being booked
+        $source = isset($input['source']) ? $input['source'] : 'step2'; //Where the user came from and should be redirected to in the case of an error
+        $quantity = isset($input['quantity']) ? $input['quantity'] : 1;
 
         //If the site requires registration, force it on the user, otherwise log them in
         $settings = Session::get('settings');
@@ -219,7 +265,7 @@ class LoginController extends BaseController
             }
             if (is_bool($isAccountClaimedYet) && !$isAccountClaimedYet)
             {
-                if (Session::has('intent'))
+                if (Session::has('intent')) //A login requested was forced on the user in the middle of trying to add an item to cart
                 {
                     $messages = new Illuminate\Support\MessageBag;
                     $messages->add('errors', $strings['str_accountCreationForced']);
@@ -228,8 +274,8 @@ class LoginController extends BaseController
                 else
                 {
                     $createAccountErrors = array();
-                    $createAccountErrors[$input['heatId']] = array($strings['str_accountCreationForced']);
-                    return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+                    $createAccountErrors[$itemId] = array($strings['str_accountCreationForced']);
+                    return Redirect::to("/$source?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
                 }
             }
         }
@@ -247,16 +293,17 @@ class LoginController extends BaseController
             Session::put('authenticatedEmail',$input['email']);
 
             //Direct them to the URL that will add that item to their cart
-            $heatId = $input['heatId'];
-            $numOfRacers = $input['quantity'];
-
-            if ($heatId == "" || $numOfRacers == "")
+            if ($heatId != null)
             {
-                return Redirect::to("/cart");
+                return Redirect::to("/cart?action=add&heatId=$itemId&quantity=$quantity");
+            }
+            else if ($productId != null)
+            {
+                return Redirect::to("/cart?action=add&productId=$itemId&quantity=$quantity");
             }
             else
             {
-                return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$numOfRacers");
+                return Redirect::to("/cart");
             }
         }
         else

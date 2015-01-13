@@ -193,7 +193,7 @@ class GiftCardsController extends BaseController
         {
             $report[] = array(
                 $headerRow[0] => $currentGiftCard->cardId,
-                $headerRow[1] => $currentGiftCard->money,
+                $headerRow[1] => number_format($currentGiftCard->money,2,'.',''),
                 $headerRow[2] => $currentGiftCard->points,
                 $headerRow[3] => $currentGiftCard->isGiftCard ? 'false' : 'true'
             );
@@ -317,7 +317,7 @@ class GiftCardsController extends BaseController
             $report[] = array(
                 $headerRow[0] => str_replace('T',' ',$currentGiftCard->date),
                 $headerRow[1] => $currentGiftCard->cardId,
-                $headerRow[2] => $currentGiftCard->money,
+                $headerRow[2] => number_format($currentGiftCard->money,2,'.',''),
                 $headerRow[3] => $currentGiftCard->points,
                 $headerRow[4] => $currentGiftCard->notes,
             );

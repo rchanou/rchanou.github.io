@@ -353,7 +353,7 @@ var MenuItem = React.createClass({
 });
 
 
-var MenuItemEditor = React.createClass({
+module.exports = React.createClass({
   getDefaultProps(){
     return {
       itemWidth: 500,
@@ -582,40 +582,36 @@ var MenuItemEditor = React.createClass({
   },
 
   renderItemBucket(){
-    var bucketItemElements = this.getRemainingBucketItems() //this.props.menuItemBucket
-    .map((item, i) => {
-      var positionProps;
-      if (this.state.dragItemBucketId !== null && item.bucketId === this.state.dragItemBucketId){
-        positionProps = {
-          top: this.state.mouseY - this.state.dragCursorOffsetY,
-          left: this.state.mouseX - this.state.dragCursorOffsetX,
-          dragging: true
-        };
-      } else {
-        positionProps = {
-          top: i * this.props.bucketItemHeight
-        };
-      }
+    var bucket = '(no preset items available)';
 
-      return <MenuItem
-        inBucket={true}
-        bucketId={item.bucketId}
-        key={item.itemKey}
-        height={this.props.bucketItemHeight}
-        {...item}
-        {...positionProps}
-        onDragStart={this.handleDragStart}
-      />;
-    });
+    if (this.getRemainingBucketItems().length > 0){
+      var bucketItemElements = this.getRemainingBucketItems() //this.props.menuItemBucket
+      .map((item, i) => {
+        var positionProps;
+        if (this.state.dragItemBucketId !== null && item.bucketId === this.state.dragItemBucketId){
+          positionProps = {
+            top: this.state.mouseY - this.state.dragCursorOffsetY,
+            left: this.state.mouseX - this.state.dragCursorOffsetX,
+            dragging: true
+          };
+        } else {
+          positionProps = {
+            top: i * this.props.bucketItemHeight
+          };
+        }
 
-    return <div
-      className='col-xs-12 col-sm-6 col-md-5 col-lg-4'
-      style={{ opacity: 0.85 }}
-    >
-      <h1>
-        {this.getRemainingBucketItems().length > 0 && 'Preset Items'}
-      </h1>
-      <Anim component='ol' ref='bucket'
+        return <MenuItem
+          inBucket={true}
+          bucketId={item.bucketId}
+          key={item.itemKey}
+          height={this.props.bucketItemHeight}
+          {...item}
+          {...positionProps}
+          onDragStart={this.handleDragStart}
+        />;
+      });
+
+      bucket = <Anim component='ol' ref='bucket'
         duration={this.props.animationDuration}
         style={{
           position: 'relative',
@@ -625,7 +621,18 @@ var MenuItemEditor = React.createClass({
         }}
       >
         {bucketItemElements}
-      </Anim>
+      </Anim>;
+    }
+
+    return <div
+      className='col-xs-12 col-sm-6 col-md-5 col-lg-4'
+      style={{ opacity: 0.85 }}
+    >
+      <h1>
+        Preset Items
+        {/*this.getRemainingBucketItems().length > 0 && 'Preset Items'*/}
+      </h1>
+      {bucket}
     </div>;
   },
 
@@ -875,6 +882,3 @@ var MenuItemEditor = React.createClass({
     this.setState(newState);
   }
 });
-
-
-module.exports = MenuItemEditor;

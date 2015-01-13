@@ -13,111 +13,34 @@
   body{margin:0; padding:0;}
   img{border:0; height:auto; line-height:100%; outline:none; text-decoration:none;}
 
-  #wrapper {
-    margin: 0 auto;
-    width: 640px;
-  }
-  h1, h2, h3, h4 {
-    color: #008AE6;
-  }
-  .pull-right {
-    float: right !important;
-  }
-  .pull-left {
-    float: left !important;
-  }
-  .col-12 .col-6 .col-4 .col-3 .col-2 .col-1 {
-    position: relative;
-    min-height: 1px;
-    padding-right: 15px;
-    padding-left: 15px;
-    float: left;
-  }
-  .row {
-    width: 100%;
-  }
-  .col-12 {
-    width: 100%;
-  }
-  .col-9 {
-    width: 75%;
-  }
-  .col-6 {
-    width: 50%;
-  }
-  .col-4 {
-    width: 33%;
-  }
-  .col-3 {
-    width: 25%;
-  }
-  .col-2 {
-    width: 16.66%;
-  }
-  .col-1 {
-    width: 8.33%;
-  }
-  .text-right {
-    text-align: right;
-  }
-  .text-left {
-    text-align: left;
-  }
-  .text-center {
-    text-align: center;
-  }
-  .no-wrap {
-    white-space: nowrap;
-  }
-  .bold {
-    font-weight: bold;
-  }
-
-  /* hijacked bootstrap table styling, since we can't include style headers or links */
-  table {
-    border-spacing: 0;
-    border-collapse: collapse;
-  }
-  td,
-  th {
-    padding: 0;
-  }
-  .table {
-    width: 100%;
-    max-width: 100%;
-    margin-bottom: 20px;
-    border-collapse: collapse !important;
-  }
-  .table > thead > tr > th,
-  .table > tbody > tr > th,
-  .table > tfoot > tr > th,
-  .table > thead > tr > td,
-  .table > tbody > tr > td,
-  .table > tfoot > tr > td {
-    padding: 8px;
-    line-height: 1.42857143;
-    vertical-align: top;
-    border-top: 1px solid #ddd;
-  }
-  .table > thead > tr > th {
-    vertical-align: bottom;
-    border-bottom: 2px solid #ddd;
-  }
-  .table-bordered th,
-  .table-bordered td {
-    border: 1px solid #ddd !important;
-  }
 </style>
 </head>
-<body style="-webkit-text-size-adjust: none;margin: 0;padding: 0;width: 100% !important;font-family: sans-serif;-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;">
+<body style="-webkit-text-size-adjust: none; margin: 0;padding: 0;width: 100% !important;font-family: sans-serif; -webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;">
   <div id="wrapper" style="margin: 0 auto;width: 640px;">
     <div id="header">
       <div class="pull-right bold" style="font-weight: bold;float: right !important;">
-        <div>Gift Card</div>
+        <div>Gift Card #{{giftCardNo}}</div>
       </div>
     </div>
-    <div id="gift-card">
-      Your gift card # is {{giftCardNo}}.
+    <div id="greeting">
+      <h3 style="color: #008AE6;">Hello {{customer}},</h3>
+      <p>
+        Thank you for shopping with {{business}}!
+        Your gift card details are below.
+      </p>
+    </div>
+    <div id="details">
+      <h3 style="color: #008AE6;">Gift Card Details</h3>
+      <div id="giftCardContainer" style="border: 1px solid black; border-radius: 10px; width: 300px; margin: 0 auto; padding: 10px; text-align: center;">
+        {{giftCardImage}}
+        <div style="font-size: 24px;">#{{giftCardNo}}</div>
+      </div>
+    </div>
+    <div id="remarks">
+      <p>
+        This is your gift card. Please print it out and bring it with you to the track.
+      </p>
+      <h3 style="color: #008AE6;">Thank you for shopping with us!</h3>
     </div>
   </div>
 </body>

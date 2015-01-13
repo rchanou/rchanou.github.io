@@ -17,12 +17,16 @@ class CreateAccountController extends BaseController
         $strings = Strings::getStrings();
 
         $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
-        $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
-        $source = isset($input['source']) ? $input['source'] : 'step1';
+        $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to add to cart after creating the account
+        $source = isset($input['source']) ? $input['source'] : 'step1'; //Where the user came from and should be redirected to in the case of an error
+        $itemId = $heatId != null ? $heatId : $productId; //The heatId or productId being booked
 
         $settings = Session::get('settings');
 
-        //DATA VALIDATION
+        // #################################
+        // # LARAVEL DATA VALIDATION RULES #
+        // #################################
+
         $rules = array();
         $messages = array();
 
@@ -129,22 +133,32 @@ class CreateAccountController extends BaseController
             $messages['Custom4.required'] = $strings['str_genericField.required'];
         }
 
+        // #####################################
+        // # END LARAVEL DATA VALIDATION RULES #
+        // #####################################
+
         //Create the validator
         $validator = Validator::make($input, $rules, $messages);
 
         if ($validator->fails())
         {
-            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            if ($source == "step2") //Back to /step2 with an error
             {
                 $createAccountErrors = array();
-                $createAccountErrors[$input['heatId']] = $validator->errors()->all();
-                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+                $createAccountErrors[$itemId] = $validator->errors()->all();
+                return Redirect::to("/step2?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
             }
-            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            else if ($source == "giftcards") //Back to /giftcards with an error
+            {
+                $createAccountErrors = array();
+                $createAccountErrors[$itemId] = $validator->errors()->all();
+                return Redirect::to("/giftcards?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if ($source == "login") //Back to /login with an error
             {
                 return Redirect::to('/login')->withErrors($validator);
             }
-            else
+            else //Back to /step1 with an error
             {
                 return Redirect::to('/step1')->withErrors($validator);
             }
@@ -152,24 +166,32 @@ class CreateAccountController extends BaseController
 
         $customerData = $this->convertCustomerDataToClubSpeedFormat($input);
 
+        // ####################################
+        // # ADDITIONAL DATA VALIDATION RULES #
+        // ####################################
+
         $createAccountErrors = array();
-        $createAccountErrors[$heatId] = array();
+        $createAccountErrors[$itemId] = array();
 
         if ($customerData['birthdate'] == "") //Enforce birthdate requirement
         {
-            $createAccountErrors[$heatId][] = $strings['str_birthDate.required'];
+            $createAccountErrors[$itemId][] = $strings['str_birthDate.required'];
 
-            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            if ($source == "step2") //Back to /step2 with an error
             {
-                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+                return Redirect::to("/step2?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
             }
-            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            else if ($source == "giftcards") //Back to /giftcards with an error
+            {
+                return Redirect::to("/giftcards?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if ($source == "login") //Back to /login with an error
             {
                 $messages = new Illuminate\Support\MessageBag;
                 $messages->add('errors', $strings['str_birthDate.required']);
                 return Redirect::to('/login')->withErrors($messages);
             }
-            else
+            else //Back to /step1 with an error
             {
                 $messages = new Illuminate\Support\MessageBag;
                 $messages->add('errors', $strings['str_birthDate.required']);
@@ -178,19 +200,23 @@ class CreateAccountController extends BaseController
         }
         if ($input['Password'] != $input['PasswordConfirmation'] ) //Enforce password matching requirement
         {
-            $createAccountErrors[$heatId][] = $strings['str_passwordsDoNotMatch'];
+            $createAccountErrors[$itemId][] = $strings['str_passwordsDoNotMatch'];
 
-            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            if ($source == "step2") //Back to /step2 with an error
             {
-                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+                return Redirect::to("/step2?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
             }
-            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            else if ($source == "giftcards") //Back to /giftcards with an error
+            {
+                return Redirect::to("/giftcards?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if ($source == "login") //Back to /login with an error
             {
                 $messages = new Illuminate\Support\MessageBag;
                 $messages->add('errors', $strings['str_passwordsDoNotMatch']);
                 return Redirect::to('/login')->withErrors($messages);
             }
-            else
+            else //Back to /step1 with an error
             {
                 $messages = new Illuminate\Support\MessageBag;
                 $messages->add('errors', $strings['str_passwordsDoNotMatch']);
@@ -199,19 +225,23 @@ class CreateAccountController extends BaseController
         }
         if ($input['EmailAddress'] != $input['EmailAddressConfirmation'] ) //Enforce password matching requirement
         {
-            $createAccountErrors[$heatId][] = $strings['str_emailsMustMatch'];
+            $createAccountErrors[$itemId][] = $strings['str_emailsMustMatch'];
 
-            if (array_key_exists('source',$input) && $input['source'] == "step2")
+            if ($source == "step2") //Back to /step2 with an error
             {
-                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+                return Redirect::to("/step2?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
             }
-            else if (array_key_exists('source',$input) && $input['source'] == "login")
+            else if ($source == "giftcards") //Back to /giftcards with an error
+            {
+                return Redirect::to("/giftcards?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else if ($source == "login") //Back to /login with an error
             {
                 $messages = new Illuminate\Support\MessageBag;
                 $messages->add('errors', $strings['str_emailsMustMatch']);
                 return Redirect::to('/login')->withErrors($messages);
             }
-            else
+            else //Back to /step1 with an error
             {
                 $messages = new Illuminate\Support\MessageBag;
                 $messages->add('errors', $strings['str_emailsMustMatch']);
@@ -219,7 +249,11 @@ class CreateAccountController extends BaseController
             }
         }
 
-        //If we've made it this far, the form data has passed validation
+        // ########################################
+        // # END ADDITIONAL DATA VALIDATION RULES #
+        // ########################################
+
+        //If we've made it this far, the form data has passed initial validation
 
         $response = CS_API::createClubSpeedAccount($customerData); //Create the customer account
 
@@ -231,22 +265,26 @@ class CreateAccountController extends BaseController
         {
             $errorCodes = Strings::getErrorCodes();
             $createAccountErrors = array();
-            $createAccountErrors[$heatId] = array();
+            $createAccountErrors[$itemId] = array();
 
             if (str_contains($response,$errorCodes['emailAlreadyExists']) || str_contains($response,'Precondition Failed: Customer create found an email which already exists!')) //If the creation failed because an account already existed, let the user know
             {
-                $createAccountErrors[$heatId][] = $strings['str_emailAlreadyRegistered'] . ' <br/>' . $strings['str_toResetYourPassword'] . ' ' . link_to('resetpassword',$strings['str_clickHere']) . '.';
+                $createAccountErrors[$itemId][] = $strings['str_emailAlreadyRegistered'] . ' <br/>' . $strings['str_toResetYourPassword'] . ' ' . link_to('resetpassword',$strings['str_clickHere']) . '.';
             }
             else
             {
-                $createAccountErrors[$heatId][] = $strings['str_errorCreatingAccount'];
+                $createAccountErrors[$itemId][] = $strings['str_errorCreatingAccount'];
 
             }
-            if ($source == "step2")
+            if ($source == "step2") //Back to /step2 with an error
             {
-                return Redirect::to("/step2?create=$heatId#$heatId")->with(array('createAccountErrors' => $createAccountErrors));
+                return Redirect::to("/step2?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
             }
-            else
+            else if ($source == "giftcards") //Back to /giftcards with an error
+            {
+                return Redirect::to("/giftcards?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+            else //Back to /login with an error
             {
                 $messages = new Illuminate\Support\MessageBag;
                 $messages->add('errors', $strings['str_errorCreatingAccountUnknown'] . ' <br/>' . $strings['str_toResetYourPassword'] . ' ' . link_to('resetpassword',$strings['str_clickHere']) . '.');
@@ -269,16 +307,20 @@ class CreateAccountController extends BaseController
         {
             if ($heatId != null)
             {
-                return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$quantity"); //TODO: Will this redirect back to a bad place?
+                return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$quantity");
             }
             else if ($productId != null)
             {
-                return Redirect::to("/cart?action=add&productId=$productId&quantity=$quantity"); //TODO: Will this redirect back to a bad place?
+                return Redirect::to("/cart?action=add&productId=$productId&quantity=$quantity");
             }
             else
             {
                 return Redirect::to('/step1');
             }
+        }
+        else if ($source == "giftcards")
+        {
+            return Redirect::to("/cart?action=add&productId=$productId&quantity=$quantity");
         }
 
     }

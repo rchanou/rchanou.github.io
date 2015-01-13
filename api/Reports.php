@@ -1,6 +1,7 @@
 <?php
 
 use ClubSpeed\Utility\Strings as Strings;
+use ClubSpeed\Connection as Connection;
 
 class Reports extends BaseApi
 {
@@ -57,18 +58,17 @@ GROUP BY CheckDetails.ProductID
 ORDER BY Total DESC
 */
 
-		/**
-		 * DETAILED PAYMENTS REPORT
-		 *
-		 * Show the detailed breakdown of the payments taken in a date range for each check
-		 */
-
-		public function payments() {
+	/**
+	 * DETAILED PAYMENTS REPORT
+	 *
+	 * Show the detailed breakdown of the payments taken in a date range for each check
+	 */
+	public function payments() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
 				
-				$tsql = <<<EOD
+		$tsql = <<<EOD
 select
 
 case
@@ -109,59 +109,160 @@ and p.paystatus = 1
 order by p.paydate
 EOD;
         $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-				$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-				$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-				$params = array(&$start, &$end);
+		$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+		$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+		$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+		$params = array(&$start, &$end);
         $data = $this->run_query($tsql, $params);
-				
-				return $data;
-		}
+		return $data;
+	}
+
+    /**
+     * @url GET /payments/eurekas
+     */
+    public function payments_eurekas() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+        if (!$this->logic->version->hasEurekas())
+            throw new RestException(404, "Eurekas database could not be found!");
+        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+        $start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+        $end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+        $end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+        $params = array(&$start, &$end);
+        $sql = <<<EOS
+SELECT
+    CASE WHEN c.CheckStatus = 0 THEN 'Open' ELSE 'Closed' END AS 'Check Status'
+    , c.OpenedDate AS 'Opened On'
+    , c.ClosedDate AS 'Closed On'
+    , c.CheckID AS 'Check ID'
+    , NULL AS 'Customer ID'
+    , NULL AS 'Customer Last Name'
+    , NULL AS 'Customer First Name'
+    , u.UserName AS 'Created By'
+    , c.CheckTotal AS 'Check Total'
+    , p.PaymentAmount AS 'Pay Amount'
+    , p.Shift AS 'Shift'
+    , u2.UserName AS 'Cashed By'
+    , CASE p.PaymentType
+        WHEN 1 THEN 'Cash'
+        WHEN 2 THEN 'Credit Card'
+        WHEN 3 THEN 'External Payment'
+        WHEN 4 THEN 'Gift Card'
+        WHEN 5 THEN 'Voucher'
+        WHEN 6 THEN 'Complimentary'
+        WHEN 7 THEN 'Check'
+        WHEN 8 THEN 'Game Card'
+        WHEN 9 THEN 'Debit Card'
+        ELSE ''
+      END AS 'Tender'
+    , p.TerminalName AS 'Pay Terminal'
+    , p.TransactionDate AS 'Paid On'
+FROM dbo.Checks c
+LEFT OUTER JOIN dbo.Payment p
+    ON c.CheckID = p.CheckID
+LEFT OUTER JOIN dbo.Users u
+    ON c.UserID = u.UserID
+LEFT OUTER JOIN dbo.Users u2
+    ON p.UserID = u2.UserID
+WHERE
+    p.TransactionDate BETWEEN ? AND ?
+    AND p.IsVoid = 0
+ORDER BY
+    p.TransactionDate
+EOS;
+        $conn = new Connection\ClubSpeedConnection("(local)", "RestaurantPiece");
+        $data = $conn->query($sql, $params);
+        return $data;
+    }
 
 
-		/**
-		 * SUMMARY PAYMENTS REPORT
-		 *
-		 * Show the summary of the payments in a date range by tender
-		 */
-
-		public function payments_summary() {
+	/**
+	 * SUMMARY PAYMENTS REPORT
+	 *
+	 * Show the summary of the payments in a date range by tender
+	 */
+	public function payments_summary() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
-				
-				$tsql = "SELECT dbo.PayType.TypeDescription AS 'Tender', SUM(dbo.Payment.PayAmount) AS 'Total Amount' FROM dbo.Payment INNER JOIN dbo.PayType ON dbo.Payment.PayType = dbo.PayType.ID WHERE (dbo.Payment.PayStatus = 1) AND (dbo.Payment.PayDate BETWEEN ? AND ?) GROUP BY dbo.PayType.TypeDescription";
-				
-				$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-				$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-				$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-				$params = array(&$start, &$end);
+		
+        $tsql = <<<EOS
+SELECT
+    pt.TypeDescription AS 'Tender'
+    , SUM(p.PayAmount) AS 'Total Amount'
+FROM
+    dbo.Payment p
+INNER JOIN dbo.PayType pt
+    ON p.PayType = pt.ID
+WHERE
+    p.PayStatus = 1
+    AND p.PayDate BETWEEN ? AND ?
+GROUP BY
+    pt.TypeDescription
+EOS;
+		
+		$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+		$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+		$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+		$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+		$params = array(&$start, &$end);
         $data = $this->run_query($tsql, $params);
-				
-				return $data;
-		}
+		return $data;
+	}
+
+    /**
+     * @url GET /payments_summary/eurekas
+     */
+    public function payments_summary_eurekas() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+        if (!$this->logic->version->hasEurekas())
+            throw new RestException(404, "Eurekas database could not be found!");
+        $opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+        $start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+        $end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+        $end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+        $params = array(&$start, &$end);
+        $sql = <<<EOS
+SELECT
+    pt.PaymentType AS 'Tender'
+    , SUM(p.PaymentAmount) AS 'Total Amount'
+FROM
+    dbo.Payment p
+INNER JOIN dbo.PaymentType pt
+    ON p.PaymentType = pt.ID
+WHERE
+    p.IsVoid = 0
+    AND p.TransactionDate BETWEEN ? AND ?
+GROUP BY
+    pt.PaymentType
+EOS;
+        $conn = new Connection\ClubSpeedConnection("(local)", "RestaurantPiece");
+        $data = $conn->query($sql, $params);
+        return $data;
+    }
 
 
-		/**
-		 * DETAILED SALES REPORT
-		 *
-		 * Shows the line items of every check in a date range.
-		 * 
-		 * Depending on the country, some will want to see items by either the check *closing* or *opening* date. In UK and
-		 * most of Europe, taxes are owed when the service is provided (open date), not when the check is paid (closed date).
-		 *
-		 * We default to US-style, showing by check *closed* date. The "show_by_open_date=true" flag will show checks
-		 * by their opening date instead.
-		 */
-		public function sales() {
+	/**
+	 * DETAILED SALES REPORT
+	 *
+	 * Shows the line items of every check in a date range.
+	 * 
+	 * Depending on the country, some will want to see items by either the check *closing* or *opening* date. In UK and
+	 * most of Europe, taxes are owed when the service is provided (open date), not when the check is paid (closed date).
+	 *
+	 * We default to US-style, showing by check *closed* date. The "show_by_open_date=true" flag will show checks
+	 * by their opening date instead.
+	 */
+	public function sales() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
-				
-				$opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
-				
-				$tsql = <<<EOD
+		
+		$opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+		$tsql = <<<EOD
 select
 
 c.CheckID AS 'Check ID',
@@ -223,17 +324,123 @@ left join ProductClasses pc ON pc.ProductClassID = products.ProductClassID
 WHERE {$opened_or_closed_date} BETWEEN ? AND ?
 ORDER BY {$opened_or_closed_date}
 EOD;
-				
-				$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-				$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-				$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-				$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-				$params = array(&$start, &$end);
+		
+		$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+		$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+		$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+		$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+		$params = array(&$start, &$end);
         $data = $this->run_query($tsql, $params);
-				
-				return $data;
-		}
 
+        // // if we want to "union" eurekas data, this pattern can be followed
+        // // but there could be check id collisions / confusion
+        // $data = array_merge($data, $this->salesEureka()); // no parameters, using $_GET context for all variables
+        // if ($opened_or_closed_date === 'c.OpenedDate')
+        //     $key = 'Check Opened On';
+        // else
+        //     $key = 'Check Closed On';
+        // usort($data, function($a, $b) use ($key) {
+        //     if ($a[$key] == $b[$key])
+        //         return 0; // php order of operations stupidity. don't add this to the ternary below, unless we like adding parentheses everywhere
+        //     return ($a[$key] < $b[$key] ? -1 : 1);
+        // });
+        // // end eurekas union portion
+
+		return $data;
+	}
+
+    /**
+     * @url GET /sales/eurekas
+     */
+    public function sales_eurekas() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+        if (!$this->logic->version->hasEurekas())
+            throw new RestException(404, "Eurekas database could not be found!");
+
+        $opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
+        $start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
+        $end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
+        $end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
+        $params = array(&$start, &$end);
+
+        $sql = <<<EOS
+SELECT
+    c.CheckID
+    , cli.ItemID AS 'Product ID'
+    , cli.ItemDescription AS 'Product Name'
+    , cli.UnitPrice
+    , cli.Qty AS 'Quantity'
+    , cli.ItemDiscount AS 'Total Discount' -- cli.TaxDiscount exists. usage?
+    , cli.TaxPercent AS 'Tax Percent'
+    , cli.TaxID AS 'Tax ID'
+    , CASE WHEN c.CheckStatus = 2 THEN 'Voided' ELSE '' END AS 'Void Status'
+    , ic.ItemClassID AS 'Product Class ID'
+    , ic.Description AS 'Product Class Description'
+    , NULL AS 'Product Class Export' -- no equivalent in eurekas?
+    , CASE WHEN c.CheckStatus = 0 THEN 'Open' ELSE 'Closed' END AS 'Check Status'
+    , c.OpenedDate AS 'Check Opened On'
+    , c.ClosedDate AS 'Check Closed On'
+    , NULL AS 'Customer ID' -- unreachable?
+    , NULL AS 'Customer First Name' -- unreachable?
+    , NULL AS 'Customer Last Name' -- unreachable?
+    , u.UserName AS 'Created By'
+    , p.PaymentAmount AS 'Pay Amount'
+    , p.Shift AS 'Shift'
+    , u2.UserName AS 'Cashed By'
+    , CASE p.PaymentType
+        WHEN 1 THEN 'Cash'
+        WHEN 2 THEN 'Credit Card'
+        WHEN 3 THEN 'External Payment'
+        WHEN 4 THEN 'Gift Card'
+        WHEN 5 THEN 'Voucher'
+        WHEN 6 THEN 'Complimentary'
+        WHEN 7 THEN 'Check'
+        WHEN 8 THEN 'Game Card'
+        WHEN 9 THEN 'Debit Card'
+        ELSE ''
+      END AS 'Tender'
+    , p.TerminalName AS 'Pay Terminal'
+    , p.TransactionDate AS 'Paid On'
+    , CASE p.IsVoid WHEN 0 THEN 'Paid' ELSE 'Voided' END AS 'Payment Status'
+FROM dbo.Checks c
+LEFT OUTER JOIN dbo.Users u -- could use inner as well
+    ON c.UserID = u.UserID
+LEFT OUTER JOIN dbo.CheckLineItems cli
+    ON cli.CheckID = c.CheckID -- checks can not have line items. (one example in Kibble)
+LEFT OUTER JOIN dbo.Items i
+    ON i.ItemID = cli.ItemID
+LEFT OUTER JOIN dbo.ItemClasses ic
+    ON i.ItemClassID = ic.ItemClassID
+LEFT OUTER JOIN dbo.Payment p
+    ON p.CheckID = c.CheckID
+LEFT OUTER JOIN dbo.Users u2
+    ON p.UserID = u2.UserID
+--LEFT OUTER JOIN dbo.ChecksLineSubItems clsi -- reference to the left join for line item sub items, if needed (not necessary for kibble's data)
+--    ON clsi.CheckLineItemID = cli.CheckLineItemID
+WHERE {$opened_or_closed_date} BETWEEN ? AND ?
+ORDER BY {$opened_or_closed_date}
+EOS;
+        $conn = new Connection\ClubSpeedConnection("(local)", "RestaurantPiece");
+        $data = $conn->query($sql, $params);
+        // $eurekaData = $this->run_query($eurekaSql, $params);
+        // $data = array_merge($data, $eurekaData); // append eureka data
+        // // we could maybe hack apart the query above to get a union rolling,
+        // // but we would have to conditionally wrap in a subquery/cte and then wrap that.
+        // // for now, sort in memory unless efficiency / data size becomes a problem.
+        // if ($opened_or_closed_date === 'c.OpenedDate')
+        //     $key = 'Check Opened On';
+        // else
+        //     $key = 'Check Closed On';
+        // usort($data, function($a, $b) use ($key) {
+        //     if ($a[$key] == $b[$key])
+        //         return 0; // php order of operations stupidity. don't add this to the ternary below, unless we like adding parentheses everywhere
+        //     return ($a[$key] < $b[$key] ? -1 : 1);
+        // });
+
+        return $data;
+    }
 
     public function report() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
@@ -586,6 +793,7 @@ ORDER BY p.Description";
             $stmt->execute($params);
             
             // Put in array
+
             $output = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         } catch(Exception $e) { 

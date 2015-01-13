@@ -109,7 +109,8 @@ class FacebookLogic extends BaseLogic {
         );
         $this->db->exec($sql, $params);
 
-        $authentication = $this->db->authenticationTokens->match(array(
+        // use the logic class to match, for automatic expiry
+        $authentication = $this->logic->authenticationTokens->match(array(
               'CustomersID' => $customerId
             , 'TokenType'   => Enums::TOKEN_TYPE_CUSTOMER
         ));

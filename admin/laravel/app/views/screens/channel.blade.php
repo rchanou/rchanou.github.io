@@ -4,6 +4,11 @@
 Speed Screen Channels
 @stop
 
+@section('css_includes')
+@parent
+{{ HTML::style('css/select2-bootstrap.css') }}
+@stop
+
 @section('pageHeader')
 Speed Screen Channels
 @stop
@@ -46,7 +51,7 @@ Speed Screen Channels
                         <!-- Channel options tabs -->
                         <ul class="nav nav-tabs tab-bricky">
                             <li class="active"> <a data-toggle="tab" href="#panel_tab2_deploy_channel{{$currentChannel->channelId}}"> Deploy </a> </li>
-                            <li class=""> <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}"> Slide Lineup </a> </li>
+                            <li class="" style="display: none"> <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}"> Slide Lineup </a> </li>
                             <li class="" style="display: none"> <a data-toggle="tab" href="#panel_tab2_channelsettings_channel{{$currentChannel->channelId}}"> Channel Settings </a> </li>
                         </ul>
                         <!-- Content of all channel tabs -->
@@ -125,12 +130,13 @@ Speed Screen Channels
 <!-- BEGIN JAVASCRIPT INCLUDES -->
 @section('js_includes')
 @parent <!-- This includes the original parent's javascript -->
+{{ HTML::script('js/react/build/speedScreen/manage/main.min.js') }}
 <script language="javascript">
 
 /**
-    Helper method to set callbacks to fire after the delay call 
+    Helper method to set callbacks to fire after the delay call
     has not been fired for the provided wait parameter.
-    
+
     @param {function} callback The callback to execute after the method has not been called for the specified wait time.
     @param {number} wait The number of milliseconds to wait between function calls before executing the callback.
     @returns {void}
@@ -167,7 +173,7 @@ function Channel(opts) {
 
 /**
     Outputs a string representation of the channel object's relevant url.
-  
+
     @returns {string} A string representation of the channel object's relevant url.
 */
 Channel.prototype.toString = function() {
@@ -176,7 +182,7 @@ Channel.prototype.toString = function() {
 
 /**
     Handler for when a disable animations checkbox has been changed.
-    
+
     @param {Channel} channel The channel object which needs to store the change.
     @param {JQuery} disableAnimationsCheckbox The jQuery object representation of the disable animations checkbox.
     @param {Event} evt The event which is causing disableAnimationsChanged to be called.
@@ -187,10 +193,10 @@ function disableAnimationsChanged(channel, disableAnimationsCheckbox, evt) {
   channel.elems.urlInput.val(channel.toString());
   channel.elems.channelPreviewLink.attr('href',channel.toString());
 }
-  
+
 /**
     Handler for when a channel input url has changed.
-    
+
     @param {Channel} channel The channel object which needs to store the change.
     @param {JQuery} channelInput The jQuery object representation of the channel url input.
     @param {Event} evt The event which is causing channelUrlChanged to be called.

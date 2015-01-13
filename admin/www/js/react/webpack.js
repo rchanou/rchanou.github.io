@@ -9,12 +9,16 @@ var _ = require('lodash');
 var fs = require('fs-extra');
 
 
-var MAIN_PATHS = ['mobileApp/menuItems', 'booking/manage'];
+var MAIN_PATHS = ['speedScreen/manage', 'mobileApp/menuItems', 'booking/manage'];
 
 var DEFAULT_MODULE = {
   loaders: [
     {
       test: /^(?!.*(bower_components|node_modules))+.+\.js$/,
+      loader: 'traceur?runtime'
+    },
+    {
+      test: /^.*js-csp.*csp.*.js$/,
       loader: 'traceur?runtime'
     },
     {
@@ -25,7 +29,7 @@ var DEFAULT_MODULE = {
 };
 
 
-//buildType is third command line "word" (first two are "node webpack")
+//buildType determined from third command line "word" (first two are "node webpack")
 var buildType = process.argv.slice(2)[0];
 
 
@@ -142,16 +146,6 @@ MAIN_PATHS.forEach(function(path){
               }
             );
           });
-
-          /*releaseCompiler.run(function(err, stats){
-            if (stats.hasErrors()){
-              console.log('RELEASE BUILD ERROR', stats.toJson().errors);
-              return;
-            }
-
-            var seconds = (stats.endTime - stats.startTime) / 1000;
-            console.log('Release build done: ' + seconds + 's, at ' + new Date() + ' for ' + path);
-          });*/
         }
       });
       break;

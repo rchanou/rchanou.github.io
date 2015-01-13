@@ -97,7 +97,9 @@ class Settings
             'currency' => 'USD', //http://www.xe.com/iso4217.php
             'numberFormattingLocale' => 'en_US', //http://www.oracle.com/technetwork/java/javase/javase7locales-334809.html
             'maxRacersForDropdown' => 50,
-            'currentCulture' => 'en-US'
+            'currentCulture' => 'en-US',
+            'giftCardSalesEnabled' => false,
+            'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}'
         );
 
         self::$currentSettings = self::$defaultSettings;
@@ -147,6 +149,8 @@ class Settings
         }
 
         self::$currentSettings['dropdownOptions'] = $dropdownOptions;
+
+        Session::put('giftCardSalesEnabled',self::$currentSettings['giftCardSalesEnabled']);
 
         self::$initialized = true;
     }

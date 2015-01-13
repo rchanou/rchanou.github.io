@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Standalone Component Tester
+    </title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/bootstrap.min.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/font-awesome.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/fullcalendar.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/jquery.jscrollpane.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/icheck/flat/blue.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/select2.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/unicorn.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/admin.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/jquery.ui.ie.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/jquery-ui.css">
+    <link media="all" type="text/css" rel="stylesheet" href="../../../../css/select2-bootstrap.css">
+
+  </head>
+  <body data-color="grey" class="flat">
+    <!-- BEGIN MAIN PAGE CONTAINER -->
+    <div id="wrapper">
+      <div id="header">
+        <h1><a href="https://192.168.111.165/admin/www/dashboard">  Mobile App Menu Item Editor</a></h1>
+        <a id="menu-trigger" href="#"><i class="fa fa-bars"></i></a>
+      </div>
+
+      <div id="user-nav">
+        <ul class="btn-group">
+          <li class="btn"><a href="#">Logged in as: support</a></li>
+          <li class="btn"><a title="" href="https://192.168.111.165/admin/www/logout"><i class="fa fa-share"></i> <span class="text">Logout</span></a></li>
+        </ul>
+      </div>
+
+      <div id="sidebar">
+
+      <ul>
+        <li><a href="https://192.168.111.165/admin/www/dashboard"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
+
+        <li class="submenu">
+          <a href="#"><i class="fa fa-desktop"></i> <span>Speed Screens</span> <i class="arrow fa fa-chevron-right"></i></a>
+          <ul>
+            <li><a href="https://192.168.111.165/admin/www/channel">Channels</a></li>
+            <li><a href="https://192.168.111.165/admin/www/channelSettings">Settings</a></li> <!-- TODO: Rename to channel/settings -->
+            <li><a href="https://192.168.111.165/admin/www/docs/Club Speed - Speed Screen Guide.pdf" target="_blank">Documentation</a></li>
+          </ul>
+        </li>
+
+        <li class="submenu">
+          <a href="#"><i class="fa fa-calendar"></i> <span>Online Bookings</span> <i class="arrow fa fa-chevron-right"></i></a>
+          <ul>
+            <li><a href="https://192.168.111.165/admin/www/booking">Manage Bookings</a></li>
+            <li><a href="https://192.168.111.165/admin/www/booking/settings">Settings</a></li>
+            <li><a href="https://192.168.111.165/admin/www/booking/payments">Payment Processors</a></li>
+            <li><a href="https://192.168.111.165/admin/www/booking/templates">Templates</a></li>
+            <li><a href="https://192.168.111.165/admin/www/booking/giftcardsales">Gift Card Sales</a></li>
+            <li><a href="https://192.168.111.165/admin/www/booking/translations">Translations</a></li>
+            <li><a href="https://192.168.111.165/admin/www/docs/Club Speed - Online Booking Guide.pdf" target="_blank">Documentation</a></li>
+          </ul>
+        </li>
+
+        <li class="submenu">
+          <a href="#"><i class="fa fa-tablet"></i> <span>Registrations</span> <i class="arrow fa fa-chevron-right"></i></a>
+          <ul>
+            <li><a href="https://192.168.111.165/admin/www/registration/settings">Settings</a></li>
+            <li><a href="https://192.168.111.165/admin/www/docs/Club Speed - iPad Registration Kiosk Guide - MokiTouch 2.pdf" target="_blank">Documentation</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="https://192.168.111.165/admin/www/reports"><i class="fa fa-file-o"></i> <span>Reports</span></a>
+        </li>
+
+        <li class="active open">
+          <a href="#"><i class="fa fa-mobile"></i> <span>Mobile App</span> <i class="arrow fa fa-chevron-right"></i></a>
+          <ul>
+            <li><a href="https://192.168.111.165/admin/www/mobileApp/menuItems">Menu Items</a></li>
+            <li><a href="https://192.168.111.165/admin/www/mobileApp/settings">Settings</a></li>
+            <li><a href="https://192.168.111.165/admin/www/mobileApp/templates">Templates</a></li>
+          </ul>
+        </li>
+
+        <li class="submenu">
+          <a href="#"><i class="fa fa-credit-card"></i> <span>Gift Cards</span> <i class="arrow fa fa-chevron-right"></i></a>
+          <ul>
+            <li><a href="https://192.168.111.165/admin/www/giftcards/manage">Manage</a></li>
+            <li><a href="https://192.168.111.165/admin/www/giftcards/reports">Reports</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div id="content">
+      <div id="content-header" class="mini">
+        <h1>  Standalone Component Tester
+        </h1>
+      </div>
+
+      <div id="breadcrumb">
+        <a href="https://192.168.111.165/admin/www/dashboard" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
+        <a href="#" class="current">Breadcrumb 1</a>
+        <a href="#" class="current">Breadcrumb 2</a>
+      </div>
+
+      <!-- BEGIN MAIN CONTENT -->
+      <div class="container-fluid">
+
+        <div id="main">Loading Component Tester...</div>
+
+      </div>
+      <!-- END MAIN CONTENT -->
+    </div>
+
+    <!-- START FOOTER INCLUDE -->
+    <div class="row">
+      <div id="footer" class="col-xs-12">
+        &copy; <a href="http://www.clubspeedtiming.com" target="_blank">Club Speed, Inc.</a> 2006-2014 - <a href="http://clubspeedtiming.com/Contact.php" target="_blank">Contact Us</a>
+      </div>
+    </div>    <!-- END FOOTER INCLUDE -->
+
+    </div>
+    <!-- END MAIN PAGE CONTAINER -->
+
+  </body>
+  <script src='../../../excanvas.min.js'></script>
+  <script src='../../../jquery.min.js'></script>
+  <script src='../../../jquery-ui.custom.js'></script>
+  <script src='../../../bootstrap.min.js'></script>
+  <script src='../../../jquery.flot.min.js'></script>
+  <script src='../../../jquery.flot.resize.min.js'></script>
+  <script src='../../../jquery.sparkline.min.js'></script>
+  <script src='../../../fullcalendar.min.js'></script>
+  <script src='../../../jquery.icheck.min.js'></script>
+  <script src='../../../select2.min.js'></script>
+  <script src='../../../jquery.nicescroll.min.js'></script>
+  <script src='../../../unicorn.js'></script>
+  <script src='../../../unicorn.form_common.js'></script>
+  <script src='../../../unicorn.dashboard.js'></script>
+  <script src='../../../modernizr-latest.js'></script>
+  <script> //Convert all HTML5 date input boxes to jQuery date pickers if there are compatibility issues
+    if (!Modernizr.inputtypes.date) {
+      $('input[type=date]').datepicker({
+        // Consistent format with the HTML5 picker
+        dateFormat: 'yy-mm-dd',
+        changeYear: true,
+        yearRange: "-100:+0"
+      });
+    }
+  </script>
+
+  <script>
+    var config =
+    {
+      apiURL: '/api/index.php',
+      //apiURL: 'http://192.168.111.122/api/index.php', //For local dev testing
+      apiKey: 'cs-dev',
+      privateKey: 'cs-dev',
+      dateFormat: 'Y-d-m'
+    };
+  </script>
+
+  <script src='../../build/booking/manage/main.min.js'></script>
+</html>

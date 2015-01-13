@@ -6,6 +6,8 @@ Route::get('/step1','Step1Controller@entry');
 Route::get('/step2','Step2Controller@entry');
 Route::post('/step2','Step2Controller@entry');
 
+Route::get('/giftcards','GiftCardsController@entry');
+
 Route::get('/login','LoginController@loginEntry');
 Route::post('/login','LoginController@login');
 Route::get('/loginfb','LoginController@loginFacebook');

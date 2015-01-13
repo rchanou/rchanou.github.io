@@ -34,6 +34,8 @@ Route::post('booking/translations/update', 'BookingController@updateTranslations
 Route::get('booking/translations/update/culture/{cultureKey}', 'BookingController@updateCulture');
 Route::get('booking/templates', 'BookingController@templates');
 Route::post('booking/templates', 'BookingController@updateTemplates');
+Route::get('booking/giftcardsales', 'BookingController@giftCardSales');
+Route::post('booking/giftcardsales/update', 'BookingController@updateGiftCardSalesSettings');
 
 /* iPad Registration */
 
@@ -54,6 +56,18 @@ Route::get('reports/summary-payments/export/csv', 'SummaryPaymentsReportControll
 Route::get('reports/detailed-sales', 'DetailedSalesReportController@index');
 Route::post('reports/detailed-sales', 'DetailedSalesReportController@index');
 Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@exportToCSV');
+
+Route::get('reports/eurekas-payments', 'EurekasPaymentsReportController@index');
+Route::post('reports/eurekas-payments', 'EurekasPaymentsReportController@index');
+Route::get('reports/eurekas-payments/export/csv', 'EurekasPaymentsReportController@exportToCSV');
+
+Route::get('reports/eurekas-detailed-sales', 'EurekasDetailedSalesReportController@index');
+Route::post('reports/eurekas-detailed-sales', 'EurekasDetailedSalesReportController@index');
+Route::get('reports/eurekas-detailed-sales/export/csv', 'EurekasDetailedSalesReportController@exportToCSV');
+
+Route::get('reports/eurekas-summary-payments', 'EurekasSummaryPaymentsReportController@index');
+Route::post('reports/eurekas-summary-payments', 'EurekasSummaryPaymentsReportController@index');
+Route::get('reports/eurekas-summary-payments/export/csv', 'EurekasSummaryPaymentsReportController@exportToCSV');
 
 /* Mobile */
 

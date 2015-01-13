@@ -41,8 +41,17 @@
             <button type="button" class="regularButton" data-toggle="collapse" data-target="#createAccount" onclick="$('#loginToAccount').collapse('hide')">{{$strings['str_createANewAccount']}}</button>
 
                 @if($settings['enableFacebook'])
+                    @if(isset($intent['heatId']))
                 <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('login','loginfb',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions&state={{$intent['heatId']}}!{{$intent['quantity']}}">
                     <button type="button" class="regularButton">{{$strings['str_loginWithFacebook']}}</button>
+                    @elseif(isset($intent['productid']))
+                <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('login','loginfb',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions&state={{$intent['productId']}}|{{$intent['quantity']}}">
+                    <button type="button" class="regularButton">{{$strings['str_loginWithFacebook']}}</button>
+                    @else
+                <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('login','loginfb',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions&state={{$intent['productId']}}|{{$intent['quantity']}}">
+                    <button type="button" class="regularButton">{{$strings['str_loginWithFacebook']}}</button>
+                    @endif
+
                 </a>
                 @endif
 

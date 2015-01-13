@@ -168,6 +168,16 @@ footer {
     font-size: 20px;
 }
 
+.noGiftCardResults {
+    border: 1px solid #696969;
+    padding: 10px;
+    -webkit-box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    4px 4px 5px 0px rgba(50, 50, 50, 0.75);
+    box-shadow:         4px 4px 5px 0px rgba(50, 50, 50, 0.75);
+    margin-top: 10px !important;
+    font-size: 20px;
+}
+
 .raceResult {
     border: 1px solid #696969;
     padding: 10px;

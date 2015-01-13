@@ -445,8 +445,8 @@ class CustomersLogic extends BaseLogic {
             throw new \RequiredArgumentMissingException("Customer create received a null or empty FName!");
         if (!isset($customer->LName) || empty($customer->LName))
             throw new \RequiredArgumentMissingException("Customer create received a null or empty LName!");
-        if (!isset($customer->BirthDate) || empty($customer->BirthDate))
-            throw new \RequiredArgumentMissingException("Customer create received a null or empty BirthDate!");
+        // if (!isset($customer->BirthDate) || empty($customer->BirthDate))
+            // throw new \RequiredArgumentMissingException("Customer create received a null or empty BirthDate!");
         if (!isset($customer->Gender)) // Gender of 0 is allowed, and PHP considers this to be empty - only check for isset
             throw new \RequiredArgumentMissingException("Customer create received a null Gender!");
 

@@ -1031,7 +1031,12 @@
                 {
                       "name"        : "r_Points"
                     , "type"        : "Double"
-                    , "description" : "On a reservation product, the quantity of points this reservation provides."
+                    , "description" : "On a reservation product, the quantity of reservation points this reservation provides."
+                },
+                {
+                      "name"        : "g_Points"
+                    , "type"        : "Double"
+                    , "description" : "On a gift card product, the quantity of gift card points this product provides."
                 },
                 {
                       "name"        : "priceCadet"
@@ -1133,7 +1138,8 @@
     "constants": {
         "CHECK_DETAIL_STATUS": {
             "NEW": 1,
-            "VOID": 2
+            "VOID": 2,
+            "CLOSED": 3
         },
         "CHECK_DETAIL_TYPE": {
               "REGULAR_ITEM": 1

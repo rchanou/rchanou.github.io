@@ -27,14 +27,21 @@ class CartController extends BaseController
 
         if (Session::has('authenticated')) //If the user is logged in
         {
-            $productInfo = Session::get('productInfo'); //Grab the list of all possible products
+            $productInfo = Session::get('productInfo'); //Grab the list of all possible heat products
             if ($productInfo == null) //If we hadn't fetched them yet, do so
             {
                 $races = CS_API::getAvailableBookings();
                 $this->recordProductInfo($races); //Remember every race and its details and store them in the session
                 $productInfo = Session::get('productInfo');
             }
-            if ($action == "add" && Input::has('heatId') && Input::has('quantity')) //Adding heat item to cart TODO: Implement non-heat additions
+            $nonHeatProductInfo = Session::get('nonHeatProductInfo'); //Grab the list of all possible non-heat products
+            if ($nonHeatProductInfo == null) //If we hadn't fetched them yet, do so
+            {
+                $nonHeatProducts = CS_API::getAllGiftCardProducts();
+                $this->recordNonHeatProductInfo($nonHeatProducts); //Remember every race and its details and store them in the session
+                $nonHeatProductInfo = Session::get('nonHeatProductInfo');
+            }
+            if ($action == "add" && Input::has('heatId') && Input::has('quantity')) //Adding heat item to cart
             {
                 $heatId = Input::get('heatId');
                 $quantity = Input::get('quantity');
@@ -81,19 +88,54 @@ class CartController extends BaseController
                     $failureToAddToCart = true;
                 }
             }
+            else if ($action == "add" && Input::has('productId') && Input::has('quantity'))
+            {
+                $productId = Input::get('productId');
+                $quantity = Input::get('quantity');
+
+                if (array_key_exists($productId,$nonHeatProductInfo)) //If the item exists in our handy list of available non-heat products and their information
+                {
+                    //Package all of the item's relevant data
+                    $name = $nonHeatProductInfo[$productId]->description;
+                    $price = $nonHeatProductInfo[$productId]->price1;
+
+                    $itemToAdd = array('itemId' => $productId,'name' => $name, 'quantity' => $quantity, 'type' => "product", 'price' => $price);
+
+                    $cartAddingWasSuccessfulLocally = Cart::addToCart($itemToAdd); //Add it to the cart locally
+
+                    if ($cartAddingWasSuccessfulLocally)
+                    {
+                        $itemAddedToCart = $name;
+                        Session::forget('checkId'); //Drop any checks we've used; we'll need to make a new one.
+                    }
+                }
+                else //If the item doesn't exist, report an error
+                {
+                    $failureToAddToCart = true;
+                }
+
+            }
             else if ($action == "delete") //Removing an item from cart
             {
                 Session::forget('checkId'); //Drop any checks we've used; we'll need to make a new one.
 
                 $cartItemId = Input::get('item');
+                $cart = Session::get('cart');
 
-                $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
-                CS_API::deleteOnlineReservation($onlineBookingsReservationId); //Remove the online booking
-                $name = Cart::removeFromCart($cartItemId); //Then remove it from the local cart
-
-                if ($name != false)
+                if(isset($cart[$cartItemId]))
                 {
-                    $itemRemovedFromCart = $name;
+                    if ($cart[$cartItemId]['type'] == 'heat')
+                    {
+                        $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
+                        CS_API::deleteOnlineReservation($onlineBookingsReservationId); //Remove the online booking
+                    }
+
+                    $name = Cart::removeFromCart($cartItemId); //Then remove it from the local cart
+
+                    if ($name != false)
+                    {
+                        $itemRemovedFromCart = $name;
+                    }
                 }
             }
 
@@ -114,13 +156,16 @@ class CartController extends BaseController
                     $listOfRemoteOnlineBookingReservationIds[] = $currentOnlineBookingReservation->onlineBookingReservationsId;
                 }
 
-                //See if any items in the local cart have been deleted from the Club Speed server
+                //See if any heat items in the local cart have been deleted from the Club Speed server
                 foreach($cart as $cartItemId => $cartItem)
                 {
-                    if(!isset($cartItem['onlineBookingsReservationId']) || !in_array($cartItem['onlineBookingsReservationId'],$listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
+                    if ($cartItem['type'] == 'heat')
                     {
-                        $localCartHasExpiredItem = true;
-                        Cart::removeFromCart($cartItemId); //Then remove it from the local cart
+                        if(!isset($cartItem['onlineBookingsReservationId']) || !in_array($cartItem['onlineBookingsReservationId'],$listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
+                        {
+                            $localCartHasExpiredItem = true;
+                            Cart::removeFromCart($cartItemId); //Then remove it from the local cart
+                        }
                     }
                 }
 
@@ -130,10 +175,20 @@ class CartController extends BaseController
                 foreach($cart as $cartItemIndex => $cartItem)
                 {
                     $newItem = array();
-                    $newItem['productId'] = $cartItem['data']->products[0]->productsId;
-                    $newItem['qty'] = $cartItem['quantity'];
-                    $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
-                    $checkDetails['checks'][0]['details'][] = $newItem;
+                    if ($cartItem['type'] == 'heat')
+                    {
+                        $newItem['productId'] = $cartItem['data']->products[0]->productsId;
+                        $newItem['qty'] = $cartItem['quantity'];
+                        $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                        $checkDetails['checks'][0]['details'][] = $newItem;
+                    }
+                    if ($cartItem['type'] == 'product')
+                    {
+                        $newItem['productId'] = $cartItem['itemId'];
+                        $newItem['qty'] = $cartItem['quantity'];
+                        $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                        $checkDetails['checks'][0]['details'][] = $newItem;
+                    }
                 }
 
                 //Check the Virtual Check calculation from Club Speed
@@ -175,6 +230,19 @@ class CartController extends BaseController
 
         $cart = Session::get('cart'); //Update the cart one last time
 
+        $heatItems = 0;
+        $nonHeatItems = 0;
+        foreach($cart as $cartItemId => $cartItem)
+        {
+            if ($cartItem['type'] == 'heat')
+            {
+                $heatItems++;
+            }
+            else
+            {
+                $nonHeatItems++;
+            }
+        }
         $settings = Session::get('settings');
         $locale = $settings['numberFormattingLocale'];
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
@@ -194,13 +262,15 @@ class CartController extends BaseController
                 'moneyFormatter' => $moneyFormatter,
                 'currency' => $currency,
                 'strings' => Strings::getStrings(),
-                'settings' => $settings
+                'settings' => $settings,
+                'hasHeatItems' => $heatItems > 0 ? true : false,
+                'hasNonHeatItems' => $nonHeatItems > 0 ? true : false
             )
         );
     }
 
     /**
-     * This function stores in the session every available product and its details.
+     * This function stores in the session every available heat product and its details.
      * The cart will use this to render things like a product name, price, and so on.
      *
      * @param $products
@@ -218,5 +288,26 @@ class CartController extends BaseController
             }
         }
         Session::put('productInfo',$productInfo);
+    }
+
+    /**
+     * This function stores in the session every available non-heat product and its details.
+     * The cart will use this to render things like a product name, price, and so on.
+     *
+     * @param $products
+     */
+    public function recordNonHeatProductInfo($products)
+    {
+        $currentProductInfo = Session::get('nonHeatProductInfo');
+        if ($currentProductInfo == null) { $currentProductInfo = array(); }
+        $productInfo = $currentProductInfo;
+        if ($products != null)
+        {
+            foreach($products as $currentProduct)
+            {
+                $productInfo[$currentProduct->productId] = $currentProduct;
+            }
+        }
+        Session::put('nonHeatProductInfo',$productInfo);
     }
 } 

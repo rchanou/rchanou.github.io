@@ -47,7 +47,7 @@ var FadeOut = React.createClass({
 	  }
 		if (this.props.className.indexOf('alert-success') !== -1){
 			this.timeout = setTimeout(
-				_ => {
+				() => {
 					if (this.isMounted()){
 						this.setState({ fading: true });
 					}
@@ -65,7 +65,7 @@ var FadeOut = React.createClass({
       if (this.state.opacity <= 0){
         this.props.onFadeComplete(this.props);
       } else {
-        requestAnimationFrame(_ => {
+        requestAnimationFrame(() => {
           if (this.isMounted()){
             this.setState({
               opacity: this.state.opacity - this.props.rate
@@ -84,21 +84,26 @@ var FadeOut = React.createClass({
 });
 
 
-var Popup = React.createClass({
+module.exports = React.createClass({
 
   getDefaultProps(){
     return {
-      message: 'Something happened!',
+      message: null,
       alertClass: 'alert-info',
       onClick(){}, onFadeComplete(){}, onDone(){}
     };
   },
 
   render(){
+    if (!this.props.message){
+      return null;
+    }
+
     let { element, alertClass, message, ...otherProps } = this.props;
 
     return <FadeOut
       element = 'div'
+      {...otherProps}
       onFadeComplete = {this.handleComplete}
       onClick = {this.handleClick}
       style = {
@@ -106,7 +111,6 @@ var Popup = React.createClass({
       }
       className = {'alert ' + this.props.alertClass}
       dangerouslySetInnerHTML = {{__html: this.props.message}}
-      {...otherProps}
     />;
   },
 
@@ -121,5 +125,3 @@ var Popup = React.createClass({
   }
 
 });
-
-module.exports = Popup;

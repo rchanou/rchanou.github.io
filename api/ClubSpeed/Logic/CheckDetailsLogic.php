@@ -110,8 +110,16 @@ class CheckDetailsLogic extends BaseLogic {
             $checkDetails->UnitPrice2 = $product->Price2;
             $checkDetails->Type = $product->ProductType; // seems to be the product type -- DOUBLE CHECK
             $checkDetails->GST = $tax->GST;
-            $checkDetails->P_Points = ($product->P_Points ?: 0) * $checkDetails->Qty;
+            $checkDetails->P_Points = ($product->P_Points ?: 0) * $checkDetails->Qty; // use 0 instead of null (for the front end)
+            if (!is_null($checkDetails->P_Points) && $checkDetails->P_Points > 0)
+                $checkDetails->P_CustID = $check->CustID;
             $checkDetails->R_Points = $product->R_Points; // we want nulls to stay null, don't convert to 0
+            if (!is_null($checkDetails->R_Points) && $checkDetails->R_Points > 0)
+                $checkDetails->R_CustID = $check->CustID;
+            $checkDetails->G_Points = $product->G_Points; // leave G_Points as null as well
+            if (!is_null($checkDetails->G_Points) && $checkDetails->G_Points > 0)
+                $checkDetails->G_CustID = $check->CustID;
+
             return $checkDetails;
         });
     }

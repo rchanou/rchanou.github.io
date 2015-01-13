@@ -49,28 +49,42 @@ class BookingController extends BaseController
           'displayName' => 'Online Booking E-mail Receipt (HTML)',
           'templateNamespace' => 'Booking',
           'templateName' => 'receiptEmailBodyHtml',
-          'isHtml' => true, // deprecated
+          'isHtml' => true, // TODO: have template from read setting type in database instead of from this
           'note' => 'Click the pencil icon to edit the source HTML.<br/><br/>' . $standardNote
         ),
         (object)array(
           'displayName' => 'Online Booking E-mail Receipt (TEXT)',
           'templateNamespace' => 'Booking',
           'templateName' => 'receiptEmailBodyText',
-          'isHtml' => false, // deprecated
+          'isHtml' => false, // TODO: have template from read setting type in database instead of from this
           'note' => $standardNote
         ),
         (object)array(
           'displayName' => 'Online Booking E-mail Subject Line',
           'templateNamespace' => 'Booking',
           'templateName' => 'receiptEmailSubject',
-          'isHtml' => false, // deprecated
+          'isHtml' => false, // TODO: have template from read setting type in database instead of from this
           'note' => $standardNote
         ),
         (object)array(
           'displayName' => 'Terms & Conditions',
           'templateNamespace' => 'Booking',
           'templateName' => 'termsAndConditions',
-          'isHtml' => true, // deprecated
+          'isHtml' => true, // TODO: have template from read setting type in database instead of from this
+          'note' => ''
+        ),
+        (object)array(
+          'displayName' => 'Gift Card E-mail (HTML)',
+          'ttemplateNamespace' => 'Booking',
+          'templateName' => 'giftCardEmailBodyHtml',
+          'isHtml' => true, // TODO: have template from read setting type in database instead of from this
+          'note' => $standardNote
+        ),
+        (object)array(
+          'displayName' => 'Gift Card E-mail Subject Line',
+          'templateNamespace' => 'Booking',
+          'templateName' => 'giftCardEmailSubject',
+          'isHtml' => false, // TODO: have template from read setting type in database instead of from this
           'note' => ''
         )
        );
@@ -730,6 +744,122 @@ class BookingController extends BaseController
         //Standard success message
         return Redirect::to('booking/translations')->with( array('message' => 'Translations updated successfully!'));
 
+    }
+
+    public function giftCardSales()
+    {
+        $bookingSettings = CS_API::getSettingsFor('Booking'); //Getting and packaging booking settings
+        if ($bookingSettings === null)
+        {
+            return Redirect::to('/disconnected');
+        }
+        $bookingSettingsCheckedData = array();
+        $bookingSettingsData = array();
+        foreach($bookingSettings->settings as $setting)
+        {
+            $bookingSettingsCheckedData[$setting->SettingName] = ($setting->SettingValue ? 'checked' : '');
+            $bookingSettingsData[$setting->SettingName] = $setting->SettingValue;
+        }
+
+        Session::put('bookingSettings',$bookingSettingsData);
+
+        $giftCardProducts = CS_API::getGiftCardProducts(); //Get a list of ALL gift card products in Club Speed
+        if (isset($giftCardProducts->products))
+        {
+            $giftCardProducts = $giftCardProducts->products;
+        }
+        else
+        {
+            $giftCardProducts = array();
+        }
+
+        $giftCardsAvailableForOnlineSale = array(); //Packaging list of gift cards to be made available online
+        if (isset($bookingSettingsData['giftCardsAvailableForOnlineSale']))
+        {
+            $giftCardsAvailableForOnlineSale = $bookingSettingsData['giftCardsAvailableForOnlineSale'];
+            $giftCardsAvailableForOnlineSale = json_decode($giftCardsAvailableForOnlineSale);
+            if (isset($giftCardsAvailableForOnlineSale->giftCardProductIDs))
+            {
+                $giftCardsAvailableForOnlineSale = $giftCardsAvailableForOnlineSale->giftCardProductIDs;
+            }
+            else
+            {
+                $giftCardsAvailableForOnlineSale = array();
+            }
+        }
+
+        //Merging the list of existing and enabled gift card products with whether or not they're available online
+        $giftCardProductsMerged = array();
+        foreach($giftCardProducts as $currentProduct)
+        {
+            if (isset($currentProduct->enabled) && $currentProduct->enabled == true)
+            {
+                $currentProductMerged = array(
+                  'productId' => $currentProduct->productId,
+                  'description' => $currentProduct->description,
+                  'availableOnline' => in_array($currentProduct->productId,$giftCardsAvailableForOnlineSale)
+                );
+                $giftCardProductsMerged[] = $currentProductMerged;
+            }
+        }
+
+        return View::make('/screens/booking/giftcardsales',
+            array('controller' => 'BookingController',
+                'currentOnlineBookingState' => $this->currentOnlineBookingState(),
+                'isChecked' => $bookingSettingsCheckedData,
+                'bookingSettings' => $bookingSettingsData,
+                'giftCardProducts' => $giftCardProductsMerged
+            )
+        );
+
+    }
+
+    public function updateGiftCardSalesSettings()
+    {
+        $input = Input::all();
+
+        //Begin formatting form input for processing - defaults available for any missing settings
+        $newSettings = array();
+        $newSettings['giftCardSalesEnabled'] = isset($input['giftCardSalesEnabled']) ? $input['giftCardSalesEnabled'] : false;
+
+        $giftCardsAvailableForOnlineSale = array('giftCardProductIDs' => array());
+        foreach($input as $currentInputKey => $currentInputValue)
+        {
+            if (strpos($currentInputKey,'giftCard_') !== false)
+            {
+                $giftCardsAvailableForOnlineSale['giftCardProductIDs'][] = str_replace('giftCard_','',$currentInputKey)   ;
+            }
+        }
+
+        $newSettings['giftCardsAvailableForOnlineSale'] = json_encode($giftCardsAvailableForOnlineSale);
+
+        //'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}'
+
+        //Identify the settings that actually changed and need to be sent to Club Speed
+        $currentSettings = Session::get('bookingSettings',array());
+        foreach($currentSettings as $currentSettingName => $currentSettingValue)
+        {
+            if (isset($newSettings[$currentSettingName]))
+            {
+                if ($newSettings[$currentSettingName] == $currentSettingValue) //If the setting hasn't changed
+                {
+                    unset($newSettings[$currentSettingName]); //Remove it from the list of new settings
+                }
+            }
+        }
+
+        $result = CS_API::updateSettingsFor('Booking',$newSettings);
+
+        if ($result === false)
+        {
+            return Redirect::to('booking/giftcardsales')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
+        }
+        else if ($result === null)
+        {
+            return Redirect::to('/disconnected');
+        }
+
+        return Redirect::to('booking/giftcardsales')->with( array('message' => 'Settings updated successfully!'));
     }
 
     private static function contains(&$haystack, $needle)

@@ -2,6 +2,7 @@
 
 namespace ClubSpeed\Logic;
 use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Connection as Connection;
 
 /**
  * The business logic class
@@ -65,5 +66,20 @@ class VersionLogic extends BaseLogic {
                 return 1; // version a is greater than version b
         }
         return 0; // version a is equivalent to version b
+    }
+
+    public function hasEurekas() {
+        // note this lovely bit of hackery
+        // this is due to the fact that SQL server pdo does not respect PDO::ATTR_TIMEOUT properly
+        // and will hang for 15-20 seconds if we try connecting to the database directly
+        try {
+            $conn = new Connection\ClubSpeedConnection(); 
+            $conn->exec('USE RestaurantPiece;');
+            return true;
+            // this will throw exception if RestaurantPiece is not available.
+        }
+        catch (\Exception $e) {
+            return false;
+        }
     }
 }

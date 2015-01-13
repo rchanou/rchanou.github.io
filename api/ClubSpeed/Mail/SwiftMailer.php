@@ -44,4 +44,28 @@ class SwiftMailer implements MailerInterface {
             ->addPart($mail->alternate, 'text/plain');
         $this->mailer->send($message);
     }
+
+    //TODO: A little hacky, but didn't want to risk breaking existing functionality - could be rolled into existing MailBuilder and SwiftMailer
+    public function sendWithInlineImages(MailBuilder $mail,$inlineImages = array())
+    {
+        $message = \Swift_Message::newInstance();
+
+        $mailBody = $mail->body;
+
+        foreach($inlineImages as $inlineImageKey => $inlineImageValue) //Embed each image into the email and then link the contentId in the body
+        {
+            $contentId = $message->embed(\Swift_Image::newInstance(base64_decode($inlineImageValue),$inlineImageKey . '.png','image/png'));
+            $imageString = '<img alt="' . $inlineImageKey . '" style="margin: 0 auto; display: block;" src="' . $contentId . '">';
+            $mailBody = str_replace('##' . $inlineImageKey . '##', $imageString, $mailBody); //Ex. ##giftCardImage## gets replaced
+        }
+
+        $message->setSubject($mail->subject)
+            ->setFrom($mail->from)
+            ->setTo($mail->to)
+            ->setCc($mail->cc)
+            ->setBcc($mail->bcc)
+            ->setBody($mailBody, 'text/html')
+            ->addPart($mail->alternate, 'text/plain');
+        $this->mailer->send($message);
+    }
 }

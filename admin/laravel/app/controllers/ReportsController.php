@@ -17,8 +17,11 @@ class ReportsController extends BaseController
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
 
+        $serverHasEurekas = CS_API::doesServerHaveEurekas();
+
         return View::make('/screens/reports/index',
-            array('controller' => 'ReportsController'
+            array('controller' => 'ReportsController',
+                  'serverHasEurekas' => $serverHasEurekas
             ));
     }
 

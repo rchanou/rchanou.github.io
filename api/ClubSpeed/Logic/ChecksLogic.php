@@ -106,7 +106,7 @@ class ChecksLogic extends BaseLogic {
         // also include void message?
         $check = $this->interface->get($checkId);
         $check = $check[0];
-        $check->Notes = (empty($check->Notes) ? '' : ' :: ') . 'Voided from API at ' . Convert::getDate();
+        $check->Notes .= (empty($check->Notes) ? '' : ' :: ' ) . 'Voided from API at ' . Convert::getDate();
         $check->CheckStatus = Enums::CHECK_STATUS_CLOSED;
         $this->interface->update($check);
         $checkDetails = $this->db->checkDetails->match(array(

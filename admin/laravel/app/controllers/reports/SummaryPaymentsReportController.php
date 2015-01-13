@@ -37,7 +37,7 @@ class SummaryPaymentsReportController extends BaseController
     {
         if (!Session::has('mostRecentReport_SummaryPayments'))
         {
-            return Redirect::to('/reports/payments');
+            return Redirect::to('/reports/summary-payments');
         }
 
         $dataToExport = Session::get('mostRecentReport_SummaryPayments');

@@ -5,9 +5,15 @@ var _ = require('lodash');
 var React = require('react/addons');
 
 
-/*** IMPORT EXTERNAL REACT COMPONENTS ***/
+/*** EXTERNAL REACT COMPONENTS ***/
 
 var DatePicker = require('../../components/datepicker');
+var Select = require('../../components/react-select2');
+
+
+/*** EXTERNAL REACT MIXINS ***/
+
+var EventFunnel = require('../../mixins/event-funnel');
 
 
 /*** CONSTANTS ***/
@@ -63,10 +69,6 @@ var CheckPropChange = {
 	}
 };
 
-
-/*** REACT MIXINS ***/
-
-var EventFunnel = require('../../mixins/event-funnel');
 
 var jQuerify = {
 	jQuerify(ref){
@@ -175,72 +177,6 @@ var IRadioGroup = React.createClass({
 	}
 });
 
-var Select = React.createClass({
-	mixins: [EventFunnel],
-	getDefaultProps(){
-		return {
-			list: [], // list: [{value: 1, label: 'Apples'}, 'Bananas', 'Cherries'],
-			selectedId: null,
-			placeholder: '(any)',
-			allowClear: true
-		};
-	},
-
-	getInitialState(){
-		return { open: false };
-	},
-
-	render(){
-		var optionsFromList = this.props.list.map(item =>
-			<option key={item.value} value={item.value}>
-				{item.label}
-			</option>
-		);
-
-		return <select className={this.props.className} style={this.props.style}>
-			<option key={-1} value={null} />
-			{optionsFromList}
-			{this.props.children}
-		</select>;
-	},
-
-	getSelectOptions(){
-		var { list, selectedId, ...options } = this.props;  // omit list and selectedId
-		return options;
-	},
-
-	componentDidMount(){
-		var data = this.props.list.map(item => (
-			{ id: item.value, text: item.label }
-		));
-
-		$(this.getDOMNode())
-			.select2(this.getSelectOptions())
-			.on('change', this.toFunnel)
-			.on('select2-open', () => 	{ this.setState({ open: true }) })
-			.on('select2-close', () => {	this.setState({ open: false }); });
-
-		this.setFromProps();
-	},
-
-	componentDidUpdate(prevProps){
-		if (prevProps.list.length !== this.props.list.length && !this.state.open){ // TODO: make list equality checking more robust?
-			$(this.getDOMNode()).select2(this.getSelectOptions());
-		}
-		if (!this.state.open && prevProps.selectedId != this.props.selectedId){
-			this.setFromProps();
-		}
-	},
-
-	setFromProps(){
-		$(this.getDOMNode()).val(this.props.selectedId).trigger('change');
-	},
-
-	componentWillUnmount(){
-		$(this.getDOMNode()).select2('destroy');
-	}
-});
-
 var LinkedSelect = React.createClass({
 	mixins: [EventFunnel],
 	getDefaultProps(){
@@ -283,16 +219,6 @@ var TrackSelect = React.createClass({
 	}
 });
 
-var ProductSelect = React.createClass({
-	mixins: [EventFunnel],
-	render(){
-		return <LinkedSelect
-			url={config.apiURL + 'products.json?key=' + config.privateKey + '&select=productId,description'}
-			listProperty='products' valueProperty='productId' labelProperty='description' placeholder=' '
-			selectedId={this.props.selectedId} onFunnelEvent={this.toFunnel} />;
-	}
-});
-
 
 /*** CHILD COMPONENT(S) ***/
 
@@ -325,7 +251,7 @@ var BookingRow = React.createClass({
 			</td>
 
 			<td className='text-right'>
-				{start.isValid()? start.format('h:mm a'): '?'}
+				{start.isValid()? start.format('h:mm a'): start}
 			</td>
 
 			<td>
@@ -353,7 +279,7 @@ var BookingRow = React.createClass({
 
 /*** TOP LEVEL/ROOT/MAIN/PARENT COMPONENT ***/
 
-var BookingAdmin = React.createClass({
+module.exports = React.createClass({
 
 	mixins: [EventFunnel, ParseRef, jQuerify /*, React.addons.PureRenderMixin*/],
 
@@ -363,7 +289,7 @@ var BookingAdmin = React.createClass({
 			apiKey: 'cs-dev',
 			privateKey: 'cs-dev'
 		};
-		if (window && window.location && window.location.hostname == '192.168.111.165') {
+		if (window && window.location && (window.location.hostname === '192.168.111.165' || window.location.hostname === 'localhost')) {
 			config.apiURL = 'https://vm-122.clubspeedtiming.com/api/index.php';
 		} else {
 			console.log = function(){};
@@ -482,7 +408,8 @@ var BookingAdmin = React.createClass({
 	getProductSelectListByPoints(){
 		return _(this.state.products)
 			.filter(product => product.productType === PRODUCT_TYPE_RESERVATION)
-			.map(product => ({ value: product.productId, label: product.description }));
+			.map(product => ({ value: product.productId, label: product.description }))
+			.value();
 
 		try {
 			if (this.state.selectedBookingIds.length == 0){
@@ -557,7 +484,6 @@ var BookingAdmin = React.createClass({
 
 	getHeatTypes(){
 		var races = _.values(this.state.raceDetails);
-		console.log('races', races);
 		return _(races).filter(race => this.isRaceInDate(race, this.state.filterByDate))
 		.map(race => ({
 			value: race.heat_type_id,
@@ -595,12 +521,13 @@ var BookingAdmin = React.createClass({
 				var booking = bookingAndRace.booking;
 				return <BookingRow
 					key={booking.onlineBookingsId || 'race.' + booking.heatId}
-					booking={booking} race={bookingAndRace.race/*this.state.raceDetails[booking.heatId]*/} product={this.state.products[booking.productsId]}
+					booking={booking} race={bookingAndRace.race} product={this.state.products[booking.productsId]}
 					selected={
 						_.contains(this.state.selectedBookingIds, booking.onlineBookingsId)
 						|| _.any(this.state.selectedBookingIds, { heatId: booking.heatId })
 					}
 					onFunnelEvent={this.handleBookingRowEvent}
+
 				/>;
 			})
 			.value();
@@ -679,7 +606,6 @@ var BookingAdmin = React.createClass({
 						Show To Public?
 					</label>
 					<div className="col-xs-3">
-						{/*<ICheck onFunnelEvent={this.handlePublicCheckEvent} checked={this.state.newIsPublic} />*/}
 						<IRadioGroup onFunnelEvent={this.handleRadioChange} selected={this.state.newIsPublic}
 									list={[ { label: 'Yes', value: true }, { label: 'No', value: false } ]} />
 						<span className='text-info'>
@@ -887,6 +813,7 @@ var BookingAdmin = React.createClass({
 				req.then(body => {
 					body.race.PointsNeeded = pointsNeededList[i];
 					body.race.RacersPerHeat = maxRacersList[i];
+					body.race.starts_at = moment(body.race.starts_at, this.getMomentFormat());
 					var change = {};
 					change[body.race.id] = { $set: body.race };
 					var raceDetails = React.addons.update(
@@ -979,7 +906,6 @@ var BookingAdmin = React.createClass({
 	},
 
 	handleBookingRowEvent (e, rowProps){
-		console.log('booking row event', e, rowProps);
 		switch (e.type) {
 			case 'click': case 'ifChecked': case 'ifUnchecked': case 'ifIndeterminate':
 				var clickedBookingId = rowProps.booking.onlineBookingsId;
@@ -1171,8 +1097,6 @@ var BookingAdmin = React.createClass({
 		if (this.areAllBookingsSelected()){
 			this.setState({ selectedBookingIds: [] });
 		} else {
-			console.log('before', this.filterBookings(this.state.filterByDate));
-
 			var filteredBookingIds = this.filterBookings(this.state.filterByDate).map(booking => {
 				if (booking.onlineBookingsId){
 					return booking.onlineBookingsId;
@@ -1180,8 +1104,6 @@ var BookingAdmin = React.createClass({
 					return { heatId: booking.heatId };
 				}
 			});
-
-			console.log('after', filteredBookingIds);
 
 			this.setState({ selectedBookingIds: filteredBookingIds });
 		}
@@ -1245,5 +1167,3 @@ var BookingAdmin = React.createClass({
 		}
 	}
 });
-
-module.exports = BookingAdmin;

@@ -811,6 +811,39 @@ class CS_API
         }
     }
 
+    /*
+    ##############
+    # GIFT CARDS #
+    ##############
+    */
+
+    public static function getAllGiftCardProducts()
+    {
+        self::initialize();
+
+        //In Club Speed, productType 7 is a gift card product
+        $url = self::$apiURL . '/products.json?productType=7&select=productId,description,price1,enabled&key=' . self::$privateKey;;
+
+        $result = self::call($url);
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null)
+        {
+            if (isset($response->body->products))
+            {
+                return $response->body->products;
+            }
+            else
+            {
+                return array();
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     /*
     #################

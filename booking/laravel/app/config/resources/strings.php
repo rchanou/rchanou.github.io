@@ -63,6 +63,7 @@ class Strings
             'str_chooseARace' => 'Choose a Race',
             'str_reviewYourOrder' => 'Review Your Order',
             'str_checkout' => 'Checkout',
+            'str_buyGiftCards' => 'Buy Gift Cards',
 
             //Disabled template strings
             'str_disabledTitle' => 'Disabled! - Online Booking',
@@ -251,7 +252,23 @@ class Strings
             //Step2Controller strings
             'str_pleaseSelectARaceDate' => 'Please select a race date.',
 
-            'str_addMoreRaces' => 'Add More Races'
+            'str_addMoreRaces' => 'Add More Races',
+
+            //Buy Gift Cards
+            'str_giftCardsTitle' => 'Buy Gift Cards',
+            'str_chooseAGiftCard' => 'Add a Gift Card to Cart',
+            'str_noGiftCardsAvailable' => 'No gift cards are available for sale at this time.<br/> Please try again later.',
+            'str_buyIt' => 'Buy it!',
+            'str_youMustBeLoggedInGiftCard' => 'You must be logged in to buy a gift card. Please select one of the following options:',
+
+            'str_productName' => 'Product',
+            'str_quantity' => 'Quantity',
+            'str_noHeatItemsInCart' => 'You currently have no races in your cart.',
+            'str_noProductsInCart'  => 'You currently have no products in your cart.',
+            'str_races' => 'Races',
+            'str_products' => 'Products',
+            'str_summary' => 'Summary'
+
             //'str_' => '',
         );
 

@@ -62,7 +62,6 @@
                         $('#postcode').val('12345');
                         $('#country').val('US');
                         $('#phone').val('(555) 1234567');
-                        $('#email').val('test@example.com');
                     });
                 });
             </script>
@@ -170,19 +169,12 @@
             </label>
             <input maxlength="255" type="text" id="phone" name="phone" value="{{Input::old('phone')}}"><br/>
 
-            <!-- Email -->
-            <label for="email">
-                <strong>
-                    {{$strings['str_email']}}: <span class="requiredAsterisk">*</span>
-                </strong>
-            </label>
-            <input maxlength="255" type="text" id="email" name="email" class="emailFormElement required" value="{{Input::old('email')}}"><br/>
-
             <div class="formHeader">{{$strings['str_orderSummary']}}</div>
 
             @if(count($cart)>0)
-                <table class="table">
-                    <thead>
+                @if($hasHeatItems)
+                    <table class="table">
+                        <thead>
                         <tr>
                             <th><strong>{{$strings['str_raceName']}}</strong></th>
                             <th><strong>{{$strings['str_racers']}}</strong></th>
@@ -192,19 +184,48 @@
                             <th><strong>{{$strings['str_tax']}}</strong></th>
                             <th><strong>{{$strings['str_total']}}</strong></th>
                         </tr>
-                    </thead>
-                @foreach($cart as $cartItemId => $cartItem)
-                    <tr>
-                        <td>{{$cartItem['name']}}</td>
-                        <td>{{$cartItem['quantity']}}</td>
-                        <td>{{date($settings['dateDisplayFormat'] . ' ' . $settings['timeDisplayFormat'],strtotime($cartItem['startTime']))}}</td>
-                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->unitPrice, $currency)}}</td>
-                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailSubtotal, $currency)}}</td>
-                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTax, $currency)}}</td>
-                        <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTotal, $currency)}}</td>
-                    </tr>
-                @endforeach
-                </table>
+                        </thead>
+                        @foreach($cart as $cartItemId => $cartItem)
+                            @if($cartItem['type'] == 'heat')
+                                <tr>
+                                    <td>{{$cartItem['name']}}</td>
+                                    <td>{{$cartItem['quantity']}}</td>
+                                    <td>{{date($settings['dateDisplayFormat'] . ' ' . $settings['timeDisplayFormat'],strtotime($cartItem['startTime']))}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->unitPrice, $currency)}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailSubtotal, $currency)}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTax, $currency)}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTotal, $currency)}}</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    </table>
+                @endif
+                @if($hasNonHeatItems)
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th><strong>{{$strings['str_productName']}}</strong></th>
+                            <th><strong>{{$strings['str_quantity']}}</strong></th>
+                            <th><strong>{{$strings['str_price']}}</strong></th>
+                            <th><strong>{{$strings['str_subtotal']}}</strong></th>
+                            <th><strong>{{$strings['str_tax']}}</strong></th>
+                            <th><strong>{{$strings['str_total']}}</strong></th>
+                        </tr>
+                        </thead>
+                        @foreach($cart as $cartItemId => $cartItem)
+                            @if($cartItem['type'] == 'product')
+                                <tr>
+                                    <td>{{$cartItem['name']}}</td>
+                                    <td>{{$cartItem['quantity']}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->unitPrice, $currency)}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailSubtotal, $currency)}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTax, $currency)}}</td>
+                                    <td>{{$moneyFormatter->formatCurrency($virtualCheckDetails[$cartItemId]->checkDetailTotal, $currency)}}</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    </table>
+                @endif
             @endif
 
             <div class="rightAligned">

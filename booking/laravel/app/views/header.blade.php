@@ -4,7 +4,12 @@
         </div>
         @yield('steps')
         @if(Session::has('debug'))
-        <div class="extras">
-        Extras: {{link_to('#','Buy Gift Cards')}} - {{link_to('login','Login (TEST)')}}
-        </div>
+                <div class="extras">
+                Debug mode enabled! {{link_to('giftcards','Buy Gift Cards (TEST)')}} - {{link_to('login','Login (TEST)')}}
+                </div>
+        @endif
+        @if(Session::get('giftCardSalesEnabled'))
+                <div class="extras">
+                        {{link_to('giftcards',$strings['str_buyGiftCards'])}}
+                </div>
         @endif

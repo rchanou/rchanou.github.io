@@ -48,4 +48,11 @@ class MailService {
             self::load(); // don't actually load until we need to send a message
         return self::$interface->send($mail);
     }
+
+    //TODO: A little hacky, but didn't want to risk breaking existing functionality - could be rolled into existing MailBuilder and SwiftMailer
+    public static function sendWithInlineImages(MailBuilder $mail,$inlineImages = array()) {
+        if (!self::$ready)
+            self::load(); // don't actually load until we need to send a message
+        return self::$interface->sendWithInlineImages($mail,$inlineImages);
+    }
 }

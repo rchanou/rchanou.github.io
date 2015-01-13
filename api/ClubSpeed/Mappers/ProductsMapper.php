@@ -50,7 +50,7 @@ class ProductsMapper extends BaseMapper {
             // , 'M_MembershiptypeID'   => ''
             , 'R_Points'             => ''
             // , 'R_LocalOnly'          => ''
-            // , 'G_Points'             => ''
+            , 'G_Points'             => ''
             // , 'S_SaleBy'             => ''
             // , 'S_NoOfLapsOrSeconds'  => ''
             // , 'S_CustID'             => ''

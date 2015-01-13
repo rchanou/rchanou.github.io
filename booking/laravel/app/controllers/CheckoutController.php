@@ -37,10 +37,13 @@ class CheckoutController extends BaseController
         //See if any items in the local cart have been deleted from the Club Speed server
         foreach($cart as $cartItemId => $cartItem)
         {
-            if(!isset($cartItem['onlineBookingsReservationId']) || !in_array($cartItem['onlineBookingsReservationId'],$listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
+            if ($cartItem['type'] == 'heat')
             {
-                $localCartHasExpiredItem = true;
-                Cart::removeFromCart($cartItemId); //Then remove it from the local cart
+                if (!isset($cartItem['onlineBookingsReservationId']) || !in_array($cartItem['onlineBookingsReservationId'], $listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
+                {
+                    $localCartHasExpiredItem = true;
+                    Cart::removeFromCart($cartItemId); //Then remove it from the local cart
+                }
             }
         }
 
@@ -55,10 +58,20 @@ class CheckoutController extends BaseController
         foreach($cart as $cartItemIndex => $cartItem)
         {
             $newItem = array();
-            $newItem['productId'] = $cartItem['data']->products[0]->productsId;
-            $newItem['qty'] = $cartItem['quantity'];
-            $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
-            $checkDetails['checks'][0]['details'][] = $newItem;
+            if ($cartItem['type'] == 'heat')
+            {
+                $newItem['productId'] = $cartItem['data']->products[0]->productsId;
+                $newItem['qty'] = $cartItem['quantity'];
+                $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                $checkDetails['checks'][0]['details'][] = $newItem;
+            }
+            if ($cartItem['type'] == 'product')
+            {
+                $newItem['productId'] = $cartItem['itemId'];
+                $newItem['qty'] = $cartItem['quantity'];
+                $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                $checkDetails['checks'][0]['details'][] = $newItem;
+            }
         }
 
         //Check the Virtual Check calculation from Club Speed
@@ -85,6 +98,20 @@ class CheckoutController extends BaseController
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
         $currency = $settings['currency'];
 
+        $heatItems = 0;
+        $nonHeatItems = 0;
+        foreach($cart as $cartItemId => $cartItem)
+        {
+            if ($cartItem['type'] == 'heat')
+            {
+                $heatItems++;
+            }
+            else
+            {
+                $nonHeatItems++;
+            }
+        }
+
         return View::make('/checkout',
             array(
                 'images' => Images::getImageAssets(),
@@ -95,6 +122,8 @@ class CheckoutController extends BaseController
                 'moneyFormatter' => $moneyFormatter,
                 'currency' => $currency,
                 'settings' => $settings,
+                'hasHeatItems' => $heatItems > 0 ? true : false,
+                'hasNonHeatItems' => $nonHeatItems > 0 ? true : false,
                 'strings' => Strings::getStrings()
             )
         );
@@ -122,11 +151,8 @@ class CheckoutController extends BaseController
         $rules['postcode'] = 'required';
         $rules['country'] = 'required';
         //$rules['phone'] may be needed in the future
-        $rules['email'] = 'required|email';
-        
+
         $messages = array(
-            'email.required' => $strings['str_email.required'],
-            'email.email' => $strings['str_email.email'],
             'firstName.required' => $strings['str_firstName.required'],
             'lastName.required' => $strings['str_lastName.required'],
             'number.required' => $strings['str_number.required'],
@@ -168,10 +194,13 @@ class CheckoutController extends BaseController
         //See if any items in the local cart have been deleted from the Club Speed server
         foreach($cart as $cartItemId => $cartItem)
         {
-            if(!isset($cartItem['onlineBookingsReservationId']) || !in_array($cartItem['onlineBookingsReservationId'],$listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
+            if ($cartItem['type'] == 'heat')
             {
-                Cart::removeFromCart($cartItemId); //Then remove it from the local cart
-                $localCartHasExpiredItem = true;
+                if (!isset($cartItem['onlineBookingsReservationId']) || !in_array($cartItem['onlineBookingsReservationId'], $listOfRemoteOnlineBookingReservationIds)) //If the local item is out of sync
+                {
+                    Cart::removeFromCart($cartItemId); //Then remove it from the local cart
+                    $localCartHasExpiredItem = true;
+                }
             }
         }
 
@@ -203,12 +232,25 @@ class CheckoutController extends BaseController
             'customerId' => Session::get('authenticated'),
             'details' => array()
         );
+
+        //Format the current items in the cart for the Virtual Check API call
         foreach($cart as $cartItemIndex => $cartItem)
         {
             $newItem = array();
-            $newItem['productId'] = $cartItem['data']->products[0]->productsId;
-            $newItem['qty'] = $cartItem['quantity'];
-            $checkDetails['checks'][0]['details'][] = $newItem;
+            if ($cartItem['type'] == 'heat')
+            {
+                $newItem['productId'] = $cartItem['data']->products[0]->productsId;
+                $newItem['qty'] = $cartItem['quantity'];
+                $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                $checkDetails['checks'][0]['details'][] = $newItem;
+            }
+            if ($cartItem['type'] == 'product')
+            {
+                $newItem['productId'] = $cartItem['itemId'];
+                $newItem['qty'] = $cartItem['quantity'];
+                $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                $checkDetails['checks'][0]['details'][] = $newItem;
+            }
         }
 
         //Create the actual check
@@ -250,6 +292,7 @@ class CheckoutController extends BaseController
         $settings = Settings::getSettings();
         $onlineBookingPaymentProcessorSettings = $settings['onlineBookingPaymentProcessorSettings'];
 
+        $email = Session::get('authenticatedEmail');
         $paymentInformation = array(
             "firstName" => isset($input['firstName']) ? $input['firstName'] : '',
             "lastName" => isset($input['lastName']) ? $input['lastName'] : '',
@@ -267,7 +310,7 @@ class CheckoutController extends BaseController
             "state" => isset($input['state']) ? $input['state'] : '',
             "country" => isset($input['country']) ? $input['country'] : '',
             "phone" => isset($input['phone']) ? $input['phone'] : '',
-            "email" => isset($input['email']) ? $input['email'] : ''
+            "email" => isset($email) ? $email : ''
         );
 
         $checkFormatted = array('checkId' => $checkId,
@@ -314,11 +357,14 @@ class CheckoutController extends BaseController
             {
                 foreach ($cart as $cartItemId => $cartItem)
                 {
-                    $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
-                    $result = CS_API::makeOnlineReservationPermanent($onlineBookingsReservationId); //Mark the online booking reservation and permanent
-                    if ($result === null)
+                    if ($cartItem['type'] == 'heat')
                     {
-                        return Redirect::to('/disconnected');
+                        $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
+                        $result = CS_API::makeOnlineReservationPermanent($onlineBookingsReservationId); //Mark the online booking reservation and permanent
+                        if ($result === null)
+                        {
+                            return Redirect::to('/disconnected');
+                        }
                     }
                 }
             }

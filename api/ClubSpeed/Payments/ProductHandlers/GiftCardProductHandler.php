@@ -1,11 +1,16 @@
 <?php
 
 namespace ClubSpeed\Payments\ProductHandlers;
+
+require_once(__DIR__.'/../../../vendors/barcode/DNS1D.php');
+
 use ClubSpeed\Enums\Enums as Enums;
 use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Templates\TemplateService as Templates;
 use ClubSpeed\Mail\MailService as Mail;
 use ClubSpeed\Utility\Convert as Convert;
+use Dinesh\BarcodeAll\DNS1D;
+
 
 class GiftCardProductHandler extends BaseProductHandler {
 
@@ -47,7 +52,6 @@ class GiftCardProductHandler extends BaseProductHandler {
                 $giftCardCustomer->IsGiftCard = true;
                 $giftCardCustomer->EmailAddress = 'giftcard' . $giftCardCustomer->CrdID . '@clubspeed.com'; // hack to satisfy customer interface logic
                 $giftCardCustomer->Gender = 0; // hack to satisfy customer interface logic
-                $giftCardCustomer->BirthDate = \ClubSpeed\Utility\Convert::toDateForServer('1970-01-01 00:00:00'); // hack to satisfy customer interface logic
 
                 $customerId = $this->logic->customers->create_v0((array)$giftCardCustomer); // convert back to array for the params to be handled properly with the old customer interface
                 $return['success'][] = '#' . $giftCardCustomer->CrdID; // use # to prevent tel: interpretation in html?
@@ -81,7 +85,6 @@ class GiftCardProductHandler extends BaseProductHandler {
                 );
             }
 
-            // TODO: fire off a gift card email containing the card number
             try {
                 $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
                 $businessName = $businessName[0];
@@ -99,14 +102,48 @@ class GiftCardProductHandler extends BaseProductHandler {
                 $emailFrom = $emailFrom[0];
                 $emailFrom = array($emailFrom->SettingValue => $businessName);
 
-                $receiptBody = "<div>Card Created! Gift card #" . $giftCardCustomer->CrdID . "</div>";
+                $barCodeUtil = new DNS1D(); //Bar-code generating library
+
+                $giftCardEmailBodyHtml = $this->logic->settings->match(array(
+                    'Namespace' => 'Booking',
+                    'Name' => 'giftCardEmailBodyHtml'
+                ));
+                $giftCardEmailBodyHtml = $giftCardEmailBodyHtml[0];
+                $giftCardEmailBodyHtml = $giftCardEmailBodyHtml->Value;
+
+                $giftCardEmailSubject = $this->logic->settings->match(array(
+                    'Namespace' => 'Booking',
+                    'Name' => 'giftCardEmailSubject'
+                ));
+
+                $giftCardEmailSubject = $giftCardEmailSubject[0];
+                $giftCardEmailSubject = $giftCardEmailSubject->Value;
+                $giftCardEmailSubject = str_replace(
+                    array('{{business}}', '{{checkId}}'),
+                    array($businessName, $checkTotal->CheckID),
+                    $giftCardEmailSubject
+                );
+
+                $giftCardEmailBodyHtml = str_replace(
+                    array('{{giftCardImage}}'),
+                    array('##giftCardImage##'),
+                    $giftCardEmailBodyHtml
+                );
+
+                $giftCardData = array(
+                    'customer' => $customer->FName . ' ' . $customer->LName,
+                    'giftCardNo' => $giftCardCustomer->CrdID,
+                    'business' => $businessName
+                );
+
+                $receiptBody = Templates::buildFromString($giftCardEmailBodyHtml, $giftCardData);
 
                 $mail = Mail::builder()
-                    ->subject($businessName . ' Gift card for Order Number: ' . $checkTotal->CheckID)
+                    ->subject($giftCardEmailSubject)
                     ->from($emailFrom)
                     ->to($emailTo)
                     ->body($receiptBody);
-                Mail::send($mail);
+                Mail::sendWithInlineImages($mail, array('giftCardImage' => $barCodeUtil->getBarcodePNG($giftCardCustomer->CrdID, "C128",2,60)));
                 Log::info($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID);
             }
             catch(\Exception $e) {

@@ -363,14 +363,19 @@ class BasePayment {
         try {
             $checkStatus = Enums::CHECK_STATUS_CLOSED;
             $checkDetails = $this->logic->checkDetails->find(
-                'CheckID $eq ' . $checkId . ' AND R_Points IS NOT NULL'
+                'CheckID $eq ' . $checkId
             );
-            if (!empty($checkDetails)) // if R_Points non-null, then LEAVE THE CHECK OPEN (!!!) -- requirement of front end
-                $checkStatus = Enums::CHECK_STATUS_OPEN;
+            foreach ($checkDetails as $checkDetail) {
+                if (!is_null($checkDetail->R_Points))
+                    $checkStatus = Enums::CHECK_STATUS_OPEN; // if any line items have R_Points as non-null, then we have to leave the check open for the front end (!!!)
+                $this->logic->checkdetails->update($checkDetail->CheckDetailID, array(
+                    'Status' => Enums::CHECK_DETAIL_STATUS_CANNOT_DELETED
+                ));
+            }
             $check = $this->logic->checks->get($checkId);
             $check = $check[0];
-            $check->CheckStatus = $checkStatus; // CheckStatus.Closed from VB enum
-            $check->Notes = (isset($params['transactionReference']) ? 'Transaction Reference #' . $params['transactionReference'] : 'No Transaction Reference');
+            $check->CheckStatus = $checkStatus;
+            // $check->Notes = (isset($params['transactionReference']) ? 'Transaction Reference #' . $params['transactionReference'] : 'No Transaction Reference');
             $check->ClosedDate = Convert::getDate();
             $this->logic->checks->update($check->CheckID, $check);
             Log::info($this->logPrefix . 'Closed Check');
@@ -392,13 +397,25 @@ class BasePayment {
                 if (isset($handle['error']))
                     $errored[] = $handle;
                 else
-                    $handled[$checkTotal->CheckDetailID] = $handle['success']; // what to do here? what if qty is greater than 1?
+                    $handled[$checkTotal->CheckDetailID] = $handle['success'];
             }
             catch (\Exception $e) {
                 $errored[] = $e->getMessage(); // to be used for debugging purposes?
             }
         }
         Log::info($this->logPrefix . "Finished processing check details");
+        try {
+            $notes = $check->Notes ?: '';
+            foreach($handled as $note) {
+                $notes .= ' ' . $note;
+            }
+            $this->logic->checks->update($check->CheckID, array(
+                'Notes' => $notes
+            ));
+        }
+        catch (\Exception $e) {
+            Log::error($this->logPrefix . 'Unable to set check notes!', $e);
+        }
 
         $receiptData = array();
         try {

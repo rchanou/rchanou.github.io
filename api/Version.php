@@ -3,6 +3,7 @@
 class Version
 {
     public $restler;
+    private $logic;
 		
 		// Versions of various applications and modules
 		public $speedscreenVersion = '0.5.0';
@@ -10,6 +11,7 @@ class Version
 		public $apiLastUpdatedAt = '1/9/2015 14:30';
 
     function __construct(){
+        $this->logic = $GLOBALS['logic'];
         // header('Access-Control-Allow-Origin: *'); //Here for all /say
     }
 
@@ -31,6 +33,8 @@ class Version
             case "sql":
                 return $this->sql();
                 break;
+            case "eurekas":
+                return $this->eurekas();
             default:
                 throw new RestException(401, "Invalid version parameter!");
         }
@@ -98,6 +102,15 @@ class Version
         
         $output = count($rows) > 0 ? $rows[0][''] : null;
         return array('SqlVersion' => $output);
+    }
+
+    public function eurekas() {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) { // or private access?
+            throw new RestException(401, "Invalid authorization!");
+        }
+        if (!$this->logic->version->hasEurekas())
+            throw new RestException(404);
+        return;
     }
 
     private function run_query($tsql, $params = array()) {

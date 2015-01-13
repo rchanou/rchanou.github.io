@@ -304,6 +304,66 @@ class CS_API
         return self::getJSON("reports/payments_summary", $params);
     }
 
+    public static function getReport_EurekasPayments($start = null, $end = null)
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+
+        $results = self::getJSON("reports/payments/eurekas.json", $params);
+        $columnsToFilter = array('Customer ID','Customer Last Name','Customer First Name');
+        if ($results !== null && count($results) > 0)
+        {
+            foreach($results as &$currentRow)
+            {
+                foreach($currentRow as $currentColumnLabel => &$currentColumnValue)
+                {
+                    if (in_array($currentColumnLabel,$columnsToFilter))
+                    {
+                        unset($currentRow->$currentColumnLabel);
+                    }
+                }
+            }
+        }
+        return $results;
+    }
+
+    public static function getReport_EurekasDetailedSales($start = null, $end = null, $show_by_opened_date = 'false')
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+        $params['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
+
+        $results = self::getJSON("reports/sales/eurekas.json", $params);
+        $columnsToFilter = array('Customer ID','Customer Last Name','Customer First Name','Product Class Export');
+        if ($results !== null && count($results) > 0)
+        {
+            foreach($results as &$currentRow)
+            {
+                foreach($currentRow as $currentColumnLabel => &$currentColumnValue)
+                {
+                    if (in_array($currentColumnLabel,$columnsToFilter))
+                    {
+                        unset($currentRow->$currentColumnLabel);
+                    }
+                }
+            }
+        }
+        return $results;
+    }
+
+    public static function getReport_EurekasSummaryPayments($start = null, $end = null)
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+
+        return self::getJSON("reports/payments_summary/eurekas.json", $params);
+    }
     public static function doesServerSupportCacheClearing()
     {
         self::initialize();
@@ -497,5 +557,23 @@ class CS_API
         self::initialize();
         $params = array('cards' => $listOfGiftCards);
         return self::getJSON("reports/gift_card_transactions.json", $params);
+    }
+
+    public static function getGiftCardProducts()
+    {
+        self::initialize();
+        $params = array(
+                'productType' => 7, //In Club Speed, type 7 is the Gift Card type
+                'select' => 'productId,description,price1,enabled'
+            );
+        return self::getJSON("products.json", $params);
+    }
+
+    public static function doesServerHaveEurekas()
+    {
+        self::initialize();
+        $result = self::getJSON("version/eurekas.json");
+        $serverHasEurekas = ($result !== null);
+        return $serverHasEurekas;
     }
 }
