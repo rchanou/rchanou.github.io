@@ -31,8 +31,8 @@ class AuthenticationTokens extends BaseRecord {
                     if (isset($data['RemoteUserID']))               $this->RemoteUserID             = \ClubSpeed\Utility\Convert::toString($data['RemoteUserID']);
                     if (isset($data['TokenType']))                  $this->TokenType                = \ClubSpeed\Utility\Convert::toString($data['TokenType']);
                     if (isset($data['Token']))                      $this->Token                    = \ClubSpeed\Utility\Convert::toString($data['Token']);
-                    if (isset($data['CreatedAt']))                  $this->CreatedAt                = \ClubSpeed\Utility\Convert::toString($data['CreatedAt']);
-                    if (isset($data['ExpiresAt']))                  $this->ExpiresAt                = \ClubSpeed\Utility\Convert::toString($data['ExpiresAt']);
+                    if (isset($data['CreatedAt']))                  $this->CreatedAt                = \ClubSpeed\Utility\Convert::toDateForServer($data['CreatedAt']);
+                    if (isset($data['ExpiresAt']))                  $this->ExpiresAt                = \ClubSpeed\Utility\Convert::toDateForServer($data['ExpiresAt']);
                     if (isset($data['Meta']))                       $this->Meta                     = \ClubSpeed\Utility\Convert::toString($data['Meta']);
                 }
             }
