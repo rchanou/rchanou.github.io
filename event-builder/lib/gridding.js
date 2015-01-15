@@ -482,11 +482,82 @@ function previousGridPositionPlusOne(array, opts) {
 }
 */
 
+////
+// OLDER Magix Lineup (only works when # racers per race == # races per driver)
+////
+
+function createOldMagixRoundLineup(numDriversTotal, numDriversPerHeat, numRoundsTotal) {
+   // Find grid lineup
+   var startingGrid = createStartingLineup(numDriversPerHeat, numDriversTotal);
+   var numRoundsTotal = typeof numRoundsTotal === 'undefined' ? numDriversTotal : numRoundsTotal;
+
+   var eventRounds = [];
+
+   for(var currentRoundNumber = 1; currentRoundNumber <= numRoundsTotal; currentRoundNumber++) {
+       // Create a copy of the starting grid to shift
+       var roundLineup = startingGrid.slice(0);
+       
+       for(var i = currentRoundNumber; i > 1; i--) {
+           
+           // Take last position
+           var lastPosition = roundLineup.pop();
+           
+           // Put it first
+           roundLineup.unshift(lastPosition);
+           
+       }
+       
+       // Convert to the proper grid lineup... [ 1, null, 3, null, 2 ] -> [1, 5, 3]
+       var modifiedRoundLineup = [];
+       roundLineup.forEach(function(position, driverNum) {
+           if(position == null) return;
+           modifiedRoundLineup[position - 1] = driverNum + 1;
+       });
+
+       // Put into the lineup
+       eventRounds.push(modifiedRoundLineup);
+   }
+   
+   return eventRounds;
+   
+   function createStartingLineup(numDriversPerHeat, numDriversTotal) {
+       var startingLineup = [1];
+       var gapsRemaining = numDriversTotal - numDriversPerHeat;
+   
+       for(var nextDriverPosition = numDriversPerHeat; nextDriverPosition > 1; nextDriverPosition--) {
+   
+           var gapsToInsert = Math.ceil(gapsRemaining / nextDriverPosition);
+           gapsRemaining = gapsRemaining - gapsToInsert;
+   
+           for(var i = gapsToInsert; i > 0; i--) {
+               startingLineup.push(null);
+           }
+   
+           startingLineup.push(nextDriverPosition);
+   
+       }
+       
+       for(var i = gapsRemaining; i > 0; i--) {
+           startingLineup.push(null);
+       }
+       
+       return startingLineup;
+   
+   }
+   
+}
 
 ////
 // Magix Lineup
 ////
 exports.magix = function magix(numDrivers, numDriversPerRace, numRacesPerDriver) {
+
+	// Use older, perfectly balanced Magix logic when # racers per race == # races per driver
+	if(numDriversPerRace == numRacesPerDriver) {
+		var numRoundsTotal = (numDrivers * numRacesPerDriver) / numDriversPerRace; // The old method always has the same number of races as drivers
+		return createOldMagixRoundLineup(numDrivers, numDriversPerRace, numRoundsTotal);
+	}
+ 
   var grid = [];
   var targetPositionSummation = Math.ceil((numDriversPerRace/2)*numRacesPerDriver) + 1;
 	var positions = [];
@@ -659,12 +730,12 @@ exports.balanced = function(numDriversTotal, numDriversPerHeat) {
  * Fair lineup -- Create even groups where the best are paired with the worst. P1 & P4 == P2 & P3
  */
 
-// TODO -- Is this clear? We're making groups, not gridding people. This is a departure from how this class works.
+// TODO -- Is this clear? We're making teams, not gridding a race. This is a departure from how this class works.
 
 exports.fair = function(numDriversTotal, numDriversPerHeat) {
 	var fairGroups = [];
-	var numGroups = numDriversTotal / numDriversPerHeat;
-	var groups = this.createBalancedGrid(numDriversTotal, numGroups);
+	var numGroups = Math.ceil(numDriversTotal / numDriversPerHeat);
+	var groups = this.createBalancedGrid(numDriversTotal, numDriversPerHeat);
 	
 	// Calculate the middle of the array (we use this to pull from top, bottom or middle to fairly balance)
 	var middle = groups.length % 2 === 1 ? Math.floor(groups.length / 2) : (groups.length / 2) - 0.5;
@@ -677,9 +748,11 @@ exports.fair = function(numDriversTotal, numDriversPerHeat) {
 
 		for(var j = 0; j < groupSize; j++) {
 			if(j === middle) {
-				// Pull from middle of array
-				var middleElement = Math.floor(groups[groupNum].length / 2);
-				participant = groups[j].splice(middleElement, 1)[0];
+				if(typeof groups[groupNum] !== 'undefined') {
+					// Pull from middle of array
+					var middleElement = Math.floor(groups[groupNum].length / 2);
+					participant = groups[j].splice(middleElement, 1)[0];
+				}
 			} else if(j < middle) {
 				// Pull from first of array
 				participant = groups[j].splice(0, 1)[0];
@@ -828,8 +901,8 @@ exports.noGrid = function noGrid(array, opts) {
 	var inverted = opts.inverted || false;
 	var nextLineup = [];
 	
-	// Invert?
-	if(inverted) array.reverse();
+	// Invert? Not for "custom", however -- for custom we allow the "custom" method to reverse the lineup of the heat, not the drivers
+	if(inverted && opts.gridType !== 'custom') array.reverse();
 	
 	// Create lineup
 	array.forEach(function(person, index) {
@@ -878,12 +951,19 @@ exports.createGrid = function(gridType, numParticipants, maxParticipantsPerGroup
 			gridLineup = this.fair(numParticipants, maxParticipantsPerGroup);
 			break;
 		case 'custom':
+			if(opts.inverted === true) {
+				opts.inverted = false;
+				var invertedGridLineup = [];
+				opts.customGrid.forEach(function(heat) {
+					invertedGridLineup.push(heat.reverse());
+				});
+				gridLineup = invertedGridLineup;
+			} else {
+				gridLineup = opts.customGrid;
+			}
 			gridLineup = opts.customGrid;
 			break;
 		case 'magix':
-			/*gridLineup = this.createMagixRoundLineup(numParticipants, maxParticipantsPerGroup);
-			break;
-		case 'magixFair':*/
 			gridLineup = this.magix(numParticipants, maxParticipantsPerGroup, opts.numHeatsPerParticipant);
 			opts.numHeatsPerParticipant = 1; // Overriding the heat copying functionality
 			break;
