@@ -1102,7 +1102,7 @@ EOD;
 
         // TODO Add filtering by speedlevel
 
-        $tsql = "SELECT TOP(".$limit.") * FROM Customers WHERE RPM <> 10000 $tsql_gender AND Deleted <> 'True' ORDER BY RPM DESC";
+        $tsql = "SELECT TOP(".$limit.") * FROM Customers WHERE RPM <> 10000 $tsql_gender AND Deleted <> 'True' AND IsEmployee = 0 ORDER BY RPM DESC";
 
         $rows = $this->run_query($tsql, $tsql_params);
 
