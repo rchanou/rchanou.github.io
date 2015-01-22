@@ -69,7 +69,7 @@ class Customers extends BaseRecord {
     public $OriginalID;
     public $CreditLimit;
     public $CreditOnHold;
-    public $LastUnSubscribedDate;
+    // public $LastUnSubscribedDate;
     public $GeneralNotes;
 
     public function __construct($data = array()) {
@@ -141,7 +141,7 @@ class Customers extends BaseRecord {
                     if (isset($data['OriginalID']))             $this->OriginalID           = \ClubSpeed\Utility\Convert::toNumber          ($data['OriginalID']);
                     if (isset($data['CreditLimit']))            $this->CreditLimit          = \ClubSpeed\Utility\Convert::toNumber          ($data['CreditLimit']);
                     if (isset($data['CreditOnHold']))           $this->CreditOnHold         = \ClubSpeed\Utility\Convert::toNumber          ($data['CreditOnHold']);
-                    if (isset($data['LastUnSubscribedDate']))   $this->LastUnSubscribedDate = \ClubSpeed\Utility\Convert::toDateForServer   ($data['LastUnSubscribedDate']);
+                    // if (isset($data['LastUnSubscribedDate']))   $this->LastUnSubscribedDate = \ClubSpeed\Utility\Convert::toDateForServer   ($data['LastUnSubscribedDate']);
                     if (isset($data['GeneralNotes']))           $this->GeneralNotes         = \ClubSpeed\Utility\Convert::toString          ($data['GeneralNotes']);
                 }
             }

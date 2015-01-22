@@ -69,7 +69,7 @@ class CustomersMapper extends BaseMapper {
             , 'OriginalID'           => ''
             , 'CreditLimit'          => ''
             , 'CreditOnHold'         => ''
-            , 'LastUnSubscribedDate' => ''
+            // , 'LastUnSubscribedDate' => ''
             , 'GeneralNotes'         => ''
         ));
 
