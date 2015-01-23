@@ -4,7 +4,7 @@
  */
 
 $settings = array(
-	'enableWaiver' => true
+	'enableWaiverStep' => true
 	);
 
 error_reporting(E_ALL);
