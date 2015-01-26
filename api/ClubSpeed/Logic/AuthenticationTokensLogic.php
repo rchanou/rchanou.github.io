@@ -33,7 +33,8 @@ class AuthenticationTokensLogic extends BaseLogic {
         $expiresAtInterval = $this->expiresAtInterval;
         return parent::_create($params, function($authenticationToken) use (&$logic, $expiresAtInterval) {
             $authenticationToken->CreatedAt = Convert::getDate(); // db also has a default
-            $authenticationToken->ExpiresAt = Convert::getDate(strtotime($expiresAtInterval));
+            if (empty($authenticationToken->ExpiresAt)) // allow ExpiresAt to be overwritten as necessary
+                $authenticationToken->ExpiresAt = Convert::getDate(strtotime($expiresAtInterval));
             if (empty($authenticationToken->Token))
                 $authenticationToken->Token = Tokens::generate();
             if (empty($authenticationToken->TokenType))
@@ -49,7 +50,9 @@ class AuthenticationTokensLogic extends BaseLogic {
         $logic =& $this->logic;
         $expiresAtInterval = $this->expiresAtInterval;
         $closure = function($old, $new) use (&$logic, $expiresAtInterval) {
-            $new->ExpiresAt = Convert::getDate(strtotime($expiresAtInterval));
+            $newExpiresAt = Convert::getDate(strtotime($expiresAtInterval));
+            if ($old->ExpiresAt < $newExpiresAt)
+                $new->ExpiresAt = $newExpiresAt;
             return $new;
         };
         array_push($args, $closure);
