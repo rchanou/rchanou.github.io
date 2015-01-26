@@ -33,6 +33,7 @@ $r->setSupportedFormats('JsonFormat', 'XmlFormat', 'JsonpFormat');
 
 $r->addAPIClass('Karting', ''); // index.php return
 
+$r->addAPIClass('AuthenticationTokens');
 $r->addAPIClass('Booking');
 $r->addAPIClass('BookingAvailability');
 $r->addAPIClass('Channel');

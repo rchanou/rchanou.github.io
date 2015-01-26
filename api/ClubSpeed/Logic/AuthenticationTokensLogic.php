@@ -2,6 +2,7 @@
 
 namespace ClubSpeed\Logic;
 use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Utility\Tokens as Tokens;
 
 /**
  * The business logic class
@@ -33,6 +34,12 @@ class AuthenticationTokensLogic extends BaseLogic {
         return parent::_create($params, function($authenticationToken) use (&$logic, $expiresAtInterval) {
             $authenticationToken->CreatedAt = Convert::getDate(); // db also has a default
             $authenticationToken->ExpiresAt = Convert::getDate(strtotime($expiresAtInterval));
+            if (empty($authenticationToken->Token))
+                $authenticationToken->Token = Tokens::generate();
+            if (empty($authenticationToken->TokenType))
+                $authenticationToken->TokenType = Enums::TOKEN_TYPE_PUBLIC;
+            if (empty($authenticationToken->RemoteUserID))
+                $authenticationToken->RemoteUserID = 1; // non-nullable. why did we do this again?
             return $authenticationToken;
         });
     }

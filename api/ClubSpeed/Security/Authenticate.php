@@ -144,7 +144,14 @@ class Authenticate {
     private static function isValidPublicKey(&$key) {
         if (isset($key) && in_array($key, $GLOBALS['authentication_keys']))
             return true;
-        // should we include customer logins (auth tokens) to be public keys too?
+        // fall through is awkward and hacky, since we don't have roles (or multi-roles),
+        // or the ability to compare access of those roles with proper chains.
+        // just consider any bearer of a token to have at least public access.
+        $authenticationToken = self::$logic->authenticationTokens->match(array(
+            'Token' => $key
+        ));
+        if (!empty($authenticationToken))
+            return true;
         return false;
     }
 

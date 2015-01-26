@@ -123,8 +123,8 @@ class Enums {
 
     // See UserDataType.vb at Enum CheckDetailStatus
     const CHECK_DETAIL_STATUS_IS_NEW         = 1;
-    const CHECK_DETAIL_STATUS_HAS_VOIDED     = 2;
-    const CHECK_DETAIL_STATUS_CANNOT_DELETED = 3; // ??
+    const CHECK_DETAIL_STATUS_HAS_VOIDED     = 2; // void
+    const CHECK_DETAIL_STATUS_CANNOT_DELETED = 3; // permanent
 
     // See UserDataType.vb at Enum CheckStatus
     const CHECK_STATUS_OPEN   = 0;
@@ -155,5 +155,6 @@ class Enums {
 
     const TOKEN_TYPE_CUSTOMER       = 'Customer';
     const TOKEN_TYPE_PASSWORD_RESET = 'PasswordReset';
+    const TOKEN_TYPE_PUBLIC         = 'Public';
    
 }
