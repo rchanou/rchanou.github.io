@@ -45,6 +45,13 @@ class FacebookLogic extends BaseLogic {
      * @throws CustomerNotFoundException    if $customerId could not be found in the database.
      */
     public final function fb_login($fbId, $customerId, $fbAccessToken, $fbAllowEmail = false, $fbAllowPost = false, $fbEnabled = true) {
+        
+        // note; FB PHP SDK requires PHP 5.4, so we are SOL for now.
+        // a hacky way to validate $fbAccessToken would be to do this:
+        // GET https://graph.facebook.com/app?access_token=MY_ACCESS_TOKEN
+        // a fail will get back an object with "error: {}" JSON
+        // super hacky, probably not reliable forever.
+
         if (!isset($fbId))
             throw new \InvalidArgumentException("Facebook login requires fbId to be set!");
         if (!isset($customerId) || !is_int($customerId))

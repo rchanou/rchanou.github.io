@@ -142,7 +142,7 @@ class Authenticate {
      * @return boolean True if the key has at least public access, false if not.
      */
     private static function isValidPublicKey(&$key) {
-        if (isset($key) && in_array($key, $GLOBALS['authentication_keys']))
+        if (isset($key) && in_array($key, $GLOBALS['authentication_keys']) && $key != md5(date('Y-m-d')))
             return true;
         // fall through is awkward and hacky, since we don't have roles (or multi-roles),
         // or the ability to compare access of those roles with proper chains.

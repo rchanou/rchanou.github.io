@@ -76,6 +76,7 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public function postfb_login($request_data) {
+        $_REQUEST['key'] = $GLOBALS['privateKey']; // oh what a beautiful hack.
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }

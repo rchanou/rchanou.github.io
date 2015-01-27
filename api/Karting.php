@@ -20,10 +20,10 @@ class Karting {
 	public function index() {
     	// API Docs I Like: http://openbeerdatabase.com/
     	// http://hurl.it/
-    	$daily_key = SimpleAuth::daily_key();
+    	// $daily_key = SimpleAuth::daily_key();
         DocAPIContainer::init();
         $data = DocAPIContainer::getData();
-        $data['daily_key'] = $daily_key;
+        $data['daily_key'] = "YOUR_KEY_HERE";
         echo Templates::build('karting.html', $data);
         die();
 	}
