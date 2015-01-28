@@ -423,11 +423,9 @@
                         val.used_spots_text = "FULL";
                     }
 
-                    // parse starts_at date and convert
-                    var tempDate = z.convert(val.starts_at, z.types.date);
-                    if (z.check.isDate(tempDate)) {
-                        val.starts_at = tempDate.toLocaleString(z.location.locale);
-                    }
+                    var tempStartsAt = z.convert.toDate(val.starts_at_iso);
+                    if (z.check.isDate(tempStartsAt))
+                        val.starts_at = tempStartsAt.toLocaleString(z.location.locale);
 
                     // apply styling to the race_number
                     val.race_number = (z.check.exists(val.race_number) ? "#" + val.race_number : "");
@@ -438,7 +436,7 @@
                     race_number: "Race #",
                     race_name: "Race Name",
                     used_spots_text: "Used Spots",
-                    starts_at: "Start Time"                 
+                    starts_at_locale: "Start Time"                 
                 });
 
                 // calculate racer height and font size

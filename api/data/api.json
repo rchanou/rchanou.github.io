@@ -409,6 +409,25 @@
             ]
         },
         {
+            "id": "races",
+            "header": "Races",
+            "route": "/races",
+            "calls": [
+                {
+                    "id": "scoreboard",
+                    "verb": "GET",
+                    "subroute": "/scoreboard",
+                    "parameters": [
+                        {
+                            "name": "track_id",
+                            "level": "required",
+                            "source": "query"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "id": "reservations",
             "header": "Reservations",
             "route": "/reservations",
@@ -494,6 +513,22 @@
             ]
         },
         {
+            "id": "shim",
+            "header": "Shim",
+            "route": "/shim",
+            "calls": [
+                {
+                    "id": "exists",
+                    "verb": "GET"
+                },
+                {
+                    "id": "clearCache",
+                    "verb": "POST",
+                    "subroute": "/clear_cache"
+                }
+            ]
+        },
+        {
             "id": "taxes",
             "header": "Taxes",
             "route": "/taxes",
@@ -520,6 +555,18 @@
                     "id": "delete",
                     "verb": "DELETE",
                     "subroute": "/:id"
+                }
+            ]
+        },
+        {
+            "id": "tracks",
+            "header": "Tracks",
+            "route": "/tracks",
+            "calls": [
+                {
+                    "id": "list",
+                    "verb": "GET",
+                    "subroute": "/index"
                 }
             ]
         },
