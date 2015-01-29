@@ -19,7 +19,7 @@ class Channel
 
     public function html($htmlId) {
         die('GETHTML' . $htmlId);
-        
+
         // Get screen
         $tsql = "SELECT Text0 FROM ScreenTemplateDetail WHERE ID = ?";
         $tsql_params = array(&$htmlId);
@@ -48,10 +48,10 @@ class Channel
         }
 
         if(!is_numeric($channelId)) throw new RestException(412,'Channel ID must be numeric');
-        
+
         // Base path for video URLs
         $baseVideoUrl = $this->channelSlideUrl . 'video.html?videoUrl=';
-        
+
         // Get screen
         $tsql = "SELECT * FROM ScreenTemplate WHERE templateid = ? AND deleted = 0";
         $tsql_params = array(&$channelId);
@@ -85,7 +85,7 @@ class Channel
             );
         }
 
-        // Add slides if the screen idle time is not "Infinite" (86400)     
+        // Add slides if the screen idle time is not "Infinite" (86400)
         if($screen['IdleTime'] !== 86400) {
             // die(print_r($slides));
             foreach($slides as $slide) {
@@ -106,7 +106,6 @@ class Channel
                             'type' => 'url',
                             'options' => array(
                                 'url'               => $url,
-                                'startAtPosition'   => (int)$slide['Text0'],
                                 'duration'          => $slide['TimeInSecond']*1000,
                                 'backgroundUrl'     => $this->speedScreenBackgroundUrl,
                                 'type'              => 'text',
@@ -119,7 +118,7 @@ class Channel
                                 'line6'             => $slide['Text6']
                             )
                         );
-                        break;                      
+                        break;
 
                     // Image slide - 5
                     case 2:
@@ -130,12 +129,12 @@ class Channel
                                 'duration'  => $slide['TimeInSecond']*1000
                             )
                         );
-                        break;                          
+                        break;
 
                     // Top Time of the Day - 5
                     case 3:
                         //?trackId=1&dateSpan=day&backgroundUrl=http://www.w8themes.com/wp-content/uploads/2013/11/White-Background-Wallpaper.jpg
-                        
+
                         // Build path to Top Time TODO Get Background Url
                         $url = $this->channelSlideUrl
                             . 'top-times.html'
@@ -160,7 +159,7 @@ class Channel
                     // Top Time of the Week - 5
                     case 4:
                         //?trackId=1&dateSpan=week&backgroundUrl=http://www.w8themes.com/wp-content/uploads/2013/11/White-Background-Wallpaper.jpg
-                        
+
                         // Build path to Top Time TODO Get Background Url
                         $url = $this->channelSlideUrl
                             . 'top-times.html'
@@ -183,7 +182,7 @@ class Channel
                         break;
 
                     // Top Time of the Month - 5
-                    case 5:                             
+                    case 5:
                         //?trackId=1&dateSpan=month&backgroundUrl=http://www.w8themes.com/wp-content/uploads/2013/11/White-Background-Wallpaper.jpg
                         $url = $this->channelSlideUrl
                             . 'top-times.html'
@@ -256,7 +255,7 @@ class Channel
                     case 8:
                         // TrackNo = trackId
                         // Text0 = startAtPosition (for 1-10 stores 1, for 11-20 stores 11, etc)
-                        // Text1 = speedLevel 
+                        // Text1 = speedLevel
 
                         // original
                         // $output['lineup'][] = array('type' => 'mostImprovedRPMOfMonth', 'options' => array('startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
@@ -281,15 +280,15 @@ class Channel
                         );
                         break;
 
-                    // Most Improved RPM of the Year - 3 
+                    // Most Improved RPM of the Year - 3
                     case 9:
                         // TrackNo = trackId
                         // Text0 = startAtPosition (for 1-10 stores 1, for 11-20 stores 11, etc)
                         // Text1 = speedLevel
-                        
+
                         // original
                         // $output['lineup'][] = array('type' => 'mostImprovedRPMOfYear', 'options' => array('startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
-                        
+
                         $url = $this->channelSlideUrl
                             . 'most-improved-proskill.html'
                             . '?trackId='       . (int)$slide['TrackNo']
@@ -317,7 +316,7 @@ class Channel
 
                         // original
                         // $output['lineup'][] = array('type' => 'schedule', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
-                        
+
                         $url = $this->channelSlideUrl
                             . 'schedule.html'
                             . '?trackId='       . (int)$slide['TrackNo']
@@ -349,7 +348,7 @@ class Channel
                             . '?trackId='       . $slide['TrackNo']
                             . '&speedLevel='    . $slide['Text1']
                             . '&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
-                        
+
                         $output['lineup'][] = array(
                             'type' => 'url',
                             'options' => array(
@@ -365,7 +364,7 @@ class Channel
                                 'type'              => 'nextRacers'
                             )
                         );
-                        break;                      
+                        break;
 
                     // Next, Next Racers - 5
                     case 14:
@@ -375,7 +374,7 @@ class Channel
                         //original
                         // $url = $this->channelSlideUrl . 'up-next.html?offset=1&trackId=' . $slide['TrackNo'] . '&backgroundUrl=' . urlencode($this->speedScreenBackgroundUrl);
                         // $output['lineup'][] = array('type' => 'url', 'options' => array('url' => $url, 'duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo'], 'backgroundUrl' => $this->speedScreenBackgroundUrl, 'type' => 'nextNextRacers'));
-                        
+
                         $url = $this->channelSlideUrl
                             . 'up-next.html'
                             . '?trackId='       . (int)$slide['TrackNo']
@@ -403,7 +402,7 @@ class Channel
 
                         // original
                         // $output['lineup'][] = array('type' => 'lastWinnerWithPicture', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
-                        
+
                         $url = $this->channelSlideUrl
                             . 'last-winner.html'
                             . '?trackId='       . (int)$slide['TrackNo']
@@ -428,10 +427,10 @@ class Channel
                     case 16:
                         // TrackNo = trackId
                         // Text1 = speedLevel
-                        
+
                         // original
                         // $output['lineup'][] = array('type' => 'topTimeOfDayWithPicture', 'options' => array('duration' => $slide['TimeInSecond']*1000, 'trackId' => (int)$slide['TrackNo']));
-                        
+
                         $url = $this->channelSlideUrl
                             . 'top-times-pictures.html'
                             . '?trackId='       . (int)$slide['TrackNo']
@@ -469,10 +468,10 @@ class Channel
                                     'duration'      => $slide['TimeInSecond']*1000
                                 )
                             );
-                        
+
                         // It's a URL
-                        } elseif(filter_var($slide['Text0'], FILTER_VALIDATE_URL)){ 
-                            
+                        } elseif(filter_var($slide['Text0'], FILTER_VALIDATE_URL)){
+
                             $output['lineup'][] = array(
                                 'type' => 'url',
                                 'options' => array(
@@ -481,10 +480,10 @@ class Channel
                                     'duration'  => $slide['TimeInSecond']*1000
                                 )
                             );
-                        
+
                         // It's a HTML block
                         } else {
-                            
+
                             $output['lineup'][] = array(
                                 'id' => $slide['ID'],
                                 'type' => 'html',
@@ -507,7 +506,7 @@ class Channel
                             3. GetEventScorePerRound @EventNo
                             4. Massage data from #3 into table
                         */
-                        
+
                         $output['lineup'][] = array(
                             'type' => 'eventScreen',
                             'options' => array(
@@ -515,7 +514,7 @@ class Channel
                                 'trackId'   => (int)$slide['TrackNo']
                             )
                         );
-                        
+
                         // new event screen format not yet implemented (2014-07-29 DL)
                         // $url = $this->channelSlideUrl
                         //     . 'event-results.html'
@@ -534,8 +533,8 @@ class Channel
                         break;
 
                     // New Scoreboard - 5
-                    case 21:                                
-                        // Ensure we haven't already added this scoreboard "channel-wide" above         
+                    case 21:
+                        // Ensure we haven't already added this scoreboard "channel-wide" above
                         if($screen['ShowScoreboard'] == 0 ||
                             ($screen['ShowScoreboard'] == 1 && (int)$screen['ScoreBoardTrackNo'] != (int)$slide['TrackNo'])) {
                             $output['lineup'][] = array(
@@ -571,14 +570,14 @@ class Channel
                                 'type'              => 'previousRaceResults'
                             )
                         );
-                        break;                  
+                        break;
 
                     // Previous, Previous Race Results - 3
                     case 23:
 
                         // original
                         // $output['lineup'][] = array('type' => 'previousPreviousRaceResults', 'options' => array('startAtPosition' => (int)$slide['Text0'], 'duration' => $slide['TimeInSecond']*1000));
-                        
+
                         $url = $this->channelSlideUrl
                             . 'previous.html'
                             . '?trackId='       . $slide['TrackNo']
@@ -603,7 +602,7 @@ class Channel
 
         // Hash the lineup
         $output['hash'] = md5(serialize($output));
-        
+
         // Include speedscreen version
         $version = new Version();
         $output['speedscreenVersion'] = $version->speedscreenVersion;
