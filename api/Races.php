@@ -605,7 +605,7 @@ class Races
 
         // If no start date given, default to today
         if(!isset($_GET['start'])) {
-            $start = date($GLOBALS['dateFormat'] . " H:i:s");
+            $start = date($GLOBALS['dateFormat']);
             $end   = date($GLOBALS['dateFormat'] . " H:i:s", strtotime(date($GLOBALS['dateFormat'], strtotime($start))) + 24*60*60); // End of today
         }
 
