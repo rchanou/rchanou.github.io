@@ -252,6 +252,21 @@ speedScreenDemoApp.controller('channelController', function($scope, $timeout, $i
                 $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
                 return;
             }
+            else if (channel_id == "swedishscoreboard") //If the user would like the channel just on the swedish custom scoreboard
+            {
+                //DEBUG: console.log("No need to poll for channel lineup. Scoreboard-only mode activated for Track 1.");
+
+                //Manually set the Speed Screen to display the scoreboard infinitely, ignoring Club Speed settings
+                slides = [];
+                slides.push(new Slide("html","pages/newhdscoreboardswedish.html",86400000,"",this.apiURL,this.apiKey, 1));
+                hasScoreboard = true;
+                scoreboardSlide = slides.length - 1;
+                this.currentTrack = 1;
+                globalVars.setCurrentTrack(this.currentTrack);
+                scoreboardTracks.push(this.currentTrack);
+                $timeout(function(){currentChannel.initializeSlides($routeParams.channel_id);},timeBetweenChannelUpdatesMs);
+                return;
+            }
             //DEBUG: console.log("Polling for new channel lineup...");
 
             //Poll the requested channel, defaulting to Channel 1

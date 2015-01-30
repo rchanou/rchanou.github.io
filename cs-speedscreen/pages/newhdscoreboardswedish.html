@@ -1,0 +1,274 @@
+<div ng-controller="newHDScoreboardController" class="hdScoreboard speedScreenBody" style="background-image:url('{{backgroundImageURL}}')">
+
+<div id="debugInfo" style="display: none">
+    <span id="clickMe2">Hide debug info</span><br/>
+{{currentScoreboard}}<p/>
+{{currentNextRace}}<p/>
+{{scoreboardState}} {{finalResultsScreenTimeMs}}<p/>
+
+{{slidePanelVisible}} = slidePanelVisible<p/>
+    lastHeatID: {{lastHeatID}}<p/>
+    lastHeatsHistory: {{lastHeatsHistory}}<p/>
+    nextRacersHistory: {{nextRacersHistory}}<p/>
+
+<!--    <button type="button" data-ng-click="startScoreboard()">startScoreboard</button><br/>
+    <button type="button" data-ng-click="stopScoreboard()">stopScoreboard</button><p/>-->
+</div>
+
+<!-- ## HD SCOREBOARD HEADER ## -->
+<div class="hdScoreboardHeader" id="clickMe">
+    <div class="headerTextBox ellipsis">
+        <span ng-if="scoreboardState == 'driver_lineup'">Racer Lineup - {{nextRace.race.race_name}} -
+            <span ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at.split(" ")[1].substring(0,5)}}</span>
+            <span ng-if="showHeatNumberInsteadOfRaceTime">#{{nextRace.race.id | formatHeatNumber}}</span>
+        </span>
+        <span ng-if="scoreboardState == 'race_ongoing'">{{currentScoreboard.race.race_name}}<span ng-if="showHeatNumberInsteadOfRaceTime"> - #{{currentScoreboard.race.id | formatHeatNumber}}</span></span>
+        <span ng-if="scoreboardState == 'final_results'">{{lastRaceScoreboard.race.race_name}}<span ng-if="showHeatNumberInsteadOfRaceTime"> - #{{lastRaceScoreboard.race.id | formatHeatNumber}}</span> - Final Results</span>
+        <span ng-if="scoreboardState == 'no_races'">No Races</span>
+        <span ng-if="scoreboardState == 'last_few_heats'">Recent Race Results</span>
+        <span ng-if="mode == 'simulation'">Race Simulation</span>
+    </div>
+    <div ng-if="showTimer && scoreboardState == 'race_ongoing' && currentScoreboard.race.race_by == 'minutes'" class="raceTimerBox ellipsis">
+        {{currentTime}}
+    </div>
+    <div ng-if="showTimer && scoreboardState == 'race_ongoing' && currentScoreboard.race.race_by == 'laps'" class="raceTimerBox ellipsis">
+        {{lapsRemaining}}L
+    </div>
+</div>
+<!-- ## END HD SCOREBOARD HEADER ## -->
+
+<!-- ## MAIN ISOTOPE CONTAINER ## -->
+<div>
+<div id="container" ng-class="{containerRegular: slidePanelVisible == false,containerSmall: slidePanelVisible}">
+
+    <!-- ## RACE ONGOING MODE ## -->
+    <div ng-repeat="racer in racers" class="racerBox shadow" ng-class="{'racerBoxRegular': (slidePanelVisible == false),'racerBoxSmaller': slidePanelVisible}" ng-if="scoreboardState == 'race_ongoing'">
+        <div class="racerBoxUpper racerBoxUpperRegular">
+                    <span class="positionBox ellipsis">
+                        <span class="racerBoxUpperHeader">Pos</span><br/>
+                        <span class="racerBoxUpperData">{{racer.position}}</span>
+                    </span>
+                    <span ng-class="{'racerNameBox': (slidePanelVisible == false),'racerNameBoxSmaller': slidePanelVisible}" class="racerName ellipsis">
+                        <span class="racerBoxUpperHeader">Racingnamn</span><br/>
+                        <span class="racerBoxUpperDataRacerName">{{racer.nickname}}</span>
+                    </span>
+                    <span class="kartBox ellipsis">
+                        <span class="racerBoxUpperHeader">Kart</span><br/>
+                        <span class="racerBoxUpperData">{{racer.kart_num}}</span>
+                    </span>
+                    <span class="lapsBox ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}">
+                        <span class="racerBoxUpperHeader">Varv</span><br/>
+                        <span class="racerBoxUpperData">{{racer.lap_num}}</span>
+                    </span>
+                    <span class="bestLapBox ellipsis" ng-class="{'racerGotABetterTime': (racer.beatBestLap)}">
+                        <span class="racerBoxUpperHeader">Bästa tid</span><br/>
+                        <span ng-class="{'fastestOverall': racer.isFastest && !disablePurpleText}" ng-if="racer.lap_num != 0" class="racerBoxUpperData">{{racer.fastest_lap_time}}</span>
+                    </span>
+        </div>
+        <div class="racerBoxLower racerBoxLowerRegular">
+                    <span ng-class="{'statusBox': (slidePanelVisible == false),'statusBoxSmaller': slidePanelVisible}" class="status">
+                        <div ng-if="racer.positionStatus == 'neutral'"><img src="images/noarrow.png" class="positionStatusImage"></div>
+                        <div ng-if="racer.positionStatus == 'wentUp'"><img src="images/uparrow.png" class="positionStatusImage"></div>
+                        <div ng-if="racer.positionStatus == 'wentDown'"><img src="images/downarrow.png" class="positionStatusImage"></div>
+                    </span>
+                    <span ng-class="{'avgLapBox': (slidePanelVisible == false),'avgLapBoxSmaller': slidePanelVisible}" class="avgLap ellipsis" style="vertical-align: middle; height: 100%; ">
+                        <span ng-if="slidePanelVisible == false" class="racerBoxLowerHeader" >Snitt</span>
+                        <span ng-if="slidePanelVisible" class="racerBoxLowerHeader" >Snitt</span>
+                        <span class="racerBoxLowerData">{{racer.average_lap_time}}</span>
+                    </span>
+                    <span ng-class="{'lastLapBox': (slidePanelVisible == false),'lastLapBoxSmaller': slidePanelVisible}" class="lastLap ellipsis">
+                        <span class="racerBoxLowerHeader" >Senaste tid</span>
+                        <span class="racerBoxLowerData" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}">{{racer.last_lap_time}}</span>
+                    </span>
+                    <span ng-class="{'gapBox': (slidePanelVisible == false),'gapBoxSmaller': slidePanelVisible}" class="gap ellipsis">
+                        <span class="racerBoxLowerHeader" >Gap</span>
+                        <span class="racerBoxLowerData">{{racer.gap == ".000" ? '-' : racer.gap }}</span>
+                    </span>
+        </div>
+        <div class="position" style="display: none">{{racer.position}}</div>
+    </div> <!-- End Live Race Display -->
+    <!-- ## END RACE ONGOING MODE ## -->
+
+    <!-- ## RACE RESULTS MODE ## -->
+    <div ng-repeat="racer in lastRaceRacers" class="racerBox shadow" ng-class="{'racerBoxRegular': (slidePanelVisible == false),'racerBoxSmaller': slidePanelVisible}" ng-if="scoreboardState == 'final_results'">
+        <div class="racerBoxUpper racerBoxUpperRegular">
+                    <span class="positionBox">
+                        <span class="racerBoxUpperHeader">Pos</span><br/>
+                        <span ng-if="racer.position != 999" class="racerBoxUpperData">{{racer.position}}</span>
+                    </span>
+                    <span ng-class="{'racerNameBox': (slidePanelVisible == false),'racerNameBoxSmaller': slidePanelVisible}" class="racerName ellipsis">
+                        <span class="racerBoxUpperHeader">Racingnamn</span><br/>
+                        <span class="racerBoxUpperDataRacerName">{{racer.nickname}}</span>
+                    </span>
+                    <span class="kartBox">
+                        <span class="racerBoxUpperHeader">Kart</span><br/>
+                        <span class="racerBoxUpperData">{{racer.kart_num}}</span>
+                    </span>
+                    <span class="lapsBox" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}">
+                        <span class="racerBoxUpperHeader">Varv</span><br/>
+                        <span class="racerBoxUpperData">{{racer.lap_num}}</span>
+                    </span>
+                    <span class="bestLapBox" ng-class="{'racerGotABetterTime': (racer.beatBestLap)}">
+                        <span class="racerBoxUpperHeader">Bästa tid</span><br/>
+                        <span ng-class="{'fastestOverall': racer.isFastest}" ng-if="racer.lap_num != 0" class="racerBoxUpperData">{{racer.fastest_lap_time}}</span>
+                    </span>
+        </div>
+        <div class="racerBoxLower racerBoxLowerRegular">
+                    <span ng-class="{'statusBox': (slidePanelVisible == false),'statusBoxSmaller': slidePanelVisible}" class="status">
+                        <div><img src="images/noarrow.png" class="positionStatusImage"></div>
+                    </span>
+                    <span ng-class="{'avgLapBox': (slidePanelVisible == false),'avgLapBoxSmaller': slidePanelVisible}" class="avgLap ellipsis" style="vertical-align: middle; height: 100%; ">
+                        <span ng-if="slidePanelVisible == false" class="racerBoxLowerHeader" >Snitt</span>
+                        <span ng-if="slidePanelVisible" class="racerBoxLowerHeader" >Snitt</span>
+                        <span class="racerBoxLowerData">{{racer.average_lap_time}}</span>
+                    </span>
+                    <span ng-class="{'lastLapBox': (slidePanelVisible == false),'lastLapBoxSmaller': slidePanelVisible}" class="lastLap">
+                        <span class="racerBoxLowerHeader" >Senaste tid</span>
+                        <span ng-if="racer.position != 999" class="racerBoxLowerData" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}">{{racer.last_lap_time}}</span>
+                    </span>
+                    <span ng-class="{'gapBox': (slidePanelVisible == false),'gapBoxSmaller': slidePanelVisible}" class="gap">
+                        <span class="racerBoxLowerHeader" >Gap</span>
+                        <span ng-if="racer.position != 999" class="racerBoxLowerData">{{racer.gap == ".000" ? '-' : racer.gap }}</span>
+                    </span>
+        </div>
+        <div class="position" style="display: none">{{racer.position}}</div>
+    </div> <!-- End Race Results Display -->
+    <!-- ## END RACE ONGOING MODE ## -->
+
+    <!-- ## DRIVER LINEUP MODE ## -->
+    <div ng-repeat="racer in nextRacers" class="racerBox racerBoxRegular" ng-if="scoreboardState == 'driver_lineup'">
+                    <span class="nextRacerPositionBox">
+                        <span class="nextRacerBoxUpperHeader">Start Pos</span><br/>
+                        <span class="nextRacerBoxUpperData">{{racer.start_position}}</span>
+                    </span>
+                    <span class="racerName nextRacerNameBox ellipsis">
+                        <span class="nextRacerBoxUpperHeader">Racingnamn</span><br/>
+                        <span class="nextRacerBoxUpperData">{{racer.nickname}}</span>
+                    </span>
+        <!-- <img src="images/firsttime.png" style="vertical-align: bottom; width: 35px;" ng-if="racer.is_first_time"> -->
+        <!--<div class="racerBoxContent">#{{racer.start_position}}-{{racer.nickname}}
+            <span ng-if="racer.is_first_time"><img src="images/firsttime.png" style="vertical-align: bottom"></span>
+        </div>-->
+        <div class="position" style="display: none">{{racer.start_position}}</div>
+    </div>
+    <!-- ## END DRIVER LINEUP MODE ## -->
+
+    <!-- ## LAST FEW HEATS MODE ## IN DEVELOPMENT -->
+
+    <div ng-repeat="heat in lastHeatsHistory" class="recentRaceBox" style="float: left; overflow: hidden" ng-if="scoreboardState == 'last_few_heats'">
+        <div style="text-align: left; margin-left: 5px;">
+        <span class="ellipsis"  style="display: inline-block; font-size: 40px; font-weight: bold; color: white">{{heat.race.starts_at | amDateFormat:'H:mm'}} </span>
+        <span class="ellipsis" style="font-size: 40px; font-weight: bold; color: gold; display: inline-block; padding-top: 10px; color: gold;
+        max-width: 490px; min-width: 490px; width:490px; text-align: left; padding-left: 5px">{{heat.race.race_name}}
+        </span> <!-- TODO: Replace temporary CSS styles being borrowed -->
+        </div>
+
+        <div style="text-align: center; color: gold;">
+
+        <span style="display: inline-block; min-width: 100px; width: 100px;
+        max-width: 100px; text-align: center;
+        font-size: 40px; min-height:60px; height: 60px; max-height: 60px;">
+            Pos
+        </span>
+        <span style="display: inline-block; min-width: 300px; width: 300px;
+        max-width: 300px; text-align: left;
+        font-size: 40px; min-height:60px; height: 60px; max-height: 60px;">
+            Racer
+        </span>
+        <!--<span style="display: inline-block; min-width: 100px; width: 100px;-->
+        <!--max-width: 100px; text-align: center;-->
+        <!--font-size: 40px; min-height:60px; height: 60px; max-height: 60px;">-->
+            <!--Laps-->
+        <!--</span>-->
+        <span style="display: inline-block; min-width: 180px; width: 180px;
+        max-width: 180px; text-align: center;
+        font-size: 40px; min-height:60px; height: 60px; max-height: 60px;">
+            Best Lap
+        </span>
+
+        </div>
+
+        <div style="text-align: center;" ng-repeat="racer in heat.scoreboard">
+
+                    <span style="display: inline-block; min-width: 100px; width: 100px;
+        max-width: 100px; text-align: center;
+        font-size: 40px; min-height:60px; height: 60px; max-height: 60px;" class="ellipsis">
+            {{racer.position}}
+        </span>
+        <span style="display: inline-block; min-width: 300px; width: 300px;
+        max-width: 300px; text-align: left;
+        font-size: 40px; min-height:60px; height: 60px; max-height: 60px;" class="ellipsis">
+            {{racer.nickname}}
+        </span>
+        <!--<span style="display: inline-block; min-width: 100px; width: 100px;-->
+        <!--max-width: 100px; text-align: center;-->
+        <!--font-size: 40px; min-height:60px; height: 60px; max-height: 60px;" class="ellipsis">-->
+            <!--{{racer.lap_num}}-->
+        <!--</span>-->
+        <span style="display: inline-block; min-width: 180px; width: 180px;
+        max-width: 180px; text-align: center;
+        font-size: 40px; min-height:60px; height: 60px; max-height: 60px;" class="ellipsis">
+            {{racer.fastest_lap_time}}
+        </span>
+        </div>
+    </div>
+
+    <!-- ## LAST FEW HEATS MODE ## -->
+
+</div>
+
+<!-- ## COMING UP NEXT SIDE PANEL - LIVE DATA ## -->
+<div class="comingUpNextBox hiddenComingUpNextBox" style="padding-bottom: 10px;" ng-if="scoreboardState != 'race_simulation'">
+    <div class="nextRacersHeader">Nästa race</div>
+    <div class="nextRacersContentBig ellipsis">{{nextRace.race.race_name}}</div>
+    <div class="nextRacersHeader" ng-if="!showHeatNumberInsteadOfRaceTime">Starttid</div>
+    <div class="nextRacersContentBig" ng-if="!showHeatNumberInsteadOfRaceTime">{{nextRace.race.starts_at.split(" ")[1].substring(0,5)}}</div>
+    <div class="nextRacersHeader" ng-if="showHeatNumberInsteadOfRaceTime">Heat Number</div>
+    <div class="nextRacersContentBig" ng-if="showHeatNumberInsteadOfRaceTime">{{nextRace.race.id | formatHeatNumber}}</div>
+
+    <div class="nextRacersHeader">Grid Lineup</div>
+    <div style="width: 100%;">
+        <span class="comingUpNextPosHeader">#</span>
+        <span class="comingUpNextRacerNameHeader">Racingnamn</span>
+        <span class="comingUpNextSpecialSymbol"></span>
+    </div>
+    <div style="width: 100%;" ng-repeat="racer in nextRacers | orderObjectBy: 'start_position'">
+        <span class="comingUpNextPosContent">{{racer.start_position}}</span>
+        <span class="comingUpNextRacerNameContent ellipsis">{{racer.nickname}}</span>
+        <span class="comingUpNextSpecialSymbolContent"><!--<img src="images/firsttime.png" ng-if="racer.is_first_time" class="comingUpNextStar">--></span>
+    </div>
+</div>
+<!-- ## END COMING UP NEXT SIDE PANEL - LIVE DATA ## -->
+
+</div>
+<!-- ## END MAIN ISOTOPE CONTAINER ## -->
+
+<!-- ## BOTTOM STATUS BAR ## -->
+<div class="statusBar">
+        <span class="statusBarLeftBox">
+            {{fastestTimeLabel == 'Today' ? 'Dagens' :
+            (fastestTimeLabel == 'This Week' ? 'Veckans' :
+            (fastestTimeLabel == 'This Month' ? 'Månadens' : '')
+            )}}
+            <br/>bästa tider
+        </span>
+
+        <span ng-repeat="fastestTime in fastestTimesThisWeek" class="statusBarTimeBox">
+            <span class="fastestTimeName ellipsis">{{fastestTime.nickname}}</span>
+            <br/>
+            <span class="fastestTimeTime">{{fastestTime.lap_time}}</span>
+        </span>
+
+        <span class="statusBarNoneBox" ng-if="fastestTimesThisWeek.length == 0">
+            None yet!
+        </span>
+
+        <span class="statusBarTimeBox">
+            <span class="fastestTimeName ellipsis" style="font-weight: bold; font-style: italic">Powered By</span>
+            <br/>
+            <span class="fastestTimeTime"><img src="images/clubspeed_full_logo_300.png" class="clubSpeedLogo"></span>
+        </span>
+</div>
+<!-- ## END BOTTOM STATUS BAR ## -->
+
+</div>
