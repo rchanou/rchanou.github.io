@@ -295,9 +295,14 @@
                     {{ Form::label('country', $strings['str_countries'] . ':') }}
                     @if ($settings['CfgRegCntryReq'])
                     <span class="requiredAsterisk">*</span><br/>
-                    {{ Form::select('Country', $settings['countries'], $settings['defaultCountry'] ?: (Config::has('config.defaultCountry') ? Config::get('config.defaultCountry') : Input::old('Country','United States')), array('style' => 'color: black; height: 26px', 'class' => 'required','id'=>'country') ) }}
+                    {{ Form::select('Country', $settings['countries'], isset($settings['defaultCountry'])? $settings['defaultCountry']
+                      : ( Config::has('config.defaultCountry') ? Config::get('config.defaultCountry') : Input::old('Country','United States') ),
+                      array('style' => 'color: black; height: 26px', 'class' => 'required','id'=>'country') ) }}
                     @else
-                    <br/>{{ Form::select('Country', $settings['countries'], $settings['defaultCountry'] ?: (Config::has('config.defaultCountry') ? Config::get('config.defaultCountry') : Input::old('Country','United States')) ,array('style' => 'color: black; height: 26px', 'id'=>'country') ) }}
+                    <br/>
+                    {{ Form::select('Country', $settings['countries'], isset($settings['defaultCountry'])? $settings['defaultCountry']
+                      : ( Config::has('config.defaultCountry') ? Config::get('config.defaultCountry') : Input::old('Country','United States') ),
+                      array('style' => 'color: black; height: 26px', 'id'=>'country') ) }}
                     @endif
                 </div>
                 @endif
@@ -451,7 +456,7 @@
             @else
             <br/>{{ Form::text('mobilephone',Input::old('mobilephone',''), array('maxlength'=>'50')) }}<p/>
             @endif
-            @if( false && $settings['showTextingWaiver'] && $settings['textingWaiver'] && $settings['textingWaiver'] != '' )
+            @if( isset($settings['showTextingWaiver']) && $settings['showTextingWaiver'] && $settings['textingWaiver'] && $settings['textingWaiver'] != '' )
                 {{$settings['textingWaiver']}}
             @elseif( Config::has('config.showTextingWaiver') && Config::get('config.showTextingWaiver') && Config::has('config.textingWaiver') )
                 {{Config::get('config.textingWaiver')}}
@@ -487,7 +492,7 @@
                     <input type="hidden" name="disableEmailIfMinor" id="disableEmailIfMinor" value="false">
                 @endif
 
-            {{str_replace('##TRACKNAME##',$settings['BusinessName'], $strings['str_emailText'])}}<p/>
+            {{str_replace('##TRACKNAME##',$settings['BusinessName'], isset($settings['emailText']) ? $settings['emailText'] : $strings['str_emailText'])}}<p/>
 
             {{ Form::checkbox('consenttoemail', 'true',false) }} {{ Form::label('consenttoemail', $strings['str_emailsOptIn']) }}
             </div>
