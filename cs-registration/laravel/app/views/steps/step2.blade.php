@@ -451,7 +451,7 @@
             @else
             <br/>{{ Form::text('mobilephone',Input::old('mobilephone',''), array('maxlength'=>'50')) }}<p/>
             @endif
-            @if( $settings['showTextingWaiver'] && $settings['textingWaiver'] && $settings['textingWaiver'] != '' )
+            @if( false && $settings['showTextingWaiver'] && $settings['textingWaiver'] && $settings['textingWaiver'] != '' )
                 {{$settings['textingWaiver']}}
             @elseif( Config::has('config.showTextingWaiver') && Config::get('config.showTextingWaiver') && Config::has('config.textingWaiver') )
                 {{Config::get('config.textingWaiver')}}
