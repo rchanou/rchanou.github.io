@@ -487,7 +487,7 @@
                     <input type="hidden" name="disableEmailIfMinor" id="disableEmailIfMinor" value="false">
                 @endif
 
-            {{str_replace('##TRACKNAME##',$settings['BusinessName'], $settings['emailText'] ?: $strings['str_emailText'])}}<p/>
+            {{str_replace('##TRACKNAME##',$settings['BusinessName'], $strings['str_emailText'])}}<p/>
 
             {{ Form::checkbox('consenttoemail', 'true',false) }} {{ Form::label('consenttoemail', $strings['str_emailsOptIn']) }}
             </div>
