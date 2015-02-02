@@ -36,15 +36,14 @@
             lapTime = parseFloat(lapTime);
             var minutes = Math.floor(lapTime / 60);
             var seconds = pad(Math.floor(lapTime % 60),2);
-            var milliseconds = parseInt((lapTime - parseInt(lapTime))*1000);
-
-
+            var milliseconds = parseInt((lapTime*1000 - parseInt(lapTime)*1000));
+            var millisecondsPadded = pad(milliseconds,3);
             var convertedLapTime = "";
             if (minutes > 0)
             {
                 convertedLapTime += minutes + ":";
             }
-            convertedLapTime += seconds + "." + milliseconds;
+            convertedLapTime += seconds + "." + millisecondsPadded;
             return convertedLapTime;
 
             function pad(num, size) {
