@@ -19,6 +19,8 @@ Route::get('channelSettings', 'ChannelController@settings');
 Route::post('channelSettingsSubmit', 'ChannelController@settingsSubmit');
 Route::post('channel/deploy','DeployController@deploy');
 Route::get('speedScreen', 'ChannelController@speedScreen');
+Route::post('channel/images/update', 'ChannelController@updateImage');
+Route::post('channel/videos/update', 'ChannelController@updateVideo');
 
 /* Booking */
 

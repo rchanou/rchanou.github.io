@@ -13,6 +13,16 @@ Speed Screen Channels
 Speed Screen Channels
 @stop
 
+<style>
+  .slide {
+    border: thin solid grey;
+  }
+
+  .slide:hover {
+    border: 3px solid #3498db;
+  }
+</style>
+
 @section('breadcrumb')
     <a href="{{URL::to('dashboard')}}" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
     <a href="#" class="current">Speed Screen Channels</a>
@@ -51,7 +61,7 @@ Speed Screen Channels
                         <!-- Channel options tabs -->
                         <ul class="nav nav-tabs tab-bricky">
                             <li class="active"> <a data-toggle="tab" href="#panel_tab2_deploy_channel{{$currentChannel->channelId}}"> Deploy </a> </li>
-                            <li class="" style="display: none"> <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}"> Slide Lineup </a> </li>
+                            <li class=""> <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}"> Slide Lineup </a> </li>
                             <li class="" style="display: none"> <a data-toggle="tab" href="#panel_tab2_channelsettings_channel{{$currentChannel->channelId}}"> Channel Settings </a> </li>
                         </ul>
                         <!-- Content of all channel tabs -->
@@ -97,7 +107,7 @@ Speed Screen Channels
                             <!-- Slide lineup tab -->
                             <div id="panel_tab2_slidelineup_channel{{$currentChannel->channelId}}" class="tab-pane">
                                 <div class="alert alert-info">
-                                    <p> This feature is under development and will allow editing of each slide in this channel. <p/>In the meanwhile, please proceed to the <a href="http://{{$_SERVER['HTTP_HOST']}}/sp_admin" target="_blank">current admin panel</a>. </p>
+                                    Loading...
                                 </div>
                                 @foreach($channelLineups[$currentChannel->channelId] as $currentSlideIndex => $currentSlide)
                                 <div class="widget-box collapsible" style="display: none;">
