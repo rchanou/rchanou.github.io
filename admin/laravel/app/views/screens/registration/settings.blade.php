@@ -66,15 +66,39 @@ Registrations Settings
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if(isset($isChecked['genderShown']) && isset($isChecked['genderRequired']))
+                                  @foreach (array_filter($customerFields, function($field){ return !isset($field['secondColumn']); }) as $field)
+                                    @if(isset($isChecked[$field['shownId']]) && isset($isChecked[$field['requiredId']]))
                                     <tr>
-                                        <td>Gender</td>
-                                        <td><input id="genderShown" name="genderShown" type="checkbox" {{$isChecked['genderShown']}}></td>
-                                        <td><input id="genderRequired" name="genderRequired" type="checkbox" {{$isChecked['genderRequired']}}></td>
+                                      <td>{{$field['label']}}</td>
+                                      <td><input id="{{$field['shownId']}}" name="{{$field['shownId']}}" type="checkbox" {{$isChecked[$field['shownId']]}}></td>
+                                      <td><input id="{{$field['requiredId']}}" name="{{$field['requiredId']}}" type="checkbox" {{$isChecked[$field['requiredId']]}}></td>
                                     </tr>
                                     @endif
+                                  @endforeach
                               </tbody>
                           </table>
+                      </div>
+                      <div class="col-sm-6">
+                        <table class="table table-bordered table-striped table-hover text-center">
+                          <thead>
+                            <tr>
+                              <th>Field</th>
+                              <th style="width: 33%">Shown</th>
+                              <th style="width: 33%">Required</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @foreach (array_filter($customerFields, function($field){ return isset($field['secondColumn']); }) as $field)
+                              @if(isset($isChecked[$field['shownId']]) && isset($isChecked[$field['requiredId']]))
+                              <tr>
+                                <td>{{$field['label']}}</td>
+                                <td><input id="{{$field['shownId']}}" name="{{$field['shownId']}}" type="checkbox" {{$isChecked[$field['shownId']]}}></td>
+                                <td><input id="{{$field['requiredId']}}" name="{{$field['requiredId']}}" type="checkbox" {{$isChecked[$field['requiredId']]}}></td>
+                              </tr>
+                              @endif
+                            @endforeach
+                          </tbody>
+                        </table>
                       </div>
                       <div class="col-sm-12">
                         <div class="form-actions" style="margin-bottom: 10px;">
@@ -277,17 +301,19 @@ Registrations Settings
 
     $(document).ready(function () {
 
-        //If a customer field is not shown, make sure it is not required
+        @foreach ($customerFields as $field)
 
-        $('#genderShown').on('ifUnchecked',function (event) {
-            $('#genderRequired').iCheck('uncheck');
-        });
+          //If a customer field is not shown, make sure it is not required
+          $("#{{$field['shownId']}}").on('ifUnchecked',function (event) {
+            $("#{{$field['requiredId']}}").iCheck('uncheck');
+          });
 
-        //If a customer field is required, make sure it is shown
+          //If a customer field is required, make sure it is shown
+          $("#{{$field['requiredId']}}").on('ifChecked',function (event) {
+            $("#{{$field['shownId']}}").iCheck('check');
+          });
 
-        $('#genderRequired').on('ifChecked',function (event) {
-            $('#genderShown').iCheck('check');
-        });
+        @endforeach
 
     });
 

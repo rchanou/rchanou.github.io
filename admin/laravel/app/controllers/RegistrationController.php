@@ -18,7 +18,6 @@ class RegistrationController extends BaseController
 
         $registrationSettings = CS_API::getSettingsFor('Registration');
 
-        //$mainEngineSettings = CS_API::getSettingsFor('MainEngine');
         $mainEngineSettings = new stdClass();
         $mainEngineSettings->settings = new stdClass();
         $mainEngineSettingNames = array('Reg_EnableFacebook', 'Reg_CaptureProfilePic', 'AgeNeedParentWaiver', 'AgeAllowOnlineReg', 'FacebookPageURL');
@@ -59,8 +58,28 @@ class RegistrationController extends BaseController
         }
         Session::put('reg1Settings', $reg1SettingsData);
 
+        $customerFields = array(
+          array('shownId' => 'genderShown', 'requiredId' => 'genderRequired', 'label' => 'Gender'),
+          array('shownId' => 'CfgRegAddShow', 'requiredId' => 'CfgRegAddReq', 'label' => 'Address'),
+          array('shownId' => 'CfgRegCityShow', 'requiredId' => 'CfgRegCityReq', 'label' => 'City'),
+          array('shownId' => 'CfgRegStateShow', 'requiredId' => 'CfgRegStateReq', 'label' => 'State'),
+          array('shownId' => 'CfgRegZipShow', 'requiredId' => 'CfgRegZipReq', 'label' => 'Zip'),
+          array('shownId' => 'CfgRegCntryShow', 'requiredId' => 'CfgRegCntryReq', 'label' => 'Country'),
+          array('shownId' => 'CfgRegRcrNameShow', 'requiredId' => 'CfgRegRcrNameReq', 'label' => 'Racer Name'),
+          array('shownId' => 'CfgRegSrcShow', 'requiredId' => 'CfgRegSrcReq', 'label' => 'Source'),
+          array('shownId' => 'CfgRegDrvrLicShow', 'requiredId' => 'CfgRegDrvrLicReq', 'label' => 'Driver\'s License', 'secondColumn' => true),
+          array('shownId' => 'CfgRegPhoneShow', 'requiredId' => 'CfgRegPhoneReq', 'label' => 'Phone', 'secondColumn' => true),
+          array('shownId' => 'CfgRegEmailShow', 'requiredId' => 'CfgRegEmailReq', 'label' => 'E-mail', 'secondColumn' => true),
+          array('shownId' => 'cfgRegCustTxt1Show', 'requiredId' => 'cfgRegCustTxt1req', 'label' => 'Custom Text 1', 'secondColumn' => true),
+          array('shownId' => 'cfgRegCustTxt2Show', 'requiredId' => 'cfgRegCustTxt2req', 'label' => 'Custom Text 2', 'secondColumn' => true),
+          array('shownId' => 'cfgRegCustTxt3Show', 'requiredId' => 'cfgRegCustTxt3req', 'label' => 'Custom Text 3', 'secondColumn' => true),
+          array('shownId' => 'cfgRegCustTxt4Show', 'requiredId' => 'cfgRegCustTxt4req', 'label' => 'Custom Text 4', 'secondColumn' => true)
+        );
+
+
         return View::make('/screens/registration/settings',
             array('controller' => 'RegistrationController',
+                  'customerFields' => $customerFields,
                   'isChecked' => $registrationSettingsCheckedData,
                   'registrationSettings' => $registrationSettingsData,
                   'mainEngineSettings' => $mainEngineSettingsData
@@ -72,13 +91,61 @@ class RegistrationController extends BaseController
         $input = Input::all();
 
         //Begin formatting form input for processing
+        $newRegSettings = array(
+          'cfgRegAllowMinorToSign',
+          'CfgRegDisblEmlForMinr',
+          'CfgRegUseMsign',
+          'CfgRegAddShow',
+          'CfgRegAddReq',
+          'CfgRegCityShow',
+          'CfgRegCityReq',
+          'CfgRegStateShow',
+          'CfgRegStateReq',
+          'CfgRegZipShow',
+          'CfgRegZipReq',
+          'CfgRegCntryShow',
+          'CfgRegCntryReq',
+          'CfgRegRcrNameShow',
+          'CfgRegRcrNameReq',
+          'CfgRegSrcShow',
+          'CfgRegSrcReq',
+          'cfgRegCustTxt1Show',
+          'cfgRegCustTxt1req',
+          'cfgRegCustTxt2Show',
+          'cfgRegCustTxt2req',
+          'cfgRegCustTxt3Show',
+          'cfgRegCustTxt3req',
+          'cfgRegCustTxt4Show',
+          'cfgRegCustTxt4req',
+          'CfgRegDrvrLicShow',
+          'CfgRegDrvrLicReq',
+          'CfgRegPhoneShow',
+          'CfgRegPhoneReq',
+          'CfgRegEmailShow',
+          'CfgRegEmailReq',
+          'genderRequired',
+          'genderShown',
+          'cfgRegAllowMinorToSign',
+          'CfgRegDisblEmlForMinr',
+          'CfgRegUseMsign',
+          'showTextingWaiver'
+        );
+
         $newRegistrationSettings = array();
-        $newRegistrationSettings['genderRequired'] = isset($input['genderRequired']) ? 1 : 0;
+
+        foreach ($newRegSettings as $settingName){
+          //if (isset($input[$settingName])){
+            $newRegistrationSettings[$settingName] = isset($input[$settingName]) ? 1 : 0;
+          //}
+        }
+
+        /*$newRegistrationSettings['genderRequired'] = isset($input['genderRequired']) ? 1 : 0;
         $newRegistrationSettings['genderShown'] = isset($input['genderShown']) ? 1 : 0;
         $newRegistrationSettings['cfgRegAllowMinorToSign'] = isset($input['cfgRegAllowMinorToSign']) ? 1 : 0;
         $newRegistrationSettings['CfgRegDisblEmlForMinr'] = isset($input['CfgRegDisblEmlForMinr']) ? 1 : 0;
         $newRegistrationSettings['CfgRegUseMsign'] = isset($input['CfgRegUseMsign']) ? 1 : 0;
-        $newRegistrationSettings['showTextingWaiver'] = isset($input['showTextingWaiver']) ? 1 : 0;
+        $newRegistrationSettings['showTextingWaiver'] = isset($input['showTextingWaiver']) ? 1 : 0;*/
+
         $newRegistrationSettings['defaultCountry'] = isset($input['defaultCountry']) ? $input['defaultCountry'] : '';
         $newRegistrationSettings['emailText'] = isset($input['emailText']) ? $input['emailText'] : '';
         $newRegistrationSettings['textingWaiver'] = isset($input['textingWaiver']) ? $input['textingWaiver'] : '';

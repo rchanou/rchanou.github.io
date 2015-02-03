@@ -53,6 +53,12 @@ function insertRegistrationSetting($SettingName, $SettingValue, $DataType = null
     'CfgRegUseMsign' => 'If checked, signatures are enabled.'
   );
 
+  if (isset($settingDescriptions[$SettingName])){
+    $description = $settingDescriptions[$SettingName];
+  } else {
+    $description = '';
+  }
+
   $TerminalName = 'Registration';
   $Fixed = false;
 
@@ -78,7 +84,7 @@ function insertRegistrationSetting($SettingName, $SettingValue, $DataType = null
     $stmt->bindParam(':SettingName', $SettingName);
     $stmt->bindParam(':SettingValue', $SettingValue);
     $stmt->bindParam(':DefaultSetting', $SettingValue);
-    $stmt->bindParam(':Description', $settingDescriptions[$SettingName]);
+    $stmt->bindParam(':Description', $description);
     $stmt->bindParam(':DataType', $DataType);
     $stmt->bindParam(':Fixed', $Fixed);
     $stmt->execute();
@@ -103,16 +109,53 @@ foreach($settingNames as $SettingName) {
 }
 
 
-$cfgSth = $conn->prepare("SELECT cfgRegAllowMinorToSign, CfgRegDisblEmlForMinr, CfgRegUseMsign FROM dbo.CfgRegistration");
+$cfgSth = $conn->prepare("SELECT * FROM dbo.CfgRegistration");
 $cfgSth->execute();
 $cfgEntry = $cfgSth->fetchAll();
 
 if(count($cfgEntry) === 0){
   echo "CfgRegistration settings not found.";
 } else {
-  insertRegistrationSetting('cfgRegAllowMinorToSign', $cfgEntry[0]['cfgRegAllowMinorToSign'], 'bit');//, 'allowMinorToSign');
-  insertRegistrationSetting('CfgRegDisblEmlForMinr', $cfgEntry[0]['CfgRegDisblEmlForMinr'], 'bit');//, 'disableEmailForMinor');
-  insertRegistrationSetting('CfgRegUseMsign', $cfgEntry[0]['CfgRegUseMsign'], 'bit');//, 'enableSignature');
+  $cfgRegSettingNames = array(
+    'cfgRegAllowMinorToSign',
+    'CfgRegDisblEmlForMinr',
+    'CfgRegUseMsign',
+    'CfgRegAddShow',
+    'CfgRegAddReq',
+    'CfgRegCityShow',
+    'CfgRegCityReq',
+    'CfgRegStateShow',
+    'CfgRegStateReq',
+    'CfgRegZipShow',
+    'CfgRegZipReq',
+    'CfgRegCntryShow',
+    'CfgRegCntryReq',
+    'CfgRegRcrNameShow',
+    'CfgRegRcrNameReq',
+    'CfgRegSrcShow',
+    'CfgRegSrcReq',
+    'cfgRegCustTxt1Show',
+    'cfgRegCustTxt1req',
+    'cfgRegCustTxt2Show',
+    'cfgRegCustTxt2req',
+    'cfgRegCustTxt3Show',
+    'cfgRegCustTxt3req',
+    'cfgRegCustTxt4Show',
+    'cfgRegCustTxt4req',
+    'CfgRegDrvrLicShow',
+    'CfgRegDrvrLicReq',
+    'CfgRegPhoneShow',
+    'CfgRegPhoneReq',
+    'CfgRegEmailShow',
+    'CfgRegEmailReq'
+  );
+
+  foreach($cfgRegSettingNames as $settingName){
+    insertRegistrationSetting($settingName, $cfgEntry[0][$settingName], 'bit');
+  }
+  //insertRegistrationSetting('cfgRegAllowMinorToSign', $cfgEntry[0]['cfgRegAllowMinorToSign'], 'bit');
+  //insertRegistrationSetting('CfgRegDisblEmlForMinr', $cfgEntry[0]['CfgRegDisblEmlForMinr'], 'bit');
+  //insertRegistrationSetting('CfgRegUseMsign', $cfgEntry[0]['CfgRegUseMsign'], 'bit');
 }
 
 
