@@ -199,6 +199,13 @@ class Step2Controller extends BaseController {
             return Redirect::to('/step2')->withErrors($messages)->withInput();
         }
 
+        if (isset($input['tooYoungToRegister']) && $input['tooYoungToRegister'])
+        {
+            $messages = new Illuminate\Support\MessageBag;
+            $messages->add('errors', $strings['str_step2SubmitCannot']);
+            return Redirect::to('/step2')->withErrors($messages)->withInput();
+        }
+
         //Error messages in case of validation failure
         $messages = array(
             'birthdate.required' => $strings['str_birthdate.required'],

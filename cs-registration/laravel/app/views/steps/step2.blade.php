@@ -501,6 +501,7 @@
         <input type="hidden" name="isMinor" id="isMinor" value="false">
         <input type="hidden" name="minorAge" id="minorAge" value={{$settings['AgeNeedParentWaiver']}}>
         <input type="hidden" name="ageAllowedToRegister" id="ageAllowedToRegister" value="{{$settings['AgeAllowOnlineReg']}}">
+        <input type="hidden" name="tooYoungToRegister" id="tooYoungToRegister" value="0">
 
         <input type="hidden" id="facebookId" name="facebookId" value="">
         <input type="hidden" id="facebookToken" name="facebookToken" value="">
@@ -596,6 +597,7 @@
         {
             $('#submitButton').addClass('disabled');
             $('#submitButton').val("{{$strings['str_step2SubmitCannot']}}");
+            $('#tooYoungToRegister').val("1");
         }
         else
         {
@@ -603,6 +605,7 @@
             {
                 $('#submitButton').removeClass('disabled');
                 $('#submitButton').val("{{$strings['str_step2Submit']}}");
+                $('#tooYoungToRegister').val("0");
             }
         }
     }
@@ -667,6 +670,7 @@
         {
             $('#submitButton').addClass('disabled');
             $('#submitButton').val("{{$strings['str_step2SubmitCannot']}}");
+            $('#tooYoungToRegister').val("1");
         }
         else
         {
@@ -674,6 +678,7 @@
             {
                 $('#submitButton').removeClass('disabled');
                 $('#submitButton').val("{{$strings['str_step2Submit']}}");
+                $('#tooYoungToRegister').val("0");
             }
         }
     }
