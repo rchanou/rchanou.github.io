@@ -24,7 +24,7 @@
         </span>
         <span ng-if="scoreboardState == 'race_ongoing'">{{currentScoreboard.race.race_name}}<span ng-if="showHeatNumberInsteadOfRaceTime"> - #{{currentScoreboard.race.id | formatHeatNumber}}</span></span>
         <span ng-if="scoreboardState == 'final_results'">{{lastRaceScoreboard.race.race_name}}<span ng-if="showHeatNumberInsteadOfRaceTime"> - #{{lastRaceScoreboard.race.id | formatHeatNumber}}</span> - Final Results</span>
-        <span ng-if="scoreboardState == 'no_races'">No Races</span>
+        <span ng-if="scoreboardState == 'no_races'">Inga race!</span>
         <span ng-if="scoreboardState == 'last_few_heats'">Recent Race Results</span>
         <span ng-if="mode == 'simulation'">Race Simulation</span>
     </div>
@@ -260,7 +260,7 @@
         </span>
 
         <span class="statusBarNoneBox" ng-if="fastestTimesThisWeek.length == 0">
-            None yet!
+            Inga ännu!
         </span>
 
         <span class="statusBarTimeBox">
