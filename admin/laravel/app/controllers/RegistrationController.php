@@ -20,10 +20,17 @@ class RegistrationController extends BaseController
 
         $mainEngineSettings = new stdClass();
         $mainEngineSettings->settings = new stdClass();
-        $mainEngineSettingNames = array('Reg_EnableFacebook', 'Reg_CaptureProfilePic', 'AgeNeedParentWaiver', 'AgeAllowOnlineReg', 'FacebookPageURL');
+        $mainEngineSettingNames = array('Reg_EnableFacebook', 'Reg_CaptureProfilePic', 'AgeNeedParentWaiver', 'AgeAllowOnlineReg', 'FacebookPageURL', 'enableWaiverStep');
         foreach($mainEngineSettingNames as $settingName){
-          $setting = CS_API::getJSON("settings/get", array('group' => 'MainEngine', 'setting' => $settingName))->settings->$settingName;
-          $mainEngineSettings->settings->$settingName = $setting;
+          $result = CS_API::getJSON("settings/get", array('group' => 'MainEngine', 'setting' => $settingName));
+          if (count($result->settings) > 0){
+            $mainEngineSettings->settings->$settingName = $result->settings->$settingName;
+          } else {
+            $mainEngineSettings->settings->$settingName = (object)array(
+              'SettingName' => $settingName,
+              'SettingValue' => null
+            );
+          }
         }
 
         $reg1Settings = CS_API::getSettingsFor('Registration1');
@@ -134,17 +141,8 @@ class RegistrationController extends BaseController
         $newRegistrationSettings = array();
 
         foreach ($newRegSettings as $settingName){
-          //if (isset($input[$settingName])){
-            $newRegistrationSettings[$settingName] = isset($input[$settingName]) ? 1 : 0;
-          //}
+          $newRegistrationSettings[$settingName] = isset($input[$settingName]) ? 1 : 0;
         }
-
-        /*$newRegistrationSettings['genderRequired'] = isset($input['genderRequired']) ? 1 : 0;
-        $newRegistrationSettings['genderShown'] = isset($input['genderShown']) ? 1 : 0;
-        $newRegistrationSettings['cfgRegAllowMinorToSign'] = isset($input['cfgRegAllowMinorToSign']) ? 1 : 0;
-        $newRegistrationSettings['CfgRegDisblEmlForMinr'] = isset($input['CfgRegDisblEmlForMinr']) ? 1 : 0;
-        $newRegistrationSettings['CfgRegUseMsign'] = isset($input['CfgRegUseMsign']) ? 1 : 0;
-        $newRegistrationSettings['showTextingWaiver'] = isset($input['showTextingWaiver']) ? 1 : 0;*/
 
         $newRegistrationSettings['defaultCountry'] = isset($input['defaultCountry']) ? $input['defaultCountry'] : '';
         $newRegistrationSettings['emailText'] = isset($input['emailText']) ? $input['emailText'] : '';
