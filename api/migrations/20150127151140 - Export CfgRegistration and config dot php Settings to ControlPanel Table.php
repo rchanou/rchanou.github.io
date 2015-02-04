@@ -119,47 +119,47 @@ try {
 }
 
 $cfgRegSettingNames = array(
-  'cfgRegAllowMinorToSign',
-  'CfgRegDisblEmlForMinr',
-  'CfgRegUseMsign',
-  'CfgRegAddShow',
-  'CfgRegAddReq',
-  'CfgRegCityShow',
-  'CfgRegCityReq',
-  'CfgRegStateShow',
-  'CfgRegStateReq',
-  'CfgRegZipShow',
-  'CfgRegZipReq',
-  'CfgRegCntryShow',
-  'CfgRegCntryReq',
-  'CfgRegRcrNameShow',
-  'CfgRegRcrNameReq',
-  'CfgRegSrcShow',
-  'CfgRegSrcReq',
-  'cfgRegCustTxt1Show',
-  'cfgRegCustTxt1req',
-  'cfgRegCustTxt2Show',
-  'cfgRegCustTxt2req',
-  'cfgRegCustTxt3Show',
-  'cfgRegCustTxt3req',
-  'cfgRegCustTxt4Show',
-  'cfgRegCustTxt4req',
-  'CfgRegDrvrLicShow',
-  'CfgRegDrvrLicReq',
-  'CfgRegPhoneShow',
-  'CfgRegPhoneReq',
-  'CfgRegEmailShow',
-  'CfgRegEmailReq'
+  'cfgRegAllowMinorToSign' => '0',
+  'CfgRegDisblEmlForMinr' => '1',
+  'CfgRegUseMsign' => '1',
+  'CfgRegAddShow' => '1',
+  'CfgRegAddReq' => '0',
+  'CfgRegCityShow' => '1',
+  'CfgRegCityReq' => '0',
+  'CfgRegStateShow' => '1',
+  'CfgRegStateReq' => '0',
+  'CfgRegZipShow' => '1',
+  'CfgRegZipReq' => '0',
+  'CfgRegCntryShow' => '1',
+  'CfgRegCntryReq' => '0',
+  'CfgRegRcrNameShow' => '1',
+  'CfgRegRcrNameReq' => '1',
+  'CfgRegSrcShow' => '1',
+  'CfgRegSrcReq' => '0',
+  'cfgRegCustTxt1Show' => '0',
+  'cfgRegCustTxt1req' => '0',
+  'cfgRegCustTxt2Show' => '0',
+  'cfgRegCustTxt2req' => '0',
+  'cfgRegCustTxt3Show' => '0',
+  'cfgRegCustTxt3req' => '0',
+  'cfgRegCustTxt4Show' => '0',
+  'cfgRegCustTxt4req' => '0',
+  'CfgRegDrvrLicShow' => '0',
+  'CfgRegDrvrLicReq' => '0',
+  'CfgRegPhoneShow' => '1',
+  'CfgRegPhoneReq' => '0',
+  'CfgRegEmailShow' => '1',
+  'CfgRegEmailReq' => '0'
 );
 
 if(!isset($cfgEntry) || count($cfgEntry) === 0){
   echo "CfgRegistration table or settings not found. Inserting default entries.<br/>";
 
-  foreach($cfgRegSettingNames as $settingName){
-    insertRegistrationSetting($settingName, '0', 'bit');
+  foreach($cfgRegSettingNames as $settingName => $settingValue){
+    insertRegistrationSetting($settingName, $settingValue, 'bit');
   }
 } else {
-  foreach($cfgRegSettingNames as $settingName){
+  foreach($cfgRegSettingNames as $settingName => $settingValue){
     insertRegistrationSetting($settingName, $cfgEntry[0][$settingName], 'bit');
   }
 }
