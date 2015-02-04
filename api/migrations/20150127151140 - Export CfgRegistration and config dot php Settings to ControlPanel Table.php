@@ -168,7 +168,7 @@ if(!isset($cfgEntry) || count($cfgEntry) === 0){
 // Add any missing Registration 1 and MainEngine registration settings
 insertRegistrationSetting('enableWaiverStep', '1', 'bit', null, 'Registration1');
 insertRegistrationSetting('FacebookPageURL', '', '65535', null, 'MainEngine');
-insertRegistrationSetting('Reg_EnableFacebook', '0', 'bit', null, 'MainEngine');
+insertRegistrationSetting('Reg_EnableFacebook', '1', 'bit', null, 'MainEngine');
 insertRegistrationSetting('Reg_CaptureProfilePic', '0', 'bit', null, 'MainEngine');
 insertRegistrationSetting('AgeNeedParentWaiver', '18', 'numericp', null, 'MainEngine');
 insertRegistrationSetting('AgeAllowOnlineReg', '16', 'numericp', null, 'MainEngine');
