@@ -111,46 +111,54 @@ foreach($settingNames as $SettingName) {
 
 // copy CfgRegistration settings to ControlPanel
 $cfgSth = $conn->prepare("SELECT * FROM dbo.CfgRegistration");
-$cfgSth->execute();
-$cfgEntry = $cfgSth->fetchAll();
 
-if(count($cfgEntry) === 0){
-  echo "CfgRegistration settings not found.";
+try {
+  $cfgSth->execute();
+  $cfgEntry = $cfgSth->fetchAll();
+} catch(Exception $ex){
+}
+
+$cfgRegSettingNames = array(
+  'cfgRegAllowMinorToSign',
+  'CfgRegDisblEmlForMinr',
+  'CfgRegUseMsign',
+  'CfgRegAddShow',
+  'CfgRegAddReq',
+  'CfgRegCityShow',
+  'CfgRegCityReq',
+  'CfgRegStateShow',
+  'CfgRegStateReq',
+  'CfgRegZipShow',
+  'CfgRegZipReq',
+  'CfgRegCntryShow',
+  'CfgRegCntryReq',
+  'CfgRegRcrNameShow',
+  'CfgRegRcrNameReq',
+  'CfgRegSrcShow',
+  'CfgRegSrcReq',
+  'cfgRegCustTxt1Show',
+  'cfgRegCustTxt1req',
+  'cfgRegCustTxt2Show',
+  'cfgRegCustTxt2req',
+  'cfgRegCustTxt3Show',
+  'cfgRegCustTxt3req',
+  'cfgRegCustTxt4Show',
+  'cfgRegCustTxt4req',
+  'CfgRegDrvrLicShow',
+  'CfgRegDrvrLicReq',
+  'CfgRegPhoneShow',
+  'CfgRegPhoneReq',
+  'CfgRegEmailShow',
+  'CfgRegEmailReq'
+);
+
+if(!isset($cfgEntry) || count($cfgEntry) === 0){
+  echo "CfgRegistration table or settings not found. Inserting default entries.<br/>";
+
+  foreach($cfgRegSettingNames as $settingName){
+    insertRegistrationSetting($settingName, '0', 'bit');
+  }
 } else {
-  $cfgRegSettingNames = array(
-    'cfgRegAllowMinorToSign',
-    'CfgRegDisblEmlForMinr',
-    'CfgRegUseMsign',
-    'CfgRegAddShow',
-    'CfgRegAddReq',
-    'CfgRegCityShow',
-    'CfgRegCityReq',
-    'CfgRegStateShow',
-    'CfgRegStateReq',
-    'CfgRegZipShow',
-    'CfgRegZipReq',
-    'CfgRegCntryShow',
-    'CfgRegCntryReq',
-    'CfgRegRcrNameShow',
-    'CfgRegRcrNameReq',
-    'CfgRegSrcShow',
-    'CfgRegSrcReq',
-    'cfgRegCustTxt1Show',
-    'cfgRegCustTxt1req',
-    'cfgRegCustTxt2Show',
-    'cfgRegCustTxt2req',
-    'cfgRegCustTxt3Show',
-    'cfgRegCustTxt3req',
-    'cfgRegCustTxt4Show',
-    'cfgRegCustTxt4req',
-    'CfgRegDrvrLicShow',
-    'CfgRegDrvrLicReq',
-    'CfgRegPhoneShow',
-    'CfgRegPhoneReq',
-    'CfgRegEmailShow',
-    'CfgRegEmailReq'
-  );
-
   foreach($cfgRegSettingNames as $settingName){
     insertRegistrationSetting($settingName, $cfgEntry[0][$settingName], 'bit');
   }
