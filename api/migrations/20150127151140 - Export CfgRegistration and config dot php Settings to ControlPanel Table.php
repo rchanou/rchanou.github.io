@@ -23,7 +23,7 @@ if(!file_exists($registration_config_file)) {
 }
 
 
-// Get private key
+// Get private key, config objects and SQL connections
 require_once('../config.php');
 if(!isset($privateKey)) {
   die('$privateKey is not set! Exiting!');
@@ -40,7 +40,8 @@ $conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 $stmt = $conn->prepare("INSERT INTO ControlPanel (TerminalName, SettingName, DataType, DefaultSetting, SettingValue, Description, Fixed, CreatedDate) VALUES (:TerminalName, :SettingName, :DataType, :DefaultSetting, :SettingValue, :Description, :Fixed, GETDATE())");
 
 
-function insertRegistrationSetting($SettingName, $SettingValue, $DataType = null, $NewName = null){
+// main function to be used to import registration settings
+function insertRegistrationSetting($SettingName, $SettingValue, $DataType = null, $NewName = null, $TerminalName = 'Registration'){
   global $conn, $stmt;
 
   $settingDescriptions = array(
@@ -59,7 +60,6 @@ function insertRegistrationSetting($SettingName, $SettingValue, $DataType = null
     $description = '';
   }
 
-  $TerminalName = 'Registration';
   $Fixed = false;
 
   if ($DataType === null){
@@ -95,6 +95,7 @@ function insertRegistrationSetting($SettingName, $SettingValue, $DataType = null
 }
 
 
+// add config.php and/or config.orig.php settings to ControlPanel
 foreach($settingNames as $SettingName) {
   if (isset($config[$SettingName])){
     $SettingValue = $config[$SettingName];
@@ -104,11 +105,11 @@ foreach($settingNames as $SettingName) {
     insertRegistrationSetting($SettingName, $SettingValue);
   } else {
     insertRegistrationSetting($SettingName, "");
-    //echo $SettingName . " not set in config.php or config.orig.php. Skipping...<br/>";
   }
 }
 
 
+// copy CfgRegistration settings to ControlPanel
 $cfgSth = $conn->prepare("SELECT * FROM dbo.CfgRegistration");
 $cfgSth->execute();
 $cfgEntry = $cfgSth->fetchAll();
@@ -153,10 +154,16 @@ if(count($cfgEntry) === 0){
   foreach($cfgRegSettingNames as $settingName){
     insertRegistrationSetting($settingName, $cfgEntry[0][$settingName], 'bit');
   }
-  //insertRegistrationSetting('cfgRegAllowMinorToSign', $cfgEntry[0]['cfgRegAllowMinorToSign'], 'bit');
-  //insertRegistrationSetting('CfgRegDisblEmlForMinr', $cfgEntry[0]['CfgRegDisblEmlForMinr'], 'bit');
-  //insertRegistrationSetting('CfgRegUseMsign', $cfgEntry[0]['CfgRegUseMsign'], 'bit');
 }
+
+
+// Add any missing Registration 1 and MainEngine registration settings
+insertRegistrationSetting('enableWaiverStep', '1', 'bit', null, 'Registration1');
+insertRegistrationSetting('FacebookPageURL', '', '65535', null, 'MainEngine');
+insertRegistrationSetting('Reg_EnableFacebook', '0', 'bit', null, 'MainEngine');
+insertRegistrationSetting('Reg_CaptureProfilePic', '0', 'bit', null, 'MainEngine');
+insertRegistrationSetting('AgeNeedParentWaiver', '18', 'numericp', null, 'MainEngine');
+insertRegistrationSetting('AgeAllowOnlineReg', '16', 'numericp', null, 'MainEngine');
 
 
 // Confirm success
