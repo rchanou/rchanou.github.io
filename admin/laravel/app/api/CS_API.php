@@ -209,6 +209,12 @@ class CS_API
         return self::getJSON("channel/$channelId");
     }
 
+    public static function createChannel()
+    {
+      self::initialize();
+      return self::call(self::$apiURL . '/screenTemplate?key=' . self::$privateKey, array('screenTemplateName' => '(untitled)', 'key' => self::$privateKey), 'POST');
+    }
+
     public static function getSettingsFor($terminalName)
     {
         self::initialize();

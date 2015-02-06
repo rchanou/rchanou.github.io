@@ -14,10 +14,6 @@ Speed Screen Channels
 @stop
 
 <style>
-  .slide {
-    border: thin solid grey;
-  }
-
   .slide:hover {
     border: 3px solid #3498db;
   }
@@ -32,14 +28,52 @@ Speed Screen Channels
     <div class="row">
       <div class="row">
         <div class="col-sm-12">
+          @if (Session::has("message"))
+            <div class="alert alert-success fadeAway">
+              <p>{{ Session::get("message") }}</p>
+            </div>
+          @endif
+          @if (Session::has("error"))
+            <div class="alert alert-danger">
+              <p>{{ Session::get("error") }}</p>
+            </div>
+          @endif
+          @if (Session::has("errors"))
+            <div class="alert alert-danger"> <!-- Errors from Laravel validation -->
+              <ul>
+                @foreach ($errors->all('<li>:message</li>') as $message)
+                {{ $message }}
+                @endforeach
+              </ul>
+            </div>
+          @endif
+
           <div class="tabbable inline tabs-left">
             <!-- Channel list tabs on left side -->
             <ul class="nav nav-tabs tab-green">
                 <?php $currentChannelCount = 0;?>
                 @foreach($listOfChannels as $currentChannel)
                 <?php $currentChannelCount++;?>
-                <li{{$currentChannelCount == 1 ? ' class="active"' : ''}}> <a data-toggle="tab" href="#panel_tab4_channel{{$currentChannel->channelId}}">{{$currentChannel->channelId}}. {{$currentChannel->channelName}} </a> </li>
+                <li{{((Session::has('selectLastChannel') && $currentChannelCount == count($channelLineups)) || (!Session::has('selectLastChannel') && $currentChannelCount == 1)) ? ' class="active"' : ''}}>
+                  <a data-toggle="tab" href="#panel_tab4_channel{{$currentChannel->channelId}}">
+                    {{$currentChannel->channelId}}. {{$currentChannel->channelName}}
+                  </a>
+                </li>
                 @endforeach
+                <li>
+                  {{ Form::open(array('action' => 'ChannelController@createChannel')) }}
+                    {{ Form::submit('Create New Channel',
+                      array(
+                        'class' => 'btn btn-success',
+                        'onClick' => '(function(){
+                          this.value = "Creating New Channel...";
+                          this.disabled = true;
+                          this.parentNode.submit();
+                        }).bind(this)()'
+                      )
+                    ) }}
+                  {{ Form::close() }}
+                </li>
             </ul>
 
             <!-- Channel content on right side -->
@@ -47,7 +81,7 @@ Speed Screen Channels
                 <?php $currentChannelCount = 0;?>
                 @foreach($listOfChannels as $currentChannel)
                 <?php $currentChannelCount++; ?>
-                <div id="panel_tab4_channel{{$currentChannel->channelId}}" class="tab-pane channel-tab{{$currentChannelCount == 1 ? ' active' : ''}}">
+                <div id="panel_tab4_channel{{$currentChannel->channelId}}" class="tab-pane channel-tab{{((Session::has('selectLastChannel') && $currentChannelCount == count($channelLineups)) || (!Session::has('selectLastChannel') && $currentChannelCount == 1)) ? ' active' : ''}}">
                     <!-- Channel header -->
                     <div class="row">
                         <div class="col-sm-10">
@@ -62,7 +96,7 @@ Speed Screen Channels
                         <ul class="nav nav-tabs tab-bricky">
                             <li class="active"> <a data-toggle="tab" href="#panel_tab2_deploy_channel{{$currentChannel->channelId}}"> Deploy </a> </li>
                             <li class=""> <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}"> Slide Lineup </a> </li>
-                            <li class="" style="display: none"> <a data-toggle="tab" href="#panel_tab2_channelsettings_channel{{$currentChannel->channelId}}"> Channel Settings </a> </li>
+                            <li class=""> <a data-toggle="tab" href="#panel_tab2_channelsettings_channel{{$currentChannel->channelId}}"> Channel Settings </a> </li>
                         </ul>
                         <!-- Content of all channel tabs -->
                         <div class="tab-content">
@@ -109,22 +143,13 @@ Speed Screen Channels
                                 <div class="alert alert-info">
                                     Loading...
                                 </div>
-                                @foreach($channelLineups[$currentChannel->channelId] as $currentSlideIndex => $currentSlide)
-                                <div class="widget-box collapsible" style="display: none;">
-                                    <div class="widget-title"> <a href="#slide{{$currentSlideIndex+1}}_channel{{$currentChannel->channelId}}" data-toggle="collapse"> <span class="icon"><i class="fa fa-bar-chart-o"></i></span>
-                                            <h5>{{$currentSlideIndex+1}}. {{$currentSlide->type}}</h5>
-                                        </a> </div>
-                                    <div class="collapse" id="slide{{$currentSlideIndex+1}}_channel{{$currentChannel->channelId}}">
-                                        <div class="widget-content"></div>
-                                    </div>
-                                </div>
-                                @endforeach
                             </div>
 
                             <!-- Channel Settings tab -->
                             <div id="panel_tab2_channelsettings_channel{{$currentChannel->channelId}}" class="tab-pane">
-                                <p>Placeholder for channel-wide settings such as "Channel Name" and "Delete" button.</p>
-                                <button class="btn btn-dark-red">Delete Channel</button>
+                              <div class="alert alert-info">
+                                Loading...
+                              </div>
                             </div>
                         </div>
                     </div>

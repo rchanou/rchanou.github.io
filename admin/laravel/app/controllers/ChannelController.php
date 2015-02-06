@@ -31,11 +31,12 @@ class ChannelController extends BaseController
 			. DIRECTORY_SEPARATOR . 'SP_Admin'
 			. DIRECTORY_SEPARATOR . 'ScreenImages';
 
-			/*if (!file_exists($this->slide_image_directory) && getenv('SERVER_ADDR') === '192.168.111.165'){
+			if (!file_exists($this->slide_image_directory) && getenv('SERVER_ADDR') === '192.168.111.165'){
 				// Ronnie's debugging directory
 				$this->slide_image_directory = '\\\\192.168.111.122\\c$\\ClubSpeed\\wwwroot\\SP_Admin\\ScreenImages';
 			}
-			*/
+
+			$this->slide_image_directory = '\\\\192.168.111.122\\c$\\ClubSpeed\\wwwroot\\SP_Admin\\ScreenImages';
 
 			// Video uploader data
 			$this->video_directory = __DIR__
@@ -46,11 +47,9 @@ class ChannelController extends BaseController
 			. DIRECTORY_SEPARATOR . 'assets'
 			. DIRECTORY_SEPARATOR . 'videos';
 
-			/*
 			if (!file_exists($this->video_directory) && getenv('SERVER_ADDR') == '192.168.111.165'){
 				$this->video_directory = '\\\\192.168.111.122\\c$\\clubspeedapps\\assets\\videos';
 			}
-			*/
 		}
 
 		private function return_bytes($val) {
@@ -114,7 +113,7 @@ class ChannelController extends BaseController
 				// permissions of the temporary folder.
 				exec('c:\windows\system32\icacls.exe ' . $this->video_directory . DIRECTORY_SEPARATOR . $filename . ' /inheritance:e');
 
-				return Response::json(array('message' => 'Image uploaded successfully!'), 200);
+				return Response::json(array('message' => 'Video uploaded successfully!'), 200);
 			}
 		}
 
@@ -158,7 +157,7 @@ class ChannelController extends BaseController
 				// permissions of the temporary folder.
 				exec('c:\windows\system32\icacls.exe ' . $this->slide_image_directory . DIRECTORY_SEPARATOR . $filename . ' /inheritance:e');
 
-				return Response::json(array('message' => 'Video uploaded successfully!'), 200);
+				return Response::json(array('message' => 'Image uploaded successfully!'), 200);
 			}
 		}
 
@@ -302,6 +301,13 @@ class ChannelController extends BaseController
         return $output;
     }
 
-
+		public function createChannel(){
+			$result = CS_API::createChannel();
+			if (isset($result) && $result != null){
+				return Redirect::to('/channel')->with('selectLastChannel', true)->with('message', 'Channel successfully created!');
+			} else {
+				return Redirect::to('/channel')->with('error', 'An error occurred while trying to create the channel.');
+			}
+		}
 
 }
