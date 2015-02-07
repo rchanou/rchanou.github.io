@@ -59,7 +59,7 @@ class Channel
         $screen = $screen[0];
 
         // Get slides
-        $tsql = "SELECT * FROM ScreenTemplateDetail WHERE templateid = ? and enable = 1 ORDER BY seq";
+        $tsql = "SELECT * FROM ScreenTemplateDetail WHERE templateid = ? and enable = 1 ORDER BY seq, ID";
         $tsql_params = array(&$channelId);
         $slides = $this->run_query($tsql, $tsql_params);
 
