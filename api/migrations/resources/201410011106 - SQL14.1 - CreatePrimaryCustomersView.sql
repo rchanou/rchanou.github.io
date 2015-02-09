@@ -10,7 +10,8 @@ WITH PrimaryCustomer AS (
                 , c.BirthDate
                 , c.EmailAddress -- for testing purposes
             ORDER BY
-                CASE WHEN (c.Password IS NULL OR LEN(LTRIM(RTRIM(c.Password))) = 0) THEN 1 ELSE 0 END -- push null or empty passwords to the bottom
+                  CASE WHEN (c.Password IS NULL OR LEN(LTRIM(RTRIM(c.Password))) = 0) THEN 1 ELSE 0 END -- push null or empty passwords to the bottom
+                , CASE WHEN (c.EmailAddress IS NULL OR LEN(LTRIM(RTRIM(c.EmailAddress))) = 0) THEN 1 ELSE 0 END -- push null or empty emails to the bottom
                 , Points DESC
                 , c.TotalRaces DESC
                 , c.LastVisited DESC
@@ -35,10 +36,7 @@ WITH PrimaryCustomer AS (
     ) AS p ON p.CustID = c.CustID
     WHERE
         c.Deleted = 0
-        AND (
-            c.EmailAddress IS NOT NULL
-            AND LEN(LTRIM(RTRIM(c.EmailAddress))) > 0
-        )
+        AND c.IsGiftCard = 0
 )
 SELECT
       c.CustID
