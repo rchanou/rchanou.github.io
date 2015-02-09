@@ -379,7 +379,7 @@
                 r.racers = data.race.racers
                     .innerJoin(data.scoreboard) // join scoreboard to racers
                     .on(function(x, y) { return x.id === y.racer_id; }) // on racers.id == scoreboard.racer_id
-                    .orderBy(function(x) { return x.finish_position; }) // order by joined_object.finish_position (originally from scoreboard)
+                    .orderBy(function(x) { return z.convert.toNumber(x.finish_position); }) // order by joined_object.finish_position (originally from scoreboard)
                     .map(function(x) {
 
                         // attempt to parse and localize each racer's fastest lap time
