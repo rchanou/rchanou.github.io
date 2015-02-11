@@ -91,7 +91,7 @@
                 <a href="#"><i class="fa fa-tablet"></i> <span>Registrations</span> <i class="arrow fa fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/registration/settings','Settings')}}</li>
-                    <li>{{link_to('/docs/Club Speed - iPad Registration Kiosk Guide - MokiTouch 2.pdf','Documentation', array('target' => '_blank'))}}</li>
+                    <li>{{link_to('/docs/Club Speed - Club Speed Registration Kiosk Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
             @if (@$controller == 'ReportsController')
