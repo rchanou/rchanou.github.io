@@ -35,13 +35,18 @@ class BookingController extends BaseController
                     . '<b>Order #:</b> {{checkId}}<br/>'
                     . '<b>Customer\'s Name:</b> {{customer}}<br/>'
                     . '<b>Your Business Name:</b> {{business}}<br/>'
-                    . '<b>Item Description:</b> {{detail.description}}<br/>'
-                    . '<b>Item Quantity:</b> {{detail.quantity}}<br/>'
-                    . '<b>Item Price:</b> {{detail.price}}<br/>'
                     . '<b>Subtotal:</b> {{checkSubtotal}}<br/>'
                     . '<b>Estimated Tax:</b> {{checkTax}}<br/>'
                     . '<b>Gift Card Deduction:</b> {{giftCardTotal}}<br/>'
-                    . '<b>Total:</b> {{checkTotal}}';
+                    . '<b>Total:</b> {{checkTotal}}<br/><br/>'
+                    . 'For an item list, create the HTML for one item and wrap it like so:<br/>'
+                    . '<b>&#60;!-- {% for detail in details %} --&#62;<br/>'
+                    . '&nbsp;&nbsp;&nbsp;&nbsp;INSERT ITEM HTML HERE<br/>'
+                    . '&#60;!-- {% endfor %} --&#62;</b><br/>'
+                    . 'You can use the following inside the item block:<br/>'
+                    . '<b>Item Description:</b> {{detail.description}}<br/>'
+                    . '<b>Item Quantity:</b> {{detail.quantity}}<br/>'
+                    . '<b>Item Price:</b> {{detail.price}}';
 
       // Booking Templates
       $this->templates = array(
