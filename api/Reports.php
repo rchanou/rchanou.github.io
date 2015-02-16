@@ -245,6 +245,37 @@ EOS;
     }
 
 
+    /**
+     * @url GET /brokers_summary
+     */
+    public function brokers_summary() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+
+        $opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+
+        $sql = <<<EOS
+SELECT
+    c.BrokerName AS 'Broker/Affiliate Code'
+    , SUM(p.PayAmount) AS 'Total Amount'
+FROM dbo.Checks c
+INNER JOIN dbo.Payment p
+    ON p.CheckID = c.CheckID
+WHERE
+    p.PayStatus = 1
+    AND c.BrokerName IS NOT NULL
+    AND LEN(c.BrokerName) > 0
+		AND {$opened_or_closed_date} BETWEEN :start AND :end
+GROUP BY
+    c.BrokerName
+ORDER BY c.BrokerName
+EOS;
+        $params = array(&$start, &$end);
+				$data = $this->run_query($sql, $this->getDateRange());
+        return $data;
+    }
+
+
 	/**
 	 * DETAILED SALES REPORT
 	 *
@@ -290,6 +321,7 @@ cust.LName AS 'Customer Last Name',
 cust.FName AS 'Customer First Name',
 u.UserName AS 'Created By',
 c.checktotal AS 'Check Total',
+c.BrokerName AS 'Broker/Affiliate Code',
 p.PayAmount AS 'Pay Amount',
 p.Shift AS 'Shift',
 u2.username AS 'Cashed By', 
