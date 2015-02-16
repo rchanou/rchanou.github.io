@@ -2,6 +2,7 @@
 
 use ClubSpeed\Utility\Strings as Strings;
 use ClubSpeed\Connection as Connection;
+use ClubSpeed\Utility\Convert as Convert;
 
 class Reports extends BaseApi
 {
