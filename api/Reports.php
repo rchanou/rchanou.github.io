@@ -58,6 +58,28 @@ GROUP BY CheckDetails.ProductID
 ORDER BY Total DESC
 */
 
+
+    private function getDateRange() {
+        if (isset($_REQUEST['start']))
+            $start = Convert::toDateForServer($_REQUEST['start']);
+        else {
+            $start = new DateTime();
+            $start->setTime(0, 0, 0); // remove time from date
+            $start = Convert::toDateForServer($start); // get it back as a string
+        }
+        if (isset($_REQUEST['end']))
+            $end = Convert::toDateForServer($_REQUEST['end']);
+        else {
+            $end = new DateTime($start); // get a copy of the start date
+            $end->setTime(23, 59, 59); // set time to the end of the day
+            $end = Convert::toDateForServer($end); // get it back as a string
+        }
+        return array(
+            'start' => $start
+            , 'end' => $end
+        );
+    }
+
 	/**
 	 * DETAILED PAYMENTS REPORT
 	 *

@@ -1,7 +1,7 @@
 @extends('master')
 
 @section('title')
-Detailed Sales Report
+Broker/Affiliate Codes Report
 @stop
 
 @section('css_includes')
