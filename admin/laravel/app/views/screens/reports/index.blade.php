@@ -55,6 +55,13 @@ Reports
                         </a>
                             <em>Summary of payments in a date range by tender</em>
                     </div>
+                    <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                        <a href="{{URL::to('reports/broker-codes')}}">
+                            <i class="fa fa-user-plus fa-4x"></i><p/>
+                            <strong>Broker/Affiliate Codes Report</strong><p/>
+                        </a>
+                            <em>Summary of checks grouped by Broker/Affiliate Code</em>
+                    </div>
                   </div>
               </div>
             </div>
