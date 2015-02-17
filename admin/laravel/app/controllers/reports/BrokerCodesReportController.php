@@ -18,8 +18,11 @@ class BrokerCodesReportController extends BaseController
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
 
-        $start = empty(Input::get('start')) ? date('Y-m-d') : Input::get('start');
-        $end   = empty(Input::get('end'))   ? date('Y-m-d') . 'T23:59:59' : Input::get('end');
+        $start = Input::get('start');
+				$end   = Input::get('end');
+				
+				$start = empty($start) ? date('Y-m-d') : $start;
+        $end   = empty($end)   ? date('Y-m-d') . 'T23:59:59' : $end;
         $show_by_opened_date = Input::get('show_by_opened_date');
 
         $report = CS_API::getReport_BrokerCodes($start,$end,$show_by_opened_date);
