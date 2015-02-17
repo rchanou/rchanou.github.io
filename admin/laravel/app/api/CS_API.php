@@ -289,6 +289,17 @@ class CS_API
         return self::getJSON("reports/payments", $params);
     }
 
+    public static function getReport_BrokerCodes($start = null, $end = null, $show_by_opened_date = 'false')
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+        $params['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
+
+        return self::getJSON("reports/brokers_summary", $params);
+    }
+
     public static function getReport_DetailedSales($start = null, $end = null, $show_by_opened_date = 'false')
     {
         self::initialize();

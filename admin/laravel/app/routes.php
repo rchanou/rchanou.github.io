@@ -56,6 +56,10 @@ Route::get('reports/summary-payments', 'SummaryPaymentsReportController@index');
 Route::post('reports/summary-payments', 'SummaryPaymentsReportController@index');
 Route::get('reports/summary-payments/export/csv', 'SummaryPaymentsReportController@exportToCSV');
 
+Route::get('reports/broker-codes', 'BrokerCodesReportController@index');
+Route::post('reports/broker-codes', 'BrokerCodesReportController@index');
+Route::get('reports/broker-codes/export/csv', 'BrokerCodesReportController@exportToCSV');
+
 Route::get('reports/detailed-sales', 'DetailedSalesReportController@index');
 Route::post('reports/detailed-sales', 'DetailedSalesReportController@index');
 Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@exportToCSV');
