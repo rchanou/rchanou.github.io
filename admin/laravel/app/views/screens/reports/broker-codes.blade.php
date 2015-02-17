@@ -11,7 +11,7 @@ Broker/Affiliate Codes Report
 @stop
 
 @section('pageHeader')
-Detailed Sales Report
+Broker/Affiliate Codes Report
 @stop
 
 @section('breadcrumb')

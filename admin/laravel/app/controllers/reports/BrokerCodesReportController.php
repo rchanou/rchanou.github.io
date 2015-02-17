@@ -22,7 +22,7 @@ class BrokerCodesReportController extends BaseController
 				$end   = Input::get('end');
 				
 				$start = empty($start) ? date('Y-m-d') : $start;
-        $end   = empty($end)   ? date('Y-m-d') . 'T23:59:59' : $end;
+        $end   = empty($end)   ? date('Y-m-d') : $end;
         $show_by_opened_date = Input::get('show_by_opened_date');
 
         $report = CS_API::getReport_BrokerCodes($start,$end,$show_by_opened_date);
