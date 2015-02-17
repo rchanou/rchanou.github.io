@@ -94,7 +94,7 @@ Broker/Affiliate Codes Report
                     <h5>Broker/Affiliate Codes Report - Today ({{$show_by_opened_date == 'true' ? 'By Opened Date' : 'By Closing Date'}})</h5>
                 @endif
                 <span class="icon pull-right" style="font-size: 12px; line-height: 12px;">
-                    <a href="{{URL::to('reports/detailed-sales/export/csv')}}"><button type="button">Export to CSV</button></a>
+                    <a href="{{URL::to('reports/broker-codes/export/csv')}}"><button type="button">Export to CSV</button></a>
                 </span>
               </div>
               <div class="widget-content">
