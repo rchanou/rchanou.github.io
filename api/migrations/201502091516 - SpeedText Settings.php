@@ -51,8 +51,8 @@ $settings = array(
         'Namespace'    => $namespace,
         'Name'         => 'provider',
         'Type'         => 'String',
-        'DefaultValue' => 'twillo',
-        'Value'        => 'twillo',
+        'DefaultValue' => 'twilio',
+        'Value'        => 'twilio',
         'Description'  => 'The provider from which to send text messages.'
     ),
     array(
