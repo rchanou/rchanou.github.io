@@ -74,6 +74,7 @@ class Step2Controller extends BaseController
         $this->recordProductInfo($races); //Remember every race and its details and store them in the session
 
         $races = CS_API::filterHeatsByAvailableSpots($races,$numberOfParticipants); //Only list the results with at least one spot available
+        $races = CS_API::filterHeatsByHeatType($races,$heatType);
 
         if ($races === null) //If there was an error with the API call, redirect to the Disconnected page
         {

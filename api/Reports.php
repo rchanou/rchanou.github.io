@@ -2,6 +2,7 @@
 
 use ClubSpeed\Utility\Strings as Strings;
 use ClubSpeed\Connection as Connection;
+use ClubSpeed\Utility\Convert as Convert;
 
 class Reports extends BaseApi
 {
@@ -57,6 +58,28 @@ WHERE     (Checks.ClosedDate BETWEEN '2012-12-17 00:00:00' AND '2012-12-17 23:59
 GROUP BY CheckDetails.ProductID
 ORDER BY Total DESC
 */
+
+
+    private function getDateRange() {
+        if (isset($_REQUEST['start']))
+            $start = Convert::toDateForServer($_REQUEST['start']);
+        else {
+            $start = new DateTime();
+            $start->setTime(0, 0, 0); // remove time from date
+            $start = Convert::toDateForServer($start); // get it back as a string
+        }
+        if (isset($_REQUEST['end']))
+            $end = Convert::toDateForServer($_REQUEST['end']);
+        else {
+            $end = new DateTime($start); // get a copy of the start date
+            $end->setTime(23, 59, 59); // set time to the end of the day
+            $end = Convert::toDateForServer($end); // get it back as a string
+        }
+        return array(
+            'start' => $start
+            , 'end' => $end
+        );
+    }
 
 	/**
 	 * DETAILED PAYMENTS REPORT
@@ -245,6 +268,37 @@ EOS;
     }
 
 
+    /**
+     * @url GET /brokers_summary
+     */
+    public function brokers_summary() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+
+        $opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+
+        $sql = <<<EOS
+SELECT
+    c.BrokerName AS 'Broker/Affiliate Code'
+    , SUM(p.PayAmount) AS 'Total Amount'
+FROM dbo.Checks c
+INNER JOIN dbo.Payment p
+    ON p.CheckID = c.CheckID
+WHERE
+    p.PayStatus = 1
+    AND c.BrokerName IS NOT NULL
+    AND LEN(c.BrokerName) > 0
+		AND {$opened_or_closed_date} BETWEEN :start AND :end
+GROUP BY
+    c.BrokerName
+ORDER BY c.BrokerName
+EOS;
+        $params = array(&$start, &$end);
+				$data = $this->run_query($sql, $this->getDateRange());
+        return $data;
+    }
+
+
 	/**
 	 * DETAILED SALES REPORT
 	 *
@@ -290,6 +344,7 @@ cust.LName AS 'Customer Last Name',
 cust.FName AS 'Customer First Name',
 u.UserName AS 'Created By',
 c.checktotal AS 'Check Total',
+c.BrokerName AS 'Broker/Affiliate Code',
 p.PayAmount AS 'Pay Amount',
 p.Shift AS 'Shift',
 u2.username AS 'Cashed By', 

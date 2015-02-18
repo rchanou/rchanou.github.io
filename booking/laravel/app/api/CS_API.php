@@ -170,6 +170,30 @@ class CS_API
         return $heatsFiltered;
     }
 
+    public static function filterHeatsByHeatType($heats,$heatType)
+    {
+        self::initialize();
+
+        if ($heatType == -1)
+        {
+            return $heats;
+        }
+
+        $heatsFiltered = array();
+        if ($heats != null)
+        {
+            foreach($heats as $currentHeat)
+            {
+                if ((int)$currentHeat->heatTypeId == (int)$heatType)
+                {
+                    $heatsFiltered[] = $currentHeat;
+                }
+            }
+        }
+
+        return $heatsFiltered;
+    }
+
     /*
    ##########
    # STEP 2 #
