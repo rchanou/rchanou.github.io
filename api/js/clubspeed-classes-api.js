@@ -112,7 +112,6 @@
                 var data = {
                     // no items needed!
                 };
-                
                 return sendRequest({
                     api: "races/upcoming.json",
                     type: "GET",
@@ -155,14 +154,20 @@
             });
 
             var getTopTimes = function(options) {
+                var data = {
+                    track: options.track || getTopTimes.defaults.track,
+                    range: options.range || getTopTimes.defaults.range,
+                    limit: options.limit || getTopTimes.defaults.limit
+                };
+                if (z.check.exists(options.speed_level)) {
+                    var speed_level = z.convert(options.speed_level, z.types.number);
+                    // if (speed_level > 0) // taking out for testing
+                        data.speed_level = speed_level;
+                }
                 return sendRequest({
                     api: "races/fastest.json",
                     type: "GET",
-                    data: {
-                        track: options.track || getTopTimes.defaults.track,
-                        range: options.range || getTopTimes.defaults.range,
-                        limit: options.limit || getTopTimes.defaults.limit
-                    }
+                    data: data
                 });
             }.extend({
                 defaults: {
