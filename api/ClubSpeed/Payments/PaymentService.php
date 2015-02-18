@@ -24,7 +24,8 @@ class PaymentService {
             'PayPal_Pro',
             'PCCharge',
             'WorldPay',
-            'WorldPayXML'
+            'WorldPayXML',
+            'AuthorizeNet_AIM'
             // add processors as we test/support them -- dummy should ABSOLUTELY be removed before going live
         );
     }
