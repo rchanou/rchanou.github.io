@@ -63,6 +63,7 @@
             "PaymentExpress_PxPost",
             "PayPal_Express",
             "PayPal_Pro",
+            "PCCharge",
             "Pin",
             "SagePay_Direct",
             "SagePay_Server",
@@ -72,7 +73,8 @@
             "TargetPay_Ideal",
             "TargetPay_Mrcash",
             "TwoCheckout",
-            "WorldPay"
+            "WorldPay",
+            "WorldPayXML"
         ]
     }
 }
