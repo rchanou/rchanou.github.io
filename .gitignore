@@ -26,8 +26,7 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must ends with two \r.
-Icon
-
+Icon
 # Thumbnails
 ._*
 
@@ -48,3 +47,5 @@ booking/www/web.config.bak
 cs-registration/www/web.config.bak
 assets/
 cs-mobilewebapp/js/config.js
+
+node_modules/
