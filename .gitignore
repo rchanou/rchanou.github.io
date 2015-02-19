@@ -47,5 +47,3 @@ booking/www/web.config.bak
 cs-registration/www/web.config.bak
 assets/
 cs-mobilewebapp/js/config.js
-
-node_modules/
