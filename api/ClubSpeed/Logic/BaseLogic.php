@@ -32,11 +32,14 @@ abstract class BaseLogic {
      */
     protected $insertable;
 
+    private $callbacks;
+
     public function __construct(&$logic, &$db) {
         $this->logic = $logic;
         $this->db = $db;
         $this->updatable = array(); // okay, since parent constructor gets called first
         $this->insertable = array(); // okay, same as above
+        $this->callbacks = array();
     }
 
     public function dummy($params = array()) {
@@ -125,6 +128,34 @@ abstract class BaseLogic {
     public function exists() {
         $args = func_get_args();
         return call_user_func_array(array($this->interface, "exists"), $args);
+    }
+
+    public function on($namespace, $callback) {
+        $this->callbacks[$namespace][] = $callback;
+    }
+
+    protected function emit() {
+        $args = func_get_args(); // namespace, data1, data2, ... , dataN
+        $namespace = array_shift($args);
+        if (isset($this->callbacks[$namespace]) && !empty($this->callbacks[$namespace])) {
+            foreach($this->callbacks[$namespace] as $callback)
+                call_user_func_array($callback, $args);
+        }
+    }
+
+    public function uow(&$uow) {
+        switch($uow->action) {
+            case 'create':
+                $uow->data = $this->interface->dummy($this->insertable($uow->data)); // if we still want to restrict. leaning towards no.
+                break;
+            case 'update':
+                $uow->data = $this->interface->dummy($this->updatable($uow->data));
+                break;
+            // any other defaults for incoming data?
+            // what about batchCreate and batchUpdate? probably need to loop with dummy.
+        }
+        $this->emit('uow', $uow); // allow callbacks to mutate the data, as business logic requires.
+        return $this->interface->uow($uow);
     }
 
     protected function insertable($mapped) {

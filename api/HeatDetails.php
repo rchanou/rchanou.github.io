@@ -1,20 +1,21 @@
 <?php
 
-class HeatDetails extends BaseApi {
+use ClubSpeed\Database\Helpers\UnitOfWork as UnitOfWork;
+
+class HeatDetails extends BaseUowApi {
 
     function __construct() {
         parent::__construct();
-        $this->mapper = new \ClubSpeed\Mappers\HeatDetailsMapper();
-        $this->interface = $this->logic->heatDetails;
+        $this->resource = 'heatDetails';
     }
 
-    public function get1($id1, $request_data) {
+    public function get1($id1, $request_data = null) {
         throw new \RestException(404); // disallow get by 1 id
     }
-    public function put1($id1, $request_data) {
+    public function put1($id1, $request_data = null) {
         throw new \RestException(404); // disallow update by 1 id
     }
-    public function delete1($id1) {
+    public function delete1($id1, $request_data = null) {
         throw new \RestException(404); // disallow delete by 1 id
     }
 
@@ -22,23 +23,42 @@ class HeatDetails extends BaseApi {
      * @url GET /:id1/:id2
      */
     public function get2($id1, $id2, $request_data) {
-        $this->validate('get');
-        return call_user_func_array(array($this, '_get'), func_get_args()); // need to pass on request_data in case it has "select"
+        try {
+            $this->validate('get');
+            $uow = UnitOfWork::build($request_data)->action('get')->table_id(array($id1, $id2)); // order of ids matters!
+            $this->_handle($uow);
+            return $uow->data;
+        }
+        catch (Exception $e) {
+            $this->_error($e);
+        }
     }
 
     /**
      * @url PUT /:id1/:id2
      */
     public function put2($id1, $id2, $request_data) {
-        $this->validate('put');
-        return call_user_func_array(array($this, '_put'), func_get_args());
+        try {
+            $this->validate('put');
+            $uow = UnitOfWork::build($request_data)->action('update')->table_id(array($id1, $id2)); // again, id order matters!
+            $uow = $this->_handle($uow);
+        }
+        catch (Exception $e) {
+            $this->_error($e);
+        }
     }
 
     /**
      * @url DELETE /:id1/:id2
      */
     public function delete2($id1, $id2, $request_data) {
-        $this->validate('delete');
-        return call_user_func_array(array($this, '_delete'), func_get_args());
+        try {
+            $this->validate('delete');
+            $uow = UnitOfWork::build($request_data)->action('delete')->table_id(array($id1, $id2));
+            $uow = $this->_handle($uow);
+        }
+        catch (Exception $e) {
+            $this->_error($e);
+        }
     }
 }

@@ -4,9 +4,7 @@ namespace Omnipay\WorldPayXML\Message;
 
 use DOMDocument;
 use Omnipay\Common\Exception\InvalidResponseException;
-use Omnipay\Common\Exception\RuntimeException;
 use Omnipay\Common\Message\AbstractResponse;
-use Omnipay\Common\Message\RedirectResponseInterface;
 use Omnipay\Common\Message\RequestInterface;
 
 /**
@@ -14,9 +12,21 @@ use Omnipay\Common\Message\RequestInterface;
  */
 class Response extends AbstractResponse
 {
+    /**
+     * Constructor
+     *
+     * @param RequestInterface $request Request
+     * @param string           $data    Data
+     *
+     * @access public
+     */
     public function __construct(RequestInterface $request, $data)
     {
         $this->request = $request;
+
+        if (empty($data)) {
+            throw new InvalidResponseException();
+        }
 
         $responseDom = new DOMDocument;
         $responseDom->loadXML($data);
@@ -26,6 +36,12 @@ class Response extends AbstractResponse
         );
     }
 
+    /**
+     * Get message
+     *
+     * @access public
+     * @return string
+     */
     public function getMessage()
     {
         $codes = array(
@@ -78,63 +94,67 @@ class Response extends AbstractResponse
 
         $message = 'PENDING';
 
-        if (isset($this->data->error))
-        {
+        if (isset($this->data->error)) {
             $message = 'ERROR: ' . $this->data->error;
         }
 
-        if (isset($this->data->payment->ISO8583ReturnCode))
-        {
+        if (isset($this->data->payment->ISO8583ReturnCode)) {
             $returnCode = $this->data->payment->ISO8583ReturnCode->attributes();
 
-            foreach ($returnCode as $name => $value)
-            {
-                if ($name == 'code')
-                {
+            foreach ($returnCode as $name => $value) {
+                if ($name == 'code') {
                     $message = $codes[intval($value)];
                 }
             }
         }
 
-        if ($this->isSuccessful())
-        {
+        if ($this->isSuccessful()) {
             $message = $codes[0];
         }
 
         return $message;
     }
 
+    /**
+     * Get transaction reference
+     *
+     * @access public
+     * @return string
+     */
     public function getTransactionReference()
     {
         $attributes = $this->data->attributes();
 
-        if (isset($attributes['orderCode']))
-        {
-            if ($this->request->getTransactionId() == $attributes['orderCode'])
-            {
-                return $attributes['orderCode'];
-            }
+        if (isset($attributes['orderCode'])) {
+            return $attributes['orderCode'];
         }
-
-        return null;
     }
 
+    /**
+     * Get is redirect
+     *
+     * @access public
+     * @return boolean
+     */
     public function isRedirect()
     {
-        if (isset($this->data->requestInfo->request3DSecure->issuerURL))
-        {
+        if (isset($this->data->requestInfo->request3DSecure->issuerURL)) {
             return true;
         }
 
         return false;
     }
 
+    /**
+     * Get is successful
+     *
+     * @access public
+     * @return boolean
+     */
     public function isSuccessful()
     {
-        if (isset($this->data->payment->lastEvent))
-        {
-            if (strtoupper($this->data->payment->lastEvent) == 'AUTHORISED')
-            {
+        if (isset($this->data->payment->lastEvent)) {
+            if (strtoupper($this->data->payment->lastEvent) == 'AUTHORISED') {
                 return true;
             }
         }

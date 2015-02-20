@@ -1,6 +1,9 @@
 <?php
 
 namespace ClubSpeed\Database;
+use ClubSpeed\Database\Helpers\SqlBuilder; // we will want to inject this if we ever want to use something other than Sql Server.
+use ClubSpeed\Utility\Arrays;
+use ClubSpeed\Utility\Convert;
 
 class DbCollection {
 
@@ -35,6 +38,85 @@ class DbCollection {
         $lastId = $this->conn->exec($insert['statement'], $insert['values']);
         $lastId = \ClubSpeed\Utility\Convert::toNumber($lastId);
         return $lastId;
+    }
+
+    public function uow(&$uow) {
+        // for testing
+        // $sw = $GLOBALS['sw'];
+
+        $this->validate($uow); // ensure the columns being used are legitimate before running any sql.
+        $uow->table = $this->definition; // store the definition instead of just the table name at this point.
+        $query = SqlBuilder::uow($uow); // ~ 8ms to make it all the way to this point from
+        switch($uow->action) {
+            case 'create':
+                $lastId = $this->conn->exec($query['statement'], $query['values']);
+                $lastId = \ClubSpeed\Utility\Convert::toNumber($lastId);
+                $uow->data->load($lastId); // note that this might not match exactly what is in the database. careful(!!!)
+                $uow->table_id = $lastId;  // the equality will depend on whether we have defaults being set by the database.
+                return $uow;
+            case 'all':
+                $results = $this->conn->query($query['statement'], $query['values']);
+                $all = array();
+                foreach($results as $result)
+                    $all[] = $this->definition->newInstance($result);
+                $uow->data = $all;
+                return $uow;
+            case 'get':
+                $results = $this->conn->query($query['statement'], $query['values']);
+                // don't bother running an exists query separately.
+                // just use $results to determine whether or not to throw RecordNotFoundException
+                if (count($results) < 1) {
+                    $ids = (is_array($uow->table_id) ? implode(", ", $uow->table_id) : $uow->table_id);
+                    throw new \RecordNotFoundException($this->table . " (" . $ids . ")");
+                }
+                $get = (count($results) > 0 ? $this->definition->newInstance(Arrays::first($results)) : null);
+                $uow->data = $get;
+                return $uow;
+            case 'count':
+                $results = $this->conn->query($query['statement'], $query['values']);
+                $count = 0;
+                if (count($results) > 0) {
+                    $temp = Arrays::first($results);
+                    $count = Convert::toNumber($temp['Count']);
+                }
+                $uow->data = $count;
+                return $uow;
+            case 'exists':
+                $results = $this->conn->query($query['statement'], $query['values']);
+                $exists = false;
+                if (count($results) > 0) {
+                    $temp = Arrays::first($results);
+                    $exists = Convert::toBoolean($temp['Exists']);
+                }
+                $uow->data = $exists;
+                return $uow;
+            case 'update':
+                // hijack before the count, and run exists before even executing the update
+                // performance issue? tests show that the queries take ~0-1ms
+                $cloned = clone $uow; // make sure we use a clone, so we don't lose the original data on accident.
+                $cloned->action('exists');
+                $exists = $this->uow($cloned);
+                if (!$exists->data) {
+                    $ids = (is_array($uow->table_id) ? implode(", ", $uow->table_id) : $uow->table_id);
+                    throw new \RecordNotFoundException($this->table . " (" . $ids . ")");
+                }
+                $affected = $this->conn->exec($query['statement'], $query['values']);
+                // store $affected?
+                return $uow;
+            case 'delete':
+                $cloned = clone $uow; // make sure we use a clone, so we don't lose the original data on accident.
+                $cloned->action('exists');
+                $exists = $this->uow($cloned);
+                if (!$exists->data) {
+                    $ids = (is_array($uow->table_id) ? implode(", ", $uow->table_id) : $uow->table_id);
+                    throw new \RecordNotFoundException($this->table . " (" . $ids . ")");
+                }
+                $affected = $this->conn->exec($query['statement'], $query['values']);
+                // store $affected?
+                return $uow;
+            default:
+                throw new \InvalidArgumentValueException("DbCollection received a UnitOfWork with an unrecognized action! Received: " . $uow->action);
+        }
     }
 
     public function batchCreate($data) {
@@ -173,6 +255,38 @@ class DbCollection {
             }
         }
         return false;
+    }
+
+    public function validate(&$uow) {
+        // items to handle (note that while we are using mapper, this shouldn't be necessary for client validation.)
+        // 1. select
+        // 2. where
+        // 3. order
+        // 4. data(?) -- may not be necessary, since we are 'casting' to properly 'typed' objects.
+        if (!empty($uow->select)) {
+            if (!is_array($uow->select))
+                throw new \CSException('Received a UnitOfWork with a select in an invalid format! Expected array, received: ' . print_r($uow->select, true));
+            foreach($uow->select as $select) {
+                if (!$this->definition->hasProperty($select))
+                    throw new \CSException("Received a UnitOfWork with a select and a column not in the table definition! Attempted to use: [" . $this->table . "].[" . $select . "]");
+            }
+        }
+        if (!empty($uow->where)) {
+            if (!is_array($uow->where) && !$uow->where instanceof \ClubSpeed\Database\Records\BaseRecord)
+                throw new \CSException('Received a UnitOfWork with a where in an invalid format! Expected associative array or BaseRecord, received: ' . print_r($uow->where, true));
+            foreach($uow->where as $key => $val) {
+                if (!$this->definition->hasProperty($key))
+                    throw new \CSException("Received a UnitOfWork with a where and a column not in the table definition! Attempted to use: [" . $this->table . "].[" . $key . "]");
+            }
+        }
+        if (!empty($uow->order)) {
+            if (!is_array($uow->order))
+                throw new \CSException('Received a UnitOfWork with an order in an invalid format! Expected associative array, received: ' . print_r($uow->order, true));
+            foreach($uow->order as $key => $val) {
+                if (!$this->definition->hasProperty($key))
+                    throw new \CSException("Received a UnitOfWork with an order and a column not in the table definition! Attempted to use: [" . $this->table . "].[" . $key . "]");
+            }
+        }
     }
 
     public function validateComparators($comparators) {

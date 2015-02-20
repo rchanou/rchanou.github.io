@@ -87,7 +87,6 @@ class GatewayFactory
     public function getSupportedGateways()
     {
         $package = json_decode(file_get_contents(__DIR__.'/../../../composer.json'), true);
-
         return $package['extra']['gateways'];
     }
 }

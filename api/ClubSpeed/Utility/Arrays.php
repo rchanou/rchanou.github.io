@@ -6,23 +6,24 @@ use ClubSpeed\Enums\Enums as Enums;
 class Arrays {
 
     /**
-     * Dummy constructor to prevent any initialization of the Objects Class
+     * Dummy constructor to prevent any initialization of the Arrays Class
      */
     private function __construct() {} // prevent any initialization of this class
 
     public static function contains($arr, $predicate) {
         if (count($arr) > 0) {
             foreach($arr as $key => $val) {
-                if (call_user_func($predicate, $val, $key, $arr)) {
+                if (call_user_func($predicate, $val, $key, $arr))
                     return true;
-                }
             }
         }
         return false;
     }
 
-    public static function &first(&$arr, $predicate) {
+    public static function &first(&$arr, $predicate = null) {
         $return = null;
+        if (is_null($predicate) || empty($predicate))
+            $predicate = function($x) { return $x; };
         if (count($arr) > 0) {
             foreach($arr as $key => $val) {
                 if (call_user_func($predicate, $val, $key, $arr))
@@ -113,9 +114,8 @@ class Arrays {
 
     public static function select(&$arr, $selector) {
         $return = array();
-        foreach($arr as $key => &$val) {
+        foreach($arr as $key => &$val)
             $return[] = call_user_func($selector, $val, $key, $arr);
-        }
         return $return;
     }
 
@@ -123,9 +123,8 @@ class Arrays {
         $return = array();
         foreach($arr as $key => &$val) {
             // if only we had the yield keyword..
-            if (call_user_func($predicate, $val, $key, $arr)) {
+            if (call_user_func($predicate, $val, $key, $arr))
                 $return[] =& $val;
-            }
         }
         return $return;
     }

@@ -79,6 +79,12 @@ class Enums {
      */
     const API_FREE_ACCESS = 99;
 
+    /**
+     * The constant representing the default page size to use
+     * when a page size is not provided to the get all method.
+     */
+    const API_DEFAULT_PAGE_SIZE = 100;
+
 
     // See UserDataType.vb at Enum ProductType
     const PRODUCT_TYPE_REGULAR     = 1;

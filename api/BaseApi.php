@@ -3,25 +3,28 @@
 use ClubSpeed\Enums\Enums as Enums;
 use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Security\Authenticate as Authenticate;
+use ClubSpeed\Database\Helpers\UnitOfWork as UnitOfWork;
 
 abstract class BaseApi {
 
     public $restler;
-    protected $interface;
-    protected $mapper;
+    protected $interface;   // Logic instance
+    protected $mapper;      // Mapper instance
     protected $access;
-    protected $logic;
+    protected $logic;       // LogicService
+    protected $mappers;     // MapperService
 
     function __construct() {
-        $this->logic = $GLOBALS['logic'];
+        $this->logic = $GLOBALS['logic'];       // these should really be injected,
+        $this->mappers = $GLOBALS['mappers'];   // but we don't have a choice with restler v2.
         $this->access = array(
-            'post'   => Enums::API_PRIVATE_ACCESS,
+            'all'    => Enums::API_PRIVATE_ACCESS,
+            'delete' => Enums::API_PRIVATE_ACCESS,
+            'filter' => Enums::API_PRIVATE_ACCESS,
             'get'    => Enums::API_PRIVATE_ACCESS,
             'match'  => Enums::API_PRIVATE_ACCESS,
-            'filter' => Enums::API_PRIVATE_ACCESS,
-            'put'    => Enums::API_PRIVATE_ACCESS,
-            'delete' => Enums::API_PRIVATE_ACCESS,
-            'all'    => Enums::API_PRIVATE_ACCESS
+            'post'   => Enums::API_PRIVATE_ACCESS,
+            'put'    => Enums::API_PRIVATE_ACCESS
         );
     }
 
@@ -55,7 +58,10 @@ abstract class BaseApi {
         }
     }
 
-    public function post($id, $request_data = null) {
+    /**
+     * @url POST /
+     */
+    public function post($request_data = null) {
         $this->validate('post');
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this

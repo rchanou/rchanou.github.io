@@ -59,7 +59,6 @@ GROUP BY CheckDetails.ProductID
 ORDER BY Total DESC
 */
 
-
     private function getDateRange() {
         if (isset($_REQUEST['start']))
             $start = Convert::toDateForServer($_REQUEST['start']);
@@ -89,8 +88,7 @@ ORDER BY Total DESC
 	public function payments() {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
-        }
-				
+        }	
 		$tsql = <<<EOD
 select
 
@@ -127,16 +125,12 @@ left join Customers cust on c.CustID = cust.CustID
 left join Payment p on p.CheckID = c.checkid
 left join Users u on u.UserID = c.userid
 left join Users u2 on u2.UserID = p.userid
-where p.paydate between ? and ?
+where p.paydate between :start and :end
 and p.paystatus = 1
 order by p.paydate
 EOD;
-        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-		$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-		$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-		$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-		$params = array(&$start, &$end);
-        $data = $this->run_query($tsql, $params);
+        $dates = $this->getDateRange();
+        $data = $this->run_query($tsql, $dates);
 		return $data;
 	}
 
@@ -148,11 +142,6 @@ EOD;
             throw new RestException(401, "Invalid authorization!");
         if (!$this->logic->version->hasEurekas())
             throw new RestException(404, "Eurekas database could not be found!");
-        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-        $start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-        $end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-        $end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-        $params = array(&$start, &$end);
         $sql = <<<EOS
 SELECT
     CASE WHEN c.CheckStatus = 0 THEN 'Open' ELSE 'Closed' END AS 'Check Status'
@@ -189,13 +178,13 @@ LEFT OUTER JOIN dbo.Users u
 LEFT OUTER JOIN dbo.Users u2
     ON p.UserID = u2.UserID
 WHERE
-    p.TransactionDate BETWEEN ? AND ?
+    p.TransactionDate BETWEEN :start AND :end
     AND p.IsVoid = 0
 ORDER BY
     p.TransactionDate
 EOS;
         $conn = new Connection\ClubSpeedConnection("(local)", "RestaurantPiece");
-        $data = $conn->query($sql, $params);
+        $data = $conn->query($sql, $this->getDateRange());
         return $data;
     }
 
@@ -206,10 +195,8 @@ EOS;
 	 * Show the summary of the payments in a date range by tender
 	 */
 	public function payments_summary() {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
             throw new RestException(401, "Invalid authorization!");
-        }
-		
         $tsql = <<<EOS
 SELECT
     pt.TypeDescription AS 'Tender'
@@ -220,17 +207,11 @@ INNER JOIN dbo.PayType pt
     ON p.PayType = pt.ID
 WHERE
     p.PayStatus = 1
-    AND p.PayDate BETWEEN ? AND ?
+    AND p.PayDate BETWEEN :start AND :end
 GROUP BY
     pt.TypeDescription
 EOS;
-		
-		$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-		$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-		$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-		$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-		$params = array(&$start, &$end);
-        $data = $this->run_query($tsql, $params);
+        $data = $this->run_query($tsql, $this->getDateRange());
 		return $data;
 	}
 
@@ -242,12 +223,6 @@ EOS;
             throw new RestException(401, "Invalid authorization!");
         if (!$this->logic->version->hasEurekas())
             throw new RestException(404, "Eurekas database could not be found!");
-        $opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
-        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-        $start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-        $end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-        $end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-        $params = array(&$start, &$end);
         $sql = <<<EOS
 SELECT
     pt.PaymentType AS 'Tender'
@@ -258,15 +233,14 @@ INNER JOIN dbo.PaymentType pt
     ON p.PaymentType = pt.ID
 WHERE
     p.IsVoid = 0
-    AND p.TransactionDate BETWEEN ? AND ?
+    AND p.TransactionDate BETWEEN :start AND :end
 GROUP BY
     pt.PaymentType
 EOS;
         $conn = new Connection\ClubSpeedConnection("(local)", "RestaurantPiece");
-        $data = $conn->query($sql, $params);
+        $data = $conn->query($sql, $this->getDateRange());
         return $data;
     }
-
 
     /**
      * @url GET /brokers_summary
@@ -311,9 +285,8 @@ EOS;
 	 * by their opening date instead.
 	 */
 	public function sales() {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
             throw new RestException(401, "Invalid authorization!");
-        }
 		
 		$opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
 		$tsql = <<<EOD
@@ -342,6 +315,7 @@ c.ClosedDate AS 'Check Closed On',
 c.CustID as 'Customer ID',
 cust.LName AS 'Customer Last Name',
 cust.FName AS 'Customer First Name',
+c.BrokerName AS 'Broker/Affiliate',
 u.UserName AS 'Created By',
 c.checktotal AS 'Check Total',
 c.BrokerName AS 'Broker/Affiliate Code',
@@ -366,7 +340,9 @@ CASE
 WHEN p.PayStatus = 1 THEN 'Paid'
 WHEN p.PayStatus = 2 THEN 'Voided'
 END
-AS "Payment Status"
+AS "Payment Status",
+
+c.DiscountNotes AS 'Discount Notes'
 
 FROM CheckDetails cd
 left join Checks c ON c.CheckID = cd.CheckID
@@ -376,16 +352,11 @@ left join Users u on u.UserID = c.userid
 left join Users u2 on u2.UserID = p.userid
 left join Products ON Products.ProductID = cd.ProductID
 left join ProductClasses pc ON pc.ProductClassID = products.ProductClassID
-WHERE {$opened_or_closed_date} BETWEEN ? AND ?
+WHERE {$opened_or_closed_date} BETWEEN :start AND :end
 ORDER BY {$opened_or_closed_date}
 EOD;
-		
-		$start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-		$start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-		$end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-		$end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
 		$params = array(&$start, &$end);
-        $data = $this->run_query($tsql, $params);
+        $data = $this->run_query($tsql, $this->getDateRange());
 
         // // if we want to "union" eurekas data, this pattern can be followed
         // // but there could be check id collisions / confusion
@@ -412,14 +383,7 @@ EOD;
             throw new RestException(401, "Invalid authorization!");
         if (!$this->logic->version->hasEurekas())
             throw new RestException(404, "Eurekas database could not be found!");
-
         $opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
-        $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : date($GLOBALS['dateFormat']);
-        $start = date($GLOBALS['dateFormat'] . " 00:00:00", strtotime($start));
-        $end = isset($_REQUEST['end']) ? $_REQUEST['end'] : date($GLOBALS['dateFormat'], strtotime($start));
-        $end = date($GLOBALS['dateFormat'] . " 23:59:59", strtotime($end));
-        $params = array(&$start, &$end);
-
         $sql = <<<EOS
 SELECT
     c.CheckID
@@ -474,11 +438,11 @@ LEFT OUTER JOIN dbo.Users u2
     ON p.UserID = u2.UserID
 --LEFT OUTER JOIN dbo.ChecksLineSubItems clsi -- reference to the left join for line item sub items, if needed (not necessary for kibble's data)
 --    ON clsi.CheckLineItemID = cli.CheckLineItemID
-WHERE {$opened_or_closed_date} BETWEEN ? AND ?
+WHERE {$opened_or_closed_date} BETWEEN :start AND :end
 ORDER BY {$opened_or_closed_date}
 EOS;
         $conn = new Connection\ClubSpeedConnection("(local)", "RestaurantPiece");
-        $data = $conn->query($sql, $params);
+        $data = $conn->query($sql, $this->getDateRange());
         // $eurekaData = $this->run_query($eurekaSql, $params);
         // $data = array_merge($data, $eurekaData); // append eureka data
         // // we could maybe hack apart the query above to get a union rolling,

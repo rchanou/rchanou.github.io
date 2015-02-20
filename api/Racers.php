@@ -3,6 +3,7 @@ require_once('vendors/swiftmailer/lib/swift_required.php');
 require_once('./Queues.php');
 
 use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Logging\LogService as Log;
 
 /**
  * ClubSpeed API
@@ -392,7 +393,7 @@ class Racers
         else
         {
             $waiverPath = empty($GLOBALS['customerAdultWaiverImagePath']) ? 'C:\ClubSpeed\CustomerWaivers' : $GLOBALS['customerAdultWaiverImagePath'];
-            $termsText = $request_data['Waiver1'];
+            $termsText = @$request_data['Waiver1'];
         }
 
         $subheaderData = array(
@@ -423,59 +424,66 @@ class Racers
 
     private function send_welcome_email(&$request_data) {
         //Welcome e-mail
-        if ($request_data['email'] != '') //If we have an e-mail address to send to
-        {
-            // Get the SMTP settings
-            $settings = $this->logic->helpers->getControlPanelSettings(
-                "MainEngine",
-                array(
-                    "SendWelcomeMail"
-                    , "EmailWelcomeFrom"
-                    , "SMTPServerUseAuthentiation"
-                    , "SMTPServer"
-                    , "SMTPServerPort"
-                    , "SMTPServerAuthenticationUserName"
-                    , "SMTPServerAuthenticationPassword"
-                    , "SMTPServerUseSSL"
-                )
-            );
-
-            if (strtolower($settings['SendWelcomeMail']) == "true") //If the track would like to send welcome e-mails
+        try {
+            if ($request_data['email'] != '') //If we have an e-mail address to send to
             {
                 // Get the SMTP settings
+                $settings = $this->logic->helpers->getControlPanelSettings(
+                    "MainEngine",
+                    array(
+                        "SendWelcomeMail"
+                        , "EmailWelcomeFrom"
+                        , "SMTPServerUseAuthentiation"
+                        , "SMTPServer"
+                        , "SMTPServerPort"
+                        , "SMTPServerAuthenticationUserName"
+                        , "SMTPServerAuthenticationPassword"
+                        , "SMTPServerUseSSL"
+                    )
+                );
 
-                // Get the mail template
-                $emailStrings = $this->logic->helpers->getMailTemplate();
-
-                //If a mail template is defined, send an e-mail (empty array signifies non-existing)
-                if (array_key_exists(0,$emailStrings)) 
+                if (strtolower($settings['SendWelcomeMail']) == "true") //If the track would like to send welcome e-mails
                 {
-                    $emailStrings['Subject'] = $emailStrings[0]['Subject'];
-                    $emailStrings['Text'] = $emailStrings[0]['Text'];
+                    // Get the SMTP settings
 
-                    //Replace any placeholders with their values
-                    $tagsToReplace = array('##FIRSTNAME##','##LASTNAME##','##EMAIL##','##TIME##','##RACERNAME##');
-                    $dataToInsert = array($request_data['firstname'],$request_data['lastname'],$request_data['email'],
-                        date("F j, Y, g:i a"),$request_data['racername']);
-                    $emailStrings['Subject'] = str_replace($tagsToReplace,$dataToInsert,$emailStrings['Subject']);
-                    $emailStrings['Text'] = str_replace($tagsToReplace,$dataToInsert,$emailStrings['Text']);
+                    // Get the mail template
+                    $emailStrings = $this->logic->helpers->getMailTemplate();
 
-                    //Send the e-mail
-                    $mail = Mail::builder()
-                        ->subject($emailStrings['Subject'])
-                        ->from(array($settings['EmailWelcomeFrom'] => $request_data['BusinessName']))
-                        ->to(array($request_data['email'] => $request_data['firstname'] . ' ' . $request_data['lastname']))
-                        ->body($emailStrings['Text'],'text/html');
-                    try {
+                    //If a mail template is defined, send an e-mail (empty array signifies non-existing)
+                    if (array_key_exists(0,$emailStrings)) {
+                        $emailStrings['Subject'] = $emailStrings[0]['Subject'];
+                        $emailStrings['Text'] = $emailStrings[0]['Text'];
+
+                        //Replace any placeholders with their values
+                        $tagsToReplace = array('##FIRSTNAME##','##LASTNAME##','##EMAIL##','##TIME##','##RACERNAME##');
+                        $dataToInsert = array($request_data['firstname'],$request_data['lastname'],$request_data['email'],
+                            date("F j, Y, g:i a"),$request_data['racername']);
+                        $emailStrings['Subject'] = str_replace($tagsToReplace,$dataToInsert,$emailStrings['Subject']);
+                        $emailStrings['Text'] = str_replace($tagsToReplace,$dataToInsert,$emailStrings['Text']);
+
+                        //Send the e-mail
+                        $mail = Mail::builder()
+                            ->subject($emailStrings['Subject'])
+                            ->from(array($settings['EmailWelcomeFrom'] => $request_data['BusinessName']))
+                            ->to(array($request_data['email'] => $request_data['firstname'] . ' ' . $request_data['lastname']))
+                            ->body($emailStrings['Text'],'text/html');
                         Mail::send($mail);
-                        Log::debug("Welcome email sent to: " . $request_data['email']);
+                        Log::info("Welcome email sent to: " . $request_data['email']);
                     }
-                    catch(Exception $e) {
-                        Log::error("Unable to send welcome email to: " . $request_data['email'], $e);
-                        return array('Exception' => $e->getMessage(), 'Settings' => $settings);
+                    else
+                    {
+                        Log::info("Welcome email not sent! Mail template is missing!");
                     }
                 }
+                else
+                    Log::info("Did not send welcome email to: " . $request_data['email'] . "! Track setting for SendWelcomeMail was not \"true\"!");
             }
+            else
+                Log::info("Unable to send welcome email! Register received a null or empty email!");
+        }
+        catch(Exception $e) {
+            Log::error("Unable to send welcome email to: " . $request_data['email'], $e);
+            return array('Exception' => $e->getMessage(), 'Settings' => $settings);
         }
     }
 

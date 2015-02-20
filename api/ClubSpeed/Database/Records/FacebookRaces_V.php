@@ -6,7 +6,10 @@ class FacebookRaces_V extends BaseRecord {
 
     public static $table      = 'dbo.FacebookRaces_V';
     public static $tableAlias = 'fbrv';
-    public static $key        = 'CustID'; // there is no unique identifier -- will add if necessary
+    public static $key        = array(
+        'HeatNo',
+        'CustID'
+    );
 
     public $CustID;
     public $Access_Token;

@@ -155,7 +155,7 @@ class ResourceSets extends BaseApi
         return $output;
     }
 
-    public function post($id, $request_data = null) {
+    public function post($request_data = null) {
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }

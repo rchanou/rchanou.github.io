@@ -82,6 +82,12 @@ class RecordNotFoundException extends \CSException {
     }
 }
 
+class BadRequestException extends \CSException {
+    public function __construct($message = null, $code = 400, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}
+
 /**
  * Clubspeed exception signifying that
  * a unique record is already considered to exist,

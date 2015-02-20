@@ -248,6 +248,10 @@
             "route": "/heatDetails",
             "calls": [
                 {
+                    "id": "list",
+                    "verb": "GET"
+                },
+                {
                     "id": "get",
                     "subroute": "/:heatId/:customerId",
                     "verb": "GET"

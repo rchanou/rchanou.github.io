@@ -15,7 +15,7 @@ class Comparator {
     // 4. accept operator abbreviations starting with a $
     // 5. all letters are case-insensitive
     protected static $pattern = '/((?: )?<=?|>=?|<>|!?=(?: )?|(?: )IS(?: NOT)?|(?:NOT )?LIKE|IN(?: )|(?:(?=.*;)%|(?:(?!.*;)\$))(?:[N]?EQ|LT[E]?|GT[E]?)(?:;?))/i'; // note case-insensitivity
-    protected static $operators = array(
+    public static $operators = array(
           '<'           => '<'
         , '<='          => '<='
         , '>'           => '>'
@@ -23,7 +23,6 @@ class Comparator {
         , '='           => '='
         , '!='          => '!='
         , '<>'          => '<>'
-        , 'is'          => 'IS'
         , 'is'          => 'IS'
         , 'is not'      => 'IS NOT'
         , 'like'        => 'LIKE'
@@ -41,6 +40,14 @@ class Comparator {
         , '$gte'        => '>='
         , '$eq'         => '='
         , '$neq'        => '!='
+        , '$is'         => 'IS' // need a way to handle IS and ISNOT from json object format
+        , '$isnot'      => 'IS NOT'
+        , '$like'       => 'LIKE'
+        , '$notlike'    => 'NOT LIKE'
+        , '$lk'         => 'LIKE'
+        , '$nlk'        => 'NOT LIKE'
+        , '$in'         => 'IN'
+        , '$has'        => 'LIKE' // special extension which will automatically surround value in %'s
     );
 
     public function __construct($data) {

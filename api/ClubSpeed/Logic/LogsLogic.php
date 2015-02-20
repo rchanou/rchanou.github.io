@@ -1,6 +1,8 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Utility\Convert;
+use ClubSpeed\Database\Helpers\UnitOfWork;
 
 /**
  * The business logic class
@@ -20,17 +22,57 @@ class LogsLogic extends BaseLogic implements \ClubSpeed\Logging\LogInterface {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->logs;
+        $this->on('uow', function($uow) { // we could really just use an abstract function for this. doubt we'll need an array of callbacks.
+            // note that we can't use &$uow due to silly PHP issues.
+            // CHECK FOR REFERENCE/VALUE PROBLEMS (!!!)
+            // we may still be safe, since $uow is an object (I think...)
+            switch($uow->action) {
+                case 'create':
+                    if (is_null($uow->data->LogDate))
+                        $uow->data->LogDate = Convert::getDate();
+                    if (is_null($uow->data->TerminalName))
+                        $uow->data->TerminalName = 'ClubSpeed PHP API';
+                    break;
+                case 'update':
+                    // pr('passing through logs update');
+                    break;
+                case 'all':
+                    if (empty($uow->order))
+                        $uow->order('LogID DESC');
+                    break;
+                default:
+                    // pr('passing through logs uow for: ' . $uow->action);
+                    break;
+            }
+        });
     }
 
     // note that in addition to editing the underlying logs records with CRUD operations,
     // we also want to extend this 
 
     public function log($message) {
-        return $this->create(array(
-              'Message'      => \ClubSpeed\Utility\Convert::toString($message)
-            , 'LogDate'      => \ClubSpeed\Utility\Convert::getDate()
+        $data = array(
+              'Message'      => Convert::toString($message)
+            , 'LogDate'      => Convert::getDate()
             , 'TerminalName' => 'ClubSpeed PHP API'
-        ));
+        );
+        $uow = UnitOfWork::build($data)->action('create');
+        return $this->uow($uow);
+
+        // return $this->create(array(
+        //       'Message'      => \ClubSpeed\Utility\Convert::toString($message)
+        //     , 'LogDate'      => \ClubSpeed\Utility\Convert::getDate()
+        //     , 'TerminalName' => 'ClubSpeed PHP API'
+        // ));
+    }
+
+    // here is the other 
+    protected final function beforeCreate(&$uow) {
+
+    }
+
+    protected final function beforeUpdate(&$uow) {
+
     }
 
     public function debug($message) {

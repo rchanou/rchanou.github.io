@@ -20,5 +20,14 @@ class FacebookRacesLogic extends BaseReadOnlyLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->facebookRaces_V;
+        $this->on('uow', function($uow) {
+            switch($uow->action) {
+                case 'all':
+                    if (empty($uow->order))
+                        $uow->order('Finish');
+                    break;
+            }
+        });
+
     }
 }

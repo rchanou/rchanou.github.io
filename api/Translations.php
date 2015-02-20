@@ -1,5 +1,7 @@
 <?php
 
+use ClubSpeed\Enums\Enums;
+
 class Translations extends BaseApi
 {
 
@@ -13,6 +15,10 @@ class Translations extends BaseApi
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
         $this->mapper = new \ClubSpeed\Mappers\TranslationsMapper();
         $this->interface = $this->logic->translations;
+        $this->access['all'] = Enums::API_PUBLIC_ACCESS;
+        $this->access['filter'] = Enums::API_PUBLIC_ACCESS;
+        $this->access['get'] = Enums::API_PUBLIC_ACCESS;
+        $this->access['match'] = Enums::API_PUBLIC_ACCESS;
     }
 
     /**

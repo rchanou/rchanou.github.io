@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Database\Records;
+use Clubspeed\Utility\Arrays;
 
 class HeatDetails extends BaseRecord {
 
@@ -38,7 +39,8 @@ class HeatDetails extends BaseRecord {
         if (count($args) > 0) {
             $data = end($args);
             if (isset($data)) {
-                if (is_array($data)) {
+                if (Arrays::isAssociative($data)) {
+                // if (is_array($data)) {
                     if (!empty($data)) {
                         if (isset($data['HeatNo']))                 $this->HeatNo                = \ClubSpeed\Utility\Convert::toNumber         ($data['HeatNo']);
                         if (isset($data['CustID']))                 $this->CustID                = \ClubSpeed\Utility\Convert::toNumber         ($data['CustID']);
@@ -60,22 +62,20 @@ class HeatDetails extends BaseRecord {
                     }
                 }
                 else {
-                    if (count(self::$key) !== count($args)) // wrong number of keys passed, throw exception?
-                        throw new \CSException("ControlPanel record received the wrong number of primary keys!");
+                    $keys = array();
+                    if (count(self::$key) === count($args))
+                        $keys = $args; // keys passed in as Instance(key1, key2)
+                    else if (count(self::$key) === count($data))
+                        $keys = $data; // keys passed in as Instance(array(key1, key2))
+                    else // wrong number of keys passed, throw exception?
+                        return;
+                        // throw new \CSException("HeatDetails record received the wrong number of primary keys!");
                     $c = count(self::$key);
                     for($i = 0; $i < $c; $i++) {
-                        $this->{self::$key[$i]} = $args[$i];
+                        $this->{self::$key[$i]} = $keys[$i];
                     }
                 }
             }
-        }
-    }
-
-    public function validate($type) {
-        switch (strtolower($type)) {
-            case 'insert':
-                
-                break;
         }
     }
 }

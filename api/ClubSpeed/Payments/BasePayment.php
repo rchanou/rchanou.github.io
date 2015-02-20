@@ -9,6 +9,7 @@ use ClubSpeed\Templates\TemplateService as Templates;
 use ClubSpeed\Utility\Arrays as Arrays;
 use ClubSpeed\Utility\Convert as Convert;
 use ClubSpeed\Payments\ProductHandlers\ProductHandlerService as Handlers;
+use ClubSpeed\Utility\Tokens as Tokens;
 
 
 class BasePayment {
@@ -164,6 +165,7 @@ class BasePayment {
                         , 'issuer'               => ''
                         , 'card'                 => new \Omnipay\Common\CreditCard(@$params['card'])
                         , 'clientIp'             => $this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
+                        , 'session'              => Tokens::generate()
                     );
 
                     $response = $callback($options); // the actual omnipay call
@@ -563,6 +565,7 @@ class BasePayment {
 
     public function handleRedirect($check, $response) {
         // TODO!!!!
+        Log::info("inside handle redirect!!!");
         return array(
             'redirect' => array(
                 'url'       => $response->getRedirectUrl(),

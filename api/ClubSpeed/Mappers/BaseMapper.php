@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Mappers;
+use ClubSpeed\Utility\Arrays;
 
 class BaseMapper {
 
@@ -48,6 +49,78 @@ class BaseMapper {
         return $this->out($data);
     }
 
+    public function uowIn(&$uow) {
+        if (!is_null($uow->select)) // limit by mapper limiting, or...
+            $this->limit('client', $uow->select); // consider a better way to do this
+        $this->uowMap('server', $uow);
+        return $uow;
+    }
+
+    public function uowOut(&$uow) {
+        // only re-map uow->data on the way out
+        if ((is_array($uow->data) || $uow->data instanceof \ClubSpeed\Database\Records\BaseRecord) && !empty($uow->data))
+            $uow->data = $this->uowMap('client', $uow->data);
+        return $uow;
+    }
+
+    public function uow(&$uow, $callback) {
+        $this->uowIn($uow);
+        call_user_func($callback, $uow);
+        $this->uowOut($uow);
+        return $uow;
+    }
+
+    // temp function
+    public function uowMap($type, $data) {
+        if (is_null($type) || empty($type))
+            throw new \RequiredArgumentMissingException("BaseMapper uowMap() received a null or empty type!");
+        if (is_null($data))
+            throw new \RequiredArgumentMissingException("BaseMapper uowMap() received null data!");
+        $map = $this->_map[$type];
+        if ($data instanceof \ClubSpeed\Database\Helpers\UnitOfWork) {
+            if (!is_null($data->data)) // used by create, update
+                $data->data = $this->uowMap($type, $data->data);
+            if (!is_null($data->select)) // conditionally used by get, all
+                $data->select = $this->uowMap($type, $data->select);
+            if (!is_null($data->where)) // conditionally used by all
+                $data->where = $this->uowMap($type, $data->where);
+            if (!is_null($data->order))
+                $data->order = $this->uowMap($type, $data->order);
+            return $data;
+        }
+        else if (is_array($data) || is_object($data)) {
+            $mapped = array();
+            if ($data instanceof \ClubSpeed\Database\Records\BaseRecord || Arrays::isAssociative($data)) {
+                foreach($data as $key => $val) {
+                    // 1. $uow->where
+                    // 2. $uow->order
+                    // 3. $uow->data (incoming, single)
+                    // 4. $uow->data[index] (outgoing, single)
+                    $mappedKey = $this->uowMap($type, $key); // ditch the recursive call, if performance is an issue
+                    if ($mappedKey)
+                        $mapped[$mappedKey] = $val;
+                }
+            }
+            else {
+                foreach($data as $key => $val) {
+                    if ($val instanceof \ClubSpeed\Database\Records\BaseRecord) {
+                        // 5. $uow->data (outgoing, multiple)
+                        $mapped[$key] = $this->uowMap($type, $val);
+                    }
+                    else {
+                        // 6. $uow->select
+                        $mappedVal = $this->uowMap($type, $val); // use recursion to map the value
+                        if ($mappedVal)
+                            $mapped[] = $mappedVal;
+                    }
+                }
+            }
+            return $mapped;
+        }
+        else
+            return @$map[$data] ?: null;
+    }
+
     public function map($type, $data) {
         if (is_null($type) || empty($type))
             throw new \RequiredArgumentMissingException("MapBase map() received an empty type!");
@@ -82,7 +155,7 @@ class BaseMapper {
         else if (is_array($data) || is_object($data)) {
             $mapped = array();
             foreach($data as $key => $val) {
-                if (is_array($val))
+                if (is_array($val) && !self::is_assoc($data)) // CAREFUL -- run unit tests, this could break stuff.
                     $mapped[$key] = $this->map($type, $val);
                 else {
                     if (isset($currentMap[$key]))
