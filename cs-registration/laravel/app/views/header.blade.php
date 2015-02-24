@@ -2,7 +2,7 @@
     <div class="col-xs-3 topLeftBackArrow">@yield('backButton')</div>
     <div class="col-xs-6 topCenterHeader">@yield('headerTitle')</div>
     <div class="col-xs-3 topRightDropdown">
-        <dl id="languageDropdown" class="dropdown languageDropdown">
+        <dl id="languageDropdown" class="dropdown languageDropdown" @if(count($translations) <= 1) style="visibility: hidden;" @endif>
             <dt><a href="#"><span><span class="currentCultureString" style="display: inline-block">{{$strings["cultureNames"][$currentCulture]}}</span> <img src="images/flags/{{strtolower(substr($currentCulture,3,2))}}.png" class="flag"></span></a></dt>
             <dd>
                 <ul>
