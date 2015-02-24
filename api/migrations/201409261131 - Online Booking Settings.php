@@ -6,7 +6,8 @@
 
 $settings = array(
 	'onlineBookingPaymentProcessorSettings' => '{"name": "Dummy","options": {}}',
-    'onlineBookingPaymentProcessorSavedSettings' => '{"Dummy": {"name": "Dummy","options": {}}}',
+  'onlineBookingPaymentProcessorSavedSettings' => '{"Dummy": {"name": "Dummy","options": {}}}',
+	'defaultPaymentCountry' => '',
 	'emailShown' => true,
 	'emailRequired' => true,
 	'passwordShown' => true,
@@ -65,7 +66,9 @@ $settings = array(
     'maxRacersForDropdown' => 50,
     'currentCulture' => 'en-US',
 	'giftCardSalesEnabled' => false,
-	'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}'
+	'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}',
+	'brokerFieldEnabled' => false,
+	'brokerSourceInURLEnabled' => false
 	);
 
 error_reporting(E_ALL);
