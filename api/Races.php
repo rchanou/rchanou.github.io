@@ -781,31 +781,35 @@ class Races
             $limit = 50;
         }
 
+        $starttime = '00:00:00';
+        $endtime = '23:59:59';
+        $isoDateFormat = 'Y-m-d';
+
         if(isset($_GET['range'])) {
+            
             switch($_GET['range']) {
                 case 'day':
-                    $start = date($GLOBALS['dateFormat']) . ' 12:00:00 AM';
+                    $start = date($isoDateFormat) . 'T' . $starttime;
                     break;
                 case 'week':
-                    $start = date($GLOBALS['dateFormat'], strtotime('last Sunday')) . ' 12:00:00 AM';
+                    $start = date($isoDateFormat, strtotime('last Sunday')) . 'T' . $starttime;
                     break;
                 case 'month':
-                    $start = date($GLOBALS['dateFormat'], strtotime('first day of this month')) . ' 12:00:00 AM';
+                    $start = date($isoDateFormat, strtotime('first day of this month')) . 'T' . $starttime;
                     break;
-                                case 'year':
-                    $start = date($GLOBALS['dateFormat'], strtotime('first day of january')) . ' 12:00:00 AM';
+                case 'year':
+                    $start = date($isoDateFormat, strtotime('first day of january')) . 'T' . $starttime;
                     break;
                 default:
                     throw new RestException(412,'Invalid range given');
             }
-
-            $end = date($GLOBALS['dateFormat']) . ' 11:59:59 PM';
+            $end = date($GLOBALS['dateFormat']) . 'T' . $endtime;
             $tsql_range = 'AND rd.TimeStamp BETWEEN ? AND ?';
             $tsql_params[] = &$start;
             $tsql_params[] = &$end;
         } elseif(isset($_GET['start']) && isset($_GET['end'])) {
-            $start = date($GLOBALS['dateFormat'], strtotime($_GET['start'])) . ' 12:00:00 AM';
-            $end = date($GLOBALS['dateFormat'], strtotime($_GET['end'])) . ' 11:59:59 PM';
+            $start = date($isoDateFormat, strtotime($_GET['start'])) . 'T' . $starttime;
+            $end = date($isoDateFormat, strtotime($_GET['end'])) . 'T' . $endtime;
             $tsql_range = 'AND rd.TimeStamp BETWEEN ? AND ?';
             $tsql_params[] = &$start;
             $tsql_params[] = &$end;
@@ -863,9 +867,7 @@ class Races
 EOD;
 
         $rows = $this->run_query($tsql, $tsql_params);
-
         $output = array();
-
         foreach($rows as $row) {
             $output[] = array('racer_id' => $row['CustID'],
                 'nickname' => $row['RacerName'],
