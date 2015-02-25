@@ -803,7 +803,7 @@ class Races
                 default:
                     throw new RestException(412,'Invalid range given');
             }
-            $end = date($GLOBALS['dateFormat']) . 'T' . $endtime;
+            $end = date($isoDateFormat) . 'T' . $endtime;
             $tsql_range = 'AND rd.TimeStamp BETWEEN ? AND ?';
             $tsql_params[] = &$start;
             $tsql_params[] = &$end;
