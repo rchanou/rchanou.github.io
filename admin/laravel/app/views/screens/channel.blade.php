@@ -95,8 +95,8 @@ Speed Screen Channels
                         <!-- Channel options tabs -->
                         <ul class="nav nav-tabs tab-bricky">
                             <li class="active"> <a data-toggle="tab" href="#panel_tab2_deploy_channel{{$currentChannel->channelId}}"> Deploy </a> </li>
-                            <li class=""> <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}"> Slide Lineup </a> </li>
-                            <li class=""> <a data-toggle="tab" href="#panel_tab2_channelsettings_channel{{$currentChannel->channelId}}"> Channel Settings </a> </li>
+                            <li class="" style="display: none;"> <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}"> Slide Lineup </a> </li>
+                            <li class="" style="display: none;"> <a data-toggle="tab" href="#panel_tab2_channelsettings_channel{{$currentChannel->channelId}}"> Channel Settings </a> </li>
                         </ul>
                         <!-- Content of all channel tabs -->
                         <div class="tab-content">
