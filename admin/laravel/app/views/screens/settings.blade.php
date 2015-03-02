@@ -75,7 +75,7 @@ Speed Screen Settings
         </div>
       </div>
      </div>
-     <div class="row">
+     <div class="row" style="display: none;">
       <div class="col-xs-12">
         <div class="widget-box">
             <div class="widget-title">
