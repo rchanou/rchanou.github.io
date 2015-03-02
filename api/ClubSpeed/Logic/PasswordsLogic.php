@@ -156,7 +156,7 @@ class PasswordsLogic extends BaseLogic {
         $customer = $customer[0];
         // update the customer
         try {
-            $customer->Password = \ClubSpeed\Security\Hasher::hash($password);
+            $customer->Hash = \ClubSpeed\Security\Hasher::hash($password);
             $affected = $this->db->customers->update($customer);
             Log::info('Password reset has updated password for Customer ID: ' . $customer->CustID, Enums::NSP_PASSWORD);
         }
