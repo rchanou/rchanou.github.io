@@ -493,4 +493,18 @@ class CS_API
             return false;
         }
     }
+
+    public static function log($message, $terminal = 'Club Speed PHP API', $username = '')
+    {
+        self::initialize();
+
+        $url = self::$baseAPIURL . '/logs?key=' . self::$privateKey;
+        $params = array(
+            'message'  => $message,
+            'terminal' => $terminal,
+            'username' => $username
+        );
+
+        return self::callApi($url, $params, 'POST');
+    }
 }

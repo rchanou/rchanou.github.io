@@ -10,6 +10,7 @@
 | your classes in the "global" namespace without Composer updating.
 |
 */
+require_once(app_path().'/tools/CS_API.php');
 
 ClassLoader::addDirectories(array(
 
@@ -49,6 +50,8 @@ Log::useFiles(storage_path().'/logs/laravel.log');
 App::error(function(Exception $exception, $code)
 {
 	Log::error($exception);
+    $result = CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code, 'Club Speed Registration'); //DB logging;
+    return Redirect::to('/disconnected'); //Redirect to an error page
 });
 
 /*
