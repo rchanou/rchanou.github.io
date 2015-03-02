@@ -68,8 +68,8 @@ $settings = array(
         'Namespace'    => $namespace,
         'Name'         => 'providerOptions',
         'Type'         => 'JSON',
-        'DefaultValue' => '{}',
-        'Value'        => '{}',
+        'DefaultValue' => '{"sid":"","token":""}',
+        'Value'        => '{"sid":"","token":""}',
         'Description'  => 'The provider options to use to initialize the provider driver. These options will typically include usernames, keys, etc.',
 				'IsPublic'     => 0
     )
