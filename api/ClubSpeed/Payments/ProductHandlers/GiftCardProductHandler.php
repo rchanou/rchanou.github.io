@@ -55,12 +55,12 @@ class GiftCardProductHandler extends BaseProductHandler {
 
                 $customerId = $this->logic->customers->create_v0((array)$giftCardCustomer); // convert back to array for the params to be handled properly with the old customer interface
                 $return['success'][] = '#' . $giftCardCustomer->CrdID; // use # to prevent tel: interpretation in html?
-                Log::info($logPrefix . 'Created customer representation of gift card #' . $giftCardCustomer->CrdID);
+                Log::info($logPrefix . 'Created customer representation of gift card #' . $giftCardCustomer->CrdID, Enums::NSP_BOOKING);
             }
             catch(\Exception $e) {
                 // note that we can't really add the giftCardHistory if we don't have this customerId -- break early (??)
                 $message = $logPrefix . 'Unable to create customer record for the gift card! ' . $e->getMessage();
-                Log::error($message);
+                Log::error($message, Enums::NSP_BOOKING);
                 return array(
                     'error' => $message // support message?
                 );
@@ -75,11 +75,11 @@ class GiftCardProductHandler extends BaseProductHandler {
                 $giftCardHistory->CheckID = $checkTotal->CheckID;
                 $giftCardHistory->CheckDetailID = $checkTotal->CheckDetailID;
                 $giftCardHistoryId = $this->logic->giftCardHistory->create($giftCardHistory);
-                Log::info($logPrefix . 'Added ' . $giftCardHistory->Points . ' points to gift card #' . $giftCardCustomer->CrdID);
+                Log::info($logPrefix . 'Added ' . $giftCardHistory->Points . ' points to gift card #' . $giftCardCustomer->CrdID, Enums::NSP_BOOKING);
             }
             catch(\Exception $e) {
                 $message = $logPrefix . 'Unable to create gift card history record for gift card #'. $giftCardCustomer->CrdID . '!' . $e->getMessage();
-                Log::error($message);
+                Log::error($message, Enums::NSP_BOOKING);
                 return array(
                     'error' => $message // or include more information?
                 );
@@ -144,11 +144,11 @@ class GiftCardProductHandler extends BaseProductHandler {
                     ->to($emailTo)
                     ->body($receiptBody);
                 Mail::sendWithInlineImages($mail, array('giftCardImage' => $barCodeUtil->getBarcodePNG($giftCardCustomer->CrdID, "C128",2,60)));
-                Log::info($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID);
+                Log::info($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID, Enums::NSP_BOOKING);
             }
             catch(\Exception $e) {
                 $message = $logPrefix . 'Unable to send gift card email! ' . $e->getMessage();
-                Log::error($message);
+                Log::error($message, Enums::NSP_BOOKING);
                 return array(
                     'error' => $message // or include more information?
                 );

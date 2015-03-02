@@ -2,6 +2,7 @@
 
 namespace ClubSpeed\Remoting;
 use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
 
 // Grab httpful -- necessary with autoloader?
 require_once(__DIR__.'../../../httpful/httpful.phar'); // ~ 6 ms
@@ -52,11 +53,11 @@ class WebApiRemoting {
         // 5. (more?)
 
         if (!isset($GLOBALS['apiUsername']) || empty($GLOBALS['apiUsername'])) {
-            Log::warn("Attempted to use WebAPI Remoting, but apiUsername was not set in config.php!");
+            Log::warn("Attempted to use WebAPI Remoting, but apiUsername was not set in config.php!", Enums::NSP_WEBAPI);
             return false;
         }
         if (!isset($GLOBALS['apiPassword']) || empty($GLOBALS['apiPassword'])) {
-            Log::warn("Attempted to use WebAPI Remoting, but apiPassword was not set in config.php!");
+            Log::warn("Attempted to use WebAPI Remoting, but apiPassword was not set in config.php!", Enums::NSP_WEBAPI);
             return false;
         }
         if ($this->logic->version->compareToCurrent("15.4") < 0) {
@@ -64,7 +65,7 @@ class WebApiRemoting {
             // check for the override, as we have a shim which works with older versions,
             // but is selectively installed
             if (!isset($GLOBALS['cacheClearOverride']) || !$GLOBALS['cacheClearOverride']) {
-                Log::warn("Attempted to use WebAPI Remoting, but the current version is too low and cacheClearOverride is not set! Current version: " . $this->logic->version->current(false)); // pass false to keep as string
+                Log::warn("Attempted to use WebAPI Remoting, but the current version is too low and cacheClearOverride is not set! Current version: " . $this->logic->version->current(false), Enums::NSP_WEBAPI); // pass false to keep as string
                 return false;
             }
         }
@@ -74,7 +75,7 @@ class WebApiRemoting {
         ));
         if (empty($users)) {
             // invalid credentials!
-            Log::warn("Attempted to use WebAPI Remoting, but the provided username/password from config.php was invalid!");
+            Log::warn("Attempted to use WebAPI Remoting, but the provided username/password from config.php was invalid!", Enums::NSP_WEBAPI);
             return false;
         }
         // weird part: try to make a call to /ClubSpeedCache/clear without credentials
@@ -86,7 +87,7 @@ class WebApiRemoting {
             ->timeoutIn(3) // timeout after 3 seconds
             ->send();
         if($response->code != '401') {
-            Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Received status code: " . $response->code);
+            Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Received status code: " . $response->code, Enums::NSP_WEBAPI);
             return false;
         }
         return true;
@@ -142,10 +143,10 @@ class WebApiRemoting {
      */
     private function handleResponse(&$response) {
         if ($response->code != 200) {
-            Log::error("Received status code " . $response->code . " back from WebAPI! Raw body: " . $response->raw_body);
+            Log::error("Received status code " . $response->code . " back from WebAPI! Raw body: " . $response->raw_body, Enums::NSP_WEBAPI);
             throw new \Exception($response->raw_body, $response->code); // find a better way to handle this??
         }
-        Log::debug("Made a successful call to: " . $response->request->uri);
+        Log::debug("Made a successful call to: " . $response->request->uri, Enums::NSP_WEBAPI);
     }
 
     public function startRace($heatId) {

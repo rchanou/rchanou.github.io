@@ -17,14 +17,14 @@ class ReservationProductHandler extends BaseProductHandler {
 
         if (empty($metadata)) {
             $message = $logPrefix . 'No metadata passed to ReservationProductHandler';
-            Log::error($message);
+            Log::error($message, Enums::NSP_BOOKING);
             // then we are done processing, return the message
             return array('error' => $message); // is this an error? will we ever have a reservation product handler without a heatId?
         }
         else {
             if (!isset($metadata['heatId'])) {
                 $message = $logPrefix . 'No heatId passed to ReservationProductHandler';
-                Log::error($message);
+                Log::error($message, Enums::NSP_BOOKING);
                 return array('error' => $message); // is this an error or a success?
             }
             else {
@@ -40,11 +40,11 @@ class ReservationProductHandler extends BaseProductHandler {
                     $heatMain   = $heatMain[0];
                     $checkNotes = $checkTotal->Qty . ' racers for Heat #' . $heatId . ' at ' . $heatMain->ScheduledTime . ' on Track #' . $heatMain->TrackNo;
                     $message    = $logPrefix . 'Heat #' . $heatId . ' passed with check details metadata';
-                    Log::info($message);
+                    Log::info($message, Enums::NSP_BOOKING);
                 }
                 catch (\Exception $e) {
                     $message = $logPrefix . 'Unable to find Heat #' . $heatId . '! ' . $e->getMessage();
-                    Log::error($message);
+                    Log::error($message, Enums::NSP_BOOKING);
                     return array('error' => $message);
                 }
 
@@ -56,7 +56,7 @@ class ReservationProductHandler extends BaseProductHandler {
                 }
                 catch (\Exception $e) {
                     $message = $logPrefix . 'Unable to find Customer #'. $checkTotal->CustID . '! ' . $e->getMessage();
-                    Log::error($message);
+                    Log::error($message, Enums::NSP_BOOKING);
                     return array('error' => $message);
                 }
 
@@ -69,11 +69,11 @@ class ReservationProductHandler extends BaseProductHandler {
                         'Notes' => $checkNotes
                     ));
                     $message = $logPrefix . 'Updated check notes to: ' . $checkNotes;
-                    Log::info($message);
+                    Log::info($message, Enums::NSP_BOOKING);
                 }
                 catch(\Exception $e) {
                     $message = $logPrefix . 'Unable to update check notes to: ' . $checkNotes . '! Exception: ' . $e->getMessage();
-                    Log::error($message);
+                    Log::error($message, Enums::NSP_BOOKING);
                     // non blocking, continue with logic
                 }
 
@@ -85,11 +85,11 @@ class ReservationProductHandler extends BaseProductHandler {
                         'HeatNotes' => $heatNotes
                     ));
                     $message = $logPrefix . 'Updated heat notes to: ' . $heatNotes;
-                    Log::info($message);
+                    Log::info($message, Enums::NSP_BOOKING);
                 }
                 catch(\Exception $e) {
                     $message = $logPrefix . 'Unable to update heat notes to: ' . $heatNotes . '! Exception: ' . $e->getMessage();
-                    Log::error($message);
+                    Log::error($message, Enums::NSP_BOOKING);
                     // non blocking, continue with logic
                 }
 
@@ -131,11 +131,11 @@ class ReservationProductHandler extends BaseProductHandler {
                             $pointHistoryReservationId = $this->logic->pointHistory->create($pointHistoryReservation);
                             $pointHistoryReservationId = $pointHistoryReservationId['PointHistoryID'];
                             $message = $logPrefix . 'Modified points for Reservation Check #' . $checkTotal->CheckID . ' by ' . $pointHistoryReservation->PointAmount;
-                            Log::info($message);
+                            Log::info($message, Enums::NSP_BOOKING);
                         }
                         catch (\Exception $e) {
                             $message = $logPrefix . 'Unable to reduce points for Reservation Check #' . $checkTotal->CheckID . "! " . $e->getMessage();
-                            Log::error($message);
+                            Log::error($message, Enums::NSP_BOOKING);
                             return array('error' => $message);
                         }
                         
@@ -157,11 +157,11 @@ class ReservationProductHandler extends BaseProductHandler {
                             $pointHistory->Username          = 'api';
                             $this->logic->pointHistory->create($pointHistory);
                             $message = $logPrefix . 'Modified points for Customer #' . $pointHistory->CustID . ' by ' . $pointHistory->PointAmount;
-                            Log::info($message);
+                            Log::info($message, Enums::NSP_BOOKING);
                         }
                         catch (\Exception $e) {
                             $message = $logPrefix . 'Unable to add points to Customer #' . $checkTotal->CustID . "! " . $e->getMessage();
-                            Log::error($message);
+                            Log::error($message, Enums::NSP_BOOKING);
                             return array('error' => $message);
                         }
 
@@ -184,11 +184,11 @@ class ReservationProductHandler extends BaseProductHandler {
                             $pointHistoryReductionId                  = $this->logic->pointHistory->create($pointHistoryReduction);
                             $pointHistoryReductionId                  = $pointHistoryReductionId['PointHistoryID'];
                             $message                                  = $logPrefix . 'Modified points for Customer #' . $pointHistoryReduction->CustID . ' by ' . $pointHistoryReduction->PointAmount;
-                            Log::info($message);
+                            Log::info($message, Enums::NSP_BOOKING);
                         }
                         catch (\Exception $e) {
                             $message = $logPrefix . 'Unable to modify points for Customer #' . $pointHistoryReduction->CustID . ' by ' . $pointHistoryReduction->PointAmount . '! ' . $e->getMessage();
-                            Log::error($message);
+                            Log::error($message, Enums::NSP_BOOKING);
                             return array('error' => $message);
                         }
                     }
@@ -197,7 +197,7 @@ class ReservationProductHandler extends BaseProductHandler {
                     try {
                         $heatDetailExists = $this->logic->heatDetails->exists($heatId, $checkTotal->CustID);
                         if ($heatDetailExists) {
-                            Log::info($logPrefix . 'Customer #' . $checkTotal->CustID . ' already exists on the HeatDetails for Heat #' . $heatId);
+                            Log::info($logPrefix . 'Customer #' . $checkTotal->CustID . ' already exists on the HeatDetails for Heat #' . $heatId, Enums::NSP_BOOKING);
                             // keep the remaining qty the same - we need to add this as a reservation, since they are making a double+ purchase for the same heat
                         }
                         else {
@@ -209,12 +209,12 @@ class ReservationProductHandler extends BaseProductHandler {
                             $this->logic->heatDetails->create($heatDetails);
                             $remainingQty = $remainingQty - 1; // chop one off the remaining quantity, since one person has been added
                             $message = $logPrefix . 'Added Customer #' . $customer->CustID . ' to race #' . $heatId;
-                            Log::info($message);
+                            Log::info($message, Enums::NSP_BOOKING);
                         }
                     }
                     catch(\Exception $e) {
                         $message = $logPrefix . 'Unable to add Customer #' . $customer->CustID . ' to race #' . $heatId . '! ' . $e->getMessage();
-                        Log::error($message);
+                        Log::error($message, Enums::NSP_BOOKING);
                         return array('error' => $message);
                     }
                 }
@@ -229,12 +229,12 @@ class ReservationProductHandler extends BaseProductHandler {
                         $heat->NumberOfReservation = ($heat->NumberOfReservation ?: 0) + $remainingQty;
                         $this->logic->heatMain->update($heat->HeatNo, $heat);
                         $message = $logPrefix . 'Added ' . $remainingQty . ' additional reservations to race #' . $heatId;
-                        Log::info($message);
+                        Log::info($message, Enums::NSP_BOOKING);
                     }
                 }
                 catch(\Exception $e) {
                     $message = $logPrefix . 'Unable to add ' . $remainingQty . ' additional reservations to race #' . $heatId . '! ' . $e->getMessage();
-                    Log::error($message);
+                    Log::error($message, Enums::NSP_BOOKING);
                     return array('error' => $message);
                 }
 
@@ -244,7 +244,7 @@ class ReservationProductHandler extends BaseProductHandler {
                 }
                 catch (\Exception $e) {
                     $message = $logPrefix . 'Unable to clear WebAPI cache! Received code: ' . $e->getCode(); // . $e->getMessage();
-                    Log::error($message);
+                    Log::error($message, Enums::NSP_BOOKING);
                     // return array('error' => $message); // ignore the error return during testing, pretend successful
                 }
 

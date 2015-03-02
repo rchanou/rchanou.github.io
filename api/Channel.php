@@ -56,6 +56,10 @@ class Channel
         $tsql = "SELECT * FROM ScreenTemplate WHERE templateid = ? AND deleted = 0";
         $tsql_params = array(&$channelId);
         $screen = $this->run_query($tsql, $tsql_params);
+        if(!isset($screen[0]))
+        {
+            throw new RestException(404, "Channel not found!");
+        }
         $screen = $screen[0];
 
         // Get slides

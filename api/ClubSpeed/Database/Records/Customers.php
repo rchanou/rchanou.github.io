@@ -49,7 +49,7 @@ class Customers extends BaseRecord {
     public $PromotionCode;
     public $IsGiftCard;
     public $WebUserName;
-    public $Password;
+    // public $Password;
     public $Award1;
     public $Award2;
     public $Custom1;
@@ -71,6 +71,7 @@ class Customers extends BaseRecord {
     public $CreditOnHold;
     // public $LastUnSubscribedDate;
     public $GeneralNotes;
+    public $Hash;
 
     public function __construct($data = array()) {
         $this->load($data);
@@ -121,7 +122,7 @@ class Customers extends BaseRecord {
                     if (isset($data['PromotionCode']))          $this->PromotionCode        = \ClubSpeed\Utility\Convert::toString          ($data['PromotionCode']);
                     if (isset($data['IsGiftCard']))             $this->IsGiftCard           = \ClubSpeed\Utility\Convert::toBoolean         ($data['IsGiftCard']);
                     if (isset($data['WebUserName']))            $this->WebUserName          = \ClubSpeed\Utility\Convert::toString          ($data['WebUserName']);
-                    if (isset($data['Password']))               $this->Password             = \ClubSpeed\Utility\Convert::toString          ($data['Password']);
+                    // if (isset($data['Password']))               $this->Password             = \ClubSpeed\Utility\Convert::toString          ($data['Password']);
                     if (isset($data['Award1']))                 $this->Award1               = \ClubSpeed\Utility\Convert::toNumber          ($data['Award1']);
                     if (isset($data['Award2']))                 $this->Award2               = \ClubSpeed\Utility\Convert::toNumber          ($data['Award2']);
                     if (isset($data['Custom1']))                $this->Custom1              = \ClubSpeed\Utility\Convert::toString          ($data['Custom1']);
@@ -143,6 +144,7 @@ class Customers extends BaseRecord {
                     if (isset($data['CreditOnHold']))           $this->CreditOnHold         = \ClubSpeed\Utility\Convert::toNumber          ($data['CreditOnHold']);
                     // if (isset($data['LastUnSubscribedDate']))   $this->LastUnSubscribedDate = \ClubSpeed\Utility\Convert::toDateForServer   ($data['LastUnSubscribedDate']);
                     if (isset($data['GeneralNotes']))           $this->GeneralNotes         = \ClubSpeed\Utility\Convert::toString          ($data['GeneralNotes']);
+                    if (isset($data['Hash']))                   $this->Hash                 = \ClubSpeed\Utility\Convert::toString          ($data['Hash']);
                 }
             }
             else {

@@ -32,14 +32,8 @@ CONSTANTS1 AS (
     SELECT
         cd.CheckDetailID
         , cd.CheckID
-        , ISNULL(
-            CAST(cd.UnitPrice AS DECIMAL(9,5)) * (cd.Qty + cd.CadetQty) 
-            - Case CONSTANTS.DISCOUNT_BEFORE_TAXES
-                    When 1 Then cd.DiscountApplied 
-                    Else 0 
-                End
-            , 0
-        ) AS CheckDetailSubtotal
+        , cd.UnitPrice
+        , cd.Qty + cd.CadetQty AS CheckDetailActualQuantity
         , (
             ISNULL(
                 CASE WHEN CONSTANTS.USE_SALES_TAX = 1
@@ -55,32 +49,38 @@ CONSTANTS1 AS (
 )
 , CheckDetailSums2 AS (
     SELECT
-        cds1.CheckDetailID
-        , cds1.CheckID
-        , cds1.CheckDetailSubtotal
-        , ROUND(
-            (cds1.CheckDetailSubtotal * cds1.CheckDetailTaxPercentage)
-            , 2
-        ) AS CheckDetailTax -- rounding should be applied here, on each line item, to 2 decimal points
-    FROM CheckdetailSums1 cds1
+        cds.CheckID
+        , cds.CheckDetailID
+        , cds.UnitPrice
+        , cds.CheckDetailActualQuantity
+        , ROUND(cds.UnitPrice * cds.CheckDetailTaxPercentage, 2) AS CheckDetailSingleTaxAmount
+    FROM CheckDetailSums1 cds
 )
 , CheckDetailSums3 AS (
     SELECT
-        cds2.CheckDetailID
-        , cds2.CheckID
-        , cds2.CheckDetailTax
-        , cds2.CheckDetailSubtotal
-        , (cds2.CheckDetailSubtotal + cds2.CheckDetailTax) AS CheckDetailTotal
-    FROM CheckDetailSums2 cds2
+        cds.CheckDetailID
+        , cds.CheckID
+        , cds.CheckDetailSingleTaxAmount * cds.CheckDetailActualQuantity AS CheckDetailTax
+        , cds.UnitPrice * cds.CheckDetailActualQuantity AS CheckDetailSubtotal
+    FROM CheckdetailSums2 cds
+)
+, CheckDetailSums4 AS (
+    SELECT
+        cds.CheckDetailID
+        , cds.CheckID
+        , cds.CheckDetailTax
+        , cds.CheckDetailSubtotal
+        , (cds.CheckDetailSubtotal + cds.CheckDetailTax) AS CheckDetailTotal
+    FROM CheckDetailSums3 cds
 )
 , CheckSums AS (
     SELECT
-        cds3.CheckID
-        , SUM(cds3.CheckDetailTax) AS CheckTax
-        , SUM(cds3.CheckDetailSubtotal) AS CheckSubtotal
-        , SUM(cds3.CheckDetailTotal) AS CheckTotalTemp
-    FROM CheckDetailSums3 cds3
-    GROUP BY cds3.CheckID
+        cds.CheckID
+        , SUM(cds.CheckDetailTax) AS CheckTax
+        , SUM(cds.CheckDetailSubtotal) AS CheckSubtotal
+        , SUM(cds.CheckDetailTotal) AS CheckTotalTemp
+    FROM CheckDetailSums4 cds
+    GROUP BY cds.CheckID
 )
 , ExistingPayments AS (
     SELECT
@@ -169,16 +169,16 @@ CONSTANTS1 AS (
         , cd.S_Vol
         , cd.CadetQty
         -- ISNULL the following items, in case there are no non-voided CheckDetails to join
-        , ISNULL(cds3.CheckDetailTax, 0) AS CheckDetailTax
-        , ISNULL(cds3.CheckDetailSubtotal, 0) AS CheckDetailSubtotal
-        , ISNULL(cds3.CheckDetailTotal, 0) AS CheckDetailTotal
+        , ISNULL(cds.CheckDetailTax, 0) AS CheckDetailTax
+        , ISNULL(cds.CheckDetailSubtotal, 0) AS CheckDetailSubtotal
+        , ISNULL(cds.CheckDetailTotal, 0) AS CheckDetailTotal
     FROM dbo.Checks c
-    LEFT OUTER JOIN CheckDetailSums3 cds3
-        ON c.CheckID = cds3.CheckID
+    LEFT OUTER JOIN CheckDetailSums4 cds
+        ON c.CheckID = cds.CheckID
     LEFT OUTER JOIN CheckSums cs
         ON c.CheckID = cs.CheckID
     LEFT OUTER JOIN dbo.CheckDetails cd
-        ON cd.CheckDetailID = cds3.CheckDetailID
+        ON cd.CheckDetailID = cds.CheckDetailID
     LEFT OUTER JOIN ExistingPayments ep
         ON ep.CheckID = c.CheckID
 )

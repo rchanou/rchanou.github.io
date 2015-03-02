@@ -2,8 +2,11 @@
 require_once('vendors/swiftmailer/lib/swift_required.php');
 require_once('./Queues.php');
 
-use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Database\Helpers\UnitOfWork;
+use ClubSpeed\Enums\Enums;
 use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Mail\MailService as Mail;
+use ClubSpeed\Utility\Arrays;
 
 /**
  * ClubSpeed API
@@ -48,20 +51,21 @@ class Racers
     public function postlogin($request_data) {
         // ditch the public access entirely for racer login -- this needs to be wide open
         try {
-            $username = $request_data['username'];
-            $password = $request_data['password'];
-            $account = $this->logic->customers->login($username, $password);
-            return $account;
+            $username   = @$request_data['username'];
+            $password   = @$request_data['password'];
+            $token      = @$request_data['token'];
+            if (!empty($token))
+                return $this->logic->customers->authenticate($token);
+            else
+                return $this->logic->customers->login($username, $password);
         }
-        catch (\InvalidEmailException $e) {
-            // use 401, not 403 since we want the user to attempt re-authentication
-            throw new RestException(401, "Invalid username or password!");
+        catch (RestException $e) {
+            throw $e;
         }
-        catch (\InvalidPasswordException $e) {
-            // throwing the same error as invalid email for security purposes
-            throw new RestException(401, "Invalid username or password!");
+        catch (CSException $e) {
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
             throw new RestException(500, $e->getMessage());
         }
     }
@@ -77,21 +81,19 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public function postfb_login($request_data) {
-        $_REQUEST['key'] = $GLOBALS['privateKey']; // oh what a beautiful hack.
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
-            throw new RestException(401, "Invalid authorization!");
-        }
+        // leave fb login open, for permissions -- same as regular login.
         try {
             $params = $this->mapCreateParams($request_data);
+            if (empty($params['Standard']['EmailAddress']))
+                throw new CSException('Attempted facebook login without providing an email address!');
             // should customer existence be checked here, or inside facebook->fb_login ??
             $account = $this->logic->customers->find_primary_account($params['Standard']['EmailAddress']);
             if (empty($account)) {
                 $results = $this->postCreate($request_data);
                 $customerId = $results['customerId'];
             }
-            else {
+            else
                 $customerId = $account->CustID;
-            }
             $fbId = $params['Facebook']['UId'];
             $fbAccessToken = $params['Facebook']['Access_token'];
             $fbAllowEmail = $params['Facebook']['AllowEmail'];
@@ -284,7 +286,7 @@ class Racers
                 // "CustID"         => // CustID to be provided by the db class
                 "RacerName"         => @$request_data['racername']
                 , "EmailAddress"    => @$request_data['email']
-                , "Password"        => @$request_data['password']
+                , "Hash"            => @$request_data['password'] ?: @$request_data['hash'] // store as "Hash", since we can be sure Hash will be overwritten if password strength is valid.
                 , "DoNotMail"       => @$request_data['donotemail']
                 , "FName"           => @$request_data['firstname']
                 , "LName"           => @$request_data['lastname']
@@ -442,47 +444,53 @@ class Racers
                     )
                 );
 
-                if (strtolower($settings['SendWelcomeMail']) == "true") //If the track would like to send welcome e-mails
-                {
-                    // Get the SMTP settings
+                if (strtolower($settings['SendWelcomeMail']) == "true") { //If the track would like to send welcome e-mails
+                    $uow = UnitOfWork::build()->action('all');
+                    $this->logic->mailTemplate->uow($uow);
+                    $mailTemplate = Arrays::first($uow->data);
 
-                    // Get the mail template
-                    $emailStrings = $this->logic->helpers->getMailTemplate();
-
-                    //If a mail template is defined, send an e-mail (empty array signifies non-existing)
-                    if (array_key_exists(0,$emailStrings)) {
-                        $emailStrings['Subject'] = $emailStrings[0]['Subject'];
-                        $emailStrings['Text'] = $emailStrings[0]['Text'];
+                    if (!empty($mailTemplate)) {
+                        $subject = $mailTemplate->Subject;
+                        $text = $mailTemplate->Text;
 
                         //Replace any placeholders with their values
                         $tagsToReplace = array('##FIRSTNAME##','##LASTNAME##','##EMAIL##','##TIME##','##RACERNAME##');
                         $dataToInsert = array($request_data['firstname'],$request_data['lastname'],$request_data['email'],
                             date("F j, Y, g:i a"),$request_data['racername']);
-                        $emailStrings['Subject'] = str_replace($tagsToReplace,$dataToInsert,$emailStrings['Subject']);
-                        $emailStrings['Text'] = str_replace($tagsToReplace,$dataToInsert,$emailStrings['Text']);
+
+                        $subject = str_replace($tagsToReplace,$dataToInsert,$subject);
+                        $text = str_replace($tagsToReplace,$dataToInsert,$text);
+
+                        $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
+                        $businessName = $businessName[0];
+                        $businessName = $businessName->SettingValue;
+
+                        $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
+                        $emailFrom = $emailFrom[0];
+                        $emailFrom = array($emailFrom->SettingValue => $businessName);
+
+                        $emailTo = array($request_data['email'] => $request_data['firstname'] . ' ' . $request_data['lastname']);
 
                         //Send the e-mail
                         $mail = Mail::builder()
-                            ->subject($emailStrings['Subject'])
-                            ->from(array($settings['EmailWelcomeFrom'] => $request_data['BusinessName']))
-                            ->to(array($request_data['email'] => $request_data['firstname'] . ' ' . $request_data['lastname']))
-                            ->body($emailStrings['Text'],'text/html');
+                            ->subject($subject)
+                            ->from($emailFrom)
+                            ->to($emailTo)
+                            ->body($text,'text/html');
                         Mail::send($mail);
-                        Log::info("Welcome email sent to: " . $request_data['email']);
+                        Log::info("Welcome email sent to: " . $request_data['email'], Enums::NSP_REGISTRATION);
                     }
                     else
-                    {
-                        Log::info("Welcome email not sent! Mail template is missing!");
-                    }
+                        Log::info("Welcome email not sent! Mail template is missing!", Enums::NSP_REGISTRATION);
                 }
                 else
-                    Log::info("Did not send welcome email to: " . $request_data['email'] . "! Track setting for SendWelcomeMail was not \"true\"!");
+                    Log::info("Did not send welcome email to: " . $request_data['email'] . "! Track setting for SendWelcomeMail was not \"true\"!", Enums::NSP_REGISTRATION);
             }
             else
-                Log::info("Unable to send welcome email! Register received a null or empty email!");
+                Log::info("Unable to send welcome email! Register received a null or empty email!", Enums::NSP_REGISTRATION);
         }
         catch(Exception $e) {
-            Log::error("Unable to send welcome email to: " . $request_data['email'], $e);
+            Log::error("Unable to send welcome email to: " . $request_data['email'], Enums::NSP_REGISTRATION, $e);
             return array('Exception' => $e->getMessage(), 'Settings' => $settings);
         }
     }

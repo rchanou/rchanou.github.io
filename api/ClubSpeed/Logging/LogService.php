@@ -14,23 +14,23 @@ class LogService {
         self::$logger = $logger;
     }
 
-    public static function log($message) {
-        return self::$logger->log($message);
+    public static function log($message, $namespace = null) {
+        return self::$logger->log($message, $namespace);
     }
 
-    public static function info($message) {
-        return self::$logger->info($message);
+    public static function info($message, $namespace = null) {
+        return self::$logger->info($message, $namespace);
     }
 
-    public static function warn($message) {
-        return self::$logger->warn($message);
+    public static function warn($message, $namespace = null) {
+        return self::$logger->warn($message, $namespace);
     }
 
-    public static function debug($message) {
-        return self::$logger->debug($message);
+    public static function debug($message, $namespace = null) {
+        return self::$logger->debug($message, $namespace);
     }
 
-    public static function error($message, \Exception $exception = null) {
-        return self::$logger->error($message, $exception);
+    public static function error($message, $namespace = null, \Exception $exception = null) {
+        return self::$logger->error($message, $namespace, $exception);
     }
 }

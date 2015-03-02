@@ -4,6 +4,7 @@ use ClubSpeed\Enums\Enums as Enums;
 use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Security\Authenticate as Authenticate;
 use ClubSpeed\Database\Helpers\UnitOfWork as UnitOfWork;
+use ClubSpeed\Utility\Params;
 
 abstract class BaseApi {
 
@@ -88,8 +89,8 @@ abstract class BaseApi {
         // figure out which call the user actually wants - all, match, or filter
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            if (\ClubSpeed\Utility\Params::hasNonReservedData($request_data)) {
-                if (\ClubSpeed\Utility\Params::isFilter($request_data)) {
+            if (Params::hasNonReservedData($request_data)) {
+                if (Params::isFilter($request_data)) {
                     $this->validate('filter');
                     return $this->mapper->mutate($request_data, function($mapped = array()) use (&$interface) {
                         return $interface->find($mapped);

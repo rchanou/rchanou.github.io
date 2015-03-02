@@ -110,6 +110,15 @@ class Authenticate {
      * @return string[string] An associative array containing the current username, password, and key.
      */
     private static function getCredentials() {
+        $username = @$_SERVER['PHP_AUTH_USER']; // basic auth user
+        $password = @$_SERVER['PHP_AUTH_PW']; // basic auth password
+        $key      = @$_REQUEST['key']; // query string key
+        $token    = empty($key) ? array() : self::$logic->authenticationTokens->match(array(
+            'Token' => $key
+        ));
+
+        // TODO! RETURN THE TOKEN BY DEFAULT -- so we can properly look for 401 vs 403 errors
+
         return array(
               'username'    => @$_SERVER['PHP_AUTH_USER'] // basic auth decoded user
             , 'password'    => @$_SERVER['PHP_AUTH_PW'] // basic auth decoded password
@@ -119,7 +128,7 @@ class Authenticate {
 
     /**
      * Checks a provided username and password for validation
-     * by using the users->validate method of the injected $logic class.
+     * by using the users->login method of the injected $logic class.
      *
      * @param string $username The username to use for validation.
      * @param string $password The password to use for validation.
@@ -128,8 +137,14 @@ class Authenticate {
     private static function isValidUser(&$username, &$password) {
         if (!self::$isInitialized)
             throw new \LogicException("Error: attempted a call to \ClubSpeed\Security\Validate\isValidUser before initializing!");
-        if (isset($username) && isset($password))
-            return self::$logic->users->validate($username, $password);
+        if (isset($username) && isset($password)) {
+            $uow = self::$logic->users->login(array(
+                  'username' => $username
+                , 'password' => $password
+            ));
+            if (!empty($uow->data))
+                return true;
+        }
         return false;
     }
 
@@ -142,16 +157,15 @@ class Authenticate {
      * @return boolean True if the key has at least public access, false if not.
      */
     private static function isValidPublicKey(&$key) {
-        if (isset($key) && in_array($key, $GLOBALS['authentication_keys']) && $key != md5(date('Y-m-d')))
-            return true;
-        // fall through is awkward and hacky, since we don't have roles (or multi-roles),
-        // or the ability to compare access of those roles with proper chains.
-        // just consider any bearer of a token to have at least public access.
-        $authenticationToken = self::$logic->authenticationTokens->match(array(
-            'Token' => $key
-        ));
-        if (!empty($authenticationToken))
-            return true;
+        if (isset($key) && !empty($key)) {
+            if (in_array($key, $GLOBALS['authentication_keys']) && $key != md5(date('Y-m-d')))
+                return true;
+            $authenticationToken = self::$logic->authenticationTokens->match(array(
+                'Token' => $key
+            ));
+            if (!empty($authenticationToken))
+                return true;
+        }
         return false;
     }
 

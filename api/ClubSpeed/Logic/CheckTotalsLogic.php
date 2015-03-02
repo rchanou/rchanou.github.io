@@ -105,13 +105,6 @@ class CheckTotalsLogic extends BaseLogic {
         $taxes = array(); // keep track of taxes by taxId
 
         $useSalesTax = $this->logic->helpers->useSalesTax();
-        $discountBeforeTaxes = $this->logic->controlPanel->find("SettingName LIKE %DiscountBeforeTaxes%");
-        if (!empty($discountBeforeTaxes)) {
-            $discountBeforeTaxes = $discountBeforeTaxes[0];
-            $discountBeforeTaxes = Convert::toBoolean($discountBeforeTaxes->SettingValue);
-        }
-        else
-            $discountBeforeTaxes = false; // override to false if no records are found for DiscountBeforeTaxes
 
         foreach($checks as $check) {
             if (!isset($products[$check->ProductID])) {
@@ -141,16 +134,17 @@ class CheckTotalsLogic extends BaseLogic {
             // begin logic found in VB
             $check->DiscountApplied = 0; // just assume the DiscountApplied will be 0 with virtual/posted checks
             $check->UnitPrice = $product->Price1;
-
-            $check->CheckDetailSubtotal = $check->UnitPrice * (($check->Qty ?: 0) + ($check->CadetQty ?: 0)) - ($discountBeforeTaxes ? $check->DiscountApplied : 0);
-            
+            $checkDetailActualQuantity = ($check->Qty ?: 0) + ($check->CadetQty ?: 0);
+            $check->CheckDetailSubtotal = $check->UnitPrice * $checkDetailActualQuantity;
             if ($useSalesTax) {
                 $compoundTaxRate = (((1 + $tax->GST / 100) * (1 + ($tax->Amount - $tax->GST) / 100)) - 1) * 100; // calculation taken from WebAPI
-                $check->CheckDetailTax = round((($check->CheckDetailSubtotal * $compoundTaxRate) / 100.0), 2);
+                $checkDetailSingleTaxAmount = round($check->UnitPrice * ($compoundTaxRate / 100.0), 2);
+                $check->CheckDetailTax = $checkDetailSingleTaxAmount * $checkDetailActualQuantity;
                 $check->CheckDetailTotal = $check->CheckDetailSubtotal + $check->CheckDetailTax;
             }
             else { // assume VAT
-                $check->CheckDetailTax = round((($check->CheckDetailSubtotal * $tax->Amount) / (100 + $tax->Amount)), 2);
+                $checkDetailSingleTaxAmount = round($check->UnitPrice * ($tax->Amount / 100.0), 2);
+                $check->CheckDetailTax = $checkDetailSingleTaxAmount * $checkDetailActualQuantity;
                 $check->CheckDetailTotal = $check->CheckDetailSubtotal;
             }
             if (!isset($running[$check->CheckID])) {
@@ -173,7 +167,7 @@ class CheckTotalsLogic extends BaseLogic {
             }
             $check->CheckTotal -= $check->Discount;
 
-            // for virtual, assume there are no outstanding payments
+            // for virtual, assume there are no outstanding payments (may need to change in future)
             $check->CheckPaidTax = 0;
             $check->CheckPaidTotal = 0;
             $check->CheckRemainingTax = $check->CheckTax;

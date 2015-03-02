@@ -32,9 +32,10 @@ class Convert {
     private function __construct() {} // prevent any initialization of this class
 
     public static function getDate($time = null) {
-        if (!isset($time) || is_null($time))
-            $time = time();
-        return self::toDateForServer(date(self::DATE_FORMAT_FROM_CLIENT, $time));
+        $date = new \DateTime();
+        if (!empty($time) && is_integer($time))
+            $date->setTimestamp($time);
+        return self::toDateForServer($date);
     }
 
     /**
@@ -53,9 +54,9 @@ class Convert {
                 return ""; // shortcut? will most likely cause a sql exception, but really should never be hit.
             $date = new \DateTime($date);
         }
-
         // aim to have \DateTime by this point.
         if ($date instanceof \DateTime) {
+            $date->setTimezone(new \DateTimeZone(date_default_timezone_get())); // if we have a Z/UTC timezone, convert to local time, defined by API's config.php
             $datetimeString = $date->format(self::ISO_FOR_MSSQL_DATETIME);
             $microseconds = Convert::toNumber($date->format('u')); // 'u' grabs microseconds only.
             // since mssql datetime type rounds to the nearest 0.##0, 0.##3, or 0.##7 (bits/precision issue),

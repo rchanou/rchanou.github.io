@@ -1,0 +1,18 @@
+USE ClubspeedV8;
+SET XACT_ABORT ON;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN TRANSACTION;
+
+-- Drop and recreate the view by default
+IF EXISTS (
+    SELECT *
+    FROM INFORMATION_SCHEMA.VIEWS v
+    WHERE
+            v.TABLE_SCHEMA  = 'dbo'
+        AND v.TABLE_NAME    = 'UserTasks_V'
+)
+BEGIN
+    DROP VIEW dbo.UserTasks_V
+END
+
+COMMIT;

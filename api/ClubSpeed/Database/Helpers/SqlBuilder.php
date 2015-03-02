@@ -69,8 +69,6 @@ class SqlBuilder {
         }
     }
 
-    
-
     public static function buildUowCreate(&$uow) {
         if (!$uow instanceof \ClubSpeed\Database\Helpers\UnitOfWork)
             throw new \InvalidArgumentException("Attempted to build sql insert statement from a non UnitOfWork! Received: " . print_r($uow, true));
@@ -221,10 +219,11 @@ class SqlBuilder {
             , 'values'  => array()
         );
         $alias = $uow->table->getStaticPropertyValue('tableAlias');
-        $record = $uow->table->newInstance($uow->table_id); // reflection class for the record object
-        // do we want to use exists for more than just the identity? we can change a bit, if necessary.
-        $identity = self::getRecordIdentity($record);
-        $uow->where = $identity; // overwrite any other part of the where object, if it existed
+        if (!empty($uow->table_id)) {
+            $record = $uow->table->newInstance($uow->table_id);
+            $identity = self::getRecordIdentity($record);
+            $uow->where = $identity; // overwrite any existing portion of the $where? or append?
+        }
         $from = self::buildUowFrom($uow);
         $where = self::buildUowWhere($uow);
         $exists['statement'] = ''
@@ -322,7 +321,7 @@ class SqlBuilder {
         );
         $table = $uow->table->getStaticPropertyValue('table');
         $alias = $uow->table->getStaticPropertyValue('tableAlias');
-        if (is_null($uow->select)) {
+        if (is_null($uow->select) || empty($uow->select)) {
             $uow->select = array();
             $columns = $uow->table->getProperties(\ReflectionProperty::IS_PUBLIC);
             foreach($columns as $column) {

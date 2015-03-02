@@ -49,7 +49,7 @@ class CustomersMapper extends BaseMapper {
             , 'PromotionCode'        => ''
             , 'IsGiftCard'           => ''
             , 'WebUserName'          => ''
-            , 'Password'             => '' // we need to be able to insert this, but not select it.
+            , 'Hash'                 => 'password' // we need to be able to insert this, but not select it.
             , 'Award1'               => ''
             , 'Award2'               => ''
             , 'Custom1'              => 'Custom1'

@@ -73,9 +73,15 @@ class UnitOfWork {
     }
 
     public function select($select) {
-        if (is_string($select) && !empty($select)) // assume comma delimited
-            $select = array_map(function($x) { return trim($x); }, explode(",", $select));
-        if (is_array($select) && !empty($select))
+        if (is_string($select) && !empty($select)) {
+            // check for json representation of an array
+            $_select = json_decode($select, true);
+            if (!empty($_select))
+                $select = $_select;
+            else // check for basic comma separated list
+                $select = array_map(function($x) { return trim($x); }, explode(",", $select));
+        }
+        if (is_array($select) && !empty($select)) // check for isAssociative?
             $this->select = $select;
         return $this;
     }

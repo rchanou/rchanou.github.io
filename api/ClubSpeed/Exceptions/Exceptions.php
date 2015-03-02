@@ -11,20 +11,6 @@ class CSException extends \Exception {}
 
 /**
  * A ClubSpeed business logic exception
- * signifying that the email provided
- * for a login attempt was invalid.
- */
-class InvalidEmailException extends \CSException {}
-
-/**
- * A ClubSpeed business logic exception
- * signifying that the password provided
- * for a login attempt was invalid.
- */
-class InvalidPasswordException extends \CSException {}
-
-/**
- * A ClubSpeed business logic exception
  * signifying that the token provided
  * for a password reset attempt was invalid.
  */
@@ -87,6 +73,32 @@ class BadRequestException extends \CSException {
         parent::__construct($message, $code, $previous);
     }
 }
+
+class UnauthorizedException extends \CSException {
+    public function __construct($message = null, $code = 401, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}
+
+class ForbiddenException extends \CSException {
+    public function __construct($message = null, $code = 403, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}
+
+/**
+ * A ClubSpeed business logic exception
+ * signifying that the email provided
+ * for a login attempt was invalid.
+ */
+class InvalidEmailException extends \UnauthorizedException {}
+
+/**
+ * A ClubSpeed business logic exception
+ * signifying that the password provided
+ * for a login attempt was invalid.
+ */
+class InvalidPasswordException extends \UnauthorizedException {}
 
 /**
  * Clubspeed exception signifying that

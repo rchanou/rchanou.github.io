@@ -21,20 +21,21 @@ class Customers extends BaseApi {
         // note that racers->login is a copy of this method (not a pointer. we could make it one, if necessary.)
         // leave access wide open, since customers won't have a key until after this point
         try {
-            $username = $request_data['username'];
-            $password = $request_data['password'];
-            $account = $this->interface->login($username, $password);
-            return $account;
+            $username   = @$request_data['username'];
+            $password   = @$request_data['password'];
+            $token      = @$request_data['token'];
+            if (!empty($token))
+                return $this->logic->customers->authenticate($token);
+            else
+                return $this->logic->customers->login($username, $password);
         }
-        catch (\InvalidEmailException $e) {
-            // use 401, not 403 since we want the user to attempt re-authentication
-            throw new RestException(401, "Invalid username or password!");
+        catch (RestException $e) {
+            throw $e;
         }
-        catch (\InvalidPasswordException $e) {
-            // throwing the same error as invalid email for security purposes
-            throw new RestException(401, "Invalid username or password!");
+        catch (CSException $e) {
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
         }
-        catch (\Exception $e) {
+        catch (Exception $e) {
             throw new RestException(500, $e->getMessage());
         }
     }

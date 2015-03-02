@@ -34,7 +34,7 @@ class BasePayment {
     protected function init($data) {
         if (!isset($data['name']) || empty($data['name'])) {
             $message = "Attempted to process a payment without providing a payment processor name!";
-            Log::error($message);
+            Log::error($message, Enums::NSP_BOOKING);
             throw new \CSException($message);
         }
         $name = $data['name'];
@@ -44,13 +44,13 @@ class BasePayment {
         });
         if (!$allowed) {
             $message = "Attempted to process a payment by using an unsupported payment processor! Received: " . $name;
-            Log::error($message);
+            Log::error($message, Enums::NSP_BOOKING);
             throw new \CSException($message);
         }
         $this->gateway = Omnipay::create(@$data['name']);
         $this->gateway->initialize(@$data['options']);
         $this->logPrefix = 'Check #' . @$data['check']['checkId'] . ": Base: ";
-        Log::info($this->logPrefix . "Starting payment using processor: " . $name);
+        Log::info($this->logPrefix . "Starting payment using processor: " . $name, Enums::NSP_BOOKING);
 
         // load all defaults
         try {
@@ -144,7 +144,7 @@ class BasePayment {
         else {
             if (!isset($params['card'])) {
                 // if the credit card information is not set, then error! there is a balance still to be paid, and no payment is available!
-                Log::error($this->logPrefix . "Customer " . $checkTotals->CustID . " attempted to pay for check using only gift cards, but the gift cards point balances were too low! Card IDs: " . print_r($giftCardIds, true));
+                Log::error($this->logPrefix . "Customer " . $checkTotals->CustID . " attempted to pay for check using only gift cards, but the gift cards point balances were too low! Card IDs: " . print_r($giftCardIds, true), Enums::NSP_BOOKING);
                 // send off to handle failure -- no need to throw an exception, but how do we use the message?
                 return $this->handleFailure($checkId, "Check balance cannot be fully covered by the provided payment items!");
             }
@@ -195,12 +195,12 @@ class BasePayment {
                     // we still have a balance to pay -- keep processing provided gift cards
                     $giftCardBalance = $this->logic->giftCardBalance->find('CrdID = ' . $giftCardId);
                     if (empty($giftCardBalance)) {
-                        Log::error($this->logPrefix . "Customer " . $checkTotals->CustID . " attempted to use gift card #" . $giftCardId . " but it could not be found in the gift card history sums view!");
+                        Log::error($this->logPrefix . "Customer " . $checkTotals->CustID . " attempted to use gift card #" . $giftCardId . " but it could not be found in the gift card history sums view!", Enums::NSP_BOOKING);
                         throw new \RecordNotFoundException("Unable to find a gift card history sum with a CrdID of " . $giftCardId);
                     }
                     $giftCardBalance = $giftCardBalance[0];
                     if ($giftCardBalance->Balance <= 0) {
-                        Log::warn($this->logPrefix . "Customer " . $checkTotals->CustID . " attempted to use gift card #" . $giftCardId . " which has a balance of " . $giftCardBalance->Balance . "!");
+                        Log::warn($this->logPrefix . "Customer " . $checkTotals->CustID . " attempted to use gift card #" . $giftCardId . " which has a balance of " . $giftCardBalance->Balance . "!", Enums::NSP_BOOKING);
                         // throw exception for trying to use a gift card which doesn't have points on it, or allow it?
                         continue; // or just continue through the loop of card ids
                     }
@@ -256,7 +256,7 @@ class BasePayment {
                     $giftCardPaymentId = $this->logic->payment->create($giftCardPayment);
                     $giftCardPaymentId = $giftCardPaymentId[$giftCardPayment::$key];
                     $this->logic->giftCardHistory->create($giftCardHistory);
-                    Log::info($this->logPrefix . "Applied payment #" . $giftCardPaymentId . " for " . $giftCardPayment->PayAmount . " from gift card #" . $giftCardBalance->CrdID);
+                    Log::info($this->logPrefix . "Applied payment #" . $giftCardPaymentId . " for " . $giftCardPayment->PayAmount . " from gift card #" . $giftCardBalance->CrdID, Enums::NSP_BOOKING);
 
                     // recollect checkTotals each time
                     // to allow database to handle the summations
@@ -268,7 +268,7 @@ class BasePayment {
                 }
             }
             catch (\Exception $e) {
-                Log::error($this->logPrefix . "Unable to apply payment from Gift Card #" . $giftCardId, $e);
+                Log::error($this->logPrefix . "Unable to apply payment from Gift Card #" . $giftCardId, Enums::NSP_BOOKING, $e);
                 $this->handleFailure($checkTotals->CheckID, $e->getMessage()); // what params? don't pass gift cards, we should look up any gift card payments in the database itself
             }
         }
@@ -308,12 +308,13 @@ class BasePayment {
 
     public function handleSuccess($checkId, &$params, &$response = null) {
 
-        Log::info($this->logPrefix . "Payment was fully collected from Omnipay processor");
+        Log::info($this->logPrefix . "Payment was fully collected from Omnipay processor", Enums::NSP_BOOKING);
         // the customer's credit card has been processed at this point
         // or the credit card does not need to be processed (?) (as in, gift cards provided > than total required)
 
         $params['transactionReference'] = $response ? $response->getTransactionReference() : Enums::DB_NULL;
         $now = Convert::getDate();
+
         try {
             $checkTotals = $this->logic->checkTotals->match(array('CheckID' => $checkId));
             $checkTotal = $checkTotals[0];
@@ -342,14 +343,14 @@ class BasePayment {
                 $payment->ExternalAccountName   = ''; // front end logs error if this is null
                 $payment->UserID                = 1; // probably should be non-nullable, onlinebooking userId?
                 $paymentId = $this->logic->payment->create($payment); // what if this fails? credit card will be charged, but payment record could not be created (!!!)
-                Log::info($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId['PayID']);
+                Log::info($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId['PayID'], Enums::NSP_BOOKING);
             }
             else {
                 // is this an error? the check supposedly doesn't have anything left to be paid, but we are still trying to apply a payment
             }
         }
         catch (\Exception $e) {
-            Log::error($this->logPrefix . 'Omnipay has registered a successful payment but we were unable to apply the payment to the Payments table! Transaction reference was: ' . $transactionReference, $e);
+            Log::error($this->logPrefix . 'Omnipay has registered a successful payment but we were unable to apply the payment to the Payments table! Transaction reference was: ' . $transactionReference, Enums::NSP_BOOKING, $e);
             // continue at this point?
             // if we continue, the check will be closed,
             // all line items will be processed (gift cards, etc),
@@ -380,10 +381,10 @@ class BasePayment {
             // $check->Notes = (isset($params['transactionReference']) ? 'Transaction Reference #' . $params['transactionReference'] : 'No Transaction Reference');
             $check->ClosedDate = Convert::getDate();
             $this->logic->checks->update($check->CheckID, $check);
-            Log::info($this->logPrefix . 'Closed Check');
+            Log::info($this->logPrefix . 'Closed Check', Enums::NSP_BOOKING);
         }
         catch (\Exception $e) {
-            Log::error($this->logPrefix . 'Unable to update check!', $e);
+            Log::error($this->logPrefix . 'Unable to update check!', Enums::NSP_BOOKING, $e);
         }
 
         $handled = array();
@@ -405,7 +406,7 @@ class BasePayment {
                 $errored[] = $e->getMessage(); // to be used for debugging purposes?
             }
         }
-        Log::info($this->logPrefix . "Finished processing check details");
+        Log::info($this->logPrefix . "Finished processing check details", Enums::NSP_BOOKING);
         try {
             $notes = $check->Notes ?: '';
             foreach($handled as $note) {
@@ -416,7 +417,7 @@ class BasePayment {
             ));
         }
         catch (\Exception $e) {
-            Log::error($this->logPrefix . 'Unable to set check notes!', $e);
+            Log::error($this->logPrefix . 'Unable to set check notes!', Enums::NSP_BOOKING, $e);
         }
 
         $receiptData = array();
@@ -503,9 +504,9 @@ class BasePayment {
             try {
                 $sendCustomerReceiptEmail = isset($params['sendCustomerReceiptEmail']) ? Convert::toBoolean($params['sendCustomerReceiptEmail']) : true; // default to true
                 if (!$sendCustomerReceiptEmail)
-                    Log::info($this->logPrefix . 'API Call has opted out of sending the customer a receipt email!');
+                    Log::info($this->logPrefix . 'API Call has opted out of sending the customer a receipt email!', Enums::NSP_BOOKING);
                 else
-                    Log::info($this->logPrefix . 'Receipt will be emailed to Customer #' . $customer->CustID . ' at ' . $customer->EmailAddress);
+                    Log::info($this->logPrefix . 'Receipt will be emailed to Customer #' . $customer->CustID . ' at ' . $customer->EmailAddress, Enums::NSP_BOOKING);
 
                 $sendReceiptCopyTo = $this->logic->controlPanel->match(array(
                     'TerminalName' => 'Booking',
@@ -522,9 +523,9 @@ class BasePayment {
                     }
                 }
                 if (!empty($sendReceiptCopyTo)) // check again to see if its still empty
-                    Log::info($this->logPrefix . 'Receipt copies will be sent to the following addresses: ' . print_r($sendReceiptCopyTo, true));
+                    Log::info($this->logPrefix . 'Receipt copies will be sent to the following addresses: ' . print_r($sendReceiptCopyTo, true), Enums::NSP_BOOKING);
                 else
-                    Log::info($this->logPrefix . 'No BCC list was found for receipt copies!');
+                    Log::info($this->logPrefix . 'No BCC list was found for receipt copies!', Enums::NSP_BOOKING);
 
                 // check to see if we have no override, or a BCC list
                 // if we have either or, then attempt to send the mail
@@ -541,17 +542,17 @@ class BasePayment {
                     Mail::send($mail);
 
                     // update this message - the email may or may not have been sent, should we signify this?
-                    Log::info($this->logPrefix . 'Receipt email was sent for Customer #' . $customer->CustID);
+                    Log::info($this->logPrefix . 'Receipt email was sent for Customer #' . $customer->CustID, Enums::NSP_BOOKING);
                 }
                 else
-                    Log::info($this->logPrefix . 'Receipt email was not sent, since no valid BCC list was found and the API opted out of sending the customer a receipt!');
+                    Log::info($this->logPrefix . 'Receipt email was not sent, since no valid BCC list was found and the API opted out of sending the customer a receipt!', Enums::NSP_BOOKING);
             }
             catch (\Exception $e) {
-                Log::error($this->logPrefix . "Receipt email could not be sent to Customer #" . $customer->CustID . '!', $e);
+                Log::error($this->logPrefix . "Receipt email could not be sent to Customer #" . $customer->CustID . '!', Enums::NSP_BOOKING, $e);
             }
         }
         catch (\Exception $e) {
-            Log::error($this->logPrefix . "Receipt email could not be built!", $e);
+            Log::error($this->logPrefix . "Receipt email could not be built!", Enums::NSP_BOOKING, $e);
         }
 
         if (!empty($errored)) {
@@ -565,7 +566,7 @@ class BasePayment {
 
     public function handleRedirect($check, $response) {
         // TODO!!!!
-        Log::info("inside handle redirect!!!");
+        Log::info("inside handle redirect!!!", Enums::NSP_BOOKING);
         return array(
             'redirect' => array(
                 'url'       => $response->getRedirectUrl(),
@@ -588,7 +589,7 @@ class BasePayment {
         // and we run the risk of accidentally reverting this gift card payment?
         // worst case scenario, the gift card will just have the balance back on it
 
-        Log::error($this->logPrefix . "Unable to finish processing check! Message: " . $message);
+        Log::error($this->logPrefix . "Unable to finish processing check! Message: " . $message, Enums::NSP_BOOKING);
         $checkTotals = $this->refresh($checkId);
 
         $checkDetails = array();
@@ -596,10 +597,10 @@ class BasePayment {
             $checkDetails = $this->logic->checkDetails->match(array(
                 'CheckID' => $checkId
             ));
-            Log::info($this->logPrefix . "Check Detail Count: " . count($checkDetails));
+            Log::info($this->logPrefix . "Check Detail Count: " . count($checkDetails), Enums::NSP_BOOKING);
         }
         catch(\Exception $e) {
-            Log::error($this->logPrefix . "Unable to find any check details by CheckID!", $e);
+            Log::error($this->logPrefix . "Unable to find any check details by CheckID!", Enums::NSP_BOOKING, $e);
         }
         foreach($checkDetails as $checkDetail) {
             try {
@@ -607,27 +608,27 @@ class BasePayment {
                     'Status' => Enums::CHECK_DETAIL_STATUS_HAS_VOIDED,
                     'VoidNotes' => $this->logPrefix . 'Voiding from purchase error: ' . $message
                 ));
-                Log::info($this->logPrefix . "Voided CheckDetail #" . $checkDetail->CheckDetailID);
+                Log::info($this->logPrefix . "Voided CheckDetail #" . $checkDetail->CheckDetailID, Enums::NSP_BOOKING);
             }
             catch(\Exception $e) {
-                Log::error($this->logPrefix . "Unable to void CheckDetail #" . $checkDetail->CheckDetailID, $e);
+                Log::error($this->logPrefix . "Unable to void CheckDetail #" . $checkDetail->CheckDetailID, Enums::NSP_BOOKING, $e);
             }
         }
         try {
             $this->logic->checks->update($checkId, array(
                 'CheckStatus' => Enums::CHECK_STATUS_CLOSED
             ));
-            Log::info($this->logPrefix . 'Closed check after failed payment!');
+            Log::info($this->logPrefix . 'Closed check after failed payment!', Enums::NSP_BOOKING);
         }
         catch (\Exception $e) {
-            Log::error($this->logPrefix . "Unable to close check after failed payment!", $e);
+            Log::error($this->logPrefix . "Unable to close check after failed payment!", Enums::NSP_BOOKING, $e);
         }
         try {
             $this->logic->checks->applyCheckTotal($checkId);
-            Log::info($this->logPrefix . 'Called dbo.ApplyCheckTotal');
+            Log::info($this->logPrefix . 'Called dbo.ApplyCheckTotal', Enums::NSP_BOOKING);
         }
         catch (\Exception $e) {
-            Log::error($this->logPrefix . 'Unable to call dbo.ApplyChecktotal!', $e);
+            Log::error($this->logPrefix . 'Unable to call dbo.ApplyChecktotal!', Enums::NSP_BOOKING, $e);
         }
 
         // assume that the check will be re-created, not re-used on failure
@@ -643,10 +644,10 @@ class BasePayment {
                 'CheckID' => $checkTotals->CheckID
                 , 'PayType' => Enums::PAY_TYPE_GIFT_CARD
             ));
-            Log::info($this->logPrefix . "Gift card payment count: " . count($giftCardPayments));
+            Log::info($this->logPrefix . "Gift card payment count: " . count($giftCardPayments), Enums::NSP_BOOKING);
         }
         catch(\Exception $e) {
-            Log::error($this->logPrefix . "Unable to search for gift card payments!", $e);            
+            Log::error($this->logPrefix . "Unable to search for gift card payments!", Enums::NSP_BOOKING, $e);            
         }
         foreach($giftCardPayments as $giftCardPayment) {
             try {
@@ -656,10 +657,10 @@ class BasePayment {
                 $giftCardBalance = $giftCardBalance[0];
                 $giftCardPayment->PayStatus = Enums::PAY_STATUS_VOID;
                 $this->logic->payment->update($giftCardPayment->PayID, $giftCardPayment);
-                Log::info($this->logPrefix . "Voided Payment #" . $giftCardPayment->PayID . " for gift card #" . $giftCardBalance->CrdID);
+                Log::info($this->logPrefix . "Voided Payment #" . $giftCardPayment->PayID . " for gift card #" . $giftCardBalance->CrdID, Enums::NSP_BOOKING);
             }
             catch (\Exception $e) {
-                Log::error($this->logPrefix . "Unable to void Payment #" . $giftCardPayment->PayID . " for gift card #" . $giftCardBalance->CrdID, $e);
+                Log::error($this->logPrefix . "Unable to void Payment #" . $giftCardPayment->PayID . " for gift card #" . $giftCardBalance->CrdID, Enums::NSP_BOOKING, $e);
             }
             try {
                 $giftCardHistory                = $this->logic->giftCardHistory->dummy();
@@ -670,10 +671,10 @@ class BasePayment {
                 $giftCardHistory->UserID        = 0; // support id for now?
                 $giftCardHistory->Points        = $giftCardPayment->PayAmount; // refund the gift card
                 $this->logic->giftCardHistory->create($giftCardHistory);
-                Log::info($this->logPrefix . "Refunded " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " from check error");
+                Log::info($this->logPrefix . "Refunded " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " from check error", Enums::NSP_BOOKING);
             }
             catch (\Exception $e) {
-                Log::error($this->logPrefix . "Unable to refund " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " for original check error", $e);
+                Log::error($this->logPrefix . "Unable to refund " . $giftCardPayment->PayAmount . " to Gift Card#" . $giftCardBalance->CrdID . " for original check error", Enums::NSP_BOOKING, $e);
             }
         }
 

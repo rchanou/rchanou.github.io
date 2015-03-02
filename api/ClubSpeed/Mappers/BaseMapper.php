@@ -6,6 +6,7 @@ use ClubSpeed\Utility\Arrays;
 class BaseMapper {
 
     protected $_map;
+    public $namespace;
 
     public function __construct() {
         $this->_map = array();
@@ -170,15 +171,16 @@ class BaseMapper {
         }
     }
 
-    protected function limit($type, $select = array()) {
+    public function limit($type, $select = array()) {
         if (isset($select) && !empty($select) && is_array($select)) {
             if (isset($this->_map[$type])) {
-                $map =& $this->_map[$type];
-                foreach($map as $key => $val) { // could conver this to making a new array and overwriting the old one for performance
-                    if (!in_array($val, $select)) {
-                        unset($map[$key]);
-                    }
+                $tempMap = $this->_map[$type]; // this makes a copy of the array
+                foreach($tempMap as $key => $val) { // could conver this to making a new array and overwriting the old one for performance
+                    if (!in_array($val, $select))
+                        unset($tempMap[$key]);
                 }
+                if (!empty($tempMap)) // if the list of selected columns is empty, don't use it. bad user input?
+                    $this->_map[$type] = $tempMap;
             }
         }
     }

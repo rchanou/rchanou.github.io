@@ -162,5 +162,11 @@ class Enums {
     const TOKEN_TYPE_CUSTOMER       = 'Customer';
     const TOKEN_TYPE_PASSWORD_RESET = 'PasswordReset';
     const TOKEN_TYPE_PUBLIC         = 'Public';
-   
+
+    const NSP_ADMIN        = 'Club Speed Admin Panel';
+    const NSP_API          = 'Club Speed PHP API';
+    const NSP_BOOKING      = 'Club Speed Online Booking';
+    const NSP_REGISTRATION = 'Club Speed Registration';
+    const NSP_PASSWORD     = 'Club Speed Password Reset';
+    const NSP_WEBAPI       = 'Club Speed WebAPI';
 }

@@ -41,9 +41,7 @@ class DbCollection {
     }
 
     public function uow(&$uow) {
-        // for testing
         // $sw = $GLOBALS['sw'];
-
         $this->validate($uow); // ensure the columns being used are legitimate before running any sql.
         $uow->table = $this->definition; // store the definition instead of just the table name at this point.
         $query = SqlBuilder::uow($uow); // ~ 8ms to make it all the way to this point from

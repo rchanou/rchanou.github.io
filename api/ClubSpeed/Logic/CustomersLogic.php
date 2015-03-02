@@ -120,6 +120,35 @@ class CustomersLogic extends BaseLogic {
     }
 
     /**
+     * Attempts to log in a customer using the provided authentication token.
+     *
+     * @param string $token The authentication token for the login.
+     */
+    public final function authenticate($token) {
+        if (!isset($token) || !is_string($token))
+            throw new \InvalidArgumentException("Customer authenticate requres token to be a non-empty string!");
+        $authenticationTokens = $this->logic->authenticationTokens->match(array(
+              'TokenType' => Enums::TOKEN_TYPE_CUSTOMER
+            , 'Token'     => $token
+        ));
+        if (empty($authenticationTokens))
+            throw new \UnauthorizedException();
+        $authenticationToken = $authenticationTokens[0];
+
+        // automatically update the ExpiresAt on the token, or allow it to expire?
+        $this->logic->authenticationTokens->update($authenticationToken->AuthenticationTokensID, $authenticationToken); // logic class will update ExpiresAt automatically
+        // potential security issue?
+        // if an unauthorized member gets hold of an authentication token,
+        // they can use this method over and over to ensure it stays valid forever,
+        // unless we implement the standard refresh tokens (potentially - not convinced about their security)
+        // or we allow the token to continue on to expiration by removing the update above.
+        return array(
+              'customerId' => $authenticationToken->CustomersID
+            , 'token'      => $authenticationToken->Token
+        );
+    }
+
+    /**
      * Attempts to log in a customer using the provided email address and password.
      *
      * @param string $email The email for the login
@@ -129,8 +158,8 @@ class CustomersLogic extends BaseLogic {
      *
      * @throws InvalidArgumentException If the email provided is not a string.
      * @throws InvalidArgumentException If the the password provided is not a string.
-     * @throws InvalidEmailException    If the email provided could not be found in the database.
-     * @throws InvalidPasswordException If the provided password does not match the hash stored in the database.
+     * @throws UnauthorizedException    If the email provided could not be found in the database.
+     * @throws UnauthorizedException    If the provided password does not match the hash stored in the database.
      */
     public final function login($email, $password) {
         if (!isset($email) || !is_string($email))
@@ -141,16 +170,13 @@ class CustomersLogic extends BaseLogic {
         $primaryCustomer = $this->find_primary_account($email); // ~ 143ms
         if(empty($primaryCustomer)) {
             // Customer email could not be found in the database
-            throw new \InvalidEmailException("Invalid credentials!");
+            throw new \UnauthorizedException("Invalid credentials!");
         }
         $customerId = $primaryCustomer->CustID; // password is not exposed on primaryCustomer -- grab the underlying customer record
         $customer = $this->interface->get($customerId);
         $customer = $customer[0];
-        if (!Hasher::verify($password, $customer->Password)) {
-            // note that $account['Password'] is a salted hash, not the actual password
-            // Hasher::verify will handle the salted hash comparison to the provided password
-            throw new \InvalidPasswordException("Invalid credentials!");
-        }
+        if (!Hasher::verify($password, $customer->Hash))
+            throw new \UnauthorizedException("Invalid credentials!");
         $authentication = $this->db->authenticationTokens->match(array(
               'CustomersID' => $primaryCustomer->CustID
             , 'TokenType'   => Enums::TOKEN_TYPE_CUSTOMER
@@ -166,9 +192,9 @@ class CustomersLogic extends BaseLogic {
             ));
         }
         else {
-            // record was found - update it
+            // record was found - update the expiration date
             $authentication = $authentication[0];
-            $token = $authentication->Token; // don't update the token to satisfy the case where a user logs in on multiple devices
+            $token = $authentication->Token; // store the token to return, but don't change it (in case the user is logging in on multiple devices with the same account)
             $this->logic->authenticationTokens->update($authentication->AuthenticationTokensID, $authentication); // logic class will update ExpiresAt automatically
         }
         return array(
@@ -190,48 +216,9 @@ class CustomersLogic extends BaseLogic {
 
         // cheat! point this to PrimaryCustomersLogic, as a temporary fix
         $primaryCustomer = $this->logic->primaryCustomers->match(array('EmailAddress' => $email)); // ~ 147ms
-        if (empty($primaryCustomer)) {
+        if (empty($primaryCustomer))
             return array();
-        }
         return $primaryCustomer[0];
-
-        // $sql = "SELECT"
-        //     ."\n    c.CustID"
-        //     ."\n    , ISNULL(c.EmailAddress, '') AS EmailAddress"
-        //     ."\n    , c.Password"
-        //     ."\n    , ISNULL(p.Points, 0) AS Points"
-        //     ."\n    , c.TotalRaces"
-        //     ."\n    , c.LastVisited"
-        //     ."\n    , c.RPM AS ProSkill"
-        //     ."\n    , c.FName"
-        //     ."\n    , c.LName"
-        //     ."\nFROM CUSTOMERS c"
-        //     ."\nLEFT OUTER JOIN ("
-        //     ."\n    SELECT p.CustID, SUM(ISNULL(p.PointAmount, 0)) as Points"
-        //     ."\n    FROM POINTHISTORY p"
-        //     ."\n    WHERE"
-        //     ."\n        p.PointExpDate IS NULL"
-        //     ."\n        OR p.PointExpDate >= GETDATE()"
-        //     ."\n    GROUP BY p.CustID"
-        //     ."\n) AS p ON p.CustID = c.CustID"
-        //     ."\nWHERE"
-        //     ."\n        c.EmailAddress = ?"
-        //     ."\n    AND c.Deleted = 0"
-        //     ."\nORDER BY"
-        //     ."\n    CASE WHEN c.Password IS NULL THEN 1 ELSE 0 END" // push null passwords to bottom
-        //     ."\n    , Points DESC"
-        //     ."\n    , c.TotalRaces DESC"
-        //     ."\n    , c.LastVisited DESC"
-        //     ."\n    , c.RPM DESC"
-        //     ;
-
-        // $params = array($email);
-        // $results = $this->db->query($sql, $params);
-        // if (count($results) > 0) {
-        //     return $results[0];
-        // }
-        // return array(); // return empty array, or throw exception?
-        // throw UnexpectedValueException("find_primary_account was unable to find any accounts with EmailAddress of: " . $email);
     }
 
     /**
@@ -417,26 +404,10 @@ class CustomersLogic extends BaseLogic {
      */
     public final function create_v0($params = array()) {
 
-        //----------------
-        // Business logic
-        //----------------
-
-        // $columns = $this->checkControlPanelForRequiredAndAllowedColumns($params); // ditch this, entirely -- this should be the job of the php side of the client
-
-        // // skim the allowable parameters out of the provided parameters
-        // // to prevent passing parameters we do not want to accept here
-        // $paramsCleaned = \ClubSpeed\Utility\Params::cleanParams(
-        //       $columns['required
-        //     , $columns['allowed
-        //     , $params
-        // );
-
+        // bit of an oddball - note that $params have already been mapped by racers.php
         $customer = $this->interface->dummy($params);
-        
 
-        // note that $params have already been mapped by racers.php
-
-        // run special validation checks / formatting on any existing paPrameters
+        // run special validation checks / formatting on any existing parameters
         // note that if the parameter is set and not empty after being cleaned,
         // we can assume that it was not required based on kiosk settings, and thus
         // does not need to be checked for specific validation.
@@ -465,10 +436,10 @@ class CustomersLogic extends BaseLogic {
         }
 
         // validate password strength, then hash it
-        if (isset($customer->Password) && !empty($customer->Password)) {
-            if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Password))
+        if (isset($customer->Hash) && !empty($customer->Hash)) {
+            if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Hash))
                 throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
-            $customer->Password = Hasher::hash($customer->Password);
+            $customer->Hash = Hasher::hash($customer->Hash);
         }
         // convert the gender to the expected gender "id" on the database
         if (isset($params['Gender']) && !empty($params['Gender'])) {
@@ -488,9 +459,8 @@ class CustomersLogic extends BaseLogic {
         }
 
         // if RacerName is missing, use FName + " " + LName
-        if (!isset($customer->RacerName) || empty($customer->RacerName)) {
+        if (!isset($customer->RacerName) || empty($customer->RacerName))
             $customer->RacerName = $customer->FName . " " . $customer->LName;
-        }
 
         // grab the CustID using an internal SQL call (can't be done using @@IDENTITY or anything of the like, due to the IDs matching with a LocationID)
         $customer->CustID = $this->getNextCustId(); //$CustID;
@@ -547,11 +517,10 @@ class CustomersLogic extends BaseLogic {
     public function create($params = array()) {
         $newCustId = $this->getNextCustId(); // get out here for scoping issues
         $settings = $this->getSettings(); // get out here for scoping issues
-        
+
         $db =& $this->db;
         $createReturn = parent::_create($params, function($customer) use (&$db, &$params, &$settings, &$newCustId) {
-            
-            // // validate email
+            // validate email
             if (isset($customer->EmailAddress) && !empty($customer->EmailAddress)) {
 
                 // check the email formatting
@@ -588,10 +557,10 @@ class CustomersLogic extends BaseLogic {
             }
 
             // validate password strength, then hash it
-            if (isset($customer->Password) && !empty($customer->Password)) {
-                if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Password))
+            if (isset($customer->Hash) && !empty($customer->Hash)) {
+                if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Hash))
                     throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
-                $customer->Password = Hasher::hash($customer->Password);
+                $customer->Hash = Hasher::hash($customer->Hash);
             }
 
             // if RacerName is missing, use FName + " " + LName
@@ -619,7 +588,6 @@ class CustomersLogic extends BaseLogic {
         $params = $args[1] ?: array();
         $db =& $this->db;
         $closure = function($old, $new) use (&$db, &$params) {
-
 
             // // validate email
             if (isset($new->EmailAddress) && !empty($new->EmailAddress) && $new->EmailAddress != $old->EmailAddress) {
@@ -656,10 +624,10 @@ class CustomersLogic extends BaseLogic {
                         break;
                 }
             }
-            if (isset($new->Password) && !empty($new->Password)) {
-                if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($new->Password))
+            if (isset($new->Hash) && !empty($new->Hash)) {
+                if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($new->Hash))
                     throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
-                $new->Password = Hasher::hash($new->Password);
+                $new->Hash = Hasher::hash($new->Hash);
             }
             return $new;
         };

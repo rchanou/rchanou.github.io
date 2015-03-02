@@ -13,7 +13,7 @@ class PointProductHandler extends BaseProductHandler {
 
     public function handle($checkTotal, $metadata = array()) {
         $logPrefix = "Check #" . $checkTotal->CheckID . ": CheckDetail #" . $checkTotal->CheckDetailID . ": ";
-        $now = \ClubSpeed\Utility\Convert::getDate();
+        $now = Convert::getDate();
         if ($checkTotal->P_Points != 0) {
             try {
                 $pointHistory                    = $this->logic->pointHistory->dummy();
@@ -32,11 +32,11 @@ class PointProductHandler extends BaseProductHandler {
                 $pointHistory->Username          = 'api';
                 $this->logic->pointHistory->create($pointHistory);
                 $message = $logPrefix . 'Modified points for Customer #' . $pointHistory->CustID . ' by ' . $pointHistory->PointAmount;
-                Log::info($message);
+                Log::info($message, Enums::NSP_BOOKING);
             }
             catch (\Exception $e) {
                 $message = $logPrefix . 'Unable to add points to Customer #' . $checkTotal->CustID . "! " . $e->getMessage();
-                Log::error($message);
+                Log::error($message, Enums::NSP_BOOKING);
                 return array('error' => $message);
             }
         }

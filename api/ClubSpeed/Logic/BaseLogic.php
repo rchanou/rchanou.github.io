@@ -144,6 +144,8 @@ abstract class BaseLogic {
     }
 
     public function uow(&$uow) {
+        if (empty($uow->table)) // or we could just set it, regardless
+            $uow->table = $this->interface->table;
         switch($uow->action) {
             case 'create':
                 $uow->data = $this->interface->dummy($this->insertable($uow->data)); // if we still want to restrict. leaning towards no.

@@ -11,9 +11,17 @@ $settings = array(
         'Namespace'    => $namespace,
         'Name'         => 'isEnabled',
         'Type'         => 'Boolean',
-        'DefaultValue' => '1', // or 'true'? SQL will store as nvarchar, either way.
-        'Value'        => '1',
+        'DefaultValue' => '0', // or 'true'? SQL will store as nvarchar, either way.
+        'Value'        => '0',
         'Description'  => 'Override flag to globally enable or disable SpeedText applications and processing.'
+    ),
+		array(
+        'Namespace'    => $namespace,
+        'Name'         => 'textingIsEnabled',
+        'Type'         => 'Boolean',
+        'DefaultValue' => '0', // or 'true'? SQL will store as nvarchar, either way.
+        'Value'        => '0',
+        'Description'  => 'Override flag to disable SpeedText sending.'
     ),
     array(
         'Namespace'    => $namespace,
@@ -53,7 +61,8 @@ $settings = array(
         'Type'         => 'String',
         'DefaultValue' => 'twilio',
         'Value'        => 'twilio',
-        'Description'  => 'The provider from which to send text messages.'
+        'Description'  => 'The provider from which to send text messages.',
+				'IsPublic'     => 0
     ),
     array(
         'Namespace'    => $namespace,
@@ -61,7 +70,8 @@ $settings = array(
         'Type'         => 'JSON',
         'DefaultValue' => '{}',
         'Value'        => '{}',
-        'Description'  => 'The provider options to use to initialize the provider driver. These options will typically include usernames, keys, etc.'
+        'Description'  => 'The provider options to use to initialize the provider driver. These options will typically include usernames, keys, etc.',
+				'IsPublic'     => 0
     )
 );
 foreach($settings as $setting) {
@@ -85,4 +95,4 @@ foreach($settings as $setting) {
         echo '<br>';
     }
 }
-die('Successfully imported password reset templates.');
+die('Successfully imported SpeedText settings!');

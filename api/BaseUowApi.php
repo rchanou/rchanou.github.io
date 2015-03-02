@@ -125,9 +125,11 @@ abstract class BaseUowApi extends BaseApi {
      * @access private
      *
      * Boo. @access only works with Restler 3.0.
+     * The _ in the function name should be enough
+     * to protect it from being called externally. I think.
      */
     protected final function _handle(&$uow) {
-        $uow->table($this->resource); // override in handle?
+        $uow->table($this->resource); // override in handle? not super helpful. getting overwritten by DbCollection anyways.
         $mapper = $this->mappers->{$this->resource};
         $interface = $this->logic->{$this->resource};
         $uow = $mapper->uow($uow, function($mapped) use (&$interface) {
