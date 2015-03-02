@@ -102,7 +102,7 @@ Speed Screen Settings
                                 </div>
                             </div>
                             @endif
-                            @if(isset($speedscreenSettings['apiDriver']) && Session::get('user') === 'support')
+                            @if(isset($speedscreenSettings['apiDriver']) && $user === 'support')
                                 <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">
                                         <img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This setting is only visible to Club Speed support staff.">
@@ -116,7 +116,7 @@ Speed Screen Settings
                                     </div>
                                 </div>
                             @endif
-                            @if(isset($speedscreenSettings['channelUpdateFrequencyMs']) && Session::get('user') === 'support')
+                            @if(isset($speedscreenSettings['channelUpdateFrequencyMs']) && $user === 'support')
                                 <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">
                                         <img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This setting is only visible to Club Speed support staff.">
@@ -132,7 +132,7 @@ Speed Screen Settings
                             @endif
                         </div>
                         <div class="col-sm-6">
-                            @if(isset($speedscreenSettings['racesPollingRateMs']) && Session::get('user') === 'support')
+                            @if(isset($speedscreenSettings['racesPollingRateMs']) && $user === 'support')
                                 <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">
                                         <img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This setting is only visible to Club Speed support staff.">
@@ -146,7 +146,7 @@ Speed Screen Settings
                                     </div>
                                 </div>
                             @endif
-                            @if(isset($speedscreenSettings['timeUntilRestartOnErrorMs']) && Session::get('user') === 'support')
+                            @if(isset($speedscreenSettings['timeUntilRestartOnErrorMs']) && $user === 'support')
                                 <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">
                                         <img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This setting is only visible to Club Speed support staff.">
@@ -160,7 +160,7 @@ Speed Screen Settings
                                     </div>
                                 </div>
                             @endif
-                            @if(isset($speedscreenSettings['channelSource']) && Session::get('user') === 'support')
+                            @if(isset($speedscreenSettings['channelSource']) && $user === 'support')
                                 <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">
                                         <img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This setting is only visible to Club Speed support staff.">

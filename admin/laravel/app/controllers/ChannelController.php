@@ -345,7 +345,8 @@ class ChannelController extends BaseController
             return View::make('/screens/settings',
                 array('background_image_url' => is_file($this->image_path) ? $this->image_url : null,
                     'speedscreenSettings' => $speedscreenSettingsFormatted,
-                    'supportedLocales' => $supportedLocales)
+                    'supportedLocales' => $supportedLocales,
+                    'user' => strtolower(Session::get('user')))
             );
         }
 

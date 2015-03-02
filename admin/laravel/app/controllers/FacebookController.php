@@ -49,7 +49,8 @@ class FacebookController extends BaseController
         return View::make('/screens/facebook/afterRaceSettings',
             array('controller' => 'FacebookController',
                 'isChecked' => $afterRaceSettingsCheckedData,
-                'afterRaceSettings' => $afterRaceSettingsData
+                'afterRaceSettings' => $afterRaceSettingsData,
+                'user' => strtolower(Session::get('user'))
             ));
     }
 

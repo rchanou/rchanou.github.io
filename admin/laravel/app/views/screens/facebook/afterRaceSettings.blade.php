@@ -71,9 +71,9 @@ After Race Posting Settings
                               </div>
                             </div>
                         @endif
-                        @if ((isset($afterRaceSettings['featureIsEnabled']) && $afterRaceSettings['featureIsEnabled']) || Session::get('user') === 'support')
+                        @if ((isset($afterRaceSettings['featureIsEnabled']) && $afterRaceSettings['featureIsEnabled']) || $user === 'support')
                             <div class="col-sm-6">
-                                @if(Session::get('user') === 'support')
+                                @if($user === 'support')
                                 <div class="form-group">
                                   <label class="col-sm-4 col-md-4 col-lg-4 control-label"><img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This setting is only visible to Club Speed support staff."> Enable Feature for Track</label>
                                   <div class="col-sm-8 col-md-8 col-lg-8">

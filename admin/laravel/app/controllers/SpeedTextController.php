@@ -65,7 +65,8 @@ class SpeedTextController extends BaseController
             array('controller' => 'SpeedTextController',
                 'isChecked' => $settingsCheckedData,
                 'settings' => $settingsData,
-                'supportedProviders' => $supportedProviders
+                'supportedProviders' => $supportedProviders,
+                'user' => strtolower(Session::get('user'))
             ));
     }
 

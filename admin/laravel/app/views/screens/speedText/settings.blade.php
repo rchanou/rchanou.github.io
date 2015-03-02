@@ -74,9 +74,9 @@ SpeedText Messaging Settings
                     </div>
                   @endif
 
-                  @if ((isset($settings['isEnabled']) && $settings['isEnabled']) || Session::get('user') === 'support')
+                  @if ((isset($settings['isEnabled']) && $settings['isEnabled']) || $user === 'support')
                     <div class="col-sm-6">
-                      @if(Session::get('user') === 'support')
+                      @if($user === 'support')
                         <div class="form-group">
                           <label class="col-sm-4 col-md-4 col-lg-4 control-label">
                             <img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This setting is only visible to Club Speed support staff.">
@@ -135,7 +135,7 @@ SpeedText Messaging Settings
         </div>
       </div>
 
-      @if ((isset($settings['isEnabled']) && $settings['isEnabled']) || Session::get('user') === 'support')
+      @if ((isset($settings['isEnabled']) && $settings['isEnabled']) || $user === 'support')
         <div class="row">
           <div class="col-xs-12">
             <div class="widget-box">
