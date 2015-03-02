@@ -18,6 +18,7 @@ BEGIN
     WHERE
             c.Password IS NOT NULL
         AND LEN(LTRIM(RTRIM(c.Password))) > 0
+        AND c.Hash IS NULL
 END;
 
 COMMIT;
