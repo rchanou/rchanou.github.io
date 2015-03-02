@@ -369,7 +369,7 @@
                     @endif
 
                     <input type="hidden" name="productId" value="{{$giftCard['productId']}}">
-                    <input type="hidden" name="source" value="giftcards">
+                    <input type="hidden" name="pageSource" value="giftcards">
                     <div class="rightAligned">
                         <button type="submit" class="formButton">{{$strings['str_createAccount']}}</button>
                     </div>
@@ -393,7 +393,7 @@
                     <label for="loginEmail_{{$giftCard['productId']}}"><strong>{{$strings['str_emailAddress']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="text" name="EmailAddress" id="loginEmail_{{$giftCard['productId']}}" class="required mustBeValidEmail"><br/>
                     <label for="loginPassword_{{$giftCard['productId']}}"><strong>{{$strings['str_password']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="password" name="Password" id="loginPassword_{{$giftCard['productId']}}" class="required"><br/>
                     <input type="hidden" name="productId" value="{{$giftCard['productId']}}">
-                    <input type="hidden" name="source" value="giftcards">
+                    <input type="hidden" name="pageSource" value="giftcards">
                     <div class="rightAligned">
                         {{link_to('resetpassword',$strings['str_resetPassword'])}} <button type="submit" class="formButton">{{$strings['str_login']}}</button>
                     </div>

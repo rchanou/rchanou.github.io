@@ -62,6 +62,22 @@ Route::filter('checkIfDisabled', function ()
 {
     if (Request::segment(1) != "disabled") //Prevents redirect loops
     {
+        $settings = Settings::getSettings(); //Get website settings and check if we should be disabled
+
+        if (Input::has('source') && $settings['brokerSourceInURLEnabled']) //Broker name can be put as a URL parameter 'source'
+        {
+            Session::put('brokerName',Input::get('source'));
+            Session::put('brokerNameSource','url');
+        }
+
+        if (Input::has('testMode'))
+        {
+            if (Input::get('testMode') == 'on')
+            {
+                Session::put('debug',true);
+            }
+        }
+
         $key = Input::get('key'); //Check for a key that may override the disabled state
 
         if ($key == md5(Config::get('config.privateKey'))) //If the key is correct
@@ -75,7 +91,7 @@ Route::filter('checkIfDisabled', function ()
             return Redirect::to('/disabled');
 
         }
-        $settings = Settings::getSettings(); //Get website settings and check if we should be disabled
+
         $paymentProcessor = ($settings['onlineBookingPaymentProcessorSettings']);
         $paymentProcessor = $paymentProcessor->name;
         if (!$settings['registrationEnabled'] && Session::get('disabledOverride') != true

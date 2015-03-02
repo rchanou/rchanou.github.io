@@ -232,17 +232,21 @@ class CartController extends BaseController
 
         $heatItems = 0;
         $nonHeatItems = 0;
-        foreach($cart as $cartItemId => $cartItem)
+        if ($cart != null)
         {
-            if ($cartItem['type'] == 'heat')
+            foreach($cart as $cartItemId => $cartItem)
             {
-                $heatItems++;
-            }
-            else
-            {
-                $nonHeatItems++;
+                if ($cartItem['type'] == 'heat')
+                {
+                    $heatItems++;
+                }
+                else
+                {
+                    $nonHeatItems++;
+                }
             }
         }
+
         $settings = Session::get('settings');
         $locale = $settings['numberFormattingLocale'];
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
@@ -267,6 +271,24 @@ class CartController extends BaseController
                 'hasNonHeatItems' => $nonHeatItems > 0 ? true : false
             )
         );
+    }
+
+    public function applyBrokerName()
+    {
+        $brokerName = Input::get('brokerName');
+        $strings = Strings::getStrings();
+        if ($brokerName != null)
+        {
+            Session::put('brokerName',$brokerName);
+            Session::put('brokerNameSource','form'); //User input it themselves explicitly
+        }
+        else
+        {
+            Session::forget('brokerName');
+            Session::forget('brokerNameSource');
+        }
+        return Redirect::to('cart')->with('message',$strings['str_affiliateCodeUpdated']);
+
     }
 
     /**

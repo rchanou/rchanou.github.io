@@ -112,6 +112,21 @@ class CheckoutController extends BaseController
             }
         }
 
+        $countries = CS_API::getCountries();
+
+        $countries = is_array($countries) ? $countries : null;
+        if ($countries != null)
+        {
+            $countriesFormatted = array();
+            foreach($countries as $country) {
+                $countriesFormatted[$country->{'ISO_3166-1_Alpha_2'}] = $country->Name;
+            }
+        }
+        else
+        {
+            $countriesFormatted = null;
+        }
+
         return View::make('/checkout',
             array(
                 'images' => Images::getImageAssets(),
@@ -124,7 +139,8 @@ class CheckoutController extends BaseController
                 'settings' => $settings,
                 'hasHeatItems' => $heatItems > 0 ? true : false,
                 'hasNonHeatItems' => $nonHeatItems > 0 ? true : false,
-                'strings' => Strings::getStrings()
+                'strings' => Strings::getStrings(),
+                'countries' => $countriesFormatted
             )
         );
     }
@@ -230,7 +246,8 @@ class CheckoutController extends BaseController
         $checkDetails['checks'][] = array(
             'userId' => 1, //support user in Club Speed
             'customerId' => Session::get('authenticated'),
-            'details' => array()
+            'details' => array(),
+            'broker' => Session::has('brokerName') ? Session::get('brokerName') : ''
         );
 
         //Format the current items in the cart for the Virtual Check API call

@@ -10,6 +10,7 @@
 | your classes in the "global" namespace without Composer updating.
 |
 */
+require_once(app_path().'/includes/includes.php');
 
 ClassLoader::addDirectories(array(
 
@@ -48,7 +49,17 @@ Log::useFiles(storage_path().'/logs/laravel.log');
 
 App::error(function(Exception $exception, $code)
 {
-	Log::error($exception);
+    Log::error($exception); //Local logging (laravel.log)
+    CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code, 'Club Speed Online Booking'); //DB logging
+
+    return View::make('/errorpages/error',
+        array(
+            'images' => Images::getImageAssets(),
+            'errorInfo' => json_encode(Request::url() . ' ' . utf8_encode($exception)),
+            'code' => $code,
+            'strings' => Strings::getStrings()
+        )
+    );
 });
 
 /*

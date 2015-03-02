@@ -116,7 +116,7 @@
             <input type="hidden" id="gender" name="gender" value="">
             <input type="hidden" name="heatId" value="{{$heatId}}">
             <input type="hidden" name="productId" value="{{$productId}}">
-            <input type="hidden" name="source" value="{{$source}}">
+            <input type="hidden" name="pageSource" value="{{$pageSource}}">
             <input type="hidden" name="quantity" value="{{$quantity}}">
         </form>
     </div>

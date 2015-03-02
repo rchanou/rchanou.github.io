@@ -50,6 +50,12 @@
     </div>
     @endif
 
+    @if(Session::has('message'))
+        <div class="alert alert-success fadeAway" role="alert">
+            {{Session::get('message')}}
+        </div>
+    @endif
+
     @if(Session::has('authenticated'))
 
         <div class="raceResult">
@@ -127,8 +133,27 @@
 
                 <strong>{{$strings['str_order']}} {{$strings['str_subtotal']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkSubtotal, $currency)}}<br/>
                 <strong>{{$strings['str_order']}} {{$strings['str_tax']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTax, $currency)}}<br/>
-                <strong>{{$strings['str_order']}} {{$strings['str_total']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTotal, $currency)}}<br/><br/>
+                <strong>{{$strings['str_order']}} {{$strings['str_total']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTotal, $currency)}}<br/>
+                    
+                @if($settings['brokerFieldEnabled'] && Session::get('brokerNameSource') != 'url')
+                <div class="well-sm">
+                    <form action="{{URL::action('CartController@applyBrokerName')}}" method="POST">
+                        @if(Session::has('brokerName') && Session::get('brokerNameSource') == 'form')
+                            <strong>{{$strings['str_affiliateCode']}}</strong> {{Session::get('brokerName')}}<br/>
+                            {{$strings['str_wantToUpdateIt']}}
+                            <br/>
+                            <input type="text" name="brokerName" placeholder="{{$strings['str_updateAffiliateCode']}}">
+                        @else
+                            {{$strings['str_haveAnAffiliateCode']}}
+                            <br/>
+                            <input type="text" name="brokerName" placeholder="{{$strings['str_enterAffiliateCode']}}">
+                        @endif
 
+                        <button>{{$strings['str_apply']}}</button>
+                    </form>
+                </div>
+                @endif
+                <br/>
                 <form action="{{URL::action('CheckoutController@entry')}}">
                     <a class="btn formButton" href="{{URL::to('step2')}}">{{$strings['str_addMoreRaces']}}</a>
                     <button class="btn formButton">{{$strings['str_proceedToCheckout']}}</button>

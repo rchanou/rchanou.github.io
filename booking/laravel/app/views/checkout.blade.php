@@ -159,8 +159,11 @@
                     {{$strings['str_country']}}: <span class="requiredAsterisk">*</span>
                 </strong>
             </label>
-            <input maxlength="255" type="text" id="country" name="country" class="required" value="{{Input::old('country')}}"><br/>
-
+            @if(isset($countries) && count($countries) > 0 && isset($settings['defaultPaymentCountry']))
+                {{Form::select('country', $countries, $settings['defaultPaymentCountry'], array("style" => "width: 300px;"))}}
+            @else
+                <input maxlength="255" type="text" id="country" name="country" class="required" value="{{Input::old('country')}}"><br/>
+            @endif
             <!-- Phone -->
             <label for="phone">
                 <strong>
@@ -229,6 +232,9 @@
             @endif
 
             <div class="rightAligned">
+            @if($settings['brokerFieldEnabled'] && Session::get('brokerNameSource') != 'url' && Session::has('brokerName'))
+                <strong>Affiliate code:</strong> {{Session::get('brokerName')}}<br/>
+            @endif
             <strong>{{$strings['str_order']}} {{$strings['str_subtotal']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkSubtotal, $currency)}}<br/>
             <strong>{{$strings['str_order']}} {{$strings['str_tax']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTax, $currency)}}<br/>
             <strong>{{$strings['str_order']}} {{$strings['str_total']}}:</strong> {{$moneyFormatter->formatCurrency($virtualCheck->checkTotal, $currency)}}<br/>

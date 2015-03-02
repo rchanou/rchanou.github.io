@@ -375,7 +375,7 @@
 
                     <input type="hidden" name="heatId" value="{{$race->heatId}}">
                     <input type="hidden" name="numberOfParticipants" value="{{$numberOfParticipants}}">
-                    <input type="hidden" name="source" value="step2">
+                    <input type="hidden" name="pageSource" value="step2">
                     <div class="rightAligned">
                         <button type="submit" class="formButton">{{$strings['str_createAccount']}}</button>
                     </div>
@@ -400,7 +400,7 @@
                     <label for="loginPassword_{{$race->heatId}}"><strong>{{$strings['str_password']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="password" name="Password" id="loginPassword_{{$race->heatId}}" class="required"><br/>
                     <input type="hidden" name="heatId" value="{{$race->heatId}}">
                     <input type="hidden" name="numberOfParticipants" value="{{$numberOfParticipants}}">
-                    <input type="hidden" name="source" value="step2">
+                    <input type="hidden" name="pageSource" value="step2">
                     <div class="rightAligned">
                         {{link_to('resetpassword',$strings['str_resetPassword'])}} <button type="submit" class="formButton">{{$strings['str_login']}}</button>
                     </div>

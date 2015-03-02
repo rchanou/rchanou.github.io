@@ -76,6 +76,11 @@ class Strings
             'str_disconnected' => 'Disconnected!',
             'str_unableToReachServer' => "Unable to reach the track's server.",
 
+            //Error template strings
+            'str_errorTitle' => 'Error! - Online Booking',
+            'str_error' => 'Error!',
+            'str_errorMessage' => 'An error has occurred. Error code: ',
+
             //Step 1 template strings
             'str_step1Title' => 'Book a Race - Online Booking',
             'str_chooseYourDate' => 'Choose your date:',
@@ -248,6 +253,7 @@ class Strings
             //LoginController strings
             'str_incorrectUsernameOrPassword' => 'Incorrect username or password.',
             'str_accountCreationForced' => 'This track requires you to create an account before using Facebook login. Please create one below using the same e-mail address as your Facebook account.',
+            'str_problemWithFacebook' => 'There was a problem syncing with your Facebook account. Please create a new account instead!',
 
             //Step2Controller strings
             'str_pleaseSelectARaceDate' => 'Please select a race date.',
@@ -267,7 +273,19 @@ class Strings
             'str_noProductsInCart'  => 'You currently have no products in your cart.',
             'str_races' => 'Races',
             'str_products' => 'Products',
-            'str_summary' => 'Summary'
+            'str_summary' => 'Summary',
+
+            //Broker names / affiliate codes
+            'str_affiliateCode' => 'Affiliate code:',
+            'str_wantToUpdateIt' => 'Want to update it? Enter it below!',
+            'str_updateAffiliateCode' => 'Update affiliate code',
+            'str_haveAnAffiliateCode' => 'Have an affiliate code? Enter it below!',
+            'str_enterAffiliateCode' => 'Enter affiliate code',
+            'str_apply' => 'Apply',
+            'str_affiliateCodeUpdated' => 'Affiliate code updated!'
+
+
+
 
             //'str_' => '',
         );

@@ -99,7 +99,9 @@ class Settings
             'maxRacersForDropdown' => 50,
             'currentCulture' => 'en-US',
             'giftCardSalesEnabled' => false,
-            'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}'
+            'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}',
+            'brokerFieldEnabled' => false,
+            'brokerSourceInURLEnabled' => false
         );
 
         self::$currentSettings = self::$defaultSettings;

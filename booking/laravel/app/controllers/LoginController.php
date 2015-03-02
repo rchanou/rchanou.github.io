@@ -56,7 +56,7 @@ class LoginController extends BaseController
         $strings = Strings::getStrings();
         $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
         $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
-        $source = isset($input['source']) ? $input['source'] : 'step1'; //Where the user came from and should be redirected to in the case of an error
+        $source = isset($input['pageSource']) ? $input['pageSource'] : 'step1'; //Where the user came from and should be redirected to in the case of an error
         $itemId = $heatId != null ? $heatId : $productId; //The heatId or productId being booked
         $quantity = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : 1;
 
@@ -209,7 +209,7 @@ class LoginController extends BaseController
                     'images' => Images::getImageAssets(),
                     'heatId' => $heatId,
                     'productId' => $productId,
-                    'source' => $source,
+                    'pageSource' => $source,
                     'quantity' => $quantity,
                     'strings' => Strings::getStrings()
                 )
@@ -250,8 +250,24 @@ class LoginController extends BaseController
         $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
         $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
         $itemId = $heatId != null ? $heatId : $productId; //The heatId or productId being booked
-        $source = isset($input['source']) ? $input['source'] : 'step2'; //Where the user came from and should be redirected to in the case of an error
+        $source = isset($input['pageSource']) ? $input['pageSource'] : 'step2'; //Where the user came from and should be redirected to in the case of an error
         $quantity = isset($input['quantity']) ? $input['quantity'] : 1;
+
+        if ($input['email'] == '' || $input['email'] == null) //If no valid e-mail was received from Facebook, we must have the user create a new account
+        {
+            if (Session::has('intent'))
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', $strings['str_problemWithFacebook']);
+                return Redirect::to('/login')->withErrors($messages);
+            }
+            else
+            {
+                $createAccountErrors = array();
+                $createAccountErrors[$itemId] = array($strings['str_problemWithFacebook']);
+                return Redirect::to("/$source?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
+        }
 
         //If the site requires registration, force it on the user, otherwise log them in
         $settings = Session::get('settings');
@@ -306,9 +322,20 @@ class LoginController extends BaseController
                 return Redirect::to("/cart");
             }
         }
-        else
+        else //If Facebook login failed, have the user just create a new account
         {
-            return Redirect::to('/disconnected');
+            if (Session::has('intent'))
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', $strings['str_problemWithFacebook']);
+                return Redirect::to('/login')->withErrors($messages);
+            }
+            else
+            {
+                $createAccountErrors = array();
+                $createAccountErrors[$itemId] = array($strings['str_problemWithFacebook']);
+                return Redirect::to("/$source?create=$itemId#$itemId")->with(array('createAccountErrors' => $createAccountErrors));
+            }
         }
     }
 }

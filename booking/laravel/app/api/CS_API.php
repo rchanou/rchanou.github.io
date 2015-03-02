@@ -763,6 +763,27 @@ class CS_API
         }
     }
 
+    public static function getCountries($params = null)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/countries.json?&key=' . self::$privateKey;;
+
+        $result = self::call($url);
+
+        $response = $result['response'];
+        $error = $result['error'];
+
+        if ($response !== null && isset($response->body))
+        {
+            return $response->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /*
     ################
     # TRANSLATIONS #
@@ -867,6 +888,26 @@ class CS_API
         {
             return null;
         }
+    }
+
+    /*
+    ###########
+    # LOGGING #
+    ###########
+    */
+
+    public static function log($message, $terminal = 'Club Speed PHP API', $username = '')
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/logs?key=' . self::$privateKey;
+        $params = array(
+            'message'  => $message,
+            'terminal' => $terminal,
+            'username' => $username
+        );
+
+        return self::call($url, $params, 'POST');
     }
 
     /*

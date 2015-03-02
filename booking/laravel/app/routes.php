@@ -17,6 +17,7 @@ Route::post('/loginfbconfirm','LoginController@loginFacebookConfirm');
 Route::post('/createaccount','CreateAccountController@entry');
 Route::get('/cart','CartController@entry');
 Route::post('/cart','CartController@entry');
+Route::post('/cart/brokername','CartController@applyBrokerName');
 
 Route::get('/checkout','CheckoutController@entry');
 Route::post('/pay','CheckoutController@pay');

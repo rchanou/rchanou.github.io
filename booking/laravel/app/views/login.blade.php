@@ -368,7 +368,7 @@
                     <input type="hidden" name="heatId" value="{{$intent['heatId']}}">
                     <input type="hidden" name="productId" value="{{$intent['productId']}}">
                     <input type="hidden" name="numberOfParticipants" value="{{$intent['quantity']}}">
-                    <input type="hidden" name="source" value="login">
+                    <input type="hidden" name="pageSource" value="login">
                     <div class="rightAligned">
                         <button type="submit" class="formButton">{{$strings['str_createAccount']}}</button>
                     </div>
@@ -386,7 +386,7 @@
                     <input type="hidden" name="heatId" value="{{$intent['heatId']}}">
                     <input type="hidden" name="productId" value="{{$intent['productId']}}">
                     <input type="hidden" name="numberOfParticipants" value="{{$intent['quantity']}}">
-                    <input type="hidden" name="source" value="login">
+                    <input type="hidden" name="pageSource" value="login">
                     <div class="rightAligned">
                         {{link_to('resetpassword',$strings['str_resetPassword'])}} <button type="submit" class="formButton">{{$strings['str_login']}}</button>
                     </div>

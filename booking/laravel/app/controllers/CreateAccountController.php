@@ -18,7 +18,7 @@ class CreateAccountController extends BaseController
 
         $heatId = isset($input['heatId']) ? $input['heatId'] : null; //Heat that the user intends to book after creating the account
         $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to add to cart after creating the account
-        $source = isset($input['source']) ? $input['source'] : 'step1'; //Where the user came from and should be redirected to in the case of an error
+        $source = isset($input['pageSource']) ? $input['pageSource'] : 'step1'; //Where the user came from and should be redirected to in the case of an error
         $itemId = $heatId != null ? $heatId : $productId; //The heatId or productId being booked
 
         $settings = Session::get('settings');
