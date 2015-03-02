@@ -16,7 +16,7 @@ class ReportsController extends BaseController
         return View::make('/screens/reports/index',
             array('controller' => 'ReportsController',
                   'serverHasEurekas' => $serverHasEurekas,
-									'user' => Session::get('user')
+									'user' => strtolower(Session::get('user'))
             ));
     }
 
