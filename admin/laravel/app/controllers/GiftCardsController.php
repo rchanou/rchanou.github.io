@@ -6,17 +6,13 @@ require_once(app_path().'/tools/Exports.php');
 class GiftCardsController extends BaseController
 {
 
+		public function __construct()
+		{
+				$this->beforeFilter('validatePermission:View Reports Module');
+		}
+
     public function index()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
         return View::make('/screens/giftcards/manage',array(
             'controller' => 'GiftCardsController'
         ));

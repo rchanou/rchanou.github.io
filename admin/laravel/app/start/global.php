@@ -10,6 +10,7 @@
 | your classes in the "global" namespace without Composer updating.
 |
 */
+require_once(app_path().'/includes/includes.php');
 
 ClassLoader::addDirectories(array(
 
@@ -17,6 +18,7 @@ ClassLoader::addDirectories(array(
 	app_path().'/controllers',
     app_path().'/controllers/reports',
 	app_path().'/controllers/reports/eurekas',
+	app_path().'/controllers/reports/brokers',
 	app_path().'/models',
 	app_path().'/database/seeds',
 
@@ -50,7 +52,16 @@ Log::useFiles(storage_path().'/logs/laravel.log');
 
 App::error(function(Exception $exception, $code)
 {
-	Log::error($exception);
+	Log::error($exception); //Local logging (laravel.log)
+    CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code, 'Club Speed Admin Panel'); //DB logging
+
+    return View::make('/errorpages/error',
+        array(
+            'images' => Images::getImageAssets(),
+            'errorInfo' => json_encode(Request::url() . ' ' . utf8_encode($exception)),
+            'code' => $code
+        )
+    );
 });
 
 /*

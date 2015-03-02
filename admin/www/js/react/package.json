@@ -1,16 +1,16 @@
 {
   "dependencies": {
     "d3": "^3.4.13",
-    "immutable": "^3.4.1",
+    "immutable": "^3.6.2",
     "js-csp": "^0.3.2",
+    "jsonp": "^0.1.0",
     "lodash": "^2.4.1",
-    "moment": "^2.8.3",
-    "react": "^0.12.0",
-    "transducers-js": "^0.4.135"
+    "moment": "^2.9.0",
+    "react": "^0.12.0"
   },
   "devDependencies": {
-    "fs-extra": "^0.13.0",
     "jsx-loader": "^0.12.2",
+    "strip-loader": "^0.1.0",
     "traceur-loader": "^0.6.3",
     "webpack": "^1.4.13"
   },

@@ -31,7 +31,7 @@ class ChannelController extends BaseController
 			. DIRECTORY_SEPARATOR . 'SP_Admin'
 			. DIRECTORY_SEPARATOR . 'ScreenImages';
 
-			if (!file_exists($this->slide_image_directory) && getenv('SERVER_ADDR') === '192.168.111.165'){
+			if (!file_exists($this->slide_image_directory) && getenv('SERVER_ADDR') === '192.168.111.205'){
 				// Ronnie's debugging directory
 				$this->slide_image_directory = '\\\\192.168.111.122\\c$\\ClubSpeed\\wwwroot\\SP_Admin\\ScreenImages';
 			}
@@ -47,7 +47,7 @@ class ChannelController extends BaseController
 			. DIRECTORY_SEPARATOR . 'assets'
 			. DIRECTORY_SEPARATOR . 'videos';
 
-			if (!file_exists($this->video_directory) && getenv('SERVER_ADDR') == '192.168.111.165'){
+			if (!file_exists($this->video_directory) && getenv('SERVER_ADDR') == '192.168.111.205'){
 				$this->video_directory = '\\\\192.168.111.122\\c$\\clubspeedapps\\assets\\videos';
 			}
 		}
@@ -70,14 +70,6 @@ class ChannelController extends BaseController
 
 		public function updateVideo()
 		{
-			$session = Session::all();
-			if (!(isset($session["authenticated"]) && $session["authenticated"]))
-			{
-				$messages = new Illuminate\Support\MessageBag;
-				$messages->add('errors', "You must login before viewing the admin panel.");
-				return Redirect::to('/login')->withErrors($messages)->withInput();
-			}
-
 			//ini_set("max_file_uploads", 1);
 
 			// Build the input for our validation
@@ -119,14 +111,6 @@ class ChannelController extends BaseController
 
 		public function updateImage()
 		{
-			$session = Session::all();
-			if (!(isset($session["authenticated"]) && $session["authenticated"]))
-			{
-				$messages = new Illuminate\Support\MessageBag;
-				$messages->add('errors', "You must login before viewing the admin panel.");
-				return Redirect::to('/login')->withErrors($messages)->withInput();
-			}
-
 			// Build the input for our validation
 			$input = array('image' => Input::file('image'));
 			$filename = Input::get('filename');
@@ -163,16 +147,6 @@ class ChannelController extends BaseController
 
     public function index()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $listOfChannels = CS_API::getListOfChannels();
         $apiCallFailed = ($listOfChannels === null);
         if ($apiCallFailed)
@@ -209,47 +183,244 @@ class ChannelController extends BaseController
 
 		public function speedScreen()
 		{
-			$session = Session::all();
-			if (!(isset($session["authenticated"]) && $session["authenticated"]))
-			{
-				$messages = new Illuminate\Support\MessageBag;
-				$messages->add('errors', "You must login before viewing the admin panel.");
-
-				//Redirect to the previous page with an appropriate error message
-				return Redirect::to('/login')->withErrors($messages)->withInput();
-			}
-
 			return View::make('/screens/speedScreen');
 		}
 
-		public function settings()
-    {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
 
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
+    public function translations()
+    {
+        $supportedCultures = array(
+            'en-US' => 'English (US)',
+            'en-GB' => 'English (UK)',
+            'en-NZ' => 'English (NZ)',
+            'en-AU' => 'English (AU)',
+            'en-IE' => 'English (IE)',
+            'en-CA' => 'English (CA)',
+            'es-MX' => 'Español',
+            'es-CR' => 'Español (CR)',
+            'es-ES' => 'Castellano',
+            'es-PR' => 'Español (PR)',
+            'ru-RU' => 'Pусский язык',
+            'fr-CA' => 'Français',
+            'de-DE' => 'Deutsch',
+            'nl-NL' => 'Nederlands',
+            'pl-PL' => 'Język polski',
+            'da-DK' => 'Dansk',
+            'ar-AE' => 'العربية',
+            'it-IT' => 'Italiano',
+            'bg-BG' => 'български език',
+            'sv-SE' => 'Svenska'
+        );
+
+        $currentCulture = "en-US";
+
+        $translations = CS_API::getTranslations('Speedscreen');
+
+        $translations_scoreboard = CS_API::getTranslations('Scoreboard');
+
+        return View::make('/screens/speedScreen/translations',
+            array('controller' => 'ChannelController',
+                'supportedCultures' => $supportedCultures,
+                'currentCulture' => $currentCulture,
+                'translations' => $translations,
+                'translations_scoreboard' => $translations_scoreboard
+            )
+        );
+    }
+
+    public function updateTranslations()
+    {
+        $input = Input::all();
+        unset($input['_token']); //Removing Laravel's default form value
+        $cultureKey = $input['cultureKey'];
+        $namespace = $input['namespace'];
+        unset($input['cultureKey']);
+        unset($input['namespace']);
+
+        //Format the missing string data as expected by Club Speed's API
+        $updatedTranslations = array(); //Destined to a PUT
+        $newTranslations = array(); //Destined to a POST
+        foreach($input as $stringId => $stringValue)
+        {
+            if (isset($stringId))
+            {
+                if (!$this->contains($stringId,'new_'))
+                {
+                    $updatedTranslations[] = array(
+                        'translationsId' => str_replace("id_","",$stringId),
+                        'value' => $stringValue
+                    );
+                }
+                else if ($stringValue != "")
+                {
+                    $newTranslations[] = array(
+                        'name' => str_replace("id_new_","",$stringId),
+                        'namespace' => $namespace,
+                        'value' => $stringValue,
+                        'defaultValue' => $stringValue,
+                        'culture' => $cultureKey,
+                        'comment' => '');
+                }
+            }
         }
 
-        return View::make('/screens/settings',
-            array('background_image_url' => is_file($this->image_path) ? $this->image_url : null));
+        $result = null;
+        if (count($updatedTranslations) > 0)
+        {
+            $result = CS_API::updateTranslationsBatch($updatedTranslations);
+
+            $updateWasSuccessful = ($result !== null);
+            if ($updateWasSuccessful === false)
+            {
+                return Redirect::to('speedScreen/translations')->with( array('error' => 'One or more translations could not be updated. Please try again.'));
+            }
+            else if ($updateWasSuccessful === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+
+
+        $result = null;
+        if (count($newTranslations) > 0)
+        {
+            $result = CS_API::insertTranslationsBatch($newTranslations);
+
+            $insertWasSuccessful = ($result !== null);
+            if ($insertWasSuccessful === false)
+            {
+                return Redirect::to('speedScreen/translations')->with( array('error' => 'One or more translations could not be created. Please try again.'));
+            }
+            else if ($insertWasSuccessful === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+
+        //Standard success message
+        return Redirect::to('speedScreen/translations')->with( array('message' => 'Translations updated successfully!'));
     }
+
+
+		public function settings()
+        {
+            $speedscreenSettings = CS_API::getSettingsFromNewTableFor('Speedscreen');
+            $speedscreenSettingsFormatted = array();
+            $speedscreenSettingsIds = array();
+            if (isset($speedscreenSettings->settings))
+            {
+                foreach($speedscreenSettings->settings as $setting)
+                {
+                    $speedscreenSettingsFormatted[$setting->name] = $setting->value;
+                    $speedscreenSettingsIds[$setting->name] = $setting->settingsId;
+                }
+            }
+
+            Session::put('speedscreenSettings',$speedscreenSettingsFormatted);
+            Session::put('speedscreenSettingsIds',$speedscreenSettingsIds);
+
+            $supportedLocales = array(
+                'en-US' => 'English (US)',
+                'en-GB' => 'English (UK)',
+                'en-NZ' => 'English (NZ)',
+                'en-AU' => 'English (AU)',
+                'en-IE' => 'English (IE)',
+                'en-CA' => 'English (CA)',
+                'es-MX' => 'Español',
+                'es-CR' => 'Español (CR)',
+                'es-ES' => 'Castellano',
+                'es-PR' => 'Español (PR)',
+                'ru-RU' => 'Pусский язык',
+                'fr-CA' => 'Français',
+                'de-DE' => 'Deutsch',
+                'nl-NL' => 'Nederlands',
+                'pl-PL' => 'Język polski',
+                'da-DK' => 'Dansk',
+                'ar-AE' => 'العربية',
+                'it-IT' => 'Italiano',
+                'bg-BG' => 'български език',
+                'sv-SE' => 'Svenska'
+            );
+
+            return View::make('/screens/settings',
+                array('background_image_url' => is_file($this->image_path) ? $this->image_url : null,
+                    'speedscreenSettings' => $speedscreenSettingsFormatted,
+                    'supportedLocales' => $supportedLocales)
+            );
+        }
+
+        public function updateSettings()
+        {
+            $input = Input::all();
+            unset($input['_token']); //Removing Laravel's default form value
+            $destination = '/channelSettings';
+
+            //Begin data validation
+            $rules = array(
+                'channelUpdateFrequencyMs' => 'integer|min:1000',
+                'racesPollingRateMs' => 'integer|min:200',
+                'timeUntilRestartOnErrorMs' => 'integer|min:1000'
+            );
+            $messages = array(
+                'channelUpdateFrequencyMs.integer' => 'The channel update frequency must be an integer.',
+                'channelUpdateFrequencyMs.min' => 'The channel update frequency has to be at least 1000 milliseconds.',
+                'racesPollingRateMs.integer' => 'The races polling rate must be an integer.',
+                'racesPollingRateMs.min' => 'The races polling rate must be at least 200 milliseconds.',
+                'timeUntilRestartOnErrorMs.integer' => 'The time to wait until restarting must be an integer.',
+                'timeUntilRestartOnErrorMs.min' => 'The time to wait until restarting must be at least 1000 milliseconds.'
+            );
+            $validator = Validator::make($input, $rules, $messages);
+            if ($validator->fails()) {
+                return Redirect::to($destination)->withErrors($validator);
+            } //End data validation
+
+            //Begin formatting form input for processing
+            $newSettings = array();
+            foreach($input as $currentSettingName => $currentSettingValue)
+            {
+                $newSettings[$currentSettingName] = $currentSettingValue;
+            }
+            //End formatting
+
+            //Identify the settings that actually changed and need to be sent to Club Speed
+            $currentSettings = Session::get('speedscreenSettings',array());
+            foreach($currentSettings as $currentSettingName => $currentSettingValue)
+            {
+                if (isset($newSettings[$currentSettingName]))
+                {
+                    if ($newSettings[$currentSettingName] == $currentSettingValue) //If the setting hasn't changed
+                    {
+                        unset($newSettings[$currentSettingName]); //Remove it from the list of new settings
+                    }
+                }
+            }
+
+            //Only send settings that already exist in the API due to migrations having already been run
+            foreach($newSettings as $newSettingName => $newSettingValue)
+            {
+                if (!isset($currentSettings[$newSettingName]))
+                {
+                    unset($newSettings[$newSettingName]); //Remove any settings about to be sent that the API doesn't know about yet
+                }
+            }
+
+            $newSettingsIds = Session::get('speedscreenSettingsIds');
+            $result = CS_API::updateSettingsInNewTableFor('Speedscreen',$newSettings,$newSettingsIds);
+
+            if ($result === false)
+            {
+                return Redirect::to($destination)->with( array('error' => 'One or more settings could not be updated. Please try again.'));
+            }
+            else if ($result === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+
+            return Redirect::to($destination)->with( array('message' => 'Settings updated successfully!'));
+        }
 
 		public function settingsSubmit()
 		{
-				$session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
 				// Build the input for our validation
 				$input = array('image' => Input::file('image'));
 
@@ -309,5 +480,11 @@ class ChannelController extends BaseController
 				return Redirect::to('/channel')->with('error', 'An error occurred while trying to create the channel.');
 			}
 		}
+
+    private static function contains(&$haystack, $needle)
+    {
+        $result = strpos($haystack, $needle);
+        return $result !== false;
+    }
 
 }

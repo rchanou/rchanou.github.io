@@ -9,18 +9,6 @@ var MAX_Z_INDEX = 16777271;
 
 var Popup = require('../../components/popup');
 
-function* idMaker(){
-  var index = 0;
-  while(true)
-    yield index++;
-}
-
-var gen = idMaker();
-
-console.log(gen.next().value); // 0
-console.log(gen.next().value); // 1
-console.log(gen.next().value); // 2
-
 
 var MenuItem = React.createClass({
   awaitingIconUpdate: false,
@@ -113,10 +101,9 @@ var MenuItem = React.createClass({
           onMouseDown={e => { e.stopPropagation(); }}
           onTouchStart={e => { e.stopPropagation(); }}
         >
-          <input type='file' ref='uploader'
+          <input type='file' ref='uploader' accept='image/*'
             style={{ visibility: 'hidden' }}
             onChange={e => {
-              console.log('changed', e.target.files);
               if (e.target.files.length == 0){
                 return;
               }
@@ -125,18 +112,17 @@ var MenuItem = React.createClass({
 
               var data = new FormData();
               var uploadTime = new Date().valueOf();
-              console.log(uploadTime + '.jpg');
               data.append('filename', uploadTime + '.jpg');
               data.append('image', file);
 
               var url = '/admin/mobileApp/images/update';
-              if (window.location.hostname.indexOf('192.168.111') !== -1){
+              if (window.location.hostname === '192.168.111.205'){
                 url = '/admin/www/mobileApp/images/update';
               }
 
               $.ajax({
                 type: 'POST',
-                url, //: '/admin/www/mobileApp/images/update',
+                url,
                 cache: false,
                 contentType: false,
                 processData: false,
@@ -147,7 +133,7 @@ var MenuItem = React.createClass({
                 this.props.onIconUpload();
 
                 var iconUrl = '';
-                if (window.location.hostname.indexOf('192.168.111.') !== -1){
+                if (window.location.hostname === '192.168.111.205'){
                   iconUrl = 'https://vm-122.clubspeedtiming.com';
                 }
                 iconUrl += '/assets/mobileApp/icons/' + uploadTime + '.jpg';
@@ -337,7 +323,7 @@ var MenuItem = React.createClass({
 
     var fullIconUrl;
     if (url[0] === '/'){
-      if (window.location.hostname === '192.168.111.165'){
+      if (window.location.hostname === '192.168.111.205'){
         fullIconUrl = 'https://vm-122.clubspeedtiming.com' + url;
       } else {
         fullIconUrl = (window.location.origin) + url;
@@ -368,32 +354,48 @@ module.exports = React.createClass({
         {
           "label":"Club Speed",
           "url":"http://www.clubspeed.com",
-          "iconUrl":"/assets/MobileApp/icons/tachometer.png"
+          "iconUrl":"/assets/MobileApp/icons/tachometer.png",
+          "fixedId": "clubspeed"
         },
         {
           "label":"Member Card",
           "id":"profile",
-          "iconUrl":"/assets/mobile/icons/credit-card.png"
+          "iconUrl":"/assets/mobile/icons/credit-card.png",
+          "fixedId": "membercard"
         },
         {
           "label":"Track Information",
           "id":"trackInformation",
-          "iconUrl":"/assets/mobile/icons/map-marker.png"
+          "iconUrl":"/assets/mobile/icons/map-marker.png",
+          "fixedId": "trackinfo"
         },
         {
           "label":"My Results",
           "url":"/mobile/#/racersearch/{{customerId}}/",
-          "iconUrl":"/assets/MobileApp/icons/chart.png"
+          "iconUrl":"/assets/MobileApp/icons/chart.png",
+          "fixedId": "proskill"
         },
         {
           "label":"Top Times",
           "url":"/mobile/#/livetiming/fastestTimeByWeek",
-          "iconUrl":"http://vm-122.clubspeedtiming.com/assets/MobileApp/icons/trophy.png"
+          "iconUrl":"http://vm-122.clubspeedtiming.com/assets/MobileApp/icons/trophy.png",
+          "fixedId": "toptimes"
         },
         {
           "label":"Online Booking",
           "url":"/booking/?login={{authToken}}",
-          "iconUrl":"/assets/mobile/icons/MISSING-IMAGE-DOES-NOT-EXIST.png"
+          "iconUrl":"/assets/mobile/icons/MISSING-IMAGE-DOES-NOT-EXIST.png",
+          "fixedId": "booking"
+        },
+        {
+          "label":"Promotions",
+          "id":"promotions",
+          "fixedId": "promotions"
+        },
+        {
+          "label":"Extra",
+          "id":"extra",
+          "fixedId": "extra"
         }
       ]
     };
@@ -649,11 +651,10 @@ module.exports = React.createClass({
       <button
         className='btn btn-info'
         onClick={() => {
-          var propsToSave = ['label', 'id', 'url', 'iconUrl', 'itemKey'];
+          var propsToSave = ['label', 'id', 'url', 'iconUrl', 'fixedId'];
           var url = config.apiURL + 'settings/' + this.state.settingsId + '?key=' + config.privateKey;
-          var value = JSON.stringify({
-            menuItems: _.map(this.state.menuItems, item => _.pick(item, propsToSave))
-          });
+          var menuItems = _.map(this.state.menuItems, item => _.pick(item, propsToSave));
+          var value = JSON.stringify({ menuItems });
           var request = { type: 'PUT', url, data: { value } };
 
           $.ajax(request)
@@ -672,25 +673,6 @@ module.exports = React.createClass({
       >
         Save All
       </button>
-      {/*<button className='btn btn-info pull-right'
-        onClick={() => {
-          var menuItems = React.addons.update(
-            this.state.menuItems,
-            { $push: [
-              {
-                itemKey: Math.max.apply(null, this.state.menuItems.concat(this.props.menuItemBucket)),
-                label: '(new item)',
-                url: '',
-                iconUrl: ''
-              }
-            ] }
-          );
-
-          this.setState({ menuItems });
-        }}
-      >
-        Add Item
-      </button>*/}
     </Anim>;
   },
 
@@ -866,7 +848,7 @@ module.exports = React.createClass({
     return _(this.props.menuItemBucket)
       .forEach((item, i) => { item.itemKey = i; item.bucketId = i; })
       .filter(
-        item => !_.any(this.state.menuItems, { label: item.label })
+        item => !_.any(this.state.menuItems, menuItem => item.fixedId === menuItem.fixedId || item.label === menuItem.label)
       )
       .sortBy('label')
       .value();

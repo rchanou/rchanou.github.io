@@ -64,6 +64,7 @@
                 <ul>
                     <li>{{link_to('/channel','Channels')}}</li>
                     <li>{{link_to('/channelSettings','Settings')}}</li> <!-- TODO: Rename to channel/settings -->
+                    {{--<li>{{link_to('/speedScreen/translations','Translations')}}</li>--}}
                     <li>{{link_to('/docs/Club Speed - Speed Screen Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
@@ -80,6 +81,7 @@
                     <li>{{link_to('/booking/templates','Templates')}}</li>
                     {{--<li>{{link_to('/booking/giftcardsales','Gift Card Sales')}}</li>--}}
                     <li>{{link_to('/booking/translations','Translations')}}</li>
+										<li>{{link_to('/booking/logs','Logs')}}</li>
                     <li>{{link_to('/docs/Club Speed - Online Booking Guide.pdf','Documentation',array('target' => '_blank'))}}</li>
                 </ul>
             </li>
@@ -101,7 +103,7 @@
             @endif
                 <a href="{{URL::to('reports')}}"><i class="fa fa-file-o"></i> <span>Reports</span></a>
             </li>
-            {{--@if (@$controller == 'MobileAppController')
+            @if (@$controller == 'MobileAppController')
             <li class="active open">
             @else
             <li class="submenu">
@@ -112,7 +114,7 @@
                     <li>{{link_to('/mobileApp/settings','Settings')}}</li>
                     <li>{{link_to('/mobileApp/templates','Templates')}}</li>
                 </ul>
-            </li>--}}
+            </li>
             @if (@$controller == 'GiftCardsController')
                 <li class="active open">
             @else
@@ -124,6 +126,28 @@
                         <li>{{link_to('/giftcards/reports','Reports')}}</li>
                     </ul>
                 </li>
+{{--						@if (@$controller == 'FacebookController')
+							<li class="active open">
+						@else
+							<li class="submenu">
+						@endif
+							<a href="#"><i class="fa fa-facebook-square"></i> <span>Facebook</span> <i class="arrow fa fa-chevron-right"></i></a>
+							<ul>
+								<li>{{link_to('/facebook/after-race-settings','After Race Posting Settings')}}</li>
+                <li>{{link_to('/facebook/logs','Logs')}}</li>
+							</ul>
+						</li>--}}
+           	@if (@$controller == 'SpeedTextController')
+							<li class="active open">
+						@else
+							<li class="submenu">
+						@endif
+							<a href="#"><i class="fa fa-comments"></i> <span>SpeedText</span> <i class="arrow fa fa-chevron-right"></i></a>
+							<ul>
+								<li>{{link_to('/speedtext/settings','Settings')}}</li>
+                <li>{{link_to('/speedtext/logs','Logs')}}</li>
+							</ul>
+						</li>
         </ul>
 
     </div>

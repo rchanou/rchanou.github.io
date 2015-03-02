@@ -80,7 +80,7 @@ class BookingController extends BaseController
         ),
         (object)array(
           'displayName' => 'Gift Card E-mail (HTML)',
-          'ttemplateNamespace' => 'Booking',
+          'templateNamespace' => 'Booking',
           'templateName' => 'giftCardEmailBodyHtml',
           'isHtml' => true, // TODO: have template from read setting type in database instead of from this
           'note' => $standardNote
@@ -97,15 +97,6 @@ class BookingController extends BaseController
 
     public function index()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
         return View::make('/screens/booking/manage',array(
             'controller' => 'BookingController',
             'currentOnlineBookingState' => $this->currentOnlineBookingState()
@@ -114,16 +105,6 @@ class BookingController extends BaseController
 
     public function settings()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $bookingSettings = CS_API::getSettingsFor('Booking');
         if ($bookingSettings === null)
         {
@@ -180,12 +161,21 @@ class BookingController extends BaseController
             'sv_SE' => 'Svenska'
         );
 
+				// Massage API country list into Laravel's expected format
+				$apiCountries = CS_API::getCountries();
+				$apiCountries = is_array($apiCountries) ? $apiCountries : array('' => 'Unable to Load Countries');
+				$defaultPaymentCountries = array();
+				foreach($apiCountries as $country) {
+				    $defaultPaymentCountries[$country->{'ISO_3166-1_Alpha_2'}] = $country->Name;
+				}
+
         return View::make('/screens/booking/settings',
             array('controller' => 'BookingController',
                   'isChecked' => $bookingSettingsCheckedData,
                   'bookingSettings' => $bookingSettingsData,
                   'currentOnlineBookingState' => $this->currentOnlineBookingState(),
                   'supportedCurrencies' => $supportedCurrencies,
+									'defaultPaymentCountries' => $defaultPaymentCountries,
                   'supportedNumberLocales' => $supportedNumberLocales,
                   'background_image_url' => is_file($this->image_paths['background.jpg']) ? $this->image_urls['background.jpg'] : null,
                   'header_image_url' => is_file($this->image_paths['header.jpg']) ? $this->image_urls['header.jpg'] : null,
@@ -322,6 +312,9 @@ class BookingController extends BaseController
         $newSettings['currency'] = isset($input['currency']) ? $input['currency'] : 'USD';
         $newSettings['numberFormattingLocale'] = isset($input['numberFormattingLocale']) ? $input['numberFormattingLocale'] : 'en_US';
         $newSettings['maxRacersForDropdown'] = isset($input['maxRacersForDropdown']) ? $input['maxRacersForDropdown'] : 50;
+        $newSettings['brokerFieldEnabled'] = isset($input['brokerFieldEnabled']) ? $input['brokerFieldEnabled'] : 0;
+        $newSettings['brokerSourceInURLEnabled'] = isset($input['brokerSourceInURLEnabled']) ? $input['brokerSourceInURLEnabled'] : 0;
+				$newSettings['defaultPaymentCountry'] = isset($input['defaultPaymentCountry']) ? $input['defaultPaymentCountry'] : '';
 
         if (isset($input['reservationTimeout']))
         {
@@ -349,6 +342,15 @@ class BookingController extends BaseController
             }
         }
 
+        //Only send settings that already exist in the API due to migrations having already been run
+        foreach($newSettings as $newSettingName => $newSettingValue)
+        {
+            if (!isset($currentSettings[$newSettingName]))
+            {
+                unset($newSettings[$newSettingName]); //Remove any settings about to be sent that the API doesn't know about yet
+            }
+        }
+
         $result = CS_API::updateSettingsFor('Booking',$newSettings);
 
         if ($result === false)
@@ -365,14 +367,6 @@ class BookingController extends BaseController
 
     public function updateImage()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         // Build the input for our validation
         $input = array('image' => Input::file('image'));
         $filename = Input::get('filename');
@@ -410,14 +404,6 @@ class BookingController extends BaseController
 
     public function updateFile()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         // Build the input for our validation
         $input = array('customfile' => Input::file('customfile'));
         $filename = Input::get('filename');
@@ -467,16 +453,6 @@ class BookingController extends BaseController
 
     public function payments()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $supportedPaymentTypes = CS_API::getSupportedPaymentTypes();
         if ($supportedPaymentTypes === null)
         {
@@ -632,16 +608,6 @@ class BookingController extends BaseController
 
     public function translations()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $supportedCultures = array(
             'en-US' => 'English (US)',
             'en-GB' => 'English (UK)',
@@ -916,16 +882,6 @@ class BookingController extends BaseController
 
     public function templates()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $bookingTemplates = CS_API::getJSON('settings', array('namespace' => 'booking'))->settings;
 
         // merge this controller's booking template settings with booking template values from API
@@ -994,5 +950,23 @@ class BookingController extends BaseController
       }
 
       return Redirect::to('booking/templates')->with( array('message' => 'Template(s) updated successfully!'));
+    }
+
+    public function logs()
+    {
+      return View::make('/screens/booking/logs', array(
+        'controller' => 'BookingController'
+      ));
+    }
+
+    public function data()
+    {
+      $params = Input::get();
+      $params['model'] = 'logs';
+      $params['where']['terminal'] = 'Club Speed Online Booking'; //'Facebook';//
+
+      $data = CS_API::getDataTableData($params);
+
+      return $data;
     }
 }

@@ -20,50 +20,50 @@ class LoginController extends BaseController
         $username = $input['username'];
         $password = $input['password'];
 
-        $loginWasSuccessful = CS_API::login($username,$password);
-        $loginCallSucceeded = ($loginWasSuccessful !== null);
+        $loginResult = CS_API::login($username, $password);
 
-        if ($loginCallSucceeded)
-        {
-            if ($loginWasSuccessful)
-            {
-                Session::put('authenticated',true);
-                Session::put('user',$username);
+				if($loginResult['result'] === true) {
+						Session::put('authenticated', true);
+						Session::put('user', $loginResult['user']->username);
+						
+						$userPermissions = CS_API::getUserTasks(array(
+								'where' => array(
+										'userId' => array('$eq' => $loginResult['user']->userId))
+										)
+								);
 
-                $session = Session::all();
-                if (isset($session["redirectTo"]))
-                {
-                    Session::forget("redirectTo");
-                    return Redirect::to($session["redirectTo"]);
-                }
-                return Redirect::to('/dashboard');
-            }
-            else //If the login attempt failed
-            {
-                $messages = new Illuminate\Support\MessageBag;
-                $messages->add('errors', "Incorrect username or password.");
+						$permissions = array('allowedTasks' => array(), 'allowedRoles' => array());
+						foreach($userPermissions as $task) {
+								if(!empty($task->taskDescription)) $permissions['allowedTasks'][str_replace(':', '|', $task->taskDescription)] = true;  // Laravel uses a colon (:) internally to specify filter params
+								if(!empty($task->roleId)) $permissions['allowedRoles'][$task->roleId] = true;
+						}
+						Session::put('permissions', $permissions);
 
-                //Redirect to the previous page with an appropriate error message
-                return Redirect::to('/login')->withErrors($messages)->withInput();
-            }
-        }
-        else //If the login call itself failed
-        {
-            //TODO: Change this to redirect to a Disconnected page, like other recent Laravel projects
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "There was a problem with your login. Please try again later.");
+						// Redirect back to intended location (if set)
+						$session = Session::all();
+						if (isset($session["redirectTo"]))
+						{
+								Session::forget("redirectTo");
+								return Redirect::to($session["redirectTo"]);
+						}
+						return Redirect::to('/dashboard');
+				} else {
+						$messages = new Illuminate\Support\MessageBag;
+						$messages->add('errors', $loginResult['message']);
 
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
+						//Redirect to the previous page with an appropriate error message
+						return Redirect::to('/login')->withErrors($messages)->withInput();
+				}
         return View::make('/login');
     }
 
     public function logout()
     {
-        Session::flush();
+        $username = Session::get('user');
+				Session::flush();
         Session::regenerate();
-        return Redirect::to('/login');
+        CS_API::log("INFO :: Successful logout for \"{$username}\"", 'Club Speed Admin Panel');
+				return Redirect::to('/login');
     }
 
     //TODO: I don't think this pattern works in Laravel. The redirect may never happen as it needs to chain up.

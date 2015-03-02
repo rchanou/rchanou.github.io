@@ -6,31 +6,14 @@ class RegistrationController extends BaseController
 {
     public function settings()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $registrationSettings = CS_API::getSettingsFor('Registration');
 
         $mainEngineSettings = new stdClass();
         $mainEngineSettings->settings = new stdClass();
-        $mainEngineSettingNames = array('Reg_EnableFacebook', 'Reg_CaptureProfilePic', 'AgeNeedParentWaiver', 'AgeAllowOnlineReg', 'FacebookPageURL', 'enableWaiverStep');
+        $mainEngineSettingNames = array('Reg_EnableFacebook', 'Reg_CaptureProfilePic', 'AgeNeedParentWaiver', 'AgeAllowOnlineReg', 'FacebookPageURL');
         foreach($mainEngineSettingNames as $settingName){
-          $result = CS_API::getJSON("settings/get", array('group' => 'MainEngine', 'setting' => $settingName));
-          if (count($result->settings) > 0){
-            $mainEngineSettings->settings->$settingName = $result->settings->$settingName;
-          } else {
-            $mainEngineSettings->settings->$settingName = (object)array(
-              'SettingName' => $settingName,
-              'SettingValue' => null
-            );
-          }
+          $setting = CS_API::getJSON("settings/get", array('group' => 'MainEngine', 'setting' => $settingName))->settings->$settingName;
+          $mainEngineSettings->settings->$settingName = $setting;
         }
 
         $reg1Settings = CS_API::getSettingsFor('Registration1');
@@ -73,7 +56,7 @@ class RegistrationController extends BaseController
           array('shownId' => 'CfgRegZipShow', 'requiredId' => 'CfgRegZipReq', 'label' => 'Zip'),
           array('shownId' => 'CfgRegCntryShow', 'requiredId' => 'CfgRegCntryReq', 'label' => 'Country'),
           array('shownId' => 'CfgRegRcrNameShow', 'requiredId' => 'CfgRegRcrNameReq', 'label' => 'Racer Name'),
-          array('shownId' => 'CfgRegSrcShow', 'requiredId' => 'CfgRegSrcReq', 'label' => 'Source'),
+          array('shownId' => 'CfgRegSrcShow', 'requiredId' => 'CfgRegSrcReq', 'label' => 'How did you hear about us?'),
           array('shownId' => 'CfgRegDrvrLicShow', 'requiredId' => 'CfgRegDrvrLicReq', 'label' => 'Driver\'s License', 'secondColumn' => true),
           array('shownId' => 'CfgRegPhoneShow', 'requiredId' => 'CfgRegPhoneReq', 'label' => 'Phone', 'secondColumn' => true),
           array('shownId' => 'CfgRegEmailShow', 'requiredId' => 'CfgRegEmailReq', 'label' => 'E-mail', 'secondColumn' => true),

@@ -105,6 +105,31 @@ Reports
               </div>
           </div>
           @endif
+          
+					@if(@$user == 'support')
+          <div class="col-sm-12">
+              <div class="widget-box">
+                  <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-cog"></i>
+                </span>
+                      <h5>Logs</h5>
+                  </div>
+                  <div class="widget-content">
+                      <div class="row">
+                          <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                              <a href="{{URL::to('reports/logs')}}">
+                                  <i class="fa fa-list fa-4x"></i><p/>
+                                  <strong>All Log Entries</strong><p/>
+                              </a>
+                              <em>View and search all log entries from Club Speed</em>
+
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          @endif
 
       </div>
     </div>

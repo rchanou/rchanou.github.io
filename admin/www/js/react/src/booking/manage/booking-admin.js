@@ -113,6 +113,8 @@ var Popup = require('../../components/popup.js');
 
 var ICheck = require('../../components/icheck.js')
 
+var TrackSelect = require('../../components/track-select');
+
 var IRadio = React.createClass({
 	mixins: [EventFunnel],
 	render(){
@@ -174,48 +176,6 @@ var IRadioGroup = React.createClass({
 	},
 	handleRadioChange(e, optionProps, state){
 		this.toFunnel(e, optionProps);
-	}
-});
-
-var LinkedSelect = React.createClass({
-	mixins: [EventFunnel],
-	getDefaultProps(){
-		return {
-			url: '',
-			list: [],
-			listProperty: 'products',
-			valueProperty: 'productId',
-			labelProperty: 'description'
-		};
-	},
-	getInitialState(){
-		return {
-			list: this.props.list
-		}
-	},
-	render(){
-		var props = this.props;
-		// must be wrapped in div to avoid wonky formatting, with BS3 at least
-		return <Select onFunnelEvent={this.toFunnel} selectedId={props.selectedId} placeholder={props.placeholder}
-			className={this.props.className} style={this.props.style}
-			list={_.map(this.state.list, item => ({ value: item[props.valueProperty], label: item[props.labelProperty]}))} />;
-	},
-	componentWillMount(){
-		if (this.props.url){
-			$.get(this.props.url, body => {
-				this.setState({ list: _.sortBy(body[this.props.listProperty], this.props.labelProperty) });
-			});
-		}
-	}
-});
-
-var TrackSelect = React.createClass({
-	mixins: [EventFunnel],
-	render(){
-		return <LinkedSelect url={config.apiURL + 'tracks/index.json?key=' + config.apiKey}
-			listProperty='tracks' valueProperty='id' labelProperty='name'
-			className={this.props.className} style={this.props.style}
-			selectedId={this.props.selectedId} onFunnelEvent={this.toFunnel} />;
 	}
 });
 
@@ -289,7 +249,7 @@ module.exports = React.createClass({
 			apiKey: 'cs-dev',
 			privateKey: 'cs-dev'
 		};
-		if (window && window.location && (window.location.hostname === '192.168.111.165' || window.location.hostname === 'localhost')) {
+		if (window && window.location && (window.location.hostname === '192.168.111.29' || window.location.hostname === 'localhost')) {
 			config.apiURL = 'https://vm-122.clubspeedtiming.com/api/index.php';
 		} else {
 			console.log = function(){};
@@ -461,7 +421,7 @@ module.exports = React.createClass({
 						Track
 					</label>
 					<div>
-						<TrackSelect className='form-control' style={{ width: '100%' }} onFunnelEvent={this.handleTrackSelectEvent} />
+						<TrackSelect config={this.props.config} className='form-control' style={{ width: '100%' }} onFunnelEvent={this.handleTrackSelectEvent} />
 					</div>
 				</div>
 
@@ -607,7 +567,7 @@ module.exports = React.createClass({
 					</label>
 					<div className="col-xs-3">
 						<IRadioGroup onFunnelEvent={this.handleRadioChange} selected={this.state.newIsPublic}
-									list={[ { label: 'Yes', value: true }, { label: 'No', value: false } ]} />
+							list={[ { label: 'Yes', value: true }, { label: 'No', value: false } ]} />
 						<span className='text-info'>
 							{this.state.selectedBookingIds.length > 1 && this.state.newIsPublic == null  && !this.areOnlyNewBookingsSelected()
 								&& '(multiple)'}

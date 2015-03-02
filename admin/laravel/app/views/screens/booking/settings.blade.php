@@ -25,12 +25,10 @@ Online Bookings Settings
 
     <div class="container-fluid">
       <div class="row">
-
-
           <div class="col-xs-12">
             @if ($currentOnlineBookingState == 'disabled_manually')
             <div class="alert alert-warning">
-                <p>(Note: Online Booking is <strong>current disabled</strong> because the "Enable Online Booking" setting is not checked.</p>
+                <p>(Note: Online Booking is <strong>currently disabled</strong> because the "Enable Online Booking" setting is not checked.</p>
                 To access Online Booking while it's disabled (for testing), <a href="{{'https://' . $_SERVER['HTTP_HOST'] . '/booking/step1?key=' . md5(Config::get('config.privateKey'))}}">use this link</a>.
             </div>
             @endif
@@ -414,6 +412,15 @@ Online Bookings Settings
                                 </div>
                             </div>
                             @endif
+                          @if(isset($isChecked['brokerFieldEnabled']))
+                              <div class="form-group">
+                                  <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Broker Name Field</label>
+                                  <div class="col-sm-8 col-md-8 col-lg-8">
+                                      <input type="checkbox" id="brokerFieldEnabled" name="brokerFieldEnabled" {{$isChecked['brokerFieldEnabled']}}>
+                                      <span class="help-block text-left">If checked, customers may enter a broker name (affiliate code) into the cart during checkout.</span>
+                                  </div>
+                              </div>
+                          @endif
                       </div>
                       <div class="col-sm-6">
                           @if(isset($isChecked['showTermsAndConditions']))
@@ -536,6 +543,35 @@ Online Bookings Settings
                                 </div>
                             </div>
                             @endif
+                            @if(isset($bookingSettings['defaultPaymentCountry']))
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Default Payment Country</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    {{Form::select('defaultPaymentCountry', $defaultPaymentCountries, $bookingSettings['defaultPaymentCountry'])}}
+                                    <span class="help-block text-left">
+                                    The default billing country to use during checkout.
+                                    </span>
+                                </div>
+                            </div>
+                            @else
+                            <div class="form-group">
+                                <label class="col-sm-4 col-md-4 col-lg-4 control-label">Default Payment Country</label>
+                                <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <span class="help-block text-left" style="color: #c20000">
+                                    This setting is not currently supported by your server.
+                                    </span>
+                                </div>
+                            </div>
+                            @endif
+                              @if(isset($isChecked['brokerSourceInURLEnabled']))
+                                  <div class="form-group">
+                                      <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Broker Name Via URL</label>
+                                      <div class="col-sm-8 col-md-8 col-lg-8">
+                                          <input type="checkbox" id="brokerSourceInURLEnabled" name="brokerSourceInURLEnabled" {{$isChecked['brokerSourceInURLEnabled']}}>
+                                          <span class="help-block text-left">If checked, the broker name (affiliate code) may be inserted via a URL parameter 'source' upon entry to any portion of the website.</span>
+                                      </div>
+                                  </div>
+                              @endif
                       </div>
                       <div class="col-sm-12">
                            <div class="form-actions" style="margin-bottom: 10px;">
@@ -546,13 +582,11 @@ Online Bookings Settings
               </div>
             </div>
           </div>
-
-
      </div>
 
     {{ Form::close() }}
 
-     <div class="row">
+      <div class="row">
         <div class="col-xs-12">
             <div class="widget-box">
               <div class="widget-title">
@@ -583,9 +617,9 @@ Online Bookings Settings
               </div>
             </div>
         </div>
-     </div>
+      </div>
 
-     <div class="row">
+      <div class="row">
         <div class="col-xs-12">
             <div class="widget-box">
               <div class="widget-title">
@@ -616,9 +650,9 @@ Online Bookings Settings
               </div>
             </div>
         </div>
-     </div>
+      </div>
 
-     <div class="row">
+      <div class="row">
         <div class="col-xs-12">
             <div class="widget-box">
               <div class="widget-title">
@@ -650,9 +684,9 @@ Online Bookings Settings
               </div>
             </div>
         </div>
-     </div>
+      </div>
 
-     <div class="row">
+      <div class="row">
         <div class="col-xs-12">
             <div class="widget-box">
               <div class="widget-title">
@@ -684,9 +718,7 @@ Online Bookings Settings
               </div>
             </div>
         </div>
-     </div>
-
-
+      </div>
     </div>
 
 @stop
@@ -708,139 +740,139 @@ Online Bookings Settings
         $('#racerNameShown').on('ifUnchecked',function (event) {
             $('#racerNameRequired').iCheck('uncheck');
         });
-    
+
         $('#genderShown').on('ifUnchecked',function (event) {
             $('#genderRequired').iCheck('uncheck');
         });
-    
+
         $('#birthDateShown').on('ifUnchecked',function (event) {
             $('#birthDateRequired').iCheck('uncheck');
         });
-    
+
         $('#emailShown').on('ifUnchecked',function (event) {
             $('#emailRequired').iCheck('uncheck');
         });
-    
+
         $('#cellShown').on('ifUnchecked',function (event) {
             $('#cellRequired').iCheck('uncheck');
         });
-    
+
         $('#companyShown').on('ifUnchecked',function (event) {
             $('#companyRequired').iCheck('uncheck');
         });
-    
+
         $('#licenseNumberShown').on('ifUnchecked',function (event) {
             $('#licenseNumberRequired').iCheck('uncheck');
         });
-    
+
         $('#whereDidYouHearAboutUsShown').on('ifUnchecked',function (event) {
             $('#whereDidYouHearAboutUsRequired').iCheck('uncheck');
         });
-    
+
         $('#countryShown').on('ifUnchecked',function (event) {
             $('#countryRequired').iCheck('uncheck');
         });
-    
+
         $('#addressShown').on('ifUnchecked',function (event) {
             $('#addressRequired').iCheck('uncheck');
         });
-    
+
         $('#cityShown').on('ifUnchecked',function (event) {
             $('#cityRequired').iCheck('uncheck');
         });
-    
+
         $('#stateShown').on('ifUnchecked',function (event) {
             $('#stateRequired').iCheck('uncheck');
         });
-    
+
         $('#zipShown').on('ifUnchecked',function (event) {
             $('#zipRequired').iCheck('uncheck');
         });
-    
+
         $('#custom1Shown').on('ifUnchecked',function (event) {
             $('#custom1Required').iCheck('uncheck');
         });
-    
+
         $('#custom2Shown').on('ifUnchecked',function (event) {
             $('#custom2Required').iCheck('uncheck');
         });
-        
+
         $('#custom3Shown').on('ifUnchecked',function (event) {
             $('#custom3Required').iCheck('uncheck');
         });
-                
+
         $('#custom4Shown').on('ifUnchecked',function (event) {
             $('#custom4Required').iCheck('uncheck');
         });
-                      
+
         //If a customer field is required, make sure it is shown
         $('#racerNameRequired').on('ifChecked',function (event) {
             $('#racerNameShown').iCheck('check');
         });
-    
+
         $('#genderRequired').on('ifChecked',function (event) {
             $('#genderShown').iCheck('check');
         });
-    
+
         $('#birthDateRequired').on('ifChecked',function (event) {
             $('#birthDateShown').iCheck('check');
         });
-    
+
         $('#emailRequired').on('ifChecked',function (event) {
             $('#emailShown').iCheck('check');
         });
-    
+
         $('#cellRequired').on('ifChecked',function (event) {
             $('#cellShown').iCheck('check');
         });
-    
+
         $('#companyRequired').on('ifChecked',function (event) {
             $('#companyShown').iCheck('check');
         });
-    
+
         $('#licenseNumberRequired').on('ifChecked',function (event) {
             $('#licenseNumberShown').iCheck('check');
         });
-    
+
         $('#whereDidYouHearAboutUsRequired').on('ifChecked',function (event) {
             $('#whereDidYouHearAboutUsShown').iCheck('check');
         });
-    
+
         $('#countryRequired').on('ifChecked',function (event) {
             $('#countryShown').iCheck('check');
         });
-    
+
         $('#addressRequired').on('ifChecked',function (event) {
             $('#addressShown').iCheck('check');
         });
-    
+
         $('#cityRequired').on('ifChecked',function (event) {
             $('#cityShown').iCheck('check');
         });
-    
+
         $('#stateRequired').on('ifChecked',function (event) {
             $('#stateShown').iCheck('check');
         });
-    
+
         $('#zipRequired').on('ifChecked',function (event) {
             $('#zipShown').iCheck('check');
         });
-    
+
         $('#custom1Required').on('ifChecked',function (event) {
             $('#custom1Shown').iCheck('check');
         });
-    
+
         $('#custom2Required').on('ifChecked',function (event) {
             $('#custom2Shown').iCheck('check');
         });
-        
+
         $('#custom3Required').on('ifChecked',function (event) {
             $('#custom3Shown').iCheck('check');
         });
-                
+
         $('#custom4Required').on('ifChecked',function (event) {
             $('#custom4Shown').iCheck('check');
-        }); 
+        });
     });
 
 </script>

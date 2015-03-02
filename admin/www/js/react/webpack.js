@@ -1,15 +1,23 @@
 /*
  USAGE: in the command line, in this file's folder, enter "node webpack"
         to deploy, enter "node webpack deploy"
-        to build React component demos, enter "node webpack demo"
+        to build the standalone React component test demos, enter "node webpack demo"
+        to build a specific project, enter it's position in the MAIN_PATHS array as the fourth argument
+          e.g. "node webpack _ 2" to do a dev build of 'booking/manage'
+          or   "node webpack deploy 1" to do a build and deploy of 'mobileApp/menuItems'
  */
 
 var webpack = require('webpack');
 var _ = require('lodash');
-var fs = require('fs-extra');
 
 
-var MAIN_PATHS = ['speedScreen/manage', 'mobileApp/menuItems', 'booking/manage'];
+var MAIN_PATHS = [
+  'speedScreen/manage',
+  'mobileApp/menuItems',
+  'booking/manage',
+  'speedText/logTable',
+  'facebook/logTable'
+];
 
 var DEFAULT_MODULE = {
   loaders: [
@@ -24,14 +32,16 @@ var DEFAULT_MODULE = {
     {
       test: /^(?!.*(bower_components|node_modules))+.+\.js$/,
       loader: 'jsx-loader?harmony'
-    }
+    }/*,
+    {
+      test: /^.*react-magic-move.*.js$/,
+      loader: 'jsx-loader?harmony'
+    }*/
   ]
 };
 
-
 //buildType determined from third command line "word" (first two are "node webpack")
-var buildType = process.argv.slice(2)[0];
-
+var buildType = process.argv[2];
 
 if (buildType === 'demo'){
   fs.readdir('demo', function(err, files){
@@ -67,7 +77,20 @@ if (buildType === 'demo'){
 }
 
 
-MAIN_PATHS.forEach(function(path){
+/*
+  Description of the build process for each project in MAIN_PATHS:
+    First, an unminified dev version is built. This should take less than 2 seconds, allowing for a fast feedback loop for local testing.
+    Next, a minified dev version and, if you entered "node webpack deploy", a minified release version, are built and deployed to their respective output paths.
+    Let the minification step complete before committing any "main.min.js" files, because it's not actually minified before then.
+*/
+
+
+MAIN_PATHS.forEach(function(path, i){
+  if (typeof process.argv[3] !== 'undefined' && ~~process.argv[3] !== i){
+    return;
+  }
+  console.log('Building ' + path + '...');
+
   var sharedConfig = {
     entry: './src/' + path + '/main.js',
     output: {
@@ -89,17 +112,24 @@ MAIN_PATHS.forEach(function(path){
     }
   );
 
+  var releaseModule = _.cloneDeep(DEFAULT_MODULE);
+  releaseModule.loaders.push({
+    test: /(.*)\.js/,
+    loader: 'strip-loader?strip[]=assert,strip[]=console.assert,strip[]=console.debug,strip[]=console.dir,strip[]=console.log,strip[]=console.table,strip[]=console.warn'
+  });
   var releaseConfig = _.extend(
     _.cloneDeep(sharedConfig),
     {
       output: {
         filename: './../../../../clubspeedapps/admin/www/js/react/build/' + path + '/main.min.js'
       },
+      module: releaseModule,
       plugins: [
         new webpack.optimize.UglifyJsPlugin()
       ]
     }
   );
+
 
   // initialize webpack instances
 
@@ -113,14 +143,22 @@ MAIN_PATHS.forEach(function(path){
   switch(buildType){
     case 'deploy':
       devCompiler.watch(200, function(err, stats){
-        var seconds = (stats.endTime - stats.startTime) / 1000;
-        console.log('Dev build done: ' + seconds + 's, at ' + new Date() + ' for ' + path);
-        console.log('Started minified builds...');
+        if (stats){
+          var seconds = (stats.endTime - stats.startTime) / 1000;
+          console.log('Dev build done: ' + seconds + 's, at ' + new Date() + ' for ' + path);
+          console.log('Started minified builds...');
+        } else {
+          console.log('Dev build completed.');
+        }
 
-        if (stats.hasErrors()){
+        if (stats && stats.hasErrors()){
           console.log('ERROR!', err, stats.toJson().errors);
         } else {
           minifiedCompiler.run(function(err, stats){
+            if (!stats){
+              console.log('Min dev build completed.');
+            }
+
             if (stats.hasErrors()){
               console.log('DEV MINIFIER ERROR', stats.toJson().errors);
               return;
@@ -128,23 +166,20 @@ MAIN_PATHS.forEach(function(path){
 
             var seconds = (stats.endTime - stats.startTime) / 1000;
             console.log('Min dev build done: ' + seconds + 's, at ' + new Date() + ' for ' + path);
+          });
 
-            fs.copy(
-              'build/' + path + '/main.min.js',
-              '../../../../clubspeedapps/admin/www/js/react/build/' + path + '/main.min.js',
-              function(err){
-                if (err) return console.err('*ERROR DEPLOYING*', err);
-                console.log(path + ' deployed to clubspeedapps!');
-              }
-            );
+          releaseCompiler.run(function(err, stats){
+            if (!stats){
+              console.log('Release build completed.');
+            }
 
-            fs.copy(
-              'build/' + path + '/main.min.js.map',
-              '../../../../clubspeedapps/admin/www/js/react/build/' + path + '/main.min.js.map',
-              function(err){
-                if (err) return console.err('Error deploying source map: ', err);
-              }
-            );
+            if (stats.hasErrors()){
+              console.log('RELEASE MINIFIER ERROR', stats.toJson().errors);
+              return;
+            }
+
+            var seconds = (stats.endTime - stats.startTime) / 1000;
+            console.log('Release build done: ' + seconds + 's, at ' + new Date() + ' for ' + path);
           });
         }
       });

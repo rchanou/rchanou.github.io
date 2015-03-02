@@ -96,6 +96,7 @@ class CS_API
                     'error' => $errorMessage);
             }
         }
+
         if ($response === null || !property_exists($response, 'code') || $response->code != 200)
         {
 
@@ -176,10 +177,39 @@ class CS_API
     {
         self::initialize();
 
-        $urlVars = array('username' => $username,
+				$ipAddress = $_SERVER['REMOTE_ADDR'];
+				if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)) {
+						$ipAddress = array_pop(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
+				}
+
+				// Check for maximum number of failed logins
+				$maxFailedLoginAttempts = 5;
+				$maxLoginAttemptTimeoutInMinutes = 5;
+				$numFailedLoginAttempts = 0;
+
+				$params = array(
+						'limit' => $maxFailedLoginAttempts,
+						'where' => array(
+							'message' => array('$like' => "ERROR :: Unsuccessful login for \"{$username}\"%"),
+							'date'    => array('$gte'  => date('Y-m-d\TH:i:s\Z', time() - ($maxLoginAttemptTimeoutInMinutes * 60))),
+							'terminalName' => array('$eq' => 'Club Speed Admin Panel')
+							)
+						);
+				$failedAttemptLogs = self::getLogs($params);
+
+				$numFailedLoginAttempts = count($failedAttemptLogs);
+				$attemptsRemaining = $maxFailedLoginAttempts - $numFailedLoginAttempts;
+
+				if($attemptsRemaining <= 0)
+				{
+						self::log("ERROR :: Unsuccessful login for \"{$username}\" from {$ipAddress}, maximum failed attempts of {$maxFailedLoginAttempts} reached. Account locked out for {$maxLoginAttemptTimeoutInMinutes} minutes.", 'Club Speed Admin Panel');
+						return array('result' => false, 'message' => "Account locked out. Maximum attempts reached for \"{$username}\", please try agan in {$maxLoginAttemptTimeoutInMinutes} minutes."); // Not totally accurate, a rolling timeout
+				}
+
+        // Attempt login
+				$urlVars = array('username' => $username,
             'password' => $password,
-            'is_admin' => 1,
-            'key' => self::$apiKey);
+            'key'      => self::$apiKey);
 
         $url = self::$apiURL . '/users/login.json?' . http_build_query($urlVars);
 
@@ -187,14 +217,22 @@ class CS_API
         $response = $result['response'];
         $error = $result['error'];
 
-        if ($response !== null && property_exists($response,'body') && property_exists($response->body,'valid'))
-        {
-            return $response->body->valid;
-        }
-        else
-        {
-            return null;
-        }
+				if(!empty($response) && property_exists($response->body, 'userId'))
+				{
+						self::log("INFO :: Successful login for \"{$username}\" from {$ipAddress}", 'Club Speed Admin Panel');
+						return array('result' => true, 'message' => "Successful login for \"{$username}\"", 'user' => $response->body);
+				} elseif(isset($error)) {
+						self::log("ERROR :: Unsuccessful login for \"{$username}\" from {$ipAddress}. Attempts remaining: {$attemptsRemaining}. API error given: {$error}", 'Club Speed Admin Panel');
+						$attemptsMessage = ($attemptsRemaining === 1) ? "You have {$attemptsRemaining} attempt remaining." : "You have {$attemptsRemaining} attempts remaining.";
+						return array('result' => false, 'message' => "Incorrect username or password for \"{$username}\". {$attemptsMessage}");
+				} else {
+						return array('result' => false, 'message' => 'There was a problem contacting the Club Speed Server. Please try again later or contact support@clubspeed.com if the problem persists.');
+				}
+    }
+
+    public static function getSpeedScreenChannels(){
+      self::initialize();
+      return self::getJSON('speedscreenchannels');
     }
 
     public static function getListOfChannels()
@@ -485,6 +523,186 @@ class CS_API
         }
     }
 
+		public static function log($message, $terminal = 'Club Speed PHP API', $username = '')
+		{
+				self::initialize();
+
+        $url = self::$apiURL . '/logs?key=' . self::$privateKey;
+				$params = array(
+						'message'  => $message,
+						'terminal' => $terminal,
+						'username' => $username
+						);
+
+        return self::call($url, $params, 'POST');
+		}
+
+		public static function getUserTasks($params)
+		{
+				self::initialize();
+
+				$urlParams = array(
+					'limit'  => isset($params['limit'])  ? $params['limit']  : null,
+					'page'   => isset($params['page'])   ? $params['page']   : null,
+					'offset' => isset($params['offset']) ? $params['offset'] : null,
+					'where'  => isset($params['where'])  ? json_encode($params['where']) : null,
+					'order'  => isset($params['order'])  ? $params['order']  : null,
+					'select' => isset($params['select']) ? json_encode($params['select']) : null, // Could be array or CSV
+					'key'    => self::$privateKey
+					);
+
+				// Remove empty items
+				foreach($urlParams as $key => $value) {
+				    if(empty($value)) {
+				        unset($urlParams[$key]);
+				    }
+				}
+
+        $url = self::$apiURL . "/userTasks.json?" . http_build_query($urlParams);
+
+        $result = self::call($url);
+
+				return isset($result['error']) ? $result : $result['response']->body;
+		}
+
+		public static function getLogs($params)
+		{
+				/*
+				4. Find Logs
+				Verb: GET
+				Url: https://vm122.clubspeedtiming.com/api/index.php/logs?key=cs-dev&where={"terminal": "ClubSpeed PHP API", "message": {"$like": "ERROR%"}}&limit=3&offset=10&order=logsId DESC
+				Response Body:
+				[
+					{
+						"logsId": 15166,
+						"message": "ERROR :: Check #3667: CheckDetail #9107: Unable to clear WebAPI cache! Received code: 404",
+						"date": "2015-02-06T13:15:39",
+						"terminal": "ClubSpeed PHP API",
+						"username": null
+					},
+					{
+						"logsId": 15148,
+						"message": "ERROR :: Check #3666: CheckDetail #9106: Unable to clear WebAPI cache! Received code: 404",
+						"date": "2015-02-06T13:15:34",
+						"terminal": "ClubSpeed PHP API",
+						"username": null
+					}
+				]
+				Notes:
+				Biggest difference here is with the Url parameters.
+				1. limit -- optional, defaults to 100.
+				2. page -- optional, extension to set offset based on limit. use of offset will override page.
+				3. offset -- optional, defaults to 0.
+				4. where -- optional, must be parsable JSON, set of available options listed below, example above will provide records where terminal equals "ClubSpeed PHP API" and message is like "ERROR%".
+				5. order -- optional, typically defaults to :table_id ASC. In the case of logs, it actually defaults to :table_id DESC.
+
+				List of available where parameters, and what they map to. Technically, more are supported, but these should be the preferred items moving forward.
+
+				'$lt'         => '<'
+				'$lte'        => '<='
+				'$gt'         => '>'
+				'$gte'        => '>='
+				'$eq'         => '='
+				'$neq'        => '!='
+				'$is'         => 'IS' // only works with nulls
+				'$isnot'      => 'IS NOT' // only works with nulls
+				'$like'       => 'LIKE'
+				'$notlike'    => 'NOT LIKE'
+				'$lk'         => 'LIKE'
+				'$nlk'        => 'NOT LIKE'
+				'$in'         => 'IN'
+				'$has'        => 'LIKE' // special like extension, surrounds a string in % signs automatically
+				*/
+
+				// https://vm122.clubspeedtiming.com/api/index.php/logs?key=cs-dev&where={"terminal": "ClubSpeed PHP API", "message": {"$like": "ERROR%"}}&limit=3&offset=10&order=logsId DESC
+
+				self::initialize();
+
+				$urlParams = array(
+					'limit'  => isset($params['limit'])  ? $params['limit']  : null,
+					'page'   => isset($params['page'])   ? $params['page']   : null,
+					'offset' => isset($params['offset']) ? $params['offset'] : null,
+					'where'  => isset($params['where'])  ? json_encode($params['where']) : null, // {"terminal": "ClubSpeed PHP API", "message": {"$like": "ERROR%"}}
+					'order'  => isset($params['order'])  ? $params['order']  : null,
+					'key'    => self::$privateKey
+					);
+
+				// Remove empty items
+				foreach($urlParams as $key => $value) {
+				    if(empty($value)) {
+				        unset($urlParams[$key]);
+				    }
+				}
+
+        $url = self::$apiURL . "/logs.json?" . http_build_query($urlParams);
+
+        $result = self::call($url);
+
+				return isset($result['error']) ? $result : $result['response']->body;
+		}
+
+    public static function getDataTableData($params)
+    {
+        set_time_limit(66);
+
+				self::initialize();
+
+				// Handle searching
+				if(!empty($params['search']['value'])) $params['where']['message'] = array('$like' => '%' . $params['search']['value'] . '%');
+
+				// Handle sorting
+				$formattedOrder = array();
+				foreach($params['order'] as $key => $order) {
+						$direction = $order['dir'] == 'asc' ? 'ASC' : 'DESC';
+						$columnName = $params['columns'][$order['column']]['name'];
+						$formattedOrder[] = "{$columnName} {$direction}";
+				}
+				$formattedOrder = implode(',', $formattedOrder);
+
+				// Build params for API call
+				$urlParams = array(
+					'limit'  => isset($params['length']) && $params['length'] !== -1 ? $params['length']  : null,
+					'offset' => isset($params['start'])  ? $params['start'] : null,
+					'where'  => isset($params['where'])  ? json_encode($params['where']) : null,
+					'order'  => !empty($formattedOrder)  ? $formattedOrder  : null,
+					'key'    => self::$privateKey
+				);
+
+				// Remove empty items
+				foreach($urlParams as $key => $value) {
+				    if(empty($value)) {
+				        unset($urlParams[$key]);
+				    }
+				}
+
+        $terminalQuery = '';
+        if (isset($params['where']) && isset($params['where']['terminal']) && !empty($params['where']['terminal'])){
+          $terminalQuery = 'where=' . urlencode(json_encode(array('terminal' => $params['where']['terminal'])));
+        }
+
+        $recordsTotalPath = self::$apiURL . "/{$params['model']}/count?" . $terminalQuery . "&key=" . self::$privateKey;
+        $urlRecordsTotal = self::call($recordsTotalPath);
+        $urlData = self::call(self::$apiURL . "/{$params['model']}?" . http_build_query($urlParams));
+        $urlRecordsFiltered = self::call(self::$apiURL . "/{$params['model']}/count?" . $terminalQuery . "&key=" . http_build_query($urlParams));
+
+				$data = array();
+				foreach($urlData['response']->body as $key => $row) {
+					foreach($row as $item) {
+						$data[$key][] = $item;
+					}
+				}
+
+				$dataSet = array(
+					'draw' => $params['draw'],
+					'recordsTotal' => $urlRecordsTotal['response']->body,
+					'recordsFiltered' => $urlRecordsFiltered['response']->body,
+					'data' => $data
+					//'apiParams' => $urlParams // Debug
+				);
+				return $dataSet;
+
+		}
+
     public static function insertTranslationsBatch($newTranslations)
     {
         self::initialize();
@@ -592,5 +810,12 @@ class CS_API
         $result = self::getJSON("version/eurekas.json");
         $serverHasEurekas = ($result !== null);
         return $serverHasEurekas;
+    }
+
+		public static function getCountries($params = null)
+    {
+        self::initialize();
+        $result = self::getJSON("countries.json");
+        return $result;
     }
 }

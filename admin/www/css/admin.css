@@ -36,6 +36,10 @@
     display: none;
 }
 
+.translationsBox_scoreboard {
+    display: none;
+}
+
 .inline-dl dt, dd {
   display: block;
   float: left;

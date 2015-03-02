@@ -30,22 +30,46 @@ App::after(function($request, $response)
 | Authentication Filters
 |--------------------------------------------------------------------------
 |
-| The following filters are used to verify that the user of the current
-| session is logged into this application. The "basic" filter easily
-| integrates HTTP Basic authentication for quick, simple checking.
+| The following filter checks for an authenticated user and optionally
+| sets the return URL
 |
 */
 
 Route::filter('auth', function()
 {
-	if (Auth::guest()) return Redirect::guest('login');
+ 	$session = Session::all();
+	if (!(isset($session["authenticated"]) && $session["authenticated"]))
+	{
+			// Set error message
+			$messages = new Illuminate\Support\MessageBag;
+			$messages->add('errors', "You must login before viewing the admin panel.");
+			
+			// Set "redirectTo" so that we can return to the intended spot after logging in
+			Session::put('redirectTo', Request::path());
+
+			//Redirect to the login page with an appropriate error message
+			return Redirect::to('/login')->withErrors($messages)->withInput();
+	}
 });
 
-
-Route::filter('auth.basic', function()
+Route::filter('validatePermission', function($route, $request, $permissionRequired = null)
 {
-	return Auth::basic();
+		$permissions = Session::get('permissions');
+
+		// Must have the task allowed or a roleId of 1 (Administrator)
+		if(!array_key_exists($permissionRequired, $permissions['allowedTasks'])
+			&& !array_key_exists(1, $permissions['allowedRoles'])
+		)
+		{
+				// Set error message
+				$messages = new Illuminate\Support\MessageBag;
+				$messages->add('errors', "You do not have permission to access this portion of the Administration Panel.");
+			
+				//Redirect to the login page with an appropriate error message
+				return Redirect::to('/dashboard')->withErrors($messages);
+		}	
 });
+
 
 /*
 |--------------------------------------------------------------------------

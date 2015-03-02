@@ -10,8 +10,8 @@ class MobileAppController extends BaseController
     public $image_urls;
 
     public function __construct() {
-      //Image uploader data
-      if (getenv('SERVER_ADDR') == '192.168.111.165'){
+			//Image uploader data
+      if (getenv('SERVER_ADDR') == '192.168.111.205'){
         // Ronnie's debugging directory
         $this->image_directory = '\\\\192.168.111.122\\c$\\clubspeedapps\\assets\\MobileApp\\icons';
       } else {
@@ -55,30 +55,11 @@ class MobileAppController extends BaseController
 
     public function index()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
         return View::make('/screens/mobileApp/menuItems',array('controller' => 'MobileAppController'));
     }
 
     public function menuItems()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         return View::make('/screens/mobileApp/menuItems', array(
           'controller' => 'MobileAppController'
         ));
@@ -87,15 +68,6 @@ class MobileAppController extends BaseController
 
     public function settings()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $mobileSettings = CS_API::getSettingsFromNewTableFor('MobileApp');
         if ($mobileSettings === null)
         {
@@ -166,16 +138,6 @@ class MobileAppController extends BaseController
 
     public function templates()
     {
-        $session = Session::all();
-        if (!(isset($session["authenticated"]) && $session["authenticated"]))
-        {
-            $messages = new Illuminate\Support\MessageBag;
-            $messages->add('errors', "You must login before viewing the admin panel.");
-
-            //Redirect to the previous page with an appropriate error message
-            return Redirect::to('/login')->withErrors($messages)->withInput();
-        }
-
         $mobileAppTemplates = CS_API::getJSON('settings', array('namespace' => 'mobileApp'))->settings;
 
         // merge this controller's mobileApp template settings with mobileApp template values from API
@@ -248,14 +210,6 @@ class MobileAppController extends BaseController
 
     public function updateImage()
     {
-      $session = Session::all();
-      if (!(isset($session["authenticated"]) && $session["authenticated"]))
-      {
-        $messages = new Illuminate\Support\MessageBag;
-        $messages->add('errors', "You must login before viewing the admin panel.");
-        return Redirect::to('/login')->withErrors($messages)->withInput();
-      }
-
       // Build the input for our validation
       $input = array('image' => Input::file('image'));
       $filename = Input::get('filename');
