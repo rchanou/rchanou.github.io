@@ -43,8 +43,8 @@ class SpeedTextController extends BaseController
         {
             if($setting->name === 'providerOptions'){
               $providerOptions = json_decode($setting->value);
-              $settingsData['sid'] = $providerOptions->sid;
-              $settingsData['token'] = $providerOptions->token;
+              $settingsData['sid'] = isset($providerOptions->sid) ? $providerOptions->sid : "";
+              $settingsData['token'] = isset($providerOptions->token) ? $providerOptions->token : "";
               $settingsIds[$setting->name] = $setting->settingsId;
             } else if ($setting->name === 'from'){
               $from = json_decode($setting->value);
