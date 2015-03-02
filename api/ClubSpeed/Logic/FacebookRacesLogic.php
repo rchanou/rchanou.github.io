@@ -1,6 +1,8 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Utility\Arrays;
+use ClubSpeed\Utility\Convert;
 
 /**
  * The business logic class
@@ -25,9 +27,19 @@ class FacebookRacesLogic extends BaseReadOnlyLogic {
                 case 'all':
                     if (empty($uow->order))
                         $uow->order('Finish');
+                    if (!empty($uow->where)) {
+                        if (isset($uow->where['Finish'])) {
+                            $finish =& $uow->where['Finish'];
+                            if (is_array($finish) && Arrays::isAssociative($finish)) {
+                                foreach($finish as $key => $val)
+                                    $finish[$key] = Convert::toDateForServer($val);
+                            }
+                            else
+                                $finish = Convert::toDateForServer($val);
+                        }
+                    }
                     break;
             }
         });
-
     }
 }
