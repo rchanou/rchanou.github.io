@@ -3,6 +3,7 @@ var jf = require('jsonfile');
 var request = require('request');
 var util = require('util');
 var FB = require('fb');
+var hasPulledSettings = false;
 
 // Modify Stored Proc to be disabled: GetFB_Customer
 /*
@@ -28,8 +29,8 @@ INNER JOIN [Customers] ON FB_Customers_New.CustID=Customers.CustID
 // Handle database for last processed file
 var db = jf.readFileSync(config.databaseFilename, { throws: false });
 if(db === null) { // Handle first run
-	var d = new Date();
-	var now = d.getTime(); // Now, local time in milliseconds
+	var date = new Date();
+	var now = date.toISOString();
 	db = {
 		lastProcessedHeatFinishTime: now
 	};
@@ -37,32 +38,38 @@ if(db === null) { // Handle first run
 }
 log('Latest date processed ' + db.lastProcessedHeatFinishTime, 'DEBUG');
 
-processFB();
 getSettings();
-
+setTimeout(processFB, 10000); // Give the settings a moment to run on the first start
 
 function processFB() {
 
-	/*// Disabled during testing
+	// Do not run if we have not pulled settings yet.
+	if(!hasPulledSettings) {
+		log('Facebook app has not pulled configuraiton settings yet settings yet', 'INFO');
+		setTimeout(processFB, config.racePollingInterval);
+		return;
+	}
+
+	// ENSURE Facebook processing is enabled...
 	if(config.facebook.featureIsEnabled === false) {
-		log('Facebook Posting After Race feature is disabled', 'INFO');
+		log('Facebook Posting After Race feature is disabled (Club Speed support must enable)', 'INFO');
 		setTimeout(processFB, config.racePollingInterval);
 		return;
 	} else if(config.facebook.postingIsEnabled === false) {
-		log('Facebook Posting After Race posting is disabled', 'INFO');
+		log('Facebook Posting After Race posting is disabled (Must be enabled in Administration panel)', 'INFO');
 		setTimeout(processFB, config.racePollingInterval);
 		return;
-	}*/
+	}
 
 	// Build query string
-	var lastDateProcessedString = new Date(db.lastProcessedHeatFinishTime);
+	var lastDateProcessedString = db.lastProcessedHeatFinishTime;
 	var whereQuery = {
 		heatFinishTime: {
-			'$gt': toCSAPIFormat(lastDateProcessedString)
+			'$gt': lastDateProcessedString
 		}
 	};
 
-	var url = config.clubSpeedApiUrl + '/facebookRaces.js?where=' + JSON.stringify(whereQuery) + '&limit=' + config.recordsToProcess + '&key=' + config.clubSpeedApiKey;
+	var url = config.clubSpeedApiUrl + '/facebookRaces.js?where=' + JSON.stringify(whereQuery) + '&order=heatFinishTime&limit=' + config.recordsToProcess + '&key=' + config.clubSpeedApiKey;
 	log('Checking for Facebook postings to make at: ' + url);
 	
 	request({ url: url, json: true }, function (error, response, body) {
@@ -84,7 +91,7 @@ function processFB() {
 function postToFacebook(race) {
 	race.ordinalFinishPosition = ordinalInWord(race.finishPosition);
 
-// If Privacy4 is True Is a 1 or 0 // Convert data type? TODO
+	// TODO Do not post if Privacy4 is True or False? -- Not in result set yet
 
 	var fbPost = {
 		message: applyTemplate(config.facebook.message, race),
@@ -95,18 +102,21 @@ function postToFacebook(race) {
 		caption: applyTemplate(config.facebook.caption, race)
 		};
 	log('Would have posted this ' + util.inspect(fbPost) + ' for ' + util.inspect(race), 'DEBUG');
-	log('Would have posted for ' + race.customerId + ' for heat # ' + race.heatId + ' this ' + util.inspect(fbPost), 'INFO');
+	log('Would have posted for ' + race.customerId + ' for heat #' + race.heatId + ' this ' + util.inspect(fbPost), 'INFO');
 
-	// Save last processed time of this record
-	var currentFinishTime = new Date(race.heatFinishTime.replace('T', ' '));
-	log('*****Comparing ' + currentFinishTime.getTime() + ' to ' + db.lastProcessedHeatFinishTime, 'INFO');
-	if(currentFinishTime.getTime() >= db.lastProcessedHeatFinishTime) {		
-		// Update our last posted race
-		console.log('Updating last race to', currentFinishTime);
-		db.lastProcessedHeatFinishTime = currentFinishTime.getTime() + 1000;
-		jf.writeFileSync(config.databaseFilename, db);
-	}
-	
+	/**
+	 * KLUDGE ALERT:
+	 * Save last processed time of this record -- Have to increment by a second due to MSSQL DateTime rounding...
+	 * 2014-04-19T18:04:01.95 becomes 2014-04-19T18:04:02.95 (note 01 seconds to 02)
+	 * PHP API takes 2014-04-19T18:04:60.95 (note the "60" as valid)
+	 */
+	var secAndMsPortion = currentFinishTime.split(':')[2];
+	var msPortion = secAndMsPortion.split('.')[1] || '000';
+	var replacement = (('00' + (parseInt(secAndMsPortion.split('.')[0])+1).toString()).substr(-2) + '.' + msPortion);
+	db.lastProcessedHeatFinishTime = currentFinishTime.replace(secAndMsPortion, replacement);
+	log('Updating last race to ' + db.lastProcessedHeatFinishTime + ' from ' + currentFinishTime);
+	jf.writeFileSync(config.databaseFilename, db);
+
 	FB.setAccessToken(race.token);
 	/*FB.api('me/feed', 'post', fbPost, function (res) {
 		if(!res || res.error) {
@@ -118,8 +128,14 @@ function postToFacebook(race) {
 }
 
 function getSettings() {
+	if(config.clubSpeedApiUrl == '' || config.clubSpeedApiKey == '') {
+		setTimeout(getSettings, config.settingPollingInterval);
+		log('No Club Speed API URL or Private Key Set in config.js', 'ERROR');
+		return;
+	}
+
 	var url = config.clubSpeedApiUrl + '/settings.json?namespace=FacebookAfterRace&key=' + config.clubSpeedApiKey;
-	log('Getting settings from: ' + url, 'DEBUG');
+	log('Getting settings from: ' + url, hasPulledSettings ? 'DEBUG' : 'INFO');
 	log('Existing settings (prior to updating): ' + util.inspect(config), 'DEBUG');
 	
 	request({ url: url, json: true }, function (error, response, body) {
@@ -128,6 +144,7 @@ function getSettings() {
 				config.facebook[setting.name] = castValueToType(setting.value, setting.type);
 			});
 			log('Settings changed to: ' + util.inspect(config), 'DEBUG');
+			hasPulledSettings = true;
 			
 		} else if(error) {
 			log(error, 'ERROR');
@@ -142,16 +159,6 @@ function getSettings() {
 /**
  * Helper functions
  */
-
-function twoDigits(d) {
-    if(0 <= d && d < 10) return "0" + d.toString();
-    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
-    return d.toString();
-}
-
-function toCSAPIFormat(date) {
-    return date.getFullYear() + "-" + twoDigits(1 + date.getMonth()) + "-" + twoDigits(date.getDate()) + "T" + twoDigits(date.getHours()) + ":" + twoDigits(date.getMinutes()) + ":" + twoDigits(date.getSeconds() + "." + date.getMilliseconds());
-};
 
 function applyTemplate(str, placeholders) {
 	for(var placeholder in placeholders) {
