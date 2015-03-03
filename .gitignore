@@ -47,3 +47,5 @@ booking/www/web.config.bak
 cs-registration/www/web.config.bak
 assets/
 cs-mobilewebapp/js/config.js
+facebook/config.js
+facebook/node_modules
