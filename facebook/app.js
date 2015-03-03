@@ -110,6 +110,7 @@ function postToFacebook(race) {
 	 * 2014-04-19T18:04:01.95 becomes 2014-04-19T18:04:02.95 (note 01 seconds to 02)
 	 * PHP API takes 2014-04-19T18:04:60.95 (note the "60" as valid)
 	 */
+	var currentFinishTime = race.heatFinishTime;
 	var secAndMsPortion = currentFinishTime.split(':')[2];
 	var msPortion = secAndMsPortion.split('.')[1] || '000';
 	var replacement = (('00' + (parseInt(secAndMsPortion.split('.')[0])+1).toString()).substr(-2) + '.' + msPortion);
