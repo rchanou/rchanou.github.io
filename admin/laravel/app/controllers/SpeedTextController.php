@@ -101,9 +101,10 @@ class SpeedTextController extends BaseController
           echo $json;
         }
 
+				$newSettings['cutoffHour'] = isset($input['cutoffHour']) ? $input['cutoffHour'] : 4;
         $newSettings['isEnabled'] = isset($input['isEnabled']) ? 1 : 0;
         $newSettings['textingIsEnabled'] = isset($input['textingIsEnabled']) ? 1 : 0;
-        $newSettings['heatsPriorToSend'] = isset($input['heatsPriorToSend']) ? $input['heatsPriorToSend'] : 0;
+        $newSettings['heatsPriorToSend'] = isset($input['heatsPriorToSend']) ? $input['heatsPriorToSend'] : 3;
         $newSettings['message'] = isset($input['message']) ? $input['message'] : '';
         //End formatting
 

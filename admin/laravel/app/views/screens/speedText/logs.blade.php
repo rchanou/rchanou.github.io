@@ -1,7 +1,7 @@
 @extends('master')
 
 @section('title')
-  Speed Text Logs
+  SpeedText Logs
 @stop
 
 @section('css_includes')
@@ -16,8 +16,8 @@
 
 @section('breadcrumb')
   <a href="{{URL::to('dashboard')}}" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
-  <a href="#">Facebook</a>
-  <a href="#" class="current">Speed Text Logs</a>
+  <a href="#">SpeedText</a>
+  <a href="#" class="current">SpeedText Logs</a>
 @stop
 
 @section('content')
