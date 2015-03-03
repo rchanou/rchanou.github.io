@@ -104,6 +104,7 @@ class BasePayment {
         $check = $this->logic->checks->get($checkId);
         $check = $check[0]; // re-get the check record after the applyCheckTotal stored procedure is called
         $checkTotals = $this->refresh($checkId);
+        $response = null;
 
         // what should the order of events be?
         // 1. get check total
@@ -167,20 +168,22 @@ class BasePayment {
                         , 'clientIp'             => $this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
                         , 'session'              => Tokens::generate()
                     );
-
                     $response = $callback($options); // the actual omnipay call
+                }
+                catch(\Exception $e) {
+                    // note that sometimes omnipay can throw exceptions, so we need to catch and handle those,
+                    // as well as checking for a non-successful, non-redirect response which will not throw exceptions.
+                    // for example, an invalid card number structure
+                    return $this->handleFailure($check->CheckID, $e->getMessage());
+                }
 
+                if (isset($response) && !empty($response)) {
                     if ($response->isSuccessful())
                         return $this->handleSuccess($check->CheckID, $params, $response);
                     else if ($response->isRedirect())
                         return $this->handleRedirect($check, $response);
                     else
                         return $this->handleFailure($check->CheckID, $response->getMessage());
-                }
-                catch(\Exception $e) {
-                    // note that sometimes omnipay can throw exceptions
-                    // for example, an invalid card number structure
-                    $this->handleFailure($check->CheckID, $e->getMessage());
                 }
             }
         }
