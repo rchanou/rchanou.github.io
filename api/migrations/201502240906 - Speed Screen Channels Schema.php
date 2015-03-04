@@ -33,7 +33,7 @@ foreach($sql_files as $sql_file) {
     catch (Exception $e) {
         echo 'Unable to execute ' . $sql_file . '! ' . $e->getMessage();
         echo '<br>';
-        $noFailures = false;
+        //$noFailures = false; //Cannot trust 2003 servers to accurately report errors.
     }
 }
 echo 'All schema updates complete!<p/>';
