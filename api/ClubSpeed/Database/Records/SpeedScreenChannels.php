@@ -23,7 +23,7 @@ class SpeedScreenChannels extends BaseRecord {
                 if (!empty($data)) {
                     if (isset($data['ChannelID']))      $this->ChannelID       = \ClubSpeed\Utility\Convert::toNumber          ($data['ChannelID']);
                     if (isset($data['ChannelNumber']))  $this->ChannelNumber   = \ClubSpeed\Utility\Convert::toNumber          ($data['ChannelNumber']);
-                    if (isset($data['ChannelData']))    $this->ChannelData     = json_decode                                   ($data['ChannelData']);
+                    if (isset($data['ChannelData']))    $this->ChannelData     = \ClubSpeed\Utility\Convert::toString          ($data['ChannelData']);
                     if (isset($data['Created']))        $this->Created         = \ClubSpeed\Utility\Convert::toDateForServer   ($data['Created']);
 
                 }
