@@ -27,6 +27,12 @@ SpeedText Messaging Settings
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-12">
+          @if(empty($settings['sid']))
+          	<div class="alert alert-danger">
+                <p>You do not have a text messaging account with Twilio saved. Please <a href="http://www.twilio.com" target="_blank">create an account</a> and save your API credentials in the "Provider Options" section below.</p>
+            </div>
+          @endif
+          
           @if (Session::has("message"))
             <div class="alert alert-success fadeAway">
                 <p>{{ Session::get("message") }}</p>
@@ -109,6 +115,7 @@ SpeedText Messaging Settings
                                 '13' => '1 PM', '14' => '2 PM', '15' => '3 PM', '16' => '4 PM', '17' => '5 PM', '18' => '6 PM',
                                 '19' => '7 PM', '20' => '8 PM', '21' => '9 PM', '22' => '10 PM', '23' => '11 PM'
                               ), $settings['cutoffHour'])}}
+                              <span class="help-block text-left">Text messages will not be sent earlier than this time each day. Typically set to an hour before opening time.</span>
                               <!--input type="number" style="width: 50%" class="form-control" id="heatsPriorToSend" name="heatsPriorToSend" value="{{$settings['heatsPriorToSend']}}">
                               <span class="help-block text-left">Text reminders will be sent this many heats before.</span-->
                             </div>
