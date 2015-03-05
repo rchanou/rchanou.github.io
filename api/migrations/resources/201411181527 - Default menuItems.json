@@ -3,32 +3,32 @@
     {
       "label": "Club Speed",
       "url": "http://www.clubspeed.com",
-      "iconUrl": "/assets/MobileApp/icons/tachometer.png"
+      "iconUrl": "/assets/MobileApp/icons/ClubSpeed.png"
     },
     {
       "label": "Member Card",
       "id": "profile",
-      "iconUrl": "/assets/mobileApp/icons/credit-card.png"
+      "iconUrl": "/assets/mobileApp/icons/e-Card.png"
     },
     {
       "label": "Track Information",
       "id": "trackInformation",
-      "iconUrl": "/assets/mobileApp/icons/map-marker.png"
+      "iconUrl": "/assets/mobileApp/icons/Venue.png"
     },
     {
       "label": "My Results",
       "url": "/mobile/#/racersearch/{{customerId}}/",
-      "iconUrl": "/assets/MobileApp/icons/chart.png"
+      "iconUrl": "/assets/MobileApp/icons/ProSkill.png"
     },
 		{
       "label": "Top Times",
       "url": "/mobile/#/livetiming/fastestTimeByWeek",
-      "iconUrl": "http://vm-122.clubspeedtiming.com/assets/MobileApp/icons/trophy.png"
+      "iconUrl": "http://vm-122.clubspeedtiming.com/assets/MobileApp/icons/TopTimes.png"
     },
     {
       "label": "Online Booking",
       "url": "/booking/?login={{authToken}}",
-      "iconUrl": "/assets/mobileApp/icons/MISSING-IMAGE-DOES-NOT-EXIST.png"
+      "iconUrl": "/assets/mobileApp/icons/Booking.png"
     }
   ]
 }
