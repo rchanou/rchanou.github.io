@@ -14,11 +14,11 @@ if(db === null) { // Handle first run
 }
 
 getSettings();
-sendTexts();
+setTimeout(sendTexts, 10000); // Give settings time to pull on the first load
 
 // Kick off the master "Send All the Texts" process
 function sendTexts() {
-	if(config.textMessaging.featureIsEnabled === false) {
+	if(config.textMessaging.isEnabled === false) {
 		log('Text messaging feature is disabled', 'INFO');
 		setTimeout(sendTexts, config.racePollingInterval);
 		return;

@@ -20,7 +20,7 @@ config.disableSending = false;
 config.databaseFilename = './db.json';
 
 config.textMessaging = {};
-config.textMessaging.featureIsEnabled = false;
+config.textMessaging.isEnabled = false;
 config.textMessaging.textingIsEnabled = false;
 config.textMessaging.heatsPriorToSend = 3;
 config.textMessaging.cutoffHour = 8;
