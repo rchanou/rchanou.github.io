@@ -6,13 +6,7 @@ class Countries {
 
     function __construct() {
         $this->countries = array(
-              array(
-                  'Name'               => 'Abkhazia'
-                , 'ISO_3166-1_Alpha_2' => 'GE'
-                , 'ISO_3166-1_Alpha_3' => 'GEO'
-                , 'ISO_3166-1_Numeric' => '268'
-            )
-            , array(
+            array(
                   'Name'               => 'Afghanistan'
                 , 'ISO_3166-1_Alpha_2' => 'AF'
                 , 'ISO_3166-1_Alpha_3' => 'AFG'
@@ -97,7 +91,7 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '36'
             )
             , array(
-                  'Name'               => 'Australian Antarctic Territory'
+                  'Name'               => 'Antarctica'
                 , 'ISO_3166-1_Alpha_2' => 'AQ'
                 , 'ISO_3166-1_Alpha_3' => 'ATA'
                 , 'ISO_3166-1_Numeric' => '10'
@@ -125,12 +119,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'BH'
                 , 'ISO_3166-1_Alpha_3' => 'BHR'
                 , 'ISO_3166-1_Numeric' => '48'
-            )
-            , array(
-                  'Name'               => 'Baker Island'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
             )
             , array(
                   'Name'               => 'Bangladesh'
@@ -209,12 +197,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'BR'
                 , 'ISO_3166-1_Alpha_3' => 'BRA'
                 , 'ISO_3166-1_Numeric' => '76'
-            )
-            , array(
-                  'Name'               => 'British Antarctic Territory'
-                , 'ISO_3166-1_Alpha_2' => 'AQ'
-                , 'ISO_3166-1_Alpha_3' => 'ATA'
-                , 'ISO_3166-1_Numeric' => '10'
             )
             , array(
                   'Name'               => 'British Indian Ocean Territory'
@@ -317,12 +299,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'CX'
                 , 'ISO_3166-1_Alpha_3' => 'CXR'
                 , 'ISO_3166-1_Numeric' => '162'
-            )
-            , array(
-                  'Name'               => 'Clipperton Island'
-                , 'ISO_3166-1_Alpha_2' => 'PF'
-                , 'ISO_3166-1_Alpha_3' => 'PYF'
-                , 'ISO_3166-1_Numeric' => '258'
             )
             , array(
                   'Name'               => 'Cocos (Keeling) Islands'
@@ -631,12 +607,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '344'
             )
             , array(
-                  'Name'               => 'Howland Island'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
-            )
-            , array(
                   'Name'               => 'Hungary'
                 , 'ISO_3166-1_Alpha_2' => 'HU'
                 , 'ISO_3166-1_Alpha_3' => 'HUN'
@@ -709,22 +679,10 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '392'
             )
             , array(
-                  'Name'               => 'Jarvis Island'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
-            )
-            , array(
                   'Name'               => 'Jersey'
                 , 'ISO_3166-1_Alpha_2' => 'JE'
                 , 'ISO_3166-1_Alpha_3' => 'JEY'
                 , 'ISO_3166-1_Numeric' => '832'
-            )
-            , array(
-                  'Name'               => 'Johnston Atoll'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
             )
             , array(
                   'Name'               => 'Jordan'
@@ -743,12 +701,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'KE'
                 , 'ISO_3166-1_Alpha_3' => 'KEN'
                 , 'ISO_3166-1_Numeric' => '404'
-            )
-            , array(
-                  'Name'               => 'Kingman Reef'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
             )
             , array(
                   'Name'               => 'Kiribati'
@@ -925,12 +877,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '583'
             )
             , array(
-                  'Name'               => 'Midway Islands'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
-            )
-            , array(
                   'Name'               => 'Moldova'
                 , 'ISO_3166-1_Alpha_2' => 'MD'
                 , 'ISO_3166-1_Alpha_3' => 'MDA'
@@ -979,12 +925,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '104'
             )
             , array(
-                  'Name'               => 'Nagorno-Karabakh'
-                , 'ISO_3166-1_Alpha_2' => 'AZ'
-                , 'ISO_3166-1_Alpha_3' => 'AZE'
-                , 'ISO_3166-1_Numeric' => '31'
-            )
-            , array(
                   'Name'               => 'Namibia'
                 , 'ISO_3166-1_Alpha_2' => 'NA'
                 , 'ISO_3166-1_Alpha_3' => 'NAM'
@@ -995,12 +935,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'NR'
                 , 'ISO_3166-1_Alpha_3' => 'NRU'
                 , 'ISO_3166-1_Numeric' => '520'
-            )
-            , array(
-                  'Name'               => 'Navassa Island'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
             )
             , array(
                   'Name'               => 'Nepal'
@@ -1063,12 +997,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '574'
             )
             , array(
-                  'Name'               => 'Northern Cyprus'
-                , 'ISO_3166-1_Alpha_2' => 'CY'
-                , 'ISO_3166-1_Alpha_3' => 'CYP'
-                , 'ISO_3166-1_Numeric' => '196'
-            )
-            , array(
                   'Name'               => 'Northern Mariana Islands'
                 , 'ISO_3166-1_Alpha_2' => 'MP'
                 , 'ISO_3166-1_Alpha_3' => 'MNP'
@@ -1099,12 +1027,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '585'
             )
             , array(
-                  'Name'               => 'Palmyra Atoll'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '581'
-            )
-            , array(
                   'Name'               => 'Panama'
                 , 'ISO_3166-1_Alpha_2' => 'PA'
                 , 'ISO_3166-1_Alpha_3' => 'PAN'
@@ -1127,12 +1049,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'PE'
                 , 'ISO_3166-1_Alpha_3' => 'PER'
                 , 'ISO_3166-1_Numeric' => '604'
-            )
-            , array(
-                  'Name'               => 'Peter I Island'
-                , 'ISO_3166-1_Alpha_2' => 'AQ'
-                , 'ISO_3166-1_Alpha_3' => 'ATA'
-                , 'ISO_3166-1_Numeric' => '10'
             )
             , array(
                   'Name'               => 'Philippines'
@@ -1159,12 +1075,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '620'
             )
             , array(
-                  'Name'               => 'Pridnestrovie (Transnistria)'
-                , 'ISO_3166-1_Alpha_2' => 'MD'
-                , 'ISO_3166-1_Alpha_3' => 'MDA'
-                , 'ISO_3166-1_Numeric' => '498'
-            )
-            , array(
                   'Name'               => 'Puerto Rico'
                 , 'ISO_3166-1_Alpha_2' => 'PR'
                 , 'ISO_3166-1_Alpha_3' => 'PRI'
@@ -1175,12 +1085,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'QA'
                 , 'ISO_3166-1_Alpha_3' => 'QAT'
                 , 'ISO_3166-1_Numeric' => '634'
-            )
-            , array(
-                  'Name'               => 'Queen Maud Land'
-                , 'ISO_3166-1_Alpha_2' => 'AQ'
-                , 'ISO_3166-1_Alpha_3' => 'ATA'
-                , 'ISO_3166-1_Numeric' => '10'
             )
             , array(
                   'Name'               => 'Reunion'
@@ -1195,12 +1099,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '642'
             )
             , array(
-                  'Name'               => 'Ross Dependency'
-                , 'ISO_3166-1_Alpha_2' => 'AQ'
-                , 'ISO_3166-1_Alpha_3' => 'ATA'
-                , 'ISO_3166-1_Numeric' => '10'
-            )
-            , array(
                   'Name'               => 'Russia'
                 , 'ISO_3166-1_Alpha_2' => 'RU'
                 , 'ISO_3166-1_Alpha_3' => 'RUS'
@@ -1211,12 +1109,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'RW'
                 , 'ISO_3166-1_Alpha_3' => 'RWA'
                 , 'ISO_3166-1_Numeric' => '646'
-            )
-            , array(
-                  'Name'               => 'Saint Barthelemy'
-                , 'ISO_3166-1_Alpha_2' => 'GP'
-                , 'ISO_3166-1_Alpha_3' => 'GLP'
-                , 'ISO_3166-1_Numeric' => '312'
             )
             , array(
                   'Name'               => 'Saint Helena'
@@ -1235,12 +1127,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'LC'
                 , 'ISO_3166-1_Alpha_3' => 'LCA'
                 , 'ISO_3166-1_Numeric' => '662'
-            )
-            , array(
-                  'Name'               => 'Saint Martin'
-                , 'ISO_3166-1_Alpha_2' => 'GP'
-                , 'ISO_3166-1_Alpha_3' => 'GLP'
-                , 'ISO_3166-1_Numeric' => '312'
             )
             , array(
                   'Name'               => 'Saint Pierre and Miquelon'
@@ -1333,12 +1219,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '706'
             )
             , array(
-                  'Name'               => 'Somaliland'
-                , 'ISO_3166-1_Alpha_2' => 'SO'
-                , 'ISO_3166-1_Alpha_3' => 'SOM'
-                , 'ISO_3166-1_Numeric' => '706'
-            )
-            , array(
                   'Name'               => 'South Africa'
                 , 'ISO_3166-1_Alpha_2' => 'ZA'
                 , 'ISO_3166-1_Alpha_3' => 'ZAF'
@@ -1349,12 +1229,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'GS'
                 , 'ISO_3166-1_Alpha_3' => 'SGS'
                 , 'ISO_3166-1_Numeric' => '239'
-            )
-            , array(
-                  'Name'               => 'South Ossetia'
-                , 'ISO_3166-1_Alpha_2' => 'GE'
-                , 'ISO_3166-1_Alpha_3' => 'GEO'
-                , 'ISO_3166-1_Numeric' => '268'
             )
             , array(
                   'Name'               => 'Spain'
@@ -1531,6 +1405,12 @@ class Countries {
                 , 'ISO_3166-1_Numeric' => '840'
             )
             , array(
+                  'Name'               => 'United States Minor Outlying Islands'
+                , 'ISO_3166-1_Alpha_2' => 'UM'
+                , 'ISO_3166-1_Alpha_3' => 'UMI'
+                , 'ISO_3166-1_Numeric' => '581'
+            )
+            , array(
                   'Name'               => 'Uruguay'
                 , 'ISO_3166-1_Alpha_2' => 'UY'
                 , 'ISO_3166-1_Alpha_3' => 'URY'
@@ -1565,12 +1445,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'VN'
                 , 'ISO_3166-1_Alpha_3' => 'VNM'
                 , 'ISO_3166-1_Numeric' => '704'
-            )
-            , array(
-                  'Name'               => 'Wake Island'
-                , 'ISO_3166-1_Alpha_2' => 'UM'
-                , 'ISO_3166-1_Alpha_3' => 'UMI'
-                , 'ISO_3166-1_Numeric' => '850'
             )
             , array(
                   'Name'               => 'Wallis and Futuna'
