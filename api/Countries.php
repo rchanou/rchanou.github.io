@@ -91,12 +91,6 @@ class Countries {
                 , 'ISO_3166-1_Numeric' =>' '
             )
             , array(
-                  'Name'               => 'Ashmore and Cartier Islands'
-                , 'ISO_3166-1_Alpha_2' => 'AU'
-                , 'ISO_3166-1_Alpha_3' => 'AUS'
-                , 'ISO_3166-1_Numeric' => '36'
-            )
-            , array(
                   'Name'               => 'Australia'
                 , 'ISO_3166-1_Alpha_2' => 'AU'
                 , 'ISO_3166-1_Alpha_3' => 'AUS'
@@ -365,12 +359,6 @@ class Countries {
                 , 'ISO_3166-1_Alpha_2' => 'CK'
                 , 'ISO_3166-1_Alpha_3' => 'COK'
                 , 'ISO_3166-1_Numeric' => '184'
-            )
-            , array(
-                  'Name'               => 'Coral Sea Islands'
-                , 'ISO_3166-1_Alpha_2' => 'AU'
-                , 'ISO_3166-1_Alpha_3' => 'AUS'
-                , 'ISO_3166-1_Numeric' => '36'
             )
             , array(
                   'Name'               => 'Costa Rica'
