@@ -186,11 +186,11 @@ SpeedText Messaging Settings
 
                     @if(isset($settings['sid']))
                       <div class="form-group">
-                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">API User</label>
+                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">Account SID</label>
                         <div class="col-sm-8 col-md-8 col-lg-8">
                           <input type="text" class="form-control" id="sid" name="sid" value="{{$settings['sid']}}">
                           <span class="help-block text-left">
-                            The user for the provider.
+                            The Account SID provided by Twilio.
                           </span>
                         </div>
                       </div>
@@ -200,11 +200,11 @@ SpeedText Messaging Settings
                   <div class="col-sm-6">
                     @if(isset($settings['token']))
                     <div class="form-group">
-                      <label class="col-sm-4 col-md-4 col-lg-4 control-label">API Key</label>
+                      <label class="col-sm-4 col-md-4 col-lg-4 control-label">Auth Token</label>
                       <div class="col-sm-8 col-md-8 col-lg-8">
                         <input type="text" class="form-control" id="token" name="token" value="{{$settings['token']}}">
                         <span class="help-block text-left">
-                          The key for the user of the provider.
+                          The Auth Token provided by Twilio.
                         </span>
                       </div>
                     </div>
@@ -216,7 +216,7 @@ SpeedText Messaging Settings
                         <div class="col-sm-8 col-md-8 col-lg-8">
                           <input type="text" class="form-control" id="from" name="from" value="{{$settings['from']}}">
                           <span class="help-block text-left">
-                            The phone number(s) that the text messages will be sent from.
+                            The phone number(s), provided by Twilio, that the text messages will be sent from. Typically in the format "+12223334444"
                           </span>
                         </div>
                       </div>
