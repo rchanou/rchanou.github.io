@@ -31,35 +31,64 @@ class SpeedTextController extends BaseController
             return Redirect::to('/login')->withErrors($messages)->withInput();
         }
 
-        $settings = CS_API::getSettingsFromNewTableFor('SpeedText');
-        if ($settings === null)
+        $response = CS_API::getSettingsFromNewTableFor('SpeedText');
+        if ($response === null)
         {
             return Redirect::to('/disconnected');
         }
-        $settingsCheckedData = array();
-        $settingsData = array();
-        $settingsIds = array();
-        foreach($settings->settings as $setting)
-        {
-            if($setting->name === 'providerOptions'){
-              $providerOptions = json_decode($setting->value);
-              $settingsData['sid'] = isset($providerOptions->sid) ? $providerOptions->sid : "";
-              $settingsData['token'] = isset($providerOptions->token) ? $providerOptions->token : "";
-              $settingsIds[$setting->name] = $setting->settingsId;
-            } else if ($setting->name === 'from'){
-              $from = json_decode($setting->value);
-              $settingsData['from'] = implode(",", $from);
-            } else {
-              $settingsCheckedData[$setting->name] = ($setting->value ? 'checked' : '');
-              $settingsData[$setting->name] = $setting->value;
-            }
-            $settingsIds[$setting->name] = $setting->settingsId;
-        }
+
+				$settingsCheckedData = array();
+				$settingsData = array();
+				$settingsIds = array();
+
+				// get provider
+				foreach($response->settings as $setting){
+					if ($setting->name === 'provider'){
+						$provider = $setting->value;
+						break;
+					}
+				}
+
+				if ($provider === 'twilio'){
+					foreach($response->settings as $setting)
+					{
+							if($setting->name === 'providerOptions'){
+								$providerOptions = json_decode($setting->value);
+								$settingsData['sid'] = isset($providerOptions->sid) ? $providerOptions->sid : "";
+								$settingsData['token'] = isset($providerOptions->token) ? $providerOptions->token : "";
+								$settingsIds[$setting->name] = $setting->settingsId;
+							} else if ($setting->name === 'from'){
+								$from = json_decode($setting->value);
+								$settingsData['from'] = implode(",", $from);
+							} else {
+								$settingsCheckedData[$setting->name] = ($setting->value ? 'checked' : '');
+								$settingsData[$setting->name] = $setting->value;
+							}
+							$settingsIds[$setting->name] = $setting->settingsId;
+					}
+				} else {
+					foreach($response->settings as $setting)
+					{
+						if ($setting->name !== 'providerOptions' && $setting->name !== 'from'){
+							$settingsCheckedData[$setting->name] = ($setting->value ? 'checked' : '');
+							$settingsData[$setting->name] = $setting->value;
+						}
+						$settingsIds[$setting->name] = $setting->settingsId;
+					}
+				}
+				//var_dump($response, $provider, $settingsCheckedData, $settingsData, $settingsIds);
+				//die();
+				// unset "from" for non-twilio provider(s)
+				/*if ($settingsData['provider'] !== 'twilio'){
+					if (isset($settingsData['from'])){
+						unset($settingsData['from']);
+					}
+				}*/
 
 				Session::put('settings', $settingsData);
         Session::put('settingsIds', $settingsIds);
 
-        $supportedProviders = array('twilio' => 'Twilio');
+        $supportedProviders = array('twilio' => 'Twilio', 'bulksms' => 'BulkSMS');
 
         return View::make('/screens/speedtext/settings',
             array('controller' => 'SpeedTextController',
@@ -84,23 +113,28 @@ class SpeedTextController extends BaseController
 
         $input = Input::all();
 
+				$currentSettings = Session::get('settings',array());
+
         //Begin formatting form input for processing - defaults available for any missing settings
         $newSettings = array();
 
-        $providerOptions = array(
-          'sid' => $input['sid'],
-          'token' => $input['token']
-        );
-        $providerOptionsJson = json_encode($providerOptions);
-        $newSettings['providerOptions'] = $providerOptionsJson;
+				if ($currentSettings['provider'] === 'twilio'){
+	        $providerOptions = array(
+	          'sid' => $input['sid'],
+	          'token' => $input['token']
+	        );
+	        $providerOptionsJson = json_encode($providerOptions);
+	        $newSettings['providerOptions'] = $providerOptionsJson;
 
-        if(isset($input['from'])){
-          $from = explode(",", $input['from']);
-          $json = json_encode($from);
-          $newSettings['from'] = $json;
-          echo $json;
-        }
+	        if(isset($input['from'])){
+	          $from = explode(",", $input['from']);
+	          $json = json_encode($from);
+	          $newSettings['from'] = $json;
+	          echo $json;
+	        }
+				}
 
+				$newSettings['provider'] = isset($input['provider']) ? $input['provider'] : '';
 				$newSettings['cutoffHour'] = isset($input['cutoffHour']) ? $input['cutoffHour'] : 4;
         $newSettings['isEnabled'] = isset($input['isEnabled']) ? 1 : 0;
         $newSettings['textingIsEnabled'] = isset($input['textingIsEnabled']) ? 1 : 0;
@@ -109,7 +143,6 @@ class SpeedTextController extends BaseController
         //End formatting
 
         //Identify the settings that actually changed and need to be sent to Club Speed
-        $currentSettings = Session::get('settings',array());
         foreach($currentSettings as $currentSettingName => $currentSettingValue)
         {
             // TODO, could add additional security to filter the featureIsEnabled by "support" user here $session['user']);

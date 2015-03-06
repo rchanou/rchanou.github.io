@@ -27,12 +27,12 @@ SpeedText Messaging Settings
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-12">
-          @if(empty($settings['sid']))
+          @if($settings['provider'] === 'twilio' && empty($settings['sid']))
           	<div class="alert alert-danger">
                 <p>You do not have a text messaging account with Twilio saved. Please <a href="http://www.twilio.com" target="_blank">create an account</a> and save your API credentials in the "Provider Options" section below.</p>
             </div>
           @endif
-          
+
           @if (Session::has("message"))
             <div class="alert alert-success fadeAway">
                 <p>{{ Session::get("message") }}</p>
@@ -143,6 +143,18 @@ SpeedText Messaging Settings
                           </div>
                         </div>
                       @endif
+
+                      @if(isset($settings['provider']))
+                        <div class="form-group">
+                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Service</label>
+                          <div class="col-sm-8 col-md-8 col-lg-8">
+                            {{Form::select('provider',$supportedProviders,$settings['provider'])}}
+                            <span class="help-block text-left">
+                              The service provider for text messaging.
+                            </span>
+                          </div>
+                        </div>
+                      @endif
                     </div>
 
                     <div class="col-sm-12">
@@ -158,7 +170,7 @@ SpeedText Messaging Settings
         </div>
       </div>
 
-      @if ((isset($settings['isEnabled']) && $settings['isEnabled']) || $user === 'support')
+      @if (((isset($settings['isEnabled']) && $settings['isEnabled']) || $user === 'support') && $settings['provider'] === 'twilio')
         <div class="row">
           <div class="col-xs-12">
             <div class="widget-box">
@@ -166,27 +178,15 @@ SpeedText Messaging Settings
                 <span class="icon">
                   <i class="fa fa-align-justify"></i>
                 </span>
-                <h5>Text Messaging Provider Settings</h5>
+                <h5>Twilio Settings</h5>
               </div>
 
               <div class="widget-content">
                 <div class="row">
                   <div class="col-sm-6">
-                    @if(isset($settings['provider']))
-                      <div class="form-group">
-                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">Service</label>
-                        <div class="col-sm-8 col-md-8 col-lg-8">
-                          {{Form::select('provider',$supportedProviders,$settings['provider'])}}
-                          <span class="help-block text-left">
-                            The service provider for text messaging.
-                          </span>
-                        </div>
-                      </div>
-                    @endif
-
                     @if(isset($settings['sid']))
                       <div class="form-group">
-                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">Account SID</label>
+                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">API User</label>
                         <div class="col-sm-8 col-md-8 col-lg-8">
                           <input type="text" class="form-control" id="sid" name="sid" value="{{$settings['sid']}}">
                           <span class="help-block text-left">
@@ -195,22 +195,22 @@ SpeedText Messaging Settings
                         </div>
                       </div>
                     @endif
+
+                    @if(isset($settings['token']))
+                      <div class="form-group">
+                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">API Key</label>
+                        <div class="col-sm-8 col-md-8 col-lg-8">
+                          <input type="text" class="form-control" id="token" name="token" value="{{$settings['token']}}">
+                          <span class="help-block text-left">
+                            The Auth Token provided by Twilio.
+                          </span>
+                        </div>
+                      </div>
+                    @endif
                   </div>
 
                   <div class="col-sm-6">
-                    @if(isset($settings['token']))
-                    <div class="form-group">
-                      <label class="col-sm-4 col-md-4 col-lg-4 control-label">Auth Token</label>
-                      <div class="col-sm-8 col-md-8 col-lg-8">
-                        <input type="text" class="form-control" id="token" name="token" value="{{$settings['token']}}">
-                        <span class="help-block text-left">
-                          The Auth Token provided by Twilio.
-                        </span>
-                      </div>
-                    </div>
-                    @endif
-
-                    @if(isset($settings['token']))
+                    @if(isset($settings['from']))
                       <div class="form-group">
                         <label class="col-sm-4 col-md-4 col-lg-4 control-label">From</label>
                         <div class="col-sm-8 col-md-8 col-lg-8">
