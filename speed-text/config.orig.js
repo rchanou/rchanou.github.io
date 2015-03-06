@@ -1,9 +1,9 @@
 /*
-Setup instructions:
-- Rename config.orig.js to config.js and put in API Private Key and URL
-- Run migration (no harm will come running multiple times if you are unsure)
-- Install FireDaemon Service/check for error
-- Enable app in admin panel
+Setup instructions: (all from C:\ClubSpeedApps\speed-text)
+- Rename config.orig.js to config.js and put in API Private Key and API URL (can find this in C:\ClubSpeedApps\api\config.php)
+- Run migration (no harm will come running multiple times if you are unsure): https://TRACKNAME.clubspeedtiming.com/api/migrations/201502091516%20-%20SpeedText%20Settings.php
+- Drag XML file in directory into Fire Daemon to setup service
+- Enable "Feature for Track" checkbox in admin panel: https://TRACKNAME.clubspeedtiming.com/admin/speedtext/settings
 */
 
 var config = {}
