@@ -169,6 +169,9 @@ function sendMessage(to, message, fromArray) {
 		case 'twilio':
 			sendTwilioMessage(to, message, fromArray, config.textMessaging.providerOptions);
 			break;
+		case 'bulksms':
+			sendBulkSMSMessage(to, message, fromArray, config.textMessaging.providerOptions);
+			break;
 		default:
 			log('Unsupported text messaging provider: ' + config.textMessaging.provider, 'ERROR');
 	}
@@ -197,6 +200,31 @@ function sendTwilioMessage(to, message, fromArray, opts) {
 				log('Message sent! ' + message);
 			}
 	});
+}
+
+function sendBulkSMSMessage(to, message, fromArray, opts) {
+		to = to.replace(/\D/g,'');
+	
+		log('Attempting to send "' + message + '" to "' + to + '"', 'INFO');
+		
+		if(config.disableSending) return log('Sending disabled in config file!', 'INFO');
+		if(opts.username.length == 0) return log('No BulkSMS username given', 'ERROR');
+		if(opts.password.length == 0) return log('No BulkSMS password given', 'ERROR');
+		
+		var url = opts.url || 'http://usa.bulksms.com/eapi/submission/send_sms/2/2.0';
+		var formData = {
+			username: opts.username,
+			password: opts.password,
+			message: message,
+			msisdn: to
+		}
+
+		request.post({url: url, form: formData }, function(err, httpResponse, body) {
+				if(err) return log(err, 'ERROR');
+				
+				log(body);
+		});
+
 }
 
 function log(message, level) {
