@@ -403,7 +403,6 @@ class CustomersLogic extends BaseLogic {
      * @throws RequiredParameterMissingException if any of the required parameters are either not set or empty in $params.
      */
     public final function create_v0($params = array()) {
-
         // bit of an oddball - note that $params have already been mapped by racers.php
         $customer = $this->interface->dummy($params);
 
@@ -428,9 +427,9 @@ class CustomersLogic extends BaseLogic {
             if (!\ClubSpeed\Security\Authenticate::isValidEmailFormat($customer->EmailAddress))
                 throw new \InvalidEmailException("Customer create found an invalid EmailAddress! Received: " . $customer->EmailAddress);
             
-            // check AllowDuplicateEmail settings
-            $settings = $this->getSettings(); // collect kiosk settings
-            $allowDuplicateEmail = Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
+            $allowDuplicateEmail = $this->logic->controlPanel->get('MainEngine', 'AllowDuplicateEmail');
+            $allowDuplicateEmail = $allowDuplicateEmail[0];
+            $allowDuplicateEmail = Convert::toBoolean($allowDuplicateEmail->SettingValue);
             if (!$allowDuplicateEmail && $this->email_exists($customer->EmailAddress))
                 throw new \EmailAlreadyExistsException("Customer create found an email which already exists! Received: " . $customer->EmailAddress);
         }

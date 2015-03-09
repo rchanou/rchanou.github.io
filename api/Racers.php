@@ -88,10 +88,8 @@ class Racers
                 throw new CSException('Attempted facebook login without providing an email address!');
             // should customer existence be checked here, or inside facebook->fb_login ??
             $account = $this->logic->customers->find_primary_account($params['Standard']['EmailAddress']);
-            if (empty($account)) {
-                $results = $this->postCreate($request_data);
-                $customerId = $results['customerId'];
-            }
+            if (empty($account))
+                $customerId = $this->logic->customers->create_v0($params['Standard']); // use the old, non restful version of the call
             else
                 $customerId = $account->CustID;
             $fbId = $params['Facebook']['UId'];
@@ -99,7 +97,6 @@ class Racers
             $fbAllowEmail = $params['Facebook']['AllowEmail'];
             $fbAllowPost = $params['Facebook']['AllowPost'];
             $fbEnabled = $params['Facebook']['Enabled'];
-
             $customer = $this->logic->facebook->fb_login(
                 $fbId
                 , $customerId
@@ -130,9 +127,8 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public function postCreate($request_data) {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
             throw new RestException(401, "Invalid authorization!");
-        }
 
         // Create customer
         // Create a customer flow from Shakib: Get ID, Check for Unicode, Set Status Flags (based on actions defined), Send Welcome Email, Check for Duplicates, Set privacy_4 = true (if using Facebook)
