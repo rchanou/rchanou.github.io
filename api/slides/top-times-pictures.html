@@ -458,7 +458,7 @@
         self.numCols = numElems.roundUp(self.numRows) / self.numRows; // round up to the nearest numRows, then divide by numRows to get numCols
         self.height = self.heightMax / self.numRows; // determine the height by 
         self.width = self.widthMax / self.numCols;
-        var baseFontSize = 20 / ((self.numRows > 1 ? self.numRows : 2) + 6);
+        var baseFontSize = 20 / ((self.numRows > 1 ? self.numRows : 2) + 7); // still too large with 10 racers
         self.labelFontSize = baseFontSize + "vh";
         self.dataFontSize = (function() {
             // note that 1, 2, and 3 are all single row items
@@ -470,7 +470,7 @@
                 case 2:
                     return baseFontSize * 4.6 / 1.5;
                 case 3:
-                    return baseFontSize * 4.6 / 2;
+                    return baseFontSize * 4.6 / 2.4;
                 default:
                     return baseFontSize * 6.0 / (self.numCols * 1.05);
             }
