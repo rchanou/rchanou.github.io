@@ -137,14 +137,13 @@ class SpeedTextController extends BaseController
 					$newSettings['from'] = $json;
 				}
 
+				$isSupport = strtolower(Session::get('user')) === 'support';
+				if ($isSupport){
+					$newSettings['isEnabled'] = isset($input['isEnabled']) ? 1 : 0;
+				}
+
 				$newSettings['provider'] = isset($input['provider']) ? $input['provider'] : '';
 				$newSettings['cutoffHour'] = isset($input['cutoffHour']) ? $input['cutoffHour'] : 4;
-				if (isset($input['isEnabled'])){
-					$newSettings['isEnabled'] = $input['isEnabled'] ? 1 : 0;
-				} else if (isset($currentSettings['isEnabled'])){
-					$newSettings['isEnabled'] = $currentSettings['isEnabled'] ? 1 : 0;
-				}
-        //$newSettings['isEnabled'] = (isset($input['isEnabled']) ? 1 : (isset($currentSettings['isEnabled'])$currentSettings['isEnabled']? 1 : 0));
         $newSettings['textingIsEnabled'] = isset($input['textingIsEnabled']) ? 1 : 0;
         $newSettings['heatsPriorToSend'] = isset($input['heatsPriorToSend']) ? $input['heatsPriorToSend'] : 3;
         $newSettings['message'] = isset($input['message']) ? $input['message'] : '';
