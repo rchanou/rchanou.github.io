@@ -22,8 +22,7 @@ SpeedText Messaging Settings
 @stop
 
 @section('content')
-  {{ Form::open(array('action'=>'SpeedTextController@updateSettings','files'=>false, 'class' => 'form-horizontal')) }}
-
+  {{ Form::open(array('action'=>'SpeedTextController@updateSettings', 'files'=> false, 'class' => 'form-horizontal')) }}
     <div class="container-fluid">
       <div class="row">
         <div class="col-xs-12">
@@ -146,9 +145,9 @@ SpeedText Messaging Settings
 
                       @if(isset($settings['provider']))
                         <div class="form-group">
-                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Service</label>
+                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Provider</label>
                           <div class="col-sm-8 col-md-8 col-lg-8">
-                            {{Form::select('provider',$supportedProviders,$settings['provider'])}}
+                            {{Form::select('provider', $supportedProviders, $settings['provider'], array('id' => 'providerDropdown'))}}
                             <span class="help-block text-left">
                               The service provider for text messaging.
                             </span>
@@ -170,73 +169,80 @@ SpeedText Messaging Settings
         </div>
       </div>
 
-      @if (((isset($settings['isEnabled']) && $settings['isEnabled']) || $user === 'support') && $settings['provider'] === 'twilio')
-        <div class="row">
-          <div class="col-xs-12">
-            <div class="widget-box">
-              <div class="widget-title">
-                <span class="icon">
-                  <i class="fa fa-align-justify"></i>
-                </span>
-                <h5>Twilio Settings</h5>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="widget-box">
+            <div class="widget-title">
+              <span class="icon">
+                <i class="fa fa-align-justify"></i>
+              </span>
+              <h5>Provider Settings</h5>
+            </div>
+
+            <div class="widget-content">
+              <div class="alert alert-info" id="providerChangeAlert" style="display:none;">
+                The provider was changed. Save changes to view settings for the new provider.
               </div>
 
-              <div class="widget-content">
-                <div class="row">
-                  <div class="col-sm-6">
-                    @if(isset($settings['sid']))
+              <div class="row" id="providerForm">
+                <div class="col-sm-6">
+                  @foreach($firstColumnProviderOptions as $option)
+                    @if(isset($settings[$option]))
+                      <?php
+                        $detail;
+                        foreach($providerOptionDetails as $d){
+                          if ($d['key'] === $option){
+                            $detail = $d;
+                          }
+                        }
+                      ?>
                       <div class="form-group">
-                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">API User</label>
+                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">{{$detail['label']}}</label>
                         <div class="col-sm-8 col-md-8 col-lg-8">
-                          <input type="text" class="form-control" id="sid" name="sid" value="{{$settings['sid']}}">
+                          <input type="text" class="form-control" id="{{$detail['key']}}" name="{{$detail['key']}}" value="{{$settings[$detail['key']]}}">
                           <span class="help-block text-left">
-                            The Account SID provided by Twilio.
+                            {{$detail['tip']}}
                           </span>
                         </div>
                       </div>
                     @endif
+                  @endforeach
+                </div>
 
-                    @if(isset($settings['token']))
+                <div class="col-sm-6">
+                  @foreach($secondColumnProviderOptions as $option)
+                    @if(isset($settings[$option]))
+                      <?php
+                        $detail;
+                        foreach($providerOptionDetails as $d){
+                          if ($d['key'] === $option){
+                            $detail = $d;
+                          }
+                        }
+                      ?>
                       <div class="form-group">
-                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">API Key</label>
+                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">{{$detail['label']}}</label>
                         <div class="col-sm-8 col-md-8 col-lg-8">
-                          <input type="text" class="form-control" id="token" name="token" value="{{$settings['token']}}">
+                          <input type="text" class="form-control" id="{{$detail['key']}}" name="{{$detail['key']}}" value="{{$settings[$detail['key']]}}">
                           <span class="help-block text-left">
-                            The Auth Token provided by Twilio.
+                            {{$detail['tip']}}
                           </span>
                         </div>
                       </div>
                     @endif
-                  </div>
+                  @endforeach
+                </div>
 
-                  <div class="col-sm-6">
-                    @if(isset($settings['from']))
-                      <div class="form-group">
-                        <label class="col-sm-4 col-md-4 col-lg-4 control-label">From</label>
-                        <div class="col-sm-8 col-md-8 col-lg-8">
-                          <input type="text" class="form-control" id="from" name="from" value="{{$settings['from']}}">
-                          <span class="help-block text-left">
-                            The phone number(s), provided by Twilio, that the text messages will be sent from. Typically in the format "+12223334444"
-                          </span>
-                        </div>
-                      </div>
-                    @endif
-                  </div>
-
-                  <div class="col-sm-12">
-                    <div class="form-actions">
-                      {{ Form::submit('Save Changes', array('class' => 'btn btn-info')) }}
-                    </div>
+                <div class="col-sm-12">
+                  <div class="form-actions">
+                    {{ Form::submit('Save Changes', array('class' => 'btn btn-info')) }}
                   </div>
                 </div>
               </div>
-
-
             </div>
           </div>
         </div>
-      @endif
-
+      </div>
     </div>
 
   {{ Form::close() }}
@@ -245,12 +251,20 @@ SpeedText Messaging Settings
 
 <!-- BEGIN JAVASCRIPT INCLUDES -->
 @section('js_includes')
-@parent
-{{ HTML::script('js/bootstrap-tokenfield.min.js') }}
-<script>
+  @parent
+  {{ HTML::script('js/bootstrap-tokenfield.min.js') }}
+  <script>
+    $('#providerDropdown').change(function(e){
+      if (e.val !== '{{$settings["provider"]}}'){
+        $('#providerForm').css('display', 'none');
+          $('#providerChangeAlert').css('display', 'block');
+      } else {
+        $('#providerForm').css('display', 'block');
+          $('#providerChangeAlert').css('display', 'none');
+      }
+    });
 
     $(document).ready(function () {
-
         window.setTimeout(function() {
           $(".fadeAway").fadeTo(500, 0).slideUp(500, function(){
               $(this).remove();
@@ -260,6 +274,6 @@ SpeedText Messaging Settings
         $("#from").tokenfield({ createTokensOnBlur: true });
     });
 
-</script>
+  </script>
 @stop
 <!-- END JAVASCRIPT INCLUDES -->
