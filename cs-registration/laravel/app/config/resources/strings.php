@@ -45,7 +45,7 @@ class Strings {
             'str_welcomeMessage' => 'Welcome to our track!',
             'str_registerHeader' => 'Register',
             'str_newAccount' => 'Create a new account',
-            'str_checkIn' => 'Check in with existing account',
+            'str_checkIn' => 'Check in with an existing account',
             'str_checkInFinal' => 'Complete check-in',
             'str_facebook' => 'Create a new account with Facebook',
             'str_connectFacebook' => 'Connect your account to Facebook?',
