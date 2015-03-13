@@ -787,6 +787,10 @@
                 */
                 on: function(predicate) {
                     var target = [];
+                    if (!z.check.exists(leftArray))
+                        return target;
+                    if (!z.check.exists(rightArray))
+                        return target;
                     predicate = z.lambda(predicate);
                     for (var i = 0; i < leftArray.length; i++) {
                         z.check.isObject(leftArray[i]);
