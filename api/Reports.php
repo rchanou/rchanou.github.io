@@ -310,38 +310,12 @@ c.BrokerName AS 'Broker/Affiliate',
 u.UserName AS 'Created By',
 c.checktotal AS 'Check Total',
 c.BrokerName AS 'Broker/Affiliate Code',
-p.PayAmount AS 'Pay Amount',
-p.Shift AS 'Shift',
-u2.username AS 'Cashed By', 
-
-case 
-when p.paytype = 1 then 'Cash' 
-when p.PayType = 2 then 'Credit Card' 
-when p.PayType = 3 then 'External Payment' 
-when p.PayType = 4 then 'Gift Card' 
-when p.PayType = 5 then 'Voucher' 
-when p.PayType = 6 then 'Complimentary' 
-when p.PayType = 7 then 'Check' 
-when p.PayType = 8 then 'Game Card' 
-when p.PayType = 9 then 'Debit Card' 
-end as Tender,
-
-p.PayTerminal AS 'Pay Terminal', p.PayDate AS 'Paid On',
-CASE
-WHEN p.PayStatus = 1 THEN 'Paid'
-WHEN p.PayStatus = 2 THEN 'Voided'
-END
-AS "Payment Status",
-
 c.DiscountNotes AS 'Discount Notes'
 
 FROM CheckDetails cd
 left join Checks c ON c.CheckID = cd.CheckID
 left join Customers cust on c.CustID = cust.CustID
-left join Payment p on p.CheckID = c.checkid
 left join Users u on u.UserID = c.userid
-left join Users u2 on u2.UserID = p.userid
-left join Products ON Products.ProductID = cd.ProductID
 left join ProductClasses pc ON pc.ProductClassID = products.ProductClassID
 WHERE {$opened_or_closed_date} BETWEEN :start AND :end
 ORDER BY {$opened_or_closed_date}
@@ -396,12 +370,6 @@ SELECT
     , NULL AS 'Customer First Name' -- unreachable
     , NULL AS 'Customer Last Name' -- unreachable
     , u.UserName AS 'Created By'
-    , p.PaymentAmount AS 'Pay Amount'
-    , p.Shift AS 'Shift'
-    , u2.UserName AS 'Cashed By'
-    , pt.PaymentType AS 'Tender'
-    , p.TerminalName AS 'Pay Terminal'
-    , p.TransactionDate AS 'Paid On'
     , CASE p.IsVoid WHEN 0 THEN 'Paid' ELSE 'Voided' END AS 'Payment Status'
 FROM dbo.Checks c
 LEFT OUTER JOIN dbo.Users u -- could use inner as well
@@ -412,12 +380,6 @@ LEFT OUTER JOIN dbo.Items i
     ON i.ItemID = cli.ItemID
 LEFT OUTER JOIN dbo.ItemClasses ic
     ON i.ItemClassID = ic.ItemClassID
-LEFT OUTER JOIN dbo.Payment p
-    ON p.CheckID = c.CheckID
-LEFT OUTER JOIN dbo.PaymentType pt
-    ON pt.ID = p.PaymentType
-LEFT OUTER JOIN dbo.Users u2
-    ON p.UserID = u2.UserID
 --LEFT OUTER JOIN dbo.ChecksLineSubItems clsi -- reference to the left join for line item sub items, if needed (not necessary for kibble's data)
 --    ON clsi.CheckLineItemID = cli.CheckLineItemID
 WHERE {$opened_or_closed_date} BETWEEN :start AND :end
