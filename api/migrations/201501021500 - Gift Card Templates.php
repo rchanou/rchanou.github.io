@@ -39,7 +39,9 @@ foreach($settings as $setting) {
             echo '<br>';
         }
         else {
-            echo 'Setting (' . $setting['Namespace'] . ', ' . $setting['Name'] . ') already exists!';
+            $setting['SettingsID'] = $existing[0]->SettingsID;
+            $db->settings->update($setting);
+            echo 'Setting (' . $setting['Namespace'] . ', ' . $setting['Name'] . ') already exists! FORCING AN UPDATE instead.';
             echo '<br>';
         }
     }
