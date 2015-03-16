@@ -316,6 +316,7 @@ FROM CheckDetails cd
 left join Checks c ON c.CheckID = cd.CheckID
 left join Customers cust on c.CustID = cust.CustID
 left join Users u on u.UserID = c.userid
+left join Products ON Products.ProductID = cd.ProductID
 left join ProductClasses pc ON pc.ProductClassID = products.ProductClassID
 WHERE {$opened_or_closed_date} BETWEEN :start AND :end
 ORDER BY {$opened_or_closed_date}
@@ -370,7 +371,6 @@ SELECT
     , NULL AS 'Customer First Name' -- unreachable
     , NULL AS 'Customer Last Name' -- unreachable
     , u.UserName AS 'Created By'
-    , CASE p.IsVoid WHEN 0 THEN 'Paid' ELSE 'Voided' END AS 'Payment Status'
 FROM dbo.Checks c
 LEFT OUTER JOIN dbo.Users u -- could use inner as well
     ON c.UserID = u.UserID
