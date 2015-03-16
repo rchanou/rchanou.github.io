@@ -48,6 +48,15 @@ class BookingController extends BaseController
                     . '<b>Item Quantity:</b> {{detail.quantity}}<br/>'
                     . '<b>Item Price:</b> {{detail.price}}';
 
+        $giftCardEmailNote = 'The following can be inserted into this template:<br/><br/>'
+            . '<b>Customer\'s Name:</b> {{customer}}<br/>'
+            . '<b>Your Business Name:</b> {{business}}<br/>'
+            . '<b>eGiftcard Number:</b> {{giftCardNo}}<br/>'
+            . '<b>eGiftcard Barcode:</b> {{giftCardImage}}';
+
+        $giftCardEmailSubjectNote = 'The following can be inserted into this template:<br/><br/>'
+            . '<b>Your Business Name:</b> {{business}}';
+
       // Booking Templates
       $this->templates = array(
         (object)array(
@@ -83,14 +92,14 @@ class BookingController extends BaseController
           'templateNamespace' => 'Booking',
           'templateName' => 'giftCardEmailBodyHtml',
           'isHtml' => true, // TODO: have template from read setting type in database instead of from this
-          'note' => $standardNote
+          'note' => $giftCardEmailNote
         ),
         (object)array(
           'displayName' => 'Gift Card E-mail Subject Line',
           'templateNamespace' => 'Booking',
           'templateName' => 'giftCardEmailSubject',
           'isHtml' => false, // TODO: have template from read setting type in database instead of from this
-          'note' => ''
+          'note' => $giftCardEmailSubjectNote
         )
        );
     }
