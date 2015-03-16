@@ -382,19 +382,19 @@ SELECT
     , cli.ItemDescription AS 'Product Name'
     , cli.UnitPrice
     , cli.Qty AS 'Quantity'
-    , cli.ItemDiscount AS 'Total Discount' -- cli.TaxDiscount exists. usage?
+    , cli.ItemDiscount AS 'Total Discount' -- cli.TaxDiscount exists. usage
     , cli.TaxPercent AS 'Tax Percent'
     , cli.TaxID AS 'Tax ID'
     , CASE WHEN c.CheckStatus = 2 THEN 'Voided' ELSE '' END AS 'Void Status'
     , ic.ItemClassID AS 'Product Class ID'
     , ic.Description AS 'Product Class Description'
-    , NULL AS 'Product Class Export' -- no equivalent in eurekas?
+    , NULL AS 'Product Class Export' -- no equivalent in eurekas
     , CASE WHEN c.CheckStatus = 0 THEN 'Open' ELSE 'Closed' END AS 'Check Status'
     , c.OpenedDate AS 'Check Opened On'
     , c.ClosedDate AS 'Check Closed On'
-    , NULL AS 'Customer ID' -- unreachable?
-    , NULL AS 'Customer First Name' -- unreachable?
-    , NULL AS 'Customer Last Name' -- unreachable?
+    , NULL AS 'Customer ID' -- unreachable
+    , NULL AS 'Customer First Name' -- unreachable
+    , NULL AS 'Customer Last Name' -- unreachable
     , u.UserName AS 'Created By'
     , p.PaymentAmount AS 'Pay Amount'
     , p.Shift AS 'Shift'
