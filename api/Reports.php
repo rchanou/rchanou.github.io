@@ -156,23 +156,14 @@ SELECT
     , p.PaymentAmount AS 'Pay Amount'
     , p.Shift AS 'Shift'
     , u2.UserName AS 'Cashed By'
-    , CASE p.PaymentType
-        WHEN 1 THEN 'Cash'
-        WHEN 2 THEN 'Credit Card'
-        WHEN 3 THEN 'External Payment'
-        WHEN 4 THEN 'Gift Card'
-        WHEN 5 THEN 'Voucher'
-        WHEN 6 THEN 'Complimentary'
-        WHEN 7 THEN 'Check'
-        WHEN 8 THEN 'Game Card'
-        WHEN 9 THEN 'Debit Card'
-        ELSE ''
-      END AS 'Tender'
+    , pt.PaymentType AS 'Tender'
     , p.TerminalName AS 'Pay Terminal'
     , p.TransactionDate AS 'Paid On'
 FROM dbo.Checks c
 LEFT OUTER JOIN dbo.Payment p
     ON c.CheckID = p.CheckID
+LEFT OUTER JOIN dbo.PaymentType pt
+	ON pt.ID = p.PaymentType
 LEFT OUTER JOIN dbo.Users u
     ON c.UserID = u.UserID
 LEFT OUTER JOIN dbo.Users u2
@@ -408,18 +399,7 @@ SELECT
     , p.PaymentAmount AS 'Pay Amount'
     , p.Shift AS 'Shift'
     , u2.UserName AS 'Cashed By'
-    , CASE p.PaymentType
-        WHEN 1 THEN 'Cash'
-        WHEN 2 THEN 'Credit Card'
-        WHEN 3 THEN 'External Payment'
-        WHEN 4 THEN 'Gift Card'
-        WHEN 5 THEN 'Voucher'
-        WHEN 6 THEN 'Complimentary'
-        WHEN 7 THEN 'Check'
-        WHEN 8 THEN 'Game Card'
-        WHEN 9 THEN 'Debit Card'
-        ELSE ''
-      END AS 'Tender'
+    , pt.PaymentType AS 'Tender'
     , p.TerminalName AS 'Pay Terminal'
     , p.TransactionDate AS 'Paid On'
     , CASE p.IsVoid WHEN 0 THEN 'Paid' ELSE 'Voided' END AS 'Payment Status'
@@ -434,6 +414,8 @@ LEFT OUTER JOIN dbo.ItemClasses ic
     ON i.ItemClassID = ic.ItemClassID
 LEFT OUTER JOIN dbo.Payment p
     ON p.CheckID = c.CheckID
+LEFT OUTER JOIN dbo.PaymentType pt
+    ON pt.ID = p.PaymentType
 LEFT OUTER JOIN dbo.Users u2
     ON p.UserID = u2.UserID
 --LEFT OUTER JOIN dbo.ChecksLineSubItems clsi -- reference to the left join for line item sub items, if needed (not necessary for kibble's data)
