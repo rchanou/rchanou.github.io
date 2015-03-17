@@ -281,10 +281,14 @@ class CS_API
     }
 
     //This fetches settings from the Settings table, instead of the ControlPanel table
-    public static function getSettingsFromNewTableFor($namespace)
+    public static function getSettingsFromNewTableFor($namespace, $name = null)
     {
         self::initialize();
         $params = array('namespace' => $namespace);
+        if ($name != null)
+        {
+            $params['name'] = $name;
+        }
         return self::getJSON("settings", $params);
     }
 
@@ -799,7 +803,9 @@ class CS_API
         self::initialize();
         $params = array(
                 'productType' => 7, //In Club Speed, type 7 is the Gift Card type
-                'select' => 'productId,description,price1,enabled'
+                'select' => 'productId,description,price1,enabled',
+                'deleted' => 0,
+                'enabled' => 1
             );
         return self::getJSON("products.json", $params);
     }

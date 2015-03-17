@@ -63,7 +63,9 @@ Route::group(array('before' => 'auth'), function()
 	/* iPad Registration */
 	Route::get('registration/settings', 'RegistrationController@settings');
 	Route::post('registration/settings/update', 'RegistrationController@updateSettings');
-
+    Route::get('registration/translations', 'RegistrationController@translations');
+    Route::post('registration/translations/update', 'RegistrationController@updateTranslations');
+    Route::get('registration/translations/update/culture/{cultureKey}', 'RegistrationController@updateCulture');
 
 	/* Reports */
 	Route::get('reports', 'ReportsController@index');
