@@ -237,6 +237,8 @@ class ChannelController extends BaseController
         unset($input['cultureKey']);
         unset($input['namespace']);
 
+        $input = $input['trans']; //HACK: PHP converts periods to underscores in _GET and _POST. Wrapping input names in an array gets around this behavior.
+
         //Format the missing string data as expected by Club Speed's API
         $updatedTranslations = array(); //Destined to a PUT
         $newTranslations = array(); //Destined to a POST

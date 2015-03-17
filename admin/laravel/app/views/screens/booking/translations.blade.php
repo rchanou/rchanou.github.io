@@ -92,7 +92,7 @@ Translations
                                                             <td class="col-sm-9 col-xs-9">
                                                             <input type="text"
                                                             class="text-center wideInput"
-                                                            name="id_{{isset($translations[$cultureKey][$translationsKey]['id']) ? $translations[$cultureKey][$translationsKey]['id'] : 'new_' . $translationsKey}}"
+                                                            name="trans[id_{{isset($translations[$cultureKey][$translationsKey]['id']) ? $translations[$cultureKey][$translationsKey]['id'] : 'new_' . $translationsKey}}]"
                                                             placeholder="{{$translationsValue['value']}}"
                                                             value="{{isset($translations[$cultureKey][$translationsKey]['value']) ? $translations[$cultureKey][$translationsKey]['value'] : ""}}">
                                                             </td>

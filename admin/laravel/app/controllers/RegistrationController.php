@@ -241,6 +241,8 @@ class RegistrationController extends BaseController
         $cultureKey = $input['cultureKey'];
         unset($input['cultureKey']);
 
+        $input = $input['trans']; //HACK: PHP converts periods to underscores in _GET and _POST. Wrapping input names in an array gets around this behavior.
+
         //Format the missing string data as expected by Club Speed's API
         $updatedTranslations = array(); //Destined to a PUT
         $newTranslations = array(); //Destined to a POST
@@ -283,7 +285,6 @@ class RegistrationController extends BaseController
                 return Redirect::to('/disconnected');
             }
         }
-
 
         $result = null;
         if (count($newTranslations) > 0)
