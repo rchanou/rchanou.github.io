@@ -234,6 +234,7 @@ class Strings
             'str_country.required' => 'Country is required.',
             'str_oneOrMoreItemsExpiredDuringPayment' => 'One or more items in your cart expired during payment.',
             'str_paymentDeclined' => 'Your payment was declined. Please try again.',
+            'str_pleaseSelectAnOption' => 'Please select an option below:',
 
             //CreateAccountController strings
             'str_password.required' => 'The Password field is required.',

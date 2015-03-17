@@ -115,9 +115,11 @@ class CheckoutController extends BaseController
         $countries = CS_API::getCountries();
 
         $countries = is_array($countries) ? $countries : null;
+        $strings = Strings::getStrings();
         if ($countries != null)
         {
             $countriesFormatted = array();
+            $countriesFormatted['ZZ'] = $strings['str_pleaseSelectAnOption'];
             foreach($countries as $country) {
                 $countriesFormatted[$country->{'ISO_3166-1_Alpha_2'}] = $country->Name;
             }
@@ -139,7 +141,7 @@ class CheckoutController extends BaseController
                 'settings' => $settings,
                 'hasHeatItems' => $heatItems > 0 ? true : false,
                 'hasNonHeatItems' => $nonHeatItems > 0 ? true : false,
-                'strings' => Strings::getStrings(),
+                'strings' => $strings,
                 'countries' => $countriesFormatted
             )
         );
@@ -165,7 +167,7 @@ class CheckoutController extends BaseController
         $rules['city'] = 'required';
         $rules['state'] = 'required';
         $rules['postcode'] = 'required';
-        $rules['country'] = 'required';
+        $rules['country'] = 'required|not_in:ZZ';
         //$rules['phone'] may be needed in the future
 
         $messages = array(
@@ -179,7 +181,8 @@ class CheckoutController extends BaseController
             'city.required' => $strings['str_city.required'],
             'state.required' => $strings['str_state.required'],
             'postcode.required' => $strings['str_postcode.required'],
-            'country.required' => $strings['str_country.required']
+            'country.required' => $strings['str_country.required'],
+            'country.not_in' => $strings['str_country.required']
         );
 
         //Create the validator

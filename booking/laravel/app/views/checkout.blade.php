@@ -51,7 +51,7 @@
                     $('#testdata').click(function () {
                         $('#firstName').val('TestFirstName');
                         $('#lastName').val('TestLastName');
-                        $('#number').val('4111111111111111');
+                        $('#number').val('4242424242424242');
                         $('#cvv').val('162');
                         $('#expiryMonth').val('7');
                         $('#expiryYear').val('2015');

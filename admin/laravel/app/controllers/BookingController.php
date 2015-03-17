@@ -174,6 +174,7 @@ class BookingController extends BaseController
 				$apiCountries = CS_API::getCountries();
 				$apiCountries = is_array($apiCountries) ? $apiCountries : array('' => 'Unable to Load Countries');
 				$defaultPaymentCountries = array();
+                $defaultPaymentCountries['ZZ'] = 'Please select an option below:';
 				foreach($apiCountries as $country) {
 				    $defaultPaymentCountries[$country->{'ISO_3166-1_Alpha_2'}] = $country->Name;
 				}
