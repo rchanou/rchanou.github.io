@@ -72,9 +72,7 @@ class ChecksLogic extends BaseLogic {
         // note that in 5.4+, we can just reference $this inside the closure
         // and then $this can properly access private and protected items
         $return = parent::_create($params, function($check) use (&$db) {
-
             // validate physical structure before checking for foreign keys
-            $check->validate('insert');
 
             // validate the customer "foreign key", as the database does not actually have a foreign key
             $customer = $db->customers->get($check->CustID);

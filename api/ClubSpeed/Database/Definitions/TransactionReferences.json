@@ -1,0 +1,31 @@
+{
+    "table": {
+        "name": "dbo.TransactionReferences",
+        "alias": "tr"
+    },
+    "keys": [
+        "TransactionReferencesID"
+    ],
+    "columns": [
+        {
+              "name": "TransactionReferencesID"
+            , "type": "Integer"
+        }
+        , {
+              "name": "CheckID"
+            , "type": "Integer"
+        }
+        , {
+              "name": "TransactionReference"
+            , "type": "String"
+        }
+        , {
+              "name": "Amount"
+            , "type": "Decimal"
+        }
+        , {
+              "name": "Currency"
+            , "type": "String"
+        }
+    ]
+}

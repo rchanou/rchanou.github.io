@@ -60,7 +60,7 @@ abstract class BaseUowApi extends BaseApi {
      */
     public function get1($id, $request_data = null) {
         try {
-            $this->validate('get');
+            $this->validate('get', $id);
             $uow = UnitOfWork::build($request_data)->action('get')->table_id($id);
             $this->_handle($uow);
             return $uow->data;
@@ -109,7 +109,7 @@ abstract class BaseUowApi extends BaseApi {
      * Abstracted error handler.
      * Use to convert internal exceptions to RestExceptions as necessary.
      *
-     * Note, @access doesn't actually work with Restler 3.0. 
+     * Note, @access doesn't actually work with Restler 3.0.
      * Holding on to it for documentation purposes.
      * The function is named with an underscore to keep it out of the exposed API calls.
      */

@@ -43,6 +43,7 @@ class UnitOfWork {
     // -> return from API
 
     public $action;     // create, update, delete, select, get, all (?)
+    public $definition; // the json definitino of the table
     public $table;      // table -- use a string if possible, convert to definition later
     public $table_id;   // required for update and delete, return from create (and possibly use with create, if we have it ahead of time -- IE customers)
     public $data;       // used by create and update. update should be non destructive for non-provided items.
@@ -59,6 +60,11 @@ class UnitOfWork {
 
     public function action($action) {
         $this->action = $action;
+        return $this;
+    }
+
+    public function definition($definition) {
+        $this->definition = $definition;
         return $this;
     }
 

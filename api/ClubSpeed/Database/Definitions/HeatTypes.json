@@ -1,0 +1,107 @@
+{
+    "table": {
+        "name": "dbo.HeatTypes",
+        "alias": "ht"
+    },
+    "keys": [
+        "HeatTypeNo"
+    ],
+    "columns": [
+        {
+              "name": "HeatTypeNo"
+            , "type": "int"
+        }
+        , {
+              "name": "TrackNo"
+            , "type": "int"
+        }
+        , {
+              "name": "HeatTypeName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "WinBy"
+            , "type": "int"
+        }
+        , {
+              "name": "RaceBy"
+            , "type": "int"
+        }
+        , {
+              "name": "LapsOrMinutes"
+            , "type": "int"
+        }
+        , {
+              "name": "CannotBelow"
+            , "type": "int"
+        }
+        , {
+              "name": "CannotExceed"
+            , "type": "int"
+        }
+        , {
+              "name": "RacersPerHeat"
+            , "type": "int"
+        }
+        , {
+              "name": "ScheduleDuration"
+            , "type": "int"
+        }
+        , {
+              "name": "IsEventHeatOnly"
+            , "type": "bit"
+        }
+        , {
+              "name": "SpeedLevel"
+            , "type": "int"
+        }
+        , {
+              "name": "IsPracticeHeat"
+            , "type": "bit"
+        }
+        , {
+              "name": "Enabled"
+            , "type": "bit"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "Web"
+            , "type": "bit"
+        }
+        , {
+              "name": "MemberOnly"
+            , "type": "bit"
+        }
+        , {
+              "name": "OnHeatStart"
+            , "type": "int"
+        }
+        , {
+              "name": "OnHeatFinishAssignLoop"
+            , "type": "int"
+        }
+        , {
+              "name": "OnHeatStop"
+            , "type": "int"
+        }
+        , {
+              "name": "Cost"
+            , "type": "int"
+        }
+        , {
+              "name": "PrintResult"
+            , "type": "int"
+        }
+        , {
+              "name": "EntitleHeat"
+            , "type": "bit"
+        }
+        , {
+              "name": "CadetsPerHeat"
+            , "type": "int"
+        }
+    ]
+}

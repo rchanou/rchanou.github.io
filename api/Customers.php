@@ -1,17 +1,36 @@
 <?php
 
 use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Database\Helpers\UnitOfWork;
 
-class Customers extends BaseApi {
+class Customers extends BaseUowApi {
 
     function __construct() {
         parent::__construct();
-        $this->mapper = new \ClubSpeed\Mappers\CustomersMapper();
-        $this->interface = $this->logic->customers;
+        $this->resource = 'Customers';
 
         // allow customers to get and edit their own information
         $this->access['get'] = Enums::API_CUSTOMER_ACCESS;
         $this->access['put'] = Enums::API_CUSTOMER_ACCESS;
+    }
+
+    /**
+     * @url GET /:id
+     *
+     * Take over the BaseAPI functionality to test/prove out the UnitOfWork structure.
+     */
+    public function get1($id, $request_data = null) {
+        try {
+            $this->validate('get', $id);
+            $uow = UnitOfWork::build($request_data)->action('get')->table_id($id);
+            $this->_handle($uow);
+            return array(
+                'customers' => array($uow->data) // hack to be backwards compatible with the iPhone app
+            );
+        }
+        catch (Exception $e) {
+            $this->_error($e);
+        }
     }
 
     /**

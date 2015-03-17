@@ -50,9 +50,8 @@ class DbService {
                 break;
         }
         // $record = __NAMESPACE__ . '\Records\\' . ucfirst($prop);
-        if (!isset($this->_lazy[$prop])) {
+        if (!isset($this->_lazy[$prop]))
             $this->_lazy[$prop] = new DbCollection($conn, $record);
-        }
         return $this->_lazy[$prop];
     }
 

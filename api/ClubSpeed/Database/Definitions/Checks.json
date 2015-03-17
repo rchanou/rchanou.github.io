@@ -1,0 +1,87 @@
+{
+    "table": {
+        "name": "dbo.Checks",
+        "alias": "chcks"
+    },
+    "keys": [
+        "CheckID"
+    ],
+    "columns": [
+        {
+              "name": "CheckID"
+            , "type": "int"
+        }
+        , {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckType"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckStatus"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "UserID"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckTotal"
+            , "type": "decimal"
+        }
+        , {
+              "name": "BrokerName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Notes"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Gratuity"
+            , "type": "decimal"
+        }
+        , {
+              "name": "Fee"
+            , "type": "decimal"
+        }
+        , {
+              "name": "OpenedDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "ClosedDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "IsTaxExempt"
+            , "type": "bit"
+        }
+        , {
+              "name": "Discount"
+            , "type": "decimal"
+        }
+        , {
+              "name": "DiscountID"
+            , "type": "int"
+        }
+        , {
+              "name": "DiscountNotes"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "DiscountUserID"
+            , "type": "int"
+        }
+        , {
+              "name": "InvoiceDate"
+            , "type": "datetime"
+        }
+    ]
+}

@@ -1,0 +1,155 @@
+{
+    "table": {
+        "name": "dbo.Users",
+        "alias": "usrs"
+    },
+    "keys": [
+        "UserID"
+    ],
+    "columns": [
+        {
+              "name": "UserID"
+            , "type": "Integer"
+        }
+        , {
+              "name": "FName"
+            , "type": "String"
+        }
+        , {
+              "name": "LName"
+            , "type": "String"
+        }
+        , {
+              "name": "UserName"
+            , "type": "String"
+        }
+        , {
+              "name": "Password"
+            , "type": "String"
+        }
+        , {
+              "name": "CrdID"
+            , "type": "Integer"
+        }
+        , {
+              "name": "Enabled"
+            , "type": "Bit"
+        }
+        , {
+              "name": "EmailAddress"
+            , "type": "String"
+        }
+        , {
+              "name": "PhoneNumber"
+            , "type": "String"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "Bit"
+        }
+        , {
+              "name": "MaxHrsPerWeek"
+            , "type": "Integer"
+        }
+        , {
+              "name": "MaxHoursPerDay"
+            , "type": "Integer"
+        }
+        , {
+              "name": "MondayOn"
+            , "type": "Bit"
+        }
+        , {
+              "name": "TuesdayOn"
+            , "type": "Bit"
+        }
+        , {
+              "name": "WednesdayOn"
+            , "type": "Bit"
+        }
+        , {
+              "name": "ThursdayOn"
+            , "type": "Bit"
+        }
+        , {
+              "name": "FridayOn"
+            , "type": "Bit"
+        }
+        , {
+              "name": "SaturdayOn"
+            , "type": "Bit"
+        }
+        , {
+              "name": "SundayOn"
+            , "type": "Bit"
+        }
+        , {
+              "name": "MondayStart"
+            , "type": "Date"
+        }
+        , {
+              "name": "MondayEnd"
+            , "type": "Date"
+        }
+        , {
+              "name": "TuesdayStart"
+            , "type": "Date"
+        }
+        , {
+              "name": "TuesdayEnd"
+            , "type": "Date"
+        }
+        , {
+              "name": "WednesdayStart"
+            , "type": "Date"
+        }
+        , {
+              "name": "WednesdayEnd"
+            , "type": "Date"
+        }
+        , {
+              "name": "ThursdayStart"
+            , "type": "Date"
+        }
+        , {
+              "name": "ThursdayEnd"
+            , "type": "Date"
+        }
+        , {
+              "name": "FridayStart"
+            , "type": "Date"
+        }
+        , {
+              "name": "FridayEnd"
+            , "type": "Date"
+        }
+        , {
+              "name": "SaturdayStart"
+            , "type": "Date"
+        }
+        , {
+              "name": "SaturdayEnd"
+            , "type": "Date"
+        }
+        , {
+              "name": "SundayStart"
+            , "type": "Date"
+        }
+        , {
+              "name": "SundayEnd"
+            , "type": "Date"
+        }
+        , {
+              "name": "EmpStartDate"
+            , "type": "Date"
+        }
+        , {
+              "name": "WebPassword"
+            , "type": "String"
+        }
+        , {
+              "name": "SystemUsers"
+            , "type": "Bit"
+        }
+    ]
+}

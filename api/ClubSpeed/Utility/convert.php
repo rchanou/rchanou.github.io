@@ -62,6 +62,7 @@ class Convert {
             // since mssql datetime type rounds to the nearest 0.##0, 0.##3, or 0.##7 (bits/precision issue),
             // opting for rounding to the nearest predictable / reproducible digit (0.##)
             $roundedMicroseconds = round($microseconds / 10000); // only grab two digits of precision. could also leave as 0.### and chop off the leading 0 before concat
+            // $datetimeMicroseconds = str_pad($roundedMicroseconds, 2, '0', \STR_PAD_LEFT); // this works too. doesn't seem to be faster.
             $datetimeMicroseconds = sprintf("%02d", $roundedMicroseconds); // make sure we zero-pad to 2 characters.
             $datetimeFullString = $datetimeString . '.' . $datetimeMicroseconds;
             return $datetimeFullString;
@@ -80,17 +81,23 @@ class Convert {
 
     public static function convert($val, $type) {
         if(isset($type) && is_string($type)) {
-            switch(strtolower($type)) {
-                case 'number':
-                case 'integer':
-                case 'double':
-                case 'identifier':
-                    return self::toNumber($val);
-                case 'boolean':
-                case 'bit':
+            switch($type) {
+                case Types::$boolean:
                     return self::toBoolean($val);
-                case 'string':
+                case Types::$date:
+                    return self::toDate($val);
+                case Types::$double:
+                    return self::toDouble($val);
+                case Types::$integer:
+                    return self::toInteger($val);
+                case Types::$string:
                     return self::toString($val);
+                case Types::$null:
+                    return null; // something else?
+                default:
+                    $type = Types::byName($type); // see if we got passed a name that doesn't quite match properly.
+                    if (!empty($type)) // if we did, then take another run through.
+                        return Convert::convert($val, $type);
             }
         }
         return $val; // unknown type, just return the original
@@ -102,10 +109,27 @@ class Convert {
         return filter_var($val, FILTER_VALIDATE_BOOLEAN);
     }
 
+    public static function toDouble($val) {
+        if (self::is_null_or_db_null($val))
+            return $val;
+        return (double)$val;
+    }
+
+    public static function toDate($date, $dateFormat = null) {
+        // return $date; // for testing purposes
+        return self::toDateForServer($date, $dateFormat);
+    }
+
+    public static function toInteger($val) {
+        if (self::is_null_or_db_null($val))
+            return $val;
+        return (int)$val;
+    }
+
     public static function toNumber($val) {
         if (self::is_null_or_db_null($val))
             return $val;
-        return +$val;
+        return +$val; // consider a method for int vs double conversion
     }
 
     public static function toString($val) {

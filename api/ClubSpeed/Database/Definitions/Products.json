@@ -1,0 +1,235 @@
+{
+    "table": {
+        "name": "dbo.Products",
+        "alias": "prdcts"
+    },
+    "keys": [
+        "ProductID"
+    ],
+    "columns": [
+        {
+              "name": "ProductID"
+            , "type": "int"
+        }
+        , {
+              "name": "ProductType"
+            , "type": "int"
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Price1"
+            , "type": "money"
+        }
+        , {
+              "name": "Price2"
+            , "type": "money"
+        }
+        , {
+              "name": "Price3"
+            , "type": "money"
+        }
+        , {
+              "name": "Price4"
+            , "type": "money"
+        }
+        , {
+              "name": "Price5"
+            , "type": "money"
+        }
+        , {
+              "name": "TaxID"
+            , "type": "int"
+        }
+        , {
+              "name": "ProductClassID"
+            , "type": "int"
+        }
+        , {
+              "name": "LargeIcon"
+            , "type": "image"
+        }
+        , {
+              "name": "IsSpecial"
+            , "type": "bit"
+        }
+        , {
+              "name": "AvailableDay"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "AvailableFromTime"
+            , "type": "datetime"
+        }
+        , {
+              "name": "AvailableToTime"
+            , "type": "datetime"
+        }
+        , {
+              "name": "IsRequiredMembership"
+            , "type": "bit"
+        }
+        , {
+              "name": "ShowOnWeb"
+            , "type": "bit"
+        }
+        , {
+              "name": "IsTrackable"
+            , "type": "bit"
+        }
+        , {
+              "name": "IsShowStat"
+            , "type": "bit"
+        }
+        , {
+              "name": "IsInventory"
+            , "type": "bit"
+        }
+        , {
+              "name": "Cost"
+            , "type": "money"
+        }
+        , {
+              "name": "Req"
+            , "type": "int"
+        }
+        , {
+              "name": "VendorID"
+            , "type": "int"
+        }
+        , {
+              "name": "Enabled"
+            , "type": "bit"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "P_PointTypeID"
+            , "type": "int"
+        }
+        , {
+              "name": "P_Points"
+            , "type": "decimal"
+        }
+        , {
+              "name": "BonusValue"
+            , "type": "decimal"
+        }
+        , {
+              "name": "PaidValue"
+            , "type": "decimal"
+        }
+        , {
+              "name": "ComValue"
+            , "type": "decimal"
+        }
+        , {
+              "name": "Entitle1"
+            , "type": "int"
+        }
+        , {
+              "name": "Entitle2"
+            , "type": "int"
+        }
+        , {
+              "name": "Entitle3"
+            , "type": "int"
+        }
+        , {
+              "name": "Entitle4"
+            , "type": "int"
+        }
+        , {
+              "name": "Entitle5"
+            , "type": "int"
+        }
+        , {
+              "name": "Entitle6"
+            , "type": "int"
+        }
+        , {
+              "name": "Entitle7"
+            , "type": "int"
+        }
+        , {
+              "name": "Entitle8"
+            , "type": "int"
+        }
+        , {
+              "name": "M_Points"
+            , "type": "decimal"
+        }
+        , {
+              "name": "M_MembershiptypeID"
+            , "type": "int"
+        }
+        , {
+              "name": "R_Points"
+            , "type": "decimal"
+        }
+        , {
+              "name": "R_LocalOnly"
+            , "type": "bit"
+        }
+        , {
+              "name": "G_Points"
+            , "type": "money"
+        }
+        , {
+              "name": "S_SaleBy"
+            , "type": "int"
+        }
+        , {
+              "name": "S_NoOfLapsOrSeconds"
+            , "type": "int"
+        }
+        , {
+              "name": "S_CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "S_Vol"
+            , "type": "int"
+        }
+        , {
+              "name": "PriceCadet"
+            , "type": "money"
+        }
+        , {
+              "name": "DateCreated"
+            , "type": "datetime"
+        }
+        , {
+              "name": "WebShop"
+            , "type": "bit"
+        }
+        , {
+              "name": "Custom1"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Custom2"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Custom3"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Custom4"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Sku"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "TransferID"
+            , "type": "uniqueidentifier"
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "table": {
+        "name": "dbo.AuthenticationTokens",
+        "alias": "at"
+    },
+    "keys": [
+        "AuthenticationTokensID"
+    ],
+    "columns": [
+        {
+              "name": "AuthenticationTokensID"
+            , "type": "Integer"
+        }
+        , {
+              "name": "CustomersID"
+            , "type": "String"
+        }
+        , {
+              "name": "RemoteUserID"
+            , "type": "String"
+        }
+        , {
+              "name": "TokenType"
+            , "type": "String"
+        }
+        , {
+              "name": "Token"
+            , "type": "String"
+        }
+        , {
+              "name": "CreatedAt"
+            , "type": "Date"
+        }
+        , {
+              "name": "ExpiresAt"
+            , "type": "Date"
+        }
+        , {
+              "name": "Meta"
+            , "type": "String"
+        }
+    ]
+}

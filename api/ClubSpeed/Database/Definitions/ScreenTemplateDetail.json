@@ -1,0 +1,67 @@
+{
+    "table": {
+        "name": "dbo.ScreenTemplateDetail",
+        "alias": "std"
+    },
+    "keys": [
+        "ID"
+    ],
+    "columns": [
+        {
+              "name": "ID"
+            , "type": "int"
+        }
+        , {
+              "name": "TemplateID"
+            , "type": "int"
+        }
+        , {
+              "name": "Seq"
+            , "type": "int"
+        }
+        , {
+              "name": "TypeID"
+            , "type": "int"
+        }
+        , {
+              "name": "TimeInSecond"
+            , "type": "int"
+        }
+        , {
+              "name": "Text0"
+            , "type": "ntext"
+        }
+        , {
+              "name": "Text1"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Text2"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Text3"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Text4"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Text5"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Text6"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Enable"
+            , "type": "bit"
+        }
+        , {
+              "name": "TrackNo"
+            , "type": "int"
+        }
+    ]
+}

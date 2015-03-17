@@ -30,36 +30,8 @@ class LogicService {
         $this->_lazy = array();
     }
 
-    // this structure works fine, but requires us to call functions instead of referencing properties
-    // this may be bad practice (!!!) make sure we test this --
-    // if all else fails, bypass the __get, and call the methods externally instead of the properties
     function __get($prop) {
-
         return $this->load($prop);
-
-        // switch($prop) {
-        //     case 'booking':                     return $this->booking();
-        //     case 'bookingAvailability':         return $this->bookingAvailability();
-        //     case 'bookingAvailabilityPublic':   return $this->bookingAvailabilityPublic();
-        //     case 'checks':                      return $this->checks();
-        //     case 'checkDetails':                return $this->checkDetails();
-        //     case 'checkTotals':                 return $this->checkTotals();
-        //     case 'controlPanel':                return $this->controlPanel();
-        //     case 'customers':                   return $this->customers();
-        //     case 'events':                      return $this->events();
-        //     case 'facebook':                    return $this->facebook();
-        //     case 'helpers':                     return $this->helpers();
-        //     case 'passwords':                   return $this->passwords();
-        //     case 'products':                    return $this->products();
-        //     case 'replication':                 return $this->replication();
-        //     case 'reservations':                return $this->reservations();
-        //     case 'screenTemplate':              return $this->screenTemplate();
-        //     case 'screenTemplateDetail':        return $this->screenTemplateDetail();
-        //     case 'taxes':                       return $this->taxes();
-        //     case 'translations':                return $this->translations();
-        //     case 'users':                       return $this->users();
-        //     default:                            throw new \CSException("Attempted to access an invalid CSLogic subclass! Received: " . $prop);
-        // }
     }
 
     private function load($prop) {

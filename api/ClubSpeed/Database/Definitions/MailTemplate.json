@@ -1,0 +1,23 @@
+{
+    "table": {
+        "name": "dbo.MailTemplate",
+        "alias": "mltmp"
+    },
+    "keys": [
+        "EmailTemplateID"
+    ],
+    "columns": [
+        {
+              "name": "EmailTemplateID"
+            , "type": "int"
+        }
+        , {
+              "name": "Text"
+            , "type": "ntext"
+        }
+        , {
+              "name": "Subject"
+            , "type": "nvarchar"
+        }
+    ]
+}

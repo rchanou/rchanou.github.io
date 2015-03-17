@@ -7,7 +7,7 @@ class Version
 		
 		// Versions of various applications and modules
 		public $speedscreenVersion = '0.5.0';
-		public $apiVersion = '1.3';
+		public $apiVersion = '1.3.1';
 		public $apiLastUpdatedAt = '3/2/2015 9:36';
 
     function __construct(){

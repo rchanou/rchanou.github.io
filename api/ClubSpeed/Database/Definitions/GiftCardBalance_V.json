@@ -1,0 +1,27 @@
+{
+    "table": {
+        "name": "dbo.GiftCardBalance_V",
+        "alias": "gcb_v"
+    },
+    "keys": [
+        "CrdID"
+    ],
+    "columns": [
+        {
+              "name": "CrdID"
+            , "type": "bigint"
+        }
+        , {
+              "name": "IsGiftCard"
+            , "type": "bit"
+        }
+        , {
+              "name": "Money"
+            , "type": "money"
+        }
+        , {
+              "name": "Points"
+            , "type": "money"
+        }
+    ]
+}

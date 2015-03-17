@@ -3,7 +3,7 @@
 // Configuration parameters...
 require('config.php');
 
-if($debugging == true) {
+if(@$debugging == true) {
 	error_reporting(E_ALL);
 	ini_set('display_errors', '1');
 }
@@ -15,7 +15,7 @@ if($debugging == true) {
     that web.config contains the OPTIONS verb at the PHP level,
     then set the headers and return the pre-flight request immediately.
 
-    If not, allow the request to continue through with the CORS headers set.  
+    If not, allow the request to continue through with the CORS headers set.
 */
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: DELETE,GET,OPTIONS,POST,PUT');
@@ -33,6 +33,7 @@ $r->setSupportedFormats('JsonFormat', 'XmlFormat', 'JsonpFormat');
 
 $r->addAPIClass('Karting', ''); // index.php return
 
+$r->addAPIClass('ActiveRaceLapCount');
 $r->addAPIClass('AuthenticationTokens');
 $r->addAPIClass('Booking');
 $r->addAPIClass('BookingAvailability');
@@ -51,6 +52,7 @@ $r->addAPIClass('GiftCardBalance');
 $r->addAPIClass('GiftCardHistory');
 $r->addAPIClass('HeatDetails');
 $r->addAPIClass('HeatMain');
+$r->addAPIClass('HeatTypes');
 $r->addAPIClass('Logs');
 $r->addAPIClass('Passwords');
 $r->addAPIClass('Payments');
@@ -79,5 +81,4 @@ $r->addAPIClass('UserTasks');
 $r->addAPIClass('Version');
 
 // $r->addAuthenticationClass('SimpleAuth');
-
 $r->handle();

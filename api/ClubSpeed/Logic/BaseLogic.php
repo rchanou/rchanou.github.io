@@ -58,13 +58,15 @@ abstract class BaseLogic {
         if (!is_null($callback) && is_callable($callback))
             $dummy = $callback($dummy);
         $id = $this->interface->create($dummy);
-        $key = $this->interface->key;
-        if (!is_array($key)) {
+        $keys = $this->interface->keys;
+        if (count($keys) === 1 && $id > 0) { // haaaaacky. php pdo doesn't give us anything back for lastInsertedId with composite keys.
             return array(
-                $key => $id
+                $keys[0] => $id
             );
         }
-        return array(); // what to do with composite primary keys? just leaving blank for now.
+        else {
+            return array();
+        }
     }
 
     public function all($params = array()) {
@@ -181,7 +183,7 @@ abstract class BaseLogic {
             $mapped = (array)$mapped; // convert dummy objects to arrays for foreach syntax to always work
         $return = array();
         foreach($usable as $val) {
-            if (isset($mapped[$val]) && $val != $this->interface->key)
+            if (isset($mapped[$val]) && !in_array($val, $this->interface->keys))
                 $return[$val] = $mapped[$val];
         }
         return $return;

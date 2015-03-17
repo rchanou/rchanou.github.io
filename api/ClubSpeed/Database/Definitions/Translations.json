@@ -1,0 +1,43 @@
+{
+    "table": {
+        "name": "dbo.Translations",
+        "alias": "trns"
+    },
+    "keys": [
+        "TranslationsID"
+    ],
+    "columns": [
+        {
+              "name": "TranslationsID"
+            , "type": "int"
+        }
+        , {
+              "name": "Namespace"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Name"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Culture"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "DefaultValue"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Value"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Created"
+            , "type": "datetime"
+        }
+    ]
+}

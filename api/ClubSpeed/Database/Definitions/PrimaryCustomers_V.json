@@ -1,0 +1,35 @@
+{
+    "table": {
+        "name": "dbo.PrimaryCustomers_V",
+        "alias": "pc_v"
+    },
+    "keys": [
+        "CustID"
+    ],
+    "columns": [
+        {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "FName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "LName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "BirthDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "EmailAddress"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ProSkill"
+            , "type": "int"
+        }
+    ]
+}

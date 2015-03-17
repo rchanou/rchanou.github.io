@@ -1,0 +1,43 @@
+{
+    "table": {
+        "name": "dbo.OnlineBookingReservations",
+        "alias": "obr"
+    },
+    "keys": [
+        "OnlineBookingReservationsID"
+    ],
+    "columns": [
+        {
+              "name": "OnlineBookingReservationsID"
+            , "type": "int"
+        }
+        , {
+              "name": "OnlineBookingsID"
+            , "type": "int"
+        }
+        , {
+              "name": "CustomersID"
+            , "type": "int"
+        }
+        , {
+              "name": "SessionID"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Quantity"
+            , "type": "int"
+        }
+        , {
+              "name": "CreatedAt"
+            , "type": "datetime"
+        }
+        , {
+              "name": "ExpiresAt"
+            , "type": "datetime"
+        }
+        , {
+              "name": "OnlineBookingReservationStatusID"
+            , "type": "int"
+        }
+    ]
+}

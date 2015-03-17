@@ -1,0 +1,31 @@
+{
+    "table": {
+        "name": "dbo.Logs",
+        "alias": "lgs"
+    },
+    "keys": [
+        "LogID"
+    ],
+    "columns": [
+        {
+              "name": "LogID"
+            , "type": "Integer"
+        }
+        , {
+              "name": "Message"
+            , "type": "String"
+        }
+        , {
+              "name": "LogDate"
+            , "type": "Date"
+        }
+        , {
+              "name": "TerminalName"
+            , "type": "String"
+        }
+        , {
+              "name": "UserName"
+            , "type": "String"
+        }
+    ]
+}

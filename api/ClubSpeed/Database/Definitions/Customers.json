@@ -1,0 +1,263 @@
+{
+    "table": {
+        "name": "dbo.Customers",
+        "alias": "cst"
+    },
+    "keys": [
+        "CustID"
+    ],
+    "columns": [
+        {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "Company"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "FName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "LName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "RacerName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "BirthDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "IgnoreDOB"
+            , "type": "bit"
+        }
+        , {
+              "name": "Gender"
+            , "type": "int"
+        }
+        , {
+              "name": "EmailAddress"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "SourceID"
+            , "type": "int"
+        }
+        , {
+              "name": "Hotel"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "IndustryID"
+            , "type": "int"
+        }
+        , {
+              "name": "RefID"
+            , "type": "int"
+        }
+        , {
+              "name": "DoNotMail"
+            , "type": "bit"
+        }
+        , {
+              "name": "Address"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Address2"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "City"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "State"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Zip"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Country"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "PhoneNumber"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "PhoneNumber2"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Cell"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Fax"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "LicenseNumber"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "IssuedBy"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Waiver"
+            , "type": "int"
+        }
+        , {
+              "name": "Waiver2"
+            , "type": "int"
+        }
+        , {
+              "name": "CrdID"
+            , "type": "bigint"
+        }
+        , {
+              "name": "RPM"
+            , "type": "int"
+        }
+        , {
+              "name": "AccountCreated"
+            , "type": "datetime"
+        }
+        , {
+              "name": "LastVisited"
+            , "type": "datetime"
+        }
+        , {
+              "name": "TotalVisits"
+            , "type": "int"
+        }
+        , {
+              "name": "TotalRaces"
+            , "type": "int"
+        }
+        , {
+              "name": "MembershipStatus"
+            , "type": "int"
+        }
+        , {
+              "name": "MembershipText"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "MemberShipTextLong"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "PriceLevel"
+            , "type": "int"
+        }
+        , {
+              "name": "PromotionCode"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "IsGiftCard"
+            , "type": "bit"
+        }
+        , {
+              "name": "WebUserName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Password"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Award1"
+            , "type": "int"
+        }
+        , {
+              "name": "Award2"
+            , "type": "int"
+        }
+        , {
+              "name": "Custom1"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Custom2"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Custom3"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Custom4"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Privacy1"
+            , "type": "bit"
+        }
+        , {
+              "name": "Privacy2"
+            , "type": "bit"
+        }
+        , {
+              "name": "Privacy3"
+            , "type": "bit"
+        }
+        , {
+              "name": "Privacy4"
+            , "type": "bit"
+        }
+        , {
+              "name": "Status1"
+            , "type": "int"
+        }
+        , {
+              "name": "Status2"
+            , "type": "int"
+        }
+        , {
+              "name": "Status3"
+            , "type": "int"
+        }
+        , {
+              "name": "Status4"
+            , "type": "int"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "IsEmployee"
+            , "type": "bit"
+        }
+        , {
+              "name": "OriginalID"
+            , "type": "int"
+        }
+        , {
+              "name": "CreditLimit"
+            , "type": "decimal"
+        }
+        , {
+              "name": "CreditOnHold"
+            , "type": "bit"
+        }
+        , {
+              "name": "GeneralNotes"
+            , "type": "ntext"
+        }
+        , {
+              "name": "Hash"
+            , "type": "nvarchar"
+        }
+    ]
+}

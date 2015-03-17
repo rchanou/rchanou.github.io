@@ -73,7 +73,7 @@ class TranslationsLogic extends BaseLogic {
         $return = array();
         if (!empty($new)) {
             $batch = $this->interface->batchCreate($new);
-            $pk = $this->interface->key;
+            $pk = $this->interface->keys[0];
             foreach($batch as $key => $val) {
                 if (is_int($val))
                     $new[$key] = array($pk => $val);
@@ -91,7 +91,7 @@ class TranslationsLogic extends BaseLogic {
         foreach($mapped as $key => $data) {
             try {
                 $record = $this->interface->dummy($data);
-                $this->update($record->{$record::$key}, $record);
+                $this->update($record->{$this->interface->keys[0]}, $record);
             }
             catch(\Exception $e) {
                 $errors[] = $e->getMessage();

@@ -1,0 +1,36 @@
+{
+    "table": {
+        "name": "dbo.FacebookRaces_V",
+        "alias": "fr_v"
+    },
+    "keys": [
+        "HeatNo"
+        , "CustID"
+    ],
+    "columns": [
+        {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "Access_Token"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "HeatNo"
+            , "type": "int"
+        }
+        , {
+              "name": "HeatTypeName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "FinishPosition"
+            , "type": "int"
+        }
+        , {
+              "name": "Finish"
+            , "type": "datetime"
+        }
+    ]
+}

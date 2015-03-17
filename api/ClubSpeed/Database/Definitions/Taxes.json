@@ -1,0 +1,31 @@
+{
+    "table": {
+        "name": "dbo.Taxes",
+        "alias": "txs"
+    },
+    "keys": [
+        "TaxID"
+    ],
+    "columns": [
+        {
+              "name": "TaxID"
+            , "type": "int"
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Amount"
+            , "type": "float"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "GST"
+            , "type": "decimal"
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "table": {
+        "name": "dbo.ControlPanel",
+        "alias": "cntrlpnl"
+    },
+    "keys": [
+        "TerminalName",
+        "SettingName"
+    ],
+    "columns": [
+        {
+              "name": "TerminalName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "SettingName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "DataType"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "DefaultSetting"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "SettingValue"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Fixed"
+            , "type": "bit"
+        }
+        , {
+              "name": "CreatedDate"
+            , "type": "datetime"
+        }
+    ]
+}

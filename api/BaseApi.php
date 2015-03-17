@@ -122,7 +122,7 @@ abstract class BaseApi {
     }
 
     /**
-     * The function to be used by all route extensions of get, 
+     * The function to be used by all route extensions of get,
      * and works regardless of the number of routing ids passed.
      */
     protected function _get() {

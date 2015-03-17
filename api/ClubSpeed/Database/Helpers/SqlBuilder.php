@@ -25,7 +25,9 @@ class SqlBuilder {
     private static function mutateByRecordKeys($record, $callback) {
         // return a copy of the record only containing everything BUT primary keys and their values
         $tempRecord = clone $record;
-        $keys = $tempRecord::$key;
+        $def = $record->definition();
+        $keys = $def['keys'];
+        // $keys = $tempRecord::$key;
         if (!is_array($keys))
             $keys = array($keys);
         foreach($tempRecord as $key => $val) {
@@ -36,7 +38,9 @@ class SqlBuilder {
     }
 
     private static function allKeysSet($record) {
-        $keys = $record::$key;
+        // $keys = $record::$key;
+        $def = $record->definition();
+        $keys = $def['keys'];
         if (!is_array($keys))
             $keys = array($keys);
         foreach($keys as $key) {
@@ -82,7 +86,7 @@ class SqlBuilder {
             , 'values'  => array()
             , 'aliases' => array()
         );
-        $table = $uow->table->getStaticPropertyValue('table');
+        $table = $uow->definition['table']['name'];
         foreach($uow->data as $name => $value) {
             if (isset($value) && $value !== Enums::DB_NULL) {
                 $create['names'][]      = $name;
@@ -108,41 +112,38 @@ class SqlBuilder {
               'statement'   => ''
             , 'values'      => array()
         );
-        $key   = $uow->table->getStaticPropertyValue('key');
-        $table = $uow->table->getStaticPropertyValue('table');
-        $alias = $uow->table->getStaticPropertyValue('tableAlias');
 
-        // multi-key shenanigans. arguably an anti-pattern, but we have to support it.
-        if (!is_array($key))
-            $key = array($key);
+        $keys  = $uow->definition['keys']; // check to see if we have legitimate primary keys before building pagination?
+        $table = $uow->definition['table']['name'];
+        $alias = $uow->definition['table']['alias'];
 
         // the order portion of UnitOfWork is specific to 'all' actions.
-        $order = array(); 
+        $order = array();
         if (!is_null($uow->order)) {
             foreach($uow->order as $column => $direction)
                 $order[] = $alias . "." . $column . " " . $direction;
         }
         else {
             // no order is provided. just use the key ascending for the ROW_NUMBER().
-            foreach($key as $column)
+            foreach($keys as $column)
                 $order[] = $alias . "." . $column . " ASC";
         }
         $order = implode(', ', $order);
 
         // more multi-key shenanigans (boo.)
         $paginationColumns = array();
-        foreach($key as $column)
+        foreach($keys as $column)
             $paginationColumns[] = $alias . "." . $column;
 
         // even more multi-key shenanigans!
         $paginationJoinOn = array();
-        foreach($key as $column)
+        foreach($keys as $column)
             $paginationJoinOn[] = "pg." . $column . " = " . $alias . "." . $column;
 
         $select = self::buildUowSelect($uow);
         $from = self::buildUowFrom($uow);
         $where = self::buildUowWhere($uow);
-        
+
         $all['statement'] = ""
             ."\n;WITH pagination AS ("
             ."\n    SELECT"
@@ -218,7 +219,7 @@ class SqlBuilder {
             'statement' => ''
             , 'values'  => array()
         );
-        $alias = $uow->table->getStaticPropertyValue('tableAlias');
+        $alias = $uow->definition['table']['alias'];
         if (!empty($uow->table_id)) {
             $record = $uow->table->newInstance($uow->table_id);
             $identity = self::getRecordIdentity($record);
@@ -254,8 +255,8 @@ class SqlBuilder {
             'statement' => ''
             , 'values'  => array()
         );
-        $table = $uow->table->getStaticPropertyValue('table');
-        $alias = $uow->table->getStaticPropertyValue('tableAlias');
+        $table = $uow->definition['table']['name'];
+        $alias = $uow->definition['table']['alias'];
         $columns = array();
         $identity = $uow->table->newInstance($uow->table_id);
         if (!self::allKeysSet($identity)) // is empty is not sufficient -- we need to account for partial primary keys.
@@ -272,7 +273,7 @@ class SqlBuilder {
                 $update['values'][$param] = ($value === Enums::DB_NULL ? NULL : $value);
             }
         }
-        
+
         foreach($columns as $key => $val)
             $columns[$key] = $alias . "." . $val['name'] . ' = ' . $val['alias'];
         $update['statement'] = ""
@@ -295,9 +296,8 @@ class SqlBuilder {
               'statement' => ''
             , 'values'    => array()
         );
-
-        $table = $uow->table->getStaticPropertyValue('table');
-        $alias = $uow->table->getStaticPropertyValue('tableAlias');
+        $table = $uow->definition['table']['name'];
+        $alias = $uow->definition['table']['alias'];
         $record = $uow->table->newInstance($uow->table_id);
         $identity = self::getRecordIdentity($record);
         if (!self::allKeysSet($identity)) // is empty is not sufficient -- we need to account for partial primary keys.
@@ -319,8 +319,8 @@ class SqlBuilder {
               'statement' => ''
             , 'names'     => array()
         );
-        $table = $uow->table->getStaticPropertyValue('table');
-        $alias = $uow->table->getStaticPropertyValue('tableAlias');
+        $table = $uow->definition['table']['name'];
+        $alias = $uow->definition['table']['alias'];
         if (is_null($uow->select) || empty($uow->select)) {
             $uow->select = array();
             $columns = $uow->table->getProperties(\ReflectionProperty::IS_PUBLIC);
@@ -337,6 +337,7 @@ class SqlBuilder {
             ."SELECT"
             ."\n" . implode("\n    , ", $select['names'])
             ;
+
         return $select;
     }
 
@@ -346,15 +347,15 @@ class SqlBuilder {
         $from = array(
             'statement' => ''
         );
-        $table = $uow->table->getStaticPropertyValue('table');
-        $alias = $uow->table->getStaticPropertyValue('tableAlias');
+        $table = $uow->definition['table']['name'];
+        $alias = $uow->definition['table']['alias'];
         $from['statement'] = "FROM " . $table . " AS " . $alias;
         return $from;
     }
 
     public static function buildUowWhere(&$uow) {
-        $table      = $uow->table->getStaticPropertyValue('table');
-        $alias      = $uow->table->getStaticPropertyValue('tableAlias');
+        $table      = $uow->definition['table']['name'];
+        $alias      = $uow->definition['table']['alias'];
         $operators  = Comparator::$operators;
         $where      = array(
               'statement' => ''
@@ -387,7 +388,7 @@ class SqlBuilder {
                                 case $operators['$is']:
                                 case $operators['$isnot']:
                                     // force the comparator value to be NULL.
-                                    // we can't parameterize null, so don't bother accepting 
+                                    // we can't parameterize null, so don't bother accepting
                                     // any sort of user input. should ensure injection safety, as well.
                                     // (there's no need to, with sql server - see https://msdn.microsoft.com/en-us/library/ms188795.aspx)
                                     $tempColumn['right'] = 'NULL';
@@ -508,29 +509,33 @@ class SqlBuilder {
                 $insert['aliases'][]    = ":" . $name;
             }
         }
+        $definition = $record->definition();
+        $table = $definition['table']['name'];
         $insert['statement'] = ""
-            ."\nINSERT INTO " . $record::$table . " ("
+            ."\nINSERT INTO " . $table . " ("
             ."\n    " . implode(", ", $insert['names'])
             ."\n)"
             ."\nVALUES ("
             ."\n    " . implode(", ", $insert['aliases'])
             ."\n)"
             ;
-
         return $insert;
     }
 
     public static function buildSelect($record = array()) {
         if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
             throw new \InvalidArgumentException("Attempted to select from a non BaseRecord! Received: " . $record);
+        $definition = $record->definition();
+        $table = $definition['table']['name'];
+        $alias = $definition['table']['alias'];
         $select = array(
             'names'         => array()
-            , 'table'       => $record::$table
-            , 'tableAlias'  => $record::$tableAlias
+            , 'table'       => $table
+            , 'tableAlias'  => $alias
         );
         foreach ($record as $name => $value) {
             if (isset($name)) { // probably not necessary
-                $select['names'][] = $record::$tableAlias . '.' . $name;
+                $select['names'][] = $alias . '.' . $name;
             }
         }
         $select['names'][0] = '    ' . $select['names'][0]; // for readability (?)
@@ -556,9 +561,8 @@ class SqlBuilder {
     }
 
     public static function buildFind($definition, $groupedComparators = null) {
-        if ($definition instanceof \ReflectionClass) {
+        if ($definition instanceof \ReflectionClass)
             $record = $definition->newInstance();
-        }
         else if ($definition instanceof \ClubSpeed\Database\Records\BaseRecord) {
             $record = $definition;
             if (is_null($groupedComparators))
@@ -590,6 +594,9 @@ class SqlBuilder {
         $valueCounter = 0; // switching to value counter, since a count is no longer sufficient with support for the IN keyword
         if (is_null($groupedComparators))
             $groupedComparators = new \ClubSpeed\Database\Helpers\GroupedComparator($record); // build if null?
+        $definition = $record->definition();
+        $alias = $definition['table']['alias'];
+        $table = $definition['table']['name'];
         $comparators = $groupedComparators->comparators;
         foreach($comparators as $key => $data) {
             $comparator = $data['comparator'];
@@ -603,7 +610,7 @@ class SqlBuilder {
                 $where['columns'][] = array(
                       'left'        => $param
                     , 'operator'    => ' '. $comparator->operator . ' '
-                    , 'right'       => $record::$tableAlias . '.' . $comparator->right
+                    , 'right'       => $alias . '.' . $comparator->right
                     , 'connector'   => isset($connector) ? $connector . ' ' : null
                 );
                 $where['values'][$param] = $comparator->left; // alias it to protect against injection
@@ -613,7 +620,7 @@ class SqlBuilder {
                 // check for IS(?: NOT) NULL special case
                 if ($comparator->right != 'NULL') { // convert to DB_NULL at some point -- make map do the conversion (?)
                     $tempColumn = array(
-                        'left'        => $record::$tableAlias . '.' . $comparator->left
+                          'left'        => $alias . '.' . $comparator->left
                         , 'operator'    => ' '. $comparator->operator . ' '
                         , 'connector'   => isset($connector) ? $connector . ' ' : null
                     );
@@ -639,7 +646,7 @@ class SqlBuilder {
                     // don't alias the right, if it is supposed to be a NULL comparison
                     // CAREFUL FOR INJECTION HERE -- more dangerous than the others
                     $where['columns'][] = array(
-                          'left'        => $record::$tableAlias . '.' . $comparator->left
+                          'left'        => $alias . '.' . $comparator->left
                         , 'operator'    => ' '. $comparator->operator . ' '
                         , 'right'       => $comparator->right
                         , 'connector'   => isset($connector) ? $connector . ' ' : null
@@ -656,7 +663,7 @@ class SqlBuilder {
         // shouldn't ever happen unless we get a server error,
         // or something sneaks by the logic classes.
         if (empty($where['columns']))
-            throw new \CSException("Attempted to build a where clause for " . $record::$table . " without any columns!");
+            throw new \CSException("Attempted to build a where clause for " . $table . " without any columns!");
 
         foreach($where['columns'] as $key => $val) {
             $where['columns'][$key] = "\n    "
@@ -673,16 +680,17 @@ class SqlBuilder {
     public static function buildUpdate($record = array()) {
         if (!$record instanceof \ClubSpeed\Database\Records\BaseRecord)
             throw new \InvalidArgumentException("Attempted to update using a non BaseRecord! Received: " . $record);
-
         $identity = self::getRecordIdentity($record);
         if (Objects::isEmpty($identity))
             throw new \CSException("Attempted to update using a record which did not contain any primary keys!");
         if (!self::allKeysSet($identity)) // is empty is not sufficient -- what if we have part of a primary key?
             throw new \CSException("Attempted to update using a record which did not contain a full set of primary keys! Received: " . print_r($record, true)); // possible security risk?
-
-
         $where = self::buildWhere($identity);
         $record = self::stripRecordIdentity($record); // more testing required
+        $definition = $record->definition();
+        $table = $definition['table']['name'];
+        $alias = $definition['table']['alias'];
+
         $update = array(
               'values'  => array()
             , 'columns'  => array()
@@ -696,7 +704,7 @@ class SqlBuilder {
                 $update['values'][":" . $name] = ($value === Enums::DB_NULL ? NULL : $value);
             }
         }
-        $tablePrefix = $record::$tableAlias . '.';
+        $tablePrefix = $alias . '.';
         foreach($update['columns'] as $key => $val) {
             $update['columns'][$key] = "\n    "
                 . $tablePrefix
@@ -706,10 +714,10 @@ class SqlBuilder {
                 ;
         }
         $update['statement'] = ""
-            ."\nUPDATE " . $record::$tableAlias
+            ."\nUPDATE " . $alias
             ."\nSET"
             . implode(", ", $update['columns'])
-            ."\nFROM " . $record::$table . ' AS ' . $record::$tableAlias
+            ."\nFROM " . $table . ' AS ' . $alias
             . $where['statement']
             ;
         $update['values'] = array_merge($update['values'], $where['values']);
@@ -722,10 +730,13 @@ class SqlBuilder {
         $identity = self::getRecordIdentity($record);
         if (!self::allKeysSet($identity)) // is empty is not sufficient -- what if we have part of a primary key?
             throw new \CSException("Attempted to delete using a record which did not contain a full set of primary keys! Received: " . print_r($record, true)); // possible security risk?
+        $definition = $record->definition();
+        $table = $definition['table']['name'];
+        $alias = $definition['table']['alias'];
         $where = self::buildWhere($record);
         $delete['statement'] = ""
-            ."\nDELETE " . $record::$tableAlias
-            ."\nFROM " . $record::$table . ' AS ' . $record::$tableAlias
+            ."\nDELETE " . $alias
+            ."\nFROM " . $table . ' AS ' . $alias
             ."\n" . $where['statement']
             ;
         $delete['values'] = $where['values'];
@@ -738,13 +749,16 @@ class SqlBuilder {
         $identity = self::getRecordIdentity($record);
         if (!self::allKeysSet($identity)) // is empty is not sufficient -- what if we have part of a primary key?
             throw new \CSException("Attempted to check for existence of a record which did not contain a full set of primary keys! Received: " . print_r($record, true)); // possible security risk?
+        $definition = $record->definition();
+        $table = $definition['table']['name'];
+        $alias = $definition['table']['alias'];
         $where = self::buildWhere($identity);
         $exists = array();
         $exists['statement'] = ''
             ."\nSELECT"
             ."\n    CASE WHEN EXISTS ("
-            ."\n        SELECT TOP 1 " . $record::$tableAlias . ".*"
-            ."\n        FROM " . $record::$table . " " . $record::$tableAlias
+            ."\n        SELECT TOP 1 " . $alias . ".*"
+            ."\n        FROM " . $table . " " . $alias
             ."\n        " . $where['statement'] // $record::$tableAlias . "." . $record::$key . " = :" . $record::$key
             ."\n    )"
             ."\n    THEN 1"

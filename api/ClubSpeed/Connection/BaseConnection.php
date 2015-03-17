@@ -106,12 +106,10 @@ abstract class BaseConnection {
         try {
             $stmt = $conn->prepare($tsql);
             $stmt->execute($params);
-            if (stripos($tsql, 'INSERT') !== false) {
+            if (stripos($tsql, 'INSERT') !== false) // hacky. woo.
                 $return = $conn->lastInsertId();
-            }
-            else {
+            else
                 $return = $stmt->rowCount();
-            }
             return $return;
         }
         catch (Exception $e) {

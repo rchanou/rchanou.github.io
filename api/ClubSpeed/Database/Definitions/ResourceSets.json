@@ -1,0 +1,39 @@
+{
+    "table": {
+        "name": "dbo.ResourceSets",
+        "alias": "rs"
+    },
+    "keys": [
+        "ResourceID"
+    ],
+    "columns": [
+        {
+              "name": "ResourceID"
+            , "type": "int"
+        }
+        , {
+              "name": "ResourceSetName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Culture"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ResourceName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ResourceValue"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ResourceType"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ResourceComment"
+            , "type": "nvarchar"
+        }
+    ]
+}

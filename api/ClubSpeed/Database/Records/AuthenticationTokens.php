@@ -1,13 +1,10 @@
 <?php
 
 namespace ClubSpeed\Database\Records;
-use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Utility\Types as Types;
 
 class AuthenticationTokens extends BaseRecord {
-
-    public static $table      = 'dbo.AuthenticationTokens';
-    public static $tableAlias = 'at';
-    public static $key        = 'AuthenticationTokensID';
+    protected static $_definition; // must be declared, so BaseRecord can use it in definition()
 
     public $AuthenticationTokensID;
     public $CustomersID;
@@ -17,36 +14,4 @@ class AuthenticationTokens extends BaseRecord {
     public $CreatedAt;
     public $ExpiresAt;
     public $Meta;
-
-    public function __construct($data = array()) {
-        $this->load($data);
-    }
-
-    public function load($data = array()) {
-        if (isset($data)) {
-            if (is_array($data)) {
-                if (!empty($data)) {
-                    if (isset($data['AuthenticationTokensID']))     $this->AuthenticationTokensID   = \ClubSpeed\Utility\Convert::toNumber($data['AuthenticationTokensID']);
-                    if (isset($data['CustomersID']))                $this->CustomersID              = \ClubSpeed\Utility\Convert::toNumber($data['CustomersID']);
-                    if (isset($data['RemoteUserID']))               $this->RemoteUserID             = \ClubSpeed\Utility\Convert::toString($data['RemoteUserID']);
-                    if (isset($data['TokenType']))                  $this->TokenType                = \ClubSpeed\Utility\Convert::toString($data['TokenType']);
-                    if (isset($data['Token']))                      $this->Token                    = \ClubSpeed\Utility\Convert::toString($data['Token']);
-                    if (isset($data['CreatedAt']))                  $this->CreatedAt                = \ClubSpeed\Utility\Convert::toDateForServer($data['CreatedAt']);
-                    if (isset($data['ExpiresAt']))                  $this->ExpiresAt                = \ClubSpeed\Utility\Convert::toDateForServer($data['ExpiresAt']);
-                    if (isset($data['Meta']))                       $this->Meta                     = \ClubSpeed\Utility\Convert::toString($data['Meta']);
-                }
-            }
-            else {
-                $this->{self::$key} = Convert::toNumber($data);
-            }
-        }
-    }
-
-    public function validate($type) {
-        // switch (strtolower($type)) {
-        //     case 'insert':
-                
-        //         break;
-        // }
-    }
 }

@@ -1,0 +1,83 @@
+{
+    "table": {
+        "name": "dbo.OnlineBookingAvailability_V",
+        "alias": "oba_v"
+    },
+    "keys": [
+        "OnlineBookingsID"
+    ],
+    "columns": [
+        {
+              "name": "HeatNo"
+            , "type": "int"
+        }
+        , {
+              "name": "HeatTypeNo"
+            , "type": "int"
+        }
+        , {
+              "name": "HeatDescription"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "HeatStartsAt"
+            , "type": "datetime"
+        }
+        , {
+              "name": "HeatEndsAt"
+            , "type": "datetime"
+        }
+        , {
+              "name": "OnlineBookingsID"
+            , "type": "int"
+        }
+        , {
+              "name": "IsPublic"
+            , "type": "bit"
+        }
+        , {
+              "name": "ProductsID"
+            , "type": "int"
+        }
+        , {
+              "name": "ProductType"
+            , "type": "int"
+        }
+        , {
+              "name": "ProductDescription"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Price1"
+            , "type": "money"
+        }
+        , {
+              "name": "HeatSpotsUsed"
+            , "type": "int"
+        }
+        , {
+              "name": "HeatSpotsTotalActual"
+            , "type": "int"
+        }
+        , {
+              "name": "HeatSpotsAvailableCombined"
+            , "type": "int"
+        }
+        , {
+              "name": "HeatSpotsAvailableOnline"
+            , "type": "int"
+        }
+        , {
+              "name": "ProductSpotsUsed"
+            , "type": "int"
+        }
+        , {
+              "name": "ProductSpotsAvailableOnline"
+            , "type": "int"
+        }
+        , {
+              "name": "ProductSpotsTotal"
+            , "type": "int"
+        }
+    ]
+}

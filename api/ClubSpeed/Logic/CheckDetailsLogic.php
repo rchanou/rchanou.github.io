@@ -88,7 +88,6 @@ class CheckDetailsLogic extends BaseLogic {
     public final function create($params = array()) {
         $logic = &$this->logic; // we have to do this for PHP 5.3, as we run into issues with protected/private -- 5.4 has access to correctly scoped $this
         return parent::_create($params, function($checkDetails) use (&$logic) {
-            $checkDetails->validate('insert'); // validate the physical structure early, before trying to get foreign keys
             if ((is_null($checkDetails->Qty) || !is_int($checkDetails->Qty) || $checkDetails->Qty < 1) && (is_null($checkDetails->CadetQty) || !is_int($checkDetails->CadetQty) || $checkDetails->CadetQty < 1))
                 throw new \RequiredArgumentMissingException("CheckDetails create requires a positive Qty or CadetQty! Received Qty: " . $checkDetails->Qty . " and CadetQty: " . $checkDetails->CadetQty);
             $check = $logic->checks->get($checkDetails->CheckID);

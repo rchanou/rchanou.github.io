@@ -1,0 +1,47 @@
+{
+    "table": {
+        "name": "dbo.ScreenTemplate",
+        "alias": "st"
+    },
+    "keys": [
+        "TemplateID"
+    ],
+    "columns": [
+        {
+              "name": "TemplateID"
+            , "type": "int"
+        }
+        , {
+              "name": "TemplateName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ShowScoreboard"
+            , "type": "bit"
+        }
+        , {
+              "name": "IdleTime"
+            , "type": "int"
+        }
+        , {
+              "name": "ScoreBoardTrackNo"
+            , "type": "int"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "StartPosition"
+            , "type": "int"
+        }
+        , {
+              "name": "SizeX"
+            , "type": "int"
+        }
+        , {
+              "name": "SizeY"
+            , "type": "int"
+        }
+    ]
+}

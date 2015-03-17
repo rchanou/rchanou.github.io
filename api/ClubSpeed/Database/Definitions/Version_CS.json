@@ -1,0 +1,27 @@
+{
+    "table": {
+        "name": "dbo.Version_CS",
+        "alias": "vcs"
+    },
+    "keys": [
+        "ID"
+    ],
+    "columns": [
+        {
+              "name": "ID"
+            , "type": "int"
+        }
+        , {
+              "name": "VersionNumber"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "CurrentVersion"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "UpdatedDate"
+            , "type": "datetime"
+        }
+    ]
+}

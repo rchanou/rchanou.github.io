@@ -1,0 +1,41 @@
+{
+    "table": {
+        "name": "dbo.UserTasks_V",
+        "alias": "ut_v"
+    },
+    "keys": [
+        "UserID",
+        "RoleID",
+        "TaskID"
+    ],
+    "columns": [
+        {
+              "name": "UserID"
+            , "type": "int"
+        }
+        , {
+              "name": "UserName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "EmailAddress"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "RoleID"
+            , "type": "int"
+        }
+        , {
+              "name": "RoleName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "TaskID"
+            , "type": "int"
+        }
+        , {
+              "name": "TaskDescription"
+            , "type": "nvarchar"
+        }
+    ]
+}

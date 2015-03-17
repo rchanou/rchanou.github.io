@@ -1,0 +1,31 @@
+{
+    "table": {
+        "name": "dbo.GiftCardTransactions_V",
+        "alias": "gct_v"
+    },
+    "keys": [
+        "HistoryID"
+    ],
+    "columns": [
+        {
+              "name": "CrdID"
+            , "type": "bigint"
+        }
+        , {
+              "name": "Money"
+            , "type": "money"
+        }
+        , {
+              "name": "Points"
+            , "type": "money"
+        }
+        , {
+              "name": "Date"
+            , "type": "datetime"
+        }
+        , {
+              "name": "Notes"
+            , "type": "nvarchar"
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "table": {
+        "name": "dbo.ActiveRaceLapCount_V",
+        "alias": "arlc_v"
+    },
+    "keys": [
+        "TrackNo"
+    ],
+    "columns": [
+        {
+              "name": "TrackNo"
+            , "type": "Integer"
+        }
+        , {
+              "name": "HeatNo"
+            , "type": "Integer"
+        }
+        , {
+              "name": "LapCount"
+            , "type": "Integer"
+        }
+    ]
+}

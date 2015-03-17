@@ -1,0 +1,80 @@
+{
+    "table": {
+        "name": "dbo.HeatDetails",
+        "alias": "hd"
+    },
+    "keys": [
+        "HeatNo",
+        "CustID"
+    ],
+    "columns": [
+        {
+              "name": "HeatNo"
+            , "type": "int"
+        }
+        , {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "AutoNo"
+            , "type": "int"
+        }
+        , {
+              "name": "LineUpPosition"
+            , "type": "int"
+        }
+        , {
+              "name": "GroupID"
+            , "type": "int"
+        }
+        , {
+              "name": "RPM"
+            , "type": "int"
+        }
+        , {
+              "name": "PointHistoryID"
+            , "type": "int"
+        }
+        , {
+              "name": "FirstTime"
+            , "type": "bit"
+        }
+        , {
+              "name": "UserID"
+            , "type": "int"
+        }
+        , {
+              "name": "FinishPosition"
+            , "type": "int"
+        }
+        , {
+              "name": "GroupFinishPosition"
+            , "type": "int"
+        }
+        , {
+              "name": "RPMDiff"
+            , "type": "int"
+        }
+        , {
+              "name": "PositionEditedDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "HistoryAutoNo"
+            , "type": "int"
+        }
+        , {
+              "name": "Scores"
+            , "type": "int"
+        }
+        , {
+              "name": "TimeAdded"
+            , "type": "datetime"
+        }
+        , {
+              "name": "AssignedtoEntitleHeat"
+            , "type": "bit"
+        }
+    ]
+}

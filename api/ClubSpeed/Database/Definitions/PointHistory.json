@@ -1,0 +1,79 @@
+{
+    "table": {
+        "name": "dbo.PointHistory",
+        "alias": "ph"
+    },
+    "keys": [
+        "PointHistoryID"
+    ],
+    "columns": [
+        {
+              "name": "PointHistoryID"
+            , "type": "int"
+        }
+        , {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckID"
+            , "type": "int"
+        }
+        , {
+              "name": "UserID"
+            , "type": "int"
+        }
+        , {
+              "name": "ReferenceID"
+            , "type": "int"
+        }
+        , {
+              "name": "PointAmount"
+            , "type": "money"
+        }
+        , {
+              "name": "Type"
+            , "type": "int"
+        }
+        , {
+              "name": "PointDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "PointExpDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "Notes"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "RefPointHistoryID"
+            , "type": "int"
+        }
+        , {
+              "name": "IPAddress"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "IsManual"
+            , "type": "bit"
+        }
+        , {
+              "name": "CheckDetailID"
+            , "type": "int"
+        }
+        , {
+              "name": "ReservationID"
+            , "type": "int"
+        }
+        , {
+              "name": "Username"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ApprovedByUserName"
+            , "type": "nvarchar"
+        }
+    ]
+}

@@ -29,7 +29,7 @@ class Authenticate {
      * The maximum length for a password.
      *
      * Note that this is being set since
-     * the bcrypt algorithm truncates 
+     * the bcrypt algorithm truncates
      * password inputs to 72 characters.
      */
     const PASSWORD_MAXIMUM_LENGTH = 72; // bcrypt will truncate past 72 characters. allow users to go this high?
@@ -46,7 +46,7 @@ class Authenticate {
      * Note that the CSLogic is expected to contain a Users class
      * which will validate a username and password against the database
      * by utilizing a method named validate.
-     * 
+     *
      * @param CSLogic &$CSLogic The reference to the CSLogic class.
      * @return void
      */
@@ -66,7 +66,7 @@ class Authenticate {
     /**
      * Verifies the credentials of the current session by comparing public keys,
      * and (if necessary) by validating the username and password through DbConnection->users.
-     * 
+     *
      * @return boolean True if the credentials are valid for at least public access, false if not.
      */
     public static function publicAccess() {
@@ -92,7 +92,7 @@ class Authenticate {
     /**
      * Verifies the credentials of the current session by comparing public keys,
      * and (if necessary) by validating the username and password through DbConnection->users.
-     * 
+     *
      * @return boolean True if the credentials are valid for at least public access, false if not.
      */
     public static function privateAccess() {
@@ -178,7 +178,7 @@ class Authenticate {
      * @return boolean True if the key has at least private access, false if not.
      */
     private static function isValidPrivateKey(&$key) {
-        if (isset($key) && $key === $GLOBALS['privateKey'])
+        if (isset($key) && $key === @$GLOBALS['privateKey'])
             return true;
         return false;
     }
