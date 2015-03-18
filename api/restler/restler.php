@@ -1117,9 +1117,11 @@ class JsonFormat implements iFormat
 
     public function encode($data, $human_readable = FALSE)
     {
-        return $human_readable
-            ? $this->json_format(json_encode(object_to_array($data)))
-            : json_encode(object_to_array($data));
+
+        return json_encode(object_to_array($data));
+        // return $human_readable
+        //     ? $this->json_format(json_encode(object_to_array($data)))
+        //     : json_encode(object_to_array($data));
     }
 
     public function decode($data)
