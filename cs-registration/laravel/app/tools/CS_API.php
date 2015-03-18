@@ -281,45 +281,35 @@ class CS_API
                 break;
 
             case 'getTranslations':
-                $url = $url . '/resourcesets/getNamespace.json' . '?namespace=Translations.Registration&key=' .self::$apiKey;
+                $url = $url . '/translations?namespace=Registration&key=' . self::$apiKey;
                 $result = self::callApi($url);
                 $resultFormatted = array();
-                if ($result == null || array_key_exists("error",$result) || !is_array($result))
+                if ($result == null || array_key_exists("error",$result) || !is_array($result) || !isset($result["translations"]))
                 {
                     $result = null;
                 }
                 else
                 {
-                    //The index may be either "translation" or "translations" depending on the version of the API
-                    $translationIndex = "translation";
-                    $translationIndex = isset($result["translations"]) ? "translations" : $translationIndex;
-
-                    foreach($result[$translationIndex] as $language => $translations)
-                    {
-                        $language = ($language == null ? 'en-US' : $language);
-                        foreach($translations as $currentTranslation)
+                    $translations = $result["translations"];
+                    //echo json_encode($result["translations"]); die();
+                    foreach ($translations as $translation) {
+                        if ($translation["value"] != "")
                         {
-                            $resultFormatted[$language][$currentTranslation["name"]] = $currentTranslation["value"];
+                            $language = (isset($translation["culture"]) ? $translation["culture"] : 'en-US');
+                            $resultFormatted[$language][$translation["name"]] = $translation["value"];
                         }
                     }
                     $result = $resultFormatted;
                 }
                 break;
             case 'getCurrentCulture':
-                $url = $url . '/settings/get.json' . '?group=MainEngine&setting=currentCulture&key=' .self::$privateKey;
+                $url = $url . '/settings.json' . '?namespace=Registration&name=currentCulture&key=' .self::$privateKey;
                 $result = self::callApi($url);
-                if ($result == null || array_key_exists("error",$result) || !is_array($result) || !array_key_exists("CurrentCulture",$result["settings"]))
-                {
-                    $result = "en-US";
-                }
-                else
-                {
-                    $result = $result["settings"]["CurrentCulture"]["SettingValue"];
-                }
+                $result = isset($result['settings'][0]['value']) ? $result['settings'][0]['value'] : 'en-US';
                 break;
             case 'sendMissingStrings':
-                $url = $url . '/resourcesets.json' . '?key=' . self::$privateKey;
-                $result = self::callApi($url,$params[0],'POST');
+                $url = $url . '/translations/batch?key=' . self::$privateKey;
+                $result = self::callApi($url,$params,'POST');
                 break;
             case 'getImages':
                 $url = $url . '/settings/getImages.json?app=kiosk' . '&key=' .self::$privateKey;

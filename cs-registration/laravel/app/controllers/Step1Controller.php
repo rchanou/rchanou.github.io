@@ -165,7 +165,14 @@ class Step1Controller extends BaseController
                 Session::put('currentCulture',"en-US");
                 Session::put('currentCultureFB',"en_US");
 
-                return Strings::getDefaultEnglish();
+                if (isset($stringTranslations["en-US"]))
+                {
+                    return $stringTranslations["en-US"];
+                }
+                else
+                {
+                    return Strings::getDefaultEnglish();
+                }
             }
         }
     }
@@ -307,18 +314,19 @@ class Step1Controller extends BaseController
         if (count($stringsClubSpeedIsMissing) > 0) //If any strings are missing
         {
             //Format the missing string data as expected by Club Speed's API
-            $stringsClubSpeedIsMissingFormatted = array('batch' => array());
+            $stringsClubSpeedIsMissingFormatted = array();
             foreach($stringsClubSpeedIsMissing as $stringLabel => $stringValue)
             {
-                $stringsClubSpeedIsMissingFormatted['batch'][] = array('name' => $stringLabel,
-                                                              'namespace' => 'Translations.Registration',
-                                                              'value' => $stringValue,
-                                                              'language' => null,
-                                                              'comment' => '');
+                $stringsClubSpeedIsMissingFormatted[] = array('name' => $stringLabel,
+                    'namespace' => 'Registration',
+                    'value' => $stringValue,
+                    'defaultValue' => $stringValue,
+                    'culture' => 'en-US',
+                    'comment' => '');
             }
 
             //Send Club Speed the missing strings
-            $result = CS_API::call("sendMissingStrings",array($stringsClubSpeedIsMissingFormatted));
+            $result = CS_API::call("sendMissingStrings",$stringsClubSpeedIsMissingFormatted);
         }
     }
 } 
