@@ -23,7 +23,6 @@ class PaymentService {
             'Payflow_Pro',
             'PayPal_Pro',
             'PCCharge',
-            'WorldPay',
             'WorldPayXML',
             'AuthorizeNet_AIM'
             // add processors as we test/support them -- dummy should ABSOLUTELY be removed before going live
