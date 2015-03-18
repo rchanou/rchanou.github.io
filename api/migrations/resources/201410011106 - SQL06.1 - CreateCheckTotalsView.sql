@@ -30,16 +30,14 @@ CONSTANTS1 AS (
 )
 , CheckDetailSums1 AS (
     SELECT
-        cd.CheckDetailID
+          cd.CheckDetailID
         , cd.CheckID
         , cd.UnitPrice
         , cd.Qty + cd.CadetQty AS CheckDetailActualQuantity
+        , cd.DiscountApplied
         , (
             ISNULL(
-                CASE WHEN CONSTANTS.USE_SALES_TAX = 1
-                    THEN (((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100 
-                    ELSE 0 
-                END
+                (((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100
                 , 0
             ) / 100.00
         ) AS CheckDetailTaxPercentage
@@ -49,42 +47,65 @@ CONSTANTS1 AS (
 )
 , CheckDetailSums2 AS (
     SELECT
-        cds.CheckID
+          cds.CheckID
+        , cds.DiscountApplied
         , cds.CheckDetailID
         , cds.UnitPrice
         , cds.CheckDetailActualQuantity
-        , ROUND(cds.UnitPrice * cds.CheckDetailTaxPercentage, 2) AS CheckDetailSingleTaxAmount
+        , cds.CheckDetailTaxPercentage
+        , cds.UnitPrice - ISNULL(cds.DiscountApplied,0) / CheckDetailActualQuantity  AS UnitPriceAfterDiscount
     FROM CheckDetailSums1 cds
 )
 , CheckDetailSums3 AS (
-    SELECT
-        cds.CheckDetailID
-        , cds.CheckID
-        , cds.CheckDetailSingleTaxAmount * cds.CheckDetailActualQuantity AS CheckDetailTax
-        , cds.UnitPrice * cds.CheckDetailActualQuantity AS CheckDetailSubtotal
-    FROM CheckdetailSums2 cds
+    SELECT 
+          cds.CheckID
+        , cds.DiscountApplied
+        , cds.CheckDetailID
+        , cds.UnitPrice
+        , cds.CheckDetailActualQuantity
+        , cds.UnitPriceAfterDiscount
+        , ROUND(cds.UnitPriceAfterDiscount * cds.CheckDetailTaxPercentage, 2) AS CheckDetailSingleTaxAmount
+    FROM CheckDetailSums2 cds
 )
 , CheckDetailSums4 AS (
     SELECT
-        cds.CheckDetailID
+          cds.CheckDetailID
         , cds.CheckID
+        , cds.DiscountApplied
+        , cds.CheckDetailSingleTaxAmount * cds.CheckDetailActualQuantity AS CheckDetailTax
+        , cds.UnitPriceAfterDiscount * cds.CheckDetailActualQuantity AS CheckDetailSubtotal
+    FROM CheckdetailSums3 cds
+)
+, CheckDetailSums5 AS (
+    SELECT
+          cds.CheckDetailID
+        , cds.CheckID
+        , cds.DiscountApplied
         , cds.CheckDetailTax
         , cds.CheckDetailSubtotal
-        , (cds.CheckDetailSubtotal + cds.CheckDetailTax) AS CheckDetailTotal
-    FROM CheckDetailSums3 cds
-)
-, CheckSums AS (
-    SELECT
-        cds.CheckID
-        , SUM(cds.CheckDetailTax) AS CheckTax
-        , SUM(cds.CheckDetailSubtotal) AS CheckSubtotal
-        , SUM(cds.CheckDetailTotal) AS CheckTotalTemp
+        , (
+            cds.CheckDetailSubtotal
+            + (
+                CASE WHEN CONSTANTS.USE_SALES_TAX = 1 THEN cds.CheckDetailTax
+                ELSE 0 END
+            ) 
+        ) AS CheckDetailTotal
     FROM CheckDetailSums4 cds
+    OUTER APPLY CONSTANTS
+)
+, CheckSums1 AS (
+    SELECT
+          cds.CheckID
+        , SUM(cds.CheckDetailTax) AS CheckTax
+        , SUM(cds.CheckDetailSubtotal)  AS CheckSubtotal --- SUM(cds.DiscountApplied)
+    FROM CheckDetailSums5 cds
+    INNER JOIN dbo.Checks c
+        ON c.CheckID = cds.CheckID
     GROUP BY cds.CheckID
 )
 , ExistingPayments AS (
     SELECT
-        p.CheckID
+          p.CheckID
         , SUM(ISNULL(p.PayAmount, 0)) AS PaidAmount
         , SUM(ISNULL(p.PayTax, 0)) AS PaidTax
     FROM dbo.Payment p
@@ -93,7 +114,7 @@ CONSTANTS1 AS (
 )
 , CheckTotals AS (
     SELECT
-        c.CheckID
+          c.CheckID
         , c.CustID
         , c.CheckType
         , c.CheckStatus
@@ -107,7 +128,7 @@ CONSTANTS1 AS (
         , c.OpenedDate
         , c.ClosedDate
         , c.IsTaxExempt
-        , c.Discount
+        , c.Discount -- note: this will always be a dollar amount at this point
         --, c.DiscountID
         --, c.DiscountNotes
         --, c.DiscountUserID
@@ -115,7 +136,7 @@ CONSTANTS1 AS (
         -- ISNULL the following items, in case there are no non-voided CheckDetails to join
         , ISNULL(cs.CheckSubtotal, 0) AS CheckSubtotal
         , ISNULL(cs.CheckTax, 0) AS CheckTax
-        , ISNULL(cs.CheckTotalTemp + c.Gratuity + c.Fee - c.Discount, 0) AS CheckTotal
+        , ISNULL(cs.CheckSubtotal + CASE WHEN CONSTANTS.USE_SALES_TAX = 1 THEN cs.CheckTax ELSE 0 END  + c.Fee + c.Gratuity - c.Discount , 0) AS CheckTotal
         , ISNULL(ep.PaidTax, 0) AS CheckPaidTax -- when no payments exist, use 0
         , ISNULL(ep.PaidAmount, 0) AS CheckPaidTotal -- when no payments exist, use 0
         , cd.CheckDetailID
@@ -173,14 +194,15 @@ CONSTANTS1 AS (
         , ISNULL(cds.CheckDetailSubtotal, 0) AS CheckDetailSubtotal
         , ISNULL(cds.CheckDetailTotal, 0) AS CheckDetailTotal
     FROM dbo.Checks c
-    LEFT OUTER JOIN CheckDetailSums4 cds
+    LEFT OUTER JOIN CheckDetailSums5 cds
         ON c.CheckID = cds.CheckID
-    LEFT OUTER JOIN CheckSums cs
+    LEFT OUTER JOIN CheckSums1 cs
         ON c.CheckID = cs.CheckID
     LEFT OUTER JOIN dbo.CheckDetails cd
         ON cd.CheckDetailID = cds.CheckDetailID
     LEFT OUTER JOIN ExistingPayments ep
         ON ep.CheckID = c.CheckID
+    OUTER APPLY CONSTANTS
 )
 SELECT
     c.CheckID

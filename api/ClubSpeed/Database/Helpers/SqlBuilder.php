@@ -119,7 +119,7 @@ class SqlBuilder {
 
         // the order portion of UnitOfWork is specific to 'all' actions.
         $order = array();
-        if (!is_null($uow->order)) {
+        if (!empty($uow->order)) { // check against empty, in case the user provided all invalid column names for order, which would result in an empty array
             foreach($uow->order as $column => $direction)
                 $order[] = $alias . "." . $column . " " . $direction;
         }
@@ -130,38 +130,26 @@ class SqlBuilder {
         }
         $order = implode(', ', $order);
 
-        // more multi-key shenanigans (boo.)
-        $paginationColumns = array();
-        foreach($keys as $column)
-            $paginationColumns[] = $alias . "." . $column;
-
-        // even more multi-key shenanigans!
-        $paginationJoinOn = array();
-        foreach($keys as $column)
-            $paginationJoinOn[] = "pg." . $column . " = " . $alias . "." . $column;
-
         $select = self::buildUowSelect($uow);
         $from = self::buildUowFrom($uow);
         $where = self::buildUowWhere($uow);
 
         $all['statement'] = ""
-            ."\n;WITH pagination AS ("
+            ."\n". $select['statement']
+            ."\nFROM ("
             ."\n    SELECT"
-            ."\n          " . implode("\n        , ", $paginationColumns)
+            ."\n        *"
             ."\n        , ROW_NUMBER() OVER (ORDER BY " . $order . ") AS [Rank]"
             ."\n    " . $from['statement']
             . (!empty($where['statement']) ? "\n    " . $where['statement'] : '')
-            ."\n)"
-            ."\n" . $select['statement']
-            ."\n" . $from['statement']
-            ."\nINNER JOIN pagination pg"
-            ."\n    ON " . implode("\n    AND ", $paginationJoinOn) //pg." . $key . " = " . $alias . "." . $key
+            ."\n) " . $alias
             ."\nWHERE"
-            ."\n        pg.[Rank] >  :offset"
-            ."\n    AND pg.[Rank] <= :offsetLimit"
+            ."\n        " . $alias . ".[Rank] >  :offset"
+            ."\n    AND " . $alias . ".[Rank] <= :offsetLimit"
             ."\nORDER BY"
-            ."\n    pg.[Rank]"
+            ."\n    ". $alias . ".[Rank]"
             ;
+
         $all['values'] = array_merge($where['values'], array( // where values should come first.
               ':offset'      => $uow->offset
             , ':offsetLimit' => $uow->offset + $uow->limit
