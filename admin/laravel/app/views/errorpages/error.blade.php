@@ -15,6 +15,8 @@ Error
 
 @section('content')
 
+    <div style="display:none;">{{$error}}</div>
+
     <div class="row">
         <div class="col-xs-12 col-sm-3"></div>
         <div class="col-xs-12 col-sm-6 text-center">

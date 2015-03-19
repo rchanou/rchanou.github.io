@@ -55,13 +55,14 @@ App::error(function(Exception $exception, $code)
 	Log::error($exception); //Local logging (laravel.log)
     CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code, 'Club Speed Admin Panel'); //DB logging
 
-    return View::make('/errorpages/error',
+    return Response::make(View::make('/errorpages/error',
         array(
             'images' => Images::getImageAssets(),
+						'error' => $exception,
             'errorInfo' => json_encode(Request::url() . ' ' . utf8_encode($exception)),
             'code' => $code
         )
-    );
+    ), $code);
 });
 
 /*
