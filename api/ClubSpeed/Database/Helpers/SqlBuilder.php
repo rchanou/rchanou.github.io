@@ -188,7 +188,6 @@ class SqlBuilder {
         $count = array(
             'statement' => ''
         );
-        $table = $uow->table->getStaticPropertyValue('table');
         $from = self::buildUowFrom($uow);
         $where = self::buildUowWhere($uow);
         $count['statement'] = ""
