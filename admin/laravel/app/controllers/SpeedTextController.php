@@ -56,7 +56,7 @@ class SpeedTextController extends BaseController
 				// get provider
 				foreach($response->settings as $setting){
 					if ($setting->name === 'provider'){
-						$provider = $setting->value;
+						$provider = $setting->value ?: $setting->default;
 						$providerOptionDetails = $providerOptionDetailSets[$provider];
 						break;
 					}
