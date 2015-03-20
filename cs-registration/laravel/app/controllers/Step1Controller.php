@@ -117,6 +117,7 @@ class Step1Controller extends BaseController
 
         $stringTranslations = CS_API::call("getTranslations");
         $currentCulture = CS_API::call("getCurrentCulture");
+        $enabledCultures = CS_API::call("getEnabledCultures");
 
         if ($stringTranslations === false || $currentCulture === false) //If Club Speed could not be reached
         {
@@ -126,9 +127,17 @@ class Step1Controller extends BaseController
 
             Session::put('currentCulture',$currentCulture);
             Session::put('currentCultureFB',CS_API::convertCultureToFacebook($currentCulture));
-            Session::put('supportedCultures', array('en-US'));
 
             $stringTranslations["en-US"] = Strings::getDefaultEnglish();
+            $otherDefaultTranslations = Strings::getDefaultTranslations();
+            $supportedCultures = array();
+            $supportedCultures['en-US'] = 'en-US';
+            foreach($otherDefaultTranslations as $cultureName => $cultureTranslations)
+            {
+                $supportedCultures[$cultureName] = $cultureName;
+                $stringTranslations[$cultureName] = array_merge(Strings::getDefaultEnglish(),$otherDefaultTranslations[$cultureName]);
+            }
+            Session::put('supportedCultures', $supportedCultures);
             Session::put('translations', $stringTranslations);
             return $stringTranslations[$currentCulture];
         }
@@ -137,11 +146,19 @@ class Step1Controller extends BaseController
             $this->checkClubSpeedStrings($stringTranslations); //Check the Club Speed strings to ensure none are missing
 
             //Determine all supported cultures and replace any missing fields with English fields
+
             $supportedCultures = array();
             foreach($stringTranslations as $cultureName => $cultureTranslations)
             {
-                $supportedCultures[$cultureName] = $cultureName;
-                $stringTranslations[$cultureName] = array_merge(Strings::getDefaultEnglish(),$stringTranslations[$cultureName]);
+                if ($cultureName == 'en-US' || in_array($cultureName,$enabledCultures))
+                {
+                    $supportedCultures[$cultureName] = $cultureName;
+                    $stringTranslations[$cultureName] = array_merge(Strings::getDefaultEnglish(),$stringTranslations[$cultureName]);
+                }
+                else
+                {
+                    unset($stringTranslations[$cultureName]);
+                }
             }
 
             //If English isn't supported, insert our default English strings

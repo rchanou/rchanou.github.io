@@ -638,7 +638,8 @@ class BookingController extends BaseController
             'ar-AE' => 'العربية',
             'it-IT' => 'Italiano',
             'bg-BG' => 'български език',
-            'sv-SE' => 'Svenska'
+            'sv-SE' => 'Svenska',
+            'zh-CN' => '中文'
         );
 
         $currentCulture = CS_API::getCurrentCultureForOnlineBooking();
@@ -873,7 +874,8 @@ class BookingController extends BaseController
             'ar-AE',
             'it-IT',
             'bg-BG',
-            'sv-SE'
+            'sv-SE',
+            'zh-CN'
         );
 
 

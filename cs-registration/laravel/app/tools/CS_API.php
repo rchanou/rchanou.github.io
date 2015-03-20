@@ -307,6 +307,12 @@ class CS_API
                 $result = self::callApi($url);
                 $result = isset($result['settings'][0]['value']) ? $result['settings'][0]['value'] : 'en-US';
                 break;
+            case 'getEnabledCultures':
+                $url = $url . '/settings.json' . '?namespace=Registration&name=enabledCultures&key=' .self::$privateKey;
+                $result = self::callApi($url);
+                $result = isset($result['settings'][0]['value']) ? $result['settings'][0]['value'] : '[]';
+                $result = json_decode($result);
+                break;
             case 'sendMissingStrings':
                 $url = $url . '/translations/batch?key=' . self::$privateKey;
                 $result = self::callApi($url,$params,'POST');

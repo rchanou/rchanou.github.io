@@ -4,6 +4,26 @@ require_once(app_path().'/includes/includes.php');
 
 class RegistrationController extends BaseController
 {
+    public $image_directory;
+    public $image_filenames;
+    public $image_paths;
+    public $image_urls;
+
+    public function __construct()
+    {
+        //Image uploader data
+        $this->image_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'cs-registration' . DIRECTORY_SEPARATOR . 'images';
+        $this->image_filenames = array('bg_default.jpg','default_header.png');
+        $this->image_paths = array();
+        $this->image_urls = array();
+
+        foreach($this->image_filenames as $currentFileName)
+        {
+            $this->image_paths[$currentFileName] = $this->image_directory . DIRECTORY_SEPARATOR . $currentFileName;
+            $this->image_urls[$currentFileName] = '/assets/cs-registration/images/' . $currentFileName;
+        }
+    }
+
     public function settings()
     {
         $registrationSettings = CS_API::getSettingsFor('Registration');
@@ -66,13 +86,15 @@ class RegistrationController extends BaseController
           array('shownId' => 'cfgRegCustTxt4Show', 'requiredId' => 'cfgRegCustTxt4req', 'label' => 'Custom Text 4', 'secondColumn' => true)
         );
 
-
         return View::make('/screens/registration/settings',
             array('controller' => 'RegistrationController',
                   'customerFields' => $customerFields,
                   'isChecked' => $registrationSettingsCheckedData,
                   'registrationSettings' => $registrationSettingsData,
-                  'mainEngineSettings' => $mainEngineSettingsData
+                  'mainEngineSettings' => $mainEngineSettingsData,
+                  'countries' => $this->countries,
+                'background_image_url' => is_file($this->image_paths['bg_default.jpg']) ? $this->image_urls['bg_default.jpg'] : null,
+                'header_image_url' => is_file($this->image_paths['default_header.png']) ? $this->image_urls['default_header.png'] : null
             ));
     }
 
@@ -217,18 +239,34 @@ class RegistrationController extends BaseController
             'ar-AE' => 'العربية',
             'it-IT' => 'Italiano',
             'bg-BG' => 'български език',
-            'sv-SE' => 'Svenska'
+            'sv-SE' => 'Svenska',
+            'zh-CN' => '中文'
         );
 
         $registrationCultureSetting = CS_API::getSettingsFromNewTableFor('Registration','currentCulture');
         $currentCulture = isset($registrationCultureSetting->settings[0]->value) ? $registrationCultureSetting->settings[0]->value : 'en-US';
+
+        $enabledCulturesSetting = CS_API::getSettingsFromNewTableFor('Registration','enabledCultures');
+        $enabledCulturesSetting = isset($enabledCulturesSetting->settings[0]->value) ? $enabledCulturesSetting->settings[0]->value : null;
+        $enabledCultures = null;
+        if ($enabledCulturesSetting != null)
+        {
+            $enabledCultures = array();
+            $enabledCulturesSetting = json_decode($enabledCulturesSetting);
+            foreach($enabledCulturesSetting as $key => $culture)
+            {
+                $enabledCultures[$culture] = $culture;
+            }
+        }
 
         $translations = CS_API::getTranslations('Registration');
 
         return View::make('/screens/registration/translations',
             array('controller' => 'RegistrationController',
                 'supportedCultures' => $supportedCultures,
+                'supportedCulturesSplit' => array_chunk($supportedCultures,ceil(count($supportedCultures)/3),true),
                 'currentCulture' => $currentCulture,
+                'enabledCultures' => $enabledCultures,
                 'translations' => $translations
             )
         );
@@ -329,7 +367,8 @@ class RegistrationController extends BaseController
             'ar-AE',
             'it-IT',
             'bg-BG',
-            'sv-SE'
+            'sv-SE',
+            'zh-CN'
         );
 
 
@@ -355,9 +394,266 @@ class RegistrationController extends BaseController
         return Redirect::to('registration/translations')->with( array('message' => 'Current culture updated successfully!'));
     }
 
+    public function updateDropdownLanguages()
+    {
+        $input = Input::all();
+        unset($input["_token"]);
+
+        if ($input !== null)
+        {
+            $enabledCultures = json_encode(array_keys($input));
+            $enabledCulturesSetting = CS_API::getSettingsFromNewTableFor('Registration','enabledCultures');
+            $enabledCulturesSettingID = isset($enabledCulturesSetting->settings[0]->settingsId) ? $enabledCulturesSetting->settings[0]->settingsId : null;
+            if ($enabledCulturesSettingID === null)
+            {
+                return Redirect::to('registration/translations')->with( array('error' => 'Enabled cultures could not be updated. Please try again later. If the issue persists, contact Club Speed support.'));
+            }
+
+            $result = CS_API::updateSettingsInNewTableFor('Registration',array('enabledCultures' => $enabledCultures), array('enabledCultures' => $enabledCulturesSettingID));
+            if ($result != true)
+            {
+                return Redirect::to('registration/translations')->with( array('error' => 'Enabled cultures could not be updated. Please try again later. If the issue persists, contact Club Speed support.'));
+            }
+        }
+
+        //Standard success message
+        return Redirect::to('registration/translations')->with( array('message' => 'Dropdown languages updated successfully!'));
+    }
+
+    public function updateImage()
+    {
+        // Build the input for our validation
+        $input = array('image' => Input::file('image'));
+        $filename = Input::get('filename');
+
+        // Within the ruleset, make sure we let the validator know that this
+        $rules = array(
+            'image' => 'required|max:10000',
+        );
+
+        // Now pass the input and rules into the validator
+        $validator = Validator::make($input, $rules);
+
+        // Check to see if validation fails or passes
+        if ($validator->fails()) {
+            // VALIDATION FAILED
+            return Redirect::to('registration/settings')->with('error', 'The provided file was not an image');
+        } else {
+            // SAVE THE FILE...
+
+            // Ensure the directory exists, if not, create it!
+            if(!is_dir($this->image_directory)) mkdir($this->image_directory, null, true);
+
+            // Move the file, overwriting if necessary
+            Input::file('image')->move($this->image_directory, $filename);
+
+            // Fix permissions on Windows (works on 2003?). This is because by default the uploaded imaged
+            // does not inherit permissions from the folder it is moved to. Instead, it retains the
+            // permissions of the temporary folder.
+            exec('c:\windows\system32\icacls.exe ' . $this->image_paths[$filename] . ' /inheritance:e');
+
+            return Redirect::to('registration/settings')->with('message', 'Image uploaded successfully!');
+        }
+
+    }
+
     private static function contains(&$haystack, $needle)
     {
         $result = strpos($haystack, $needle);
         return $result !== false;
     }
+
+    //This is a mirror of the countries dropdown baked into cs-registration. Should be moved to a setting in the future.
+    private $countries =  array(
+                                        '' => '','Afghanistan' => 'Afghanestan',
+                                        'Albania' => 'Shqiperia',
+                                        'Algeria' => 'Al Jaza\'ir',
+                                        'Andorra' => 'Andorra',
+                                        'Angola' => 'Angola',
+                                        'Antigua and Barbuda' => 'Antigua and Barbuda',
+                                        'Argentina' => 'Argentina',
+                                        'Armenia' => 'Hayastan',
+                                        'Australia' => 'Australia',
+                                        'Austria' => 'Oesterreich',
+                                        'Azerbaijan' => 'Azarbaycan Respublikasi',
+                                        'The Bahamas' => 'The Bahamas',
+                                        'Bahrain' => 'Al Bahrayn',
+                                        'Bangladesh' => 'Bangladesh',
+                                        'Barbados' => 'Barbados',
+                                        'Belarus' => 'Byelarus',
+                                        'Belgium' => 'Belgie',
+                                        'Belize' => 'Belice',
+                                        'Benin' => 'Benin',
+                                        'Bhutan' => 'Drukyul',
+                                        'Bolivia' => 'Bolivia',
+                                        'Bosnia and Herzegovina' => 'Bosna i Hercegovina',
+                                        'Botswana' => 'Botswana',
+                                        'Brazil' => 'Brasil',
+                                        'Brunei' => 'Brunei',
+                                        'Bulgaria' => 'Republika Bulgariya',
+                                        'Burkina Faso' => 'Burkina Faso',
+                                        'Burundi' => 'Burundi',
+                                        'Cambodia' => 'Kampuchea',
+                                        'Cameroon' => 'Cameroon',
+                                        'Canada' => 'Canada',
+                                        'Cape Verde' => 'Cabo Verde',
+                                        'Central African Republic' => 'Republique Centrafricaine',
+                                        'Chad' => 'Tchad',
+                                        'Chile' => 'Chile',
+                                        'China' => 'Zhong Guo',
+                                        'Colombia' => 'Colombia',
+                                        'Comoros' => 'Comores',
+                                        'Congo, Republic of the' => 'Republique du Congo',
+                                        'Congo, Democratic Republic of the' => 'Republique Democratique du Congo',
+                                        'Costa Rica' => 'Costa Rica',
+                                        'Cote d\'Ivoire' => 'Cote d\'Ivoire',
+                                        'Croatia' => 'Hrvatska',
+                                        'Cuba' => 'Cuba',
+                                        'Cyprus' => 'Kypros',
+                                        'Czech Republic' => 'Ceska Republika',
+                                        'Denmark' => 'Danmark',
+                                        'Djibouti' => 'Djibouti',
+                                        'Dominica' => 'Dominica',
+                                        'Dominican Republic' => 'Republica Dominicana',
+                                        'Ecuador' => 'Ecuador',
+                                        'Egypt' => 'Misr',
+                                        'El Salvador' => 'El Salvador',
+                                        'Equatorial Guinea' => 'Guinea Ecuatorial',
+                                        'Eritrea' => 'Ertra',
+                                        'Estonia' => 'Eesti',
+                                        'Ethiopia' => 'YeItyop\'iya',
+                                        'Fiji' => 'Fiji',
+                                        'Finland' => 'Suomi',
+                                        'France' => 'France or Republique Francaise',
+                                        'Gabon' => 'Gabon',
+                                        'The Gambia' => 'The Gambia',
+                                        'Georgia' => 'Sak\'art\'velo',
+                                        'Germany' => 'Deutschland',
+                                        'Ghana' => 'Ghana',
+                                        'Greece' => 'Ellas',
+                                        'Grenada' => 'Grenada',
+                                        'Guatemala' => 'Guatemala',
+                                        'Guinea' => 'Guinee',
+                                        'Guinea-Bissau' => 'Guine-Bissau',
+                                        'Guyana' => 'Guyana',
+                                        'Haiti' => 'Haiti',
+                                        'Honduras' => 'Honduras',
+                                        'Hungary' => 'Magyarorszag',
+                                        'Iceland' => 'Island',
+                                        'India' => 'India, Bharat',
+                                        'Indonesia' => 'Indonesia',
+                                        'Iran' => 'Iran, Persia',
+                                        'Iraq' => 'Al Iraq',
+                                        'Ireland' => 'Ireland or Eire',
+                                        'Israel' => 'Yisra\'el',
+                                        'Italy' => 'Italia',
+                                        'Jamaica' => 'Jamaica',
+                                        'Japan' => 'Nippon',
+                                        'Jordan' => 'Al Urdun',
+                                        'Kazakhstan' => 'Qazaqstan',
+                                        'Kenya' => 'Kenya',
+                                        'Kiribati' => 'Kiribati',
+                                        'Korea, North' => 'Choson or Choson-minjujuui-inmin-konghwaguk',
+                                        'Korea, South' => 'Taehan-min\'guk',
+                                        'Kuwait' => 'Al Kuwayt',
+                                        'Kyrgyzstan' => 'Kyrgyz Respublikasy',
+                                        'Laos' => 'Sathalanalat Paxathipatai Paxaxon Lao',
+                                        'Latvia' => 'Latvija',
+                                        'Lebanon' => 'Lubnan',
+                                        'Lesotho' => 'Lesotho',
+                                        'Liberia' => 'Liberia',
+                                        'Libya' => 'Libya',
+                                        'Liechtenstein' => 'Liechtenstein',
+                                        'Lithuania' => 'Lietuva',
+                                        'Luxembourg' => 'Luxembourg',
+                                        'Macedonia' => 'Makedonija',
+                                        'Madagascar' => 'Madagascar',
+                                        'Malawi' => 'Malawi',
+                                        'Malaysia' => 'Malaysia',
+                                        'Maldives' => 'Dhivehi Raajje',
+                                        'Mali' => 'Mali',
+                                        'Malta' => 'Malta',
+                                        'Marshall Islands' => 'Marshall Islands',
+                                        'Mauritania' => 'Muritaniyah',
+                                        'Mauritius' => 'Mauritius',
+                                        'Mexico' => 'Mexico',
+                                        'Federated States of Micronesia' => 'Federated States of Micronesia',
+                                        'Moldova' => 'Moldova',
+                                        'Monaco' => 'Monaco',
+                                        'Mongolia' => 'Mongol Uls',
+                                        'Morocco' => 'Al Maghrib',
+                                        'Mozambique' => 'Mocambique',
+                                        'Myanmar (Burma)' => 'Myanma Naingngandaw',
+                                        'Namibia' => 'Namibia',
+                                        'Nauru' => 'Nauru',
+                                        'Nepal' => 'Nepal',
+                                        'Netherlands' => 'Nederland',
+                                        'New Zealand' => 'New Zealand',
+                                        'Nicaragua' => 'Nicaragua',
+                                        'Niger' => 'Niger',
+                                        'Nigeria' => 'Nigeria',
+                                        'Norway' => 'Norge',
+                                        'Oman' => 'Uman',
+                                        'Pakistan' => 'Pakistan',
+                                        'Palau' => 'Belau',
+                                        'Panama' => 'Panama',
+                                        'Papua New Guinea' => 'Papua New Guinea',
+                                        'Paraguay' => 'Paraguay',
+                                        'Peru' => 'Peru',
+                                        'Philippines' => 'Pilipinas',
+                                        'Poland' => 'Polska',
+                                        'Portugal' => 'Portugal',
+                                        'Qatar' => 'Qatar',
+                                        'Romania' => 'Romania',
+                                        'Russia' => 'Rossiya',
+                                        'Rwanda' => 'Rwanda',
+                                        'Saint Kitts and Nevis' => 'Saint Kitts and Nevis',
+                                        'Saint Lucia' => 'Saint Lucia',
+                                        'Samoa' => 'Samoa',
+                                        'San Marino' => 'San Marino',
+                                        'Sao Tome and Principe' => 'Sao Tome e Principe',
+                                        'Saudi Arabia' => 'Al Arabiyah as Suudiyah',
+                                        'Senegal' => 'Senegal',
+                                        'Serbia and Montenegro' => 'Srbija-Crna Gora',
+                                        'Seychelles' => 'Seychelles',
+                                        'Sierra Leone' => 'Sierra Leone',
+                                        'Singapore' => 'Singapore',
+                                        'Slovakia' => 'Slovensko',
+                                        'Slovenia' => 'Slovenija',
+                                        'Solomon Islands' => 'Solomon Islands',
+                                        'Somalia' => 'Somalia',
+                                        'South Africa' => 'South Africa',
+                                        'Spain' => 'Espana',
+                                        'Sri Lanka' => 'Sri Lanka',
+                                        'Sudan' => 'As-Sudan',
+                                        'Suriname' => 'Suriname',
+                                        'Swaziland' => 'Swaziland',
+                                        'Sweden' => 'Sverige',
+                                        'Switzerland' => 'Suisse (French)',
+                                        'Syria' => 'Suriyah',
+                                        'Taiwan' => 'T\'ai-wan',
+                                        'Tajikistan' => 'Jumhurii Tojikistan',
+                                        'Tanzania' => 'Tanzania',
+                                        'Thailand' => 'Muang Thai',
+                                        'Tolo' => 'Togo',
+                                        'Tonga' => 'Tonga',
+                                        'Trinidad and Tobago' => 'Trinidad and Tobago',
+                                        'Tunisia' => 'Tunis',
+                                        'Turkey' => 'Turkiye',
+                                        'Turkmenistan' => 'Turkmenistan',
+                                        'Tuvalu' => 'Tuvalu',
+                                        'Uganda' => 'Uganda',
+                                        'Ukraine' => 'Ukrayina',
+                                        'United Arab Emirates' => 'Al Imarat al Arabiyah al Muttahidah',
+                                        'United Kingdom' => 'United Kingdom',
+                                        'United States' => 'United States',
+                                        'Uruguay' => 'Uruguay',
+                                        'Uzbekistan' => 'Uzbekiston Respublikasi',
+                                        'Vanuatu' => 'Vanuatu',
+                                        'Vatican City (Holy See)' => 'Santa Sede (Citta del Vaticano)',
+                                        'Venezuela' => 'Venezuela',
+                                        'Vietnam' => 'Viet Nam',
+                                        'Yemen' => 'Al Yaman',
+                                        'Zambia' => 'Zambia',
+                                        'Zimbabwe' => 'Zimbabwe');
 }
