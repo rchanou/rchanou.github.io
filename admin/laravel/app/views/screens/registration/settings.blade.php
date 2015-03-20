@@ -310,7 +310,7 @@ Registrations Settings
                             <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('image','Select an Image',array('id'=>'','class'=>'')) }}</label>
                             <div class="col-sm-9 col-md-9 col-lg-10">
                                 {{ Form::file('image','',array('id'=>'','class'=>'')) }}
-                                <span class="help-block text-left">Image must be a JPG. Recommended size: 1034x28 pixels.</span>
+                                <span class="help-block text-left">Image must be a JPG. Recommended size: 1034x728 pixels.</span>
                             </div>
                         </div>
                         <div class="form-actions">
