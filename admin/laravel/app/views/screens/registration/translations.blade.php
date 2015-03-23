@@ -115,8 +115,10 @@ Translations
                                           <p/>The culture highlighted in green denotes the default culture shown at registration.
                                       </div>
                                   </div>
-                                  {{ Form::submit('Save Changes', array('class' => 'btn btn-info')) }}
-                                  {{Form::close()}}
+                                  <div class="col-sm-12">
+                                      {{ Form::submit('Save Changes', array('class' => 'btn btn-info')) }}
+                                      {{Form::close()}}
+                                  </div>
                                   @else
                                       <div class="alert alert-warning">
                                       This feature is not enabled. Please contact <a href="mailto:support@clubspeed.com">Club Speed</a> for activation and training.

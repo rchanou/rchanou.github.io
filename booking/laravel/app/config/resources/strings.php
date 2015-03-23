@@ -304,7 +304,8 @@ class Strings
             'es-ES' => 'Castellano',
             'es-PR' => 'Español (PR)',
             'ru-RU' => 'Pусский язык',
-            'fr-CA' => 'Français',
+            'fr-FR' => 'Français',
+            'fr-CA' => 'Français (CA)',
             'de-DE' => 'Deutsch',
             'nl-NL' => 'Nederlands',
             'pl-PL' => 'Język polski',
@@ -312,7 +313,8 @@ class Strings
             'ar-AE' => 'العربية',
             'it-IT' => 'Italiano',
             'bg-BG' => 'български език',
-            'sv-SE' => 'Svenska'
+            'sv-SE' => 'Svenska',
+            'zh-CN' => '中文'
         );
 
         //Error codes. Used for sparingly few API calls.
