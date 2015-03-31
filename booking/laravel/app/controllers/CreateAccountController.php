@@ -298,7 +298,7 @@ class CreateAccountController extends BaseController
         Session::put('authenticated',$customerId);
         Session::put('authenticatedEmail',$customerData['email']);
 
-        $quantity = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : 1;
+        $quantity = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : (isset($input['quantity']) ? $input['quantity'] : 1);
         if ($source == "step2") //Direct them to the URL that will add that item to their cart
         {
             return Redirect::to("/cart?action=add&heatId=$heatId&quantity=$quantity");

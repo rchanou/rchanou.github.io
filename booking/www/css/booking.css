@@ -37,7 +37,7 @@ footer {
 .steps {
     font-size: 18px;
     text-align: center;
-    border-top: 2px solid #bbbbbb;
+    /*border-top: 2px solid #bbbbbb;*/
     border-bottom: 2px solid #bbbbbb;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -89,14 +89,7 @@ footer {
 }
 
 .formButton {
-    background: #a90329; /* Old browsers */
-    background: -moz-linear-gradient(top,  #a90329 0%, #8f0222 44%, #6d0019 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#a90329), color-stop(44%,#8f0222), color-stop(100%,#6d0019)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* IE10+ */
-    background: linear-gradient(to bottom,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a90329', endColorstr='#6d0019',GradientType=0 ); /* IE6-9 */
+    background: #cd2128;
     color: white;
     font-size: 20px;
 }
@@ -107,13 +100,6 @@ footer {
 
 .formButtonDisabled {
     background: #bbbbbb; /* Old browsers */
-    background: -moz-linear-gradient(top,  #bbbbbb 0%, #999999 44%, #444444 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#bbbbbb), color-stop(44%,#999999), color-stop(100%,#444444)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  #bbbbbb 0%,#999999 44%,#444444 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  #bbbbbb 0%,#999999 44%,#444444 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  #bbbbbb 0%,#999999 44%,#444444 100%); /* IE10+ */
-    background: linear-gradient(to bottom,  #bbbbbb 0%,#999999 44%,#444444 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bbbbbb', endColorstr='#444444',GradientType=0 ); /* IE6-9 */
     color: white;
     font-size: 20px;
 }
@@ -123,14 +109,7 @@ footer {
 }
 
 .regularButton {
-    background: #a90329; /* Old browsers */
-    background: -moz-linear-gradient(top,  #a90329 0%, #8f0222 44%, #6d0019 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#a90329), color-stop(44%,#8f0222), color-stop(100%,#6d0019)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* IE10+ */
-    background: linear-gradient(to bottom,  #a90329 0%,#8f0222 44%,#6d0019 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a90329', endColorstr='#6d0019',GradientType=0 ); /* IE6-9 */
+    background: #cd2128; /* Old browsers */
     color: white;
     font-size: 20px;
     width: 32%;
@@ -156,6 +135,11 @@ footer {
     vertical-align: middle;
     font-weight: bold;
     padding-right: 0px;
+}
+
+.quantityText {
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .noRaceResults {

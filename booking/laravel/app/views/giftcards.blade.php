@@ -50,7 +50,9 @@
         @foreach($giftCardOptions as $giftCard)
         <div class="raceResult" id="{{$giftCard['productId']}}">
             <div class="raceResultHeader row">
-                <div class="raceName ellipsis col-xs-8">{{$giftCard['description']}}</div>
+                <div class="raceName ellipsis col-xs-8">
+                    {{$giftCard['description']}}
+                </div>
                 <div class="raceDate col-xs-4 text-right">{{$moneyFormatter->formatCurrency($giftCard['price1'], $currency)}}</div>
             </div>
 
@@ -59,8 +61,9 @@
 
                 </div>
                 <div class="raceBookButtonArea col-xs-6 text-right">
+                    <span class="quantityText">Qty: {{ Form::selectRange('quantity', 1, 20, 1, array('class' => 'quantityDropdown', 'id' => 'quantity_' . $giftCard['productId'])) }}</span>
                     @if($authenticated != null)
-                        <a href="cart?action=add&productId={{$giftCard['productId']}}&quantity=1"><button type="button" class="formButton">{{$strings['str_buyIt']}}</button></a>
+                        <a href="cart?action=add&productId={{$giftCard['productId']}}&quantity=1" id="buyLink_{{$giftCard['productId']}}"><button type="button" class="formButton">{{$strings['str_buyIt']}}</button></a>
                     @else
                         <button type="button" class="formButton" data-toggle="collapse" data-target="#loginOptions_{{$giftCard['productId']}}">{{$strings['str_buyIt']}}</button>
                     @endif
@@ -72,7 +75,7 @@
             <button type="button" class="regularButton" data-toggle="collapse" data-target="#createAccount_{{$giftCard['productId']}}" onclick="$('#loginToAccount_{{$giftCard['productId']}}').collapse('hide')">{{$strings['str_createANewAccount']}}</button>
 
                 @if($settings['enableFacebook'])
-                <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('giftcards','loginfb',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions&state={{$giftCard['productId']}}|1">
+                <a id="fbLink_{{$giftCard['productId']}}" href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('giftcards','loginfb',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions&state={{$giftCard['productId']}}|1">
                     <button type="button" class="regularButton">{{$strings['str_loginWithFacebook']}}</button>
                 </a>
                 @endif
@@ -370,6 +373,8 @@
 
                     <input type="hidden" name="productId" value="{{$giftCard['productId']}}">
                     <input type="hidden" name="pageSource" value="giftcards">
+                    <input type="hidden" name="quantity" value="1" id="createQuantity_{{$giftCard['productId']}}">
+
                     <div class="rightAligned">
                         <button type="submit" class="formButton">{{$strings['str_createAccount']}}</button>
                     </div>
@@ -394,6 +399,7 @@
                     <label for="loginPassword_{{$giftCard['productId']}}"><strong>{{$strings['str_password']}}: <span class="requiredAsterisk">*</span></strong></label> <input type="password" name="Password" id="loginPassword_{{$giftCard['productId']}}" class="required"><br/>
                     <input type="hidden" name="productId" value="{{$giftCard['productId']}}">
                     <input type="hidden" name="pageSource" value="giftcards">
+                    <input type="hidden" name="quantity" value="1" id="loginQuantity_{{$giftCard['productId']}}">
                     <div class="rightAligned">
                         {{link_to('resetpassword',$strings['str_resetPassword'])}} <button type="submit" class="formButton">{{$strings['str_login']}}</button>
                     </div>
@@ -488,5 +494,41 @@
 
 
 </script>
+
+<!-- Updating quantity links and inputs when dropdowns change -->
+<script>
+    $( document ).ready(function() {
+        var quantityDropdowns = $('.quantityDropdown');
+        quantityDropdowns.each(function() {
+            $(this).change(function() {
+                var currentDropdown = $(this);
+                var newQuantity = currentDropdown.val();
+                var id = currentDropdown.attr('id').replace('quantity_','');
+                var loginQuantity = $('#loginQuantity_' + id);
+                var createQuantity = $('#createQuantity_' + id);
+                var buyLink = $('#buyLink_' + id);
+                var fbLink = $('#fbLink_' + id);
+                loginQuantity.val(newQuantity);
+                createQuantity.val(newQuantity);
+                if (buyLink.length > 0)
+                {
+                    var buyLinkURL = buyLink.attr('href');
+                    buyLinkURL = buyLinkURL.substring(0, buyLinkURL.indexOf('quantity'));
+                    buyLinkURL = buyLinkURL + 'quantity=' + newQuantity;
+                    buyLink.attr('href',buyLinkURL);
+                }
+                if (fbLink.length > 0)
+                {
+                    var fbLinkURL = fbLink.attr('href');
+                    fbLinkURL = fbLinkURL.substring(0, fbLinkURL.indexOf('|'));
+                    fbLinkURL = fbLinkURL + '|' + newQuantity;
+                    fbLink.attr('href',fbLinkURL);
+                }
+            });
+        });
+    });
+
+</script>
+
 @stop
 <!-- END JAVASCRIPT INCLUDES -->

@@ -1,4 +1,10 @@
 <!-- Footer -->
+    @if(Session::get('giftCardSalesEnabled') && Request::segment(1) != "disabled" && Request::segment(1) != "giftcards")
+        <div>
+            <a href="{{URL::to('giftcards')}}"><img src="{{asset($images['buygiftcards'])}}"></a>
+            <p/>
+        </div>
+    @endif
     @if(Session::has('authenticated'))
         <div id="loggedInAs">
         {{$strings['str_youAreLoggedInAs']}} <strong>{{Session::get('authenticatedEmail')}}</strong>.<br/><a href="logout">{{$strings['str_logout']}}</a><p/><p/>

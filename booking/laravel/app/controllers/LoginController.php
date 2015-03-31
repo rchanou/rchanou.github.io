@@ -58,7 +58,7 @@ class LoginController extends BaseController
         $productId = isset($input['productId']) ? $input['productId'] : null; //Product that the user intends to book after creating the account
         $source = isset($input['pageSource']) ? $input['pageSource'] : 'step1'; //Where the user came from and should be redirected to in the case of an error
         $itemId = $heatId != null ? $heatId : $productId; //The heatId or productId being booked
-        $quantity = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : 1;
+        $quantity = isset($input['numberOfParticipants']) ? $input['numberOfParticipants'] : (isset($input['quantity']) ? $input['quantity'] : 1);
 
         //DATA VALIDATION
         $rules = array();

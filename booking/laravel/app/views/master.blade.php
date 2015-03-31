@@ -13,7 +13,7 @@
     {{ HTML::style('css/vendors/jquery-ui/jquery-ui.theme.min.css') }}
     {{ HTML::style('css/vendors/bootstrap-theme.min.css') }}
 
-    <?php $bookingStylesURL = 'css/booking.css?v=1.1'; //To prevent caching ?>
+    <?php $bookingStylesURL = 'css/booking.css?v=1.2'; //To prevent caching ?>
     {{ HTML::style($bookingStylesURL) }}
 
     {{ HTML::script('js/vendors/jquery-2.1.0.min.js')}} <!-- Needed earlier -->
@@ -106,7 +106,7 @@
     {{ HTML::script('js/vendors/jquery-ui/jquery-ui.min.js') }}
 
     <!-- Custom JS if present in /assets -->
-    <?php $customJavaScriptURL = str_replace('http://','https://', Config::get('config.assetsURL')) . '/js/custom-js.js??v=1.1'; //To prevent caching ?>
+    <?php $customJavaScriptURL = str_replace('http://','https://', Config::get('config.assetsURL')) . '/js/custom-js.js?v=1.2'; //To prevent caching ?>
     {{ ((remoteFileExists(Config::get('config.assetsURL') . '/js/custom-js.js?')) ? HTML::script($customJavaScriptURL) : '') }}
 
     <script>

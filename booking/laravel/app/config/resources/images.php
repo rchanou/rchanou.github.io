@@ -30,7 +30,8 @@ class Images
             'background' => 'images/background.jpg', //Needs to be overwritten in the CSS file
             'disconnected' => 'images/disconnected.png',
             'success' => 'images/success.png',
-            'clubspeed_logo' => 'images/clubspeed_logo.png'
+            'clubspeed_logo' => 'images/clubspeed_logo.png',
+            'buygiftcards' => 'images/buygiftcards.png'
         );
 
         $assetsURL = 'http://' . $_SERVER['HTTP_HOST'] . 'assets/booking/';
