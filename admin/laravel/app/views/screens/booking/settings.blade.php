@@ -652,6 +652,39 @@ Online Bookings Settings
         </div>
       </div>
 
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="widget-box">
+                    <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                        <h5>Buy A Gift Card Image</h5>
+                    </div>
+                    <div class="widget-content nopadding">
+                        {{ Form::open(array('action'=>'BookingController@updateImage','files'=>true, 'class' => 'form-horizontal')) }}
+                        @if(!empty($buygiftcards_image_url))
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3 col-lg-2 control-label">Current Image</div><div class="col-sm-9 col-md-9 col-lg-10"><a href="{{$buygiftcards_image_url}}" target="_blank"><img src="{{$buygiftcards_image_url}}" width="305" height="39" style="border: 1px solid #ddd; padding: 5px; margin: 1em;" /></a></div>
+                            </div>
+                        @endif
+                        <div class="form-group">
+                            <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('image','Select an Image',array('id'=>'','class'=>'')) }}</label>
+                            <div class="col-sm-9 col-md-9 col-lg-10">
+                                {{ Form::file('image','',array('id'=>'','class'=>'')) }}
+                                <span class="help-block text-left">Image must be a PNG. Recommended size: 610x77 pixels.</span>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <input type="hidden" name="filename" value="buygiftcards.png">
+                            {{ Form::submit('Upload', array('class' => 'btn btn-info')) }}
+                        </div>
+                        {{ Form::close() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
       <div class="row">
         <div class="col-xs-12">
             <div class="widget-box">

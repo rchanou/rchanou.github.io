@@ -13,7 +13,7 @@ class BookingController extends BaseController
 
         //Image uploader data
         $this->image_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'booking' . DIRECTORY_SEPARATOR . 'images';
-        $this->image_filenames = array('background.jpg','header.jpg');
+        $this->image_filenames = array('background.jpg','header.jpg','buygiftcards.png');
         $this->image_paths = array();
         $this->image_urls = array();
 
@@ -245,6 +245,7 @@ class BookingController extends BaseController
                   'supportedNumberLocales' => $supportedNumberLocales,
                   'background_image_url' => is_file($this->image_paths['background.jpg']) ? $this->image_urls['background.jpg'] : null,
                   'header_image_url' => is_file($this->image_paths['header.jpg']) ? $this->image_urls['header.jpg'] : null,
+                  'buygiftcards_image_url' => is_file($this->image_paths['buygiftcards.png']) ? $this->image_urls['buygiftcards.png'] : null,
                   'custom_css_url' => is_file($this->css_path) ? $this->css_url : null,
                   'custom_js_url' => is_file($this->js_path) ? $this->js_url : null,
             ));
