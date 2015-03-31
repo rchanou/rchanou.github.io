@@ -54,7 +54,7 @@ class BookingController extends BaseController
             . '<b>eGiftcard Number:</b> {{giftCardNo}}<br/>'
             . '<b>eGiftcard Barcode:</b> {{giftCardImage}}<br/>'
             . '<i class="fa fa-question-circle tip"
-                            data-container="body" data-toggle="popover" data-placement="top" data-html="true"
+                            data-container="body" data-toggle="popover" data-placement="bottom" data-html="true"
                             data-content="
                                 <div class=\'text-center\'><strong>Valid characters</strong></div>
                                 <table class=\'table table-condensed table-mini\'>
