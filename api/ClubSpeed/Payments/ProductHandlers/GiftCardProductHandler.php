@@ -136,6 +136,19 @@ class GiftCardProductHandler extends BaseProductHandler {
                     'business' => $businessName
                 );
 
+                $dateFormat = $this->findStringBetween($giftCardEmailBodyHtml,'{{date:','}}');
+
+                if ($dateFormat !== null)
+                {
+                    $dateTag = '{{date:' . $dateFormat . '}}';
+                    $date = date($dateFormat);
+                    $giftCardEmailBodyHtml = str_replace(
+                        array($dateTag),
+                        array($date),
+                        $giftCardEmailBodyHtml
+                    );
+                }
+
                 $receiptBody = Templates::buildFromString($giftCardEmailBodyHtml, $giftCardData);
 
                 $mail = Mail::builder()
@@ -157,5 +170,15 @@ class GiftCardProductHandler extends BaseProductHandler {
 
         $return['success'] = 'Gift Cards: ' . implode(', ', $return['success']);
         return $return;
+    }
+
+    private function findStringBetween($string, $start, $end)
+    {
+        $string = " ".$string;
+        $ini = strpos($string,$start);
+        if ($ini == 0) return null;
+        $ini += strlen($start);
+        $len = strpos($string,$end,$ini) - $ini;
+        return substr($string,$ini,$len);
     }
 }
