@@ -52,7 +52,63 @@ class BookingController extends BaseController
             . '<b>Customer\'s Name:</b> {{customer}}<br/>'
             . '<b>Your Business Name:</b> {{business}}<br/>'
             . '<b>eGiftcard Number:</b> {{giftCardNo}}<br/>'
-            . '<b>eGiftcard Barcode:</b> {{giftCardImage}}';
+            . '<b>eGiftcard Barcode:</b> {{giftCardImage}}<br/>'
+            . '<i class="fa fa-question-circle tip"
+                            data-container="body" data-toggle="popover" data-placement="top" data-html="true"
+                            data-content="
+                                <div class=\'text-center\'><strong>Valid characters</strong></div>
+                                <table class=\'table table-condensed table-mini\'>
+                                    <thead>
+                                        <tr>
+                                            <th>Character</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>d</td>
+                                            <td>Day of the month, 2 digits with leading zeros</td>
+                                            <td>01 to 31</td>
+                                        </tr>
+                                        <tr>
+                                            <td>D</td>
+                                            <td>A textual representation of a day, three letters</td>
+                                            <td>Mon through Sun</td>
+                                        </tr>
+                                        <tr>
+                                            <td>l (lowercase L)</td>
+                                            <td>A full textual representation of the day of the week</td>
+                                            <td>Sunday through Saturday</td>
+                                        </tr>
+                                        <tr>
+                                            <td>m</td>
+                                            <td>Numeric representation of a month, with leading zeros</td>
+                                            <td>01 through 12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>M</td>
+                                            <td>A short textual representation of a month, three letters</td>
+                                            <td>Jan through Dec</td>
+                                        </tr>
+                                        <tr>
+                                            <td>F</td>
+                                            <td>A full textual representation of a month, such as January or March</td>
+                                            <td>January through December</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Y</td>
+                                            <td>A full numeric representation of a year, 4 digits</td>
+                                            <td>Examples: 1999 or 2003</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class=\'table-mini\'>
+                                Also usable: Spaces, dashes, commas, and forward slashes.
+                                </div>
+                            ">
+                        </i>'
+        . ' <b>Date:</b> {{date:Y-m-d}}';
 
         $giftCardEmailSubjectNote = 'The following can be inserted into this template:<br/><br/>'
             . '<b>Your Business Name:</b> {{business}}';
