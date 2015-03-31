@@ -652,6 +652,7 @@ Online Bookings Settings
         </div>
       </div>
 
+        @if(isset($bookingSettings['giftCardSalesEnabled']) && $bookingSettings['giftCardSalesEnabled'] != false)
         <div class="row">
             <div class="col-xs-12">
                 <div class="widget-box">
@@ -684,6 +685,7 @@ Online Bookings Settings
                 </div>
             </div>
         </div>
+        @endif
 
       <div class="row">
         <div class="col-xs-12">
