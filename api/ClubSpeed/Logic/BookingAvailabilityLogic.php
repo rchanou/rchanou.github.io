@@ -59,8 +59,10 @@ class BookingAvailabilityLogic extends BaseLogic {
             throw new \CSException("Unable to find the ControlPanel setting for Booking." . $endName . "!");
         $beginningSetting = Convert::toNumber($beginning->SettingValue ?: $beginning->DefaultSetting);
         $endSetting = Convert::toNumber($end->SettingValue ?: $end->DefaultSetting);
-        $beginning = Convert::getDate(time() + $beginningSetting);
-        $end = Convert::getDate(time() + $endSetting);
+        $beginning = new \DateTime();
+        $beginning->add(new \DateInterval('PT' . $beginningSetting . 'S'));
+        $end = new \DateTime();
+        $end->add(new \DateInterval('PT' . $endSetting . 'S'));
         return array(
             'beginning' => $beginning,
             'end' => $end
@@ -70,8 +72,8 @@ class BookingAvailabilityLogic extends BaseLogic {
     public final function visible($params = array()) {
         $dates = $this->getPublicDates();
         $availability = $this->logic->bookingAvailability->find(
-            $dates['beginning'] . ' <= HeatStartsAt'
-            . ' AND HeatStartsAt < ' . $dates['end']
+            Convert::toDateForServer($dates['beginning']) . ' <= HeatStartsAt'
+            . ' AND HeatStartsAt < ' . Convert::toDateForServer($dates['end'])
         );
         return $availability;
     }
@@ -81,26 +83,33 @@ class BookingAvailabilityLogic extends BaseLogic {
         if (!isset($params['start']))
             $params['start'] = $publicDates['beginning'];
         else {
-            $passedBeginningTime = strtotime($params['start']);
-            $publicBeginningTime = strtotime($publicDates['beginning']);
-            if ($passedBeginningTime < $publicBeginningTime)
-                $params['start'] = $publicDates['beginning']; // don't allow a date range past the control panel setting
+            $passedBeginningTime = new \DateTime($params['start']);
+            if ($passedBeginningTime < $publicDates['beginning'])
+                $params['start'] = $publicDates['beginning']; // don't allow a date range before the control panel setting
+            else
+                $params['start'] = $passedBeginningTime;
         }
         if (!isset($params['end'])) {
             $timeformat = 'Y-m-d H:i:s';
             $dayformat = 'Y-m-d';
-            $params['end'] = Convert::toDateForServer(date($dayformat, strtotime($params['start'] . ' + 1 day')), $timeformat);
+            $date = new \DateTime($params['start']->format($timeformat)); // cheater copy constructor
+            $date->add(new \DateInterval('P1D')); // period 1 day
+            $endOfDay = new \DateTime($date->format($dayformat)); // trim time
+            if ($endOfDay < $publicDates['end'])
+                $params['end'] = $endOfDay;
+            else
+                $params['end'] = $publicDates['end'];
         }
         else {
-            $passedEndTime = strtotime($params['end']);
-            $publicEndTime = strtotime($publicDates['end']);
-            if ($passedEndTime > $publicEndTime)
-                $params['end'] = $publicDates['end']; // don't allow a date range past the control panel setting
+            $passedEndTime = new \DateTime($params['end']);
+            if ($passedEndTime > $publicDates['end'])
+                $params['end'] = $publicDates['end']; // don't allow a date range after the control panel setting
+            else
+                $params['end'] = $passedEndTime;
         }
-
         $sqlParams = array(
-            ':start' => $params['start'] // make associative for tsql
-            , ':end' => $params['end']
+              ':start' => Convert::toDateForServer($params['start']) // make associative for tsql
+            , ':end'   => Convert::toDateForServer($params['end'])
         );
         $sql = ""
             ."\nDECLARE @StartRange DATETIME2;"
