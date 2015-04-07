@@ -61,8 +61,9 @@ Registrations Settings
                                 <thead>
                                     <tr>
                                         <th>Field</th>
-                                        <th style="width: 33%">Shown</th>
-                                        <th style="width: 33%">Required</th>
+                                        <th style="width: 25%">Shown</th>
+                                        <th style="width: 25%">Required</th>
+                                        <th style="width: 25%">Validated</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -72,6 +73,22 @@ Registrations Settings
                                       <td>{{$field['label']}}</td>
                                       <td><input id="{{$field['shownId']}}" name="{{$field['shownId']}}" type="checkbox" {{$isChecked[$field['shownId']]}}></td>
                                       <td><input id="{{$field['requiredId']}}" name="{{$field['requiredId']}}" type="checkbox" {{$isChecked[$field['requiredId']]}}></td>
+                                      <td>
+                                          @if(isset($field['validatedId']) && isset($isChecked[$field['validatedId']]))
+                                        <input id="{{$field['validatedId']}}" name="{{$field['validatedId']}}" type="checkbox" {{$isChecked[$field['validatedId']]}}>
+                                              @if($field['validatedId'] == 'zipValidated')
+                                                  <i class="fa fa-question-circle tip" style="vertical-align: super"
+                                                     data-container="body" data-toggle="popover" data-placement="top" data-html="true"
+                                                     data-content="<strong>Supported ZIP validation formats:</strong>
+                                               <br>
+                                                <ul>
+                                                  <li>U.S. ZIP (Ex. 12345)</li>
+                                                  <li>U.S. ZIP+4 (Ex. 12345-6789)</li>
+                                                </ul>">
+                                                  </i>
+                                              @endif
+                                          @endif
+                                      </td>
                                     </tr>
                                     @endif
                                   @endforeach
@@ -82,9 +99,10 @@ Registrations Settings
                         <table class="table table-bordered table-striped table-hover text-center">
                           <thead>
                             <tr>
-                              <th>Field</th>
-                              <th style="width: 33%">Shown</th>
-                              <th style="width: 33%">Required</th>
+                                <th>Field</th>
+                                <th style="width: 25%">Shown</th>
+                                <th style="width: 25%">Required</th>
+                                <th style="width: 25%">Validated</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -94,6 +112,22 @@ Registrations Settings
                                 <td>{{$field['label']}}</td>
                                 <td><input id="{{$field['shownId']}}" name="{{$field['shownId']}}" type="checkbox" {{$isChecked[$field['shownId']]}}></td>
                                 <td><input id="{{$field['requiredId']}}" name="{{$field['requiredId']}}" type="checkbox" {{$isChecked[$field['requiredId']]}}></td>
+                                <td>
+                                    @if(isset($field['validatedId']) && isset($isChecked[$field['validatedId']]))
+                                        <input id="{{$field['validatedId']}}" name="{{$field['validatedId']}}" type="checkbox" {{$isChecked[$field['validatedId']]}}>
+                                        @if($field['validatedId'] == 'zipValidated')
+                                            <i class="fa fa-question-circle tip" style="vertical-align: super"
+                                               data-container="body" data-toggle="popover" data-placement="top" data-html="true"
+                                               data-content="<strong>Supported ZIP validation formats:</strong>
+                                               <br>
+                                                <ul>
+                                                  <li>U.S. ZIP (Ex. 12345)</li>
+                                                  <li>U.S. ZIP+4 (Ex. 12345-6789)</li>
+                                                </ul>">
+                                            </i>
+                                        @endif
+                                    @endif
+                                </td>
                               </tr>
                               @endif
                             @endforeach
@@ -371,9 +405,15 @@ Registrations Settings
 
         @foreach ($customerFields as $field)
 
-          //If a customer field is not shown, make sure it is not required
+          //If a customer field is not shown, make sure it is not required or validated
           $("#{{$field['shownId']}}").on('ifUnchecked',function (event) {
             $("#{{$field['requiredId']}}").iCheck('uncheck');
+              @if(isset($field['validatedId']))
+              if ($("#{{$field['validatedId']}}").length > 0)
+              {
+                  $("#{{$field['validatedId']}}").iCheck('uncheck');
+              }
+              @endif
           });
 
           //If a customer field is required, make sure it is shown
@@ -381,6 +421,21 @@ Registrations Settings
             $("#{{$field['shownId']}}").iCheck('check');
           });
 
+          @if(isset($field['validatedId']))
+          if ($("#{{$field['validatedId']}}").length > 0)
+          {
+              //If a customer field requires validation, make sure it is shown and required
+              $("#{{$field['validatedId']}}").on('ifChecked',function (event) {
+                  $("#{{$field['shownId']}}").iCheck('check');
+                  $("#{{$field['requiredId']}}").iCheck('check');
+              });
+              //If a customer field is not required, make sure it is not validated
+              $("#{{$field['requiredId']}}").on('ifUnchecked',function (event) {
+                  $("#{{$field['validatedId']}}").iCheck('uncheck');
+              });
+          }
+
+          @endif
         @endforeach
 
     });

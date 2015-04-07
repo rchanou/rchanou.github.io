@@ -73,7 +73,7 @@ class RegistrationController extends BaseController
           array('shownId' => 'CfgRegAddShow', 'requiredId' => 'CfgRegAddReq', 'label' => 'Address'),
           array('shownId' => 'CfgRegCityShow', 'requiredId' => 'CfgRegCityReq', 'label' => 'City'),
           array('shownId' => 'CfgRegStateShow', 'requiredId' => 'CfgRegStateReq', 'label' => 'State'),
-          array('shownId' => 'CfgRegZipShow', 'requiredId' => 'CfgRegZipReq', 'label' => 'Zip'),
+          array('shownId' => 'CfgRegZipShow', 'requiredId' => 'CfgRegZipReq', 'label' => 'Zip', 'validatedId' => 'zipValidated'),
           array('shownId' => 'CfgRegCntryShow', 'requiredId' => 'CfgRegCntryReq', 'label' => 'Country'),
           array('shownId' => 'CfgRegRcrNameShow', 'requiredId' => 'CfgRegRcrNameReq', 'label' => 'Racer Name'),
           array('shownId' => 'CfgRegSrcShow', 'requiredId' => 'CfgRegSrcReq', 'label' => 'How did you hear about us?'),
@@ -140,7 +140,8 @@ class RegistrationController extends BaseController
           'cfgRegAllowMinorToSign',
           'CfgRegDisblEmlForMinr',
           'CfgRegUseMsign',
-          'showTextingWaiver'
+          'showTextingWaiver',
+          'zipValidated'
         );
 
         $newRegistrationSettings = array();
@@ -162,7 +163,6 @@ class RegistrationController extends BaseController
 
         $newreg1Settings = array();
         $newreg1Settings['enableWaiverStep'] = isset($input['enableWaiverStep']) ? 1 : 0;
-
 
         //End formatting
 
