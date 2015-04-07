@@ -71,6 +71,7 @@ class Settings {
             'CfgRegUseMsign' => true,
             'genderShown' => true,
             'genderRequired' => true,
+            'zipValidated' => false,
 
             'states' => array('' => '','Alaska' => 'Alaska',
                 'Alabama' => 'Alabama',

@@ -279,7 +279,11 @@
                     <div>
                         {{ Form::label('Zip', $strings['str_Zip'] . ':') }}
                         @if($settings['CfgRegZipReq'])
-                        <span class="requiredAsterisk">*</span><br/>{{ Form::text('Zip',Input::old('Zip',''),array('class'=>'required','maxlength'=>'15')) }}<p/>
+                            @if($settings['zipValidated'])
+                                <span class="requiredAsterisk">*</span><br/>{{ Form::text('Zip',Input::old('Zip',''),array('class'=>'required validated','maxlength'=>'15')) }}<p/>
+                            @else
+                                <span class="requiredAsterisk">*</span><br/>{{ Form::text('Zip',Input::old('Zip',''),array('class'=>'required','maxlength'=>'15')) }}<p/>
+                            @endif
                         @else
                         <br/>{{ Form::text('Zip',Input::old('Zip',''),array('maxlength'=>'15')) }}<p/>
                         @endif
@@ -866,8 +870,20 @@
             if ($('#Zip').length > 0 && $('#Zip').hasClass('required'))
             {
                 var Zip = new LiveValidation('Zip');
-                Zip.add( Validate.Presence,
-                    { failureMessage: "{{$strings['str_required']}}" } );
+                if ($('#Zip').hasClass('validated'))
+                {
+                    Zip.add( Validate.Format,
+                            {
+                                pattern: /(^\d{5}$)|(^\d{5}-\d{4}$)/,
+                                failureMessage: "{{$strings['str_invalidZipCode']}}"
+                            }
+                    );
+                }
+                else
+                {
+                    Zip.add( Validate.Presence,
+                            { failureMessage: "{{$strings['str_required']}}" } );
+                }
             }
 
             if ($('#city').length > 0 && $('#city').hasClass('required'))

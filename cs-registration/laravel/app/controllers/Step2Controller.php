@@ -143,7 +143,46 @@ class Step2Controller extends BaseController {
         }
         if ($settings['CfgRegZipShow'] && $settings['CfgRegZipReq'])
         {
-            $rules['Zip'] = 'required';
+            if ($settings['zipValidated'])
+            {
+                $rules['Zip'] = 'validzipcode';
+
+                //Custom Zip validator - either 5 numerical digits, or 9 digit format (11111-4444)
+                Validator::extend('validzipcode', function($attribute, $value, $parameters) {
+                    $zipIsValid = true;
+                    $zip = Input::get('Zip');
+                    if (strlen($zip) <= 0)
+                    {
+                        $zipIsValid = false;
+                    }
+                    else if (strlen($zip) == 5)
+                    {
+                        if (!ctype_digit($zip))
+                        {
+                            $zipIsValid = false;
+                        }
+                    }
+                    else if (strlen($zip) == 10)
+                    {
+                        $zipFirstFive = substr($zip,0,5);
+                        $zipDash = substr($zip,5,1);
+                        $zipLastFour = substr($zip,-4);
+                        if (!ctype_digit($zipFirstFive) || !ctype_digit($zipLastFour) || $zipDash != '-')
+                        {
+                            $zipIsValid = false;
+                        }
+                    }
+                    else
+                    {
+                        $zipIsValid = false;
+                    }
+                    return $zipIsValid;
+                });
+            }
+            else
+            {
+                $rules['Zip'] = 'required';
+            }
         }
         if ($settings['cfgRegCustTxt1Show'] && $settings['cfgRegCustTxt1req'])
         {
@@ -227,7 +266,8 @@ class Step2Controller extends BaseController {
             'Custom2.required' => $strings['str_Custom2.required'],
             'Custom3.required' => $strings['str_Custom3.required'],
             'Custom4.required' => $strings['str_Custom4.required'],
-            'LicenseNumber.required' => $strings['str_LicenseNumber.required']
+            'LicenseNumber.required' => $strings['str_LicenseNumber.required'],
+            'Zip.validzipcode' => $strings['str_invalidZipCode']
         );
 
         //Create the validator
