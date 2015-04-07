@@ -5,7 +5,8 @@
 
 $settings = array(
 	'genderShown' => true,
-	'genderRequired' => true
+	'genderRequired' => true,
+    'zipValidated' => false
 	);
 
 error_reporting(E_ALL);
