@@ -113,7 +113,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'This field is required',
         'str_Custom4.required' => 'This field is required',
         'str_LicenseNumber.required' => 'License # is required',
-        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.'
+        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''
     ),
     'en-GB' => array(
         'str_welcomeMessage' => 'Welcome to our track!',
@@ -222,7 +224,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'This field is required',
         'str_Custom4.required' => 'This field is required',
         'str_LicenseNumber.required' => 'License # is required',
-        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.'),
+        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''),
     'en-NZ' => array(
         'str_welcomeMessage' => 'Welcome to our track!',
         'str_registerHeader' => 'Register',
@@ -330,7 +334,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'This field is required',
         'str_Custom4.required' => 'This field is required',
         'str_LicenseNumber.required' => 'License # is required',
-        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.'),
+        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''),
     'en-AU' => array(
         'str_welcomeMessage' => 'Welcome to our track!',
         'str_registerHeader' => 'Register',
@@ -438,7 +444,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'This field is required',
         'str_Custom4.required' => 'This field is required',
         'str_LicenseNumber.required' => 'License # is required',
-        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.'),
+        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''),
     'en-IE' => array(
         'str_welcomeMessage' => 'Welcome to our track!',
         'str_registerHeader' => 'Register',
@@ -546,7 +554,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'This field is required',
         'str_Custom4.required' => 'This field is required',
         'str_LicenseNumber.required' => 'License # is required',
-        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.'),
+        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''),
     'en-CA' => array(
         'str_welcomeMessage' => 'Welcome to our track!',
         'str_registerHeader' => 'Register',
@@ -654,7 +664,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'This field is required',
         'str_Custom4.required' => 'This field is required',
         'str_LicenseNumber.required' => 'License # is required',
-        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.'),
+        'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''),
     'zh-CN' => array(
         'str_welcomeMessage' => '欢迎来到我们车馆',
         'str_registerHeader' => '注册',
@@ -762,7 +774,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => '这项必填',
         'str_Custom4.required' => '这项必填',
         'str_LicenseNumber.required' => '赛照号码',
-        'str_problemWithRegistration' => '您提交的信息有误，请重试'
+        'str_problemWithRegistration' => '您提交的信息有误，请重试',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''
     ),
     'de-DE' => array(
         'str_welcomeMessage' => 'Herzlich Willkommen!',
@@ -871,7 +885,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'Dieses Feld wird benötigt',
         'str_Custom4.required' => 'Dieses Feld wird benötigt',
         'str_LicenseNumber.required' => 'Lizenz-Nr wird benötigt',
-        'str_problemWithRegistration' => 'Es gab ein Problem bei der Übermittlung Ihrer Daten. Bitte versuchen Sie es erneut.'
+        'str_problemWithRegistration' => 'Es gab ein Problem bei der Übermittlung Ihrer Daten. Bitte versuchen Sie es erneut.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''
     ),
     'nl-NL' => array(
         "str_LicenseNumber.required" => "Licentie # nodig",
@@ -979,7 +995,9 @@ $translationsSplitByCulture = array(
         "str_checkInFailure" => "We hebben je account niet gevonden met de gegevens die je hebt ingevuld.",
         "str_walkIn" => "Inloop",
         "str_problemWithRegistration" => "Er is een probleem opgetreden bij het insturen. Probeer opnieuw!",
-        "str_connectFacebookDisclaimer" => "Door het koppelen aanje Facebook-account geef je Club Speed, Inc. toestemming om je persoonlijke raceresultaten op je tijdlijn te posten."
+        "str_connectFacebookDisclaimer" => "Door het koppelen aanje Facebook-account geef je Club Speed, Inc. toestemming om je persoonlijke raceresultaten op je tijdlijn te posten.",
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''
     ),
     'fr-CA' => array(
         'str_welcomeMessage' => 'Bienvenue sur notre piste!',
@@ -1088,7 +1106,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'Ce champ est obligatoire',
         'str_Custom4.required' => 'Ce champ est obligatoire',
         'str_LicenseNumber.required' => 'Un numéro de licence est requis',
-        'str_problemWithRegistration' => 'Il y avait un probème transmettant vos renseignements. Veuillez essayer de nouveau.'
+        'str_problemWithRegistration' => 'Il y avait un probème transmettant vos renseignements. Veuillez essayer de nouveau.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''
     ),
     'fr-FR' => array(
         'str_welcomeMessage' => 'Bienvenue sur notre piste!',
@@ -1197,7 +1217,9 @@ $translationsSplitByCulture = array(
         'str_Custom3.required' => 'Ce champ est obligatoire',
         'str_Custom4.required' => 'Ce champ est obligatoire',
         'str_LicenseNumber.required' => 'Un numéro de licence est requis',
-        'str_problemWithRegistration' => 'Il y avait un probème transmettant vos renseignements. Veuillez essayer de nouveau.'
+        'str_problemWithRegistration' => 'Il y avait un probème transmettant vos renseignements. Veuillez essayer de nouveau.',
+        'str_WaiverAdult' => '',
+        'str_WaiverChild' => ''
     )
 );
 
@@ -1242,6 +1264,28 @@ foreach($translations as $translation) {
 	
 	// If it doesn't exist, insert it
 	if(count($existingEntry) === 0) {
+        if ($Name == 'str_WaiverAdult') //Try to grab any existing adult waiver to migrate to new system
+        {
+            $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (1)"); //Adult waiver is hard-coded to 1 in Club Speed
+            $statement->execute();
+            $adultWaiver = $statement->fetchAll();
+            if (isset($adultWaiver[0]))
+            {
+                echo '<em>Fetching existing Adult Waiver to migrate into new Translations table...<br/></em>';
+                $Value = $adultWaiver[0]['WaiverText'];
+            }
+        }
+        else if ($Name == 'str_WaiverChild') //Try to grab any existing child waiver to migrate to new system
+        {
+            $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (2)"); //Child waiver is hard-coded to 2 in Club Speed
+            $statement->execute();
+            $childWaiver = $statement->fetchAll();
+            if (isset($childWaiver[0]))
+            {
+                echo '<em>Fetching existing Child Waiver to migrate into new Translations table...<br/></em>';
+                $Value = $childWaiver[0]['WaiverText'];
+            }
+        }
 		$stmt->bindParam(':Namespace', $Namespace);
 		$stmt->bindParam(':Name', $Name);
 		$stmt->bindParam(':Culture', $Culture);
@@ -1251,7 +1295,49 @@ foreach($translations as $translation) {
 		$stmt->execute();
 		echo "Inserting " . $Name . " (" . $Culture . ")<br/>";
 	} else {
-		echo "Did not create " . $Name . " (" . $Culture . ") - (already exists)<br/>";
+        if ($Name == 'str_WaiverAdult' && isset($existingEntry[0]["Value"]) && $existingEntry[0]["Value"] == "") //Updating waivers if empty
+        {
+            echo 'Detected that str_WaiverAdult was an empty string. Overwriting with value in Waiver1, if it exists.<br/>';
+            $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (1)"); //Adult waiver is hard-coded to 1 in Club Speed
+            $statement->execute();
+            $adultWaiver = $statement->fetchAll();
+            if (isset($adultWaiver[0]))
+            {
+                echo '<em>Fetching existing Adult Waiver to migrate into new Translations table...<br/></em>';
+                $Value = $adultWaiver[0]['WaiverText'];
+                $updateStmt = $conn->prepare("UPDATE Translations SET Value = :Value WHERE Namespace = :Namespace AND Name = :Name AND Culture = :Culture");
+                $updateStmt->bindParam(':Namespace', $Namespace);
+                $updateStmt->bindParam(':Culture', $Culture);
+                $updateStmt->bindParam(':Value', $Value);
+                $updateStmt->bindParam(':Name', $Name);
+                $updateStmt->execute();
+                echo "Updating " . $Name . " (" . $Culture . ")<br/>";
+            }
+
+        }
+        else if ($Name == 'str_WaiverChild' && isset($existingEntry[0]["Value"]) && $existingEntry[0]["Value"] == "") //Updating waivers if empty
+        {
+            echo 'Detected that str_WaiverChild was an empty string. Overwriting with value in Waiver2, if it exists.<br/>';
+            $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (2)"); //Child waiver is hard-coded to 2 in Club Speed
+            $statement->execute();
+            $childWaiver = $statement->fetchAll();
+            if (isset($childWaiver[0]))
+            {
+                echo '<em>Fetching existing Child Waiver to migrate into new Translations table...<br/></em>';
+                $Value = $childWaiver[0]['WaiverText'];
+                $updateStmt = $conn->prepare("UPDATE Translations SET Value = :Value WHERE Namespace = :Namespace AND Name = :Name AND Culture = :Culture");
+                $updateStmt->bindParam(':Namespace', $Namespace);
+                $updateStmt->bindParam(':Culture', $Culture);
+                $updateStmt->bindParam(':Value', $Value);
+                $updateStmt->bindParam(':Name', $Name);
+                $updateStmt->execute();
+                echo "Updating " . $Name . " (" . $Culture . ")<br/>";
+            }
+        }
+        else
+        {
+            echo "Did not create " . $Name . " (" . $Culture . ") - (already exists)<br/>";
+        }
 	}
 
 }
