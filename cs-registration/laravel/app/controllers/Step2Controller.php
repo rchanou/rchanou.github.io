@@ -346,6 +346,20 @@ class Step2Controller extends BaseController {
             $type = pathinfo($path, PATHINFO_EXTENSION);
         }
         $data = file_get_contents($path);
+
+        //Strips away EXIF orientation data after rotating, if necessary
+        $exifData = @exif_read_data($path);
+        if (isset($exifData['Orientation']))
+        {
+            $possibleRotations = array(0, 0, 0, 180, 0, 0, -90, 0, 90);
+            $data = imagecreatefromstring($data);
+            $data = imagerotate($data, $possibleRotations[$exifData['Orientation']] ?: 0, 0);
+            ob_start();
+            imagejpeg($data, NULL, 100);
+            $data = ob_get_contents();
+            ob_end_clean();
+        }
+
         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
         return $base64;
     }
