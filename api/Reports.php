@@ -360,7 +360,8 @@ SELECT
     , cli.ItemDiscount AS 'Total Discount' -- cli.TaxDiscount exists. usage
     , cli.TaxPercent AS 'Tax Percent'
     , cli.TaxID AS 'Tax ID'
-    , CASE WHEN c.CheckStatus = 2 THEN 'Voided' ELSE '' END AS 'Void Status'
+    , CASE WHEN c.CheckStatus = 2 THEN 'Voided' ELSE '' END AS 'Check Void Status'
+		, CASE WHEN cli.FoodStatusId = 4 THEN 'Voided' ELSE '' END AS 'Item Void Status'
     , ic.ItemClassID AS 'Product Class ID'
     , ic.Description AS 'Product Class Description'
     , NULL AS 'Product Class Export' -- no equivalent in eurekas
