@@ -6,6 +6,8 @@
 $settings = array(
 	'genderShown' => true,
 	'genderRequired' => true,
+    'statusChangesWhenRegistered' => '{"statusChanges": [1,0,0,0]}', //Change status 1 to 1, change status 2 to 0, etc...
+    'statusChangesWhenRegisteredForEvent' => '{"statusChanges": [1,0,0,0]}', //Change status 1 to 1, change status 2 to 0, etc...
     'zipValidated' => false
 	);
 

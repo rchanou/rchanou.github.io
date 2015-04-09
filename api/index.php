@@ -44,6 +44,7 @@ $r->addAPIClass('CheckTotals');
 $r->addAPIClass('ControlPanel');
 $r->addAPIClass('Countries');
 $r->addAPIClass('Customers');
+$r->addAPIClass('CustomerStatus');
 $r->addAPIClass('Definition');
 $r->addAPIClass('Events');
 $r->addAPIClass('Facebook');
