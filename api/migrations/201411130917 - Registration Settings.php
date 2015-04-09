@@ -33,6 +33,38 @@ foreach($settings as $SettingName => $SettingValue) {
 	
 	// If it doesn't exist, insert it
 	if(count($existingEntry) === 0) {
+        if ($SettingName == 'statusChangesWhenRegistered') //Try to grab any existing status to migrate to new system
+        {
+            $statement = $conn->prepare("SELECT * FROM Rules WHERE RuleID IN (2)"); //"Add Customer From Registration Terminal" is hard-coded to 2
+            $statement->execute();
+            $statusWhenRegistered = $statement->fetchAll();
+            if (isset($statusWhenRegistered[0]))
+            {
+                echo '<em>Fetching existing "Add Customer From Registration Terminal" rule to migrate into new settings table...<br/></em>';
+                $statusChanges = array('statusChanges' => array());
+                $statusChanges['statusChanges'][] =  $statusWhenRegistered[0]['ChangeStatus1'];
+                $statusChanges['statusChanges'][] =  $statusWhenRegistered[0]['ChangeStatus2'];
+                $statusChanges['statusChanges'][] =  $statusWhenRegistered[0]['ChangeStatus3'];
+                $statusChanges['statusChanges'][] =  $statusWhenRegistered[0]['ChangeStatus4'];
+                $SettingValue = json_encode($statusChanges);
+            }
+        }
+        else if ($SettingName == 'statusChangesWhenRegisteredForEvent') //Try to grab any existing status to migrate to new system
+        {
+            $statement = $conn->prepare("SELECT * FROM Rules WHERE RuleID IN (4)"); //"Add Event Customer From Online Registration" is hard-coded to 4
+            $statement->execute();
+            $statusWhenRegisteredForEvent = $statement->fetchAll();
+            if (isset($statusWhenRegisteredForEvent[0]))
+            {
+                echo '<em>Fetching existing "Add Event Customer From Online Registration" rule to migrate into new settings table...<br/></em>';
+                $statusChanges = array('statusChanges' => array());
+                $statusChanges['statusChanges'][] =  $statusWhenRegisteredForEvent[0]['ChangeStatus1'];
+                $statusChanges['statusChanges'][] =  $statusWhenRegisteredForEvent[0]['ChangeStatus2'];
+                $statusChanges['statusChanges'][] =  $statusWhenRegisteredForEvent[0]['ChangeStatus3'];
+                $statusChanges['statusChanges'][] =  $statusWhenRegisteredForEvent[0]['ChangeStatus4'];
+                $SettingValue = json_encode($statusChanges);
+            }
+        }
 		$stmt->bindParam(':TerminalName', $TerminalName);
 		$stmt->bindParam(':SettingName', $SettingName);
 		$stmt->bindParam(':SettingValue', $SettingValue);
