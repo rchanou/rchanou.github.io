@@ -7,8 +7,11 @@ use ClubSpeed\Utility\Convert as Convert;
 
 class ReservationProductHandler extends BaseProductHandler {
 
+    protected $webapi;
+
     public function __construct(&$logic) {
         parent::__construct($logic);
+        $this->webapi = $GLOBALS['webapi']; // globals. bad. should really look into PHP-DI some day. 
     }
 
     public function handle($checkTotal, $metadata = array()) {
@@ -109,114 +112,120 @@ class ReservationProductHandler extends BaseProductHandler {
 
                 if ($autoAddRacerToHeat) {
                     // control panel setting signifies that we should automatically add the customer to the heat
-                    
-                    if ($checkTotal->R_Points > 0) {
+                    if ($this->webapi->canUse()) {
+                        try {
+                            // Check to see if the given customer id already exists on the given heat id
+                            $heatDetailExists = $this->logic->heatDetails->exists($heatId, $checkTotal->CustID);
+                            if (!$heatDetailExists) {
+                                // begin logic for adding a single user to a race from a reservation check
+                                // check to see if R_Points is greater than 0 -- if not, then don't make PointHistory records
+                                if ($checkTotal->R_Points > 0) {
+                                    // make a point history record to signify that the reservation was reduced
+                                    try {
+                                        $pointHistoryReservation                    = $this->logic->pointHistory->dummy();
+                                        $pointHistoryReservation->CheckDetailID     = 0; // required by front end
+                                        $pointHistoryReservation->CheckID           = Enums::DB_NULL; // required by front end
+                                        $pointHistoryReservation->CustID            = 0; // required by front end
+                                        $pointHistoryReservation->Notes             = 'Transfer points from CheckID ' . $checkTotal->CheckID;
+                                        $pointHistoryReservation->PointAmount       = -1 * $checkTotal->R_Points;
+                                        $pointHistoryReservation->PointDate         = $now;
+                                        $pointHistoryReservation->PointExpDate      = Convert::toDateForServer('2038-01-18');
+                                        $pointHistoryReservation->ReferenceID       = 0; // used when transferring points from one customer to another
+                                        $pointHistoryReservation->RefPointHistoryID = 0; // required by front end
+                                        $pointHistoryReservation->ReservationID     = $checkTotal->CheckID; // required by front end
+                                        $pointHistoryReservation->Type              = Enums::POINT_HISTORY_TRANSFER_FOR_RESERVATION; // consider this a transfer off the check?
+                                        $pointHistoryReservation->UserID            = 1;
+                                        $pointHistoryReservation->Username          = 'api';
+                                        $pointHistoryReservationId = $this->logic->pointHistory->create($pointHistoryReservation);
+                                        $pointHistoryReservationId = $pointHistoryReservationId['PointHistoryID'];
+                                        $message = $logPrefix . 'Modified points for Reservation Check #' . $checkTotal->CheckID . ' by ' . $pointHistoryReservation->PointAmount;
+                                        Log::info($message, Enums::NSP_BOOKING);
+                                    }
+                                    catch (\Exception $e) {
+                                        $message = $logPrefix . 'Unable to reduce points for Reservation Check #' . $checkTotal->CheckID . "! " . $e->getMessage();
+                                        Log::error($message, Enums::NSP_BOOKING);
+                                        return array('error' => $message);
+                                    }
+                                    
+                                    // make a point history record to add points to the customer
+                                    try {
+                                        $pointHistory                    = $this->logic->pointHistory->dummy();
+                                        $pointHistory->CheckDetailID     = $checkTotal->CheckDetailID;
+                                        $pointHistory->CheckID           = Enums::DB_NULL; // required by front end
+                                        $pointHistory->CustID            = $checkTotal->CustID;
+                                        $pointHistory->Notes             = 'CheckID ' . $checkTotal->CheckID;
+                                        $pointHistory->PointAmount       = $checkTotal->R_Points;
+                                        $pointHistory->PointDate         = $now;
+                                        $pointHistory->PointExpDate      = Convert::toDateForServer('2038-01-18');
+                                        $pointHistory->ReferenceID       = 0; // used when transferring points from one customer to another
+                                        $pointHistory->RefPointHistoryID = $pointHistoryReservationId; // required by front end
+                                        $pointHistory->ReservationID     = 0; // required by the front end
+                                        $pointHistory->Type              = Enums::POINT_HISTORY_TRANSFER_FOR_RESERVATION; // consider this a transfer off the check?
+                                        $pointHistory->UserID            = 1;
+                                        $pointHistory->Username          = 'api';
+                                        $this->logic->pointHistory->create($pointHistory);
+                                        $message = $logPrefix . 'Modified points for Customer #' . $pointHistory->CustID . ' by ' . $pointHistory->PointAmount;
+                                        Log::info($message, Enums::NSP_BOOKING);
+                                    }
+                                    catch (\Exception $e) {
+                                        $message = $logPrefix . 'Unable to add points to Customer #' . $checkTotal->CustID . "! " . $e->getMessage();
+                                        Log::error($message, Enums::NSP_BOOKING);
+                                        return array('error' => $message);
+                                    }
 
-                        // make a point history record to signify that the reservation was reduced
-                        try {
-                            $pointHistoryReservation                    = $this->logic->pointHistory->dummy();
-                            $pointHistoryReservation->CheckDetailID     = 0; // required by front end
-                            $pointHistoryReservation->CheckID           = Enums::DB_NULL; // required by front end
-                            $pointHistoryReservation->CustID            = 0; // required by front end
-                            $pointHistoryReservation->Notes             = 'Transfer points from CheckID ' . $checkTotal->CheckID;
-                            $pointHistoryReservation->PointAmount       = -1 * $checkTotal->R_Points;
-                            $pointHistoryReservation->PointDate         = $now;
-                            $pointHistoryReservation->PointExpDate      = Convert::toDateForServer('2038-01-18');
-                            $pointHistoryReservation->ReferenceID       = 0; // used when transferring points from one customer to another
-                            $pointHistoryReservation->RefPointHistoryID = 0; // required by front end
-                            $pointHistoryReservation->ReservationID     = $checkTotal->CheckID; // required by front end
-                            $pointHistoryReservation->Type              = Enums::POINT_HISTORY_TRANSFER_FOR_RESERVATION; // consider this a transfer off the check?
-                            $pointHistoryReservation->UserID            = 1;
-                            $pointHistoryReservation->Username          = 'api';
-                            $pointHistoryReservationId = $this->logic->pointHistory->create($pointHistoryReservation);
-                            $pointHistoryReservationId = $pointHistoryReservationId['PointHistoryID'];
-                            $message = $logPrefix . 'Modified points for Reservation Check #' . $checkTotal->CheckID . ' by ' . $pointHistoryReservation->PointAmount;
-                            Log::info($message, Enums::NSP_BOOKING);
-                        }
-                        catch (\Exception $e) {
-                            $message = $logPrefix . 'Unable to reduce points for Reservation Check #' . $checkTotal->CheckID . "! " . $e->getMessage();
-                            Log::error($message, Enums::NSP_BOOKING);
-                            return array('error' => $message);
-                        }
-                        
-                        // make a point history record to add points to the customer
-                        try {
-                            $pointHistory                    = $this->logic->pointHistory->dummy();
-                            $pointHistory->CheckDetailID     = $checkTotal->CheckDetailID;
-                            $pointHistory->CheckID           = Enums::DB_NULL; // required by front end
-                            $pointHistory->CustID            = $checkTotal->CustID;
-                            $pointHistory->Notes             = 'CheckID ' . $checkTotal->CheckID;
-                            $pointHistory->PointAmount       = $checkTotal->R_Points;
-                            $pointHistory->PointDate         = $now;
-                            $pointHistory->PointExpDate      = Convert::toDateForServer('2038-01-18');
-                            $pointHistory->ReferenceID       = 0; // used when transferring points from one customer to another
-                            $pointHistory->RefPointHistoryID = $pointHistoryReservationId; // required by front end
-                            $pointHistory->ReservationID     = 0; // required by the front end
-                            $pointHistory->Type              = Enums::POINT_HISTORY_TRANSFER_FOR_RESERVATION; // consider this a transfer off the check?
-                            $pointHistory->UserID            = 1;
-                            $pointHistory->Username          = 'api';
-                            $this->logic->pointHistory->create($pointHistory);
-                            $message = $logPrefix . 'Modified points for Customer #' . $pointHistory->CustID . ' by ' . $pointHistory->PointAmount;
-                            Log::info($message, Enums::NSP_BOOKING);
-                        }
-                        catch (\Exception $e) {
-                            $message = $logPrefix . 'Unable to add points to Customer #' . $checkTotal->CustID . "! " . $e->getMessage();
-                            Log::error($message, Enums::NSP_BOOKING);
-                            return array('error' => $message);
-                        }
+                                    // make a point history record to remove those same points from the customer
+                                    try {
+                                        $pointHistoryReduction                    = $this->logic->pointHistory->dummy();
+                                        $pointHistoryReduction->CheckDetailID     = 0; // required by the front end
+                                        $pointHistoryReduction->CheckID           = Enums::DB_NULL;
+                                        $pointHistoryReduction->CustID            = $checkTotal->CustID;
+                                        $pointHistoryReduction->Notes             = 'HeatNo ' . $heatId;
+                                        $pointHistoryReduction->PointAmount       = -1 * $checkTotal->R_Points;
+                                        $pointHistoryReduction->PointDate         = $now;
+                                        $pointHistoryReduction->PointExpDate      = \ClubSpeed\Utility\Convert::toDateForServer('2038-01-18');
+                                        $pointHistoryReduction->ReferenceID       = $heatMain->HeatNo; // required by the front end!!
+                                        $pointHistoryReduction->RefPointHistoryID = 0; // required by the front end
+                                        $pointHistoryReduction->ReservationID     = 0; // required by the front end
+                                        $pointHistoryReduction->Type              = Enums::POINT_HISTORY_HEAT;
+                                        $pointHistoryReduction->UserID            = 1;
+                                        $pointHistoryReduction->Username          = 'api';
+                                        $pointHistoryReductionId                  = $this->logic->pointHistory->create($pointHistoryReduction);
+                                        $pointHistoryReductionId                  = $pointHistoryReductionId['PointHistoryID'];
+                                        $message                                  = $logPrefix . 'Modified points for Customer #' . $pointHistoryReduction->CustID . ' by ' . $pointHistoryReduction->PointAmount;
+                                        Log::info($message, Enums::NSP_BOOKING);
+                                    }
+                                    catch (\Exception $e) {
+                                        $message = $logPrefix . 'Unable to modify points for Customer #' . $pointHistoryReduction->CustID . ' by ' . $pointHistoryReduction->PointAmount . '! ' . $e->getMessage();
+                                        Log::error($message, Enums::NSP_BOOKING);
+                                        return array('error' => $message);
+                                    }
+                                }
 
-                        // make a point history record to remove those same points from the customer
-                        try {
-                            $pointHistoryReduction                    = $this->logic->pointHistory->dummy();
-                            $pointHistoryReduction->CheckDetailID     = 0; // required by the front end
-                            $pointHistoryReduction->CheckID           = Enums::DB_NULL;
-                            $pointHistoryReduction->CustID            = $checkTotal->CustID;
-                            $pointHistoryReduction->Notes             = 'HeatNo ' . $heatId;
-                            $pointHistoryReduction->PointAmount       = -1 * $checkTotal->R_Points;
-                            $pointHistoryReduction->PointDate         = $now;
-                            $pointHistoryReduction->PointExpDate      = \ClubSpeed\Utility\Convert::toDateForServer('2038-01-18');
-                            $pointHistoryReduction->ReferenceID       = $heatMain->HeatNo; // required by the front end!!
-                            $pointHistoryReduction->RefPointHistoryID = 0; // required by the front end
-                            $pointHistoryReduction->ReservationID     = 0; // required by the front end
-                            $pointHistoryReduction->Type              = Enums::POINT_HISTORY_HEAT;
-                            $pointHistoryReduction->UserID            = 1;
-                            $pointHistoryReduction->Username          = 'api';
-                            $pointHistoryReductionId                  = $this->logic->pointHistory->create($pointHistoryReduction);
-                            $pointHistoryReductionId                  = $pointHistoryReductionId['PointHistoryID'];
-                            $message                                  = $logPrefix . 'Modified points for Customer #' . $pointHistoryReduction->CustID . ' by ' . $pointHistoryReduction->PointAmount;
-                            Log::info($message, Enums::NSP_BOOKING);
+                                // attempt to add the customer to the heat, regardless of the R_Points quantity
+                                // note that we do this because races can be reservations with 0 points
+                                $heatDetails                 = $this->logic->heatDetails->dummy();
+                                $heatDetails->HeatNo         = $heatId;
+                                $heatDetails->CustID         = $checkTotal->CustID;
+                                $heatDetails->RPM            = $customer->RPM;
+                                $heatDetails->PointHistoryID = ($checkTotal->R_Points > 0 && isset($pointHistoryReductionId)) ? $pointHistoryReductionId : null; // this is unavailable unless the item has points(!)
+                                $this->logic->heatDetails->create($heatDetails);
+                                $remainingQty = $remainingQty - 1; // chop one off the remaining quantity, since one person has been added
+                                $message = $logPrefix . 'Added Customer #' . $customer->CustID . ' to race #' . $heatId;
+                                Log::info($message, Enums::NSP_BOOKING);
+                            }
+                            else {
+                                // keep the remaining qty the same - we need to add this as a reservation, since they are making a double+ purchase for the same heat
+                                Log::info($logPrefix . 'Customer #' . $checkTotal->CustID . ' already exists on the HeatDetails for Heat #' . $heatId, Enums::NSP_BOOKING);
+                            }
                         }
-                        catch (\Exception $e) {
-                            $message = $logPrefix . 'Unable to modify points for Customer #' . $pointHistoryReduction->CustID . ' by ' . $pointHistoryReduction->PointAmount . '! ' . $e->getMessage();
+                        catch(\Exception $e) {
+                            $message = $logPrefix . 'Unable to add Customer #' . $customer->CustID . ' to race #' . $heatId . '! ' . $e->getMessage();
                             Log::error($message, Enums::NSP_BOOKING);
                             return array('error' => $message);
                         }
                     }
-
-                    // attempt to add the customer to the heat, regardless of the R_Points quantity (since some races will be reservations with 0 points)
-                    try {
-                        $heatDetailExists = $this->logic->heatDetails->exists($heatId, $checkTotal->CustID);
-                        if ($heatDetailExists) {
-                            Log::info($logPrefix . 'Customer #' . $checkTotal->CustID . ' already exists on the HeatDetails for Heat #' . $heatId, Enums::NSP_BOOKING);
-                            // keep the remaining qty the same - we need to add this as a reservation, since they are making a double+ purchase for the same heat
-                        }
-                        else {
-                            $heatDetails                 = $this->logic->heatDetails->dummy();
-                            $heatDetails->HeatNo         = $heatId;
-                            $heatDetails->CustID         = $checkTotal->CustID;
-                            $heatDetails->RPM            = $customer->RPM;
-                            $heatDetails->PointHistoryID = ($checkTotal->R_Points > 0) ? $pointHistoryReductionId : null; // this is unavailable unless the item has points(!)
-                            $this->logic->heatDetails->create($heatDetails);
-                            $remainingQty = $remainingQty - 1; // chop one off the remaining quantity, since one person has been added
-                            $message = $logPrefix . 'Added Customer #' . $customer->CustID . ' to race #' . $heatId;
-                            Log::info($message, Enums::NSP_BOOKING);
-                        }
-                    }
-                    catch(\Exception $e) {
-                        $message = $logPrefix . 'Unable to add Customer #' . $customer->CustID . ' to race #' . $heatId . '! ' . $e->getMessage();
-                        Log::error($message, Enums::NSP_BOOKING);
-                        return array('error' => $message);
-                    }
+                    else
+                        Log::info($logPrefix . 'Customer #' . $customer->CustID . ' was not added directly to race #' . $heatId . ' since the webapi is not accessible!');
                 }
                 else
                     Log::info($logPrefix . 'Customer #' . $customer->CustID . ' was not added directly to race #' . $heatId . ' since the Booking.autoAddRacerToHeat setting was false!');
