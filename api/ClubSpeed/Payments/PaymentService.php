@@ -19,12 +19,11 @@ class PaymentService {
         $this->_lazy = array();
         $this->allowed = array(
             'Dummy',
-            'SagePay_Direct',
+            'AuthorizeNet_AIM',
             'Payflow_Pro',
             'PayPal_Pro',
-            'PCCharge',
-            'WorldPayXML',
-            'AuthorizeNet_AIM'
+            'SagePay_Direct',
+            'WorldPayXML'
             // add processors as we test/support them -- dummy should ABSOLUTELY be removed before going live
         );
     }
