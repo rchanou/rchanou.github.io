@@ -37,7 +37,7 @@ class WebApiRemoting {
             // 'protocol'  => ($this->isSecure() ? 'https' : 'http').'://'
             'protocol'  => 'https://' // https is required for WebAPI -- isSecure() may not actually be required
             , 'root'    => $_SERVER['SERVER_NAME'] // for live!
-            // , 'root'    => "192.168.111.140" // for testing(!!!)
+            // , 'root'    => "192.168.111.151" // for testing(!!!)
             , 'api'     => '/WebAPI'
             , 'version' => '/v1.5'
         );
@@ -78,16 +78,38 @@ class WebApiRemoting {
             Log::warn("Attempted to use WebAPI Remoting, but the provided username/password from config.php was invalid!", Enums::NSP_WEBAPI);
             return false;
         }
-        // weird part: try to make a call to /ClubSpeedCache/clear without credentials
-        // if we get a 401 back, then we know the server/shim is available for sure.
-        // if we get a timeout, 404, 500, etc then it is not available.
+        $user = $users[0];
+        if ($user->Deleted === true) {
+            Log::warn("Attempted to use WebAPI Remoting, but the API User is marked as deleted! Username: " . $GLOBALS['apiUsername']);
+            return false;
+        }
+        if ($user->Enabled === false) {
+            Log::warn("Attempted to use WebAPI Remoting, but the API User is marked as not enabled! Username: " . $GLOBALS['apiUsername']);
+            return false;
+        }
+        if ($user->SystemUsers === false) {
+            Log::warn("Attempt to use the WebAPI Remoting found that the API User has SystemUsers set to false! Username: " . $GLOBALS['apiUsername']);
+            // non blocking -- shouldn't return false, but should be logged so we can fix this as we find them (consider updating in here to set SystemUsers to true? not really ideal)
+        }
+
+        // make a call to ClubSpeedCache/clear in order to determine whether or not we have valid credentials
         $callName = '/ClubSpeedCache/clear';
         $apiUrl = $this->getApiUrl($callName);
-        $response = \Httpful\Request::get($apiUrl)
-            ->timeoutIn(3) // timeout after 3 seconds
-            ->send();
-        if($response->code != '401') {
-            Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Received status code: " . $response->code, Enums::NSP_WEBAPI);
+        try {
+            $response = \Httpful\Request::get($apiUrl)
+                ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
+                ->timeoutIn(3) // timeout after 3 seconds
+                ->send();
+        }
+        catch(\Exception $e) {
+            Log::warn("Attempted to use WebAPI Remoting, but the test call threw an exception! Error: " . $e->getMessage());
+            return false;
+        }
+        if($response->code != '200') {
+            if ($response->code == '401')
+                Log::warn("Attempted to use WebAPI Remoting, but the apiUsername and apiPassword were invalid! Check the API config and Users table for proper credentials! Received status code: " . $response->code, Enums::NSP_WEBAPI);
+            else
+                Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Received status code: " . $response->code, Enums::NSP_WEBAPI);
             return false;
         }
         return true;
