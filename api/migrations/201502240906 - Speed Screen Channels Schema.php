@@ -14,6 +14,9 @@ $channelAPI = new Channel(); //Restler's Channel API
 
 $_REQUEST['debug'] = true;
 
+//If 'overwrite=1' is in the URL, the import will overwrite/update any existing channels in the new SpeedScreenChannels table
+$shouldOverwriteChannels = (isset($_GET['overwrite']) && $_GET['overwrite'] == 1) ? true : false;
+
 $resourceDir = './resources/';
 $files = scandir($resourceDir);
 $date = '201502240906'; // only grab sql files with this exact date
@@ -50,13 +53,21 @@ if ($noFailures) //If SpeedScreenChannels exists, import old Speed Screens into 
     {
         echo 'Unable to determine the number of channels in SpeedScreenChannels. Aborting import.';
     }
-    else if ($numOfChannels > 0)
+    else if ($numOfChannels > 0 && !$shouldOverwriteChannels)
     {
         echo 'SpeedScreenChannels already has channels defined. Aborting import.';
     }
-    else if ($numOfChannels === 0)
+    else if ($numOfChannels === 0 || $shouldOverwriteChannels)
     {
-        echo 'SpeedScreenChannels does not have any channels yet -- importing the old channels!<p/>';
+        if ($numOfChannels === 0)
+        {
+            echo 'SpeedScreenChannels does not have any channels yet -- importing the old channels!<p/>';
+        }
+        else if ($shouldOverwriteChannels)
+        {
+            echo 'SpeedScreenChannels has channels but overwrite mode was set to TRUE. Wiping out all channels in SpeedScreenChannels!<p/>';
+            $result = $db->exec('TRUNCATE TABLE SpeedScreenChannels');
+        }
 
         //Determine which old Speed Screen channels exist
         $result = $db->query('SELECT TemplateID FROM ScreenTemplate');
