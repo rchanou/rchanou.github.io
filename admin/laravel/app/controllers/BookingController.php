@@ -44,7 +44,28 @@ class BookingController extends BaseController
                     . '&nbsp;&nbsp;&nbsp;&nbsp;INSERT ITEM HTML HERE<br/>'
                     . '&#60;!-- {% endfor %} --&#62;</b><br/>'
                     . 'You can use the following inside the item block:<br/>'
-                    . '<b>Item Description:</b> {{detail.description}}<br/>'
+                    . '<b>Item Name:</b> <i class="fa fa-question-circle tip"
+                            data-container="body" data-toggle="popover" data-placement="bottom" data-html="true"
+                            data-content="
+                            The name of the product.<p/>
+                            <b>Examples:</b><br/>
+                             <i>Arrive & Drive Race, $25 Gift Card</i>
+                            ">
+                        </i> {{detail.productName}}<br/>'
+                    . '<b>Item Note:</b> <i class="fa fa-question-circle tip"
+                            data-container="body" data-toggle="popover" data-placement="bottom" data-html="true"
+                            data-content="
+                            The note field for the item.<p/>
+                            For heats, this is the heat number and the scheduled time.
+                            For gift cards, this is the gift card number.<p/>
+                            <b>Examples:</b><br/>
+                             <i style=\'font-size: 12px;\'>Heat #4927 scheduled at 2015-04-16 13:50,<br/>#1664491096</i>
+                            ">
+                        </i> {{detail.note}}<br/>'
+                    . '<b>Item Description:</b> <i class="fa fa-question-circle tip"
+                            data-container="body" data-toggle="popover" data-placement="bottom" data-html="true"
+                            data-content="This is shorthand for {{detail.productName}}: {{detail.note}}">
+                        </i> {{detail.description}}<br/>'
                     . '<b>Item Quantity:</b> {{detail.quantity}}<br/>'
                     . '<b>Item Price:</b> {{detail.price}}';
 
