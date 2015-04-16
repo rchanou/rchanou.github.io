@@ -168,7 +168,7 @@ class GiftCardProductHandler extends BaseProductHandler {
             }
         }
 
-        $return['success'] = 'Gift Cards: ' . implode(', ', $return['success']);
+        $return['success'] = implode(', ', $return['success']);
         return $return;
     }
 
