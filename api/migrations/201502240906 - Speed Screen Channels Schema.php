@@ -121,6 +121,16 @@ if ($noFailures) //If SpeedScreenChannels exists, import old Speed Screens into 
                     $listOfTracksWithScoreboards = array(); //Used to prevent duplicate scoreboard slides at the same track
                     foreach($channelData["lineup"] as $currentSlide)
                     {
+                        if (isset($currentSlide["options"]["backgroundUrl"]) && strpos($currentSlide["options"]["backgroundUrl"],"assets/cs-speedscreen/images/background_1080p.jpg") !== -1) //Check the given background image URL
+                        {
+                            $pathToImageAssets = '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'cs-speedscreen' . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR;
+                            $defaultImageFile = $pathToImageAssets . 'background_1080p.jpg';
+
+                            if(!file_exists($defaultImageFile)) //If the image doesn't exist, remove the backgroundUrl setting.
+                            {
+                                unset($currentSlide["options"]["backgroundUrl"]);
+                            }
+                        }
                         if ($currentSlide["type"] == "scoreboard")
                         {
                             $trackAlreadyInAScoreboardSlide = (in_array($currentSlide["options"]["trackId"],$listOfTracksWithScoreboards));
