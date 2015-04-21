@@ -1,20 +1,26 @@
 {
-  "author": "Club Speed",
+  "author": "Wes Ratcliff <wes@clubspeed.com>",
   "name": "csapi",
   "description": "REST API offering gridding services",
-  "author": "Wes Ratcliff <wes@clubspeed.com>",
   "main": "./rest-server.js",
-	"dependencies": {
-    "restify": "^2.7.0"
+  "dependencies": {
+    "restify": "^2.7.0",
+    "zana": "~0.1.9"
   },
   "devDependencies": {
-	  "mocha": "~1.12"
-	},
+    "chai": "~2.2.0",
+    "gulp": "^3.8.11",
+    "gulp-jshint": "^1.10.0",
+    "gulp-mocha": "^2.0.1",
+    "gulp-task-listing": "^1.0.0",
+    "jshint-stylish": "^1.0.1",
+    "mocha": "~1.12"
+  },
   "optionalDependencies": {},
   "engines": {
     "node": ">= 0.4.1"
   },
-	"scripts": {
+  "scripts": {
     "test": "mocha --reporter spec"
   }
 }
