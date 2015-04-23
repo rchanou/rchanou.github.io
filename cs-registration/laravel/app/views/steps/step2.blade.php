@@ -80,7 +80,10 @@
             $('#firstname').val(response.first_name);
             $('#lastname').val(response.last_name);
             $('#email').val(response.email);
-            $('#birthdate').val(new Date(response.birthday).toDateInputValue());
+            if (typeof response.birthday != "undefined")
+            {
+                $('#birthdate').val(new Date(response.birthday).toDateInputValue());
+            }
             $('#facebookprofile').attr("src","https://graph.facebook.com/" + response.id + "/picture?width=9999&height=9999");
             $('#facebookProfileURL').attr("value","https://graph.facebook.com/" + response.id + "/picture?width=9999&height=9999");
             $('#cameraInputIPCam_currentSnapshot').attr("src","https://graph.facebook.com/" + response.id + "/picture?width=9999&height=9999");
