@@ -534,10 +534,9 @@
                 }
 
                 // parse starts_at date and convert
-                var tempDate = z.convert(data.race.starts_at, z.types.date);
-                if (z.check.isDate(tempDate)) {
-                    data.race.starts_at = tempDate.toLocaleString(z.location.locale);
-                }
+                var tempStartsAt = z.convert.toDate(data.race.starts_at_iso);
+                if (z.check.isDate(tempStartsAt))
+                    data.race.starts_at = tempStartsAt.toLocaleString(z.location.locale);
             }
 
             // prepend race.race_number with a "#" if it exists
