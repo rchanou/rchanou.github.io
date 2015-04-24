@@ -35,7 +35,7 @@ class PasswordsLogic extends BaseLogic {
             $customer = $this->logic->customers->find_primary_account($email); // REQUIRED
             $customerId = $customer->CustID;
             if (is_null($customer) || empty($customer)) {
-                Log::warning('Password reset received an email address which could not be found! Received: ' . $email, Enums::NSP_PASSWORD);
+                Log::warn('Password reset received an email address which could not be found! Received: ' . $email, Enums::NSP_PASSWORD);
                 // for security purposes, return without throwing an error
                 // that way this call cannot be used 
                 // to search for existing email accounts
