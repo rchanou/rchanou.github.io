@@ -3,6 +3,7 @@
 CREATE VIEW [dbo].[GiftCardBalance_V] AS
 SELECT
       c.CrdID
+    , c.CustID
     , c.IsGiftCard
     , ISNULL(gcmv.[Money], 0) AS [Money]
     , ISNULL(gcpv.Points, 0) AS Points
