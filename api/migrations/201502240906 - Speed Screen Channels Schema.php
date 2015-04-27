@@ -138,6 +138,43 @@ if ($noFailures) //If SpeedScreenChannels exists, import old Speed Screens into 
                             {
                                 $listOfTracksWithScoreboards[] = $currentSlide["options"]["trackId"];
                             }
+                            else
+                            {
+                                continue; //Don't insert multiple scoreboards for the same track
+                            }
+
+                            if (isset($currentSlide['options']))
+                            {
+                                $defaultScoreboardSettings = array(
+                                    "postRaceIdleTime" => 15000,
+                                    "trackId" => 1,
+                                    "theme" => "classic",
+                                    "pollingInterval" => 1000,
+                                    "headerEnabled" => 1,
+                                    "showHeatNumber" => 1,
+                                    "showHeatTime" => 0,
+                                    "showHeaderTimer" => 0,
+                                    "locale" => "en-US",
+                                    "highlightFastestRacer" => 1,
+                                    "fastestRacerColor" => "00FF00",
+                                    "textLabelsColor" => "FFFFFF",
+                                    "textDataColor" => "FFD700",
+                                    "racersPerPage" => 10,
+                                    "timePerPage" => 10000,
+                                    "nextRacerTabEnabled" => 1,
+                                    "finalResultsTime" => 15000,
+                                    "showSequenceNumber" => 1,
+                                    "showLapEstimation" => 0
+                                );
+
+                                foreach($defaultScoreboardSettings as $settingName => $settingValue)
+                                {
+                                    if (!isset($currentSlide['options'][$settingName]))
+                                    {
+                                        $currentSlide['options'][$settingName] = $settingValue;
+                                    }
+                                }
+                            }
                             $newChannelFormat->timelines->races->slides[] = $currentSlide;
                         }
                         else
