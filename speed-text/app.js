@@ -197,7 +197,7 @@ function sendTwilioMessage(to, message, fromArray, opts) {
 			if(err) {
 				log(err, 'ERROR');
 			} else {
-				log('Message sent! ' + message);
+				log('Message sent! ' + JSON.stringify(message));
 			}
 	});
 }
