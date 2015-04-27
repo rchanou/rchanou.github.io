@@ -225,14 +225,14 @@ WITH CTE AS (
         , ROW_NUMBER() OVER (ORDER BY hm.ScheduledTime) AS Rank
     FROM HeatMain hm
     WHERE
-        hm.TrackNo = 1
+        hm.TrackNo = ?
         AND hm.HeatStatus IN (0,4)
         AND hm.ScheduledTime > (
             SELECT TOP(1)
                 hm.ScheduledTime
             FROM HeatMain hm
             WHERE
-                hm.TrackNo = 1
+                hm.TrackNo = ?
                 AND hm.HeatStatus IN (1,2,3)
             ORDER BY
                 hm.Begining DESC
@@ -241,7 +241,7 @@ WITH CTE AS (
 SELECT c.*
 FROM CTE c
 WHERE
-    c.Rank = 1
+    c.Rank = ?
     AND c.ScheduledTime > DATEADD(HOUR, -2, GETDATE())
 EOS;
         // $tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ScheduledTime) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC)) SELECT c.* FROM CTE c WHERE Rank = ?';
