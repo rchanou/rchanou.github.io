@@ -81,6 +81,8 @@ Select ROW_NUMBER() OVER(ORDER BY
 
       customers.LName last_name,
 
+      Case When customers.TotalRaces > 1 Then 0 Else 1 End is_first_time,
+
 			racingData.CustID racer_id,
 
 			Max(LapNum) lap_num,
@@ -135,7 +137,7 @@ Select ROW_NUMBER() OVER(ORDER BY
 
 	Where heatdetails.Heatno = @Heatno and racingdata.IsBadTime = 0 and racingdata.LapNum > 0 and racingdata.LTime > 0
 
-	Group By RacingData.CustID, Latestlap.autono, customers.racername,customers.FName,customers.LName,LatestLap.ltime, customers.rpm, Latestlap.ambtime
+	Group By RacingData.CustID, Latestlap.autono, customers.racername,customers.FName,customers.LName,customers.TotalRaces,LatestLap.ltime, customers.rpm, Latestlap.ambtime
 
 ) racing
 
