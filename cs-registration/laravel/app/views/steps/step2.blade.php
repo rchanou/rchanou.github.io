@@ -21,6 +21,15 @@
 <!-- END PAGE TITLE -->
 
 @section('facebook_integration')
+    <?php
+    $facebookEnabled = false;
+    if (Session::has('settings'))
+    {
+        $settings = Session::get('settings');
+        $facebookEnabled = isset($settings['Reg_EnableFacebook']) ? $settings['Reg_EnableFacebook'] : false;
+    }
+    ?>
+    @if($facebookEnabled)
 <!-- BEGIN FACEBOOK INTEGRATION -->
 <script>
     function statusChangeCallback(response) {
@@ -105,9 +114,8 @@
             }
         });
     }
-
-
 </script>
+    @endif
 <!-- END FACEBOOK INTEGRATION -->
 @stop
 
@@ -983,7 +991,6 @@
             });
             <!-- END UNITED STATES AND CANADA DROPDOWN SCRIPT -->
         });
-
 
     </script>
 

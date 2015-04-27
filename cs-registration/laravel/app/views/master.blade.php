@@ -28,6 +28,15 @@
 
 <body style="background-image:url({{$images['bg_image']}})">
 @section('facebook_integration')
+    <?php
+            $facebookEnabled = false;
+            if (Session::has('settings'))
+            {
+                $settings = Session::get('settings');
+                $facebookEnabled = isset($settings['Reg_EnableFacebook']) ? $settings['Reg_EnableFacebook'] : false;
+            }
+    ?>
+    @if($facebookEnabled)
 <!-- BEGIN FACEBOOK INTEGRATION -->
 <script>
     // This is called with the results from from FB.getLoginStatus().
@@ -86,6 +95,7 @@
 
 </script>
 <!-- END FACEBOOK INTEGRATION -->
+    @endif
 @show
 
 <div class="container">
