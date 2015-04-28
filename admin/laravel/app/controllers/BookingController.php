@@ -402,7 +402,8 @@ class BookingController extends BaseController
         $newSettings['maxRacersForDropdown'] = isset($input['maxRacersForDropdown']) ? $input['maxRacersForDropdown'] : 50;
         $newSettings['brokerFieldEnabled'] = isset($input['brokerFieldEnabled']) ? $input['brokerFieldEnabled'] : 0;
         $newSettings['brokerSourceInURLEnabled'] = isset($input['brokerSourceInURLEnabled']) ? $input['brokerSourceInURLEnabled'] : 0;
-				$newSettings['defaultPaymentCountry'] = isset($input['defaultPaymentCountry']) ? $input['defaultPaymentCountry'] : '';
+        $newSettings['defaultPaymentCountry'] = isset($input['defaultPaymentCountry']) ? $input['defaultPaymentCountry'] : '';
+        $newSettings['autoAddRacerToHeat'] = isset($input['autoAddRacerToHeat']) ? $input['autoAddRacerToHeat'] : 0;
 
         if (isset($input['reservationTimeout']))
         {
