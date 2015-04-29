@@ -219,30 +219,32 @@ class Races
 
 
         $tsql = <<<EOS
-WITH CTE AS (
+WITH LAST_RACE_CTE AS (
+    SELECT TOP 1
+        hm.ScheduledTime
+    FROM dbo.HeatMain hm
+    WHERE
+        hm.TrackNo = ?
+        AND hm.HeatStatus IN (1,2,3)
+    ORDER BY
+        hm.Begining DESC
+)
+, NEXT_RACES_CTE AS (
     SELECT
         hm.*
         , ROW_NUMBER() OVER (ORDER BY hm.ScheduledTime) AS Rank
-    FROM HeatMain hm
+    FROM dbo.HeatMain hm
+    OUTER APPLY LAST_RACE_CTE lrc
     WHERE
-        hm.TrackNo = ?
+            hm.TrackNo = ?
         AND hm.HeatStatus IN (0,4)
-        AND hm.ScheduledTime > (
-            SELECT TOP(1)
-                hm.ScheduledTime
-            FROM HeatMain hm
-            WHERE
-                hm.TrackNo = ?
-                AND hm.HeatStatus IN (1,2,3)
-            ORDER BY
-                hm.Begining DESC
-        )
+        AND hm.ScheduledTime > lrc.ScheduledTime
+        AND hm.ScheduledTime > DATEADD(HOUR, -2, GETDATE())
 )
 SELECT c.*
-FROM CTE c
+FROM NEXT_RACES_CTE c
 WHERE
     c.Rank = ?
-    AND c.ScheduledTime > DATEADD(HOUR, -2, GETDATE())
 EOS;
         // $tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ScheduledTime) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (0,4) AND ScheduledTime > (SELECT TOP(1) hm.ScheduledTime AS starts_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (1,2,3) ORDER BY hm.Begining DESC)) SELECT c.* FROM CTE c WHERE Rank = ?';
         $tsql_params = array(&$track_id, &$track_id, &$offset);
