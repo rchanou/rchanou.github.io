@@ -83,6 +83,8 @@ Select ROW_NUMBER() OVER(ORDER BY
 
       Case When customers.TotalRaces > 1 Then 0 Else 1 End is_first_time,
 
+      customers.TotalRaces total_races,
+
 			racingData.CustID racer_id,
 
 			Max(LapNum) lap_num,
