@@ -45,7 +45,7 @@ function processFB() {
 
 	// Do not run if we have not pulled settings yet.
 	if(!hasPulledSettings) {
-		log('Facebook app has not pulled configuraiton settings yet settings yet', 'INFO');
+		log('Facebook app has not pulled configuration settings yet!', 'INFO');
 		setTimeout(processFB, config.racePollingInterval);
 		return;
 	}
@@ -82,9 +82,9 @@ function processFB() {
 				postToFacebook(racer);
 			});
 		}
+		
+		setTimeout(processFB, config.racePollingInterval);
 	});
-	
-	setTimeout(processFB, config.racePollingInterval);
 }
 
 
@@ -101,8 +101,9 @@ function postToFacebook(race) {
 		description: applyTemplate(config.facebook.description, race),
 		caption: applyTemplate(config.facebook.caption, race)
 		};
-	log('Would have posted this ' + util.inspect(fbPost) + ' for ' + util.inspect(race), 'DEBUG');
-	log('Would have posted for ' + race.customerId + ' for heat #' + race.heatId + ' this ' + util.inspect(fbPost), 'INFO');
+	log('Posting ' + util.inspect(fbPost) + ' for ' + util.inspect(race), 'DEBUG');
+	log('Posting for ' + race.customerId + ' for heat #' + race.heatId + ' this: ' + util.inspect(fbPost), 'INFO');
+	//log('Would have posted for ' + race.customerId + ' for heat #' + race.heatId, 'INFO');
 
 	/**
 	 * KLUDGE ALERT:
@@ -110,12 +111,12 @@ function postToFacebook(race) {
 	 * 2014-04-19T18:04:01.95 becomes 2014-04-19T18:04:02.95 (note 01 seconds to 02)
 	 * PHP API takes 2014-04-19T18:04:60.95 (note the "60" as valid)
 	 */
-	var currentFinishTime = race.heatFinishTime;
-	var secAndMsPortion = currentFinishTime.split(':')[2];
+	var secAndMsPortion = race.heatFinishTime.split(':')[2];
 	var msPortion = secAndMsPortion.split('.')[1] || '000';
 	var replacement = (('00' + (parseInt(secAndMsPortion.split('.')[0])+1).toString()).substr(-2) + '.' + msPortion);
-	db.lastProcessedHeatFinishTime = currentFinishTime.replace(secAndMsPortion, replacement);
-	log('Updating last race to ' + db.lastProcessedHeatFinishTime + ' from ' + currentFinishTime);
+	db.lastProcessedHeatFinishTime = race.heatFinishTime.replace(secAndMsPortion, replacement);
+
+	log('Updating last race to ' + db.lastProcessedHeatFinishTime + ' from ' + race.heatFinishTime, 'DEBUG');
 	jf.writeFileSync(config.databaseFilename, db);
 
 	FB.setAccessToken(race.token);
