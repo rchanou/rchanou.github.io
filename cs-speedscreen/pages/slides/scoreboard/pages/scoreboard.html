@@ -132,7 +132,7 @@
         <div class="raceRunning"
              ng-style="{'width': raceRunningClassicWidth + 'vw', 'height': raceRunningClassicHeight + 'vh'}">
             <div ng-repeat="racer in racers" class="racerBox racerBoxClassic shadow"
-                 ng-style="{'width': racerBoxClassicWidth + 'vw', 'height': racerBoxClassicHeight + 'vh', 'font-size' : racerBoxClassicFontSize + 'vh'}">
+                 ng-style="{'width': racerBoxClassicWidth + 'vw', 'height': racerBoxClassicHeight + 'vh', 'font-size' : racerBoxClassicFontSize + 'vw'}">
                 <div ng-if="showLapEstimation" style="position: relative;">
                     <div class="smoothIncrease" style="position: absolute; top: 0px; left: 0px; z-index: 1; background-color:rgba(255,255,255,0.1);" ng-style="{'height': racerBoxClassicHeight + 'vh', 'width': racer.timeSinceLastPassing/1000/(racer.average_lap_time-2)*100 + '%'}">
                     </div>

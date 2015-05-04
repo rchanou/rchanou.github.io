@@ -345,7 +345,7 @@ body {
     background:rgba(22,22,22,0.8);
     text-align: left;
     overflow: hidden;
-    font-size: 12vh;
+    font-size: 7vh;
     box-sizing: border-box;
     border: 2px solid white;
 }
@@ -366,7 +366,7 @@ body {
 }
 
 .racerBoxClassicData {
-    font-size: 45%;
+    font-size: 40%;
 }
 
 .racerBoxClassicBottom {
