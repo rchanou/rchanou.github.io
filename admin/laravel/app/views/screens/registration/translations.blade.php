@@ -169,7 +169,7 @@ Translations
                                                         <td class="col-sm-3 col-xs-3"><label>{{$translationsKey}}</label></td>
                                                         <td class="col-sm-9 col-xs-9">
                                                         @if($translationsKey == 'str_WaiverAdult' || $translationsKey == 'str_WaiverChild')
-                                                            <textarea class="wideInput" name="trans[id_{{isset($translations[$cultureKey][$translationsKey]['id']) ? $translations[$cultureKey][$translationsKey]['id'] : 'new_' . $translationsKey}}]">
+                                                            <textarea style="display: none;" class="wideInput" name="trans[id_{{isset($translations[$cultureKey][$translationsKey]['id']) ? $translations[$cultureKey][$translationsKey]['id'] : 'new_' . $translationsKey}}]">
                                                                 {{isset($translations[$cultureKey][$translationsKey]['value']) ? $translations[$cultureKey][$translationsKey]['value'] : ""}}
                                                             </textarea>
                                                         @else
