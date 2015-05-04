@@ -480,8 +480,8 @@ body {
     border: 2px solid red;
     box-sizing: border-box;
     padding: 1vh;
-    padding-top: 0.6vh;
-    font-size: 4vh;
+    padding-top: 1.5vh;
+    font-size: 3.3vh;
     vertical-align: top;
 }
 
@@ -493,7 +493,7 @@ body {
 }
 
 .topTimesTimeBoxRight {
-    width: 15vw;
+    width: 14.6vw;
     display: inline-block;
     text-align: center;
     vertical-align: top;
