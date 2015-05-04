@@ -1,12 +1,10 @@
-var React = require('react/addons');
+var React = require('react');
 var _ = require('lodash');
 
-var Select = require('../../components/react-select2');
-var ICheck = require('../../components/icheck.js');
+var SmartInput = require('../../components/smart-input');
+
 
 module.exports = React.createClass({
-
-  fieldsToSave: ['screenTemplateName', 'showScoreboard', 'postRaceIdleTime', 'trackId'],
 
   getDefaultProps(){
     return {
@@ -18,12 +16,12 @@ module.exports = React.createClass({
   },
 
   getInitialState(){
-    var state = {};
-    this.fieldsToSave.forEach(field => {
-      state[field] = this.props.channel[field];
-    });
+    var channelData = this.props.channel.channelData;
 
-    return state;
+    return {
+      channelNumber: this.props.channel.channelNumber,
+      name: channelData.name
+    };
   },
 
   render(){
@@ -32,158 +30,133 @@ module.exports = React.createClass({
       <div className='form-group'>
         <label className='control-label col-sm-3 col-lg-2'>Channel Name</label>
         <div className='col-sm-9 col-lg-10'>
-          <input className='form-control' ref='screenTemplateName'
-            defaultValue={this.state.screenTemplateName}
+          <SmartInput className='form-control' ref='name'
+            defaultValue={this.state.name}
             onClick={e => {
-              if (this.state.screenTemplateName === '(untitled)'){
-                this.refs.screenTemplateName.getDOMNode().select();
+              if (this.state.name === '(untitled)'){
+                this.refs.name.getDOMNode().select();
               }
             }}
             onChange={e => {
-              this.setState({ screenTemplateName: e.target.value });
-
-              $('[href=#panel_tab4_channel' + this.props.channel.screenTemplateId + ']')
-              .text(this.props.channel.screenTemplateId + '. ' + e.target.value);
-
-              $('#panel_tab4_channel' + this.props.channel.screenTemplateId).find('h2')
-              .text(this.props.channel.screenTemplateId + '. ' + e.target.value);
+              this.setState({ name: e.target.value, dirty: true });
             }}
           />
-          <span className='help-block text-left'>
-            This is simply for identification purposes and is not displayed anywhere on the screen.
-          </span>
         </div>
       </div>
 
       <div className='form-group'>
-        <label className='control-label col-sm-3 col-lg-2'>Show Scoreboard</label>
+        <label className='control-label col-sm-3 col-lg-2'>Channel Number</label>
         <div className='col-sm-9 col-lg-10'>
-          <ICheck checked={this.state.showScoreboard}
-            onFunnelEvent={e => {
-              if (e.type === 'ifChecked'){
-                this.setState({ showScoreboard: true });
-              } else if (e.type === 'ifUnchecked'){
-                this.setState({ showScoreboard: false });
-              }
-            }}
-          />
-          <span className='help-block text-left'>
-            If checked, when a race is running for the selected track, a scoreboard will be displayed on this channel.
-          </span>
-        </div>
-      </div>
-
-      <div className='form-group'>
-        <label className='control-label col-sm-3 col-lg-2'>Post Race Idle Time (seconds)</label>
-        <div className='col-sm-9 col-lg-10'>
-          <input className='form-control' ref='postRaceIdleTime' type='number'
-            defaultValue={this.state.postRaceIdleTime}
-            onClick={() => {
-              if (!this.state.postRaceIdleTime){
-                this.refs.postRaceIdleTime.getDOMNode().select();
+          <SmartInput className='form-control' type='number' ref='channelNumber'
+            defaultValue={this.state.channelNumber} min={0}
+            onClick={e => {
+              if (this.state.channelNumber == 0){
+                this.refs.channelNumber.getDOMNode().select();
               }
             }}
             onChange={e => {
-              this.setState({ postRaceIdleTime: ~~e.target.value });
+              this.setState({ channelNumber: e.target.value, dirty: true });
             }}
           />
-          <span className='help-block text-left'>
-            If "Show Scoreboard" is checked, this determines the number of seconds the scoreboard will
-             remain on screen after a race is finished. After this, the non-scoreboard lineup will resume.
-          </span>
         </div>
       </div>
 
       <div className='form-group'>
-        <label className='control-label col-sm-3 col-lg-2'>Track</label>
+        <div className='col-sm-3 col-lg-2' />
         <div className='col-sm-9 col-lg-10'>
-          <Select style={{ width: '100%' }}
-            list={this.props.trackList}
-            selectedId={this.state.trackId}
-            allowClear={false}
-            placeholder='(Not Set!)'
-            onFunnelEvent={e => {
-              if (e.added){
-                this.setState({ trackId: e.val });
-              }
-            }}
-          />
-          <span className='help-block text-left'>
-            If "Show Scoreboard" is checked and a race is running on this track, the scoreboard slide will appear on this channel.
-          </span>
-        </div>
-      </div>
+          <button disabled={!this.state.dirty}
+            className='btn btn-info'
+            onClick={e => {
+              e.preventDefault();
 
-      <div className='form-actions col-lg-6'>
-        <button
-          className='btn btn-info'
-          onClick={e => {
-            e.preventDefault();
+              $.get(config.apiURL + 'speedscreenchannels/' + this.props.channel.channelId + '.json?key=' + config.privateKey)
+              .then(res => {
+                var dataBeforeSave = JSON.parse(res.channelData);
+                dataBeforeSave.name = this.state.name;
 
-            var data = {};
-            this.fieldsToSave.forEach(field => {
-              data[field] = this.state[field];
-            });
+                var newChannel = res;
+                newChannel.channelNumber = this.state.channelNumber;
+                newChannel.channelData = JSON.stringify(dataBeforeSave);
 
-            $.ajax({
-              type: 'PUT',
-              url: config.apiURL + 'screenTemplate/' + this.props.channel.screenTemplateId + '?key=' + config.privateKey,
-              data
-            })
-            .then(
-              res => {
-                this.props.onSave(
-                  _.extend(
-                    _.omit(this.props.channel, _.isFunction),
-                    this.state
-                  )
+                var newChannelWithParsedData = _.cloneDeep(res);
+                newChannelWithParsedData.channelNumber = this.state.channelNumber;
+                newChannelWithParsedData.channelData = dataBeforeSave;
+
+                $.ajax({
+                  type: 'PUT',
+                  url: config.apiURL + 'speedscreenchannels/' + this.props.channel.channelId + '?key=' + config.privateKey,
+                  data: newChannel
+                })
+                .then(
+                  res => {
+                    this.setState({ dirty: false });
+
+                    var viewChannel = window.viewChannels['panel_tab4_channel' + this.props.channel.channelId];
+                    viewChannel.url = 'http://' + location.hostname + (location.port ? ':' + location.port: '')
+                                 + '/cs-speedscreen/#/' + this.state.channelNumber;
+                    viewChannel.elems.urlInput.val(viewChannel.toString());
+                    viewChannel.elems.channelPreviewLink.attr('href', viewChannel.toString());
+
+                    $('[href=#panel_tab4_channel' + this.props.channel.channelId + ']')
+                    .text(this.state.name + ' (#' + (this.state.channelNumber || this.props.channel.channelId) + ')');
+
+                    $('#panel_tab4_channel' + this.props.channel.channelId).find('h2')
+                    .text(this.state.name + ' (#' + (this.state.channelNumber || this.props.channel.channelId) + ')');
+
+                    $('#panel_tab2_deploy_channel' + this.props.channel.channelId)
+                    .find('input[name=channelNumber]').val(this.state.channelNumber);
+
+                    this.props.onSave(newChannelWithParsedData);
+                  },
+                  res => {
+                    this.props.onError(res);
+                  }
                 );
-              },
-              res => {
-                this.props.onError();
+              });
+            }}
+          >
+            Save Changed Settings
+          </button>
+        </div>
+
+        <div className='col-xs-12'><br/><br/></div>
+        <div className='col-sm-3 col-lg-2' />
+        <div className='col-sm-9 col-lg-10'>
+          <button
+            className='btn btn-dark-red'
+            onClick={e => {
+              e.preventDefault();
+
+              var confirmed = window.confirm('Are you sure you want to delete this channel and its lineups?');
+              if (confirmed){
+                $.ajax({
+                  type: 'DELETE',
+                  url: config.apiURL + 'speedscreenchannels/' + this.props.channel.channelId + '?key=' + config.privateKey
+                })
+                .then(
+                  res => {
+                    this.props.onDelete();
+                  },
+                  res => {
+                    this.props.onError();
+                  }
+                );
               }
-            );
-          }}
-        >
-          Save Settings
-        </button>
-      </div>
-
-      <div className='form-actions col-lg-6'>
-        <button
-          className='btn btn-dark-red'
-          onClick={e => {
-            e.preventDefault();
-
-            var confirmed = window.confirm('Are you sure you want to delete this channel?');
-            if (confirmed){
-              $.ajax({
-                type: 'DELETE',
-                url: config.apiURL + 'screenTemplate/' + this.props.channel.screenTemplateId + '?key=' + config.privateKey
-              })
-              .then(
-                res => {
-                  this.props.onDelete();
-                },
-                res => {
-                  this.props.onError();
-                }
-              );
-            }
-          }}
-        >
-          Delete Channel
-        </button>
+            }}
+          >
+            <i className='fa fa-trash-o' />  Delete Channel
+          </button>
+        </div>
       </div>
     </form>;
   },
 
   componentDidMount(){
-    var resizeEditor = () => {
+    this.resizeEditor = () => {
       $(this.getDOMNode()).width($(window).width() - $(this.getDOMNode()).offset().left - 100);
     };
-    $(window).resize(resizeEditor);
-    $(document).on( 'shown.bs.tab', 'a[data-toggle="tab"]', resizeEditor);
+    $(window).resize(this.resizeEditor);
+    $(document).on( 'shown.bs.tab', 'a[data-toggle="tab"]', this.resizeEditor);
   },
 
   componentDidUpdate(prevProps, prevState){
@@ -192,6 +165,11 @@ module.exports = React.createClass({
         this.refs[fieldName].getDOMNode().value = this.state[fieldName];
       }
     }
+  },
+
+  componentWillUnmount(){
+    $(window).off('resize', this.resizeEditor);
+    $(document).off( 'shown.bs.tab', 'a[data-toggle="tab"]', this.resizeEditor);
   }
 
 });

@@ -1,44 +1,49 @@
-﻿// React wrapper for iCheck jQuery plugin
+// this is the newer version
 
-var React = require('react/addons');
-var EventFunnel = require('../mixins/event-funnel');
+var React = require('react');
 
 module.exports = React.createClass({
 
-  mixins: [EventFunnel],
-
   render(){
-		return <input defaultChecked={this.props.checked} type='checkbox' />;
+
+    return <input {...this.props} />;
+
+  },
+
+  getDefaultProps(){
+    return {
+      options: {
+        checkboxClass: 'icheckbox_flat-blue',
+        radioClass: 'iradio_flat-blue'
+      },
+      type: 'checkbox',
+      onEvent(){}, onChange(){}
+    };
   },
 
   componentDidMount(){
-    $(this.getDOMNode()).iCheck({
-      checkboxClass: 'icheckbox_flat-blue',
-      radioClass: 'iradio_flat-blue'
+    this.$me = $(this.getDOMNode());
+
+    this.$me.iCheck(this.props.options);
+    this.$me.iCheck('update');
+
+    var events = ['ifIndeterminate', 'ifChecked', 'ifUnchecked'];
+
+    events.forEach(event => {
+      this.$me.on(event, e => {
+        this.props.onEvent(e);
+      });
     });
-    this.setFromProps();
   },
 
-  componentDidUpdate(prevProps, prevState){
-    this.setFromProps();
+  componentDidUpdate(prevProps){
+    if (prevProps.checked !== this.props.checked){
+      this.$me.iCheck('update');
+    }
   },
 
-	setFromProps(){
-    $(this.getDOMNode()).off();
-
-	  if (this.props.checked === null){
-	    $(this.getDOMNode()).iCheck('indeterminate');
-	  } else if (this.props.checked) {
-	    $(this.getDOMNode()).iCheck('check');
-	  } else {
-	    $(this.getDOMNode()).iCheck('uncheck');
-	  }
-
-    this.funnelJQueryEvents('ifIndeterminate', 'ifChecked', 'ifUnchecked');
-	},
-
-	componentWillUnmount(){
-	  $(this.getDOMNode()).iCheck('destroy');
-	}
+  componentWillUnmount(){
+    this.$me.iCheck('destroy');
+  }
 
 });

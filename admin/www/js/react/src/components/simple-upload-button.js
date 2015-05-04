@@ -1,15 +1,11 @@
-var React = require('react/addons');
+var React = require('react');
+var hash = require('json-hash');
 
 module.exports = React.createClass({
   getDefaultProps(){
-    var url = '/admin/mobileApp/images/update';
-    if (window.location.hostname === '192.168.111.29'){
-      url = '/admin/www/mobileApp/images/update';
-    }
-
     return {
       accept: undefined,
-      url,
+      url: '/admin/mobileApp/images/update',
       className: 'btn btn-info',
       defaultValue: 'Upload Icon',
       onUpload(){}, onUploadStart(){}, onChange(){}, onError(){}
@@ -27,14 +23,26 @@ module.exports = React.createClass({
 
           var file = e.target.files[0];
 
-          var data = new FormData();
-          var uploadTime = new Date().valueOf();
+          var fileName = this.props.fileName;
+          if (!fileName){
+            // ghetto hash
+            var filePropertyTextForHash = '';
+            for (var key in file){
+              if (typeof file[key] === 'string' || typeof file[key] === 'number'){
+                filePropertyTextForHash += file[key];
+              }
+            }
+            fileName = hash.digest(filePropertyTextForHash);
+          }
           var ext = file.name.substr(file.name.lastIndexOf('.') + 1);
-          var fileName = (this.props.fileName || uploadTime) + '.' + ext;
-          data.append('filename', fileName);
+          fileName += '.' + ext;
+
+          var data = new FormData();
           data.append('image', file);
+          data.append('filename', fileName);
 
           this.props.onUploadStart({ fileName });
+
           $.ajax({
             type: 'POST',
             url: this.props.url,

@@ -68,6 +68,7 @@ Route::group(array('before' => 'auth'), function()
     Route::get('registration/translations/update/culture/{cultureKey}', 'RegistrationController@updateCulture');
     Route::post('registration/translations/cultures/update','RegistrationController@updateDropdownLanguages');
     Route::post('registration/images/update', 'RegistrationController@updateImage');
+    Route::get('registration/deploy','DeployController@deployGenericExe');
 
 	/* Reports */
 	Route::get('reports', 'ReportsController@index');

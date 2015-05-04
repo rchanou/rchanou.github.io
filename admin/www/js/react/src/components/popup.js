@@ -45,7 +45,7 @@ var FadeOut = React.createClass({
 	  if (this.timeout){
 	    clearTimeout(this.timeout);
 	  }
-		if (this.props.className.indexOf('alert-success') !== -1){
+		if (this.props.className.indexOf('alert-success') !== -1 || this.props.autoFade){
 			this.timeout = setTimeout(
 				() => {
 					if (this.isMounted()){

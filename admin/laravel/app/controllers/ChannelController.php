@@ -25,18 +25,9 @@ class ChannelController extends BaseController
 			. DIRECTORY_SEPARATOR . '..'
 			. DIRECTORY_SEPARATOR . '..'
 			. DIRECTORY_SEPARATOR . '..'
-			. DIRECTORY_SEPARATOR . '..'
-			. DIRECTORY_SEPARATOR . 'ClubSpeed'
-			. DIRECTORY_SEPARATOR . 'wwwroot'
-			. DIRECTORY_SEPARATOR . 'SP_Admin'
-			. DIRECTORY_SEPARATOR . 'ScreenImages';
-
-			if (!file_exists($this->slide_image_directory) && getenv('SERVER_ADDR') === '192.168.111.205'){
-				// Ronnie's debugging directory
-				$this->slide_image_directory = '\\\\192.168.111.122\\c$\\ClubSpeed\\wwwroot\\SP_Admin\\ScreenImages';
-			}
-
-			$this->slide_image_directory = '\\\\192.168.111.122\\c$\\ClubSpeed\\wwwroot\\SP_Admin\\ScreenImages';
+			. DIRECTORY_SEPARATOR . 'assets'
+			. DIRECTORY_SEPARATOR . 'cs-speedscreen'
+			. DIRECTORY_SEPARATOR . 'images';
 
 			// Video uploader data
 			$this->video_directory = __DIR__
@@ -46,10 +37,6 @@ class ChannelController extends BaseController
 			. DIRECTORY_SEPARATOR . '..'
 			. DIRECTORY_SEPARATOR . 'assets'
 			. DIRECTORY_SEPARATOR . 'videos';
-
-			if (!file_exists($this->video_directory) && getenv('SERVER_ADDR') == '192.168.111.205'){
-				$this->video_directory = '\\\\192.168.111.122\\c$\\clubspeedapps\\assets\\videos';
-			}
 		}
 
 		private function return_bytes($val) {
@@ -131,7 +118,8 @@ class ChannelController extends BaseController
 				// SAVE THE FILE...
 
 				// Ensure the directory exists, if not, create it!
-				if(!is_dir($this->slide_image_directory)) mkdir($this->slide_image_directory, null, true);
+				//var_dump($this->slide_image_directory); die();
+				if(!is_dir($this->slide_image_directory)) mkdir($this->slide_image_directory, 0777, true);
 
 				// Move the file, overwriting if necessary
 				Input::file('image')->move($this->slide_image_directory, $filename);
@@ -147,14 +135,23 @@ class ChannelController extends BaseController
 
     public function index()
     {
-        $listOfChannels = CS_API::getListOfChannels();
+        $listOfChannels = CS_API::getSpeedScreenChannels();
+				foreach ($listOfChannels as $channel){
+					$channel->channelData = json_decode($channel->channelData);
+                    if (!isset($channel->channelName) && isset($channel->channelData->name))
+                    {
+                        $channel->channelName = $channel->channelData->name;
+                    }
+				}
+
         $apiCallFailed = ($listOfChannels === null);
         if ($apiCallFailed)
         {
             return Redirect::to('/disconnected');
         }
 
-        if (count($listOfChannels) > 0)
+
+        /*if (count($listOfChannels) > 0)
         {
             $channelIds = array_keys(get_object_vars($listOfChannels));
 
@@ -168,7 +165,7 @@ class ChannelController extends BaseController
         else
         {
             $channelLineups = array();
-        }
+        }*/
         $numberOfMonitors = (Config::get('config.numberOfMonitors') == null ? 16 : Config::get('config.numberOfMonitors'));
 
         /*echo json_encode($channelDetails);
@@ -176,7 +173,7 @@ class ChannelController extends BaseController
         return View::make('/screens/channel',
             array(
                 'listOfChannels' => $listOfChannels,
-                'channelLineups' => $channelLineups,
+                //'channelLineups' => $channelLineups,
                 'numberOfMonitors' => $numberOfMonitors
             ));
     }
@@ -480,7 +477,12 @@ class ChannelController extends BaseController
     }
 
 		public function createChannel(){
-			$result = CS_API::createChannel();
+			$input = Input::all();
+			unset($input['_token']); //Removing Laravel's default form value
+			$newChannelNumber = $input['newChannelNumber'];
+			unset($input['newChannelNumber']);
+
+			$result = CS_API::createChannel($newChannelNumber);
 			if (isset($result) && $result != null){
 				return Redirect::to('/channel')->with('selectLastChannel', true)->with('message', 'Channel successfully created!');
 			} else {

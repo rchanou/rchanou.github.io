@@ -2,27 +2,33 @@
   "dependencies": {
     "d3": "^3.4.13",
     "immutable": "^3.6.2",
-    "js-csp": "^0.3.2",
+    "js-csp": "^0.3.4",
+    "json-hash": "0.0.4",
     "jsonp": "^0.1.0",
-    "lodash": "^2.4.1",
+    "koalaesce": "^0.4.1",
+    "lodash": "^3.3.1",
     "moment": "^2.9.0",
-    "react": "^0.12.0"
+    "random-uuid-v4": "0.0.4",
+    "react": "^0.13.1",
+    "react-widgets": "^2.2.6"
   },
   "devDependencies": {
-    "jsx-loader": "^0.12.2",
+    "babel-core": "^5.0.12",
+    "babel-jest": "^5.0.1",
+    "babel-loader": "^5.0.0",
+    "babel-runtime": "^5.0.12",
+    "react-tools": "^0.13.1",
     "strip-loader": "^0.1.0",
-    "traceur-loader": "^0.6.3",
-    "webpack": "^1.4.13"
+    "webpack": "^1.8.4"
   },
-  "browserify": {
-    "transform": [
-      [
-        "reactify",
-        {
-          "es6": "true"
-        }
-      ],
-      "es6ify"
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+    "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/react",
+      "<rootDir>/node_modules/react-tools"
     ]
   }
 }

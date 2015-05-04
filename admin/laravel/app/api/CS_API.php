@@ -247,10 +247,19 @@ class CS_API
         return self::getJSON("channel/$channelId");
     }
 
-    public static function createChannel()
+    public static function createChannel($newChannelNumber)
     {
       self::initialize();
-      return self::call(self::$apiURL . '/screenTemplate?key=' . self::$privateKey, array('screenTemplateName' => '(untitled)', 'key' => self::$privateKey), 'POST');
+      return self::call(
+        self::$apiURL . '/speedscreenchannels?key=' . self::$privateKey,
+        array(
+          'channelNumber' => $newChannelNumber,
+          'channelData' => '{"name":"","options":{},"timelines":{"regular":{"slides":[]},"races":{"slides":[]}},"hash":"4df99bad554397afa30d99d8a8d4a24765d3371c"}',
+          'key' => self::$privateKey
+        ),
+        'POST'
+      );
+      //return self::call(self::$apiURL . '/screenTemplate?key=' . self::$privateKey, array('screenTemplateName' => '(untitled)', 'key' => self::$privateKey), 'POST');
     }
 
     public static function getSettingsFor($terminalName)
@@ -423,6 +432,7 @@ class CS_API
 
         return self::getJSON("reports/payments_summary/eurekas.json", $params);
     }
+
     public static function doesServerSupportCacheClearing()
     {
         self::initialize();

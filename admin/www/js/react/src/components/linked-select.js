@@ -1,6 +1,6 @@
 var React = require('react/addons');
 var EventFunnel = require('../mixins/event-funnel');
-var Select = require('./react-select2');
+var Select = require('./old-react-select2');
 
 module.exports = React.createClass({
 

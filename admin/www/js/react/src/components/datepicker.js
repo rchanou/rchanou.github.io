@@ -225,20 +225,22 @@ module.exports = React.createClass({
 		return {
 			date: moment(),
 			onSelect: function(){},
-			language: 'en-US'
+			language: 'en-US',
+			defaultToday: true
 		};
 	},
 
-	getInitialState(){
+	/*getInitialState(){
 		return { date: this.props.date };
-	},
+	},*/
 
 	render(){
 		return <div className='row input-group' style={{ padding: 0 }} >
 			<span className={'input-group-btn'}>
 				<button className={'btn btn-default'} type='button' ref='previousDay' onClick={this.handlePreviousClick}>{'<'}</button>
 			</span>
-			<input className='form-control' ref='picker' onClick={this.handleClick} />
+			{this.props.alwaysShow? <div className='form-control' ref='picker' onClick={this.handleClick} />
+			: <input className='form-control' ref='picker' onClick={this.handleClick} onChange={this.handleChange} />}
 			<span className={'input-group-btn'}>
 				<button className={'btn btn-default'} type='button' ref='nextDay' onClick={this.handleNextClick}>{'>'}</button>
 			</span>
@@ -252,20 +254,44 @@ module.exports = React.createClass({
 	},
 
 	componentDidMount(){
-		$(this.refs.picker.getDOMNode())
+		var picker = $(this.refs.picker.getDOMNode())
 		.datepicker({
 			constrainInput: false,
 			dateFormat: this.getFormat()
 		})
-		.datepicker('setDate', '+0')
-		.datepicker('option', 'onSelect',
-			event => {
-				this.props.onSelect({
-					date: moment(this.refs.picker.getDOMNode().value, this.getLocaleFormat())
-				});
-				$(this.refs.picker.getDOMNode()).datepicker('hide');
+		.datepicker('option', 'onSelect', this.triggerSelect);
+
+		if (this.props.defaultToday){
+			picker.datepicker('setDate', '+0');
+		}
+	},
+
+	triggerSelect(){
+		if (this.refs.picker.getDOMNode().value == ''){
+			this.props.onSelect({ date: null });
+		} else {
+			var date = moment(this.refs.picker.getDOMNode().value, this.getLocaleFormat());
+
+			if (date.isValid() && date.isAfter('1900-01-01')){
+				this.props.onSelect({	date });
 			}
-		);
+			$(this.refs.picker.getDOMNode()).datepicker('hide');
+		}
+	},
+
+	handleChange(e){
+		this.triggerSelect();
+		return;
+
+		if (e.target.value == ''){
+			this.triggerSelect();
+			return;
+		}
+
+		var date = moment(e.target.value, this.getLocaleFormat());
+		if (date.isValid() && date.isAfter('1900-01-01')){
+			this.triggerSelect();
+		}
 	},
 
 	handleClick(){
@@ -275,7 +301,11 @@ module.exports = React.createClass({
 	componentWillReceiveProps(nextProps){
 	  var inputEl = $(this.refs.picker.getDOMNode());
 	  if (!inputEl.is(':focus')){
-	    inputEl.datepicker('setDate', nextProps.date.format(this.getLocaleFormat()));
+			if (!nextProps.date){
+				inputEl.datepicker('setDate', '');
+			} else {
+	    	inputEl.datepicker('setDate', moment(nextProps.date).format(this.getLocaleFormat()));
+			}
 	  }
 	},
 

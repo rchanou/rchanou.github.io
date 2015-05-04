@@ -1,57 +1,26 @@
 <!DOCTYPE html>
 
-<!-- Angular app definition -->
-<html ng-app="speedScreenDemoApp">
-    <head>
-        <title>Speed Screen</title>
-        <!-- TODO: Full audit of things being included. Make sure not to rely on internet-based stuff. -->
-        <link rel="stylesheet" href="css/vendors/bootstrap.min.css" />
-        <link rel="stylesheet" href="css/vendors/font-awesome.css" />
-        <link rel="stylesheet" href="css/clubspeedstyle.css?1.1" />
-
-    </head>
-<body style="overflow: hidden;">
+<html ng-app="speedscreen">
+<head>
+    <meta charset="utf-8">
+    <title>HD Speed Screen</title>
+    <link rel="stylesheet" href="css/speedscreen.css?v=00003" />
+</head>
+<body>
 
 <!-- Angular view injection location -->
-<div style="height: 100%;" ng-view></div>
-
-<!-- JavaScript placed at the bottom so the page loads more quickly -->
-
-<!-- Application configuration -->
-<script src="config.js"></script>
-<script>
-    config.apiURL = config.apiURL.replace("https", "http");
-</script>
-
-<script src="js/vendors/jquery.min.js"></script>
-<script src="js/vendors/bootstrap.min.js"></script>
-<script src="js/vendors/angular.min.js"></script>
-<script src="js/vendors/angular-route.min.js"></script>
-
-<!-- Isotope -->
-<script src="js/vendors/jquery.isotope.min.js"></script>
+<div ng-view></div>
 
 <!-- Angular scripts -->
-<script src="js/app.js"></script>
-<script src="js/services/speedScreenServices.js"></script>
-<script src="js/controllers/channelController.js"></script>
-<script src="js/controllers/liveScoreboardController.js"></script>
-<script src="js/controllers/hdScoreboardController.js"></script>
-<script src="js/controllers/karttracerController.js"></script>
-<script src="js/controllers/newHDScoreboardController.js"></script>
-
-<!-- AngularJS Bootstrap tools -->
-<script src="js/vendors/ui-bootstrap-tpls-0.7.0.js"></script>
-
-<!-- Date formatting and internationalization -->
-<script src="js/vendors/moment-with-langs.js"></script>
-<script src="js/vendors/angular-moment.js"></script>
-
-<!-- Scoreboard simulation (local) -->
-<script src="js/tools/liveScoreboardSimulator.js"></script>
-
-<!-- Socket.io -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+<script src="js/assets/settings.js"></script>
+<script src="js/assets/translations.js"></script>
+<script src="js/vendors/angular.min.js"></script>
+<script src="js/vendors/angular-route.min.js"></script>
+<script src="js/app.js?v=00003"></script>
+<script src="js/services/globalSettings.js?v=00003"></script>
+<script src="js/services/api_drivers/apiDriverPolling.js?v=00003"></script>
+<script src="js/services/apiService.js?v=00003"></script>
+<script src="js/controllers/speedscreenController.js?v=00003"></script>
 
 </body>
 </html>

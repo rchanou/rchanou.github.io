@@ -1,0 +1,63 @@
+<div ng-controller="speedscreenController">
+
+    <!-- Loading screen -->
+    <div class="loadingScreen" ng-if="state == 'loading'">
+        <span class="vertCenterHelper"></span>
+        <div class="vertCenter">
+
+            <img class="loadingScreenImage" src="images/clubspeed_logo.jpg">
+            <br/>
+            <div class="loadingScreenHeader flash">{{loadingHeaderText}}</div>
+            <div class="loadingScreenSubHeader">{{loadingStepText}}</div>
+            <div class="loadingScreenRestartMessage">{{loadingRestartText}} {{loadingRestartTime}}</div>
+        </div>
+    </div>
+
+    <!-- Image slide -->
+    <div class="imageSlide" ng-if="state == 'running' && slideType == 'image'">
+        <img ng-src="{{slideURL}}" class="imageSlideImage" ng-if="state == 'running' && slideType == 'image'">
+    </div>
+
+    <!-- URL slide -->
+    <div class="urlSlide" ng-if="state == 'running' && (slideType == 'url' || slideType == 'scoreboard')">
+        <iframe scrolling="no" ng-src="{{slideURL}}" class="urlSlideContent"></iframe>
+    </div>
+
+    <!-- URL overlay slide -->
+    <div class="urlSlide" style="position: absolute; top:0px; left:0px;" ng-if="showOverlaySlide">
+        <iframe scrolling="no" ng-src="{{overlaySlideURL}}" class="urlSlideContent"></iframe>
+    </div>
+
+    <!-- Debug panel -->
+    <div class="debugPanel" ng-if="debug && debugMessage != ''">
+        [Debug] {{debugMessage}}
+    </div>
+
+    <!-- Diagnostics screen -->
+    <div class="diagnosticsScreen" ng-if="state == 'diagnostics'">
+        <span class="vertCenterHelper"></span>
+        <div class="vertCenter">
+
+            <img class="loadingScreenImage" src="images/clubspeed_logo.jpg">
+            <br/>
+            <div class="loadingScreenHeader flash">Speed Screen Diagnostics Mode</div>
+            <div class="loadingScreenSubHeader">Resolution: {{screenWidth}}x{{screenHeight}}</div>
+            <div class="diagnostics">
+                Channel Number: {{currentChannelNumber}}<br/>
+                API Status: <span ng-class="{'good': clubSpeedReachable == 'Good', 'bad': clubSpeedReachable == 'Error'}">{{clubSpeedReachable}}</span><br/>
+                Channel Status:
+                <span ng-class="{'good': channelDataAvailable == 'Good', 'bad': channelDataAvailable == 'Error' || channelDataAvailable == 'Bad Data' || channelDataAvailable == 'Empty'}">
+                    {{channelDataAvailable}}
+                </span>
+                <br/>
+                Settings Status:
+                <span ng-class="{'good': settingsStatus == 'Good', 'bad': settingsStatus == 'Needs Migration'}">
+                    {{settingsStatus}}
+                </span>
+                <br/>
+                Regular Timeline Slides: {{regularTimelineSize}}<br/>
+                Races Timeline Slides: {{racesTimelineSize}}<br/>
+            </div>
+        </div>
+    </div>
+</div>

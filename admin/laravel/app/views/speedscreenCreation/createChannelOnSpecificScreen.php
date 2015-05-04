@@ -146,7 +146,7 @@ exec("rename package.zip package.nw");
 exec("copy /b /Y nw.exe+package.nw package.exe");
 exec("enigmavbconsole.exe package.evb");
 exec("mkdir generatedChannels");
-exec("move /y app.exe generatedChannels/channel$channelId" . "screen" . $targetMonitor . ".exe");
+exec("move /y app.exe generatedChannels/channel$channelNumber" . "screen" . $targetMonitor . ".exe");
 exec("del package.nw");
 exec("del package.zip");
 exec("del package.exe");
@@ -154,12 +154,11 @@ exec("del app.exe");
 
 chdir("generatedChannels");
 header('Content-Type: application/x-msdownload');
-header("Content-Disposition: attachment; filename=\"channel$channelId" . "screen" . $targetMonitor . ".exe\"");
+header("Content-Disposition: attachment; filename=\"channel$channelNumber" . "screen" . $targetMonitor . ".exe\"");
 header("Content-Transfer-Encoding: binary");
 header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0"); // HTTP/1.1
 header("Cache-Control: private",false);
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 header('Pragma: public');
 
-readfile("./channel$channelId" . "screen" . $targetMonitor . ".exe");
-
+readfile("./channel$channelNumber" . "screen" . $targetMonitor . ".exe");

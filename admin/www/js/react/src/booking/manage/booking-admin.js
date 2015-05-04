@@ -8,8 +8,8 @@ var React = require('react/addons');
 /*** EXTERNAL REACT COMPONENTS ***/
 
 var DatePicker = require('../../components/datepicker');
-var Select = require('../../components/react-select2');
-
+var Select = require('../../components/old-react-select2');
+var IRadioGroup = require('../../components/iradio-group');
 
 /*** EXTERNAL REACT MIXINS ***/
 
@@ -31,44 +31,6 @@ var NO_SELECT = {
 
 
 /*** HELPERS ***/
-
-function generateUUID(){
-    var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
-    });
-    return uuid;
-};
-
-
-// note: the following function is broken and unused
-var CheckPropChange = {
-	checkPropChange(otherProps, ...keys){
-		keys.forEach(key => {
-			if (Array.isArray(key)){
-				var thisTraverser = this.props;
-				var otherTraverser = otherProps;
-				for (var i = 0; i < key.length; i++){
-					thisTraverser = thisTraverser[key[i]];
-					otherTraverser = otherTraverser[key[i]];
-					var definedForThis = typeof thisTraverser !== 'undefined';
-					var definedForOther = typeof otherTraverser !== 'undefined';
-					if (!definedForThis && !definedForOther){
-						return false;
-					} else if ((definedForThis && !definedForOther) || (definedForOther && !definedForThis) || (thisTraverser !== otherTraverser)){
-						return true;
-					}
-				}
-			} else if (this.props[key] !== otherProps[key]){
-				return true;
-			}
-		});
-		return false;
-	}
-};
-
 
 var jQuerify = {
 	jQuerify(ref){
@@ -111,73 +73,9 @@ var ParseRef = {
 
 var Popup = require('../../components/popup.js');
 
-var ICheck = require('../../components/icheck.js')
+var ICheck = require('../../components/old-icheck.js')
 
 var TrackSelect = require('../../components/track-select');
-
-var IRadio = React.createClass({
-	mixins: [EventFunnel],
-	render(){
-		return <input type='radio' />;
-	},
-	componentDidMount(){
-		$(this.getDOMNode()).iCheck({
-			checkboxClass: 'icheckbox_flat-blue',
-			radioClass: 'iradio_flat-blue'
-		})
-		.on('ifClicked', this.toFunnel);
-		this.setFromProps();
-		//this.funnelJQueryEvents('ifChecked','ifUnchecked');
-	},
-	componentDidUpdate(){
-		this.setFromProps();
-	},
-	setFromProps(){
-		if (this.props.selected) {
-			$(this.getDOMNode()).iCheck('check');
-		} else {
-			$(this.getDOMNode()).iCheck('uncheck');
-		}
-	}
-});
-
-var IRadioGroup = React.createClass({
-	mixins: [EventFunnel],
-	getDefaultProps(){
-		return {
-			inline: true,
-			list: [{ label: 'A', value: 1 }, { label: 'b', value: 2 }],
-			selected: null
-		};
-	},
-	getInitialState(){
-		// note: name is set by generateUUID here and should never be changed after,
-		// but it is in initial state instead of default props so that a new UUID is generated for each IRadioGroup instance
-		return { selected: this.props.selected, name: generateUUID() };
-	},
-	render(){
-		var listNodes = [];
-
-		this.props.list.forEach((item, i) => {
-			listNodes.push(
-				<div key={i}>
-					<IRadio item={item} name={this.props.name || this.state.name} selected={this.props.selected === item.value}
-						onFunnelEvent={this.handleRadioChange} />
-					<label style={{ position: 'relative', top: -5, left: 10 }} >
-						{item.label}
-					</label>
-				</div>
-			);
-		});
-
-		return <span>
-			{listNodes}
-		</span>;
-	},
-	handleRadioChange(e, optionProps, state){
-		this.toFunnel(e, optionProps);
-	}
-});
 
 
 /*** CHILD COMPONENT(S) ***/
@@ -249,14 +147,14 @@ module.exports = React.createClass({
 			apiKey: 'cs-dev',
 			privateKey: 'cs-dev'
 		};
-		if (window && window.location && (window.location.hostname === '192.168.111.29' || window.location.hostname === 'localhost')) {
+		if (window && window.location && (window.location.hostname === '192.168.111.205' || window.location.hostname === 'localhost')) {
 			config.apiURL = 'https://vm-122.clubspeedtiming.com/api/index.php';
 		} else {
 			console.log = function(){};
 		}
 		thisConfig.apiURL += '/';
 
-		console.log(thisConfig);
+		//console.log(thisConfig);
 
 		return {
 			config: thisConfig,
@@ -610,7 +508,7 @@ module.exports = React.createClass({
 	},
 
 	calcMaxQty(){
-		return _(this.state.selectedBookingIds)
+		var arr = _(this.state.selectedBookingIds)
 			.map(id => {
 				if (id.heatId){
 					return this.state.raceDetails[id.heatId].RacersPerHeat;
@@ -623,7 +521,7 @@ module.exports = React.createClass({
 					}
 				}
 			})
-			.min().value();
+			.min();
 	},
 
 	getBookingById (id){

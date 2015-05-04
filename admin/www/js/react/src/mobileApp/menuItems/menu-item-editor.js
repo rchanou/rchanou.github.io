@@ -1,10 +1,29 @@
 var React = require('react/addons');
-var Anim = require('../../components/react-transition');
 var _ = require('lodash');
-
 
 var PRIMARY_MOUSE_BUTTON_VALUE = 0;
 var MAX_Z_INDEX = 16777271;
+
+
+var FIXED_ID_MAP = {
+  'TOP TIMES': 'toptimes',
+  'TRACK INFORMATION': 'trackinfo',
+  'VENUE': 'trackinfo',
+  'TRACK INFO': 'trackinfo',
+  'CLUB SPEED': 'clubspeed',
+  'CLUBSPEED': 'clubspeed',
+  'PRO SKILL': 'proskill',
+  'PROSKILL': 'proskill',
+  'MY RESULTS': 'proskill',
+  'RESULTS': 'proskill',
+  'E-CARD': 'membercard',
+  'MEMBER CARD': 'membercard',
+  'MEMBERSHIP': 'membercard',
+  'ONLINE BOOKING': 'booking',
+  'BOOKING': 'booking',
+  'EXTRA': 'extra',
+  'PROMOTIONS': 'promotions'
+};
 
 
 var Popup = require('../../components/popup');
@@ -183,9 +202,8 @@ var MenuItem = React.createClass({
       cursor = 'move';
     }
 
-    return <Anim component='li' ref='item'
+    return <li ref='item'
       className={'alert btn-info'}
-      duration={this.props.dragging? 0: this.props.animationDuration}
       style={{
         backgroundColor,
         borderColor: this.props.bucketId !== null? 'rgb(33,33,33)': 'hsl(0,50%,50%)',
@@ -195,7 +213,8 @@ var MenuItem = React.createClass({
         left: this.props.left,
         height: this.props.height,
         width: this.props.width,
-        zIndex: this.props.dragging || this.endingDrag? MAX_Z_INDEX: null
+        zIndex: this.props.dragging || this.endingDrag? MAX_Z_INDEX: null,
+        transition: 'all ' + (this.props.dragging? '0': (this.props.animationDuration / 1000)) + 's ease-out'
       }}
 
       onMouseEnter={() => {
@@ -231,7 +250,7 @@ var MenuItem = React.createClass({
       />
       <span>{this.state.hovering}</span>
       {itemForm}
-    </Anim>;
+    </li>;
   },
 
   componentDidUpdate(){
@@ -453,12 +472,12 @@ module.exports = React.createClass({
                   <h1>
                     Menu
                   </h1>
-                  <Anim component='div'
-                    duration={this.props.animationDuration}
+                  <div
                     style={{
                       position: 'relative',
                       top: '1.1em',
-                      height: this.calcPreviewHeight() + this.props.selectedItemHeight
+                      height: this.calcPreviewHeight() + this.props.selectedItemHeight,
+                      transition: 'all ' + (this.props.animationDuration / 1000) + 's ease-out'
                     }}
                   >
                     {this.renderDragItemPlaceholder()}
@@ -466,7 +485,7 @@ module.exports = React.createClass({
                       {this.renderItems()}
                     </ol>
                     {this.renderButtonPanel()}
-                  </Anim>
+                  </div>
                 </div>
 
                 <div className='hidden-xs' style={{ width: '100em' }} />
@@ -613,17 +632,17 @@ module.exports = React.createClass({
         />;
       });
 
-      bucket = <Anim component='ol' ref='bucket'
-        duration={this.props.animationDuration}
+      bucket = <ol ref='bucket'
         style={{
           position: 'relative',
           top: '1.1em',
           listStyle: 'none',
-          height: (this.getRemainingBucketItems().length + 1) * this.props.bucketItemHeight
+          height: (this.getRemainingBucketItems().length + 1) * this.props.bucketItemHeight,
+          transition: 'all ' + (this.props.animationDuration / 1000) + 's ease-out'
         }}
       >
         {bucketItemElements}
-      </Anim>;
+      </ol>;
     }
 
     return <div
@@ -639,23 +658,32 @@ module.exports = React.createClass({
   },
 
   renderButtonPanel(){
-    return <Anim component='div'
-      duration={this.props.animationDuration}
+    return <div
       style={{
         position: 'absolute',
         top: this.calcPreviewHeight() + this.props.spacerWidth,
         left: 0,
-        width: '100%'
+        width: '100%',
+        transition: 'all ' + (this.props.animationDuration / 1000) + 's ease-out'
       }}
     >
       <button
         className='btn btn-info'
-        onClick={() => {
-          var propsToSave = ['label', 'id', 'url', 'iconUrl', 'fixedId'];
+        onClick={e => {
+          console.log(e.nativeEvent);
+          /*var propsToSave = ['label', 'id', 'url', 'iconUrl', 'fixedId'];
           var url = config.apiURL + 'settings/' + this.state.settingsId + '?key=' + config.privateKey;
           var menuItems = _.map(this.state.menuItems, item => _.pick(item, propsToSave));
           var value = JSON.stringify({ menuItems });
           var request = { type: 'PUT', url, data: { value } };
+*/
+
+          var request = this.createRequest();
+
+          if (e.nativeEvent.button !== PRIMARY_MOUSE_BUTTON_VALUE){
+            console.log(request);
+            return;
+          }
 
           $.ajax(request)
           .then(
@@ -673,7 +701,16 @@ module.exports = React.createClass({
       >
         Save All
       </button>
-    </Anim>;
+    </div>;
+  },
+
+  createRequest(){
+    var propsToSave = ['label', 'id', 'url', 'iconUrl', 'fixedId'];
+    var url = config.apiURL + 'settings/' + this.state.settingsId + '?key=' + config.privateKey;
+    var menuItems = _.map(this.state.menuItems, item => _.pick(item, propsToSave));
+    var value = JSON.stringify({ menuItems });
+    var request = { type: 'PUT', url, data: { value } };
+    return request;
   },
 
   renderDragItemPlaceholder(){
@@ -718,6 +755,12 @@ module.exports = React.createClass({
           var menuItems = JSON.parse(res.settings[0].value).menuItems;
           menuItems.forEach((item, i) => {
             item.itemKey = this.props.menuItemBucket.length + 1 + i;
+            if (!item.fixedId){
+              var matchedFixedId = FIXED_ID_MAP[item.label.toUpperCase()];
+              if (matchedFixedId){
+                item.fixedId = matchedFixedId;
+              }
+            }
           });
           this.setState({ settingsId, menuItems });
         } catch(ex){

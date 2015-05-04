@@ -8,7 +8,7 @@
     <!-- BEGIN CSS INCLUDES -->
     @section('css_includes')
     {{ HTML::style('css/bootstrap.min.css') }}
-    {{ HTML::style('css/font-awesome.css') }}
+    {{ HTML::style('css/font-awesome.min.css') }}
     {{ HTML::style('css/fullcalendar.css') }}
     {{ HTML::style('css/jquery.jscrollpane.css') }}
     {{ HTML::style('css/icheck/flat/blue.css') }}
@@ -64,7 +64,7 @@
                 <ul>
                     <li>{{link_to('/channel','Channels')}}</li>
                     <li>{{link_to('/channelSettings','Settings')}}</li> <!-- TODO: Rename to channel/settings -->
-                    {{--<li>{{link_to('/speedScreen/translations','Translations')}}</li>--}}
+                    <li>{{link_to('/speedScreen/translations','Translations')}}</li>
                     <li>{{link_to('/docs/Club Speed - Speed Screen Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
@@ -95,6 +95,13 @@
                     <li>{{link_to('/registration/settings','Settings')}}</li>
                     <li>{{link_to('/registration/translations', 'Translations')}}</li>
                     <li>{{link_to('/docs/Club Speed - Club Speed Registration Kiosk Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
+                    @if(Session::has('user') && strtolower(Session::get('user')) == 'support')
+                    <li>
+                        <a href="{{URL::to('/registration/deploy?&targetUrl=http://' . $_SERVER['HTTP_HOST'] . '/cs-registration/www/&appName=registration')}}">
+                            <img src="{{asset('img/support_only.png')}}" title="This link is only visible to Club Speed support staff."> Download .exe
+                        </a>
+                    </li>
+                    @endif
                 </ul>
             </li>
             @if (@$controller == 'ReportsController')
