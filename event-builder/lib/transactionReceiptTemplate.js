@@ -541,15 +541,18 @@ exports.create = function(body) {
   /*
     GetPrintReceiptFooter (COMPLETED)
   */
+
+
   if (resources.receiptFooterText1 && resources.receiptFooterText1.trim().length > 0)
-    output += cpad(resources.receiptFooterText1, 42);
+    output += cpad(resources.receiptFooterText1, 42) + '\n';
   if (resources.receiptFooterText2 && resources.receiptFooterText2.trim().length > 0)
-    output += cpad(resources.receiptFooterText2, 42);
+    output += cpad(resources.receiptFooterText2, 42) + '\n';
   if (resources.receiptFooterText3 && resources.receiptFooterText3.trim().length > 0)
-    output += cpad(resources.receiptFooterText3, 42);
+    output += cpad(resources.receiptFooterText3, 42) + '\n';
   if (resources.receiptFooterText4 && resources.receiptFooterText4.trim().length > 0)
-    output += cpad(resources.receiptFooterText4, 42);
+    output += cpad(resources.receiptFooterText4, 42) + '\n';
   log.debug('end print receipt footer');
+
   /*
     End GetPrintReceiptFooter
   */

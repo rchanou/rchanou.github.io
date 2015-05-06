@@ -82,7 +82,7 @@ function rpad(str, num, padChar) {
 function cpad(str, totalLength, padChar) {
     var tempPadding = padding(str, totalLength, padChar);
     tempPadding = tempPadding.substr(0, length(tempPadding) / 2);
-    return tempPadding + (str ? str.toString() : '');
+    return (tempPadding + (str ? str.toString() : '')).substr(0, totalLength);
 }
 
 var utils = {};

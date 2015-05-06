@@ -17,7 +17,7 @@ describe("Transaction Receipt Template", function() {
 
     it("should gracefully handle empty input", function() {
         var input = null;
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -27,7 +27,7 @@ describe("Transaction Receipt Template", function() {
                 "companyLogoPath": "c:\\something\\greater\\than\\0\\length.bmp"
             }
         };
-        var expected = "\n\n{{LOGO}}\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n{{LOGO}}\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -40,7 +40,7 @@ describe("Transaction Receipt Template", function() {
                 , "receiptHeaderText4" : "HEADER 4"
             }
         };
-        var expected = "\n\n\u001ba\u0001\nHEADER 1\nHEADER 2\nHEADER 3\nHEADER 4\n\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\nHEADER 1\nHEADER 2\nHEADER 3\nHEADER 4\n\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -50,7 +50,7 @@ describe("Transaction Receipt Template", function() {
                 "organizationNumber": "1QX3T4"
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000Org. #: 1QX3T4\n\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000Org. #: 1QX3T4\n\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -71,7 +71,7 @@ describe("Transaction Receipt Template", function() {
                 }
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000Event Information\nName: EVENT SUBJECT\n10 Racers\n4/21/2015 7:00PM to 8:00PM\nCreated by Jim Bob Sr.\n\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000Event Information\nName: EVENT SUBJECT\n10 Racers\n4/21/2015 7:00PM to 8:00PM\nCreated by Jim Bob Sr.\n\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -91,7 +91,7 @@ describe("Transaction Receipt Template", function() {
                 }
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000Event Information\n10 Racers\n4/21/2015 7:00PM to 8:00PM\nCreated by Jim Bob Sr.\n\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000Event Information\n10 Racers\n4/21/2015 7:00PM to 8:00PM\nCreated by Jim Bob Sr.\n\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -110,7 +110,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nCustomer: Jim Bob\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nCustomer: Jim Bob\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -133,7 +133,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nCustomer: Jim Bob\nReceipt Number 1          4/19/2015 7:00PM\n                         4/20/2015 10:00AM\n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nCustomer: Jim Bob\nReceipt Number 1          4/19/2015 7:00PM\n                         4/20/2015 10:00AM\n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -161,7 +161,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nRegular Product                     $14.25\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nRegular Product                     $14.25\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -196,7 +196,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nPoints Product                      $14.25\n  Points Customer\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nPoints Product                      $14.25\n  Points Customer\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -231,7 +231,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nMembership Product                  $14.25\n  Membership Customer\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nMembership Product                  $14.25\n  Membership Customer\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -269,7 +269,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nFood Product                        $14.25\n Subitem1\n Subitem2\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nFood Product                        $14.25\n Subitem1\n Subitem2\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -302,7 +302,7 @@ describe("Transaction Receipt Template", function() {
                 "printDetail": false
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nEvent Product Descript...           $14.25\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nEvent Product Descript...           $14.25\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -340,7 +340,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nMembership Product                  $16.25\n  Membership Customer\n  $6 coupon($6.00)\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nMembership Product                  $16.25\n  Membership Customer\n  $6 coupon($6.00)\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -376,7 +376,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -456,7 +456,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nMembership Product                  $16.25\n  Membership Customer\n  $6 coupon($6.00)\n2)Points Product                    $24.50\n  Points Customer\n  $2 coupon($2.00)\nFood Product                        $13.25\n Subitem1\n Subitem2\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\nMembership Product                  $16.25\n  Membership Customer\n  $6 coupon($6.00)\n2)Points Product                    $24.50\n  Points Customer\n  $2 coupon($2.00)\nFood Product                        $13.25\n Subitem1\n Subitem2\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -471,7 +471,7 @@ describe("Transaction Receipt Template", function() {
                 }
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                            $14.00\nTax                                  $1.00\n------------------------------------------\nTotal                               $15.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                            $14.00\nTax                                  $1.00\n------------------------------------------\nTotal                               $15.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -487,7 +487,7 @@ describe("Transaction Receipt Template", function() {
                 }
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                            $14.00\nTax(Exempt)                          $0.00\n------------------------------------------\nTotal                               $14.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                            $14.00\nTax(Exempt)                          $0.00\n------------------------------------------\nTotal                               $14.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -507,7 +507,7 @@ describe("Transaction Receipt Template", function() {
                 "has2Taxes": true
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                            $14.00\nGST                                  $0.75\nPST                                  $0.25\n------------------------------------------\nTotal                               $15.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                            $14.00\nGST                                  $0.75\nPST                                  $0.25\n------------------------------------------\nTotal                               $15.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -546,7 +546,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nGift Card Payment(4/20/2015)        $10.00\n  Gift Card #1001\n  $50.00 Balance remaining.\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nGift Card Payment(4/20/2015)        $10.00\n  Gift Card #1001\n  $50.00 Balance remaining.\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -585,7 +585,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nCustomer Payment(4/20/2015)         $10.00\n  Jim Bob\n  $50.00 Account Balance\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nCustomer Payment(4/20/2015)         $10.00\n  Jim Bob\n  $50.00 Account Balance\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -610,7 +610,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nVISA1234 Payment(4/20/2015)         $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nVISA1234 Payment(4/20/2015)         $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -633,7 +633,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nCheck Payment(4/20/2015)            $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nCheck Payment(4/20/2015)            $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -659,7 +659,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nCash Payment(4/20/2015)             $10.00\nTendered                            $15.00\nChange                               $5.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nCash Payment(4/20/2015)             $10.00\nTendered                            $15.00\nChange                               $5.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -682,7 +682,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nExternal Payment(4/20/2015)         $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nExternal Payment(4/20/2015)         $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -706,7 +706,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nSome voucher Voucher(4/20/2015)     $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nSome voucher Voucher(4/20/2015)     $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -729,7 +729,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nComplimentary(4/20/2015)            $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nComplimentary(4/20/2015)            $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -752,7 +752,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nDebit Payment(4/20/2015             $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nDebit Payment(4/20/2015             $10.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -778,7 +778,7 @@ describe("Transaction Receipt Template", function() {
                 "printVoidedPayments": true
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\n*Voided Payments*                         \n*Complimentary(4/20/2015)*        ($10.00)\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\n*Voided Payments*                         \n*Complimentary(4/20/2015)*        ($10.00)\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -832,7 +832,7 @@ describe("Transaction Receipt Template", function() {
                 "printVoidedPayments": true
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nDebit Payment(4/20/2015             $10.00\nSome voucher Voucher(4/20/2015)     $10.00\n------------------------------------------\n*Voided Payments*                         \n*Complimentary(4/20/2015)*        ($10.00)\n*External Payment(4/20/2015)*     ($10.00)\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nDebit Payment(4/20/2015             $10.00\nSome voucher Voucher(4/20/2015)     $10.00\n------------------------------------------\n*Voided Payments*                         \n*Complimentary(4/20/2015)*        ($10.00)\n*External Payment(4/20/2015)*     ($10.00)\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -840,16 +840,16 @@ describe("Transaction Receipt Template", function() {
         var input = {
             "data": {
                 "check": {
-                    "checkId" : 1,
-                    "discount": 5,
-                    "discountCurrency": "$5.00"
+                    "checkId"          : 1,
+                    "discount"         : 5,
+                    "discountCurrency" : "$5.00"
                 },
                 "discountType": {
                     "description": "Discount Desc."
                 }
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nDiscount Desc.                       $5.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nDiscount Desc.                       $5.00\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -857,12 +857,12 @@ describe("Transaction Receipt Template", function() {
         var input = {
             "data": {
                 "check": {
-                    "checkId" : 1,
-                    "checkRemainingTotalCurrency": "$0.00"
+                    "checkId"                     : 1,
+                    "checkRemainingTotalCurrency" : "$0.00"
                 }
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                              $0.00\n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                              $0.00\n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -875,7 +875,7 @@ describe("Transaction Receipt Template", function() {
                 }
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n\nGratuity:      ___________________________\n\nTotal:         ___________________________\n\n\n\nSignature:     ___________________________\n\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n\nGratuity:      ___________________________\n\nTotal:         ___________________________\n\n\n\nSignature:     ___________________________\n\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -891,7 +891,7 @@ describe("Transaction Receipt Template", function() {
                 "printGratuityLineSetting": "none"
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -899,16 +899,16 @@ describe("Transaction Receipt Template", function() {
         var input = {
             "data": {
                 "check": {
-                    "checkId" : 1,
-                    "checkType": 1,
-                    "gratuity": 0
+                    "checkId"   : 1,
+                    "checkType" : 1,
+                    "gratuity"  : 0
                 }
             },
             "options": {
                 "printGratuityLineSetting": "eventonly"
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -921,15 +921,28 @@ describe("Transaction Receipt Template", function() {
             },
             "terminalName": "POS1"
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\nUser:                          Jim Bob Sr.\nTerminal:                             POS1\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\nUser:                          Jim Bob Sr.\nTerminal:                             POS1\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\n\n\n\n\n\u001dV\u0001";
+        compare(input, expected);
+    });
+
+    it("should parse receipt footers", function() {
+        var input = {
+            "resources": {
+                  "receiptFooterText1" : "Some text hoorah really really long oh boy oh boy"
+                , "receiptFooterText2" : "Looooooooooooooooooonger than 42 characters"
+                , "receiptFooterText3" : "Normal size text"
+                , "receiptFooterText4" : "Default override woo"
+            }
+        };
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\nSome text hoorah really really long oh boy\nLooooooooooooooooooonger than 42 character\n             Normal size text\n           Default override woo\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
     it("should parse survey information", function() {
         var input = {
             "resources": {
-                  "receiptFooterSurveyText1"      : "Go here for survey stuff!"
-                , "receiptFooterSurveyText2"      : "##SURVEYURL##"
+                  "receiptFooterSurveyText1" : "Go here for survey stuff!"
+                , "receiptFooterSurveyText2" : "##SURVEYURL##"
             },
             "options": {
                   "printSurveyUrlOnReceipt" : true
@@ -937,19 +950,19 @@ describe("Transaction Receipt Template", function() {
                 , "accessCode"              : "456"
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\nGo here for survey stuff!                 \nhttp://surveys.com/123                    \nYour Access code is: 456                  \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\nGo here for survey stuff!                 \nhttp://surveys.com/123                    \nYour Access code is: 456                  \n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
     it("should parse fiscal information", function() {
         var input = {
             "fiscalResponse": {
-                "success": true,
-                "serial": "QWERTY",
-                "receiptCode": "12345"
+                "success"     : true,
+                "serial"      : "QWERTY",
+                "receiptCode" : "12345"
             }
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\nKontrollkod: QWERTY\nKontrollenhet: 12345\n\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\nKontrollkod: QWERTY\nKontrollenhet: 12345\n\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -1106,7 +1119,7 @@ describe("Transaction Receipt Template", function() {
             },
             "terminalName": "POS1"
         };
-        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nCustomer: Jim Bob\nReceipt Number 1          4/19/2015 7:00PM\n                         4/20/2015 10:00AM\n------------------------------------------\nMembership Product                  $16.25\n  Membership Customer\n  $6 coupon($6.00)\n2)Points Product                    $24.50\n  Points Customer\n  $2 coupon($2.00)\nFood Product                        $13.25\n Subitem1\n Subitem2\n------------------------------------------\nSubtotal                            $14.00\nTax                                  $1.00\n------------------------------------------\nTotal                               $15.00\n------------------------------------------\nDebit Payment(4/20/2015              $1.00\nSome voucher Voucher(4/20/2015)      $1.00\n------------------------------------------\n*Voided Payments*                         \n*Complimentary(4/20/2015)*         ($1.00)\n*External Payment(4/20/2015)*      ($1.00)\n------------------------------------------\nDiscount Desc.                       $5.00\n------------------------------------------\nBalance                             $11.00\n------------------------------------------\n\nGratuity:      ___________________________\n\nTotal:         ___________________________\n\n\n\nSignature:     ___________________________\n\nUser:                          Jim Bob Sr.\nTerminal:                             POS1\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\nGo here for survey stuff!                 \nhttp://surveys.com/123                    \nYour Access code is: 456                  \n\nKontrollkod: QWERTY\nKontrollenhet: 12345\n\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n\u001ba\u0001\u001ba\u0000\nCustomer: Jim Bob\nReceipt Number 1          4/19/2015 7:00PM\n                         4/20/2015 10:00AM\n------------------------------------------\nMembership Product                  $16.25\n  Membership Customer\n  $6 coupon($6.00)\n2)Points Product                    $24.50\n  Points Customer\n  $2 coupon($2.00)\nFood Product                        $13.25\n Subitem1\n Subitem2\n------------------------------------------\nSubtotal                            $14.00\nTax                                  $1.00\n------------------------------------------\nTotal                               $15.00\n------------------------------------------\nDebit Payment(4/20/2015              $1.00\nSome voucher Voucher(4/20/2015)      $1.00\n------------------------------------------\n*Voided Payments*                         \n*Complimentary(4/20/2015)*         ($1.00)\n*External Payment(4/20/2015)*      ($1.00)\n------------------------------------------\nDiscount Desc.                       $5.00\n------------------------------------------\nBalance                             $11.00\n------------------------------------------\n\nGratuity:      ___________________________\n\nTotal:         ___________________________\n\n\n\nSignature:     ___________________________\n\nUser:                          Jim Bob Sr.\nTerminal:                             POS1\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n\nGo here for survey stuff!                 \nhttp://surveys.com/123                    \nYour Access code is: 456                  \n\nKontrollkod: QWERTY\nKontrollenhet: 12345\n\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
