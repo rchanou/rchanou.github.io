@@ -191,24 +191,38 @@ exports.create = function(body) {
       output += '{{LOGO}}\n';
 
   // Insert receipt header (with alignment), if exists
+  var alignFunction;
   switch(options.receiptHeaderAlign) {
       case 'left':
-          output += alignLeft();
+          // output += alignLeft();
+          alignFunction = rpad;
           break;
        case 'right':
-          output += alignRight();
+          // output += alignRight();
+          alignFunction = lpad;
           break;
        // case 'center':
        default:
-          output += alignCenter();
+          // output += alignCenter();
+          alignFunction = cpad;
           break;
   }
 
-  output += (resources.receiptHeaderText1.trim().length > 0) ? '\n' + resources.receiptHeaderText1 + '\n' : '';
-  output += (resources.receiptHeaderText2.trim().length > 0) ? resources.receiptHeaderText2 + '\n' : '';
-  output += (resources.receiptHeaderText3.trim().length > 0) ? resources.receiptHeaderText3 + '\n' : '';
-  output += (resources.receiptHeaderText4.trim().length > 0) ? resources.receiptHeaderText4 + '\n' : '';
-  output += alignLeft(); // reset alignment
+  if (resources.receiptHeaderText1 && resources.receiptHeaderText1.trim().length > 0)
+    output += alignFunction(resources.receiptHeaderText1, 42) + '\n';
+  if (resources.receiptHeaderText2 && resources.receiptHeaderText2.trim().length > 0)
+    output += alignFunction(resources.receiptHeaderText2, 42) + '\n';
+  if (resources.receiptHeaderText3 && resources.receiptHeaderText3.trim().length > 0)
+    output += alignFunction(resources.receiptHeaderText3, 42) + '\n';
+  if (resources.receiptHeaderText4 && resources.receiptHeaderText4.trim().length > 0)
+    output += alignFunction(resources.receiptHeaderText4, 42) + '\n';
+  log.debug('end print receipt header');
+
+  // output += (resources.receiptHeaderText1.trim().length > 0) ? '\n' + resources.receiptHeaderText1 + '\n' : '';
+  // output += (resources.receiptHeaderText2.trim().length > 0) ? resources.receiptHeaderText2 + '\n' : '';
+  // output += (resources.receiptHeaderText3.trim().length > 0) ? resources.receiptHeaderText3 + '\n' : '';
+  // output += (resources.receiptHeaderText4.trim().length > 0) ? resources.receiptHeaderText4 + '\n' : '';
+  // output += alignLeft(); // reset alignment
 
   // Fiscal Printer Organization Number
   if(options.organizationNumber && options.organizationNumber.length > 0)
@@ -541,15 +555,18 @@ exports.create = function(body) {
   /*
     GetPrintReceiptFooter (COMPLETED)
   */
+
+
   if (resources.receiptFooterText1 && resources.receiptFooterText1.trim().length > 0)
-    output += cpad(resources.receiptFooterText1, 42);
+    output += cpad(resources.receiptFooterText1, 42) + '\n';
   if (resources.receiptFooterText2 && resources.receiptFooterText2.trim().length > 0)
-    output += cpad(resources.receiptFooterText2, 42);
+    output += cpad(resources.receiptFooterText2, 42) + '\n';
   if (resources.receiptFooterText3 && resources.receiptFooterText3.trim().length > 0)
-    output += cpad(resources.receiptFooterText3, 42);
+    output += cpad(resources.receiptFooterText3, 42) + '\n';
   if (resources.receiptFooterText4 && resources.receiptFooterText4.trim().length > 0)
-    output += cpad(resources.receiptFooterText4, 42);
+    output += cpad(resources.receiptFooterText4, 42) + '\n';
   log.debug('end print receipt footer');
+
   /*
     End GetPrintReceiptFooter
   */
