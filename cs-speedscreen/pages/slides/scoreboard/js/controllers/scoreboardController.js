@@ -782,14 +782,19 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
             if($scope.nextRacerTabEnabled && $scope.nextRaceDetails != null)
             {
                 $scope.racerBoxClassicWidth -= 20;
+                $scope.adjustLineHeights = false;
+            }
+            else
+            {
+                $scope.adjustLineHeights = false;
             }
 
             var availableSpaceForRacerBoxes = $scope.raceRunningClassicHeight - $scope.marginSize*(5)*2 - $scope.marginSize;
             $scope.racerBoxClassicHeight = availableSpaceForRacerBoxes / 5;
-            $scope.racerBoxClassicFontSize = 7.5*($scope.racerBoxClassicHeight/20);
+            $scope.racerBoxClassicFontSize = 11*($scope.racerBoxClassicHeight/20);
             if($scope.nextRacerTabEnabled && $scope.nextRaceDetails != null)
             {
-                $scope.racerBoxClassicFontSize *= 0.8;
+                $scope.racerBoxClassicFontSize *= 1;
             }
         }
         else if (numberOfRacers > 5)
@@ -846,10 +851,15 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
             $scope.racerBoxClassicHeight = availableSpaceForRacerBoxes / numOfRacersPerColumn;
 
 
-            $scope.racerBoxClassicFontSize = 7.5*($scope.racerBoxClassicHeight/20);
+            $scope.racerBoxClassicFontSize = 10*($scope.racerBoxClassicHeight/20);
             if($scope.nextRacerTabEnabled && $scope.nextRaceDetails != null)
             {
                 $scope.racerBoxClassicFontSize *= 0.8;
+                $scope.adjustLineHeights = true;
+            }
+            else
+            {
+                $scope.adjustLineHeights = false;
             }
         }
 

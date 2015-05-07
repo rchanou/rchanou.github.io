@@ -132,7 +132,7 @@
         <div class="raceRunning"
              ng-style="{'width': raceRunningClassicWidth + 'vw', 'height': raceRunningClassicHeight + 'vh'}">
             <div ng-repeat="racer in racers" class="racerBox racerBoxClassic shadow"
-                 ng-style="{'width': racerBoxClassicWidth + 'vw', 'height': racerBoxClassicHeight + 'vh', 'font-size' : racerBoxClassicFontSize + 'vw'}">
+                 ng-style="{'width': racerBoxClassicWidth + 'vw', 'height': racerBoxClassicHeight + 'vh', 'font-size' : racerBoxClassicFontSize + 'vh'}">
                 <div ng-if="showLapEstimation" style="position: relative;">
                     <div class="smoothIncrease" style="position: absolute; top: 0px; left: 0px; z-index: 1; background-color:rgba(255,255,255,0.1);" ng-style="{'height': racerBoxClassicHeight + 'vh', 'width': racer.timeSinceLastPassing/1000/(racer.average_lap_time-2)*100 + '%'}">
                     </div>
@@ -140,20 +140,20 @@
                 <div class="racerBoxClassicUpper">
                     <div class="positionBoxClassic">
                         <div class="racerBoxClassicHeader" ng-style="{{textLabelsColorStyle}}">{{strings["str_position_classic"]}}</div>
-                        <div class="racerBoxClassicData dynamicData ellipsis" ng-style="{{textDataColorStyle}}">{{racer.position}}</div>
+                        <div class="racerBoxClassicData dynamicData ellipsis" ng-class="{'racerBoxClassicData_RacerTab': (adjustLineHeights)}" ng-style="{{textDataColorStyle}}">1{{racer.position}}</div>
                     </div><div class="racerNameBoxClassic">
                         <div class="racerBoxClassicHeader" style="text-align: left" ng-style="{{textLabelsColorStyle}}">{{strings["str_name_classic"]}}</div>
-                        <div class="racerBoxClassicData ellipsis" style="text-align: left">{{racer.nickname}}</div>
+                        <div class="racerBoxClassicData ellipsis" ng-class="{'racerBoxClassicData_RacerTab': (adjustLineHeights)}" style="text-align: left">{{racer.nickname}}</div>
                     </div><div class="kartBoxClassic">
                         <div class="racerBoxClassicHeader" ng-style="{{textLabelsColorStyle}}">{{strings["str_kart_classic"]}}</div>
-                        <div class="racerBoxClassicData dynamicData ellipsis" ng-style="{{textDataColorStyle}}">{{racer.kart_num}}</div>
+                        <div class="racerBoxClassicData dynamicData ellipsis" ng-class="{'racerBoxClassicData_RacerTab': (adjustLineHeights)}" ng-style="{{textDataColorStyle}}">{{racer.kart_num}}</div>
                     </div><div class="lapsBoxClassic">
                         <div class="racerBoxClassicHeader" ng-style="{{textLabelsColorStyle}}">{{strings["str_laps_classic"]}}</div>
-                        <div class="racerBoxClassicData dynamicData ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}" ng-style="{{textDataColorStyle}}">{{racer.lap_num}}</div>
+                        <div class="racerBoxClassicData dynamicData ellipsis" ng-class="{'racerBoxClassicData_RacerTab': (adjustLineHeights)}" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}" ng-style="{{textDataColorStyle}}">{{racer.lap_num}}</div>
                     </div><div class="bestLapBoxClassic">
                         <div class="racerBoxClassicHeader" ng-style="{{textLabelsColorStyle}}">{{strings["str_bestLap_classic"]}}</div>
-                        <div class="racerBoxClassicData dynamicData ellipsis" ng-if="racer.lap_num != 0 && !racer.isFastest" ng-style="{{textDataColorStyle}}">{{racer.fastest_lap_time}}</div>
-                        <div class="racerBoxClassicData dynamicData ellipsis" ng-if="racer.lap_num != 0 && racer.isFastest" ng-style="{{fastestRacerStyle}}">{{racer.fastest_lap_time}}</div>
+                        <div class="racerBoxClassicData dynamicData ellipsis" ng-class="{'racerBoxClassicData_RacerTab': (adjustLineHeights)}" ng-if="racer.lap_num != 0 && !racer.isFastest" ng-style="{{textDataColorStyle}}">{{racer.fastest_lap_time}}</div>
+                        <div class="racerBoxClassicData dynamicData ellipsis" ng-class="{'racerBoxClassicData_RacerTab': (adjustLineHeights)}" ng-if="racer.lap_num != 0 && racer.isFastest" ng-style="{{fastestRacerStyle}}">{{racer.fastest_lap_time}}</div>
 
                 </div>
                 </div>
@@ -163,15 +163,15 @@
                             <div ng-if="racer.positionStatus == 'wentUp'"><img src="images/uparrow.png" class="positionStatusImage" ng-style="{'max-height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
                             <div ng-if="racer.positionStatus == 'wentDown'"><img src="images/downarrow.png" class="positionStatusImage" ng-style="{'max-height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
                         </div><div class="avgLapBoxClassic">
-                            <div class="racerBoxClassicBottom" ng-style="{{textLabelsColorStyle}}">{{strings["str_avgLap_classic"]}}
+                            <div class="racerBoxClassicBottom" ng-class="{'racerBoxClassicBottom_RacerTab': (adjustLineHeights)}" ng-style="{{textLabelsColorStyle}}">{{strings["str_avgLap_classic"]}}
                                 <span class="dynamicData ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}" ng-style="{{textDataColorStyle}}">{{racer.average_lap_time}}</span>
                             </div>
                         </div><div class="lastLapBoxClassic">
-                            <div class="racerBoxClassicBottom" ng-style="{{textLabelsColorStyle}}">{{strings["str_lastLap_classic"]}}
+                            <div class="racerBoxClassicBottom" ng-class="{'racerBoxClassicBottom_RacerTab': (adjustLineHeights)}" ng-style="{{textLabelsColorStyle}}">{{strings["str_lastLap_classic"]}}
                                 <span class="dynamicData ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}" ng-style="{{textDataColorStyle}}">{{racer.last_lap_time}}</span>
                             </div>
                         </div><div class="gapBoxClassic">
-                            <div class="racerBoxClassicBottom" ng-style="{{textLabelsColorStyle}}">{{strings["str_gap_classic"]}}
+                            <div class="racerBoxClassicBottom" ng-class="{'racerBoxClassicBottom_RacerTab': (adjustLineHeights)}" ng-style="{{textLabelsColorStyle}}">{{strings["str_gap_classic"]}}
                                 <span class="dynamicData ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}" ng-style="{{textDataColorStyle}}">{{racer.gap == ".000" ? '-' : racer.gap }}</span>
                             </div>
                         </div>

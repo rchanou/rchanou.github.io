@@ -345,7 +345,7 @@ body {
     background:rgba(22,22,22,0.8);
     text-align: left;
     overflow: hidden;
-    font-size: 7vh;
+    font-size: 11vh;
     box-sizing: border-box;
     border: 2px solid white;
 }
@@ -366,11 +366,20 @@ body {
 }
 
 .racerBoxClassicData {
-    font-size: 40%;
+    font-size: 55%;
+    line-height: 150%;
+}
+
+.racerBoxClassicData_RacerTab {
+    line-height: 200%;
 }
 
 .racerBoxClassicBottom {
     font-size: 40%;
+    line-height: 160%;
+}
+.racerBoxClassicBottom_RacerTab {
+    line-height: 215%;
 }
 
 .racerBoxClassicHeaderBottom {
@@ -390,7 +399,7 @@ body {
 }
 
 .racerNameBoxClassic {
-    width: 40%;
+    width: 35%;
     height: 100%;
     text-align: center;
     display: inline-block;
@@ -418,7 +427,7 @@ body {
 }
 
 .bestLapBoxClassic {
-    width: 20%;
+    width: 25%;
     height: 100%;
     text-align: center;
     display: inline-block;
