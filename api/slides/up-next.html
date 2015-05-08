@@ -624,6 +624,23 @@
         pollForChanges(5000);
     }
 
+    function isEmpty(val) {
+        var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+        if (val == null)
+            return true;
+        if (val.length > 0)
+            return false;
+        if (val.length <= 0)
+            return true;
+
+        for (var key in val) {
+            if (hasOwnProperty.call(val, key))
+                return false;
+        }
+        return true;
+    }
+
     /**
         Polls for changes in the API return data
         based on a given timeout.
@@ -637,8 +654,13 @@
             track: parameters.trackId,
             offset: parameters.offset,
             callback: function(data) {
-                if (!z.equals(data, cache[data.url])) {
-                    window.location.reload();
+                if (!z.equals(data, cache[data.url]))
+                    window.location.reload(); // either race data has changed, or no race has swapped into a change. just reload for simplicity, no proper templating/update DOM system in place yet.
+            },
+            errback: function(data) {
+                if (data.status === 412) {
+                    if (!isEmpty(cache))
+                        window.location.reload(); // we had a race before, now there is none. reload.
                 }
             }
         });

@@ -14,6 +14,10 @@
     var clubspeed = w.clubspeed = (w.clubspeed || {}); // implement or collect pointer for the clubspeed namespace
     clubspeed.classes = clubspeed.classes || {}; // implement or collect pointer for the clubspeed.classes namespace
 
+    var check = z.check;
+    var exists = z.check.exists;
+    var convert = z.convert;
+
     /**
         A wrapper class used to make api calls to ClubSpeed servers.
 
@@ -200,18 +204,38 @@
                     method(options).then(
                         function(data) {
                             // success pipe
-                            var ret = options.callback(data);
-                            if (!z.check.exists(ret) || z.convert.toBoolean(ret)) {
-                                // callback function returned either undefined/nothing
-                                // or a truthy value -- assume polling should continue
-                                // until a falsy value other than undefined or null is returned
-                                _innerPoll(method, options, timeout);
+                            if (options.callback.length === 1) {
+                                // assume sync
+                                var ret = options.callback(data);
+                                if (!exists(ret) || convert.toBoolean(ret)) {
+                                    // callback function returned either undefined/nothing
+                                    // or a truthy value -- assume polling should continue
+                                    // until a falsy value other than undefined or null is returned
+                                    _innerPoll(method, options, timeout);
+                                }
+                            }
+                            else {
+                                // assume async
+                                options.callback(data, function(ret) {
+                                    if (!exists(ret) || convert.toBoolean(ret))
+                                        _innerPoll(method, options, timeout);
+                                });
                             }
                         },
                         function(data) {
-                            // error pipe
-                            // assume a re-poll is desired?
-                            _innerPoll(method, options, timeout);
+                            if (!options.errback)
+                                return _innerPoll(method, options, timeout); // assume we should keep polling if no errback provided
+                            if (options.errback.length === 1) {
+                                var ret = options.errback(data);
+                                if (!exists(ret) || convert.toBoolean(ret))
+                                    return _innerPoll(method, options, timeout);
+                            }
+                            else {
+                                options.errback(data, function(ret) {
+                                    if (!exists(ret) || convert.toBoolean(ret))
+                                        return _innerPoll(method, options, timeout);
+                                });
+                            }
                         }
                     );
                 }, timeout);
