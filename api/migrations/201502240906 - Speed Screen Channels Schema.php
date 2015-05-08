@@ -153,7 +153,7 @@ if ($noFailures) //If SpeedScreenChannels exists, import old Speed Screens into 
                                     "headerEnabled" => 1,
                                     "showHeatNumber" => 1,
                                     "showHeatTime" => 0,
-                                    "showHeaderTimer" => 0,
+                                    "showHeaderTimer" => 1,
                                     "locale" => "en-US",
                                     "highlightFastestRacer" => 1,
                                     "fastestRacerColor" => "00FF00",
