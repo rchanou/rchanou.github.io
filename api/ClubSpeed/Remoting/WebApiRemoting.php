@@ -98,7 +98,7 @@ class WebApiRemoting {
         try {
             $response = \Httpful\Request::get($apiUrl)
                 ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
-                ->timeoutIn(3) // timeout after 3 seconds
+                ->timeoutIn(10) // timeout after 10 seconds
                 ->send();
         }
         catch(\Exception $e) {
