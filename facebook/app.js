@@ -122,7 +122,7 @@ function postToFacebook(race) {
 	FB.setAccessToken(race.token);
 	FB.api('me/feed', 'post', fbPost, function (res) {
 		if(!res || res.error) {
-			log(!res ? 'error occurred' : res.error, 'ERROR');
+			log(!res ? 'error occurred' : JSON.stringify(res.error), 'ERROR');
 			return;
 		}
 		log('Successfully posted id #: ' + res.id, 'INFO');
