@@ -120,13 +120,13 @@ function postToFacebook(race) {
 	jf.writeFileSync(config.databaseFilename, db);
 
 	FB.setAccessToken(race.token);
-	/*FB.api('me/feed', 'post', fbPost, function (res) {
+	FB.api('me/feed', 'post', fbPost, function (res) {
 		if(!res || res.error) {
 			log(!res ? 'error occurred' : res.error, 'ERROR');
 			return;
 		}
 		log('Successfully posted id #: ' + res.id, 'INFO');
-	});*/
+	});
 }
 
 function getSettings() {
