@@ -76,11 +76,13 @@ function processFB() {
 		if(error) return log(util.inspect(error), 'ERROR');
 
 		if (!error && response.statusCode == 200) {
-			if(body.length === 0) return log('No Facebook postings found to process.');
-			
-			body.forEach(function(racer) {
-				postToFacebook(racer);
-			});
+			if(body.length === 0) {
+				log('No Facebook postings found to process.');
+			} else {
+				body.forEach(function(racer) {
+					postToFacebook(racer);
+				});
+			}
 		}
 		
 		setTimeout(processFB, config.racePollingInterval);
