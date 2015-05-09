@@ -124,7 +124,7 @@ function postToFacebook(race) {
 	FB.setAccessToken(race.token);
 	FB.api('me/feed', 'post', fbPost, function (res) {
 		if(!res || res.error) {
-			log(!res ? 'error occurred' : JSON.stringify(res.error), 'ERROR');
+			log(!res ? 'error occurred' : 'Error occurred posting for customer: ' + race.customerId + ' ' + JSON.stringify(res.error) + ' ' + JSON.stringify(fbPost), 'ERROR');
 			return;
 		}
 		log('Successfully posted id #: ' + res.id, 'INFO');
