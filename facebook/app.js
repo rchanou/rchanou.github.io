@@ -76,11 +76,13 @@ function processFB() {
 		if(error) return log(util.inspect(error), 'ERROR');
 
 		if (!error && response.statusCode == 200) {
-			if(body.length === 0) return log('No Facebook postings found to process.');
-			
-			body.forEach(function(racer) {
-				postToFacebook(racer);
-			});
+			if(body.length === 0) {
+				log('No Facebook postings found to process.');
+			} else {
+				body.forEach(function(racer) {
+					postToFacebook(racer);
+				});
+			}
 		}
 		
 		setTimeout(processFB, config.racePollingInterval);
@@ -94,7 +96,7 @@ function postToFacebook(race) {
 	// TODO Do not post if Privacy4 is True or False? -- Not in result set yet
 
 	var fbPost = {
-		message: applyTemplate(config.facebook.message, race),
+		//message: applyTemplate(config.facebook.message, race), // Disabled per Facebook's rules
 		link: applyTemplate(config.facebook.link, race),
 		picture: applyTemplate(config.facebook.photoUrl, race),
 		name: applyTemplate(config.facebook.name, race),
@@ -120,13 +122,13 @@ function postToFacebook(race) {
 	jf.writeFileSync(config.databaseFilename, db);
 
 	FB.setAccessToken(race.token);
-	/*FB.api('me/feed', 'post', fbPost, function (res) {
+	FB.api('me/feed', 'post', fbPost, function (res) {
 		if(!res || res.error) {
-			log(!res ? 'error occurred' : res.error, 'ERROR');
+			log(!res ? 'error occurred' : 'Error occurred posting for customer: ' + race.customerId + ' ' + JSON.stringify(res.error) + ' ' + JSON.stringify(fbPost), 'ERROR');
 			return;
 		}
 		log('Successfully posted id #: ' + res.id, 'INFO');
-	});*/
+	});
 }
 
 function getSettings() {

@@ -60,10 +60,12 @@ class FacebookController extends BaseController
 
         //Begin formatting form input for processing - defaults available for any missing settings
         $newSettings = array();
-        $newSettings['featureIsEnabled'] = isset($input['featureIsEnabled']) ? 1 : 0;
+        if(strtolower(Session::get('user')) == 'support') { // Only available for support
+						$newSettings['featureIsEnabled'] = isset($input['featureIsEnabled']) ? 1 : 0;
+				}
         $newSettings['postingIsEnabled'] = isset($input['postingIsEnabled']) ? 1 : 0;
         $newSettings['link'] = isset($input['link']) ? $input['link'] : '';
-        $newSettings['message'] = isset($input['message']) ? $input['message'] : '';
+        //$newSettings['message'] = isset($input['message']) ? $input['message'] : ''; // Disabling per Facebook's rules
         $newSettings['photoUrl'] = isset($input['photoUrl']) ? $input['photoUrl'] : '';
         $newSettings['name'] = isset($input['name']) ? $input['name'] : '';
         $newSettings['description'] = isset($input['description']) ? $input['description'] : '';

@@ -135,7 +135,7 @@
                         <li>{{link_to('/giftcards/reports','Reports')}}</li>
                     </ul>
                 </li>
-{{--						@if (@$controller == 'FacebookController')
+						@if (@$controller == 'FacebookController')
 							<li class="active open">
 						@else
 							<li class="submenu">
@@ -145,7 +145,7 @@
 								<li>{{link_to('/facebook/after-race-settings','After Race Posting Settings')}}</li>
                 <li>{{link_to('/facebook/logs','Logs')}}</li>
 							</ul>
-						</li>--}}
+						</li>
            	@if (@$controller == 'SpeedTextController')
 							<li class="active open">
 						@else
