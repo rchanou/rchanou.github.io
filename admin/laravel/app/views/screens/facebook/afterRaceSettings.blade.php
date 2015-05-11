@@ -102,16 +102,6 @@ After Race Posting Settings
                                   </div>
                                 @endif
 
-                                @if(isset($afterRaceSettings['message']))
-                                 <div class="form-group">
-                                   <label class="col-sm-4 col-md-4 col-lg-4 control-label">Message</label>
-                                   <div class="col-sm-8 col-md-8 col-lg-8">
-                                      <input type="text" style="width: 100%" id="message" name="message" value="{{$afterRaceSettings['message']}}">
-                                      <span class="help-block text-left">This is the message that will be shown at the top of the Facebook post.</span>
-                                    </div>
-                                  </div>
-                                @endif
-
                                 @if(isset($afterRaceSettings['photoUrl']))
                                   <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">Photo URL</label>

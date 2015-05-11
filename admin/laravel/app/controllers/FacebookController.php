@@ -65,7 +65,7 @@ class FacebookController extends BaseController
 				}
         $newSettings['postingIsEnabled'] = isset($input['postingIsEnabled']) ? 1 : 0;
         $newSettings['link'] = isset($input['link']) ? $input['link'] : '';
-        $newSettings['message'] = isset($input['message']) ? $input['message'] : '';
+        //$newSettings['message'] = isset($input['message']) ? $input['message'] : ''; // Disabling per Facebook's rules
         $newSettings['photoUrl'] = isset($input['photoUrl']) ? $input['photoUrl'] : '';
         $newSettings['name'] = isset($input['name']) ? $input['name'] : '';
         $newSettings['description'] = isset($input['description']) ? $input['description'] : '';

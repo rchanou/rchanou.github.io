@@ -96,7 +96,7 @@ function postToFacebook(race) {
 	// TODO Do not post if Privacy4 is True or False? -- Not in result set yet
 
 	var fbPost = {
-		message: applyTemplate(config.facebook.message, race),
+		//message: applyTemplate(config.facebook.message, race), // Disabled per Facebook's rules
 		link: applyTemplate(config.facebook.link, race),
 		picture: applyTemplate(config.facebook.photoUrl, race),
 		name: applyTemplate(config.facebook.name, race),
