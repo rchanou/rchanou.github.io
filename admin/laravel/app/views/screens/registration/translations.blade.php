@@ -165,7 +165,7 @@ Translations
                                                     </thead>
                                                     <tbody>
                                                  @foreach($translations['en-US'] as $translationsKey => $translationsValue)
-                                                     <tr>
+                                                     <tr @if($translationsKey == 'str_WaiverAdult' || $translationsKey == 'str_WaiverChild') style="display: none;" @endif>
                                                         <td class="col-sm-3 col-xs-3"><label>{{$translationsKey}}</label></td>
                                                         <td class="col-sm-9 col-xs-9">
                                                         @if($translationsKey == 'str_WaiverAdult' || $translationsKey == 'str_WaiverChild')
