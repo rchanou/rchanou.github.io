@@ -1,5 +1,9 @@
 /* Core scoreboard styles */
 
+html, body :hover {
+    cursor: none;
+}
+
 @font-face {
     font-family: 'Noto Sans';
     src: url('../fonts/NotoSans-Regular.ttf') format('truetype');

@@ -1,5 +1,9 @@
 /* Core Speed Screen structure */
 
+html, body :hover {
+    cursor: none;
+}
+
 body {
     margin: 0px;
     padding: 0px;
