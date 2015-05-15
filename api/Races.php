@@ -27,7 +27,7 @@ class Races
         if($race_id == 'current_race_id') return $this->current();
         if($race_id == 'current') $race_id = $this->current();
         if($race_id == 'fastest') return $this->fastest();
-        if($race_id == 'next') return $this->next(@$_GET['track_id'], @$_GET['offset']);
+        if($race_id == 'next') return $this->next(@$_GET['track'], @$_GET['offset']);
         if($race_id == 'previous') return $this->previous(@$_GET['track_id'], @$_GET['offset']);
         if($race_id == 'total_laps') return $this->total_laps();
         if($race_id == 'lap_number') return $this->lap_number($sub);
@@ -212,7 +212,7 @@ class Races
             throw new RestException(401, "Invalid authorization!");
         }
 
-        $track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : 1; // Default to Track 1
+        $track_id = (isset($track) && is_numeric($track)) ? (int)$track : 1; // Default to Track 1
         $offset = (int)$offset + 1; // Modify to match SQL Server where 1 = First Row
 
         // TODO Filter by Speed Level

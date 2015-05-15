@@ -31,7 +31,7 @@ angular.module('scoreboardApp.services', [])
             getNextRace: function()
             {
                 var track_id = $routeParams.track_id == null ? 1 : $routeParams.track_id; //May have changed
-                return $http.get(apiURL + '/races/next.json?&track_id=' + track_id + '&offset=0&key=' + apiKey + '&suppress_response_codes=true');
+                return $http.get(apiURL + '/races/next.json?&track=' + track_id + '&offset=0&key=' + apiKey + '&suppress_response_codes=true');
             },
             getTranslations: function() {
                 return $http.get(apiURL + '/translations?&namespace=Scoreboard&key=' + apiKey);
