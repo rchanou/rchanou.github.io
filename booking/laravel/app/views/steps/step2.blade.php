@@ -59,11 +59,11 @@
             <div class="spotsAvailable">{{$race->heatSpotsAvailableOnline}} {{$strings['str_spotsAvailableOnline']}}</div>
 
             <div class="raceResultFooter row">
-                <div class="racePrices ellipsis col-xs-6">{{$numberOfParticipants}} {{$strings['str_drivers']}}
+                <div class="racePrices ellipsis col-xs-9">{{$numberOfParticipants}} {{$strings['str_drivers']}}
 
                      x {{$moneyFormatter->formatCurrency($race->products[0]->price1, $currency)}} {{$strings['str_each']}} = {{$moneyFormatter->formatCurrency($numberOfParticipants * $race->products[0]->price1, $currency)}}
                 </div>
-                <div class="raceBookButtonArea col-xs-6 text-right">
+                <div class="raceBookButtonArea col-xs-3 text-right">
                     @if($authenticated != null)
                         <a href="cart?action=add&heatId={{$race->heatId}}&quantity={{$numberOfParticipants}}"><button type="button" class="formButton">{{$strings['str_bookIt']}}</button></a>
                     @else
