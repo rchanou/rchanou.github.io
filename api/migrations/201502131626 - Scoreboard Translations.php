@@ -34,7 +34,8 @@ $translationsSplitByCulture = array(
         "str_racerName" => "Racer Name",
         "str_topTimes" => "Top Times",
         "str_noneYet" => "None yet!",
-        "str_poweredBy" => "Powered By"
+        "str_poweredBy" => "Powered By",
+        "str_lapAbbreviation" => "L"
     )
 );
 
