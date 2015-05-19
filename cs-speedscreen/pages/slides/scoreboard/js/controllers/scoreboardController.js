@@ -520,7 +520,7 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
                     }
                     $scope.lapsRemaining = lapsRemaining;
 
-                    $scope.headerTimer = $scope.lapsRemaining + 'L';
+                    $scope.headerTimer = $scope.lapsRemaining + $scope.strings["str_lapAbbreviation"];
                 }
 
                 // #####################################
