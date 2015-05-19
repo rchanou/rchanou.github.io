@@ -472,7 +472,7 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
                         {
                             if (parseInt($scope.racersOnScoreboard[currentRacer].lap_num) < parseInt(mostLapsCompleted)) //If they're behind in laps
                             {
-                                $scope.racersOnScoreboard[currentRacer].gap = parseInt($scope.racersOnScoreboard[currentRacer].gap) + "L"; //Format their gap to be an actual lap number
+                                $scope.racersOnScoreboard[currentRacer].gap = parseInt($scope.racersOnScoreboard[currentRacer].gap) + $scope.strings["str_lapAbbreviation"]; //Format their gap to be an actual lap number
                             }
                         }
                     }
@@ -650,7 +650,7 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
                                 {
                                     if (parseInt(racers[currentRacer].lap_num) < parseInt(mostLapsCompleted)) //If they're behind in laps
                                     {
-                                        racers[currentRacer].gap = parseInt(racers[currentRacer].gap) + "L"; //Format their gap to be an actual lap number
+                                        racers[currentRacer].gap = parseInt(racers[currentRacer].gap) + $scope.strings["str_lapAbbreviation"]; //Format their gap to be an actual lap number
                                     }
                                 }
                             }
