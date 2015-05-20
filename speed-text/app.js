@@ -29,6 +29,13 @@ function sendTexts() {
 	}
 
 	var upcomingHeatsUrl = config.clubSpeedApi.url + '/races/upcoming.json?key=' + config.clubSpeedApi.key;
+
+	if(typeof config.trackId !== 'undefined') {
+		upcomingHeatsUrl = upcomingHeatsUrl + '&track=' + config.trackId;
+	} else {
+		upcomingHeatsUrl = upcomingHeatsUrl + '&track=1';
+	}
+
 	log('Getting upcoming heats from: ' + upcomingHeatsUrl, 'INFO');
 
 	// Get upcoming heats -- http://TRACK_DOMAIN.clubspeedtiming.com/api/index.php/races/upcoming.json?key=cs-dev
