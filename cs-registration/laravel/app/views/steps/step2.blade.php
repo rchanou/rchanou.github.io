@@ -936,6 +936,23 @@
             }
             <!-- END LIVE VALIDATION SCRIPT -->
 
+            <!-- INITIAL STATE LABEL LOADING -->
+
+            var selectedCountry = $('#country').val();
+
+            if (selectedCountry == 'United States')
+            {
+                $('#stateLabel').text('{{$strings['str_State']}}');
+            }
+            else if (selectedCountry == 'Canada')
+            {
+                $('#stateLabel').text('{{$strings['str_Province/Territory']}}');
+            }
+            else if (typeof selectedCountry !== 'undefined')
+            {
+                $('#stateLabel').text('{{$strings['str_State/Territory']}}');
+            }
+			
             <!-- UNITED STATES AND CANADA DROPDOWN SCRIPT -->
             $('#country').change(function()
             {
