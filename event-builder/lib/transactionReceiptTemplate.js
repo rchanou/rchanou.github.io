@@ -42,90 +42,46 @@ var defaults = {
     "resources":{
         "strAccBalance"            : "{0:C} Account Balance",
         "strAccessCode"            : "Your Access code is:",
-        "strAge"                   : "Age",
-        "strAmount"                : "Amount",
-        "strAuthNo"                : "Auth No. #",
         "strBalance"               : "Balance",
         "strBalanceRemaining"      : "{0:C} Balance remaining.",
-        "strBestLap"               : "Best Lap",
         "strCash"                  : "Cash",
-        "strCashInDrawer"          : "Cash In Drawer",
-        "strCC"                    : "Credit Card",
         "strChange"                : "Change",
         "strCheck"                 : "Check",
-        "strCheckNo"               : "Check Number",
         "strComplimentary"         : "Complimentary",
-        "strCrdIssuer"             : "to the card issuer agreement.",
         "strCreatedBy"             : "Created by {0}",
         "strCustomer"              : "Customer",
-        "strCustomer2"             : "Customer:",
         "strDebit"                 : "Debit",
-        "strDesc"                  : "Desc.",
         "strDuration"              : "Duration",
         "strEventInfo"             : "Event Information",
-        "strEventName"             : "Event Name",
         "strExempt"                : "(Exempt)",
-        "strExpDate"               : "Exp. Date",
-        "strExpense2"              : "EXPENSE",
-        "strExperience"            : "Experience",
         "strExternal"              : "External",
-        "strFee"                   : "Fee",
-        "strGameCard"              : "Game Card",
         "strGC"                    : "Gift Card",
         "strGratuity"              : "Gratuity:",
-        "strGratuity2"             : "Gratuity",
-        "strGrid"                  : "Grid",
         "strGST"                   : "GST",
-        "strHeatNo"                : "Heat#",
-        "strHeatNumber"            : "Heat No.",
-        "strIAgree"                : "I agree to pay the above amount according",
-        "strId"                    : "ID:",
-        "String3"                  : "Laps:",
-        "strLaps"                  : "Laps",
-        "strMinutes"               : "Minutes",
-        "strMinutes2"              : "Minutes:",
         "strNA"                    : "N/A",
         "strName"                  : "Name:",
-        "strNew"                   : "New",
-        "strPassword"              : "Password",
         "strPayment"               : "Payment",
-        "strPosition"              : "Position",
         "strPST"                   : "PST",
         "strReceiptNo"             : "Receipt Number",
-        "strRefNo"                 : "Ref No. #",
         "strRefund"                : "Refund",
-        "strRoundNo"               : "Round No.",
-        "strSessions"              : "sessions",
-        "strShift"                 : "Shift:",
-        "strShiftPayment"          : "Shift  Payment Type",
         "strSignature"             : "Signature:",
         "strSubtotal"              : "Subtotal",
         "strTender"                : "Tendered",
         "strTerminal"              : "Terminal:",
-        "strTillreport"            : "TILL REPORT",
         "strTime"                  : "Time",
-        "strTime2"                 : "Time:",
         "strTotal"                 : "Total:",
         "strTotal2"                : "Total",
-        "strTroutD"                : "TroutD. #",
         "strType"                  : "Type:",
         "strUser"                  : "User:",
-        "strUsername"              : "UserName",
-        "strVenue"                 : "Venue",
         "strVoided"                : "VOIDED",
         "strVoidedPayment"         : "*Voided Payments*",
         "strVoucher"               : "Voucher",
-        "strWinBy"                 : "Win By",
         "receiptFooterText1"       : "",
         "receiptFooterText2"       : "",
         "receiptFooterText3"       : "",
         "receiptFooterText4"       : "Powered By www.ClubSpeed.com",
         "receiptFooterSurveyText1" : "",
         "receiptFooterSurveyText2" : "",
-        "raceTicketLine1"          : "",
-        "raceTicketLine2"          : "",
-        "raceTicketLine3"          : "",
-        "raceTicketLine4"          : "",
         "receiptHeaderText1"       : "",
         "receiptHeaderText2"       : "",
         "receiptHeaderText3"       : "",
@@ -133,19 +89,12 @@ var defaults = {
         "taxLabel"                 : "Tax"
     },
     "options":{
-        "notShowScheduledTime"         : "true",
         "organizationNumber"           : "",
-        "printAgeOnRaceTicket"         : "false",
-        "printGridOnRaceTicket"        : "true",
         "printSurveyUrlOnReceipt"      : "false",
         "printVoidedPayments"          : false,
-        "showHeatNo"                   : "true",
-        "showScheduleTimeOnRaceTicket" : "",
         "urlSurvey"                    : "",
         "accessCode"                   : "",
-        "clubSpeedLogoPath"            : "C:\\Clubspeed\\Images\\SS.bmp",
         "printGratuityLine"            : "none",
-        "paymentSignaturesPath"        : "C:\\Clubspeed\\PaymentSignatures\\",
         "has2Taxes"                    : false,
         "receiptHeaderAlign"           : "center",
         "companyLogoPath"              : "",
@@ -194,16 +143,13 @@ exports.create = function(body) {
   var alignFunction;
   switch(options.receiptHeaderAlign) {
       case 'left':
-          // output += alignLeft();
           alignFunction = rpad;
           break;
        case 'right':
-          // output += alignRight();
           alignFunction = lpad;
           break;
        // case 'center':
        default:
-          // output += alignCenter();
           alignFunction = cpad;
           break;
   }
@@ -217,12 +163,6 @@ exports.create = function(body) {
   if (resources.receiptHeaderText4 && resources.receiptHeaderText4.trim().length > 0)
     output += alignFunction(resources.receiptHeaderText4, 42) + '\n';
   log.debug('end print receipt header');
-
-  // output += (resources.receiptHeaderText1.trim().length > 0) ? '\n' + resources.receiptHeaderText1 + '\n' : '';
-  // output += (resources.receiptHeaderText2.trim().length > 0) ? resources.receiptHeaderText2 + '\n' : '';
-  // output += (resources.receiptHeaderText3.trim().length > 0) ? resources.receiptHeaderText3 + '\n' : '';
-  // output += (resources.receiptHeaderText4.trim().length > 0) ? resources.receiptHeaderText4 + '\n' : '';
-  // output += alignLeft(); // reset alignment
 
   // Fiscal Printer Organization Number
   if(options.organizationNumber && options.organizationNumber.length > 0)
@@ -526,9 +466,9 @@ exports.create = function(body) {
   var getGratuity = function getGratuity(check) {
     if (check.gratuity !== 0)
       return '';
-    if (options.printGratuityLineSetting == 'none')
+    if (options.printGratuityLine == 'none')
       return '';
-    if (options.printGratuityLineSetting == 'eventonly' && check.checkType == CHECK_TYPE.REGULAR)
+    if (options.printGratuityLine == 'eventonly' && check.checkType == CHECK_TYPE.REGULAR)
       return '';
     var tempOutput = '\n';
     tempOutput += rpad(resources.strGratuity, 10) + lpad('___________________________', 32) + '\n';
