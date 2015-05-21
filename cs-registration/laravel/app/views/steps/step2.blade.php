@@ -942,11 +942,11 @@
                 var selectedCountry = $('#country').val();
                 if (selectedCountry == 'United States')
                 {
-                    $('#stateLabel').text({{$strings['str_State']}});
+                    $('#stateLabel').text('{{$strings['str_State']}}');
                 }
                 else if (selectedCountry == 'Canada')
                 {
-                    $('#stateLabel').text({{$strings['str_Province/Territory']}});
+                    $('#stateLabel').text('{{$strings['str_Province/Territory']}}');
                     if (emailValidationAdded == 'both')
                     {
                         email.remove( Validate.Presence,
@@ -966,7 +966,7 @@
                 }
                 else
                 {
-                    $('#stateLabel').text({{$strings['str_State/Territory']}});
+                    $('#stateLabel').text('{{$strings['str_State/Territory']}}');
                 }
 
                 if (selectedCountry != 'Canada' && emailValidationWasRemoved)
