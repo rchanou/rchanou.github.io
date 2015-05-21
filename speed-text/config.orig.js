@@ -18,6 +18,7 @@ config.racePollingInterval = 60000;
 config.debug = false;
 config.disableSending = false;
 config.databaseFilename = './db.json';
+config.trackId = 1;
 
 config.textMessaging = {};
 config.textMessaging.isEnabled = false;
