@@ -141,8 +141,8 @@ function getSettings() {
 			log('Settings changed to: ' + util.inspect(config), 'DEBUG');
 			
 		} else if(error) {
-			log(error, 'ERROR');
-			log(response, 'ERROR');
+			log(JSON.stringify(error), 'ERROR');
+			log(JSON.stringify(response), 'ERROR');
 			log(body, 'ERROR');
 		}
 	})
@@ -202,7 +202,7 @@ function sendTwilioMessage(to, message, fromArray, opts) {
 			from: fromNumber
 	}, function(err, message) {
 			if(err) {
-				log(err, 'ERROR');
+				log(JSON.stringify(err), 'ERROR');
 			} else {
 				log('Message sent! ' + JSON.stringify(message));
 			}
@@ -227,7 +227,7 @@ function sendBulkSMSMessage(to, message, fromArray, opts) {
 		}
 
 		request.post({url: url, form: formData }, function(err, httpResponse, body) {
-				if(err) return log(err, 'ERROR');
+				if(err) return log(JSON.stringify(err), 'ERROR');
 				
 				log(body);
 		});
