@@ -356,6 +356,14 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
             }
             else //If racers have crossed the loop, format the scoreboard and process racing data for the view
             {
+                if ($scope.scoreboardState != "race_running") //If we just started this race
+                {
+                    //Clear out any old data
+                    $scope.racersOnScoreboard = {};
+                    $scope.oldRacers = {};
+                    $scope.racersFromPreviousRace = {};
+                }
+
                 if (typeof $scope.racersOnScoreboard == "undefined") //Error case prevention
                 {
                     $scope.racersOnScoreboard = {};
