@@ -27,13 +27,7 @@ class Step2Controller extends BaseController {
         CS_API::checkForLanguageChange();
         if(CS_API::sessionIsInvalid())
         {
-
-            $step1URL = '/step1';
-            if (Session::has('ipcam'))
-            {
-                $step1URL = $step1URL . '?&terminal=' . Session::get('ipcam');
-            }
-            return Redirect::to($step1URL);
+            return Redirect::to(CS_API::getStep1URL());
         }
 
         $session = Session::all();
@@ -53,7 +47,8 @@ class Step2Controller extends BaseController {
             'settings' => $session['settings'],
             'translations' => $session['translations'],
             'currentCulture' => $session['currentCulture'],
-            'currentCultureFB' => $session['currentCultureFB']
+            'currentCultureFB' => $session['currentCultureFB'],
+            'step1URL' => CS_API::getStep1URL()
             )
         );
     }
@@ -318,6 +313,22 @@ class Step2Controller extends BaseController {
             {
                 $input["cameraInput"] = $input["cameraInputIPCam_currentSnapshotBase64"];
             }
+        }
+        else if (array_key_exists("cameraInputLocalCam_currentSnapshotURL",$input) &&
+            $input["cameraInputLocalCam_currentSnapshotURL"] != null) //If we're using an Local Camera and have a non-blank picture, use that
+        {
+            $input["cameraInput"] = $input["cameraInputLocalCam_currentSnapshotURL"];
+
+
+            if (substr($input["cameraInput"],0,5) != 'data:') //If the image isn't in base64 format yet
+            {
+                $input["cameraInput"] = $this->convertPathToImage($input["cameraInput"]);
+            }
+            else
+            {
+                $input["cameraInput"] = $input["cameraInputLocalCam_currentSnapshotURL"];
+            }
+            //echo('<img src="' . $input["cameraInput"] . '">' ); die();
         }
         else
         {

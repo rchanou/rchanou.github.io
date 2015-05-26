@@ -2,7 +2,7 @@
 
 <!-- HEADER -->
 @section('backButton')
-<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
+    <a href="{{$step1URL}}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
 @stop
 
 @section('headerTitle')
@@ -142,7 +142,7 @@
 <!-- FOOTER -->
 
 @section('leftFooterButton')
-<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" id="idisagreeButton" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_cancel']}}</a>
+        <a href="{{$step1URL}}" id="idisagreeButton" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_cancel']}}</a>
 @stop
 
 @section('rightFooterButton')

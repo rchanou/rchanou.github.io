@@ -88,7 +88,7 @@
         @else
         @endif
         <p/>
-        <a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" onclick="$('#loadingModal').modal();">
+        <a href="{{$step1URL}}" onclick="$('#loadingModal').modal();">
         <img src="{{$images['completeRegistration']}}" class="center-block" style="margin-top: 10px;">
         <div class="text-center" style="font-size: 20px;">{{$strings['str_completeRegistration']}}</div>
         </a>
@@ -96,7 +96,7 @@
 </div>
 
 <script type="text/javascript">
-    var timer = setTimeout(function(){ window.location='{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}';}, 15000);
+    var timer = setTimeout(function(){ window.location='{{$step1URL}}';}, 15000);
 </script>
 @stop
 <!-- END PAGE CONTENT -->

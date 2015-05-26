@@ -150,7 +150,11 @@ class Strings {
             'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
             'str_WaiverAdult' => '',
             'str_WaiverChild' => '',
-            'str_invalidZipCode' => 'Invalid zip code. Valid examples: 12345, 12345-1234'
+            'str_invalidZipCode' => 'Invalid zip code. Valid examples: 12345, 12345-1234',
+            'str_liveImageFromCamera' => 'Live Image from Camera',
+            'str_takeAPicture' => 'Take a picture',
+            'str_currentProfilePicture' => 'Current Profile Picture',
+            'str_switchToFacebookPicture' => 'Switch to Facebook Picture'
         );
 
         self::$cultureNames = array(
@@ -289,7 +293,11 @@ class Strings {
                 'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''),
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''),
             'en-NZ' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -400,7 +408,11 @@ class Strings {
                 'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''),
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''),
             'en-AU' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -511,7 +523,11 @@ class Strings {
                 'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''),
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''),
             'en-IE' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -622,7 +638,11 @@ class Strings {
                 'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''),
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''),
             'en-CA' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -733,7 +753,11 @@ class Strings {
                 'str_problemWithRegistration' => 'There was a problem submitting your information. Please try again.',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''),
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''),
             'zh-CN' => array(
                 'str_welcomeMessage' => '欢迎来到我们车馆',
                 'str_registerHeader' => '注册',
@@ -844,7 +868,11 @@ class Strings {
                 'str_problemWithRegistration' => '您提交的信息有误，请重试',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''
             ),
             'de-DE' => array(
                 'str_welcomeMessage' => 'Herzlich Willkommen!',
@@ -956,7 +984,11 @@ class Strings {
                 'str_problemWithRegistration' => 'Es gab ein Problem bei der Übermittlung Ihrer Daten. Bitte versuchen Sie es erneut.',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''
             ),
             'nl-NL' => array(
                 "str_LicenseNumber.required" => "Licentie # nodig",
@@ -1067,7 +1099,11 @@ class Strings {
                 "str_connectFacebookDisclaimer" => "Door het koppelen aanje Facebook-account geef je Club Speed, Inc. toestemming om je persoonlijke raceresultaten op je tijdlijn te posten.",
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''
             ),
             'fr-CA' => array(
             'str_welcomeMessage' => 'Bienvenue sur notre piste!',
@@ -1179,7 +1215,11 @@ class Strings {
             'str_problemWithRegistration' => 'Il y avait un probème transmettant vos renseignements. Veuillez essayer de nouveau.',
             'str_WaiverAdult' => '',
             'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''
         ),
             'fr-FR' => array(
                 'str_welcomeMessage' => 'Bienvenue sur notre piste!',
@@ -1291,7 +1331,11 @@ class Strings {
                 'str_problemWithRegistration' => 'Il y avait un probème transmettant vos renseignements. Veuillez essayer de nouveau.',
                 'str_WaiverAdult' => '',
                 'str_WaiverChild' => '',
-                'str_invalidZipCode' => ''
+                'str_invalidZipCode' => '',
+                'str_liveImageFromCamera' => '',
+                'str_takeAPicture' => '',
+                'str_currentProfilePicture' => '',
+                'str_switchToFacebookPicture' => ''
             )
 
         );

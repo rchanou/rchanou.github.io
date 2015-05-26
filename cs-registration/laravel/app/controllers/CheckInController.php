@@ -16,13 +16,7 @@ class CheckInController extends BaseController
         CS_API::checkForLanguageChange(); //Check for a language change
         if(CS_API::sessionIsInvalid()) //If the session is invalidated, redirect to step1 while maintaining any ip camera settings
         {
-
-            $step1URL = '/step1';
-            if (Session::has('ipcam'))
-            {
-                $step1URL = $step1URL . '?&terminal=' . Session::get('ipcam');
-            }
-            return Redirect::to($step1URL);
+            return Redirect::to(CS_API::getStep1URL());
         }
 
         $session = Session::all();
@@ -33,7 +27,8 @@ class CheckInController extends BaseController
                 'settings' => $session['settings'],
                 'translations' => $session['translations'],
                 'currentCulture' => $session['currentCulture'],
-                'currentCultureFB' => $session['currentCultureFB']
+                'currentCultureFB' => $session['currentCultureFB'],
+                'step1URL' => CS_API::getStep1URL()
             )
         );
     }
@@ -106,7 +101,8 @@ class CheckInController extends BaseController
                 'settings' => $session['settings'],
                 'translations' => $session['translations'],
                 'currentCulture' => $session['currentCulture'],
-                'currentCultureFB' => $session['currentCultureFB']
+                'currentCultureFB' => $session['currentCultureFB'],
+                'step1URL' => CS_API::getStep1URL()
             )
         );
     }
@@ -123,13 +119,7 @@ class CheckInController extends BaseController
         CS_API::checkForLanguageChange(); //Check for a language change
         if(CS_API::sessionIsInvalid()) //If the session is invalidated, redirect to step1 while maintaining any ip camera settings
         {
-
-            $step1URL = '/step1';
-            if (Session::has('ipcam'))
-            {
-                $step1URL = $step1URL . '?&terminal=' . Session::get('ipcam');
-            }
-            return Redirect::to($step1URL);
+            return Redirect::to(CS_API::getStep1URL());
         }
 
         $session = Session::all();
@@ -137,12 +127,7 @@ class CheckInController extends BaseController
         //Redirect back if the 'checkInUserID' is not in session
         if (!Session::has('checkInUserID'))
         {
-            $step1URL = '/step1';
-            if (Session::has('ipcam'))
-            {
-                $step1URL = $step1URL . '?&terminal=' . Session::get('ipcam');
-            }
-            return Redirect::to($step1URL);
+            return Redirect::to(CS_API::getStep1URL());
         }
 
         return View::make('/steps/checkinconfirm',
@@ -151,7 +136,8 @@ class CheckInController extends BaseController
                 'settings' => $session['settings'],
                 'translations' => $session['translations'],
                 'currentCulture' => $session['currentCulture'],
-                'currentCultureFB' => $session['currentCultureFB']
+                'currentCultureFB' => $session['currentCultureFB'],
+                'step1URL' => CS_API::getStep1URL()
             )
         );
 

@@ -2,8 +2,7 @@
 
 <!-- HEADER -->
 @section('backButton')
-<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
-
+<a href="{{$step1URL}}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
 @stop
 
 @section('headerTitle')

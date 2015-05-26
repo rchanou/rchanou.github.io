@@ -98,7 +98,7 @@
 <!-- FOOTER -->
 
 @section('leftFooterButton')
-<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" id="idisagreeButton" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_step3DoNotAgree']}}</a>
+<a href="{{$step1URL}}" id="idisagreeButton" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_step3DoNotAgree']}}</a>
 @stop
 
 @section('rightFooterButton')

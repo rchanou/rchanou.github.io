@@ -93,7 +93,8 @@ class Step1Controller extends BaseController
             'currentCulture' => $session['currentCulture'],
             'currentCultureFB' => $session['currentCultureFB'],
             'checkInEnabled' => $settings['cfgRegShowBeenHereBefr'],
-            'columnSize' => $columnSizeForFrontEnd
+            'columnSize' => $columnSizeForFrontEnd,
+            'step1URL' => CS_API::getStep1URL()
             )
         );
     }
@@ -286,11 +287,16 @@ class Step1Controller extends BaseController
             $ipCamURL = CS_API::call("getCameraIP",array("terminalName" => $ipcam));
             if ($ipCamURL != null && $ipCamURL != false)
             {
-                $ipCamURL = strtolower($ipCamURL);
                 Session::put('ipCamURL',$ipCamURL);
                 Session::put('ipcam',$ipcam);
             }
 
+        }
+
+        //Determines if we're using a local camera
+        if (Input::has('localcam') && Input::get('localcam') == 1)
+        {
+            Session::put('localcam',true);
         }
 
         $strings = Session::get('strings');

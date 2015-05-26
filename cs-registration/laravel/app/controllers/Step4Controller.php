@@ -25,12 +25,7 @@ class Step4Controller extends BaseController {
 
         if(CS_API::sessionIsInvalid() || !Session::has("signatureAcquired"))
         {
-            $step1URL = '/step1';
-            if (Session::has('ipcam'))
-            {
-                $step1URL = $step1URL . '?&terminal=' . Session::get('ipcam');
-            }
-            return Redirect::to($step1URL);
+            return Redirect::to(CS_API::getStep1URL());
         }
 
         Session::put("sessionComplete", true);
@@ -41,7 +36,8 @@ class Step4Controller extends BaseController {
             'settings' => $session['settings'],
             'translations' => $session['translations'],
             'currentCulture' => $session['currentCulture'],
-            'currentCultureFB' => $session['currentCultureFB']) );
+            'currentCultureFB' => $session['currentCultureFB'],
+            'step1URL' => CS_API::getStep1URL()) );
     }
 
 } 

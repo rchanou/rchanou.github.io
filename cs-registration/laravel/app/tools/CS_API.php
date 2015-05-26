@@ -443,6 +443,7 @@ class CS_API
                 $strings = $translations[$newCulture];
                 $strings["cultureNames"] = Strings::getCultureNames();
                 Session::put('strings',$strings);
+                Session::put('settings',$settings);
                 Session::put("currentCulture",$newCulture);
                 Session::put("currentCultureFB", self::convertCultureToFacebook($newCulture));
             }
@@ -502,5 +503,22 @@ class CS_API
         );
 
         return self::callApi($url, $params, 'POST');
+    }
+
+    //Used to reconstruct custom URL parameters upon returning to main screen - (localcam or terminal)
+    public static function getStep1URL()
+    {
+        self::initialize();
+
+        $step1URL = 'step1';
+        if (Session::has('ipcam'))
+        {
+            $step1URL = $step1URL . '?&terminal=' . Session::get('ipcam');
+        }
+        else if (Session::has('localcam'))
+        {
+            $step1URL = $step1URL . '?&localcam=1';
+        }
+        return $step1URL;
     }
 }

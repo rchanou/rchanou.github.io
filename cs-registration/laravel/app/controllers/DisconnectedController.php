@@ -34,6 +34,7 @@ class DisconnectedController extends BaseController {
             'settings' => $session['settings'],
             'translations' => $session['translations'],
             'currentCulture' => $session['currentCulture'],
-            'currentCultureFB' => $session['currentCultureFB']));
+            'currentCultureFB' => $session['currentCultureFB'],
+            'step1URL' => CS_API::getStep1URL()));
     }
 } 

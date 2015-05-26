@@ -2,7 +2,7 @@
 
 <!-- HEADER -->
 @section('backButton')
-<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
+<a href="{{$step1URL}}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
 @stop
 
 @section('headerTitle')
@@ -98,8 +98,23 @@
             $('#cameraInputIPCam_currentSnapshot').attr("src","https://graph.facebook.com/" + response.id + "/picture?width=9999&height=9999");
             $('#cameraInputIPCam_currentSnapshotURL').attr("value","https://graph.facebook.com/" + response.id + "/picture?width=9999&height=9999");
             $('#cameraInputIPCam_currentSnapshot').show();
+
+            var c = document.getElementById('cameraInputLocalCam_currentSnapshot');
+            @if (Session::has('localcam'))
+            var ctx = c.getContext('2d');
+            var img = new Image;
+            img.setAttribute('crossOrigin', 'anonymous');
+            img.onload = function(){
+                ctx.drawImage(img,20,0,180,180);
+            };
+            img.src = "https://graph.facebook.com/" + response.id + "/picture?width=9999&height=9999";
+            @endif
+
+            $('#cameraInputLocalCam_currentSnapshotURL').attr("value","https://graph.facebook.com/" + response.id + "/picture?width=9999&height=9999");
+            $('#cameraInputLocalCam_currentSnapshot').show();
             $('#facebookprofile').show();
             $('#switchToFacebookIPCamButton').hide();
+            $('#switchToFacebookLocalCamButton').hide();
             switch(response.gender)
             {
                 case 'male':
@@ -142,7 +157,7 @@
 <div class="row formArea">
     <div class="col-sm-6">
 
-        @if ($settings['Reg_CaptureProfilePic'] && !Session::has('ipcam'))
+        @if ($settings['Reg_CaptureProfilePic'] && !Session::has('ipcam') && !Session::has('localcam'))
             <div class="centered">
             {{ Form::label('yourpicture', $strings['str_yourPicture'] . ':')}}<br/>
             <input type="file" capture="camera" accept="image/*" id="cameraInput" name="cameraInput" style="display: inline; color: white"><br/>
@@ -170,15 +185,15 @@
         <div class="centered">
             <div class="row">
                 <div class="col-sm-6">
-                    Live Image from Camera<br/>
+                    {{$strings['str_liveImageFromCamera']}}<br/>
                     <img name="cameraInputIPCam" id="cameraInputIPCam" src="http://{{Session::get('ipCamURL')}}?count=0"
                          onload="setTimeout('refreshCameraImage()',200)" onabort="setTimeout('refreshCameraImage()',5000)">
                     <br/>
-                    <button class="btn btn-primary" type="button" id="captureIPCamSnapshotButton" onclick="updateIPCamSnapshot()" style="margin-top: 10px;">Take a picture</button>
+                    <button class="btn btn-primary" type="button" id="captureIPCamSnapshotButton" onclick="updateIPCamSnapshot()" style="margin-top: 10px;">{{$strings['str_takeAPicture']}}</button>
 
                 </div>
                 <div class="col-sm-6">
-                    Current Profile Picture<br/>
+                    {{$strings['str_currentProfilePicture']}}<br/>
                     @if (Input::old("facebookProfileURL") !== "#" && Input::old("facebookProfileURL") !== null && Input::old("facebookProfileURL") !== "" && substr(Input::old("cameraInputIPCam_currentSnapshotURL"),0,26) == "https://graph.facebook.com")
                     <img name="cameraInputIPCam_currentSnapshot" id="cameraInputIPCam_currentSnapshot" src="{{Input::old('cameraInputIPCam_currentSnapshotURL')}}"><br/>
                     <input type="hidden" name="facebookProfileURL" id="facebookProfileURL" value="{{Input::old('facebookProfileURL')}}">
@@ -191,9 +206,9 @@
                     <input type="hidden" name="cameraInputIPCam_currentSnapshotURL" id="cameraInputIPCam_currentSnapshotURL" value="{{Input::old('cameraInputIPCam_currentSnapshotURL')}}">
                     @endif
                     @if (Input::old("facebookProfileURL") !== "#" && Input::old("facebookProfileURL") !== null && Input::old("facebookProfileURL") !== "" && (substr(Input::old("cameraInputIPCam_currentSnapshotURL"),0,5) == "data:"))
-                    <button class="btn btn-primary" type="button" id="switchToFacebookIPCamButton" onclick="switchToFacebookIPCam()" style="margin-top: 10px;">Switch to Facebook Picture</button>
+                    <button class="btn btn-primary" type="button" id="switchToFacebookIPCamButton" onclick="switchToFacebookIPCam()" style="margin-top: 10px;">{{$strings['str_switchToFacebookPicture']}}</button>
                     @else
-                    <button class="btn btn-primary" type="button" id="switchToFacebookIPCamButton" onclick="switchToFacebookIPCam()" style="display: none; margin-top: 10px;">Switch to Facebook Picture</button>
+                    <button class="btn btn-primary" type="button" id="switchToFacebookIPCamButton" onclick="switchToFacebookIPCam()" style="display: none; margin-top: 10px;">{{$strings['str_switchToFacebookPicture']}}</button>
                     @endif
                 </div>
             </div>
@@ -203,6 +218,46 @@
 
         @endif
         <!-- END IP CAMERA CODE -->
+
+        <!-- BEGIN LOCAL CAMERA CODE -->
+        @if (Session::has('localcam'))
+
+            <div class="centered">
+                <div class="row">
+                    <div class="col-sm-6">
+                        {{$strings['str_liveImageFromCamera']}}<br/>
+                        <video id="cameraInputLocalCam" width="240" height="180" autoplay="autoplay" style="border: 1px solid red; width: 240px; height: 180px;">
+                            Your browser does not support the video tag.
+                        </video>
+                        <br/>
+                        <button class="btn btn-primary" type="button" id="captureLocalCamSnapshotButton" onclick="updateLocalCamSnapshot()" style="margin-top: 10px;">{{$strings['str_takeAPicture']}}</button>
+
+                    </div>
+                    <div class="col-sm-6">
+                        {{$strings['str_currentProfilePicture']}}<br/>
+                        @if (Input::old("facebookProfileURL") !== "#" && Input::old("facebookProfileURL") !== null && Input::old("facebookProfileURL") !== "" && substr(Input::old("cameraInputLocalCam_currentSnapshotURL"),0,26) == "https://graph.facebook.com")
+                            <canvas style="width: 240px; height: 180px;" width="240" height="180" name="cameraInputLocalCam_currentSnapshot" id="cameraInputLocalCam_currentSnapshot"></canvas><br/>
+                            <input type="hidden" name="facebookProfileURL" id="facebookProfileURL" value="{{Input::old('facebookProfileURL')}}">
+                            <input type="hidden" name="cameraInputLocalCam_currentSnapshotBase64" id="cameraInputLocalCam_currentSnapshotBase64" value="">
+                            <input type="hidden" name="cameraInputLocalCam_currentSnapshotURL" id="cameraInputLocalCam_currentSnapshotURL" value="{{Input::old('cameraInputLocalCam_currentSnapshotURL')}}">
+                        @else
+                            <canvas style="width: 240px; height: 180px;" width="240" height="180" name="cameraInputLocalCam_currentSnapshot" id="cameraInputLocalCam_currentSnapshot"></canvas><br/>
+                            <input type="hidden" name="facebookProfileURL" id="facebookProfileURL" value="{{Input::old('facebookProfileURL')}}">
+                            <input type="hidden" name="cameraInputLocalCam_currentSnapshotBase64" id="cameraInputLocalCam_currentSnapshotBase64" value="{{Input::old('cameraInputLocalCam_currentSnapshotBase64')}}">
+                            <input type="hidden" name="cameraInputLocalCam_currentSnapshotURL" id="cameraInputLocalCam_currentSnapshotURL" value="{{Input::old('cameraInputLocalCam_currentSnapshotURL')}}">
+                        @endif
+                        @if (Input::old("facebookProfileURL") !== "#" && Input::old("facebookProfileURL") !== null && Input::old("facebookProfileURL") !== "" && (substr(Input::old("cameraInputLocalCam_currentSnapshotURL"),0,5) == "data:"))
+                            <button class="btn btn-primary" type="button" id="switchToFacebookLocalCamButton" onclick="switchToFacebookLocalCam()" style="margin-top: 10px;">{{$strings['str_switchToFacebookPicture']}}</button>
+                        @else
+                            <button class="btn btn-primary" type="button" id="switchToFacebookLocalCamButton" onclick="switchToFacebookLocalCam()" style="display: none; margin-top: 10px;">{{$strings['str_switchToFacebookPicture']}}</button>
+                        @endif
+                    </div>
+                </div>
+
+
+            </div>
+        @endif
+        <!-- END LOCAL CAMERA CODE -->
 
         <div class="row" style="margin-top: 10px;">
             <div class="col-sm-6">
@@ -761,9 +816,9 @@
 
         function updateIPCamSnapshot()
         {
-            //http://vm-122.clubspeedtiming.com/api/shot/shot.php?base64={{Session::get('ipCamURL')}}
-            var ipCamURL = {{Session::get('ipCamURL') == null ? '' : Session::get('ipCamURL')}};
+            var ipCamURL = {{Session::get('ipCamURL') == null ? '""' : '"' . Session::get('ipCamURL') . '"'}};
 
+            //Test version: $.getJSON("http://192.168.111.122/api/shot/shot.php?base64=" + ipCamURL + "&callback=?",
             $.getJSON("http://{{$_SERVER['HTTP_HOST']}}/api/shot/shot.php?base64=" + ipCamURL + "&callback=?",
                 function( data ) {
                     $('#cameraInputIPCam_currentSnapshotBase64').val(data.image);
@@ -791,6 +846,75 @@
 
 
     <!-- END IP CAMERA SCRIPT -->
+
+    <!-- LOCAL CAMERA SCRIPT -->
+    <script>
+
+        @if (Session::has('localcam'))
+            $(document).ready(function(){
+                init();
+            });
+
+            function init()
+            {
+                if(navigator.webkitGetUserMedia)
+                {
+                    console.log('navigator.webkitGetUserMedia detected');
+                    navigator.webkitGetUserMedia({video:true}, onSuccess, onFail);
+                    //console.log(document.getElementById('cameraInputLocalCam'));
+                }
+                else
+                {
+                    console.log('webRTC not available');
+                }
+            }
+
+            function onSuccess(stream)
+            {
+                console.log("Call succeeded.");
+                document.getElementById('cameraInputLocalCam').src = URL.createObjectURL(stream);
+                console.log(URL.createObjectURL(stream));
+            }
+
+            function onFail()
+            {
+                console.log('could not connect stream');
+            }
+
+            function updateLocalCamSnapshot()
+            {
+                var c = document.getElementById('cameraInputLocalCam_currentSnapshot');
+                var v = document.getElementById('cameraInputLocalCam');
+                c.getContext('2d').drawImage(v, 0, 0, 240, 180);
+                $('#cameraInputLocalCam_currentSnapshotURL').val(c.toDataURL("image/jpeg", 1.0));
+                $('#cameraInputLocalCam_currentSnapshot').show();
+                if  (!($('#facebookProfileURL').attr("value") == "#" || $('#facebookProfileURL').attr("value") == ""))
+                {
+                    $('#switchToFacebookLocalCamButton').show();
+                }
+            }
+
+        function switchToFacebookLocalCam(event) {
+            $('#switchToFacebookLocalCamButton').hide();
+            var profilePicURL = $('#facebookProfileURL').val();
+            $('#cameraInputLocalCam_currentSnapshot').attr("src",profilePicURL);
+            var c = document.getElementById('cameraInputLocalCam_currentSnapshot');
+            var ctx = c.getContext('2d');
+            ctx.clearRect(0, 0, 240, 180);
+            var img = new Image;
+            img.setAttribute('crossOrigin', 'anonymous');
+            img.onload = function(){
+                ctx.drawImage(img,20,0,180,180);
+            };
+            img.src = $('#facebookProfileURL').val();
+
+            $('#cameraInputLocalCam_currentSnapshotURL').attr("value",profilePicURL);
+            $('#cameraInputLocalCam_currentSnapshotBase64').value = "";
+        }
+        @endif
+
+    </script>
+    <!-- END LOCAL CAMERA SCRIPT -->
 
     <!-- Datepicker swapping -->
     <script>
@@ -952,7 +1076,7 @@
             {
                 $('#stateLabel').text('{{$strings['str_State/Territory']}}');
             }
-			
+
             <!-- UNITED STATES AND CANADA DROPDOWN SCRIPT -->
             $('#country').change(function()
             {

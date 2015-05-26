@@ -2,7 +2,7 @@
 
 <!-- HEADER -->
 @section('backButton')
-<a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" class="arrow" onclick="$('#loadingModal').modal();"><span>Back</span></a>
+    <a href="{{$step1URL}}" class="arrow" onclick="$('#loadingModal').modal();"><span>Back</span></a>
 @stop
 
 @section('headerTitle')
@@ -28,7 +28,7 @@ Unable to Connect
     <div class="col-sm-6">
         <p/>
             <img src="images/redhelmet_disconnect.png" class="center-block" style="margin-top: 80px;" onclick="$('#errorInfo').toggle();">
-            <a href="{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}" onclick="$('#loadingModal').modal();">
+            <a href="{{$step1URL}}" onclick="$('#loadingModal').modal();">
             <div class="text-center" style="font-size: 20px;">{{$strings['str_disconnectedMessage']}}</div>
         </a>
     </div>

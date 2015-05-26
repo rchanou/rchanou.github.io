@@ -84,7 +84,7 @@
 </div>
 
 <script type="text/javascript">
-    var timer = setTimeout(function(){ window.location='{{Session::has('ipcam') ? 'step1' . '?&terminal=' . Session::get('ipcam') : 'step1' }}';}, 1800000); //Every 30 minutes, reset the session and pull new settings
+    var timer = setTimeout(function(){ window.location='{{$step1URL}}';}, 1800000); //Every 30 minutes, reset the session and pull new settings
 </script>
 <!-- END REGISTRATION OPTIONS  -->
 

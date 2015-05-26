@@ -27,12 +27,7 @@ class Step3Controller extends BaseController {
         CS_API::checkForLanguageChange();
         if(CS_API::sessionIsInvalid() || !Session::has("formInput"))
         {
-            $step1URL = '/step1';
-            if (Session::has('ipcam'))
-            {
-                $step1URL = $step1URL . '?&terminal=' . Session::get('ipcam');
-            }
-            return Redirect::to($step1URL);
+            return Redirect::to(CS_API::getStep1URL());
         }
 
         $session = Session::all();
@@ -46,7 +41,8 @@ class Step3Controller extends BaseController {
                     'translations' => $session['translations'],
                     'currentCulture' => $session['currentCulture'],
                     'currentCultureFB' => $session['currentCultureFB'],
-                    'formInput' => $session['formInput'])
+                    'formInput' => $session['formInput'],
+                    'step1URL' => CS_API::getStep1URL())
             );
         }
         else //If the waiver step is disabled, just skip to registration
@@ -191,7 +187,7 @@ class Step3Controller extends BaseController {
         echo '<b>Custom2: </b>' . $clubSpeedCustomerData["Custom2"] . '<br/>';
         echo '<b>Custom3: </b>' . $clubSpeedCustomerData["Custom3"] . '<br/>';
         echo '<b>Custom4: </b>' . $clubSpeedCustomerData["Custom4"] . '<br/>';
-        echo '<b>EventID: </b>' . $clubSpeedCustomerData["EventID"] . '<br/>';
+        //echo '<b>EventID: </b>' . $clubSpeedCustomerData["EventID"] . '<br/>';
         echo '<b>LicenseNumber: </b>' . $clubSpeedCustomerData["LicenseNumber"] . '<br/>';
         die();*/
 

@@ -13,48 +13,39 @@ $indexHTML = <<<EOT
 			margin: 0;
 			padding: 0;
 			overflow: hidden;
+			background-color: #000000;
 		}
 		iframe {
 			position: absolute;
-			top: 0;
+			top: 32px;
 			left: 0;
 			width: 100%;
-			height: 100%;
+			height: 768px;
 		}
-		#container {
-			display: block;
-			position: absolute;
-			top: 10px;
-			left: 10px;
-			padding: 1em;
-			width: 50%;
-			height: 3em;
-			font-family: Helvetica, Arial, Sans-Serif;
-			font-weight: bold;
-			z-index: 100;
-		}
-		#container:hover #controls {
-			display: block;
-		}
-		#controls {
-			display: none;
-			background-color: #ffffff;
-			float: left;
-			padding-left: 20px;
-			width: 50%;
+		#headerBar {
+		    background-color: #535353;
+		    width: 100%;
+		    max-width: 1024px;
+		    min-width: 800px;
+		    height: 32px;
+		    margin: 0px auto;
+		    padding: 0px;
+		    z-index: 100;
 		}
 		</style>
   </head>
   <body>
-    <div id="container" style="display: none;">
-    	<div id="controls">
-      <span id="close">[CLOSE SCREEN]</span> <span id="full-screen">[TOGGLE FULL SCREEN]</span>
-      </div>
+     <div id="headerBar">
+        <img src="home_ffffff_32.png" style="cursor: pointer;" onclick="resetInnerFrame()">
      </div>
-    <iframe src="$targetUrl" style="cursor: none;" frameborder="0" nwdisable nwfaketop></iframe>
-
+    <iframe id="innerFrame" src="$targetUrl" style="cursor: none;" frameborder="0" nwdisable nwfaketop></iframe>
   </body>
   <script language="javascript">
+
+    function resetInnerFrame()
+    {
+        document.getElementById('innerFrame').src = "$targetUrl";
+    }
 	// Load native UI library
 	var gui = require('nw.gui');
     gui.App.clearCache();
@@ -96,9 +87,6 @@ $indexHTML = <<<EOT
 	win.enterFullscreen();
 
 	//win.resizeTo(screens[screen_index].bounds.width, screens[screen_index].bounds.height);
-
-	document.getElementById('close').onclick = function() { win.close(); };
-	document.getElementById('full-screen').onclick = function() { win.toggleKioskMode(); };
 
 	var screenCB = {
 		onDisplayBoundsChanged : function(screen) {
@@ -147,7 +135,7 @@ EOT;
 
 file_put_contents('./speedscreenCreation/index.html',$indexHTML);
 chdir("speedscreenCreation");
-exec("lib\\7z.exe a -tzip package.zip index.html package.json");
+exec("lib\\7z.exe a -tzip package.zip index.html package.json home_ffffff_32.png");
 exec("rename package.zip package.nw");
 exec("copy /b /Y nw.exe+package.nw package.exe");
 exec("enigmavbconsole.exe package.evb");
