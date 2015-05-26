@@ -97,8 +97,14 @@
                     <li>{{link_to('/docs/Club Speed - Club Speed Registration Kiosk Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
                     @if(Session::has('user') && strtolower(Session::get('user')) == 'support')
                     <li>
-                        <a href="{{URL::to('/registration/deploy?&targetUrl=http://' . $_SERVER['HTTP_HOST'] . '/cs-registration/www/&appName=registration')}}">
-                            <img src="{{asset('img/support_only.png')}}" title="This link is only visible to Club Speed support staff."> Download .exe
+                        <a href="{{URL::to('/registration/deploy?&targetUrl=http://' . $_SERVER['HTTP_HOST'] . '/cs-registration/&appName=registration')}}">
+                            <img src="{{asset('img/support_only.png')}}" title="This link is only visible to Club Speed support staff."> Create .exe
+                        </a>
+                        <a href="{{URL::to('/registration/deploy?&targetUrl=http://' . $_SERVER['HTTP_HOST'] . '/cs-registration/%3F%26localcam%3D1&appName=registration')}}">
+                            <img src="{{asset('img/support_only.png')}}" title="This link is only visible to Club Speed support staff."> Create .exe<br>(USB camera)
+                        </a>
+                        <a href="{{URL::to('/registration/deploy?&targetUrl=http://' . $_SERVER['HTTP_HOST'] . '/cs-registration/%3F%26terminal%3Dreg1&appName=registration')}}">
+                            <img src="{{asset('img/support_only.png')}}" title="This link is only visible to Club Speed support staff."> Create .exe<br>(reg1 IP camera)
                         </a>
                     </li>
                     @endif
