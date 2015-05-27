@@ -19,6 +19,7 @@ config.debug = false;
 config.disableSending = false;
 config.databaseFilename = './db.json';
 config.trackId = 1;
+config.prependCountryCode = false; // To prepend Australia's country code, use '+61' (include the quotes)
 
 config.textMessaging = {};
 config.textMessaging.isEnabled = false;

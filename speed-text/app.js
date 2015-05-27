@@ -186,7 +186,27 @@ function sendMessage(to, message, fromArray) {
 
 function sendTwilioMessage(to, message, fromArray, opts) {
 	var twilioClient = require('twilio')(opts.sid, opts.token);	
-	to = to.replace(/\D/g,'');
+	
+	// Remove anything not a +, <space> or number
+	to = to.replace(/[^0-9\s\+]/g,'');
+	
+	// If country code override is set, and string doesn't start with a +, append one.
+	// Also realize that country codes can be 1, 2 or 3 (or more?) digits.
+	//
+	// Three cases to cover (using +61 Australia as an example):
+	//   1. 1231234 (append +61)
+	//   2. 611231234 (append +)
+	//   3. +611231234 (pass through)
+	if(config.prependCountryCode && to.charAt(0) !== '+') {
+		var countryCode = config.prependCountryCode.substring(1); // Returns just "61"
+		if(to.indexOf(countryCode) === 0) { // Number starts with "61", needs a "+"
+			to = '+'.concat(to);
+		} else { // Number does not start with 61, needs "+61" (and 0 removed if in Australia)
+			if(config.prependCountryCode === '+61' && to.charAt(0) == '0') to = to.substring(1); // Remove leading 0 in Australia -- others?
+			to = config.prependCountryCode.concat(to);
+		}
+	}
+	
 	var fromNumber = (typeof fromArray === 'string') ? fromArray : fromArray[messageCount % fromArray.length];
 	messageCount++; // Increment the message counter
 
