@@ -112,8 +112,8 @@ class BookingAvailabilityLogic extends BaseLogic {
             , ':end'   => Convert::toDateForServer($params['end'])
         );
         $sql = ""
-            ."\nDECLARE @StartRange DATETIME2;"
-            ."\nDECLARE @EndRange DATETIME2;"
+            ."\nDECLARE @StartRange DATETIME;"
+            ."\nDECLARE @EndRange DATETIME;"
             ."\nSET @StartRange = :start;"
             ."\nSET @EndRange = :end;"
             ."\nSELECT obav.*"
