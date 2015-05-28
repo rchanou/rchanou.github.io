@@ -79,7 +79,7 @@
                     <li>{{link_to('/booking/settings','Settings')}}</li>
                     <li>{{link_to('/booking/payments','Payment Processors')}}</li>
                     <li>{{link_to('/booking/templates','Templates')}}</li>
-                    {{--<li>{{link_to('/booking/giftcardsales','Gift Card Sales')}}</li>--}}
+                    <li>{{link_to('/booking/giftcardsales','Gift Card Sales')}}</li>
                     <li>{{link_to('/booking/translations','Translations')}}</li>
 										<li>{{link_to('/booking/logs','Logs')}}</li>
                     <li>{{link_to('/docs/Club Speed - Online Booking Guide.pdf','Documentation',array('target' => '_blank'))}}</li>
