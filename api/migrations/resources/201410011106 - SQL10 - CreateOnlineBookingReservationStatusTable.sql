@@ -34,10 +34,8 @@ BEGIN
         , @level1type = 'Table',  @level1name = OnlineBookingReservationStatus
         , @level2type = 'Column', @level2name = [Status]
 
-	INSERT INTO dbo.OnlineBookingReservationStatus(Status)
-	VALUES
-	      ('TEMPORARY')
-	    , ('PERMANENT')
+    INSERT INTO dbo.OnlineBookingReservationStatus(Status) VALUES ('TEMPORARY');
+    INSERT INTO dbo.OnlineBookingReservationStatus(Status) VALUES ('PERMANENT');
 END;
 
 COMMIT;
