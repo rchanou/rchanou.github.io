@@ -502,7 +502,7 @@ class RegistrationController extends BaseController
                                         'Central African Republic' => 'Republique Centrafricaine',
                                         'Chad' => 'Tchad',
                                         'Chile' => 'Chile',
-                                        'China' => 'Zhong Guo',
+                                        'China' => 'China',
                                         'Colombia' => 'Colombia',
                                         'Comoros' => 'Comores',
                                         'Congo, Republic of the' => 'Republique du Congo',
