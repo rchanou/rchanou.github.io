@@ -234,6 +234,21 @@ EOS;
     }
 
     /**
+     * @url GET /accounting
+     */
+    public function accouting() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+
+        $sql = <<<EOS
+EXEC GetAccoutingReport :start, :end
+EOS;
+        $params = array(&$start, &$end);
+				$data = $this->run_query($sql, $this->getDateRange());
+        return $data;
+    }
+		
+		/**
      * @url GET /brokers_summary
      */
     public function brokers_summary() {
