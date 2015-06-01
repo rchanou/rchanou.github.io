@@ -126,7 +126,7 @@ After Race Posting Settings
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">Description</label>
                                     <div class="col-sm-8 col-md-8 col-lg-8">
                                       <input type="text" style="width: 100%" id="description" placeholder="Ex: I came in &lbrace;&lbrace;ordinalFinishPosition&rbrace;&rbrace; at Club Speed!" name="description" value="{{$afterRaceSettings['description']}}">
-                                      <span class="help-block text-left">Optional, set a description for the photo: "I came in first a Club Speed!"</span>
+                                      <span class="help-block text-left">Optional, set a description for the photo: "I came in 1st a Club Speed!"</span>
                                     </div>
                                   </div>
                                 @endif
