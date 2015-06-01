@@ -115,7 +115,7 @@ After Race Posting Settings
                                   <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">Name</label>
                                     <div class="col-sm-8 col-md-8 col-lg-8">
-                                      <input type="text" style="width: 100%" id="name" placeholder="Ex: My {{heatType}} Race Results" name="name" value="{{$afterRaceSettings['name']}}">
+                                      <input type="text" style="width: 100%" id="name" placeholder="Ex: My &lbrace;&lbrace;heatType&rbrace;&rbrace; Race Results" name="name" value="{{$afterRaceSettings['name']}}">
                                       <span class="help-block text-left">Optional, set a name for the photo: "My Arrive &amp; Drive Race Results"</span>
                                     </div>
                                   </div>
@@ -125,7 +125,7 @@ After Race Posting Settings
                                   <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">Description</label>
                                     <div class="col-sm-8 col-md-8 col-lg-8">
-                                      <input type="text" style="width: 100%" id="description" placeholder="Ex: I came in {{ordinalFinishPosition}} at Club Speed!" name="description" value="{{$afterRaceSettings['description']}}">
+                                      <input type="text" style="width: 100%" id="description" placeholder="Ex: I came in &lbrace;&lbrace;ordinalFinishPosition&rbrace;&rbrace; at Club Speed!" name="description" value="{{$afterRaceSettings['description']}}">
                                       <span class="help-block text-left">Optional, set a description for the photo: "I came in first a Club Speed!"</span>
                                     </div>
                                   </div>
