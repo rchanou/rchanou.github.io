@@ -96,8 +96,8 @@ After Race Posting Settings
                                   <div class="form-group">
                                     <label class="col-sm-4 col-md-4 col-lg-4 control-label">Link</label>
                                     <div class="col-sm-8 col-md-8 col-lg-8">
-                                      <input type="text" style="width: 100%" id="link" name="link" value="{{$afterRaceSettings['link']}}">
-                                      <span class="help-block text-left">Controls where the Facebook posting links to.</span>
+                                      <input type="text" style="width: 100%" id="link" name="link" placeholder="Ex. http://www.yourTrack.com" value="{{$afterRaceSettings['link']}}">
+                                      <span class="help-block text-left">Website to visit when the posting is clicked.</span>
                                     </div>
                                   </div>
                                 @endif
