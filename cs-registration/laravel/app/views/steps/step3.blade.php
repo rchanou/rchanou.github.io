@@ -102,7 +102,7 @@
 @stop
 
 @section('rightFooterButton')
-    @if ($settings['CfgRegUseMsign'] && (Session::get('isMinor') == "false" || $settings['cfgRegAllowMinorToSign'] || Config::get('config.minorSignatureWithParent')) )
+    @if ($settings['CfgRegUseMsign'] && (Session::get('isMinor') == "false" || $settings['cfgRegAllowMinorToSign']) )
     <button id="iagreeButton" class="btn btn-success btn-lg rightButton disabled" data-toggle="modal" data-target="#signModal">
         {{$strings['str_buttonDisabledText']}}
     </button>
