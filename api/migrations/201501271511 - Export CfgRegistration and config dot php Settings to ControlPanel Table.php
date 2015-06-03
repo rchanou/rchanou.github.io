@@ -149,7 +149,8 @@ $cfgRegSettingNames = array(
   'CfgRegPhoneShow' => '1',
   'CfgRegPhoneReq' => '0',
   'CfgRegEmailShow' => '1',
-  'CfgRegEmailReq' => '0'
+  'CfgRegEmailReq' => '0',
+  'cfgRegShowBeenHereBefr' => '0'
 );
 
 if(!isset($cfgEntry) || count($cfgEntry) === 0){
