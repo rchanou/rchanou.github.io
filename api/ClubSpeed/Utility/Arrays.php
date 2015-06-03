@@ -112,6 +112,10 @@ class Arrays {
         return $arr; // copy or pointers?
     }
 
+    public static function reduce(&$arr, $reducer, $seed=null) {
+        return array_reduce($arr, $reducer, $seed); // no need to rewrite. just to keep the interface sane/consistent.
+    }
+
     public static function select(&$arr, $selector) {
         $return = array();
         foreach($arr as $key => &$val)

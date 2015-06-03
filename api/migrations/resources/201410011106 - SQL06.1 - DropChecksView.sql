@@ -8,10 +8,10 @@ IF EXISTS (
     FROM INFORMATION_SCHEMA.VIEWS v
     WHERE
             v.TABLE_SCHEMA  = 'dbo'
-        AND v.TABLE_NAME    = 'CheckTotals_V'
+        AND v.TABLE_NAME    = 'Checks_V'
 )
 BEGIN
-    DROP VIEW dbo.CheckTotals_V
+    DROP VIEW dbo.Checks_V
 END
 
 COMMIT;

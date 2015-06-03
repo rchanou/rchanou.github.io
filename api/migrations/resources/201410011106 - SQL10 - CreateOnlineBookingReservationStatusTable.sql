@@ -19,7 +19,7 @@ BEGIN
         OnlineBookingReservationStatusID INT IDENTITY(1,1) NOT NULL
         , [Status] NVARCHAR(255) NOT NULL
         , CONSTRAINT PK_OnlineBookingReservationStatus PRIMARY KEY CLUSTERED (OnlineBookingReservationStatusID)
-		, CONSTRAINT UQ_OnlineBookingReservationStatus_Status UNIQUE NONCLUSTERED ([Status]) -- create the unique index this way, for naming convention purposes
+        , CONSTRAINT UQ_OnlineBookingReservationStatus_Status UNIQUE NONCLUSTERED ([Status]) -- create the unique index this way, for naming convention purposes
     )
     EXEC sp_addextendedproperty
         @name = 'MS_Description'

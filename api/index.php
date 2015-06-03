@@ -46,6 +46,7 @@ $r->addAPIClass('Countries');
 $r->addAPIClass('Customers');
 $r->addAPIClass('CustomerStatus');
 $r->addAPIClass('Definition');
+$r->addAPIClass('DiscountType');
 $r->addAPIClass('Events');
 $r->addAPIClass('Facebook');
 $r->addAPIClass('FacebookRaces');

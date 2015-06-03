@@ -48,7 +48,7 @@ class BasePayment {
             throw new \CSException($message);
         }
         $this->gateway = Omnipay::create(@$data['name']);
-        $this->gateway->initialize(@$data['options']);
+        $this->gateway->initialize(@$data['options'] ?: array());
         $this->logPrefix = 'Check #' . @$data['check']['checkId'] . ": Base: ";
         Log::info($this->logPrefix . "Starting payment using processor: " . $name, Enums::NSP_BOOKING);
 

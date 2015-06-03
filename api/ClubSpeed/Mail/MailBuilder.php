@@ -4,8 +4,6 @@ namespace ClubSpeed\Mail;
 
 class MailBuilder {
 
-    // potential weirdness with public properties the same names as public functions ?
-    // (php seems to handle this ok...)
     public $subject; 
     public $from;
     public $to;

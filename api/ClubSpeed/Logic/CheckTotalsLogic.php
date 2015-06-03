@@ -2,12 +2,15 @@
 
 namespace ClubSpeed\Logic;
 use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Enums\Enums;
 
 /**
  * The business logic class
  * for ClubSpeed check totals.
  */
 class CheckTotalsLogic extends BaseLogic {
+
+    private $_discounts;
 
     /**
      * Constructs a new instance of the CheckTotalsLogic class.
@@ -21,6 +24,8 @@ class CheckTotalsLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->checkTotals_V;
+
+        $this->_discounts = array();
         
         // any others?
         $this->insertable = array( 
@@ -43,15 +48,27 @@ class CheckTotalsLogic extends BaseLogic {
             if ($calc[$this->interface->keys[0]] != $tempCheckId) {
                 // we need to create a new check -- this is either the first checkTotals record, or the client passed multiple checks
                 $check = $this->logic->checks->dummy($calc);
+                // map columns manually for any check discounts
+                $check->DiscountID     = $calc['CheckDiscountID'];
+                $check->DiscountNotes  = $calc['CheckDiscountNotes'];
+                $check->DiscountUserID = $calc['CheckDiscountUserID'];
                 $tempCheckId = $check->CheckID;
                 $check->CheckID = null;
                 $checkCreateData = $this->logic->checks->create($check);
                 $actualCheckId = $checkCreateData[$this->interface->keys[0]];
             }
             $calc[$this->interface->keys[0]] = $actualCheckId; // tie the new details record back to the new CheckID
-            $checkDetailId = $this->logic->checkDetails->create($calc);
+
+            $checkDetail = $this->logic->checkDetails->dummy($calc);
+            // map columns manually for any line discounts
+            $checkDetail->DiscountID     = $calc['CheckDetailDiscountID'];
+            $checkDetail->DiscountNotes  = $calc['CheckDetailDiscountNotes'];
+            $checkDetail->CalculateType  = $calc['CheckDetailDiscountCalculateType'];
+            $checkDetail->DiscountUserID = $calc['CheckDetailDiscountUserID'];
+            $checkDetail->DiscountDesc   = $calc['CheckDetailDiscountDesc'];
+            $checkDetailId = $this->logic->checkDetails->create($checkDetail);
         }
-        // $this->logic->checks->applyCheckTotal($actualCheckId); // check create is now automatically running the applyCheckTotal stored proc
+        $this->logic->checks->applyCheckTotal($actualCheckId);
         return $checkCreateData;
     }
 
@@ -68,41 +85,62 @@ class CheckTotalsLogic extends BaseLogic {
         // note that giftcards ids provided must match up with dbo.Customers.CrdID
         // and then that record's CustID should be used to find the GiftCardHistoryID
         // (odd, but this is the expectation for the database's data)
-        $discount = 0;
+        $paid = 0;
         if (!empty($giftCards)) {
             foreach($giftCards as $giftCardId) {
-                $giftCardCustomer = $this->logic->customers->find("CrdID = " . $giftCardId . " AND IsGiftCard = True");
-                if (empty($giftCardCustomer))
-                    throw new \RecordNotFoundException("Unable to find gift card: " . $giftCardId);
-                $giftCardCustomer = $giftCardCustomer[0];
-                $giftCardHistory = $this->logic->giftCardHistory->find("CustID = " . $giftCardCustomer->CustID);
-                if (empty($giftCardHistory))
+                $giftCardBalance = $this->logic->giftCardBalance->find("CrdID = " . $giftCardId);
+                if (empty($giftCardBalance))
                     throw new \RecordNotFoundException("Unable to find gift card by CustID: " . $giftCardCustomer->CustID);
-                $giftCardHistory = $giftCardHistory[0];
-                // consider the giftCardHistory Points to be part of a discount
-                // note that giftCardHistory->Points are not actually points,
-                // they are monetary currency (db field misnamed and never fixed?)
-                $discount += $giftCardHistory->Points;
+                $giftCardBalance = $giftCardBalance[0];
+                $paid += $giftCardBalance->Money; // or do we use Points?
             }
         }
         if (!is_array($params))
-            $params = array($params); // for foreach syntax
+            $params = array($params); // for foreach syntax. we're only accepting one check now, so this is kind of worthless, but just to be safe.
         foreach($params as $key => $param) {
             $checkTotals = $this->interface->dummy($param);
-            // consider the giftCard total a discount?
-            // altering the checkTotal based on potential future gift card payments
-            // is hacky no matter where we put it, may as well use this for now
-            $checkTotals->Discount = $discount; // consider using CheckPaidTotal instead of Discount, now that the column is available
+            $checkTotals->CheckPaidTotal = $paid; // note that now we only have 1 check being accepted, the gift cards will only line up to 1 check, so this is still technically safe, if awkward.
             $params[$key] = $checkTotals;
         }
         $calculated = $this->applyCheckTotal($params);
         return $calculated;
     }
 
+    private function loadDiscount($discountId) {
+        // re-useable local caching system?
+        if (!isset($this->_discounts[$discountId])) {
+            $discount = $this->db->discountType->get($discountId);
+            if (is_null($discount) || empty($discount))
+                throw new \RecordNotFoundException("CheckTotalsLogic received a DiscountID which could not be found! Received CheckDetailDiscountID: " . $check->CheckDetailDiscountID);
+            $discount = $discount[0];
+            $this->_discounts[$discountId] = $discount;
+        }
+        return $this->_discounts[$discountId];
+    }
+
+    private static function calculateDiscount($discount, $checkAmount) {
+        // or does this belong in DiscountTypeLogic?
+        $calculatedDiscount = 0.0;
+        if ($discount->CalculateType === Enums::CALCULATE_TYPE_AMOUNT) {
+            if ($discount->Amount > $checkAmount)
+                $calculatedDiscount = $checkAmount; // don't give discounts greater than total
+            else
+                $calculatedDiscount = $discount->Amount;
+        }
+        else /* CALCULATE_TYPE_PERCENT */ {
+            if ($discount->Amount >= 100)
+                $calculatedDiscount = $checkAmount; // again, don't give discounts greater than total
+            else
+                $calculatedDiscount = round($discount->Amount / 100.0 * $checkAmount, 2);
+        }
+        return $calculatedDiscount;
+    }
+
     private function applyCheckTotal($checks = array()) {
         $running = array(); // keep track of running totals and taxes on a checkId basis
         $products = array(); // keep track of products by productId
         $taxes = array(); // keep track of taxes by taxId
+        $discounts = array(); // keep track of discounts by discountId
 
         $useSalesTax = $this->logic->helpers->useSalesTax();
 
@@ -120,59 +158,120 @@ class CheckTotalsLogic extends BaseLogic {
             if (!isset($taxes[$product->TaxID])) {
                 $tax = $this->db->taxes->get($product->TaxID);
                 if (is_null($tax) || empty($tax)) // this should really never happen
-                    throw new \RecordNotFoundException("CheckTotal Virtual received a ProductID which had a TaxID that could nto be found! Received TaxID: " . $product->TaxID);
+                    throw new \RecordNotFoundException("CheckTotal Virtual received a ProductID which had a TaxID that could not be found! Received TaxID: " . $product->TaxID);
                 $tax = $tax[0];
                 $taxes[$product->TaxID] = $tax;
             }
             $tax = $taxes[$product->TaxID];
 
             // store items required for Check/CheckDetails storage
-            $check->TaxID = $tax->TaxID;
-            $check->GST = $tax->GST;
-            $check->TaxPercent = $tax->Amount;
+            $check->TaxID             = $tax->TaxID;
+            $check->GST               = $tax->GST;
+            $check->TaxPercent        = $tax->Amount;
+            $check->UnitPrice         = $product->Price1;
+            $check->ProductName       = $product->Description;
+            $check->CheckDetailStatus = Enums::CHECK_DETAIL_STATUS_IS_NEW;
+            $check->CheckStatus       = Enums::CHECK_STATUS_OPEN;
+            $check->CheckDetailType   = $product->ProductType;
+            $check->CheckType         = Enums::CHECK_TYPE_REGULAR; // should we allow events or "show all" (whatever that is) with virtual?
 
-            // begin logic found in VB
-            $check->DiscountApplied = 0; // just assume the DiscountApplied will be 0 with virtual/posted checks
-            $check->UnitPrice = $product->Price1;
             $checkDetailActualQuantity = ($check->Qty ?: 0) + ($check->CadetQty ?: 0);
-            $check->CheckDetailSubtotal = $check->UnitPrice * $checkDetailActualQuantity;
+
+            // if there are check detail level discounts, look them up before determining subtotal to match VB logic
+            $checkDetailSingleDiscountAmount = 0;
+            if (isset($check->CheckDetailDiscountID)) {
+                $discount = $this->loadDiscount($check->CheckDetailDiscountID);
+                $check->CheckDetailDiscountCalculateType = $discount->CalculateType;
+                $check->CheckDetailDiscountDesc = $discount->Description;
+                $check->CheckDetailDiscountUserID = $check->UserID;
+                $checkDetailSingleDiscountAmount = self::calculateDiscount($discount, $check->UnitPrice);
+                $check->DiscountApplied = $checkDetailSingleDiscountAmount * $checkDetailActualQuantity;
+            }
+            else
+                $check->DiscountApplied = 0; // ensure the return is always a number
+
+            $check->Gratuity        = $check->Gratuity ?: 0;
+            $check->Fee             = $check->Fee ?: 0;
+            // $check->Discount        = $check->Discount ?: 0;
+            // $check->DiscountApplied = $check->DiscountApplied ?: 0; // ensure the return is always a number
+
+            // note that $check->Discount is at the check level, and should always be stored as an amount
+            // as well that $check->DiscountApplied is at the single line item level, will always be stored as an amount
+            $checkDetailSingleAmount   = $check->UnitPrice - $checkDetailSingleDiscountAmount;
+            $checkDetailSubtotal       = $checkDetailSingleAmount * $checkDetailActualQuantity;
+            $checkDetailTaxPercentage  = $check->TaxPercent / 100.0;
+            $checkDetailGSTPercentage  = $check->GST / 100.0;
             if ($useSalesTax) {
-                $compoundTaxRate = (((1 + $tax->GST / 100) * (1 + ($tax->Amount - $tax->GST) / 100)) - 1) * 100; // calculation taken from WebAPI
-                $checkDetailSingleTaxAmount = round($check->UnitPrice * ($compoundTaxRate / 100.0), 2);
-                $check->CheckDetailTax = $checkDetailSingleTaxAmount * $checkDetailActualQuantity;
-                $check->CheckDetailTotal = $check->CheckDetailSubtotal + $check->CheckDetailTax;
+                $checkDetailSingleTaxAmount = round($checkDetailSingleAmount * $checkDetailTaxPercentage, 2);
+                $checkDetailSingleGSTAmount = round($checkDetailSingleAmount * $checkDetailGSTPercentage, 2);
+                $checkDetailSinglePSTAmount = $checkDetailSingleTaxAmount - $checkDetailSingleGSTAmount;
+                $checkDetailTax             = $checkDetailSingleTaxAmount * $checkDetailActualQuantity;
+                $checkDetailGST             = $checkDetailSingleGSTAmount * $checkDetailActualQuantity;
+                $checkDetailPST             = $checkDetailSinglePSTAmount * $checkDetailActualQuantity;
+                $checkDetailTotal           = $checkDetailSubtotal + $checkDetailTax;
             }
-            else { // assume VAT
-                $checkDetailSingleTaxAmount = round($check->UnitPrice * ($tax->Amount / 100.0), 2);
-                $check->CheckDetailTax = $checkDetailSingleTaxAmount * $checkDetailActualQuantity;
-                $check->CheckDetailTotal = $check->CheckDetailSubtotal;
+            else {
+                $checkDetailSingleTaxAmount = $checkDetailSingleAmount - round($checkDetailSingleAmount / (1.0 + $checkDetailTaxPercentage), 2);
+                $checkDetailTax = $checkDetailSingleTaxAmount * $checkDetailActualQuantity;
+                $checkDetailGST = 0; // GST not relevant for VAT
+                $checkDetailPST = 0; // PST not relevant for VAT
+                $checkDetailTotal = $checkDetailSubtotal; // Total == Subtotal with VAT
             }
+            $check->CheckDetailTax      = $checkDetailTax;
+            $check->CheckDetailGST      = $checkDetailGST;
+            $check->CheckDetailPST      = $checkDetailPST;
+            $check->CheckDetailSubtotal = $checkDetailSubtotal;
+            $check->CheckDetailTotal    = $checkDetailTotal;
+
             if (!isset($running[$check->CheckID])) {
                 $running[$check->CheckID] = array(
                       'subtotal'    => 0
                     , 'tax'         => 0
+                    , 'pst'         => 0
+                    , 'gst'         => 0
                 );
             }
             $running[$check->CheckID]['subtotal'] += $check->CheckDetailSubtotal;
             $running[$check->CheckID]['tax'] += $check->CheckDetailTax;
+            $running[$check->CheckID]['gst'] += $check->CheckDetailGST;
+            $running[$check->CheckID]['pst'] += $check->CheckDetailPST;
         }
         foreach($checks as $check) {
-            $check->CheckSubtotal = $running[$check->CheckID]['subtotal'];
+            $check->CheckSubtotal = $running[$check->CheckID]['subtotal']; // + $check->Fee + $check->Gratuity - $check->Discount;
             $check->CheckTax = $running[$check->CheckID]['tax'];
-            if ($useSalesTax) {
-                $check->CheckTotal = $check->CheckSubtotal + $check->CheckTax;
+            $check->CheckGST = $running[$check->CheckID]['gst'];
+            $check->CheckPST = $running[$check->CheckID]['pst'];
+            $check->CheckTotal = $check->CheckSubtotal; // start with the subtotal
+            if ($useSalesTax)
+                $check->CheckTotal += $check->CheckTax;
+            $check->CheckTotal += $check->Gratuity;
+            $check->CheckTotal += $check->Fee;
+
+            // pr($check);
+
+            if (isset($check->CheckDiscountID)) {
+                $discount = $this->loadDiscount($check->CheckDiscountID);
+                $check->CheckDiscountNotes = $discount->Description;
+                $check->CheckDiscountUserID = $check->UserID;
+                $check->Discount = self::calculateDiscount($discount, $check->CheckTotal);
             }
-            else { // assume VAT
-                $check->CheckTotal = $check->CheckSubtotal;
-            }
+            else
+                $check->Discount = 0;
             $check->CheckTotal -= $check->Discount;
 
-            // for virtual, assume there are no outstanding payments (may need to change in future)
-            $check->CheckPaidTax = 0;
-            $check->CheckPaidTotal = 0;
-            $check->CheckRemainingTax = $check->CheckTax;
-            $check->CheckRemainingTotal = $check->CheckTotal;
+            // how to handle CheckPaidTax? Apply CheckPaidTotal toward the Tax until the Tax is gone? Other way around? Try to maintain percentages??
+            $check->CheckPaidTax = $check->CheckPaidTax ?: 0;
+            $check->CheckPaidTotal = $check->CheckPaidTotal ?: 0;
+            if ($check->CheckPaidTotal > $check->CheckTotal)
+                $check->CheckPaidTotal = $check->CheckTotal; // for gift cards?
+            $check->CheckRemainingTax = $check->CheckTax - $check->CheckPaidTax; // can we deprecate this? brian isn't using it. not really sure how to get a reliable % out of this, if its not 100% covered by gift cards or discounts.
+            if ($check->CheckRemainingTax < 0)
+                $check->CheckRemainingTax = 0;
+            $check->CheckRemainingTotal = $check->CheckTotal - $check->CheckPaidTotal;
+            if ($check->CheckRemainingTotal < 0)
+                $check->CheckRemainingTotal = 0; // these could actually be negatives with refunds. careful, if we need to support that.
         }
+
         return $checks;
     }
 }

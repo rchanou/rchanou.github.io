@@ -12,7 +12,7 @@ class ProductsMapper extends BaseMapper {
             , 'ProductType'          => ''
             , 'Description'          => ''
             , 'Price1'               => ''
-            // , 'Price2'               => ''
+            , 'Price2'               => ''
             // , 'Price3'               => ''
             // , 'Price4'               => ''
             // , 'Price5'               => ''

@@ -68,16 +68,32 @@
             , "type": "decimal"
         }
         , {
-              "name": "InvoiceDate"
-            , "type": "datetime"
+              "name": "CheckDiscountID"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckDiscountNotes"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "CheckDiscountUserID"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckSubtotal"
+            , "type": "money"
         }
         , {
               "name": "CheckTax"
             , "type": "numeric"
         }
         , {
-              "name": "CheckSubtotal"
-            , "type": "money"
+              "name": "CheckGST"
+            , "type": "numeric"
+        }
+        , {
+              "name": "CheckPST"
+            , "type": "numeric"
         }
         , {
               "name": "CheckTotal"
@@ -244,23 +260,23 @@
             , "type": "decimal"
         }
         , {
-              "name": "DiscountUserID"
+              "name": "CheckDetailDiscountUserID"
             , "type": "int"
         }
         , {
-              "name": "DiscountDesc"
+              "name": "CheckDetailDiscountDesc"
             , "type": "nvarchar"
         }
         , {
-              "name": "CalculateType"
+              "name": "CheckDetailDiscountCalculateType"
             , "type": "int"
         }
         , {
-              "name": "DiscountID"
+              "name": "CheckDetailDiscountID"
             , "type": "int"
         }
         , {
-              "name": "DiscountNotes"
+              "name": "CheckDetailDiscountNotes"
             , "type": "nvarchar"
         }
         , {
@@ -300,12 +316,20 @@
             , "type": "int"
         }
         , {
+              "name": "CheckDetailSubtotal"
+            , "type": "money"
+        }
+        , {
               "name": "CheckDetailTax"
             , "type": "numeric"
         }
         , {
-              "name": "CheckDetailSubtotal"
-            , "type": "money"
+              "name": "CheckDetailGST"
+            , "type": "numeric"
+        }
+        , {
+              "name": "CheckDetailPST"
+            , "type": "numeric"
         }
         , {
               "name": "CheckDetailTotal"
