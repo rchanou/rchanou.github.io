@@ -195,6 +195,18 @@ Registrations Settings
                       </div>
                     </div>
 
+                  @if (isset($registrationSettings['cfgRegShowBeenHereBefr']))
+                      <div class="form-group">
+                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Check In</label>
+                          <div class="col-sm-8 col-md-8 col-lg-8">
+                              <input type="checkbox" id="cfgRegShowBeenHereBefr" name="cfgRegShowBeenHereBefr" {{$isChecked['cfgRegShowBeenHereBefr']}}>
+                              <span class="help-block text-left">
+                                If checked, users may check in using an existing account.
+                              </span>
+                          </div>
+                      </div>
+                  @endif
+
                     <div class="form-group">
                       <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Signature(s)</label>
                       <div class="col-sm-8 col-md-8 col-lg-8">
