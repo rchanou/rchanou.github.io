@@ -810,7 +810,7 @@
                 }
             ]
         });
-        pollForChanges(5000);
+        pollForChanges(30000);
     }
     
     /**
@@ -822,7 +822,7 @@
     */
     function pollForChanges(timeout) {
         api.getTopTimes.poll({
-            timeout: timeout || 5000,
+            timeout: timeout || 30000,
             track: parameters.trackId,
             range: parameters.range,
             limit: parameters.limit,
