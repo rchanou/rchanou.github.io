@@ -1,0 +1,47 @@
+{
+    "table": {
+        "name": "dbo.DiscountType",
+        "alias": "dt"
+    },
+    "keys": [
+        "DiscountID"
+    ],
+    "columns": [
+        {
+              "name": "DiscountID"
+            , "type": "int"
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "CalculateType"
+            , "type": "int"
+        }
+        , {
+              "name": "Amount"
+            , "type": "float"
+        }
+        , {
+              "name": "Enabled"
+            , "type": "bit"
+        }
+        , {
+              "name": "NeedApproved"
+            , "type": "bit"
+        }
+        , {
+              "name": "ProductClassID"
+            , "type": "int"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "TransferID"
+            , "type": "uniqueidentifier"
+        }
+    ]
+}

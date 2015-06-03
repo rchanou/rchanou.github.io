@@ -5,7 +5,8 @@ namespace ClubSpeed\Database\Records;
 class CheckTotals_V extends BaseRecord {
     protected static $_definition;
     
-    public $CheckID; // Check Fields
+    // check fields
+    public $CheckID;
     public $CustID;
     public $CheckType;
     public $CheckStatus;
@@ -20,14 +21,21 @@ class CheckTotals_V extends BaseRecord {
     public $ClosedDate;
     public $IsTaxExempt;
     public $Discount;
+    public $CheckDiscountID;
+    public $CheckDiscountNotes;
+    public $CheckDiscountUserID;
     public $CheckSubtotal;
     public $CheckTax;
+    public $CheckGST;
+    public $CheckPST;
     public $CheckTotal;
     public $CheckPaidTax;
     public $CheckPaidTotal;
     public $CheckRemainingTax;
     public $CheckRemainingTotal;
-    public $CheckDetailID; // Check Detail fields
+
+    // check detail fields
+    public $CheckDetailID;
     public $CheckDetailStatus;
     public $CheckDetailType;
     public $ProductID;
@@ -63,11 +71,11 @@ class CheckTotals_V extends BaseRecord {
     public $P_Points;
     public $P_CustID;
     public $R_Points;
-    public $DiscountUserID;
-    public $DiscountDesc;
-    public $CalculateType;
-    public $DiscountID;
-    public $DiscountNotes;
+    public $CheckDetailDiscountUserID;
+    public $CheckDetailDiscountDesc;
+    public $CheckDetailDiscountCalculateType;
+    public $CheckDetailDiscountID;
+    public $CheckDetailDiscountNotes;
     public $G_Points;
     public $G_CustID;
     public $GST;
@@ -79,5 +87,7 @@ class CheckTotals_V extends BaseRecord {
     public $CadetQty;
     public $CheckDetailSubtotal;
     public $CheckDetailTax;
+    public $CheckDetailGST;
+    public $CheckDetailPST;
     public $CheckDetailTotal;
 }

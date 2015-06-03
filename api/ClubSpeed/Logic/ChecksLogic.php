@@ -104,7 +104,13 @@ class ChecksLogic extends BaseLogic {
         // also include void message?
         $check = $this->interface->get($checkId);
         $check = $check[0];
-        $check->Notes .= (empty($check->Notes) ? '' : ' :: ' ) . 'Voided from API at ' . Convert::getDate();
+        $voidNotes = 'Voided from API at ' . Convert::getDate();
+
+        $notes = $check->Notes;
+        if (!empty($notes) && is_string($notes))
+            $notes = trim($notes);
+        $check->Notes = (empty($notes) ? $voidNotes : ($notes . ' :: ' . $voidNotes));
+
         $check->CheckStatus = Enums::CHECK_STATUS_CLOSED;
         $this->interface->update($check);
         $checkDetails = $this->db->checkDetails->match(array(
@@ -112,6 +118,7 @@ class ChecksLogic extends BaseLogic {
         ));
         foreach($checkDetails as $checkDetail) {
             $checkDetail->Status = Enums::CHECK_DETAIL_STATUS_HAS_VOIDED;
+            $checkDetail->VoidNotes = (empty($checkDetail->VoidNotes) ? '' : ' :: ' ) . $voidNotes;
             $this->db->checkDetails->update($checkDetail);
         }
         // // what to do with any existing payments? anything? prevent voiding check if they exist? void the payments?

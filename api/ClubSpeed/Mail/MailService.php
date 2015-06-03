@@ -1,6 +1,10 @@
 <?php
 
 namespace ClubSpeed\Mail;
+use ClubSpeed\Database\Helpers\UnitOfWork;
+use ClubSpeed\Utility\Arrays;
+use ClubSpeed\Utility\Convert;
+use ClubSpeed\Utility\Types;
 
 class MailService {
 
@@ -13,9 +17,8 @@ class MailService {
 
     private function __construct() {} // prevent creation of "static" class
 
-    public static function initialize(&$logic, $interfaceName) {
+    public static function initialize(&$logic) {
         self::$logic = $logic;
-        self::$interfaceName = $interfaceName;
         self::$ready = false;
     }
 
@@ -23,24 +26,50 @@ class MailService {
         return new MailBuilder(); // serve the builder for external use
     }
 
-    private static function load() {
-        // consider making this lazy loading so it does not get fired off on each call
-        self::$settings = self::$logic->helpers->getControlPanelSettings(
-            "MainEngine",
-            array(
-                  "SMTPServer"
-                , "SMTPServerAuthenticationPassword"
-                , "SMTPServerAuthenticationUserName"
-                , "SMTPServerPort"
-                , "SMTPServerUseAuthentiation"
-                , "SMTPServerUseSSL"
-            )
+    private static function getSetting($name) {
+        $uow = UnitOfWork::build()
+            ->action('all')
+            ->where(array(
+                  'TerminalName' => 'MainEngine'
+                , 'SettingName'  => $name
+            ));
+        self::$logic->controlPanel->uow($uow);
+        if (empty($uow->data))
+            return null; // setting does not exist in control panel - just use the default according to PHP
+        $data = Arrays::first($uow->data);
+        $value = $data->SettingValue; // do we want to is_null and check for DefaultValue as well?
+        if (!empty($data->DataType)) {
+            $type = null;
+            if (is_numeric($data->DataType) || $data->DataType === 'email') // strings will contain a number, signifying the max length
+                $type = Types::$string;
+            else
+                $type = Types::byName($data->DataType);
+            $value = Convert::convert($value, $type);
+        }
+        return $value;
+    }
+
+    private static function getSettings() {
+        $settings = array(
+              'SMTPServer'                       => self::getSetting('SMTPServer')                       ?: '127.0.0.1'
+            , 'SMTPServerAuthenticationPassword' => self::getSetting('SMTPServerAuthenticationPassword') ?: ''
+            , 'SMTPServerAuthenticationUserName' => self::getSetting('SMTPServerAuthenticationUserName') ?: ''
+            , 'SMTPServerPort'                   => self::getSetting('SMTPServerPort')                   ?: '25'
+            , 'SMTPServerUseAuthentiation'       => self::getSetting('SMTPServerUseAuthentiation')       ?: false
+            , 'SMTPServerUseSSL'                 => self::getSetting('SMTPServerUseSSL')                 ?: false
         );
-        if (!isset(self::$settings['SMTPServerPort']))
-            self::$settings['SMTPServerPort'] = "25";
+        return $settings;
+    }
+
+    private static function load() {
+        $settings = self::getSettings();
         $interface = __NAMESPACE__ . '\\' . ucfirst(self::$interfaceName) . 'Mailer';
-        self::$interface = new $interface(self::$settings);
+        self::$interface = new $interface($settings);
         self::$ready = true;
+    }
+
+    public static function useInterface($interfaceName) {
+        self::$interfaceName = $interfaceName;
     }
 
     public static function send(MailBuilder $mail) {

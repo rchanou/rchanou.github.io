@@ -116,7 +116,6 @@ class CheckDetailsLogic extends BaseLogic {
             $checkDetails->G_Points = $product->G_Points; // leave G_Points as null as well
             if (!is_null($checkDetails->G_Points) && $checkDetails->G_Points > 0)
                 $checkDetails->G_CustID = $check->CustID;
-
             return $checkDetails;
         });
     }

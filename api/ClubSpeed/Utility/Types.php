@@ -44,11 +44,13 @@ class Types {
             case "float":
             case "money":
             case "numeric":
+            case "numericp":
                 return Types::$double;
             case "ntext":
             case "varchar":
             case "nvarchar":
             case "string":
+            case "uniqueidentifier":
                 return Types::$string;
             case "null":
                 return Types::$null;

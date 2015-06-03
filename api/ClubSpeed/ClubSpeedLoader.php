@@ -36,10 +36,13 @@ Authenticate::initialize($logic); // ~ 0ms
 LogService::initialize($logic->logs); // ~ 2-3ms
 
 // inject the LogicService into the static MailService class, and name the desired MailInterface (lazy-loading)
-MailService::initialize($logic, 'Swift'); // ~ 1ms
+MailService::initialize($logic); // ~ 1ms
+MailService::useInterface('Swift');
 
 // inject the LogicService into the static ProductHandlerService class
 ProductHandlerService::initialize($logic);
+
+// DefinitionService::initialize();
 
 // top to bottom, ClubSpeedLoader takes ~16-20ms
 
