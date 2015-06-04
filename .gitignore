@@ -51,3 +51,4 @@ facebook/config.js
 facebook/node_modules
 
 facebook/db.json
+/event-builder/node_modules/
