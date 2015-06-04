@@ -6,7 +6,7 @@
 
 $path_to_registration_config_directory = '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'cs-registration' . DIRECTORY_SEPARATOR . 'laravel' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
 
-$settingNames = array('defaultCountry', 'emailText', 'showTextingWaiver', 'textingWaiver');
+$settingNames = array('defaultCountry', 'emailText', 'showTextingWaiver', 'textingWaiver', 'minorSignatureWithParent');
 
 
 // See if we need to rename config.php
@@ -51,7 +51,8 @@ function insertRegistrationSetting($SettingName, $SettingValue, $DataType = null
     'textingWaiver' => 'This is the text of the texting waiver.',
     'cfgRegAllowMinorToSign' => 'If checked, the minor may sign. If not, just clicking "Accept" will successfully end the registration.',
     'CfgRegDisblEmlForMinr' => 'If checked, does not allow minors to enter an e-mail address.',
-    'CfgRegUseMsign' => 'If checked, signatures are enabled.'
+    'CfgRegUseMsign' => 'If checked, signatures are enabled.',
+    'minorSignatureWithParent' => 'If checked, minors must sign along with a parent or guardian.'
   );
 
   if (isset($settingDescriptions[$SettingName])){
@@ -150,7 +151,8 @@ $cfgRegSettingNames = array(
   'CfgRegPhoneReq' => '0',
   'CfgRegEmailShow' => '1',
   'CfgRegEmailReq' => '0',
-  'cfgRegShowBeenHereBefr' => '0'
+  'cfgRegShowBeenHereBefr' => '0',
+  'CfgRegValidateGrp' => '0'
 );
 
 if(!isset($cfgEntry) || count($cfgEntry) === 0){
