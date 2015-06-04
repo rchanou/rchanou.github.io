@@ -1,14 +1,45 @@
 var restify  = require('restify')
   , receipt  = require('./lib/receipt.js')
-  , gridding = require('./lib/gridding.js');
+  , gridding = require('./lib/gridding.js')
+  , creditCard = require('./lib/creditCard.js');
 
 function respondGrid(req, res, next) {
 	var result = gridding.create(req.params.gridType, req.body.participants, req.body.options);
 	res.send(result);
 }
 
+function respondCreditCard(req, res, next) {
+
+	switch(req.params.action) {
+		case 'charge':
+			creditCard.charge(req.body, function(err, result) {
+				//console.log('\n\nCHARGE Transaction Result', req.body, err, result);
+				err ? res.send(err) : res.send({ result: result });
+			});
+			break;
+
+		case 'refund':
+			creditCard.refund(req.body, function(err, result) {
+				//console.log('\n\nREFUND Transaction Result', req.body, err, result);
+				err ? res.send(err) : res.send({ result: result });
+			});
+			break;
+
+		case 'void':
+			creditCard.void(req.body, function(err, result) {
+				//console.log('\n\nVOID Transaction Result', req.body, err, result);
+				err ? res.send(err) : res.send({ result: result });
+			});
+			break;
+
+		default:
+			next(new Error('Action not supported: ' + req.params.action));
+			break;
+	}
+}
+
 function respondReceipt(req, res, next) {
-    var body = req.body;
+	var body = req.body;
 	var result = receipt.create(req.params.receiptType, body);
 	res.send(result);
 }
@@ -24,6 +55,7 @@ server.use(restify.CORS());
 
 server.post('/grid/:gridType', respondGrid);
 server.post('/receipt/:receiptType', respondReceipt);
+server.post('/creditCard/:action', respondCreditCard);
 
 server.listen(8000, function() {
   console.log('%s listening at %s', server.name, server.url);
