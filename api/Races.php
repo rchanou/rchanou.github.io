@@ -908,16 +908,43 @@ EOS;
             $tsql_params[] = &$end_birthdate;
         }
 
-        $tsql = <<<EOD
-        SELECT DISTINCT TOP ($limit) MAX(rd.CustID) AS CustID, MAX(c.FName) AS FirstName, MAX(c.LName) AS LastName, MAX(c.RacerName) AS RacerName, MAX(c.RPM) AS rpm, MIN(rd.LTime) AS LTime, MAX(rd.TimeStamp) AS TimeStamp, MAX(rd.LapNum) AS LapNum, MAX(hm.SpeedLevel) AS SpeedLevel, MAX(hm.TrackNo) AS TrackNo, MIN(t.Description) AS TrackName, MAX(c.TotalRaces) AS TotalRaces
-        FROM         RacingData AS rd LEFT OUTER JOIN
-                              Customers AS c ON c.CustID = rd.CustID LEFT OUTER JOIN Tracks t ON TrackNo = t.TrackNo LEFT OUTER JOIN
-                              HeatMain AS hm ON hm.HeatNo = rd.HeatNo 
-        WHERE  (rd.LTime <> 0) AND (rd.IsBadTime <> 'true') $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate
-        GROUP BY c.RacerName
-        ORDER BY LTime
-EOD;
-
+        $tsql = <<<EOS
+;WITH racing_data_cte AS (
+    SELECT
+        rd.CustID
+        , rd.HeatNo
+        , rd.LTime
+        , c.FName AS FirstName
+        , c.LName AS LastName
+        , c.RacerName AS RacerName
+        , c.RPM AS rpm
+        , rd.TimeStamp
+        , rd.LapNum
+        , hm.SpeedLevel
+        , hm.TrackNo
+        , t.Description AS TrackName
+        , c.TotalRaces
+        , ROW_NUMBER() OVER (
+            PARTITION BY rd.CustID
+            ORDER BY rd.LTime
+        ) AS PersonalRank
+    FROM dbo.RacingData rd
+    INNER JOIN dbo.Customers c
+        ON rd.CustID = c.CustID
+    INNER JOIN dbo.HeatMain hm
+        ON hm.HeatNo = rd.HeatNo
+    INNER JOIN dbo.Tracks t
+        ON t.TrackNo = hm.TrackNo
+    WHERE
+            rd.LTime <> 0
+        AND rd.IsBadTime = 0
+        $tsql_range $tsql_track $tsql_gender $tsql_weight $tsql_speed_level $tsql_exclude_employees $tsql_birthdate
+)
+SELECT TOP($limit) *
+FROM racing_data_cte rdc
+WHERE rdc.PersonalRank = 1
+ORDER BY rdc.LTime
+EOS;
         $rows = $this->run_query($tsql, $tsql_params);
         $output = array();
         foreach($rows as $row) {
