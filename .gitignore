@@ -49,6 +49,8 @@ cs-registration/www/web.config.bak
 cs-mobilewebapp/js/config.js
 facebook/config.js
 facebook/node_modules
-
 facebook/db.json
+
 /event-builder/node_modules/
+/facebook/node_modules/
+/speed-text/node_modules/
