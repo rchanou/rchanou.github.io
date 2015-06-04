@@ -10,6 +10,7 @@ var buildFullLine = utils.receipts.buildFullLine;
 var log           = utils.logging.log;
 log.debug.on      = config.receipts.useDebugLogging;
 var PAY_STATUS    = CONSTANTS.PAY_STATUS;
+var CHECK_TYPE    = CONSTANTS.CHECK_TYPE;
 
 /*
 body example
@@ -301,7 +302,8 @@ var defaults = {
         , "strVoided"    : "VOIDED"
     },
     "options": {
-        "useESign": false
+        "useESign": false,
+        "printGratuityLine": "none"
     },
     "terminalName": ""
 };
@@ -346,13 +348,14 @@ CreditCardReceiptTemplater.prototype.create = function(body) {
     output += '   ' + (resources.strRefNo || '') + ' ' + (payment.referenceNumber || '') + '\n';
     output += '   ' + (resources.strTroutD || '') + ' ' + (payment.troutD || '') + '\n';
 
-    if (check && check.gratuity === 0) {
+    if (check.gratuity == 0 && ((options.printGratuityLine == 'eventonly' && check.checkType == CHECK_TYPE.REGULAR) || options.printGratuityLine == 'all')) {
         output += '\n';
         output += rpad(resources.strGratuity2 + ' ', 30) + lpad('____________', 12) + '\n';
         output += '\n';
         output += '\n';
         output += rpad(resources.strTotal2 + ' ', 30) + lpad('____________', 12) + '\n';
     }
+
     output += '\n';
     output += '\n';
     output += resources.strIAgree + '\n';

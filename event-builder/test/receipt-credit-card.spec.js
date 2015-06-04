@@ -71,7 +71,7 @@ describe('Credit Card Report Template', function() {
                 "strReceiptNo": "Receipt Number"
             }
         };
-        var expected = "\n\nCustomer                               N/A\nReceipt Number 12345      4/19/2015 7:00PM\n                         4/20/2015 10:00AM\n------------------------------------------\nCredit Card Payment                       \n    \n   Auth No. # \n   Ref No. # \n   TroutD. # \n\nGratuity                      ____________\n\n\nTotal                         ____________\n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                          \n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCustomer                               N/A\nReceipt Number 12345      4/19/2015 7:00PM\n                         4/20/2015 10:00AM\n------------------------------------------\nCredit Card Payment                       \n    \n   Auth No. # \n   Ref No. # \n   TroutD. # \n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                          \n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -97,6 +97,80 @@ describe('Credit Card Report Template', function() {
             }
         };
         var expected = "\n\nCustomer                               N/A\nReceipt Number N/A                        \n------------------------------------------\nCredit Card Payment                 $10.45\n   VISA 1234\n   Auth No. # AUTH123\n   Ref No. # REF123\n   TroutD. # TROUT123\n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                JimBobInc.\n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
+        compare(input, expected);
+    });
+
+    it('should ignore gratuity lines by default', function() {
+        var input = {
+            "data": {
+                "check": {
+                    "gratuity": 0
+                }
+            }
+        };
+        var expected = "\n\nCustomer                               N/A\nReceipt Number N/A                        \n------------------------------------------\nCredit Card Payment                       \n    \n   Auth No. # \n   Ref No. # \n   TroutD. # \n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                          \n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
+        compare(input, expected);
+    });
+
+    it('should ignore gratuity lines when check gratuity is non-zero', function() {
+        var input = {
+            "data": {
+                "check": {
+                    "gratuity": 1
+                }
+            },
+            "options": {
+                "printGratuityLine": "all"
+            }
+        };
+        var expected = "\n\nCustomer                               N/A\nReceipt Number N/A                        \n------------------------------------------\nCredit Card Payment                       \n    \n   Auth No. # \n   Ref No. # \n   TroutD. # \n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                          \n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
+        compare(input, expected);
+    });
+
+    it('should include gratuity lines', function() {
+        var input = {
+            "data": {
+                "check": {
+                    "gratuity": 0
+                }
+            },
+            "options": {
+                "printGratuityLine": "all"
+            }
+        };
+        var expected = "\n\nCustomer                               N/A\nReceipt Number N/A                        \n------------------------------------------\nCredit Card Payment                       \n    \n   Auth No. # \n   Ref No. # \n   TroutD. # \n\nGratuity                      ____________\n\n\nTotal                         ____________\n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                          \n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
+        compare(input, expected);
+    });
+
+    it('should include gratuity lines with eventonly and event check', function() {
+        var input = {
+            "data": {
+                "check": {
+                    "gratuity": 0,
+                    "checkType": 1
+                }
+            },
+            "options": {
+                "printGratuityLine": "eventonly"
+            }
+        };
+        var expected = "\n\nCustomer                               N/A\nReceipt Number N/A                        \n------------------------------------------\nCredit Card Payment                       \n    \n   Auth No. # \n   Ref No. # \n   TroutD. # \n\nGratuity                      ____________\n\n\nTotal                         ____________\n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                          \n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
+        compare(input, expected);
+    });
+
+    it('should ignore gratuity lines with eventonly and regular check', function() {
+        var input = {
+            "data": {
+                "check": {
+                    "gratuity": 0,
+                    "checkType": 0
+                }
+            },
+            "options": {
+                "printGratuityLine": "eventonly"
+            }
+        };
+        var expected = "\n\nCustomer                               N/A\nReceipt Number N/A                        \n------------------------------------------\nCredit Card Payment                       \n    \n   Auth No. # \n   Ref No. # \n   TroutD. # \n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n\n\n\nSign here: X______________________________\n                                          \n\nTerminal:                                 \n\n\n\n\n\n\n\n\u001dV\u0001";
         compare(input, expected);
     });
 
@@ -272,7 +346,8 @@ describe('Credit Card Report Template', function() {
                 , "strVoided"    : "VOIDED"
             },
             "options": {
-                "useESign": true
+                "useESign": true,
+                "printGratuityLine": "all"
             }
         };
         expected = "\n\n             ### VOIDED ###\n\nCustomer                        Chris Webb\nReceipt Number 6           2015/3/26 17:21\n------------------------------------------\nCredit Card Payment                ¥10.00\n   Visa 2342\n   Auth No. # 911\n   Ref No. # 123refnumb\n   TroutD. # TroudD\n\nGratuity                      ____________\n\n\nTotal                         ____________\n\n\nI agree to pay the above amount according\nto the card issuer agreement.\n{{SIGNATURE_SPLIT}}Sign here: X______________________________\n                               AccountName\n\nTerminal:                                 \n\n             ### VOIDED ###\n\n\n\n\n\n\n\n\u001dV\u0001";

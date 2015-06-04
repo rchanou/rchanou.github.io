@@ -57,6 +57,13 @@ Note that whenever a resource contains a string template variable (such as `{0}`
 			* Default -> `false`
 			* If `true`, use ESignature pad and print the signature image
 			* If `false`, print extra space for the customer to sign physically
+		* `PrintGratuityLine`
+			* Default -> `"none"`
+			* If `"none`" then never print the gratuity line, if `"eventonly"` then only print the gratuity lines for event checks where the gratuity is still `0`, if `"all"` then print the gratuity lines for all checks where the gratuity is still `0`
+			* Options
+				* `"none"`
+				* `"eventonly"`
+				* `"all"`
 
 ### Entitle Item
 * **Resource Names**
