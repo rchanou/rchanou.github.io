@@ -54,7 +54,7 @@
                 <h4 class="modal-title" id="myModalLabel" style="color: black">{{$strings['str_signHere']}}</h4>
             </div>
             <div class="modal-body">
-                @if(Config::get('config.minorSignatureWithParent') && Session::get('isMinor') == "true")
+                @if( (isset($settings['minorSignatureWithParent']) ? $settings['minorSignatureWithParent'] : Config::get('config.minorSignatureWithParent')) && Session::get('isMinor') == "true")
                 <div style="position: relative; width: 0; height: 0">
                     <div style="position: absolute; top: 40px; left: 10px; color: black; font-size: 18px; z-index: 999">
                         Parent/Guardian
@@ -86,7 +86,7 @@
 </div>
 <!-- END SIGNING POP-UP -->
 
-@if(Config::get('config.minorSignatureWithParent') && Session::get('isMinor') == "true")
+@if((isset($settings['minorSignatureWithParent']) ? $settings['minorSignatureWithParent'] : Config::get('config.minorSignatureWithParent')) && Session::get('isMinor') == "true")
 <input type="hidden" name="minorSignatureWithParent" id="minorSignatureWithParent" value="true">
 @else
 <input type="hidden" name="minorSignatureWithParent" id="minorSignatureWithParent" value="false">

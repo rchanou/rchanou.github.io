@@ -207,6 +207,18 @@ Registrations Settings
                       </div>
                   @endif
 
+                  @if (isset($registrationSettings['CfgRegValidateGrp']))
+                      <div class="form-group">
+                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Event Registration</label>
+                          <div class="col-sm-8 col-md-8 col-lg-8">
+                              <input type="checkbox" id="CfgRegValidateGrp" name="CfgRegValidateGrp" {{$isChecked['CfgRegValidateGrp']}}>
+                      <span class="help-block text-left">
+                        If checked, users may select a specific event that they are registering for.
+                      </span>
+                          </div>
+                      </div>
+                  @endif
+
                     <div class="form-group">
                       <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Signature(s)</label>
                       <div class="col-sm-8 col-md-8 col-lg-8">
@@ -246,6 +258,18 @@ Registrations Settings
                         </span>
                       </div>
                     </div>
+
+                  @if (isset($registrationSettings['minorSignatureWithParent']))
+                      <div class="form-group">
+                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Minor Signature with Parent</label>
+                          <div class="col-sm-8 col-md-8 col-lg-8">
+                              <input type="checkbox" id="minorSignatureWithParent" name="minorSignatureWithParent" {{$isChecked['minorSignatureWithParent']}}>
+                          <span class="help-block text-left">
+                            If checked, minors (if allowed to sign) must sign along with a parent or guardian.
+                          </span>
+                          </div>
+                      </div>
+                  @endif
 
                     <div class="form-group">
                       <label class="col-sm-4 col-md-4 col-lg-4 control-label">Disable E-mail Field for Minors</label>

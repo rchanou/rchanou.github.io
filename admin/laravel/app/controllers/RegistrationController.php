@@ -142,7 +142,9 @@ class RegistrationController extends BaseController
           'CfgRegUseMsign',
           'showTextingWaiver',
           'zipValidated',
-          'cfgRegShowBeenHereBefr'
+          'cfgRegShowBeenHereBefr',
+          'CfgRegValidateGrp',
+          'minorSignatureWithParent'
         );
 
         $newRegistrationSettings = array();
