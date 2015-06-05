@@ -355,6 +355,41 @@ EOD;
 
 		return $data;
 	}
+	
+		/**
+	 * EVENT SALES REP REPORT
+	 *
+	 * Shows the checks by each sales rep.
+	 *
+	 */
+	public function event_rep_sales() {
+		if (!\ClubSpeed\Security\Authenticate::privateAccess())
+				throw new RestException(401, "Invalid authorization!");
+		
+		$opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+		$tsql = <<<EOD
+;WITH CTE AS (
+       SELECT
+               p.CheckID
+               , SUM(p.PayTax) PayTax
+       FROM dbo.Payment p
+       WHERE p.PayStatus <> 2
+       GROUP BY p.CheckID
+)
+SELECT u.UserName, u.FName AS FirstName, u.LName AS LastName, er.Subject, er.Description, er.StartTime, er.Notes, c.CheckID, c.CustID, c.CheckName, c.Notes as CheckNotes, c.Gratuity, c.Fee, cte.PayTax AS Tax, c.CheckTotal, c.OpenedDate, c.ClosedDate FROM EventReservations er
+LEFT JOIN EventReservationLink erl ON er.ID = erl.ReservationID
+LEFT JOIN Checks c ON erl.CheckID = c.CheckID
+INNER JOIN CTE cte
+       ON c.CheckID = cte.CheckID
+LEFT JOIN Users u ON u.UserID = er.RepID
+WHERE {$opened_or_closed_date} BETWEEN :start AND :end
+ORDER BY {$opened_or_closed_date}
+EOD;
+		$params = array(&$start, &$end);
+    $data = $this->run_query($tsql, $this->getDateRange());
+
+		return $data;
+	}
 
     /**
      * @url GET /sales/eurekas

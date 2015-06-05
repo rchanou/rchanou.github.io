@@ -63,6 +63,22 @@ Reports
                             <em>Summary of check totals grouped by Broker/Affiliate Code</em>
                     </div>
                   </div>
+                  <div class="row">
+                  	<!--<div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                        <a href="{{URL::to('reports/accounting')}}">
+                            <i class="fa fa-dollar fa-4x"></i><p/>
+                            <strong>Accounting Export</strong><p/>
+                        </a>
+                        <em>View and export journal entries for various accounting software</em>
+                    </div>-->
+                    <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                        <a href="{{URL::to('reports/event-rep-sales')}}">
+                            <i class="fa fa-dollar fa-4x"></i><p/>
+                            <strong>Event Rep Sales</strong><p/>
+                        </a>
+                        <em>View and export event sales by representative</em>
+                    </div>
+                  </div>
               </div>
             </div>
 

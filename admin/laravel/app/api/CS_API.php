@@ -350,6 +350,16 @@ class CS_API
 
         return self::getJSON("reports/brokers_summary", $params);
     }
+		
+		public static function getReport_Accounting($start = null, $end = null)
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end   != null) { $params['end']   = $end; }
+
+        return self::getJSON("reports/accounting", $params);
+    }
 
     public static function getReport_DetailedSales($start = null, $end = null, $show_by_opened_date = 'false')
     {
@@ -360,6 +370,17 @@ class CS_API
         $params['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
 
         return self::getJSON("reports/sales", $params);
+    }
+		
+		public static function getReport_EventRepSales($start = null, $end = null, $show_by_opened_date = 'false')
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+        $params['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
+
+        return self::getJSON("reports/event_rep_sales", $params);
     }
 
     public static function getReport_SummaryPayments($start = null, $end = null)
@@ -764,6 +785,26 @@ class CS_API
 
     }
 
+    public static function getCurrentCultureForMobile()
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/settings/get.json?group=MobileApp&setting=currentCulture&key=' . self::$privateKey;
+
+        $result = self::call($url);
+        $result = $result['response'];
+
+        if ($result !== null && isset($result->body->settings->currentCulture))
+        {
+            return $result->body->settings->currentCulture->SettingValue;
+        }
+        else
+        {
+            return 'en-US';
+        }
+
+    }
+
     public static function updateGiftCardBalances($params)
     {
         self::initialize();
@@ -833,5 +874,11 @@ class CS_API
         self::initialize();
         $result = self::getJSON("countries.json");
         return $result;
+    }
+
+    public static function getCustomerStatus()
+    {
+        self::initialize();
+        return self::getJSON('customerstatus');
     }
 }

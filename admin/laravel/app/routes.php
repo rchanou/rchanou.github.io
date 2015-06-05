@@ -63,6 +63,7 @@ Route::group(array('before' => 'auth'), function()
 	/* iPad Registration */
 	Route::get('registration/settings', 'RegistrationController@settings');
 	Route::post('registration/settings/update', 'RegistrationController@updateSettings');
+	Route::get('registration/create', 'RegistrationController@create');
     Route::get('registration/translations', 'RegistrationController@translations');
     Route::post('registration/translations/update', 'RegistrationController@updateTranslations');
     Route::get('registration/translations/update/culture/{cultureKey}', 'RegistrationController@updateCulture');
@@ -83,10 +84,18 @@ Route::group(array('before' => 'auth'), function()
 	Route::get('reports/broker-codes', 'BrokerCodesReportController@index');
 	Route::post('reports/broker-codes', 'BrokerCodesReportController@index');
 	Route::get('reports/broker-codes/export/csv', 'BrokerCodesReportController@exportToCSV');
+	
+	Route::get('reports/accounting', 'AccountingReportController@index');
+	Route::post('reports/accounting', 'AccountingReportController@index');
+	Route::get('reports/accounting/export/csv', 'AccountingReportController@exportToCSV');
 
 	Route::get('reports/detailed-sales', 'DetailedSalesReportController@index');
 	Route::post('reports/detailed-sales', 'DetailedSalesReportController@index');
 	Route::get('reports/detailed-sales/export/csv', 'DetailedSalesReportController@exportToCSV');
+	
+	Route::get('reports/event-rep-sales', 'EventRepSalesReportController@index');
+	Route::post('reports/event-rep-sales', 'EventRepSalesReportController@index');
+	Route::get('reports/event-rep-sales/export/csv', 'EventRepSalesReportController@exportToCSV');
 
 	Route::get('reports/eurekas-payments', 'EurekasPaymentsReportController@index');
 	Route::post('reports/eurekas-payments', 'EurekasPaymentsReportController@index');
