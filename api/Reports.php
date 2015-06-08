@@ -241,7 +241,7 @@ EOS;
             throw new RestException(401, "Invalid authorization!");
 
         $sql = <<<EOS
-EXEC GetAccoutingReport :start, :end
+EXEC GetAccountingExport :start, :end
 EOS;
         $params = array(&$start, &$end);
 				$data = $this->run_query($sql, $this->getDateRange());
