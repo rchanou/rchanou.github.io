@@ -190,12 +190,15 @@ class Races
         if (!\ClubSpeed\Security\Authenticate::publicAccess())
             throw new RestException(401, "Invalid authorization!");
         $track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : null;
+        $limit = (isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit'])) ? (int)$_REQUEST['limit'] : 10; // default to 10, the following race queries are quite heavy.
+        if ($limit > 50)
+            throw new RestException(412, 'Cannot return more than 50 upcoming races!');
         $return = array('races' => array());
 
         // TODO Filter by Speed Level
 
         $sql = <<<EOS
-SELECT *
+SELECT TOP ($limit) *
 FROM HeatMain
 WHERE
     {{track_clause}}
