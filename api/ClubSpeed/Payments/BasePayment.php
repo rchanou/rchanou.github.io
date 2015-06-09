@@ -297,6 +297,12 @@ class BasePayment {
     public function completePurchase($params = array()) {
         // this is sort of its own beast -- do we want to use the wrapper? or a secondary wrapper?
         // do we assume that $params are already okay to send on to completePurchase (?)
+
+        $this->init($params);
+
+        // we need to have the transaction reference before sending
+        
+
         $response = $this->gateway->completePurchase($params)->send();
         $checks = $this->logic->checks->match(array('Notes' => 'Transaction Reference: ' . $response->getTransactionReference())); // find the check with the notes that match the transactionReference
         $check = $checks[0];
@@ -315,6 +321,10 @@ class BasePayment {
         // the customer's credit card has been processed at this point
         // or the credit card does not need to be processed (?) (as in, gift cards provided > than total required)
 
+        // better way to collect the payment amount? this doesn't seem reliable.
+        // need to use dbo.TransactionReferences moving forward
+        $responseData = $response->getData();
+        $amount = $responseData['amount'];
         $params['transactionReference'] = $response ? $response->getTransactionReference() : Enums::DB_NULL;
         $now = Convert::getDate();
 
@@ -334,7 +344,8 @@ class BasePayment {
                 $payment->CustID                = $checkTotal->CustID;
                 $payment->CheckID               = $checkTotal->CheckID;
                 $payment->ExtCardType           = $params['name'];
-                $payment->PayAmount             = $checkTotal->CheckRemainingTotal; // we need this information in finalizeCheck
+                // $payment->PayAmount             = $amount; // $amount comes from the response, other option would be $checkTotal->CheckRemainingTotal, which is what was sent with the request
+                $payment->PayAmount             = $checkTotal->CheckRemainingTotal;
                 $payment->PayDate               = $now;
                 $payment->PayStatus             = Enums::PAY_STATUS_PAID;
                 $payment->PayTax                = $checkTotal->CheckRemainingTax;
@@ -349,6 +360,7 @@ class BasePayment {
                 Log::info($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId['PayID'], Enums::NSP_BOOKING);
             }
             else {
+                Log::warn($this->logPrefix . "Attempted to apply payment, but there was nothing left to be paid!", Enums::NSP_BOOKING); // todo: extend error properly
                 // is this an error? the check supposedly doesn't have anything left to be paid, but we are still trying to apply a payment
             }
         }
@@ -368,12 +380,15 @@ class BasePayment {
         // update the check
         try {
             $checkStatus = Enums::CHECK_STATUS_CLOSED;
+            $closedDate = Convert::getDate();
             $checkDetails = $this->logic->checkDetails->find(
                 'CheckID $eq ' . $checkId
             );
             foreach ($checkDetails as $checkDetail) {
-                if (!is_null($checkDetail->R_Points))
+                if (!is_null($checkDetail->R_Points)) {
                     $checkStatus = Enums::CHECK_STATUS_OPEN; // if any line items have R_Points as non-null, then we have to leave the check open for the front end (!!!)
+                    $closedDate = Enums::DB_NULL;
+                }
                 $this->logic->checkdetails->update($checkDetail->CheckDetailID, array(
                     'Status' => Enums::CHECK_DETAIL_STATUS_CANNOT_DELETED
                 ));
@@ -382,7 +397,7 @@ class BasePayment {
             $check = $check[0];
             $check->CheckStatus = $checkStatus;
             // $check->Notes = (isset($params['transactionReference']) ? 'Transaction Reference #' . $params['transactionReference'] : 'No Transaction Reference');
-            $check->ClosedDate = Convert::getDate();
+            $check->ClosedDate = $closedDate;
             $this->logic->checks->update($check->CheckID, $check);
             Log::info($this->logPrefix . 'Closed Check', Enums::NSP_BOOKING);
         }
@@ -567,6 +582,12 @@ class BasePayment {
     public function handleRedirect($check, $response) {
         // TODO!!!!
         Log::info("inside handle redirect!!!", Enums::NSP_BOOKING);
+
+        // we need to store the majority of this information by transaction ... id? reference?
+        // one of the two. so we can look it up again later, once the post comes back from the booking front end.
+
+        $data = $response->getData();
+
         return array(
             'redirect' => array(
                 'url'       => $response->getRedirectUrl(),
