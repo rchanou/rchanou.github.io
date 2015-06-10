@@ -8,6 +8,12 @@ Accounting Export
     @parent
     {{ HTML::style('css/jquery.ui.ie.css') }}
     {{ HTML::style('css/jquery-ui.css') }}
+    <style type="text/css">
+		.popover-content {
+		height: 200px;
+		overflow-y: scroll;
+		}
+		</style>
 @stop
 
 @section('pageHeader')
@@ -41,6 +47,21 @@ Accounting Export
                         <tr>
                             <th>Start Date</th>
                             <th>End Date</th>
+                            <th>Replacements <!-- http://jsfiddle.net/tv5Vu/ -->
+                            	<a href="#" data-placement="left" data-toggle="popover" title="<strong>Instructions</strong>" data-html="true" data-content="##CASH_PAYMENT##=
+##COMPLIMENTARY_PAYMENT##=
+##GIFT_CARD_&_FAST_CASH_PAYMENT##=
+##_EXTERNAL_PAYMENT##=
+##ITEM_DISCOUNT##=
+##TAXES##=
+##PREPAYMENTS##=
+##PREPAYMENTS_USED##=
+##EXPENSES##=
+##GIFTCARDS##=
+##GRATUITY##=
+##FEE##=
+##CHECK_DISCOUNT##=">Help</a>
+                            </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -50,6 +71,22 @@ Accounting Export
                             </td>
                             <td>
                                 <input type="date" name="end" id="end" value="{{$end}}">
+                            </td>
+                            <td>
+                                <textarea name="replacement_mapping">##CASH_PAYMENT##=
+##COMPLIMENTARY_PAYMENT##=
+##GIFT_CARD_&_FAST_CASH_PAYMENT##=
+##_EXTERNAL_PAYMENT##=
+##ITEM_DISCOUNT##=
+##TAXES##=
+##PREPAYMENTS##=
+##PREPAYMENTS_USED##=
+##EXPENSES##=
+##GIFTCARDS##=
+##GRATUITY##=
+##FEE##=
+##CHECK_DISCOUNT##=
+                                </textarea>
                             </td>
                         </tr>
                       </tbody>
@@ -78,11 +115,13 @@ Accounting Export
                 @if(isset($start) && isset($end) && $start != "" && $end != "")
                     <h5>Accounting Export - From {{$start}} to {{$end}}</h5>
                 @elseif (isset($start) && $start != "")
-                    <h5>Broker/Affiliate Codes - {{$start}}</h5>
+                    <h5>Accounting Export - {{$start}}</h5>
                 @else
-                    <h5>Broker/Affiliate Codes Report - Today</h5>
+                    <h5>Accounting Export - Today</h5>
                 @endif
                 <span class="icon pull-right" style="font-size: 12px; line-height: 12px;">
+                    <a href="{{URL::to('reports/accounting/export/sage')}}"><button type="button">Export to Sage50</button></a> 
+                    <a href="{{URL::to('reports/accounting/export/iif')}}"><button type="button">Export to Quickbooks</button></a> 
                     <a href="{{URL::to('reports/accounting/export/csv')}}"><button type="button">Export to CSV</button></a>
                 </span>
               </div>
@@ -108,6 +147,7 @@ Accounting Export
                                     @endforeach
                                     <tr>
                                         <td><strong>Grand Total</strong></td>
+                                        <td></td>
                                         <td><strong>{{$total_debits}}</strong></td>
                                         <td><strong>{{$total_credits}}</strong></td>
                                     </tr>

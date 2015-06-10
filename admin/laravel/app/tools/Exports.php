@@ -17,9 +17,28 @@ class Exports
     public static function toIIF($data, $filename)
     {
         self::initialize();
+
+				// Build the export file...
+				$export  = "!TRNS,TRNSID,TRNSTYPE,DATE,NUMB,ACCNT,CLASS,AMOUNT,DOCNUM,MEMO\r\n";
+				$export .= "!SPL,SPLID,TRNSTYPE,DATE,NUMB,ACCNT,CLASS,AMOUNT,DOCNUM,MEMO\r\n";
+				$export .= "!ENDTRNS,,,,,,,,,\r\n";
+
+				foreach($data['data'] as $key => $val) {
+					$sor    = ($key === 0) ? 'TRNS' : 'SPL';
+					$date   = date('m/d/Y', strtotime($data['options']['start']));
+					$class  = array_key_exists('Class', $val) ? $val['Class'] : '';
+					$amount = ($val['Debit'] == '.00' ? $val['Credit'] : $val['Debit']);
+					$docnum = str_replace('-', '', $data['options']['start']);
+
+					$export .= "{$sor},,GENERAL JOURNAL,{$date},,{$val['AccountNumber']},{$class},{$amount},{$docnum},{$val['Description']}\r\n";
+				};
 				
-				die(print_r($data));
-				
+				$export .= "ENDTRNS,,,,,,,,,\r\n";
+
+				// Send file for download...				
+				header("Content-disposition: attachment; filename={$filename}_{$data['options']['start']}-{$data['options']['end']}.iif");
+				header('Content-type: text/plain');
+				echo $export;
 		}
 		
 		public static function toSAGE($data, $filename)

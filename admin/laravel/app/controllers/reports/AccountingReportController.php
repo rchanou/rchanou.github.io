@@ -15,29 +15,61 @@ class AccountingReportController extends BaseController
     {
         $start = Input::get('start');
 				$end   = Input::get('end');
+				$replacement_mapping = Input::get('replacement_mapping');
 				
 				$start = empty($start) ? date('Y-m-d') : $start;
         $end   = empty($end)   ? date('Y-m-d') : $end;
+				$data  = CS_API::getReport_Accounting($start, $end);
 
-        $report = CS_API::getReport_Accounting($start, $end);
-
-        Session::put('mostRecentReport_Accounting', $report);
+        $report = array('options' => array('start' => $start, 'end' => $end), 'data' => $data);
 
 				// Format for view
 				$total_debits = $total_credits = 0;
-				//print_r($report);die();
-				foreach($report as $line) {
+				foreach($data as $line) {
 					//print_r($line);die();
 					$total_debits  += $line->Debit;
 					$total_credits += $line->Credit;
 				}
-				//echo $total_debits;
-				//echo $total_credits;
-				//die();
+				
+				// Convert to Array (easier to work with than object)
+				foreach($report['data'] as $key => $value) {
+					$report['data'][$key] = (array) $value;
+				}
+				
+				// Prepare replacements
+				/*$replacement_mapping = <<<EOD
+##CASH_PAYMENT##=555 Cash|test|hi
+##ITEM_DISCOUNT##=11000 Item Discount|ClassName	
+EOD;*/
+
+				$replacements = array();
+				foreach(preg_split('/$\R?^/m', $replacement_mapping) as $key => $val) {
+					$line = explode('=', $val, 2);
+					if(count($line) === 2) {
+						$replacements[trim($line[0])] = explode('|', trim($line[1]));
+					}
+				}
+				
+				// Perform replacement
+				foreach($report['data'] as $key => $val) {
+					if(array_key_exists($val['AccountNumber'], $replacements)) {
+						$report['data'][$key]['AccountNumber'] = $replacements[$val['AccountNumber']][0];
+						for($i = 1; $i < count($replacements[$val['AccountNumber']]); $i++) {
+							if(strpos($replacements[$val['AccountNumber']][$i], '=') !== false) { // Contains an equals sign, specifying a key name
+								$line = explode('=', $replacements[$val['AccountNumber']][$i], 2);
+								$report['data'][$key][$line[0]] = $line[1];
+							} else { // Give a default key name
+								$report['data'][$key]['Option_' . $i] = $replacements[$val['AccountNumber']][$i];
+							}
+						}
+					}
+				}
+				
+				Session::put('mostRecentReport_Accounting', $report);
 
         return View::make('/screens/reports/accounting',
             array('controller'    => 'ReportsController',
-                  'report'        => $report,
+                  'report'        => $report['data'],
                   'start'         => $start,
                   'end'           => $end,
                   'total_debits'  => $total_debits,
