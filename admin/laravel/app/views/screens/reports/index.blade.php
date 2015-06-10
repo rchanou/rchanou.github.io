@@ -73,10 +73,17 @@ Reports
                     </div>-->
                     <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
                         <a href="{{URL::to('reports/event-rep-sales')}}">
-                            <i class="fa fa-dollar fa-4x"></i><p/>
+                            <i class="fa fa-users fa-4x"></i><p/>
                             <strong>Event Rep Sales</strong><p/>
                         </a>
-                        <em>View and export event sales by representative</em>
+                        <em>Event sales by representative</em>
+                    </div>
+                    <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                        <a href="{{URL::to('reports/marketing-source-performance')}}">
+                            <i class="fa fa-shopping-cart fa-4x"></i><p/>
+                            <strong>Marketing Source Performance</strong><p/>
+                        </a>
+                        <em>Sales totals from your marketing campaigns</em>
                     </div>
                   </div>
               </div>

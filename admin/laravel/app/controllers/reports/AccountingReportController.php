@@ -54,7 +54,33 @@ class AccountingReportController extends BaseController
 
         $dataToExport = Session::get('mostRecentReport_Accounting');
 
-        Exports::toCSV($dataToExport,'Accounting Report');
+        Exports::toCSV($dataToExport, 'Accounting Export');
+
+    }
+		
+		public function exportToIIF()
+    {
+        if (!Session::has('mostRecentReport_Accounting'))
+        {
+            return Redirect::to('/reports/accounting');
+        }
+
+        $dataToExport = Session::get('mostRecentReport_Accounting');
+
+        Exports::toIIF($dataToExport, 'Accounting Export');
+
+    }
+		
+		public function exportToSAGE()
+    {
+        if (!Session::has('mostRecentReport_Accounting'))
+        {
+            return Redirect::to('/reports/accounting');
+        }
+
+        $dataToExport = Session::get('mostRecentReport_Accounting');
+
+        Exports::toSAGE($dataToExport, 'Accounting Export');
 
     }
 

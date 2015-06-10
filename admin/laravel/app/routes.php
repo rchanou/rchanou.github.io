@@ -88,6 +88,8 @@ Route::group(array('before' => 'auth'), function()
 	Route::get('reports/accounting', 'AccountingReportController@index');
 	Route::post('reports/accounting', 'AccountingReportController@index');
 	Route::get('reports/accounting/export/csv', 'AccountingReportController@exportToCSV');
+	Route::get('reports/accounting/export/iif', 'AccountingReportController@exportToIIF');
+	Route::get('reports/accounting/export/sage', 'AccountingReportController@exportToSAGE');
 
 	Route::get('reports/detailed-sales', 'DetailedSalesReportController@index');
 	Route::post('reports/detailed-sales', 'DetailedSalesReportController@index');
@@ -96,6 +98,10 @@ Route::group(array('before' => 'auth'), function()
 	Route::get('reports/event-rep-sales', 'EventRepSalesReportController@index');
 	Route::post('reports/event-rep-sales', 'EventRepSalesReportController@index');
 	Route::get('reports/event-rep-sales/export/csv', 'EventRepSalesReportController@exportToCSV');
+	
+	Route::get('reports/marketing-source-performance', 'MarketingSourcePerformanceReportController@index');
+	Route::post('reports/marketing-source-performance', 'MarketingSourcePerformanceReportController@index');
+	Route::get('reports/marketing-source-performance/export/csv', 'MarketingSourcePerformanceReportController@exportToCSV');
 
 	Route::get('reports/eurekas-payments', 'EurekasPaymentsReportController@index');
 	Route::post('reports/eurekas-payments', 'EurekasPaymentsReportController@index');
@@ -143,6 +149,9 @@ Route::group(array('before' => 'auth'), function()
 	Route::post('mobileApp/templates', 'MobileAppController@updateTemplates');
 	Route::get('mobileApp/settings', 'MobileAppController@settings');
 	Route::post('mobileApp/settings/update', 'MobileAppController@updateSettings');
+    Route::get('mobileApp/translations', 'MobileAppController@translations');
+    Route::post('mobileApp/translations/update', 'MobileAppController@updateTranslations');
+    Route::get('mobileApp/translations/update/culture/{cultureKey}', 'MobileAppController@updateCulture');
 
 
 	/* Gift Cards */

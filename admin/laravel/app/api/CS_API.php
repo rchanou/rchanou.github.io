@@ -382,6 +382,17 @@ class CS_API
 
         return self::getJSON("reports/event_rep_sales", $params);
     }
+		
+		public static function getReport_MarketingSourcePerformance($start = null, $end = null, $show_by_opened_date = 'false')
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end != null) { $params['end'] = $end; }
+        $params['show_by_opened_date'] = isset($show_by_opened_date) ? $show_by_opened_date : 'false';
+
+        return self::getJSON("reports/marketing_source_performance", $params);
+    }
 
     public static function getReport_SummaryPayments($start = null, $end = null)
     {
