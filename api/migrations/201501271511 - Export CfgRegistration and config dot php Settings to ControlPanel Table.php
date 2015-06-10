@@ -176,6 +176,40 @@ insertRegistrationSetting('Reg_CaptureProfilePic', '0', 'bit', null, 'MainEngine
 insertRegistrationSetting('AgeNeedParentWaiver', '18', 'numericp', null, 'MainEngine');
 insertRegistrationSetting('AgeAllowOnlineReg', '16', 'numericp', null, 'MainEngine');
 
+echo "<p/>Porting old settings from Registration1/MainEngine to Registration if needed...<p/>";
+
+//Copy any old settings from Registration1 or MainEngine to Registration if they are missing
+//(Registration is the primary TerminalName for new iPad settings and takes precedence over older ones)
+
+//Old settings to check
+$settingsToFindAndCopy = array(
+    array('name' => 'enableWaiverStep', 'type' => 'bit', 'origin' => 'Registration1'),
+    array('name' => 'FacebookPageURL', 'type' => '65535', 'origin' => 'MainEngine'),
+    array('name' => 'Reg_EnableFacebook', 'type' => 'bit', 'origin' => 'MainEngine'),
+    array('name' => 'Reg_CaptureProfilePic', 'type' => 'bit', 'origin' => 'MainEngine'),
+    array('name' => 'AgeNeedParentWaiver', 'type' => 'numericp', 'origin' => 'MainEngine'),
+    array('name' => 'AgeAllowOnlineReg', 'type' => 'numericp', 'origin' => 'MainEngine'),
+);
+
+foreach($settingsToFindAndCopy as $currentSetting) //Check every old setting
+{
+    $TerminalName = $currentSetting['origin'];
+    $SettingName = $currentSetting['name'];
+    $sth = $conn->prepare("SELECT * FROM dbo.ControlPanel WHERE TerminalName = :TerminalName AND SettingName = :SettingName");
+    $sth->bindParam(':TerminalName', $TerminalName);
+    $sth->bindParam(':SettingName', $SettingName);
+    $sth->execute();
+    $existingOldEntry = $sth->fetchAll();
+
+    //If the old setting is present, copy it to the new Registration TerminalName if necessary
+    if (isset($existingOldEntry[0]['SettingValue']))
+    {
+        $SettingValue = ($existingOldEntry[0]['SettingValue']);
+        insertRegistrationSetting($SettingName,$SettingValue, $currentSetting['type'], null, 'Registration');
+    }
+}
+
+echo "<p/>";
 
 // Confirm success
 die('Successfully exported Registration settings from config.php file and/or CfgRegistration.');
