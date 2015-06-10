@@ -11,7 +11,7 @@ class Passwords {
     }
 
     public function post($id, $request_data = null) {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         try {
@@ -28,7 +28,7 @@ class Passwords {
     }
 
     public function put($id, $request_data = null) {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
         try {

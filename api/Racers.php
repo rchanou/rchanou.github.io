@@ -7,6 +7,8 @@ use ClubSpeed\Enums\Enums;
 use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Mail\MailService as Mail;
 use ClubSpeed\Utility\Arrays;
+use ClubSpeed\Utility\Tokens;
+use ClubSpeed\Security\Authenticate;
 
 /**
  * ClubSpeed API
@@ -37,9 +39,15 @@ class Racers
      */
     private $queues;
 
+    /**
+     * A reference to the internal instance of the Settings class.
+     */
+    private $settings;
+
     function __construct() {
         $this->logic = isset($GLOBALS['logic']) ? $GLOBALS['logic'] : null;
         $this->queues = new Queues();
+        $this->settings = new Settings();
     }
 
     /**
@@ -127,7 +135,7 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public function postCreate($request_data) {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+        if (!Authenticate::publicAccess())
             throw new RestException(401, "Invalid authorization!");
 
         // Create customer
@@ -142,7 +150,22 @@ class Racers
         $params = $this->mapCreateParams($request_data);
         try {
             $customerId = $this->logic->customers->create_v0($params['Standard']); // use the old, non restful version of the call
-            return array('customerId' => $customerId);
+            $token = Tokens::generate();
+            $this->logic->authenticationTokens->create(array(
+                'CustomersID'       => $customerId
+                , 'TokenType'       => Enums::TOKEN_TYPE_CUSTOMER
+                , 'RemoteUserID'    => 1 // what to do with this?
+                , 'Token'           => $token
+            ));
+            Authenticate::impersonate($token); // impersonate customer for the remaining calls
+            if (isset($request_data['profilephoto']))
+                $this->profile_photo($customerId, $request_data);
+            if (isset($request_data['email']))
+                $this->welcome($customerId, $request_data);
+            return array(
+                'customerId' => $customerId,
+                'token'      => $token
+            );
         }
         catch(\CSException $e) {
             throw new RestException(412, $e->getMessage());
@@ -338,7 +361,7 @@ class Racers
 
     private function run_new_account_logic(&$request_data, &$params, $customerId) {
         $this->create_photos($request_data, $customerId);
-        $this->send_welcome_email($request_data, $customerId);
+        $this->welcome($customerId, $request_data); //$request_data, $customerId);
         if ($this->is_event_registration($params)) {
             $this->getapplyRule(
                 $customerId
@@ -354,140 +377,91 @@ class Racers
     }
 
     private function create_photos(&$request_data, $customerId) {
-
-        // Create photo
-        // TODO -- Handle resize
-        if(isset($request_data['profilephoto']) && !empty($request_data['profilephoto'])) {
-            $picturePath = empty($GLOBALS['customerPictureImagePath']) ? 'C:\ClubSpeed\CustomerPictures' : $GLOBALS['customerPictureImagePath'];
-            file_put_contents(
-                $picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg'
-                , $this->base64_to_img($request_data['profilephoto'])
-            );
-        }
-
-        // Create signature, if present
-        if(isset($request_data['signaturephoto']) && !empty($request_data['signaturephoto']))
-        {
-            if (isset($request_data['isMinor']) && $request_data['isMinor'] == "true")
-            {
-                $picturePath = empty($GLOBALS['customerMinorSignatureImagePath']) ? 'C:\ClubSpeed\CustomerSignatures2' : $GLOBALS['customerMinorSignatureImagePath'];
-                file_put_contents($picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg',
-                    $this->base64_to_img($request_data['signaturephoto']));
-            }
-            else
-            {
-                $picturePath = empty($GLOBALS['customerAdultSignatureImagePath']) ? 'C:\ClubSpeed\CustomerSignatures' : $GLOBALS['customerAdultSignatureImagePath'];
-                file_put_contents($picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg',
-                    $this->base64_to_img($request_data['signaturephoto']));
-            }
-        }
-
-        // Create waiver
-        if (isset($request_data['isMinor']) && $request_data['isMinor'] == "true")
-        {
-            $waiverPath = empty($GLOBALS['customerMinorWaiverImagePath']) ? 'C:\ClubSpeed\CustomerWaivers2' : $GLOBALS['customerMinorWaiverImagePath'];
-            $termsText = $request_data['Waiver2'];
-        }
-        else
-        {
-            $waiverPath = empty($GLOBALS['customerAdultWaiverImagePath']) ? 'C:\ClubSpeed\CustomerWaivers' : $GLOBALS['customerAdultWaiverImagePath'];
-            $termsText = @$request_data['Waiver1'];
-        }
-
-        $subheaderData = array(
-            "Dated"         => date("l, F j, Y m/d/y")
-            , "Business"    => isset($request_data['BusinessName']) ? $request_data['BusinessName'] : ''
-            , "Participant" => $request_data['firstname'] . ' ' . $request_data['lastname'] /*array("Andrew Dodge","13000 Quailwood Rd","Midlothian, Virginia 23112")*/
-            , "License #"   => ""
-            , "Birthdate"   => $request_data['birthdate']
-            , "Phone"       => $request_data['mobilephone']
-            , "Email"       => $request_data['email']
-            , "CustID"      => $customerId
-        );
-
-        $waivers = $this->createWaiverImages(
-            $termsText
-            , $subheaderData
-            , @$request_data['signaturephoto']
-        );
-
-        $currentPage = 1;
-        foreach($waivers as $currentWaiverPage)
-        {
-            file_put_contents($waiverPath . DIRECTORY_SEPARATOR . $customerId . '-' . $currentPage .  '.jpg',
-                $this->base64_to_img($currentWaiverPage));
-            $currentPage++;
-        }
+        $this->profile_photo($customerId, $request_data);
+        $this->waivers($customerId, $request_data);
     }
 
-    private function send_welcome_email(&$request_data) {
-        //Welcome e-mail
+    /**
+     * @url POST /:racer_id/welcome
+     */
+    public function welcome($racer_id, $request_data = array()) {
         try {
-            if ($request_data['email'] != '') //If we have an e-mail address to send to
-            {
-                // Get the SMTP settings
-                $settings = $this->logic->helpers->getControlPanelSettings(
-                    "MainEngine",
-                    array(
-                        "SendWelcomeMail"
-                        , "EmailWelcomeFrom"
-                        , "SMTPServerUseAuthentiation"
-                        , "SMTPServer"
-                        , "SMTPServerPort"
-                        , "SMTPServerAuthenticationUserName"
-                        , "SMTPServerAuthenticationPassword"
-                        , "SMTPServerUseSSL"
-                    )
-                );
+            if (!Authenticate::customerAccess($racer_id))
+                throw new RestException(401, "Invalid authorization!");
+            $customer = $this->logic->customers->get($racer_id); // consider some sort of caching if this adds too much overhead.
+            $customer = $customer[0];
+            if (!empty($customer->EmailAddress)) {
+                if ($customer->DoNotMail === false) {
+                    // Get the SMTP settings
+                    $settings = $this->logic->helpers->getControlPanelSettings(
+                        "MainEngine",
+                        array(
+                            "SendWelcomeMail"
+                            , "EmailWelcomeFrom"
+                            , "SMTPServerUseAuthentiation"
+                            , "SMTPServer"
+                            , "SMTPServerPort"
+                            , "SMTPServerAuthenticationUserName"
+                            , "SMTPServerAuthenticationPassword"
+                            , "SMTPServerUseSSL"
+                        )
+                    );
 
-                if (strtolower($settings['SendWelcomeMail']) == "true") { //If the track would like to send welcome e-mails
-                    $uow = UnitOfWork::build()->action('all');
-                    $this->logic->mailTemplate->uow($uow);
-                    $mailTemplate = Arrays::first($uow->data);
+                    if (strtolower($settings['SendWelcomeMail']) == "true") { //If the track would like to send welcome e-mails
+                        $uow = UnitOfWork::build()->action('all');
+                        $this->logic->mailTemplate->uow($uow);
+                        $mailTemplate = Arrays::first($uow->data);
 
-                    if (!empty($mailTemplate)) {
-                        $subject = $mailTemplate->Subject;
-                        $text = $mailTemplate->Text;
+                        if (!empty($mailTemplate)) {
+                            $subject = $mailTemplate->Subject;
+                            $text = $mailTemplate->Text;
 
-                        //Replace any placeholders with their values
-                        $tagsToReplace = array('##FIRSTNAME##','##LASTNAME##','##EMAIL##','##TIME##','##RACERNAME##');
-                        $dataToInsert = array($request_data['firstname'],$request_data['lastname'],$request_data['email'],
-                            date("F j, Y, g:i a"),$request_data['racername']);
+                            //Replace any placeholders with their values
+                            $tagsToReplace = array('##FIRSTNAME##','##LASTNAME##','##EMAIL##','##TIME##','##RACERNAME##');
+                            $dataToInsert = array(
+                                $customer->FName
+                                , $customer->LName
+                                , $customer->EmailAddress
+                                , date("F j, Y, g:i a")
+                                , $customer->RacerName
+                            );
 
-                        $subject = str_replace($tagsToReplace,$dataToInsert,$subject);
-                        $text = str_replace($tagsToReplace,$dataToInsert,$text);
+                            $subject = str_replace($tagsToReplace,$dataToInsert,$subject);
+                            $text = str_replace($tagsToReplace,$dataToInsert,$text);
 
-                        $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
-                        $businessName = $businessName[0];
-                        $businessName = $businessName->SettingValue;
+                            $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
+                            $businessName = $businessName[0];
+                            $businessName = $businessName->SettingValue;
 
-                        $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
-                        $emailFrom = $emailFrom[0];
-                        $emailFrom = array($emailFrom->SettingValue => $businessName);
+                            $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
+                            $emailFrom = $emailFrom[0];
+                            $emailFrom = array($emailFrom->SettingValue => $businessName);
 
-                        $emailTo = array($request_data['email'] => $request_data['firstname'] . ' ' . $request_data['lastname']);
+                            $emailTo = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
 
-                        //Send the e-mail
-                        $mail = Mail::builder()
-                            ->subject($subject)
-                            ->from($emailFrom)
-                            ->to($emailTo)
-                            ->body($text,'text/html');
-                        Mail::send($mail);
-                        Log::info("Welcome email sent to: " . $request_data['email'], Enums::NSP_REGISTRATION);
+                            //Send the e-mail
+                            $mail = Mail::builder()
+                                ->subject($subject)
+                                ->from($emailFrom)
+                                ->to($emailTo)
+                                ->body($text,'text/html');
+                            Mail::send($mail);
+                            Log::info("Welcome email sent to: " . $customer->EmailAddress, Enums::NSP_REGISTRATION);
+                        }
+                        else
+                            Log::info("Welcome email not sent! Mail template is missing!", Enums::NSP_REGISTRATION);
                     }
                     else
-                        Log::info("Welcome email not sent! Mail template is missing!", Enums::NSP_REGISTRATION);
+                        Log::info("Did not send welcome email to: " . $customer->EmailAddress . "! Track setting for SendWelcomeMail was not \"true\"!", Enums::NSP_REGISTRATION);
                 }
                 else
-                    Log::info("Did not send welcome email to: " . $request_data['email'] . "! Track setting for SendWelcomeMail was not \"true\"!", Enums::NSP_REGISTRATION);
+                    Log::info("Did not send welcome email to: " . $customer->EmailAddress . "! Customer.DoNotMail was \"true\"!", Enums::NSP_REGISTRATION);
             }
             else
-                Log::info("Unable to send welcome email! Register received a null or empty email!", Enums::NSP_REGISTRATION);
+                Log::info("Unable to send welcome email! Customer had an empty email!", Enums::NSP_REGISTRATION);
         }
         catch(Exception $e) {
-            Log::error("Unable to send welcome email to: " . $request_data['email'], Enums::NSP_REGISTRATION, $e);
-            return array('Exception' => $e->getMessage(), 'Settings' => $settings);
+            $this->_error($e);
         }
     }
 
@@ -793,7 +767,103 @@ class Racers
         );
     }
 
-    public function index($racer_id, $sub = null) {
+    /**
+     * @url POST /:racer_id/waivers
+     */
+    public function waivers($racer_id, $request_data = array()) {
+        try {
+            if (!Authenticate::privateAccess())
+                throw new RestException(401, "Invalid authorization!");
+            $customer = $this->logic->customers->get($racer_id);
+            $customer = $customer[0];
+            $customerId = $customer->CustID; // could also use $racer_id directly at this point. get will throw on non-exist.
+            $isMinor = isset($request_data['isMinor']) && $request_data['isMinor'] == "true"; // should be a lookup based on customer info
+
+            if (isset($request_data['signaturephoto'])) {
+                $signaturephoto = $request_data['signaturephoto'];
+                if (!empty($signaturephoto)) {
+                    if ($isMinor) {
+                        $picturePath = empty($GLOBALS['customerMinorSignatureImagePath']) ? 'C:\ClubSpeed\CustomerSignatures2' : $GLOBALS['customerMinorSignatureImagePath'];
+                        file_put_contents(
+                            $picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg',
+                            $this->base64_to_img($request_data['signaturephoto'])
+                        );
+                    }
+                    else {
+                        $picturePath = empty($GLOBALS['customerAdultSignatureImagePath']) ? 'C:\ClubSpeed\CustomerSignatures' : $GLOBALS['customerAdultSignatureImagePath'];
+                        file_put_contents(
+                            $picturePath . DIRECTORY_SEPARATOR . $customerId . '.jpg',
+                            $this->base64_to_img($request_data['signaturephoto'])
+                        );
+                    }
+                }
+            }
+
+            if ($isMinor) {
+                $waiverPath = empty($GLOBALS['customerMinorWaiverImagePath']) ? 'C:\ClubSpeed\CustomerWaivers2' : $GLOBALS['customerMinorWaiverImagePath'];
+                $termsText = $request_data['Waiver2'];
+            }
+            else {
+                $waiverPath = empty($GLOBALS['customerAdultWaiverImagePath']) ? 'C:\ClubSpeed\CustomerWaivers' : $GLOBALS['customerAdultWaiverImagePath'];
+                $termsText = @$request_data['Waiver1'];
+            }
+
+            $subheaderData = array(
+                "Dated"         => date("l, F j, Y m/d/y")
+                , "Business"    => isset($request_data['BusinessName']) ? $request_data['BusinessName'] : ''
+                , "Participant" => $customer->FName . ' ' . $customer->LName
+                , "License #"   => ""
+                , "Birthdate"   => $customer->BirthDate
+                , "Phone"       => $customer->Cell // was 'mobile' earlier
+                , "Email"       => $customer->EmailAddress
+                , "CustID"      => $customerId
+            );
+
+            $waivers = $this->createWaiverImages(
+                $termsText
+                , $subheaderData
+                , @$request_data['signaturephoto']
+            );
+
+            $currentPage = 1;
+            foreach($waivers as $currentWaiverPage)
+            {
+                file_put_contents($waiverPath . DIRECTORY_SEPARATOR . $customerId . '-' . $currentPage .  '.jpg',
+                    $this->base64_to_img($currentWaiverPage));
+                $currentPage++;
+            }
+        }
+        catch(Exception $e) {
+            $this->_error($e);
+        }
+    }
+
+    /**
+     * @url POST /:racer_id/profile_photo
+     */
+    public function profile_photo($racer_id, $request_data = array()) {
+        try {
+            if (!Authenticate::customerAccess($racer_id))
+                throw new RestException(401, "Invalid authorization!");
+            if (!$this->logic->customers->exists($racer_id))
+                throw new \RecordNotFoundException("Unable to find record on Customers with key: ($racer_id)");
+            if (isset($request_data['profilephoto'])) {
+                $photo = $request_data['profilephoto'];
+                if (!empty($photo)) {
+                    $picture_folder = empty($GLOBALS['customerPictureImagePath']) ? 'C:\ClubSpeed\CustomerPictures' : $GLOBALS['customerPictureImagePath'];
+                    $picture_file = $racer_id . '.jpg';
+                    $picture_path = $picture_folder . DIRECTORY_SEPARATOR . $picture_file;
+                    $picture_data = $this->base64_to_img($photo);
+                    file_put_contents($picture_path, $picture_data);
+                }
+            }
+        }
+        catch(Exception $e) {
+            $this->_error($e);
+        }
+    }
+
+    public function index($racer_id, $sub = null, $sub2 = null, $request_data = null) {
         if($racer_id == 'valid') return $this->valid($_REQUEST['email'], $_REQUEST['racerName']);
         if($racer_id == 'create') return $this->postCreate($_REQUEST);
         if($racer_id == 'login') return $this->login($_REQUEST);
@@ -810,9 +880,9 @@ class Racers
             switch($sub) {
                 case 'races':
                     return $this->races($racer_id);
-                    break;
             }
-        } else {
+        }
+        else {
             return $this->racer($racer_id);
         }
     }
@@ -1177,4 +1247,11 @@ EOD;
         return true;
     }
 
+    protected final function _error($e) {
+        if ($e instanceof RestException)
+            throw $e;
+        if ($e instanceof CSException)
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        throw new RestException(500, $e->getMessage());
+    }
 }

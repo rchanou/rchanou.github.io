@@ -69,8 +69,9 @@ class Authenticate {
      *
      * @return boolean True if the credentials are valid for at least public access, false if not.
      */
-    public static function publicAccess() {
-        $credentials = self::getCredentials();
+    public static function publicAccess($credentials = array()) {
+        if (empty($credentials))
+            $credentials = self::getCredentials();
         if (self::isValidPublicKey($credentials['key']))
             return true;
         if (self::isValidUser($credentials['username'], $credentials['password']))
@@ -78,8 +79,9 @@ class Authenticate {
         return false;
     }
 
-    public static function customerAccess($customerId) {
-        $credentials = self::getCredentials();
+    public static function customerAccess($customerId, $credentials = array()) {
+        if (empty($credentials))
+            $credentials = self::getCredentials();
         if (self::isValidPrivateKey($credentials['key']))
             return true;
         if (self::isValidCustomerKey($credentials['key'], $customerId))
@@ -95,13 +97,26 @@ class Authenticate {
      *
      * @return boolean True if the credentials are valid for at least public access, false if not.
      */
-    public static function privateAccess() {
-        $credentials = self::getCredentials();
+    public static function privateAccess($credentials = array()) {
+        if (empty($credentials))
+            $credentials = self::getCredentials();
         if (self::isValidPrivateKey($credentials['key']))
             return true;
         if (self::isValidUser($credentials['username'], $credentials['password']))
             return true;
         return false;
+    }
+
+    /**
+     * Impersonates another call by overriding the key
+     *
+     * To be used in scenarios such as a customer create,
+     * then impersonating the customer for the remaining calls
+     * by using their newly generated token.
+     */
+    public static function impersonate($key = null) {
+        if (!is_null($key) && !self::privateAccess()) // don't bother impersonating if we already have private access
+            $_REQUEST['key'] = $key;
     }
 
     /**
