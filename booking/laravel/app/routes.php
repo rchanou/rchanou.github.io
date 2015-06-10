@@ -29,6 +29,9 @@ Route::post('/resetpassword','ResetPasswordController@resetPasswordRequest');
 Route::get('/resetpassword/form','ResetPasswordController@resetPasswordForm');
 Route::post('/resetpassword/form','ResetPasswordController@resetPasswordSubmission');
 
+Route::get('/resetpassword/form/ios','ResetPasswordController@resetPasswordiOS');
+Route::get('/resetpassword/form/android','ResetPasswordController@resetPasswordAndroid');
+
 Route::get('/logout','LogoutController@entry');
 
 Route::get('/disconnected', 'DisconnectedController@entry');

@@ -368,11 +368,12 @@ class CS_API
     {
         self::initialize();
 
-        $emailAddress = array('email' => $emailAddress);
+        $params = array('email' => $emailAddress,
+                        'url' => 'https://' . $_SERVER['HTTP_HOST'] . '/booking/resetpassword/form');
 
         $url = self::$apiURL . '/passwords/?key=' . self::$privateKey;
 
-        $result = self::call($url,$emailAddress,'POST');
+        $result = self::call($url,$params,'POST');
 
         $result = $result['response'];
 
@@ -867,7 +868,7 @@ class CS_API
         self::initialize();
 
         //In Club Speed, productType 7 is a gift card product
-        $url = self::$apiURL . '/products.json?productType=7&select=productId,description,price1,enabled&key=' . self::$privateKey;;
+        $url = self::$apiURL . '/products.json?productType=7&select=productId,description,price1,enabled&deleted=0&enabled=1&key=' . self::$privateKey;;
 
         $result = self::call($url);
         $response = $result['response'];

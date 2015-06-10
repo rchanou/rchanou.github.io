@@ -88,10 +88,29 @@ class MobileAppController extends BaseController
         Session::put('mobileSettings',$mobileSettingsData);
         Session::put('mobileSettingsIds',$mobileSettingsIds);
 
+        //Some settings are also in ControlPanel
+        $mobileControlPanelSettings = CS_API::getSettingsFor('MobileApp');
+        if ($mobileControlPanelSettings === null)
+        {
+            return Redirect::to('/disconnected');
+        }
+        $mobileControlPanelSettingsCheckedData = array();
+        $mobileControlPanelSettingsData = array();
+        foreach($mobileControlPanelSettings->settings as $setting)
+        {
+            $mobileControlPanelSettingsCheckedData[$setting->SettingName] = ($setting->SettingValue ? 'checked' : '');
+            $mobileControlPanelSettingsData[$setting->SettingName] = $setting->SettingValue;
+        }
+
+        Session::put('mobileControlPanelSettings',$mobileControlPanelSettingsData);
+
+
         return View::make('/screens/mobileApp/settings',
             array('controller' => 'MobileAppController',
                 'isChecked' => $mobileSettingsCheckedData,
                 'mobileSettings' => $mobileSettingsData,
+                'isCheckedControlPanel' => $mobileControlPanelSettingsCheckedData,
+                'mobileControlPanelSettings' => $mobileControlPanelSettingsData,
                 'listOfTracks' => $listOfTracks
             ));
     }
@@ -99,6 +118,8 @@ class MobileAppController extends BaseController
     public function updateSettings()
     {
         $input = Input::all();
+
+        //New settings table processing
 
         //Begin formatting form input for processing - defaults available for any missing settings
         $newSettings = array();
@@ -132,6 +153,65 @@ class MobileAppController extends BaseController
         {
             return Redirect::to('/disconnected');
         }
+
+        //ControlPanel settings table processing
+        $currentSettings = Session::get('mobileControlPanelSettings',array());
+
+        if (count($currentSettings) > 0)
+        {
+            $newControlPanelSettings = array();
+            
+            $newControlPanelSettings['racerNameShown'] = isset($input['racerNameShown']) ? 1 : 0;
+            $newControlPanelSettings['racerNameRequired'] = isset($input['racerNameRequired']) ? 1 : 0;
+            $newControlPanelSettings['genderShown'] = isset($input['genderShown']) ? 1 : 0;
+            $newControlPanelSettings['genderRequired'] = isset($input['genderRequired']) ? 1 : 0;
+            $newControlPanelSettings['birthDateShown'] = isset($input['birthDateShown']) ? 1 : 0;
+            $newControlPanelSettings['birthDateRequired'] = isset($input['birthDateRequired']) ? 1 : 0;
+            $newControlPanelSettings['emailShown'] = isset($input['emailShown']) ? 1 : 0;
+            $newControlPanelSettings['emailRequired'] = isset($input['emailRequired']) ? 1 : 0;
+            $newControlPanelSettings['cellShown'] = isset($input['cellShown']) ? 1 : 0;
+            $newControlPanelSettings['cellRequired'] = isset($input['cellRequired']) ? 1 : 0;
+            $newControlPanelSettings['companyShown'] = isset($input['companyShown']) ? 1 : 0;
+            $newControlPanelSettings['companyRequired'] = isset($input['companyRequired']) ? 1 : 0;
+            $newControlPanelSettings['licenseNumberShown'] = isset($input['licenseNumberShown']) ? 1 : 0;
+            $newControlPanelSettings['licenseNumberRequired'] = isset($input['licenseNumberRequired']) ? 1 : 0;
+            $newControlPanelSettings['addressShown'] = isset($input['addressShown']) ? 1 : 0;
+            $newControlPanelSettings['addressRequired'] = isset($input['addressRequired']) ? 1 : 0;
+            $newControlPanelSettings['cityShown'] = isset($input['cityShown']) ? 1 : 0;
+            $newControlPanelSettings['cityRequired'] = isset($input['cityRequired']) ? 1 : 0;
+            $newControlPanelSettings['stateShown'] = isset($input['stateShown']) ? 1 : 0;
+            $newControlPanelSettings['stateRequired'] = isset($input['stateRequired']) ? 1 : 0;
+            $newControlPanelSettings['zipShown'] = isset($input['zipShown']) ? 1 : 0;
+            $newControlPanelSettings['zipRequired'] = isset($input['zipRequired']) ? 1 : 0;
+            $newControlPanelSettings['countryShown'] = isset($input['countryShown']) ? 1 : 0;
+            $newControlPanelSettings['countryRequired'] = isset($input['countryRequired']) ? 1 : 0;
+            $newControlPanelSettings['whereDidYouHearAboutUsShown'] = isset($input['whereDidYouHearAboutUsShown']) ? 1 : 0;
+            $newControlPanelSettings['whereDidYouHearAboutUsRequired'] = isset($input['whereDidYouHearAboutUsRequired']) ? 1 : 0;
+
+            //Identify the settings that actually changed and need to be sent to Club Speed
+            foreach($currentSettings as $currentSettingName => $currentSettingValue)
+            {
+                if (isset($newControlPanelSettings[$currentSettingName]))
+                {
+                    if ($newControlPanelSettings[$currentSettingName] == $currentSettingValue) //If the setting hasn't changed
+                    {
+                        unset($newControlPanelSettings[$currentSettingName]); //Remove it from the list of new settings
+                    }
+                }
+            }
+
+            $result = CS_API::updateSettingsFor('MobileApp',$newControlPanelSettings);
+
+            if ($result === false)
+            {
+                return Redirect::to('mobileApp/settings')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
+            }
+            else if ($result === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+
 
         return Redirect::to('mobileApp/settings')->with( array('message' => 'Settings updated successfully!'));
     }
@@ -242,5 +322,169 @@ class MobileAppController extends BaseController
 
         return Response::json(array('message' => 'Image uploaded successfully!'), 200);
       }
+    }
+
+    public function translations()
+    {
+        $supportedCultures = array(
+            'en-US' => 'English (US)',
+            'en-GB' => 'English (UK)',
+            'en-NZ' => 'English (NZ)',
+            'en-AU' => 'English (AU)',
+            'en-IE' => 'English (IE)',
+            'en-CA' => 'English (CA)',
+            'es-MX' => 'Español',
+            'es-CR' => 'Español (CR)',
+            'es-ES' => 'Castellano',
+            'es-PR' => 'Español (PR)',
+            'ru-RU' => 'Pусский язык',
+            'fr-FR' => 'Français',
+            'fr-CA' => 'Français (CA)',
+            'de-DE' => 'Deutsch',
+            'nl-NL' => 'Nederlands',
+            'pl-PL' => 'Język polski',
+            'da-DK' => 'Dansk',
+            'ar-AE' => 'العربية',
+            'it-IT' => 'Italiano',
+            'bg-BG' => 'български език',
+            'sv-SE' => 'Svenska',
+            'zh-CN' => '中文'
+        );
+
+        $currentCulture = CS_API::getCurrentCultureForMobile();
+
+        $translations = CS_API::getTranslations('MobileApp');
+
+        return View::make('/screens/mobileApp/translations',
+            array('controller' => 'MobileAppController',
+                'supportedCultures' => $supportedCultures,
+                'currentCulture' => $currentCulture,
+                'translations' => $translations
+            )
+        );
+    }
+
+    private static function contains(&$haystack, $needle)
+    {
+        $result = strpos($haystack, $needle);
+        return $result !== false;
+    }
+    
+    public function updateTranslations()
+    {
+        $input = Input::all();
+        unset($input['_token']); //Removing Laravel's default form value
+        $cultureKey = $input['cultureKey'];
+        unset($input['cultureKey']);
+
+        $input = $input['trans']; //HACK: PHP converts periods to underscores in _GET and _POST. Wrapping input names in an array gets around this behavior.
+
+        //Format the missing string data as expected by Club Speed's API
+        $updatedTranslations = array(); //Destined to a PUT
+        $newTranslations = array(); //Destined to a POST
+        foreach($input as $stringId => $stringValue)
+        {
+            if (isset($stringId))
+            {
+                if (!$this->contains($stringId,'new_'))
+                {
+                    $updatedTranslations[] = array(
+                        'translationsId' => str_replace("id_","",$stringId),
+                        'value' => $stringValue
+                    );
+                }
+                else if ($stringValue != "")
+                {
+                    $newTranslations[] = array(
+                        'name' => str_replace("id_new_","",$stringId),
+                        'namespace' => 'MobileApp',
+                        'value' => $stringValue,
+                        'defaultValue' => $stringValue,
+                        'culture' => $cultureKey,
+                        'comment' => '');
+                }
+            }
+        }
+
+        $result = null;
+        if (count($updatedTranslations) > 0)
+        {
+            $result = CS_API::updateTranslationsBatch($updatedTranslations);
+
+            $updateWasSuccessful = ($result !== null);
+            if ($updateWasSuccessful === false)
+            {
+                return Redirect::to('mobileApp/translations')->with( array('error' => 'One or more translations could not be updated. Please try again.'));
+            }
+            else if ($updateWasSuccessful === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+
+
+        $result = null;
+        if (count($newTranslations) > 0)
+        {
+            $result = CS_API::insertTranslationsBatch($newTranslations);
+
+            $insertWasSuccessful = ($result !== null);
+            if ($insertWasSuccessful === false)
+            {
+                return Redirect::to('mobileApp/translations')->with( array('error' => 'One or more translations could not be created. Please try again.'));
+            }
+            else if ($insertWasSuccessful === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+
+        //Standard success message
+        return Redirect::to('mobileApp/translations')->with( array('message' => 'Translations updated successfully!'));
+
+    }
+
+    public function updateCulture($cultureKey)
+    {
+        $supportedCultures = array(
+            'en-US',
+            'en-GB',
+            'en-NZ',
+            'en-AU',
+            'en-IE',
+            'en-CA',
+            'es-MX',
+            'es-CR',
+            'es-ES',
+            'es-PR',
+            'ru-RU',
+            'fr-FR',
+            'fr-CA',
+            'de-DE',
+            'nl-NL',
+            'pl-PL',
+            'da-DK',
+            'ar-AE',
+            'it-IT',
+            'bg-BG',
+            'sv-SE',
+            'zh-CN'
+        );
+
+
+        if (!in_array($cultureKey,$supportedCultures))
+        {
+            return Redirect::to('mobileApp/translations')->with( array('error' => 'The desired culture was not recognized and could not be updated. Please contact Club Speed Support.'));
+        }
+
+        $result = CS_API::updateSettingsFor('MobileApp',array('currentCulture' => $cultureKey));
+
+        if ($result != true)
+        {
+            return Redirect::to('mobileApp/translations')->with( array('error' => 'The current culture could not be updated. Please try again later. If the issue persists, contact Club Speed support.'));
+        }
+
+        //Standard success message
+        return Redirect::to('mobileApp/translations')->with( array('message' => 'Current culture updated successfully!'));
     }
 }

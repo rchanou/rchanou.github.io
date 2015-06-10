@@ -138,4 +138,45 @@ class ResetPasswordController extends BaseController
             )
         );
     }
+
+    /**
+     * This is the link e-mailed to customers requesting to reset their password via an iOS device.
+     * It should contain the token as a URL parameter.
+     * It should immediately trigger the Club Speed iOS app to open, passing along the token received.
+     * @return mixed
+     */
+    public function resetPasswordiOS()
+    {
+        $token = Input::has('token') ? Input::get('token') : 'TOKEN_MISSING';
+
+        $urlComponents = explode(".",$_SERVER['HTTP_HOST']);
+        $trackName = $urlComponents[0];
+        $url = "$trackName://token/$token";
+
+        return View::make('/resetpassword_ios',
+            array(
+                'url' => $url
+            )
+        );
+    }
+
+    /**
+     * This is the link e-mailed to customers requesting to reset their password via an Android device.
+     * It should contain the token as a URL parameter.
+     * It should immediately trigger the Club Speed Android app to open, passing along the token received.
+     * @return mixed
+     */
+    public function resetPasswordAndroid()
+    {
+        $token = Input::has('token') ? Input::get('token') : 'TOKEN_MISSING';
+
+        $urlComponents = explode(".",$_SERVER['HTTP_HOST']);
+        $trackName = $urlComponents[0];
+        $url = "intent://token/$token#Intent;scheme=$trackName;package=com.clubspeedtiming.$trackName;end";
+        return View::make('/resetpassword_android',
+            array(
+                'url' => $url
+            )
+        );
+    }
 } 
