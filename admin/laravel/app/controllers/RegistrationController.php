@@ -60,13 +60,6 @@ class RegistrationController extends BaseController
         }
 
         $registrationSettingsCheckedData = array();
-        $registrationSettingsData = array();
-        foreach($registrationSettings->settings as $setting)
-        {
-            $registrationSettingsCheckedData[$setting->SettingName] = ($setting->SettingValue ? 'checked' : '');
-            $registrationSettingsData[$setting->SettingName] = $setting->SettingValue;
-        }
-        Session::put('registrationSettings',$registrationSettingsData);
 
         $mainEngineSettingsData = array();
         foreach($mainEngineSettings->settings as $setting)
@@ -83,6 +76,14 @@ class RegistrationController extends BaseController
           $reg1SettingsData[$setting->SettingName] = $setting->SettingValue;
         }
         Session::put('reg1Settings', $reg1SettingsData);
+
+        $registrationSettingsData = array();
+        foreach($registrationSettings->settings as $setting)
+        {
+            $registrationSettingsCheckedData[$setting->SettingName] = ($setting->SettingValue ? 'checked' : '');
+            $registrationSettingsData[$setting->SettingName] = $setting->SettingValue;
+        }
+        Session::put('registrationSettings',$registrationSettingsData);
 
         $customerFields = array(
           array('shownId' => 'genderShown', 'requiredId' => 'genderRequired', 'label' => 'Gender'),
@@ -163,47 +164,79 @@ class RegistrationController extends BaseController
           'minorSignatureWithParent'
         );
 
-        $newRegistrationSettings = array();
+        $registrationSettings = array();
 
         foreach ($newRegSettings as $settingName){
-          $newRegistrationSettings[$settingName] = isset($input[$settingName]) ? 1 : 0;
+            $registrationSettings[$settingName] = isset($input[$settingName]) ? 1 : 0;
         }
 
-        $newRegistrationSettings['defaultCountry'] = isset($input['defaultCountry']) ? $input['defaultCountry'] : '';
-        $newRegistrationSettings['emailText'] = isset($input['emailText']) ? $input['emailText'] : '';
-        $newRegistrationSettings['textingWaiver'] = isset($input['textingWaiver']) ? $input['textingWaiver'] : '';
+        $registrationSettings['defaultCountry'] = isset($input['defaultCountry']) ? $input['defaultCountry'] : '';
+        $registrationSettings['emailText'] = isset($input['emailText']) ? $input['emailText'] : '';
+        $registrationSettings['textingWaiver'] = isset($input['textingWaiver']) ? $input['textingWaiver'] : '';
+        
 
         $newMainEngineSettings = array();
-        $newMainEngineSettings['Reg_EnableFacebook'] = isset($input['Reg_EnableFacebook']) ? 1 : 0;
-        $newMainEngineSettings['Reg_CaptureProfilePic'] = isset($input['Reg_CaptureProfilePic']) ? 1 : 0;
-        $newMainEngineSettings['AgeAllowOnlineReg'] = isset($input['AgeAllowOnlineReg']) ? $input['AgeAllowOnlineReg'] : '';
-        $newMainEngineSettings['AgeNeedParentWaiver'] = isset($input['AgeNeedParentWaiver']) ? $input['AgeNeedParentWaiver'] : '';
-        $newMainEngineSettings['FacebookPageURL'] = isset($input['FacebookPageURL']) ? $input['FacebookPageURL'] : '';
-
         $newreg1Settings = array();
-        $newreg1Settings['enableWaiverStep'] = isset($input['enableWaiverStep']) ? 1 : 0;
+
+        //If the latest migration has been run, these settings should not be updated in their old locations, only the new (TerminalName = Registration in Control Panel)
+        $potentiallyMigratedSettings = array(
+            'Reg_EnableFacebook', 'AgeNeedParentWaiver', 'AgeAllowOnlineReg', 'enableWaiverStep', 'FacebookPageURL'
+        );
+
+        //Determine if settings have been migrated (meaning: if the ALL exist under the TerminalName Registration in the Control Panel)
+        $settingsHaveBeenMigrated = true;
+        $currentSettings = Session::get('registrationSettings',array());
+        foreach ($potentiallyMigratedSettings as $currentSettingName)
+        {
+            if (!isset($currentSettings[$currentSettingName]))
+            {
+                $settingsHaveBeenMigrated = false;
+            }
+        }
+
+        if ($settingsHaveBeenMigrated) //Update them in the new location, TerminalName = Registration
+        {
+            $registrationSettings['Reg_EnableFacebook'] = isset($input['Reg_EnableFacebook']) ? 1 : 0;
+            $registrationSettings['Reg_CaptureProfilePic'] = isset($input['Reg_CaptureProfilePic']) ? 1 : 0;
+            $registrationSettings['AgeAllowOnlineReg'] = isset($input['AgeAllowOnlineReg']) ? $input['AgeAllowOnlineReg'] : '';
+            $registrationSettings['AgeNeedParentWaiver'] = isset($input['AgeNeedParentWaiver']) ? $input['AgeNeedParentWaiver'] : '';
+            $registrationSettings['FacebookPageURL'] = isset($input['FacebookPageURL']) ? $input['FacebookPageURL'] : '';
+            $registrationSettings['enableWaiverStep'] = isset($input['enableWaiverStep']) ? 1 : 0;
+        }
+        else //Update them in their respective old locations
+        {
+            $newMainEngineSettings['Reg_EnableFacebook'] = isset($input['Reg_EnableFacebook']) ? 1 : 0;
+            $newMainEngineSettings['Reg_CaptureProfilePic'] = isset($input['Reg_CaptureProfilePic']) ? 1 : 0;
+            $newMainEngineSettings['AgeAllowOnlineReg'] = isset($input['AgeAllowOnlineReg']) ? $input['AgeAllowOnlineReg'] : '';
+            $newMainEngineSettings['AgeNeedParentWaiver'] = isset($input['AgeNeedParentWaiver']) ? $input['AgeNeedParentWaiver'] : '';
+            $newMainEngineSettings['FacebookPageURL'] = isset($input['FacebookPageURL']) ? $input['FacebookPageURL'] : '';
+            $newreg1Settings['enableWaiverStep'] = isset($input['enableWaiverStep']) ? 1 : 0;
+        }
+
 
         //End formatting
+
+        $settingsToSkip = array();
 
         //Identify the settings that actually changed and need to be sent to Club Speed
         $currentSettings = Session::get('registrationSettings',array());
         foreach($currentSettings as $currentSettingName => $currentSettingValue)
         {
-            if (isset($newRegistrationSettings[$currentSettingName]))
+            if (isset($registrationSettings[$currentSettingName]))
             {
-                if ($newRegistrationSettings[$currentSettingName] == $currentSettingValue) //If the setting hasn't changed
+                if ($registrationSettings[$currentSettingName] == $currentSettingValue) //If the setting hasn't changed
                 {
-                    unset($newRegistrationSettings[$currentSettingName]); //Remove it from the list of new settings
+                    unset($registrationSettings[$currentSettingName]); //Remove it from the list of new settings
                 }
             }
         }
 
         $currentMainEngineSettings = Session::get('mainEngineSettings', array());
-        foreach($currentMainEngineSettings as $currentSettingName => $currentSettingvalue)
+        foreach($currentMainEngineSettings as $currentSettingName => $currentSettingValue)
         {
           if (isset($newMainEngineSettings[$currentSettingName]))
           {
-            if ($newMainEngineSettings[$currentSettingName] == $currentSettingvalue)
+            if ($newMainEngineSettings[$currentSettingName] == $currentSettingValue)
             {
               unset($newMainEngineSettings[$currentSettingName]);
             }
@@ -211,18 +244,18 @@ class RegistrationController extends BaseController
         }
 
         $currentreg1Settings = Session::get('reg1Settings', array());
-        foreach($currentreg1Settings as $currentSettingName => $currentSettingvalue)
+        foreach($currentreg1Settings as $currentSettingName => $currentSettingValue)
         {
           if (isset($newreg1Settings[$currentSettingName]))
           {
-            if ($newreg1Settings[$currentSettingName] == $currentSettingvalue)
+            if ($newreg1Settings[$currentSettingName] == $currentSettingValue)
             {
               unset($newreg1Settings[$currentSettingName]);
             }
           }
         }
 
-        $result = CS_API::updateSettingsFor('Registration',$newRegistrationSettings) && CS_API::updateSettingsFor('MainEngine',$newMainEngineSettings)&& CS_API::updateSettingsFor('Registration1',$newreg1Settings);
+        $result = CS_API::updateSettingsFor('Registration',$registrationSettings) && CS_API::updateSettingsFor('MainEngine',$newMainEngineSettings)&& CS_API::updateSettingsFor('Registration1',$newreg1Settings);
 
         if ($result === false)
         {

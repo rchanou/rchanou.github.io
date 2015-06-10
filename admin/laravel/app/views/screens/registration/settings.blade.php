@@ -188,7 +188,7 @@ Registrations Settings
                     <div class="form-group">
                       <label class="col-sm-4 col-md-4 col-lg-4 control-label">Facebook URL</label>
                       <div class="col-sm-8 col-md-8 col-lg-8">
-                        <input class="form-control" type="text" id="FacebookPageURL" name="FacebookPageURL" value="{{$mainEngineSettings['FacebookPageURL']}}">
+                        <input class="form-control" type="text" id="FacebookPageURL" name="FacebookPageURL" value="{{isset($registrationSettings['FacebookPageURL']) ? $registrationSettings['FacebookPageURL'] : $mainEngineSettings['FacebookPageURL']}}">
                         <span class="help-block text-left">
                           If Facebook integration is enabled and the user logs in to Facebook while registering, a "Like Us On Facebook" widget will show linking to this page.
                         </span>
@@ -212,9 +212,9 @@ Registrations Settings
                           <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Event Registration</label>
                           <div class="col-sm-8 col-md-8 col-lg-8">
                               <input type="checkbox" id="CfgRegValidateGrp" name="CfgRegValidateGrp" {{$isChecked['CfgRegValidateGrp']}}>
-                      <span class="help-block text-left">
-                        If checked, users may select a specific event that they are registering for.
-                      </span>
+                          <span class="help-block text-left">
+                            If checked, users may select a specific event that they are registering for.
+                          </span>
                           </div>
                       </div>
                   @endif
@@ -232,7 +232,7 @@ Registrations Settings
                     <div class="form-group">
                       <label class="col-sm-4 col-md-4 col-lg-4 control-label">Minimum Age to Register Online</label>
                       <div class="col-sm-8 col-md-8 col-lg-8">
-                        <input class="form-control" type="number" style="width:50%;" id="AgeAllowOnlineReg" name="AgeAllowOnlineReg" value="{{$mainEngineSettings['AgeAllowOnlineReg']}}">
+                        <input class="form-control" type="number" style="width:50%;" id="AgeAllowOnlineReg" name="AgeAllowOnlineReg" value="{{isset($registrationSettings['AgeAllowOnlineReg']) ? $registrationSettings['AgeAllowOnlineReg'] : $mainEngineSettings['AgeAllowOnlineReg']}}">
                         <span class="help-block text-left">
                           Minimum age required to register. This is independent of minor age.
                         </span>
@@ -242,7 +242,7 @@ Registrations Settings
                     <div class="form-group">
                       <label class="col-sm-4 col-md-4 col-lg-4 control-label">Adult Age</label>
                       <div class="col-sm-8 col-md-8 col-lg-8">
-                        <input class="form-control" type="number" style="width:50%;" id="AgeNeedParentWaiver" name="AgeNeedParentWaiver" value="{{$mainEngineSettings['AgeNeedParentWaiver']}}">
+                        <input class="form-control" type="number" style="width:50%;" id="AgeNeedParentWaiver" name="AgeNeedParentWaiver" value="{{isset($registrationSettings['AgeNeedParentWaiver']) ? $registrationSettings['AgeNeedParentWaiver'] : $mainEngineSettings['AgeNeedParentWaiver']}}">
                         <span class="help-block text-left">
                           Any registrant under this age is considered a minor. (Example: If set to 18, registrants under 18 will be considered minors.)
                         </span>
@@ -264,9 +264,9 @@ Registrations Settings
                           <label class="col-sm-4 col-md-4 col-lg-4 control-label">Minor Signature with Parent</label>
                           <div class="col-sm-8 col-md-8 col-lg-8">
                               <input type="checkbox" id="minorSignatureWithParent" name="minorSignatureWithParent" {{$isChecked['minorSignatureWithParent']}}>
-                          <span class="help-block text-left">
-                            If checked, minors (if allowed to sign) must sign along with a parent or guardian.
-                          </span>
+                              <span class="help-block text-left">
+                                If checked, minors (if allowed to sign) must sign along with a parent or guardian.
+                              </span>
                           </div>
                       </div>
                   @endif
