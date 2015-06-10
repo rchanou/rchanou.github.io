@@ -14,7 +14,23 @@ class Exports
         self::$initialized = true;
     }
 
-    public static function toCSV($data,$filename)
+    public static function toIIF($data, $filename)
+    {
+        self::initialize();
+				
+				die(print_r($data));
+				
+		}
+		
+		public static function toSAGE($data, $filename)
+    {
+        self::initialize();
+				
+				die(print_r($data));
+				
+		}
+				
+		public static function toCSV($data,$filename)
     {
         self::initialize();
 

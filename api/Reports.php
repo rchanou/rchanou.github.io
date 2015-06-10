@@ -80,6 +80,30 @@ ORDER BY Total DESC
         );
     }
 
+		/**
+     * @url GET /marketing_source_performance
+     */
+    public function marketing_source_performance() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+
+        $opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
+
+        $sql = <<<EOS
+SELECT cust.sourceid AS SourceID, s.SourceName, SUM(c.CheckTotal) AS TotalSpent FROM Sources s
+LEFT JOIN Customers cust ON cust.SourceID = s.SourceID
+LEFT JOIN checks c on cust.CustID = c.custid
+WHERE c.CustID > 0
+AND {$opened_or_closed_date} BETWEEN :start AND :end
+GROUP BY cust.sourceid, s.SourceName
+ORDER BY TotalSpent DESC
+EOS;
+
+        $params = array(&$start, &$end);
+				$data = $this->run_query($sql, $this->getDateRange());
+        return $data;
+    }
+
 	/**
 	 * DETAILED PAYMENTS REPORT
 	 *
