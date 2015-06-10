@@ -27,13 +27,17 @@ class PasswordsLogic extends BaseLogic {
     }
 
     public final function create($params = array()) {
-        if (empty($params) || is_null($params['email']) || empty($params['email']))
+        if (empty($params))
+            throw new \RequiredArgumentMissingException("Password reset did not receive any parameters!");
+        if (is_null($params['email']) || empty($params['email']))
             throw new \RequiredArgumentMissingException("Password reset did not receive an email address!");
+        if (!isset($params['url']) || is_null($params['url']) || empty($params['url']))
+            throw new \RequiredArgumentMissingException("Password reset did not receive the URL to e-mail!");
         try {
             $params = \ClubSpeed\Utility\Params::nonReservedData($params);
             $email = $params['email'];
+            $url = $params['url'];
             $customer = $this->logic->customers->find_primary_account($email); // REQUIRED
-            $customerId = $customer->CustID;
             if (is_null($customer) || empty($customer)) {
                 Log::warn('Password reset received an email address which could not be found! Received: ' . $email, Enums::NSP_PASSWORD);
                 // for security purposes, return without throwing an error
@@ -42,6 +46,7 @@ class PasswordsLogic extends BaseLogic {
                 // based on the return type
                 return;
             }
+            $customerId = $customer->CustID;
             Log::info('Password reset logic being executed for Customer ID: ' . $customerId . ' at email: ' . $email);
             $authentication = $this->db->authenticationTokens->dummy();
             $authentication->CustomersID = $customerId;
@@ -91,7 +96,8 @@ class PasswordsLogic extends BaseLogic {
                 throw new \CSException('Password token create was unable to find the setting for Main.resetEmailBodyHtml!');
             $html = $html[0];
             $html = $html->Value;
-            $url = 'https://' . $_SERVER['SERVER_NAME'] . '/booking/resetpassword/form?token=' . urlencode($authentication->Token);
+            $url = $url . '?token=' . urlencode($authentication->Token);
+
             $html = strtr($html, array(
                 "{{url}}" => $url,
                 "{{business}}" => $business
