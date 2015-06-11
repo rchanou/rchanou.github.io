@@ -73,20 +73,7 @@ Accounting Export
                                 <input type="date" name="end" id="end" value="{{$end}}">
                             </td>
                             <td>
-                                <textarea name="replacement_mapping">##CASH_PAYMENT##=
-##COMPLIMENTARY_PAYMENT##=
-##GIFT_CARD_&_FAST_CASH_PAYMENT##=
-##_EXTERNAL_PAYMENT##=
-##ITEM_DISCOUNT##=
-##TAXES##=
-##PREPAYMENTS##=
-##PREPAYMENTS_USED##=
-##EXPENSES##=
-##GIFTCARDS##=
-##GRATUITY##=
-##FEE##=
-##CHECK_DISCOUNT##=
-                                </textarea>
+                                <textarea name="fieldMappings">{{$fieldMappings}}</textarea>
                             </td>
                         </tr>
                       </tbody>

@@ -15,11 +15,38 @@ class AccountingReportController extends BaseController
     {
         $start = Input::get('start');
 				$end   = Input::get('end');
-				$replacement_mapping = Input::get('replacement_mapping');
 				
+				// Handle updating settings (if we are POST'ing)
+				if (Request::isMethod('post')) {
+					$newSettings = array('fieldMappings' => Input::get('fieldMappings'));
+					$accountingExportSettingsIds = Session::get('accountingExportSettingsIds',array());
+					$result = CS_API::updateSettingsInNewTableFor('AccountingExport', $newSettings, $accountingExportSettingsIds);
+	
+					if ($result === false) {
+							return Redirect::to('reports/accounting')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
+					} else if ($result === null) {
+							return Redirect::to('/disconnected');
+					}
+				}
+				
+				// Retrieve settings from DB
+				$accountingExportSettings     = CS_API::getSettingsFromNewTableFor('AccountingExport');
+        $accountingExportSettingsData = array();
+				if ($accountingExportSettings === null) {
+            return Redirect::to('/disconnected');
+        }
+				foreach($accountingExportSettings->settings as $setting) {
+            $accountingExportSettingsData[$setting->name] = $setting->value;
+						$accountingExportSettingsIds[$setting->name]  = $setting->settingsId;
+        }
+				Session::put('accountingExportSettings', $accountingExportSettingsData);
+        Session::put('accountingExportSettingsIds', $accountingExportSettingsIds);
+				
+				// Get form-based settings
 				$start = empty($start) ? date('Y-m-d') : $start;
         $end   = empty($end)   ? date('Y-m-d') : $end;
 				$data  = CS_API::getReport_Accounting($start, $end);
+				$fieldMappings = $accountingExportSettingsData['fieldMappings'];
 
         $report = array('options' => array('start' => $start, 'end' => $end), 'data' => $data);
 
@@ -38,12 +65,12 @@ class AccountingReportController extends BaseController
 				
 				// Prepare replacements
 				/*$replacement_mapping = <<<EOD
-##CASH_PAYMENT##=555 Cash|test|hi
+##CASH_PAYMENT##=555 Cash|test|this=hi
 ##ITEM_DISCOUNT##=11000 Item Discount|ClassName	
 EOD;*/
 
 				$replacements = array();
-				foreach(preg_split('/$\R?^/m', $replacement_mapping) as $key => $val) {
+				foreach(preg_split('/$\R?^/m', $fieldMappings) as $key => $val) {
 					$line = explode('=', $val, 2);
 					if(count($line) === 2) {
 						$replacements[trim($line[0])] = explode('|', trim($line[1]));
@@ -73,7 +100,8 @@ EOD;*/
                   'start'         => $start,
                   'end'           => $end,
                   'total_debits'  => $total_debits,
-									'total_credits' => $total_credits
+									'total_credits' => $total_credits,
+									'fieldMappings' => $fieldMappings
             ));
     }
 
