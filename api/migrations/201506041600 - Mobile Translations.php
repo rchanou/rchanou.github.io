@@ -21,7 +21,8 @@ $translationsSplitByCulture = array(
         'str_Races' => 'Races',
         'str_ProSkill' => 'ProSkill',
         'str_CardID' => 'CardID',
-        'str_emailText' => 'Please email me my results and special offers.'
+        'str_emailText' => 'Please email me my results and special offers.',
+        'str_termsAndConditions' => 'Please contact our facility for our latest Terms & Conditions.'
     )
 );
 
