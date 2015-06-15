@@ -10,7 +10,8 @@ clubSpeedOnlineApp.controller('raceSummaryController', function($scope, $routePa
     ClubSpeedJSONService.getRaceDetails($routeParams.race_id).success(function (data) {
         $scope.jsonData = data;
         $scope.notEnoughRaceData = 0;
-        if (data.race.laps !== undefined) //If lap data was recorded, produce Google graphs
+        var shouldUseGoogleCharts = (typeof config == "undefined" || typeof config.removeGoogleCharts == "undefined" || !config.removeGoogleCharts);
+        if (data.race.laps !== undefined && shouldUseGoogleCharts) //If lap data was recorded, produce Google graphs
         {
             $scope.chartData = convertRaceDetailsToGoogleChartFormat(data);
             google.setOnLoadCallback(drawChart($scope.chartData,'chart_div'));

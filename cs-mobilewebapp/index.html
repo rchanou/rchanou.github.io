@@ -64,11 +64,20 @@
   <script src="js/vendors/bootstrap.min.js"></script>
   <script src="js/vendors/angular.min.js"></script>
   <script src="js/vendors/angular-route.min.js"></script>
-  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-  <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
+
+  <!-- Conditional Google Chart insertion -->
+  <script>
+      var shouldUseGoogleCharts = (typeof config == "undefined" || typeof config.removeGoogleCharts == "undefined" || !config.removeGoogleCharts);
+      if (shouldUseGoogleCharts)
+      {
+          document.write('<script type="text/javascript" src="https://www.google.com/jsapi">\x3C/script>');
+          document.write('<script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});\x3C/script>');
+          document.write('<script src="js/utils/googleCharts.js">\x3C/script>');
+      }
   </script>
-  <script src="js/utils/googleCharts.js"></script>
+
+
+  <script src="js/vendors/socket.io-client-1.3.4.js"></script>
 
   <!-- Angular scripts -->
   <script src="js/app.js?v=1.0"></script>
