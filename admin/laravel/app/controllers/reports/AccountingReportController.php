@@ -114,7 +114,7 @@ EOD;*/
 
         $dataToExport = Session::get('mostRecentReport_Accounting');
 
-        Exports::toCSV($dataToExport, 'Accounting Export');
+        Exports::toCSV($dataToExport['data'], 'Accounting Export');
 
     }
 		
