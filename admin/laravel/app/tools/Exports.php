@@ -24,8 +24,10 @@ class Exports
 				$export .= "!ENDTRNS,,,,,,,,,\r\n";
 
 				foreach($data['data'] as $key => $val) {
+					$Date_Format = array_key_exists('Date_Format', $val) ? $val['Date_Format'] : 'm/d/Y';
+
 					$sor    = ($key === 0) ? 'TRNS' : 'SPL';
-					$date   = date('m/d/Y', strtotime($data['options']['start']));
+					$date   = date($Date_Format, strtotime($data['options']['start']));
 					$class  = array_key_exists('Class', $val) ? $val['Class'] : '';
 					$amount = ($val['Debit'] == '.00' ? $val['Credit'] : $val['Debit']);
 					$docnum = str_replace('-', '', $data['options']['start']);
@@ -44,12 +46,49 @@ class Exports
 		public static function toSAGE($data, $filename)
     {
         self::initialize();
+
+				/*
+				// SAMPLE SAGE
+				Type,Bank,Date,Ref,Dept,Nominal,Details,Net,Tax Code,VAT,Gross
+				BR,1205,14/06/2015,Ext,1,4000,External Karting,189.58,T1,37.92,227.5
+				CR,1203,14/06/2015,Cash,1,4010,Cash CafÈ,13,T1,2.6,15.6
+				BR,1235,14/06/2015,Paypal,1,4100,Paypal Combat,200,T1,40,240
+				BR,1200,14/06/2015,Cheque,1,4000,Cheque Karting,316.66,T1,63.34,380
+				BR,1255,14/06/2015,Voucher,1,4050,Voucher Sundry,41.66,T1,8.34,50
+				BR,1205,14/06/2015,Ext,1,1013,External Gift Voucher,25,T0,0,25'
+				*/
 				
-				die(print_r($data));
+				$export  = "Type,Bank,Date,Ref,Dept,Nominal,Details,Net,Tax Code,VAT,Gross\r\n";
+				
+				foreach($data['data'] as $key => $val) {
+
+					// Can override the format of the date
+					$Date_Format     = array_key_exists('Date_Format', $val) ? $val['Date_Format'] : 'd/m/Y';
+
+					$row = array();
+					$row['Type']     = array_key_exists('Type', $val) ? $val['Type'] : '';
+					$row['Bank']     = array_key_exists('Bank', $val) ? $val['Bank'] : '';
+					$row['Date']     = array_key_exists('Date', $val) ? $val['Date'] : date($Date_Format, strtotime($data['options']['start']));
+					$row['Ref']      = array_key_exists('Ref', $val) ? $val['Ref'] : '';
+					$row['Dept']     = array_key_exists('Dept', $val) ? $val['Dept'] : '';
+					$row['Nominal']  = array_key_exists('Nominal', $val) ? $val['Nominal'] : $val['AccountNumber'];
+					$row['Details']  = array_key_exists('Details', $val) ? $val['Details'] : $val['Description'];
+					$row['Net']      = array_key_exists('Net', $val) ? $val['Net'] : '';
+					$row['Tax_Code'] = array_key_exists('Tax_Code', $val) ? $val['Tax_Code'] : '';
+					$row['VAT']      = array_key_exists('VAT', $val) ? $val['VAT'] : '';
+					$row['Gross']    = $val['Debit'] == '.00' ? (-1 * $val['Credit']) : $val['Debit'];
+
+					$export .= implode(',', $row) . "\r\n";
+				};
+
+				// Send file for download...				
+				header("Content-disposition: attachment; filename={$filename}_{$data['options']['start']}-{$data['options']['end']}.csv");
+				header('Content-type: text/csv');
+				echo $export;
 				
 		}
 				
-		public static function toCSV($data,$filename)
+		public static function toCSV($data, $filename)
     {
         self::initialize();
 

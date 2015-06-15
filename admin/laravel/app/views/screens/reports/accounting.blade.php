@@ -47,20 +47,64 @@ Accounting Export
                         <tr>
                             <th>Start Date</th>
                             <th>End Date</th>
-                            <th>Replacements <!-- http://jsfiddle.net/tv5Vu/ -->
-                            	<a href="#" data-placement="left" data-toggle="popover" title="<strong>Instructions</strong>" data-html="true" data-content="##CASH_PAYMENT##=
-##COMPLIMENTARY_PAYMENT##=
-##GIFT_CARD_&_FAST_CASH_PAYMENT##=
-##_EXTERNAL_PAYMENT##=
-##ITEM_DISCOUNT##=
-##TAXES##=
-##PREPAYMENTS##=
-##PREPAYMENTS_USED##=
-##EXPENSES##=
-##GIFTCARDS##=
-##GRATUITY##=
-##FEE##=
-##CHECK_DISCOUNT##=">Help</a>
+                            <th>Replacements <i class="fa fa-question-circle tip" title="<strong>Instructions</strong>" data-container="body" data-toggle="popover" data-placement="left" data-html="true" data-content="
+                              <p><strong>Overview</strong></p>
+<p>Club Speed provides a flexible export system that allows for custom field name replacements at export time.</p>
+
+<p>Mappings between Club Speed Account Name and your custom name are created by matching the AccountNumber field and then attaching any variables  in the 'Replacements' section and then running the report to save/process.</p>
+
+<p>Account Numbers for custom accounts can be updated in <a href='/sp_admin/'>the registration panel</a> under 'Settings &gt; Advanced Settings &gt; Product Classes'</p>
+
+<p><strong>Usage Examples</strong></p>
+
+<p>Variables may be appended by separating them with the pipe character '|' and the format: VARIABLE=VALUE.</p>
+
+<p>Example: ##CASH_PAYMENT##=4010|Class=My Class</p>
+
+<p>This maps the ##CASH_PAYMENT## account to account number 4010 and also assigns the variable 'Class' the value of 'My Class'.</p>
+
+<p>Each time you run the export, the Replacement Mappings are saved.</p>
+
+<p>The exported date format default may be overridden with the 'Date_Format' variable using PHP date() options.</p>
+
+<p>Example: ##CASH_PAYMENT##=4010|Date_Format=d/m/Y</p>
+
+<p><strong>Pre-defined Account Names</strong></p>
+<ul>
+	<li>##CASH_PAYMENT##</li>
+	<li>##COMPLIMENTARY_PAYMENT##</li>
+	<li>##GIFT_CARD_&_FAST_CASH_PAYMENT##</li>
+	<li>##_EXTERNAL_PAYMENT##</li>
+	<li>##ITEM_DISCOUNT##</li>
+	<li>##TAXES##</li>
+	<li>##PREPAYMENTS##</li>
+	<li>##PREPAYMENTS_USED##</li>
+	<li>##EXPENSES##</li>
+	<li>##GIFTCARDS##</li>
+	<li>##GRATUITY##</li>
+	<li>##FEE##</li>
+	<li>##CHECK_DISCOUNT##</li>
+  <li><em>Plus any custom payment types and accounts</em></li>
+</ul>
+
+<p><strong>Quickbooks Variables</strong></p>
+<ul>
+	<li>Class</li>
+</ul>
+
+<p>Example: ##CASH_PAYMENT##=4010|Class=My Class</p>
+
+<p><strong>SAGE Variables</strong></p>
+<ul>
+	<li>Tax Code</li>
+  <li>Type</li>
+  <li>Bank</li>
+  <li>Ref</li>
+  <li>Dept</li>
+</ul>
+
+<p>Example: ##CASH_PAYMENT##=4010|Tax Code=T1|Type=CR|Bank=1203|Ref=Cash|Dept=1</p>
+"></i>
                             </th>
                         </tr>
                       </thead>
@@ -73,20 +117,7 @@ Accounting Export
                                 <input type="date" name="end" id="end" value="{{$end}}">
                             </td>
                             <td>
-                                <textarea name="replacement_mapping">##CASH_PAYMENT##=
-##COMPLIMENTARY_PAYMENT##=
-##GIFT_CARD_&_FAST_CASH_PAYMENT##=
-##_EXTERNAL_PAYMENT##=
-##ITEM_DISCOUNT##=
-##TAXES##=
-##PREPAYMENTS##=
-##PREPAYMENTS_USED##=
-##EXPENSES##=
-##GIFTCARDS##=
-##GRATUITY##=
-##FEE##=
-##CHECK_DISCOUNT##=
-                                </textarea>
+                                <textarea name="fieldMappings">{{$fieldMappings}}</textarea>
                             </td>
                         </tr>
                       </tbody>
@@ -193,6 +224,17 @@ Accounting Export
         {
             $('#start').val(new Date().toDateInputValue());
         }
+				$('body').on('click', function (e) {
+
+				// Close popover when clicking outside of it
+				$('[data-toggle="popover"]').each(function () {
+								//the 'is' for buttons that trigger popups
+								//the 'has' for icons within a button that triggers a popup
+								if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+										$(this).popover('hide');
+								}
+						});
+				});
     });
 </script>
 @stop
