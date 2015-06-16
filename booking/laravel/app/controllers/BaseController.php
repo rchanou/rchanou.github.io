@@ -7,7 +7,7 @@ class BaseController extends Controller {
 
     public function __construct()
     {
-        $this->beforeFilter('checkIfDisabled'); //Checks if online registration is globally disabled
+
     }
 
 	/**
