@@ -25,7 +25,7 @@ angular.module('clubSpeedOnlineApp.services', [])
             },
             getFastestLapTimes_Week: function(track) {
                 track = defaultFor(track,1);
-                return $http.get(apiURL + '/races/fastest.json?range=week&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey) //TODO: Revert this, multitrack support
+                return $http.get(apiURL + '/races/fastest.json?range=week&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey)
             },
             getFastestLapTimes_Month: function(track) {
                 track = defaultFor(track,1);
@@ -61,9 +61,13 @@ angular.module('clubSpeedOnlineApp.services', [])
             getSettings: function()
             {
                 return $http.get(apiURL + '/settings.json?namespace=MobileApp&key=' + apiKey);
+            },
+            getTranslations: function() {
+                return $http.get(apiURL + '/translations?&namespace=MobileApp&key=' + apiKey);
+            },
+            getCurrentCulture: function() {
+                return $http.get(apiURL + '/settings/get.json?group=MobileApp&setting=currentCulture&key=' + apiKey);
             }
-
-            //http://97.67.180.38:8080/api/index.php/tracks/index.json?key=9c55d6518880c1abf100a24da2546368
         };
     }]);
 
@@ -75,3 +79,18 @@ angular.module('clubSpeedOnlineApp.services', [])
  */
 function defaultFor(arg, val)
 { return typeof arg !== 'undefined' ? arg : val; }
+
+function mergeObjects(dst) {
+    angular.forEach(arguments, function(obj) {
+        if (obj !== dst) {
+            angular.forEach(obj, function(value, key) {
+                if (dst[key] && dst[key].constructor && dst[key].constructor === Object) {
+                    mergeObjects(dst[key], value);
+                } else {
+                    dst[key] = value;
+                }
+            });
+        }
+    });
+    return dst;
+};

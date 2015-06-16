@@ -3,12 +3,12 @@ average and best lap times, and final positions -->
 
 <div class="jumbotron text-center">
 
-	<div ng-controller="raceSummaryController">
+	<div ng-controller="raceSummaryController" ng-cloak class="ng-cloak">
 
         <!-- Spinner is only visible if content is loading -->
         <span id="spinner" ng-if="spinnerActive">
             <img width="30" src="images/spinner.gif"><br/>
-            Powered by Club Speed
+            {{$root.strings["str_poweredBy"]}} Club Speed
         </span>
 
         <!-- Begin race header -->
@@ -18,7 +18,7 @@ average and best lap times, and final positions -->
                 {{jsonData.race.race_name}}<br/>
                 </span>
                 {{jsonData.race.starts_at}}<br/>
-                Track: {{jsonData.race.track}}
+                {{$root.strings["str_track"]}} {{jsonData.race.track}}
             </div>
         </div>
         <!-- End race header -->
@@ -40,12 +40,12 @@ average and best lap times, and final positions -->
                         <tr ng-click="go(racer.racer_id)">
                             <td>
                                 <span class="dataSubHeader">{{racer.nickname}}</span><br/>
-                                Best Lap Time: {{racer.fastest_lap_time | formatLapTime}}<br/>
-                                Avg Lap Time: {{racer.average_lap_time  | formatLapTime}}<br/>
-                                Gap: {{racer.gap}}<br/>
+                                {{$root.strings["str_bestLapTime"]}} {{racer.fastest_lap_time | formatLapTime}}<br/>
+                                {{$root.strings["str_avgLapTime"]}} {{racer.average_lap_time  | formatLapTime}}<br/>
+                                {{$root.strings["str_gapWithColon"]}} {{racer.gap}}<br/>
                             </td>
                             <td class="dataHighlightCell">
-                                <span class="dataSubHeader">Position</span><br/>
+                                <span class="dataSubHeader">{{$root.strings["str_position"]}}</span><br/>
                                 <span class="dataHighlightSmall">{{racer.position}}</span>
                             </td>
                         </tr>
@@ -63,12 +63,11 @@ average and best lap times, and final positions -->
         <div id="demo" class="collapse in">...</div>
         -->
 
-        <!-- TODO: So many inline styles! Aaaah -->
         <p/>
         <!-- Begin lap times table -->
         <div ng-if="spinnerActive==0 && raceConcluded">
-            <span class="dataHeader">Lap Times by Racer</span><br/>
-            (Click a racer to expand!)<p/>
+            <span class="dataHeader">{{$root.strings["str_lapTimesByRacer"]}}</span><br/>
+            {{$root.strings["str_clickARacer"]}}<p/>
             <div ng-repeat="racer in jsonData.scoreboard">
                 <button type="button" style="margin: 2px; font-size: 16pt; min-width: 300px; max-width: 600px; color: gold; border: 1px solid gray; background-color: #1f1f1f; font-weight: bold" class="btn" data-toggle="collapse" data-target="#{{racer.racer_id}}">
                     {{racer.nickname}}
@@ -78,11 +77,11 @@ average and best lap times, and final positions -->
                         <table class="dataTable">
                             <tr>
                                 <td>
-                                    <span class="dataSubHeader">Lap {{lap.lap_number}}</span><br/>
+                                    <span class="dataSubHeader">{{$root.strings["str_lap"]}} {{lap.lap_number}}</span><br/>
                                 </td>
                                 <td class="dataHighlightCell" style="padding: 5px; width: 200px; ">
                                     <div style="float: right; text-align: right">
-                                        <span class="dataSubHeader">Lap Time</span><br/>
+                                        <span class="dataSubHeader">{{$root.strings["str_lapTime"]}}</span><br/>
                                         <span class="dataHighlightSmall">{{lap.lap_time | formatLapTime}}</span>
                                     </div>
                                 </td>
@@ -100,7 +99,7 @@ average and best lap times, and final positions -->
                 <table class="dataTable">
                     <tr>
                         <td>
-                            <span>This race was never concluded and there is no more data to display.</span><br/>
+                            <span>{{$root.strings["str_raceNeverFinished"]}}</span><br/>
                         </td>
                     </tr>
                 </table>

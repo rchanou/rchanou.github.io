@@ -1,0 +1,51 @@
+var translations = {
+  "en-US": {
+      "str_topProSkillScores" : "Top ProSkill Scores",
+      "str_fastestTimesThisMonth" : "Fastest Times This Month",
+      "str_fastestTimesThisWeek" : "Fastest Times This Week",
+      "str_fastestTimesToday" : "Fastest Times Today",
+      "str_racerInformation" : "Racer Information",
+      "str_pastHeats" : "Past Heats",
+      "str_findRacer" : "Find Racer",
+      "str_leaderboard" : "Leaderboard",
+      "str_scoreboard" : "Scoreboard",
+      "str_liveScoreboard" : "Live Scoreboard",
+      "str_switchTrack" : "Switch track:",
+      "str_pos" : "Pos",
+      "str_racer" : "Racer",
+      "str_kart" : "Kart",
+      "str_bestTime" : "Best Time",
+      "str_avgTime" : "Avg Time",
+      "str_lastTime" : "Last Time",
+      "str_gap" : "Gap",
+      "str_laps" : "Laps",
+      "str_noRaceRunning" : "There is currently no race running on this track.",
+      "str_willAutoUpdate" : "This page will automatically update when a new race starts.",
+      "str_selectOneOfTheFollowing" : "Select one of the following options:",
+      "str_topLapTimeToday" : "Top Lap Time (Today)",
+      "str_topLapTimeWeek" : "Top Lap Time (This Week)",
+      "str_topLapTimeMonth" : "Top Lap Time (This Month)",
+      "str_noResults" : "There were no results for the specified track and time.",
+      "str_joined" : "Joined:",
+      "str_ProSkill" : "ProSkill", //Consistent capitalization with pre-existing translation
+      "str_searchForRacer" : "Search for racer by name or nickname",
+      "str_racerSearch" : "Racer Search",
+      "str_nickname" : "Nickname:",
+      "str_Visits" : "Visits", //Consistent capitalization with pre-existing translation
+      "str_Races" : "Races", //Consistent capitalization with pre-existing translation
+      "str_racingHistory" : "Racing History",
+      "str_track" : "Track:",
+      "str_position" : "Position",
+      "str_lapNumber" : "Lap Number",
+      "str_lapTime" : "Lap Time",
+      "str_bestLapTime": "Best Lap Time:",
+      "str_avgLapTime": "Avg Lap Time:",
+      "str_gapWithColon": "Gap:",
+      "str_lap": "Lap",
+      "str_lapTimesByRacer": "Lap Times by Racer",
+      "str_clickARacer": "(Click a racer to expand!)",
+      "str_raceNeverFinished": "This race was never concluded and there is no more data to display.",
+      "str_poweredBy": "Powered By"
+      //str_bestLapTime
+  }
+};

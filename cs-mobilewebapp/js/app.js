@@ -1,6 +1,53 @@
 	// Creation of the Club Speed Online Angular App
 	var clubSpeedOnlineApp = angular.module('clubSpeedOnlineApp', ['ngRoute','ui.bootstrap','clubSpeedOnlineApp.services','angularMoment']);
 
+    clubSpeedOnlineApp.run(function($rootScope, ClubSpeedJSONService, $location, $anchorScroll, globalVars) {
+
+        $rootScope.strings = translations["en-US"]; //Default
+        $rootScope.locale = "en-US"; //Default
+
+        //Fetch current culture
+        ClubSpeedJSONService.getCurrentCulture().success(function (data) {
+
+            if (typeof data.settings.currentCulture.SettingValue != "undefined")
+            {
+                $rootScope.locale = data.settings.currentCulture.SettingValue;
+            }
+
+            //Fetch translations
+            ClubSpeedJSONService.getTranslations().success(function (data) {
+                var formattedTranslations = {};
+                if (typeof data.translations != "undefined")
+                {
+                    for(var i = 0; i < data.translations.length; i++)
+                    {
+                        var currentTranslation = data.translations[i];
+                        if (!formattedTranslations.hasOwnProperty(currentTranslation.culture))
+                        {
+                            formattedTranslations[currentTranslation.culture] = JSON.parse(JSON.stringify(translations["en-US"])); //English is the fallback for missing strings
+                        }
+                        formattedTranslations[currentTranslation.culture][currentTranslation.name] = currentTranslation.value;
+                    }
+                    translations = mergeObjects(translations,formattedTranslations);
+
+                    $rootScope.validLocale = translations.hasOwnProperty($rootScope.locale) ? $rootScope.locale : "en-US";
+
+                    $rootScope.strings = translations[$rootScope.validLocale];
+
+                    $rootScope.locale = $rootScope.validLocale;
+                }
+
+            }).error(function(data, status, headers, config) {});
+
+        }).error(function(data, status, headers, config) {});
+
+        //Scroll to the top of the page whenever a route is changed, and also stop any scoreboards from being polled
+        $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
+            $anchorScroll();
+            globalVars.resetScoreboardUpdateTimeout();
+        });
+    });
+
 	// Routing for single page design
 	clubSpeedOnlineApp.config(function($routeProvider) {
 		$routeProvider
@@ -57,7 +104,7 @@
 // Footer controller
 
     //Just controls whether or not the scoreboard is enabled for the app - defaults to false
-    clubSpeedOnlineApp.controller('footerController', function($scope) {
+    clubSpeedOnlineApp.controller('footerController', function($scope,$rootScope) {
         if (typeof config !== "undefined")
         {
             $scope.enableScoreboard = defaultFor(config.enableScoreboard, false);
@@ -88,15 +135,6 @@
 
         return globalVars;
     });
-
-//Scroll to the top of the page whenever a route is changed, and also stop any scoreboards from being polled
-clubSpeedOnlineApp.run(function($rootScope, $location, $anchorScroll,globalVars) {
-    $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
-        $anchorScroll();
-        globalVars.resetScoreboardUpdateTimeout();
-    });
-
-});
 
 $( document ).ready(function() {
 	//If the user is on a touch device, hide the bottom footer and live timing header whenever the mobile keyboard pops up.

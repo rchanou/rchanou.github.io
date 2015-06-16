@@ -1,17 +1,17 @@
 <!-- This page displays all live timing tables. The table to display is determined by the parameter passed to the URL. -->
-<div class="jumbotron text-center">
-    <h4 style="margin-top: 2px;">Leaderboard</h4>
+<div class="jumbotron text-center ng-cloak" ng-cloak>
+    <h4 style="margin-top: 2px;">{{$root.strings["str_leaderboard"]}}</h4>
 
 	<div ng-controller="liveTimingController">
 
         <!-- Begin live timing menu options -->
         <select id="livetimingselector" style="color: white; background-color: black; min-width: 300px; max-width: 600px; width: 90%"
                 ng-model="desiredLiveTiming" ng-change="goToLiveTiming(desiredLiveTiming,currentTrackId)">
-            <option value="">Select one of the following options:</option>
-            <option value="topRPMScores">Top ProSkill Scores</option>
-            <option value="fastestTimeByDay">Top Lap Time (Today)</option>
-            <option value="fastestTimeByWeek">Top Lap Time (This Week)</option>
-            <option value="fastestTimeByMonth">Top Lap Time (This Month)</option>
+            <option value="">{{$root.strings["str_selectOneOfTheFollowing"]}}</option>
+            <option value="topRPMScores">{{$root.strings["str_topProSkillScores"]}}</option>
+            <option value="fastestTimeByDay">{{$root.strings["str_topLapTimeToday"]}}</option>
+            <option value="fastestTimeByWeek">{{$root.strings["str_topLapTimeWeek"]}}</option>
+            <option value="fastestTimeByMonth">{{$root.strings["str_topLapTimeMonth"]}}</option>
         </select>
         <p/>
         <!-- End live timing menu options -->
@@ -19,7 +19,7 @@
     <!-- Spinner is only visible if content is loading -->
     <span id="spinner" ng-if="spinnerActive">
         <img width="30" src="images/spinner.gif"><br/>
-        Powered by Club Speed
+        {{$root.strings["str_poweredBy"]}} Club Speed
     </span>
 
     <!-- Begin fastest times table - can be by Day, Week, or Month -->
@@ -31,7 +31,7 @@
         </span>
         <div ng-if="tracks != null">
             <select class="darkDropdown" ng-model="desiredTrack" ng-change="goToLiveTimingTrack(desiredTrack)">
-                <option value="">Switch track:</option>
+                <option value="">{{$root.strings["str_switchTrack"]}}</option>
                 <option ng-repeat="track in tracks" value="{{track.id}}">{{track.name}}</option>
             </select>
         </div>
@@ -50,7 +50,7 @@
             </table>
         </div>
         <div class="dataWrapperError" ng-if="jsonData.fastest.length == 0">
-            There were no results for the specified track and time.<p/>
+            {{$root.strings["str_noResults"]}}<p/>
         </div>
     </div>
     <!-- End fastest time table -->
@@ -64,10 +64,10 @@
                     <td>
                         <span class="dataSubHeader">#{{$index + 1}}: {{racer.name.first}} {{racer.name.last}}</span><br/>
                         {{racer.name.nickname}}<br/>
-                        Joined: <span>{{racer.created_at}}</span>
+                        {{$root.strings["str_joined"]}} <span>{{racer.created_at}}</span>
                     </td>
                     <td class="dataHighlightCell">
-                        <span class="dataSubHeader">ProSkill</span><br/>
+                        <span class="dataSubHeader">{{$root.strings["str_ProSkill"]}}</span><br/>
                         <span class="dataHighlightSmall">{{racer.rpm}}</span>
                     </td>
                 </tr>

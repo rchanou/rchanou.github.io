@@ -22,7 +22,7 @@
    ... and so on ]
 
  */
-function convertRaceDetailsToGoogleChartFormat(jsonData)
+function convertRaceDetailsToGoogleChartFormat(jsonData, strings)
 {
     //This helper class defines a Racer and his lap times for a race
     function Racer(id,nickname)
@@ -61,7 +61,7 @@ function convertRaceDetailsToGoogleChartFormat(jsonData)
     var googleChartData = new Array();
 
     var labelsArray = new Array();
-    labelsArray.push("Lap Number");
+    labelsArray.push(strings['str_lapNumber']);
 
     //Populate the labels array with the racer names
     for(var racerID in racers)
@@ -101,7 +101,7 @@ function convertRaceDetailsToGoogleChartFormat(jsonData)
 
 //Given chart data in the appropriate 2-dimensional array format, and a div to draw to, this function displays a
 //Line Chart derived from the given data.
-function drawChart(chartData,divToDrawTo)
+function drawChart(chartData,divToDrawTo,strings)
 {
     var data = new google.visualization.DataTable();
     for(var i=0; i < chartData[0].length; i++)
@@ -114,8 +114,8 @@ function drawChart(chartData,divToDrawTo)
 
     var seriesOptions = {};
     var options = {
-        hAxis: {title: 'Lap Number',  titleTextStyle: {color: 'white'}, textStyle:{color: 'white'}, gridlines:{color:'#333'}, format: '0' },
-        vAxis: {title: 'Lap Time', titleTextStyle: {color: 'white'}, textStyle:{color: 'white'}, gridlines:{color:'#333'}, viewWindowMode: 'maximized'},
+        hAxis: {title: strings['str_lapNumber'],  titleTextStyle: {color: 'white'}, textStyle:{color: 'white'}, gridlines:{color:'#333'}, format: '0' },
+        vAxis: {title: strings['str_lapTime'], titleTextStyle: {color: 'white'}, textStyle:{color: 'white'}, gridlines:{color:'#333'}, viewWindowMode: 'maximized'},
         titleTextStyle: {color: 'white'},
         backgroundColor: 'black',
         legend: {textStyle: {color: 'white'}, position: 'top', maxLines: 3},

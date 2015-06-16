@@ -1,5 +1,5 @@
 //This controller is responsible for fetching and presenting data related to Live Timing.
-clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routeParams, $location, ClubSpeedJSONService) {
+clubSpeedOnlineApp.controller('liveTimingController', function($rootScope, $scope, $routeParams, $location, ClubSpeedJSONService) {
     $scope.spinnerActive = 1;
 
     ClubSpeedJSONService.getSettings().success(function (data) {
@@ -41,7 +41,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routePar
         if ($routeParams.desiredTable == "topRPMScores")
         {
             $scope.tableType = "topRPMTable";
-            $scope.tableCaption = "Top ProSkill Scores";
+            $scope.tableCaption = $rootScope.strings["str_topProSkillScores"];
             ClubSpeedJSONService.getTopRPMScores().success(function (data) {
                 $scope.jsonData = data;
                 $scope.spinnerActive = 0;
@@ -51,7 +51,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routePar
         else if ($routeParams.desiredTable == "fastestTimeByMonth")
         {
             $scope.tableType = "fastestTimesTable";
-            $scope.tableCaption = "Fastest Times This Month";
+            $scope.tableCaption = $rootScope.strings["str_fastestTimesThisMonth"];
             ClubSpeedJSONService.getFastestLapTimes_Month($scope.currentTrackId).success(function (data) {
                 $scope.jsonData = data;
                 $scope.spinnerActive = 0;
@@ -62,7 +62,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routePar
         else if ($routeParams.desiredTable == "fastestTimeByWeek")
         {
             $scope.tableType = "fastestTimesTable";
-            $scope.tableCaption = "Fastest Times This Week";
+            $scope.tableCaption = $rootScope.strings["str_fastestTimesThisWeek"];
             ClubSpeedJSONService.getFastestLapTimes_Week($scope.currentTrackId).success(function (data) {
                 $scope.jsonData = data;
                 $scope.spinnerActive = 0;
@@ -73,7 +73,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($scope, $routePar
         else if ($routeParams.desiredTable == "fastestTimeByDay")
         {
             $scope.tableType = "fastestTimesTable";
-            $scope.tableCaption = "Fastest Times Today";
+            $scope.tableCaption = $rootScope.strings["str_fastestTimesToday"];
             ClubSpeedJSONService.getFastestLapTimes_Day($scope.currentTrackId).success(function (data) {
                 $scope.jsonData = data;
                 $scope.spinnerActive = 0;

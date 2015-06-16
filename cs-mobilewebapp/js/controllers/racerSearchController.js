@@ -1,5 +1,5 @@
 //This controller is responsible for fetching and displaying data to be shown on a racer search and summary page.
-clubSpeedOnlineApp.controller('racerSearchController', function($scope, $routeParams, $location, $compile, ClubSpeedJSONService) {
+clubSpeedOnlineApp.controller('racerSearchController', function($scope, $rootScope, $routeParams, $location, $compile, ClubSpeedJSONService) {
 
     //This function routes to the race summary page for the given heat_id
     $scope.go = function ( heat_id ) {
@@ -50,11 +50,11 @@ clubSpeedOnlineApp.controller('racerSearchController', function($scope, $routePa
         $scope.spinnerActive = 1;
 
         $scope.tableType = "racerInfoTable";
-        $scope.tableCaption = "Racer Information";
+        $scope.tableCaption = $rootScope.strings["str_racerInformation"];
         ClubSpeedJSONService.getRacerInfo($routeParams.racer_id).success(function (data) {
             $scope.jsonData = data;
         });
-        $scope.tableCaptionHeats = "Past Heats";
+        $scope.tableCaptionHeats = $rootScope.strings["str_pastHeats"];
         ClubSpeedJSONService.getPastRaces($routeParams.racer_id).success(function (data) {
             $scope.jsonDataHeats = data;
             $scope.spinnerActive = 0;
