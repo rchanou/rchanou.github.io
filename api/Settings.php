@@ -27,7 +27,10 @@ class Settings extends BaseApi
             'RacerNameShow' => true
         ),
         'kiosk' => true,
-        'ScotKart' => true
+        'ScotKart' => true,
+        'MobileApp' => array(
+            'currentCulture' => true
+        )
     );
         
     private $settingsNotExistingInOlderVersions = array(
