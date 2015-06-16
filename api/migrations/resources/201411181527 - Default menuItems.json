@@ -23,7 +23,7 @@
 		{
       "label": "Top Times",
       "url": "/mobile/#/livetiming/fastestTimeByWeek",
-      "iconUrl": "http://vm-122.clubspeedtiming.com/assets/MobileApp/icons/TopTimes.png"
+      "iconUrl": "/assets/MobileApp/icons/TopTimes.png"
     },
     {
       "label": "Online Booking",
