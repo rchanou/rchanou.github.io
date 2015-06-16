@@ -31,6 +31,13 @@ function respondCreditCard(req, res, next) {
 				err ? res.send(err) : res.send({ result: result });
 			});
 			break;
+			
+		case 'signature':
+			creditCard.signature(req.body, function(err, result) {
+				//console.log('\n\Signature Transaction Result', req.body, err, result);
+				err ? res.send(err) : res.send({ result: result });
+			});
+			break;
 
 		default:
 			next(new Error('Action not supported: ' + req.params.action));
