@@ -105,6 +105,18 @@ var getProvider = function getProvider(opts) {
 	}
 }
 
+exports.signature = function(opts, callback) {
+	if(opts.provider.type == 'authorize.net')      return callback(new Error('Signatures not supported'));
+
+	var provider = getProvider(opts); // TODO Handle error status
+	
+	provider.signature(opts.signature).then(function(response) {
+		callback(null, response);
+	}).catch(function(err) {
+		callback(err);
+	});
+};
+
 exports.charge = function(opts, callback) {
 	if(opts.provider.type == 'authorize.net' && !opts.order)      return callback(new Error('No order given!'));
 	if(opts.provider.type == 'authorize.net' && !opts.creditCard) return callback(new Error('No creditCard given!'));

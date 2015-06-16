@@ -148,12 +148,13 @@ After Race Posting Settings
 
                               <div class="form-group">
                                 <div class="alert alert-info">
-                                  The following can be inserted into the Facebook fields:<br/><br/>
+                                  The following placeholders may be inserted into the Facebook fields:<br/><br/>
                                   <b>Finishing Position (1st, 2nd, etc):</b> &#123;&#123;ordinalFinishPosition&#125;&#125;<br/>
                                   <b>Finish Position (1, 2, etc):</b> &#123;&#123;finishPosition&#125;&#125;<br/>
-                                  <b>Heat ID:</b> &#123;&#123;heatId&#125;&#125;<br/>
-                                  <b>Customer ID:</b> &#123;&#123;customerId&#125;&#125;<br/>
-                                  <b>Heat Type:</b> &#123;&#123;heatType&#125;&#125;
+                                  <b>Heat ID (12345):</b> &#123;&#123;heatId&#125;&#125;<br/>
+                                  <b>Customer ID (123123):</b> &#123;&#123;customerId&#125;&#125;<br/>
+                                  <b>Heat Type (10 Minute Race):</b> &#123;&#123;heatType&#125;&#125;<br/><br/>
+                                  <em>Note that these placeholders are case-sensitive</em>
                                 </div>
                               </div>
                             </div class="col-sm-6">

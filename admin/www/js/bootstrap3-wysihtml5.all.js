@@ -4731,6 +4731,34 @@ wysihtml5.browser = (function() {
   },
 
   fire: function(eventName, payload) {
+		if (eventName === 'cancel'){
+			// Kludge to prevent users from getting stuck when modal does not get dismissed completely.
+			// CLUB SPEED WAS HERE
+			
+			if (!Element.prototype.remove){
+				Element.prototype.remove = function() {
+					this.parentElement.removeChild(this);
+				}
+			}
+			if (!NodeList.prototype.remove){
+				NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+					for(var i = 0, len = this.length; i < len; i++) {
+						if(this[i] && this[i].parentElement) {
+								this[i].parentElement.removeChild(this[i]);
+						}
+					}
+				}
+			}
+		
+			setTimeout(function(){
+				var modals = document.getElementsByClassName("modal-backdrop");
+				while (modals && modals.length){
+					modals.remove();
+					modals = document.getElementsByClassName("modal-backdrop");
+				}
+			}, 666);
+		}
+	
     this.events = this.events || {};
     var handlers = this.events[eventName] || [],
         i        = 0;

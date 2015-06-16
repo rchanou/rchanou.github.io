@@ -41,6 +41,80 @@ function Ingenico (opts) {
 		});
 }
 
+Ingenico.prototype.signature = function signature(signature) {
+	var self = this;
+	var req = '<TRANSACTION>' +
+	'￼￼<INTERACTIVETIMEOUT>' + parseInt(self.opts.timeout) + '</INTERACTIVETIMEOUT>' +
+	'  <TRANSACTIONTYPE>INTERACTIVEGETSIG</TRANSACTIONTYPE>' +
+	'  <LEGALTEXT>' + signature.text + '</LEGALTEXT>' +
+	'  <SIGTYPE>INITIALS</SIGTYPE>' +
+	'</TRANSACTION>';
+
+	return new Promise(function(resolve, reject) {
+		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
+			if(err) {
+				console.log('SIG REQUEST ERROR', err, self.opts);
+				return reject({ message: err.code + ' ' + self.opts.host, error: err });
+			}
+			if(self.opts.debug) console.log('RAW BODY', body);
+
+			toJson(body, function (err, result) {
+				if(self.opts.debug) console.log('PARSED BODY', JSON.stringify(result));
+				if(err) {
+					console.log('SIG PARSING ERROR', err);
+					return reject({ message: err.code, error: err });
+				}
+				
+				if(result.TRANRESP.TRANSUCCESS[0] === 'FALSE') {
+					return resolve({
+						'message': result.TRANRESP.TRANRESPMESSAGE[0],
+						'code': result.TRANRESP.hasOwnProperty('TRANRESPERRCODE') ? result.TRANRESP.TRANRESPERRCODE[0] : null,
+						'success': false,
+						'signatureJSON': null,
+						'_original': result
+						});		
+				} else if(result.TRANRESP.TRANSUCCESS[0] === 'TRUE') {
+					
+					// Remove first and last "(" then turn into proper object format
+					var signatureJSON = [];
+					var lastCoordinate = null;
+
+					// Format Ingenico signature coordinates into array of (X, Y, isLastCoordinateInSegment 0 | 1)
+					var coordinates = result.TRANRESP.SIGDATA[0].substring(1, result.TRANRESP.SIGDATA[0].length - 1).split(')(').map(function(ele) {
+						return ele.split(',');
+					});
+					
+					coordinates.forEach(function(coordinate, i) {
+						// If lastCoordinate is null then we're starting a new stroke; Set lastCoordinate and return
+						if(lastCoordinate === null) {
+							lastCoordinate = coordinate;
+							return;
+						}
+						
+						// Take last coordinate and this coordinate and put in signatureJSON
+						signatureJSON.push({"lx": parseInt(lastCoordinate[0]), "ly": parseInt(lastCoordinate[1]), "mx": parseInt(coordinate[0]), "my": parseInt(coordinate[1])});
+						
+						// If this coordinate is last one in the stroke, set lastCoordinate to null so we start a new stroke
+						lastCoordinate = (parseInt(coordinate[2]) === 1) ? null : coordinate;
+					});
+					
+					return resolve({
+						'success': true,
+						'signatureJSON': signatureJSON,
+						'_original': result
+						});
+				} else {
+					return resolve({
+						'success': false,
+						'signatureJSON': null,
+						'_original': result
+						});
+				}
+			});
+		});
+	});
+}
+
 Ingenico.prototype.submitTransaction = function submitTransaction(order, creditCard, prospect, other) {
 	var self = this;
 	var req = '<TRANSACTION>' +
@@ -67,7 +141,7 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('CHARGE REQUEST ERROR', err, self.opts);
-				return reject({ message: err.code + ' ' + this.opts.host, error: err });
+				return reject({ message: err.code + ' ' + self.opts.host, error: err });
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 
@@ -122,7 +196,7 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('REFUND REQUEST ERROR', err, self.opts);
-				return reject({ message: err.code + ' ' + this.opts.host, error: err });
+				return reject({ message: err.code + ' ' + self.opts.host, error: err });
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 			
