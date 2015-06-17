@@ -49,7 +49,7 @@ the racer's profile information. -->
         <div class="racerProfileHeader">
             <img src="images/defaultProfilePic.jpg" class="racerProfilePic">
             <span class="racerProfileName">{{jsonData.racer.name.first}} {{jsonData.racer.name.last}}</span><br/>
-            {{$root.strings["str_nickname"]}} {{jsonData.racer.name.nickname}}<p/>
+            {{$root.strings["str_nickname"]}}: {{jsonData.racer.name.nickname}}<p/>
             {{$root.strings["str_joined"]}} <span>{{jsonData.racer.created_at}}</span>
         </div>
         <div>

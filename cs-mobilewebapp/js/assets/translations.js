@@ -30,7 +30,7 @@ var translations = {
       "str_ProSkill" : "ProSkill", //Consistent capitalization with pre-existing translation
       "str_searchForRacer" : "Search for racer by name or nickname",
       "str_racerSearch" : "Racer Search",
-      "str_nickname" : "Nickname:",
+      "str_nickname" : "Nickname",
       "str_Visits" : "Visits", //Consistent capitalization with pre-existing translation
       "str_Races" : "Races", //Consistent capitalization with pre-existing translation
       "str_racingHistory" : "Racing History",
