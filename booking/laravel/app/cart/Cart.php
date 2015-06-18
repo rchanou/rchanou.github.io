@@ -85,7 +85,7 @@ class Cart
     {
         self::initialize();
         $cart = Session::get('cart');
-        if(array_key_exists($cartItemId,$cart))
+        if(isset($cart[$cartItemId]['onlineBookingsReservationId']))
         {
             return $cart[$cartItemId]['onlineBookingsReservationId'];
         }

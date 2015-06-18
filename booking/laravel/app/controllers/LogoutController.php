@@ -15,8 +15,11 @@ class LogoutController extends BaseController
         {
             foreach ($cart as $cartItemId => $cartItem)
             {
-                $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
-                CS_API::deleteOnlineReservation($onlineBookingsReservationId); //Remove the online booking
+                if ($cart[$cartItemId]['type'] == 'heat')
+                {
+                    $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
+                    CS_API::deleteOnlineReservation($onlineBookingsReservationId); //Remove the online booking
+                }
                 Cart::removeFromCart($cartItemId); //Then remove it from the local cart
             }
         }
