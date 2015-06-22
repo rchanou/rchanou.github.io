@@ -65,7 +65,8 @@ $translationsSplitByCulture = array(
         'str_lapTimesByRacer'=> 'Lap Times by Racer',
         'str_clickARacer'=> '(Click a racer to expand!)',
         'str_raceNeverFinished'=> 'This race was never concluded and there is no more data to display.',
-        'str_poweredBy'=> 'Powered By'
+        'str_poweredBy'=> 'Powered By',
+        'str_missingCardId' => 'Please have the track assign a Card ID to your account'
     )
 );
 
