@@ -33,6 +33,9 @@ function Ingenico (opts) {
 	this.opts.DISABLECVV = opts.provider.options.DISABLECVV || 'False';
 	this.opts.DISABLEAVS = opts.provider.options.DISABLEAVS || 'False';
 	
+	// INTERACTIVEGETSIGRESP OPTIONS
+	this.opts.SIGTYPE = opts.provider.options.SIGTYPE || 'INITIALS'; // "Initials" prompts non-initials?
+	
 	request = request.defaults({
 		url: 'http://' + this.opts.host + ':' + this.opts.port,
 		method: 'POST',
@@ -47,7 +50,7 @@ Ingenico.prototype.signature = function signature(signature) {
 	'￼￼<INTERACTIVETIMEOUT>' + parseInt(self.opts.timeout) + '</INTERACTIVETIMEOUT>' +
 	'  <TRANSACTIONTYPE>INTERACTIVEGETSIG</TRANSACTIONTYPE>' +
 	'  <LEGALTEXT>' + signature.text + '</LEGALTEXT>' +
-	'  <SIGTYPE>INITIALS</SIGTYPE>' +
+	'  <SIGTYPE>' + self.opts.SIGTYPE + '</SIGTYPE>' +
 	'</TRANSACTION>';
 
 	return new Promise(function(resolve, reject) {
