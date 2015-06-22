@@ -32,15 +32,24 @@ function respondCreditCard(req, res, next) {
 			});
 			break;
 			
-		case 'signature':
-			creditCard.signature(req.body, function(err, result) {
+		default:
+			next(new Error('Action not supported: ' + req.params.action));
+			break;
+	}
+}
+
+function respondSignature(req, res, next) {
+
+	switch(req.params.action) {			
+		case 'capture':
+			creditCard.signature(req.body, function(err, result) { // Needs to be refactored into "Signature" class
 				//console.log('\n\Signature Transaction Result', req.body, err, result);
 				err ? res.send(err) : res.send({ result: result });
 			});
 			break;
 
 		default:
-			next(new Error('Action not supported: ' + req.params.action));
+			next(new Error('Action not supported: ' + req.params.action + ' ("/signature/capture" is supported)'));
 			break;
 	}
 }
@@ -63,6 +72,7 @@ server.use(restify.CORS());
 server.post('/grid/:gridType', respondGrid);
 server.post('/receipt/:receiptType', respondReceipt);
 server.post('/creditCard/:action', respondCreditCard);
+server.post('/signature/:action', respondSignature);
 
 server.listen(8000, function() {
   console.log('%s listening at %s', server.name, server.url);
