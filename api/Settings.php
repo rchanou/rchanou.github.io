@@ -17,7 +17,7 @@ class Settings extends BaseApi
         $this->access['filter'] = Enums::API_PUBLIC_ACCESS;
         $this->access['all']    = Enums::API_PUBLIC_ACCESS;
     }
-    
+
     /**
      * Whitelist of groups/settings. Set setting (or group) to "true" if it is whitelisted.
      * By default, nothing is allowed.
@@ -28,11 +28,9 @@ class Settings extends BaseApi
         ),
         'kiosk' => true,
         'ScotKart' => true,
-        'MobileApp' => array(
-            'currentCulture' => true
-        )
+        'MobileApp' => true
     );
-        
+
     private $settingsNotExistingInOlderVersions = array(
         array('SettingName' => 'CfgRegType',                'TerminalName' => 'kiosk', 'SettingValue' => 0,         'DataType' => 'int'),
         array('SettingName' => 'CfgRegRcrNameReq',          'TerminalName' => 'kiosk', 'SettingValue' => "true",    'DataType' => 'bit'), // TODO Should come from MainEngine > ShowRacerNameInRegistration
@@ -92,29 +90,47 @@ class Settings extends BaseApi
     );
 
     public function index($desiredData, $sub = null) {
+
+        $requestContainsPrivateSetting = false;
+
+        // Handling these cases:
+        //   - Want a group: /settings/get.json?key=cs-dev&group=MainEngine
+        //   - Want a single setting from a group /settings/get.json?key=cs-dev&group=MainEngine&setting=currentCulture
+        //   - Want multiple settings from a group: /settings/get.json?key=cs-dev&group=MainEngine&setting[]=currentCulture&setting[]=AcceptExternalPayment
+
+        // Error cases to handle:
+        //   - Group is missing
+        //   - Enforce private key if *ANY* of the settings we want are private (all or nothing)
+
+        // Handle missing "group" parameter
+        if(empty($_GET['group'])) throw new RestException(400, "Bad Request: Missing 'group' parameter");
+
         // Put settings into an array (if they are not already)
         if(isset($_GET['setting']) && !is_array($_GET['setting'])) $_GET['setting'] = array($_GET['setting']);
-        
-        $requestContainsPrivateSetting = false;
-        
-        // Check requested keys against the whitelist to see if we are looking for private settings
-        if(isset($_GET['setting'])) {
-            foreach(@$_GET['setting'] as $settingName) {
-                if(@$this->isAllowedWhitelist[@$_GET['group']][$settingName] !== true) $requestContainsPrivateSetting = true;
+
+        //Enforce whitelist
+
+        //If the request is for the entire group, but entire group isn't whitelisted, private access is needed
+        $requestIsForEntireGroup = !isset($_GET['setting']);
+        $groupIsFullyWhiteListed = (isset($this->isAllowedWhitelist[$_GET['group']]) && $this->isAllowedWhitelist[$_GET['group']] === true);
+        if ($requestIsForEntireGroup && !$groupIsFullyWhiteListed) { $requestContainsPrivateSetting = true; }
+
+        //If the request is for specific settings, but one or more are not represented in the whitelist, private access is needed
+        $requestIsForOneOrMoreSpecificSettings = !$requestIsForEntireGroup;
+        if($requestIsForOneOrMoreSpecificSettings && !$groupIsFullyWhiteListed)
+        {
+            foreach($_GET['setting'] as $settingName) {
+                $settingIsNotInWhiteList = ( !isset($this->isAllowedWhitelist[$_GET['group']][$settingName]) || $this->isAllowedWhitelist[$_GET['group']][$settingName] !== true);
+                if ($settingIsNotInWhiteList) {
+                    $requestContainsPrivateSetting = true;
+                    break;
+                }
             }
-        } else {
-            if(@$this->isAllowedWhitelist[@$_GET['group']] !== true) $requestContainsPrivateSetting = true;
         }
-        
+
         // Require private key if we are looking for private settings
-        if($requestContainsPrivateSetting) {
-            if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
-                throw new RestException(401, "Invalid authorization!");
-            }
-        }
-         // && $_REQUEST['key'] != $GLOBALS['privateKey'])
-         //    throw new RestException(412,'Not authorized');
-        
+        if($requestContainsPrivateSetting && !\ClubSpeed\Security\Authenticate::privateAccess()) throw new RestException(401, "Invalid authorization!");
+
         switch($desiredData) {
             case 'get':
                 return $this->getSettings(@$_GET['group'], @$_GET['setting']);
@@ -148,7 +164,7 @@ class Settings extends BaseApi
         }
 
     }
-        
+
     public function getSettings($group, $setting = null)
     {
         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
@@ -157,14 +173,14 @@ class Settings extends BaseApi
         $output = array();
         if(!empty($setting)) { // Get specific settings
             $tsql_params = array(&$group);
-            
+
             // Create placeholders in query
             $placeholders = array();
             foreach($setting as $key => $settingName) {
                 $tsql_params[] = $settingName;
                 $placeholders[] = '?';
             }
-            
+
             $tsql = 'SELECT * FROM ControlPanel WHERE TerminalName = ? AND SettingName IN ' . '(' . implode(',', $placeholders) . ')';
 
             $rows = $this->run_query($tsql, $tsql_params);
@@ -178,13 +194,13 @@ class Settings extends BaseApi
                 $tsql = "SELECT * FROM CfgRegistration WHERE CfgRegType = ?";
                 $tsql_params = array('0');
                 $config = $this->run_query($tsql, $tsql_params);
-                
+
                 $rowsConfig = array();
                 foreach($config[0] as $col => $val) {
                     $dataType = ($val == "0" || $val == "1") ? 'bit' : '512';
                     $rowsConfig[] = array('TerminalName' => 'kiosk', 'SettingName' => $col, 'SettingValue' => $val, 'DataType' => $dataType);
                 }
-                
+
                 // Get older "Registration1" Control Panel Settings
                 // Create placeholders in query
                 $placeholders = array();
@@ -194,22 +210,22 @@ class Settings extends BaseApi
                     $tsql_params[] = $settingName;
                     $placeholders[] = '?';
                 }
-                
+
                 $tsql = "SELECT * FROM ControlPanel WHERE TerminalName = ? AND SettingName IN " . '(' . implode(',', $placeholders) . ')';
                 $rowsRegistration1 = $this->run_query($tsql, $tsql_params);
-                
+
                 $rows = array_merge($rowsRegistration1, $rowsConfig);
             } elseif($group == 'kiosk' && $registrationVersion == 'old') {
                 // Else, get from control panel as Registration1 and format to match CfgRegType format
                 $tsql = "SELECT * FROM ControlPanel WHERE TerminalName = ?";
                 $tsql_params = array('Registration1');
                 $rows = $this->run_query($tsql, $tsql_params);
-                
+
                 // TODO Loop each row and remap array keys
                 foreach($rows as $key => $values) {
                     $values['TerminalName'] = 'kiosk';
                     if(array_key_exists($values['SettingName'], $this->oldToNew)) {
-                        
+
                         // Pass through older settings (new kiosk does not account for these)
                         if($this->oldToNew[$values['SettingName']] == null) {
                             //unset($rows[$key]); // Uncomment to remove the older settings
@@ -219,35 +235,35 @@ class Settings extends BaseApi
 
                     }
                 }
-                    
+
                 // Add settings that are not part of the older settings w/ defaults
                 foreach($this->settingsNotExistingInOlderVersions as $key => $val) {
                     $rows[$val['SettingName']] = $val;
                 }
-                
-            } else {                
+
+            } else {
                 // Get any other group
                 $tsql = "SELECT * FROM ControlPanel WHERE TerminalName = ?";
                 $tsql_params = array(&$group);
                 $rows = $this->run_query($tsql, $tsql_params);
             }
-            
+
             // Applies to all kiosks
             if($group == 'kiosk') {
 
                 $mainEngineSettings = array('MainEngine' => array('CustomText1','CustomText2','CustomText3','CustomText4','AgeAllowOnlineReg','AgeNeedParentWaiver','Reg_EnableFacebook','AllowDuplicateEmail','BusinessName','FacebookPageURL','Reg_CaptureProfilePic'));
 
                 foreach($mainEngineSettings as $group => $values) {
-                        foreach($values as $currentValue)
+                    foreach($values as $currentValue)
+                    {
+                        $setting = $this->getSettings($group, array($currentValue));
+                        if (array_key_exists('settings',$setting) && array_key_exists($currentValue,$setting['settings']))
                         {
-                                $setting = $this->getSettings($group, array($currentValue));
-                                if (array_key_exists('settings',$setting) && array_key_exists($currentValue,$setting['settings']))
-                                {
-                                    $rows[] = $setting['settings'][$currentValue];
-                                }
+                            $rows[] = $setting['settings'][$currentValue];
                         }
+                    }
                 }
-                
+
                 // Add in waivers (Club Speed is hardcoded to 1 = Adult, 2 = Kid)
                 $tsql = "SELECT * FROM WaiverTemplates WHERE Waiver IN (1,2)";
                 $tsql_params = array();
@@ -262,11 +278,11 @@ class Settings extends BaseApi
                     );
                 }
 
-                
+
                 /**
                  * Add in dropdown for Events running today
                  */
-                
+
                 // Find CfgRegValidateGrp
                 $CfgRegValidateGrp = false;
                 foreach($rows as $row) {
@@ -274,18 +290,18 @@ class Settings extends BaseApi
                         $CfgRegValidateGrp = filter_var($row['SettingValue'], FILTER_VALIDATE_BOOLEAN);
                     }
                 }
-                
+
                 if($CfgRegValidateGrp) {
                     $tsql = "GetTodayEventsForRegistration";
                     $tsql_params = array();
                     $events = $this->run_query($tsql, $tsql_params);
                     $eventsById = array();
-                    
+
                     $eventsById[] = array('-1' => 'Walk-in');
                     foreach($events as $event) {
                         $eventsById[] = array($event['EventID'] => $event['EventDesc']);
                     }
-                    
+
                     $rows[] = array(
                         'TerminalName' => 'kiosk',
                         'SettingName' => "eventGroups",
@@ -309,7 +325,7 @@ class Settings extends BaseApi
                         $sourcesByLocationID[$source['SourceName']] = $source;
                         if (!array_key_exists('LocationID',$source))
                         {
-                                $source['LocationID'] = '1'; //If older Club Speeds do not have LocationID, default to 1
+                            $source['LocationID'] = '1'; //If older Club Speeds do not have LocationID, default to 1
                         }
                     }
                 }
@@ -321,36 +337,36 @@ class Settings extends BaseApi
                     'DataType' => '1024000'
                 );
             }
-            
+
             // Handle decoders
             if ($group == "decoders")
             {
-                    // Add in decoders
-                    $tsql = "SELECT * FROM TimerControls";
-                    $tsql_params = array();
-                    $decoders = $this->run_query($tsql, $tsql_params);
-                    $decodersByLoopID = array();
-                    foreach($decoders as $decoder) {
-                        $decodersByLoopID[$decoder['LoopID']] = $decoder;
-                    }
-                    $rows[] = array(
-                        'TerminalName' => 'decoders',
-                        'SettingName' => "Decoders",
-                        'Description' => "Decoders from the TimerControls table",
-                        'SettingValue' => $decodersByLoopID,
-                        'DataType' => '1024000'
-                    );
+                // Add in decoders
+                $tsql = "SELECT * FROM TimerControls";
+                $tsql_params = array();
+                $decoders = $this->run_query($tsql, $tsql_params);
+                $decodersByLoopID = array();
+                foreach($decoders as $decoder) {
+                    $decodersByLoopID[$decoder['LoopID']] = $decoder;
+                }
+                $rows[] = array(
+                    'TerminalName' => 'decoders',
+                    'SettingName' => "Decoders",
+                    'Description' => "Decoders from the TimerControls table",
+                    'SettingValue' => $decodersByLoopID,
+                    'DataType' => '1024000'
+                );
             }
         }
-        
+
         foreach($rows as $key => $val) {
             if($val['DataType'] == 'bit') {
                 $rows[$key]['SettingValue'] = filter_var($rows[$key]['SettingValue'], FILTER_VALIDATE_BOOLEAN);
             }
             $output[$val['SettingName']] = $rows[$key];
         }
-        
-        return array('settings' => $output); 
+
+        return array('settings' => $output);
     }
 
     private function getRegistrationVersion() {
@@ -362,14 +378,14 @@ class Settings extends BaseApi
 
     private function run_query($tsql, $params = array(), $database = null) {
         $tsql_original = $tsql . ' ';
-                
-                // Setting default for older installs
-                $GLOBALS['defaultDatabase'] = empty($GLOBALS['defaultDatabase']) ? 'ClubspeedV8' : $GLOBALS['defaultDatabase'];
-                
-                // Allow database to be overridden
-                $database = empty($database) ? $GLOBALS['defaultDatabase'] : $database;
-        
-                // Connect
+
+        // Setting default for older installs
+        $GLOBALS['defaultDatabase'] = empty($GLOBALS['defaultDatabase']) ? 'ClubspeedV8' : $GLOBALS['defaultDatabase'];
+
+        // Allow database to be overridden
+        $database = empty($database) ? $GLOBALS['defaultDatabase'] : $database;
+
+        // Connect
         try {
             $conn = new PDO("sqlsrv:server=(local) ; Database=" . $database, "", "");
             $conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
