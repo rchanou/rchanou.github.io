@@ -1079,24 +1079,72 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
 
     function tryToShowNextSlide()
     {
-        if ($scope.validSlideSearchStart == null) //Record where we've started our search
+        debugToConsole("Trying to show next slide in the " + $scope.currentTimeline + " timeline.");
+        if ($scope.currentTimeline == 'regular')
         {
-            $scope.validSlideSearchStart = $scope.channel.currentSlideIndex - 1;
-            if ($scope.validSlideSearchStart < 0)
+            if ($scope.validSlideSearchStart == null) //Record where we've started our search
             {
-                $scope.validSlideSearchStart = $scope.channel.numberOfRegularTimelineSlides;
+                $scope.validSlideSearchStart = $scope.channel.currentSlideIndex - 1;
+                if ($scope.validSlideSearchStart < 0)
+                {
+                    $scope.validSlideSearchStart = $scope.channel.numberOfRegularTimelineSlides - 1;
+                }
+            }
+
+            if ($scope.channel.currentSlideIndex == $scope.validSlideSearchStart) //If we ended our search, report an error
+            {
+                reportErrorAndRestart($scope.strings['str_noValidSlidesToShow']);
+            }
+            else //Look for the next valid slide
+            {
+                debugToConsole("Current slide cannot be shown. Skipping to next slide.");
+                $scope.channel.showNextTimelineAndSlide();
+            }
+        }
+        else if ($scope.currentTimeline == 'races')
+        {
+            if ($scope.validRacesSlideSearchStart == null) //Record where we've started our search
+            {
+                $scope.validRacesSlideSearchStart = $scope.channel.currentSlideIndex - 1;
+                if ($scope.validRacesSlideSearchStart < 0)
+                {
+                    $scope.validRacesSlideSearchStart = $scope.channel.numberOfRacesTimelineSlides - 1;
+                }
+            }
+
+            if ($scope.channel.currentSlideIndex == $scope.validRacesSlideSearchStart) //If we ended our search, report an error
+            {
+                reportErrorAndRestart($scope.strings['str_noValidSlidesToShow']);
+            }
+            else //Look for the next valid slide
+            {
+                debugToConsole("Current slide cannot be shown. Skipping to next slide.");
+
+                debugToConsole("Time to show the next slide. Current timeline: " + $scope.currentTimeline);
+                if ($scope.channel.numberOfRacesTimelineSlides > 1)
+                {
+                    $scope.channel.currentSlideIndex++;
+                    if ($scope.channel.currentSlideIndex >= $scope.channel.numberOfRacesTimelineSlides)
+                    {
+                        $scope.channel.currentSlideIndex = 0;
+                    }
+
+                    if (!shouldShowSlide()) //If the current slide has a filter preventing it from being seen
+                    {
+                        tryToShowNextSlide(); //Try to skip to the next one
+                    }
+                    else
+                    {
+                        $scope.validRacesSlideSearchStart = null;
+                        debugToConsole("Moving speedscreen to slide " + $scope.channel.currentSlideIndex + " of the Races timeline");
+                        var durationOfCurrentSlideMs = $scope.channel.renderCurrentSlide();
+                        debugToCountdownArea('Time until next slide: ', durationOfCurrentSlideMs);
+                        $scope.channel.queueUpNextSlide(durationOfCurrentSlideMs);
+                    }
+                }
             }
         }
 
-        if ($scope.channel.currentSlideIndex == $scope.validSlideSearchStart) //If we ended our search, report an error
-        {
-            reportErrorAndRestart($scope.strings['str_noValidSlidesToShow']);
-        }
-        else //Look for the next valid slide
-        {
-            debugToConsole("Current slide cannot be shown. Skipping to next slide.");
-            $scope.channel.showNextTimelineAndSlide();
-        }
     }
 
     function updateRaceStateAndRunConditionalOverlays()
