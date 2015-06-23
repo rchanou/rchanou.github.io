@@ -254,6 +254,10 @@ class Step1Controller extends BaseController
                     }
                 }
             }
+            else //If for whatever reason the API call fails to capture the default value
+            {
+                $settings['eventGroupIDOptions']['-1'] = 'Walk-in';
+            }
         }
 
         //Assuming that the user is not a minor to start with
