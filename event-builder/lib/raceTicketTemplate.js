@@ -46,7 +46,7 @@ var defaults = {
           "showScheduledTime"       : true
         , "printGridOnRaceTicket"   : true
         , "printAgeOnRaceTicket"    : true
-        , "showHeatNumber"          : true
+        , "showHeatNo"              : true
         , "useHeatNumber"           : true
         , "numberOfTracks"          : 1
     }
@@ -95,7 +95,7 @@ RaceTicketTemplate.prototype.create = function(body) {
   log.debug('scheduled time');
 
   // Print the heat number or sequence number
-  if(options.showHeatNumber) // showHeatNumber??
+  if(options.showHeatNo)
       output += buildLine(resources.strHeatNumber, heat.heatNumber);
   else
       output += buildLine(resources.strHeatNumber, heat.sequenceNumber); // not really part of the heat -- it's actually part of the TimeslotHeat ViewModel..
