@@ -47,7 +47,7 @@ class Convert {
      * @return string The dateString in the format which the database expects.
      */
     public static function toDateForServer($date, $dateFormat = null) {
-        if (is_null($date))
+        if (self::is_null_or_db_null($date))
             return Enums::DB_NULL;
         if (is_string($date)) {
             if (empty($date))
