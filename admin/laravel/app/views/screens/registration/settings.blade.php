@@ -175,7 +175,6 @@ Registrations Settings
                   @else
 
                   <div class="col-sm-6">
-                    <div class="form-group">
                       @if(isset($registrationSettings['waiverFontSize']))
                       <div class="form-group">
                           <label class="col-sm-4 col-md-4 col-lg-4 control-label">Waiver Font Size</label>
