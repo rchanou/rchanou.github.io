@@ -12,6 +12,14 @@ class DisconnectedController extends BaseController
 {
     public function entry()
     {
+        $mostRecentAPICallResult = 'None!';
+
+        if (Session::has('callInfo'))
+        {
+            $mostRecentAPICallResult = json_encode(Session::get('callInfo'),true);
+        }
+        CS_API::log('ERROR :: Online Booking user reached disconnected page. Most recent API call results: ' . $mostRecentAPICallResult);
+
         return View::make('/errorpages/disconnected',
             array(
                 'images' => Images::getImageAssets(),

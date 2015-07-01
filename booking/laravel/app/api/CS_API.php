@@ -897,7 +897,7 @@ class CS_API
     ###########
     */
 
-    public static function log($message, $terminal = 'Club Speed PHP API', $username = '')
+    public static function log($message, $terminal = 'Club Speed Online Booking', $username = '')
     {
         self::initialize();
 
@@ -1018,6 +1018,9 @@ class CS_API
             }
             $response = null;
         }
+
+        $callInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $response);
+        Session::put('callInfo',$callInfo);
 
         return array('response' => $response,
             'error' => $errorMessage);

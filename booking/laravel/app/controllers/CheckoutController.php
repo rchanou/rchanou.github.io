@@ -200,6 +200,7 @@ class CheckoutController extends BaseController
         $currentOnlineReservations = CS_API::getOnlineReservations();
         if ($currentOnlineReservations === false || $currentOnlineReservations === null)
         {
+            CS_API::log('ERROR :: Online Booking failed at payment step while checking for expired cart items.');
             return Redirect::to('/disconnected');
         }
         $listOfRemoteOnlineBookingReservationIds = array();
@@ -277,6 +278,7 @@ class CheckoutController extends BaseController
         $checkId = CS_API::createCheck($checkDetails);
         if ($checkId === null || !is_numeric($checkId))
         {
+            CS_API::log('ERROR :: Online Booking failed at check creation step.');
             return Redirect::to('/disconnected');
         }
 
@@ -286,6 +288,7 @@ class CheckoutController extends BaseController
         $check = CS_API::getCheck($checkId);
         if ($check === null || !property_exists($check,'checks'))
         {
+            CS_API::log('ERROR :: Online Booking failed at the step it tried to fetch a check.');
             return Redirect::to('/disconnected');
         }
 
@@ -368,6 +371,7 @@ class CheckoutController extends BaseController
 
         if ($result === null)
         {
+            CS_API::log('ERROR :: Online Booking failed at the make payment step.');
             return Redirect::to('/disconnected');
         }
         else if ($result === true) //STEP 6: If successful, direct to success page
@@ -383,6 +387,7 @@ class CheckoutController extends BaseController
                         $result = CS_API::makeOnlineReservationPermanent($onlineBookingsReservationId); //Mark the online booking reservation and permanent
                         if ($result === null)
                         {
+                            CS_API::log('ERROR :: Online Booking failed at the make online reservation permanent step.');
                             return Redirect::to('/disconnected');
                         }
                     }

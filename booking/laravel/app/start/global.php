@@ -52,6 +52,14 @@ App::error(function(Exception $exception, $code)
     Log::error($exception); //Local logging (laravel.log)
     CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code, 'Club Speed Online Booking'); //DB logging
 
+    $mostRecentAPICallResult = 'None!';
+
+    if (Session::has('callInfo'))
+    {
+        $mostRecentAPICallResult = json_encode(Session::get('callInfo'),true);
+    }
+    CS_API::log('ERROR :: Online Booking user reached error page. Most recent API call results: ' . $mostRecentAPICallResult);
+
     return View::make('/errorpages/error',
         array(
             'images' => Images::getImageAssets(),
