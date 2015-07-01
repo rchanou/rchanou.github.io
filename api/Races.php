@@ -301,7 +301,7 @@ EOS;
             $sql = str_replace("{{track_clause}}", "1=1", $sql);
         }
         $upcoming = $this->run_query($sql, $params);
-        $schedule = [];
+        $schedule = array();
         foreach($upcoming as $heat) {
             $schedule[] = array(
                   "id"              => Convert::convert($heat["HeatNo"], Types::$integer)
