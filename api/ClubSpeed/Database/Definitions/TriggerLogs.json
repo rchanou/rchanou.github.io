@@ -1,0 +1,35 @@
+{
+    "table": {
+        "name": "dbo.TriggerLogs",
+        "alias": "trgl"
+    },
+    "keys": [
+        "ID"
+    ],
+    "columns": [
+        {
+              "name": "ID"
+            , "type": "int"
+        }
+        , {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "LastUpdated"
+            , "type": "datetime"
+        }
+        , {
+              "name": "TableName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Type"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "table": {
+        "name": "dbo.MembershipTypes",
+        "alias": "mt"
+    },
+    "keys": [
+        "MembershipTypeID"
+    ],
+    "columns": [
+        {
+              "name": "MembershipTypeID"
+            , "type": "int"
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "IsExpires"
+            , "type": "bit"
+        }
+        , {
+              "name": "Seq"
+            , "type": "int"
+        }
+        , {
+              "name": "Enabled"
+            , "type": "bit"
+        }
+        , {
+              "name": "ExpirationType"
+            , "type": "int"
+        }
+        , {
+              "name": "PriceLevel"
+            , "type": "int"
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "table": {
+        "name": "dbo.Sources",
+        "alias": "src"
+    },
+    "keys": [
+        "SourceID"
+    ],
+    "columns": [
+        {
+              "name": "SourceID"
+            , "type": "int"
+        }
+        , {
+              "name": "SourceName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Enabled"
+            , "type": "bit"
+        }
+        , {
+              "name": "Seq"
+            , "type": "int"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "CaboOnly"
+            , "type": "bit"
+        }
+        , {
+              "name": "Languages"
+            , "type": "bit"
+        }
+        , {
+              "name": "LocationID"
+            , "type": "int"
+        }
+    ]
+}

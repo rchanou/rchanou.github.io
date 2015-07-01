@@ -45,6 +45,8 @@ class ReservationsLogic extends BaseLogic {
         // note that in 5.4+, we can just reference $this inside the closure
         // and then $this can properly access private and protected items
         return parent::_create($params, function($reservation) use (&$logic) {
+            if (empty($reservation->OnlineBookingsID))
+                throw new \RequiredArgumentMissingException("Create reservation was missing OnlineBookingsID!");
             $availability = $logic->bookingAvailability->get($reservation->OnlineBookingsID);
             $availability = $availability[0];
             if($availability->ProductSpotsAvailableOnline < $reservation->Quantity)

@@ -1,0 +1,35 @@
+{
+    "table": {
+        "name": "dbo.TriggerMemberships",
+        "alias": "trgm"
+    },
+    "keys": [
+        "ID"
+    ],
+    "columns": [
+        {
+              "name": "ID"
+            , "type": "int"
+        }
+        , {
+              "name": "CustID"
+            , "type": "int"
+        }
+        , {
+              "name": "MembershipTypeID"
+            , "type": "int"
+        }
+        , {
+              "name": "LastUpdated"
+            , "type": "datetime"
+        }
+        , {
+              "name": "IsDeleted"
+            , "type": "bit"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+    ]
+}
