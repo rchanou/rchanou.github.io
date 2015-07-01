@@ -1,4 +1,8 @@
 <?php
+
+use ClubSpeed\Utility\Types;
+use ClubSpeed\Utility\Convert;
+
 /**
  * Club Speed API
  *
@@ -41,6 +45,7 @@ class Races
         if($race_id == 'upcoming') return $this->upcoming();
         if($race_id == 'start') return $this->start(@$_REQUEST['heatId']);
         if($race_id == 'stop') return $this->stop(@$_REQUEST['trackId']);
+        if($race_id == 'schedule') return $this->schedule();
 
         if($sub != null) {
             switch($sub) {
@@ -231,6 +236,86 @@ EOS;
             $return['races'][] = $populatedRace;
         }
         return $return;
+    }
+
+    public function schedule() {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess())
+            throw new RestException(401, "Invalid authorization!");
+        $track_id = (isset($_GET['track']) && is_numeric($_GET['track'])) ? (int)$_GET['track'] : null;
+        $limit = (isset($_REQUEST['limit']) && is_numeric($_REQUEST['limit'])) ? (int)$_REQUEST['limit'] : 10; // default to 10, the following race queries are quite heavy.
+        if ($limit > 50)
+            throw new RestException(412, 'Cannot return more than 50 upcoming races!');
+
+        // TODO Filter by Speed Level
+
+        $sql = <<<EOS
+;WITH HeatSpots AS (
+    SELECT
+          hd.HeatNo
+        , COUNT(hd.CustID) AS UsedSpots
+    FROM dbo.HeatDetails hd
+    GROUP BY hd.HeatNo
+)
+, LastFinishedHeat AS (
+    SELECT TOP(1)
+        hm.ScheduledTime
+    FROM dbo.HeatMain hm
+    WHERE
+        {{track_clause}}
+        AND hm.HeatStatus IN (1,2,3)
+    ORDER BY
+        hm.Begining DESC
+)
+SELECT TOP ($limit)
+      hm.HeatNo
+    , hm.HeatTypeNo
+    , ht.HeatTypeName
+    , hm.TrackNo
+    , hm.ScheduledTime
+    , hm.HeatStatus
+    , hm.Begining
+    , hm.Finish
+    , hm.SpeedLevel
+    , hm.NumberOfReservation
+    , ISNULL(hs.UsedSpots, 0) AS UsedSpots
+    , hm.RacersPerHeat
+FROM dbo.HeatMain hm
+INNER JOIN dbo.HeatTypes ht
+    ON hm.HeatTypeNo = ht.HeatTypeNo
+LEFT OUTER JOIN HeatSpots hs
+    ON hm.HeatNo = hs.HeatNo
+WHERE
+    {{track_clause}}
+    AND HeatStatus IN (0,4)
+    AND ScheduledTime > (SELECT TOP(1) lfh.ScheduledTime FROM LastFinishedHeat lfh)
+ORDER BY ScheduledTime ASC
+EOS;
+
+        $params = array();
+        if (!empty($track_id)) {
+            $params[] = $track_id;
+            $params[] = $track_id; // yes, duplicated on purpose
+            $sql = str_replace("{{track_clause}}", "hm.TrackNo = ?", $sql);
+        }
+        else {
+            $sql = str_replace("{{track_clause}}", "1=1", $sql);
+        }
+        $upcoming = $this->run_query($sql, $params);
+        $schedule = [];
+        foreach($upcoming as $heat) {
+            $schedule[] = array(
+                  "id"              => Convert::convert($heat["HeatNo"], Types::$integer)
+                , "race_number"     => substr($heat["HeatNo"], -2) // consider not converting to integer, we might lose intentional zeroes
+                , "track_id"        => Convert::convert($heat["TrackNo"], Types::$integer)
+                , "heat_type_id"    => Convert::convert($heat["HeatTypeNo"], Types::$integer)
+                , "race_name"       => $heat["HeatTypeName"]
+                , "starts_at"       => $heat["ScheduledTime"]
+                , "used_spots"      => Convert::convert($heat["UsedSpots"], Types::$integer)
+                  // "reservations" => $heat["NumberOfReservation"], // unused at this time, should potentially just be a part of used_spots added by sql
+                , "total_spots"     => Convert::convert($heat["RacersPerHeat"], Types::$integer)
+            );
+        }
+        return array('races' => $schedule);
     }
         
     public function next($track = null, $offset = 0) {
