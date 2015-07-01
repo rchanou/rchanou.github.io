@@ -176,6 +176,21 @@ Registrations Settings
 
                   <div class="col-sm-6">
                     <div class="form-group">
+                      @if(isset($registrationSettings['waiverFontSize']))
+                      <div class="form-group">
+                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Waiver Font Size</label>
+                          <div class="col-sm-8 col-md-8 col-lg-8">
+
+                                <input class="form-control" type="number" style="width:50%;" id="waiverFontSize" name="waiverFontSize" value="{{$registrationSettings['waiverFontSize']}}">
+                                  <span class="help-block text-left">
+                                Changes the font size of the waiver text that is generated when a customer registers. Default: 10.
+                                </span>
+
+                          </div>
+                      </div>
+                      @endif
+
+                      <div class="form-group">
                       <label class="col-sm-4 col-md-4 col-lg-4 control-label">Enable Facebook</label>
                       <div class="col-sm-8 col-md-8 col-lg-8">
                         <input type="checkbox" id="Reg_EnableFacebook" name="Reg_EnableFacebook" {{$isChecked['Reg_EnableFacebook']}}>

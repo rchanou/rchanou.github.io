@@ -174,6 +174,7 @@ class RegistrationController extends BaseController
         $registrationSettings['emailText'] = isset($input['emailText']) ? $input['emailText'] : '';
         $registrationSettings['textingWaiver'] = isset($input['textingWaiver']) ? $input['textingWaiver'] : '';
         
+        if (isset($input['waiverFontSize'])) { $registrationSettings['waiverFontSize'] = $input['waiverFontSize'];}
 
         $newMainEngineSettings = array();
         $newreg1Settings = array();
@@ -220,6 +221,7 @@ class RegistrationController extends BaseController
 
         //Identify the settings that actually changed and need to be sent to Club Speed
         $currentSettings = Session::get('registrationSettings',array());
+
         foreach($currentSettings as $currentSettingName => $currentSettingValue)
         {
             if (isset($registrationSettings[$currentSettingName]))

@@ -258,17 +258,18 @@ class Racers
         if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
             throw new RestException(401, 'Invalid authorization');
         }
+
         if(!is_numeric($customerId)) throw new RestException(412, 'Please supply a customerId');
         if(!is_numeric($ruleId)) throw new RestException(412, 'Please supply a ruleId');
         
         // Get customer
         $customer = $this->racer($customerId);
         if(count($customer['racer']) == 0) throw new RestException(412, 'Customer not found');
-        
+
         // Get rule
         $rule = $this->run_query('SELECT * FROM Rules WHERE RuleID = ?', array($ruleId));
         if(count($rule[0]) == 0) throw new RestException(412, 'Rule not found');
-        
+
         // Build query to apply rule to customer
         $placeholders = $params = $fields = $columnsToUpdate = array();
         if($rule[0]['ChangeStatus1'] > 0) { $fields[] = 'Status1'; $params[] = $rule[0]['ChangeStatus1']; }
@@ -276,15 +277,16 @@ class Racers
         if($rule[0]['ChangeStatus3'] > 0) { $fields[] = 'Status3'; $params[] = $rule[0]['ChangeStatus3']; }
         if($rule[0]['ChangeStatus4'] > 0) { $fields[] = 'Status4'; $params[] = $rule[0]['ChangeStatus4']; }
         $params[] = $customerId;
-        
+
         if(count($fields) == 0) return array('success' => 'No rules to apply');
         
         foreach($fields as $id => $field) {
             $columnsToUpdate[] = "{$fields[$id]} = ?";
         }
         $columnsToUpdate = implode(', ', $columnsToUpdate);
-        
+
         $tsql = "UPDATE Customers SET {$columnsToUpdate} WHERE CustID = ?";
+
         $result = $this->run_exec($tsql, $params);
         
         return array('success' => true);
@@ -493,6 +495,19 @@ class Racers
         $footerLabelsFontSize = 12;
         $footerDataFontSize = 11;
 
+        $waiverFontSizeSetting = $this->run_query("SELECT SettingValue FROM ControlPanel WHERE TerminalName = 'Registration' AND SettingName = 'waiverFontSize'");
+        if (isset($waiverFontSizeSetting[0]['SettingValue']))
+        {
+            if ($termsFontSize != $waiverFontSizeSetting[0]['SettingValue']) //If we're not using the default size, switch fonts and adjust size accordingly
+            {
+                $headerFontSize = 11;
+                $subheaderFontSize = 10;
+                $font = 'fonts/DroidSansMono.ttf';
+                $fontBold = 'fonts/DroidSans-Bold.ttf';
+            }
+            $termsFontSize = $waiverFontSizeSetting[0]['SettingValue'];
+        }
+
         //Key default strings
         $headerText = "Express Assumption of risk, complete waiver and agreement not to sue, and indemnity agreement"; //TODO: That capital "A". Get rid of it. Ugly, ugly.
         $termsHeaderText = "READ THIS CAREFULLY - IT AFFECTS YOUR LEGAL RIGHTS";
@@ -516,7 +531,7 @@ class Racers
         {
             $allTermsLines = explode("\n",$termsTextWrapped);
             $heightPerLine = $heightOfTermsText / sizeof($allTermsLines);
-            $numberOfLinesPerPage = floor( ($termsHeight-30) / $heightPerLine);
+            $numberOfLinesPerPage = floor( ($termsHeight-50) / $heightPerLine);
 
             $currentTermsPage = array();
             while (sizeof($allTermsLines) > 0)
@@ -670,16 +685,8 @@ class Racers
             $waiverImageBase64 = 'data:image/' . 'jpeg' . ';base64,' . base64_encode($waiverImage);
 
             array_push($waivers,$waiverImageBase64);
-
         }
 
-/*        foreach($waivers as $currentWaiver)
-        {
-            echo "<img src='$currentWaiver'>'";
-        }
-
-
-        die();*/
         return $waivers;
 
     }
@@ -692,26 +699,41 @@ class Racers
 
     function wrap($fontSize, $angle, $fontFace, $string, $width){
 
-        return wordwrap($string,110); //Hacky way of gaining performance
+        //Method 1: Hacky way of gaining performance
+        if ($fontSize == 10) //Default, Arial font - not monospaced
+        {
+            return wordwrap($string,110);
+        }
+        else //Monospaced Droid Sans font
+        {
+            $dimensionsOfSingleCharacter = imagettfbbox($fontSize, $angle, $fontFace, 'A');
+            $widthOfSingleCharacter = $dimensionsOfSingleCharacter[2] - $dimensionsOfSingleCharacter[0];
 
-        /*      Original/more accurate function:
-            //Source: http://www.php.net/manual/en/function.imagettftext.php#89505
-                  $ret = "";
+            $numOfCharacters = (int)( $width / $widthOfSingleCharacter);
 
-                $arr = explode(' ', $string);
+            return wordwrap($string,$numOfCharacters);
+        }
 
-                foreach ( $arr as $word ){
+        //Method 2 - The real, slow (8+ seconds) way of properly wrapping any text/font in this context
+        /*$words = explode(" ",$string);
+        $wnum = count($words);
+        $line = '';
+        $string='';
+        for($i=0; $i<$wnum; $i++){
+            $line .= $words[$i];
+            $dimensions = imagettfbbox($fontSize, $angle, $fontFace, $line);
+            $lineWidth = $dimensions[2] - $dimensions[0];
 
-                    $teststring = $ret.' '.$word;
-                    $testbox = imagettfbbox($fontSize, $angle, $fontFace, $teststring);
-                    if ( $testbox[2] > $width ){
-                        $ret.=($ret==""?"":"\n").$word;
-                    } else {
-                        $ret.=($ret==""?"":' ').$word;
-                    }
-                }
-
-                return $ret;*/
+            if ($lineWidth > $width) {
+                $string.=($string != '' ? "\n".$words[$i].' ' : $words[$i].' ');
+                $line = $words[$i].' ';
+            }
+            else {
+                $string.=$words[$i].' ';
+                $line.=' ';
+            }
+        }
+        return $string;*/
     }
 
     /**
@@ -813,7 +835,7 @@ class Racers
                 , "Business"    => isset($request_data['BusinessName']) ? $request_data['BusinessName'] : ''
                 , "Participant" => $customer->FName . ' ' . $customer->LName
                 , "License #"   => ""
-                , "Birthdate"   => $customer->BirthDate
+                , "Birthdate"   => str_replace("T00:00:00.00","",$customer->BirthDate)
                 , "Phone"       => $customer->Cell // was 'mobile' earlier
                 , "Email"       => $customer->EmailAddress
                 , "CustID"      => $customerId

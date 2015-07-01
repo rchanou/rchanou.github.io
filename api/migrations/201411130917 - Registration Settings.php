@@ -8,7 +8,8 @@ $settings = array(
 	'genderRequired' => true,
     'statusChangesWhenRegistered' => '{"statusChanges": [1,0,0,0]}', //Change status 1 to 1, change status 2 to 0, etc...
     'statusChangesWhenRegisteredForEvent' => '{"statusChanges": [1,0,0,0]}', //Change status 1 to 1, change status 2 to 0, etc...
-    'zipValidated' => false
+    'zipValidated' => false,
+    'waiverFontSize' => 10
 	);
 
 error_reporting(E_ALL);
