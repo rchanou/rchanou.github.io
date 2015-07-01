@@ -16,7 +16,7 @@ class DisconnectedController extends BaseController
 
         if (Session::has('callInfo'))
         {
-            $mostRecentAPICallResult = json_encode(Session::get('callInfo'),true);
+            $mostRecentAPICallResult = json_encode(var_export(Session::get('callInfo'),true));
         }
         CS_API::log('ERROR :: Online Booking user reached disconnected page. Most recent API call results: ' . $mostRecentAPICallResult);
 

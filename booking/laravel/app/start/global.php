@@ -56,7 +56,7 @@ App::error(function(Exception $exception, $code)
 
     if (Session::has('callInfo'))
     {
-        $mostRecentAPICallResult = json_encode(Session::get('callInfo'),true);
+        $mostRecentAPICallResult = json_encode(var_export(Session::get('callInfo'),true));
     }
     CS_API::log('ERROR :: Online Booking user reached error page. Most recent API call results: ' . $mostRecentAPICallResult);
 
