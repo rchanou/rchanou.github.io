@@ -1019,8 +1019,11 @@ class CS_API
             $response = null;
         }
 
-        $callInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $response);
-        Session::put('callInfo',$callInfo);
+        if (strpos($url,'/logs') === false) //If the last call wasn't a simple log call, remember it
+        {
+            $callInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $response);
+            Session::put('callInfo',$callInfo);
+        }
 
         return array('response' => $response,
             'error' => $errorMessage);
