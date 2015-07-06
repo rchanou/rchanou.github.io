@@ -94,6 +94,7 @@
                 <ul>
                     <li>{{link_to('/registration/settings','Settings')}}</li>
                     <li>{{link_to('/registration/translations', 'Translations')}}</li>
+                    <li>{{link_to('/registration/waivers', 'Waivers')}}</li>
                     @if(Session::has('user') && strtolower(Session::get('user')) == 'support')
                     <li>{{link_to('/registration/create', 'Create Application')}}</li>
                     @endif

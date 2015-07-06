@@ -175,6 +175,25 @@ Registrations Settings
                   @else
 
                   <div class="col-sm-6">
+
+
+                      <div class="form-group">
+                          <label class="col-sm-4 col-md-4 col-lg-4 control-label">Use New Waivers</label>
+                          <div class="col-sm-8 col-md-8 col-lg-8">
+                              @if(isset($registrationSettings['useNewWaivers']))
+                                <input type="checkbox" id="useNewWaivers" name="useNewWaivers" {{$isChecked['useNewWaivers']}}>
+                                <span class="help-block text-left">
+                                If checked, the new registration will use {{link_to('/registration/waivers', 'waivers')}} from this new Admin Panel instead of <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/sp_admin'}}" target="_blank">sp_admin</a>.
+                                </span>
+                              @else
+                                  <div class="alert alert-warning">
+                                      Your server needs to have the new waivers installed. <p/>Please <a href="mailto:support@clubspeed.com">contact support</a> to request this feature.<p/><p/>
+                                      In the meanwhile, you can access your waivers via <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/sp_admin'}}" target="_blank">sp_admin</a>.
+                                  </div>
+                              @endif
+                          </div>
+                      </div>
+
                       @if(isset($registrationSettings['waiverFontSize']))
                       <div class="form-group">
                           <label class="col-sm-4 col-md-4 col-lg-4 control-label">Waiver Font Size</label>

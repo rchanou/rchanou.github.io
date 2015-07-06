@@ -258,6 +258,19 @@ class Step1Controller extends BaseController
             {
                 $settings['eventGroupIDOptions']['-1'] = 'Walk-in';
             }
+
+            //If the new-style waiver texts have been defined and requested, use those instead of the old Waiver1 and Waiver2 settings
+            if (isset($settings['useNewWaivers']) && $settings['useNewWaivers'] === true)
+            {
+                if (isset($strings['str_WaiverAdult']))
+                {
+                    $settings['Waiver1'] = $strings['str_WaiverAdult'];
+                }
+                if (isset($strings['str_WaiverChild']))
+                {
+                    $settings['Waiver2'] = $strings['str_WaiverChild'];
+                }
+            }
         }
 
         //Assuming that the user is not a minor to start with

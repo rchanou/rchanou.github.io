@@ -66,6 +66,8 @@ Route::group(array('before' => 'auth'), function()
 	Route::get('registration/create', 'RegistrationController@create');
     Route::get('registration/translations', 'RegistrationController@translations');
     Route::post('registration/translations/update', 'RegistrationController@updateTranslations');
+    Route::get('registration/waivers', 'RegistrationController@waivers');
+    Route::post('registration/waivers/update', 'RegistrationController@updateWaivers');
     Route::get('registration/translations/update/culture/{cultureKey}', 'RegistrationController@updateCulture');
     Route::post('registration/translations/cultures/update','RegistrationController@updateDropdownLanguages');
     Route::post('registration/images/update', 'RegistrationController@updateImage');

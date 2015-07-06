@@ -165,22 +165,18 @@ Translations
                                                     </thead>
                                                     <tbody>
                                                  @foreach($translations['en-US'] as $translationsKey => $translationsValue)
-                                                     <tr @if($translationsKey == 'str_WaiverAdult' || $translationsKey == 'str_WaiverChild') style="display: none;" @endif>
+                                                     @if($translationsKey != 'str_WaiverAdult' && $translationsKey != 'str_WaiverChild')
+                                                     <tr>
                                                         <td class="col-sm-3 col-xs-3"><label>{{$translationsKey}}</label></td>
                                                         <td class="col-sm-9 col-xs-9">
-                                                        @if($translationsKey == 'str_WaiverAdult' || $translationsKey == 'str_WaiverChild')
-                                                            <textarea style="display: none;" class="wideInput" name="trans[id_{{isset($translations[$cultureKey][$translationsKey]['id']) ? $translations[$cultureKey][$translationsKey]['id'] : 'new_' . $translationsKey}}]">
-                                                                {{isset($translations[$cultureKey][$translationsKey]['value']) ? $translations[$cultureKey][$translationsKey]['value'] : ""}}
-                                                            </textarea>
-                                                        @else
                                                             <input type="text"
                                                             class="text-center wideInput"
                                                             name="trans[id_{{isset($translations[$cultureKey][$translationsKey]['id']) ? $translations[$cultureKey][$translationsKey]['id'] : 'new_' . $translationsKey}}]"
                                                             placeholder="{{$translationsValue['value']}}"
                                                             value="{{isset($translations[$cultureKey][$translationsKey]['value']) ? $translations[$cultureKey][$translationsKey]['value'] : ""}}">
-                                                        @endif
                                                         </td>
                                                      </tr>
+                                                     @endif
                                                  @endforeach
                                                         </tbody>
                                                     </table>

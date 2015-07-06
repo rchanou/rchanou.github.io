@@ -72,6 +72,7 @@ class Settings {
             'genderShown' => true,
             'genderRequired' => true,
             'zipValidated' => false,
+            'useNewWaivers' => false,
 
             'states' => array('' => '','Alaska' => 'Alaska',
                 'Alabama' => 'Alabama',

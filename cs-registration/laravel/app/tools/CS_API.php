@@ -442,6 +442,21 @@ class CS_API
             {
                 $strings = $translations[$newCulture];
                 $strings["cultureNames"] = Strings::getCultureNames();
+                $settings = Session::get('settings');
+
+                //If the new-style waiver texts have been defined for the new language, use those instead of the old Waiver1 and Waiver2 settings
+                if (isset($settings['useNewWaivers']) && $settings['useNewWaivers'] === true)
+                {
+                    if (isset($strings['str_WaiverAdult']))
+                    {
+                        $settings['Waiver1'] = $strings['str_WaiverAdult'];
+                    }
+                    if (isset($strings['str_WaiverChild']))
+                    {
+                        $settings['Waiver2'] = $strings['str_WaiverChild'];
+                    }
+                }
+
                 Session::put('strings',$strings);
                 Session::put('settings',$settings);
                 Session::put("currentCulture",$newCulture);
