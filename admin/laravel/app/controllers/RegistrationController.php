@@ -161,7 +161,8 @@ class RegistrationController extends BaseController
           'zipValidated',
           'cfgRegShowBeenHereBefr',
           'CfgRegValidateGrp',
-          'minorSignatureWithParent'
+          'minorSignatureWithParent',
+          'useNewWaivers'
         );
 
         $registrationSettings = array();
@@ -510,6 +511,140 @@ class RegistrationController extends BaseController
 
             return Redirect::to('registration/settings')->with('message', 'Image uploaded successfully!');
         }
+
+    }
+
+    public function waivers()
+    {
+        //TODO: Centralize this data/pull from DB
+        $supportedCultures = array(
+            'en-US' => 'English (US)',
+            'en-GB' => 'English (UK)',
+            'en-NZ' => 'English (NZ)',
+            'en-AU' => 'English (AU)',
+            'en-IE' => 'English (IE)',
+            'en-CA' => 'English (CA)',
+            'es-MX' => 'Español',
+            'es-CR' => 'Español (CR)',
+            'es-ES' => 'Castellano',
+            'es-PR' => 'Español (PR)',
+            'ru-RU' => 'Pусский язык',
+            'fr-FR' => 'Français',
+            'fr-CA' => 'Français (CA)',
+            'de-DE' => 'Deutsch',
+            'nl-NL' => 'Nederlands',
+            'pl-PL' => 'Język polski',
+            'da-DK' => 'Dansk',
+            'ar-AE' => 'العربية',
+            'it-IT' => 'Italiano',
+            'bg-BG' => 'български език',
+            'sv-SE' => 'Svenska',
+            'zh-CN' => '中文'
+        );
+
+        $registrationSettings = CS_API::getSettingsFor('Registration');
+        $useNewWaivers = isset($registrationSettings->settings->useNewWaivers) ? $registrationSettings->settings->useNewWaivers->SettingValue : null;
+
+        $registrationCultureSetting = CS_API::getSettingsFromNewTableFor('Registration','currentCulture');
+        $currentCulture = isset($registrationCultureSetting->settings[0]->value) ? $registrationCultureSetting->settings[0]->value : 'en-US';
+
+        $enabledCulturesSetting = CS_API::getSettingsFromNewTableFor('Registration','enabledCultures');
+        $enabledCulturesSetting = isset($enabledCulturesSetting->settings[0]->value) ? $enabledCulturesSetting->settings[0]->value : null;
+        $enabledCultures = null;
+        if ($enabledCulturesSetting != null)
+        {
+            $enabledCultures = array();
+            $enabledCulturesSetting = json_decode($enabledCulturesSetting);
+            foreach($enabledCulturesSetting as $key => $culture)
+            {
+                $enabledCultures[$culture] = $culture;
+            }
+        }
+
+        $translations = CS_API::getTranslations('Registration');
+
+        return View::make('/screens/registration/waivers',
+            array('controller' => 'RegistrationController',
+                'supportedCultures' => $supportedCultures,
+                'supportedCulturesSplit' => array_chunk($supportedCultures,ceil(count($supportedCultures)/3),true),
+                'currentCulture' => $currentCulture,
+                'enabledCultures' => $enabledCultures,
+                'translations' => $translations,
+                'useNewWaivers' => $useNewWaivers
+            )
+        );
+    }
+
+    public function updateWaivers()
+    {
+        $input = Input::all();
+        unset($input['_token']); //Removing Laravel's default form value
+        $cultureKey = $input['cultureKey'];
+        unset($input['cultureKey']);
+
+        $input = $input['trans']; //HACK: PHP converts periods to underscores in _GET and _POST. Wrapping input names in an array gets around this behavior.
+
+        //Format the missing string data as expected by Club Speed's API
+        $updatedTranslations = array(); //Destined to a PUT
+        $newTranslations = array(); //Destined to a POST
+        foreach($input as $stringId => $stringValue)
+        {
+            if (isset($stringId))
+            {
+                if (!$this->contains($stringId,'new_'))
+                {
+                    $updatedTranslations[] = array(
+                        'translationsId' => str_replace("id_","",$stringId),
+                        'value' => $stringValue
+                    );
+                }
+                else if ($stringValue != "")
+                {
+                    $newTranslations[] = array(
+                        'name' => str_replace("id_new_","",$stringId),
+                        'namespace' => 'Registration',
+                        'value' => $stringValue,
+                        'defaultValue' => $stringValue,
+                        'culture' => $cultureKey,
+                        'comment' => '');
+                }
+            }
+        }
+
+        $result = null;
+        if (count($updatedTranslations) > 0)
+        {
+            $result = CS_API::updateTranslationsBatch($updatedTranslations);
+
+            $updateWasSuccessful = ($result !== null);
+            if ($updateWasSuccessful === false)
+            {
+                return Redirect::to('registration/waivers')->with( array('error' => 'One or more waivers could not be updated. Please try again.'));
+            }
+            else if ($updateWasSuccessful === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+
+        $result = null;
+        if (count($newTranslations) > 0)
+        {
+            $result = CS_API::insertTranslationsBatch($newTranslations);
+
+            $insertWasSuccessful = ($result !== null);
+            if ($insertWasSuccessful === false)
+            {
+                return Redirect::to('registration/waivers')->with( array('error' => 'One or more waivers could not be created. Please try again.'));
+            }
+            else if ($insertWasSuccessful === null)
+            {
+                return Redirect::to('/disconnected');
+            }
+        }
+
+        //Standard success message
+        return Redirect::to('registration/waivers')->with( array('message' => 'Waivers updated successfully!'));
 
     }
 
