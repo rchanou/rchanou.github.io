@@ -5,6 +5,9 @@ require_once('../vendors/autoload.php');
 require_once('../ClubSpeed/ClubSpeedLoader.php');
 $_REQUEST['debug'] = true;
 
+//If 'overwriteWaivers=1' is in the URL, the import will overwrite/update the new waivers with the current values of the old waivers
+$shouldOverwriteWaivers = (isset($_GET['overwriteWaivers']) && $_GET['overwriteWaivers'] == 1) ? true : false;
+
 $translationsSplitByCulture = array(
     "en-US" => array(
         'str_welcomeMessage' => 'Welcome to our track!',
@@ -1295,43 +1298,46 @@ foreach($translations as $translation) {
 		$stmt->execute();
 		echo "Inserting " . $Name . " (" . $Culture . ")<br/>";
 	} else {
-        if ($Name == 'str_WaiverAdult' && isset($existingEntry[0]["Value"]) && $existingEntry[0]["Value"] == "") //Updating waivers if empty
+        if ($Culture == 'en-US')
         {
-            echo 'Detected that str_WaiverAdult was an empty string. Overwriting with value in Waiver1, if it exists.<br/>';
-            $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (1)"); //Adult waiver is hard-coded to 1 in Club Speed
-            $statement->execute();
-            $adultWaiver = $statement->fetchAll();
-            if (isset($adultWaiver[0]))
+            if ($Name == 'str_WaiverAdult' && ($shouldOverwriteWaivers || (isset($existingEntry[0]["Value"]) && $existingEntry[0]["Value"] == ""))) //Updating waivers if empty
             {
-                echo '<em>Fetching existing Adult Waiver to migrate into new Translations table...<br/></em>';
-                $Value = $adultWaiver[0]['WaiverText'];
-                $updateStmt = $conn->prepare("UPDATE Translations SET Value = :Value WHERE Namespace = :Namespace AND Name = :Name AND Culture = :Culture");
-                $updateStmt->bindParam(':Namespace', $Namespace);
-                $updateStmt->bindParam(':Culture', $Culture);
-                $updateStmt->bindParam(':Value', $Value);
-                $updateStmt->bindParam(':Name', $Name);
-                $updateStmt->execute();
-                echo "Updating " . $Name . " (" . $Culture . ")<br/>";
-            }
+                echo 'Detected that str_WaiverAdult was an empty string or the overwriteWaivers flag was enabled. Overwriting with value in Waiver1, if it exists.<br/>';
+                $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (1)"); //Adult waiver is hard-coded to 1 in Club Speed
+                $statement->execute();
+                $adultWaiver = $statement->fetchAll();
+                if (isset($adultWaiver[0]))
+                {
+                    echo '<em>Fetching existing Adult Waiver to migrate into new Translations table...<br/></em>';
+                    $Value = $adultWaiver[0]['WaiverText'];
+                    $updateStmt = $conn->prepare("UPDATE Translations SET Value = :Value WHERE Namespace = :Namespace AND Name = :Name AND Culture = :Culture");
+                    $updateStmt->bindParam(':Namespace', $Namespace);
+                    $updateStmt->bindParam(':Culture', $Culture);
+                    $updateStmt->bindParam(':Value', $Value);
+                    $updateStmt->bindParam(':Name', $Name);
+                    $updateStmt->execute();
+                    echo "Updating " . $Name . " (" . $Culture . ")<br/>";
+                }
 
-        }
-        else if ($Name == 'str_WaiverChild' && isset($existingEntry[0]["Value"]) && $existingEntry[0]["Value"] == "") //Updating waivers if empty
-        {
-            echo 'Detected that str_WaiverChild was an empty string. Overwriting with value in Waiver2, if it exists.<br/>';
-            $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (2)"); //Child waiver is hard-coded to 2 in Club Speed
-            $statement->execute();
-            $childWaiver = $statement->fetchAll();
-            if (isset($childWaiver[0]))
+            }
+            else if ($Name == 'str_WaiverChild' && ($shouldOverwriteWaivers || (isset($existingEntry[0]["Value"]) && $existingEntry[0]["Value"] == ""))) //Updating waivers if empty
             {
-                echo '<em>Fetching existing Child Waiver to migrate into new Translations table...<br/></em>';
-                $Value = $childWaiver[0]['WaiverText'];
-                $updateStmt = $conn->prepare("UPDATE Translations SET Value = :Value WHERE Namespace = :Namespace AND Name = :Name AND Culture = :Culture");
-                $updateStmt->bindParam(':Namespace', $Namespace);
-                $updateStmt->bindParam(':Culture', $Culture);
-                $updateStmt->bindParam(':Value', $Value);
-                $updateStmt->bindParam(':Name', $Name);
-                $updateStmt->execute();
-                echo "Updating " . $Name . " (" . $Culture . ")<br/>";
+                echo 'Detected that str_WaiverChild was an empty string or the overwriteWaivers flag was enabled. Overwriting with value in Waiver2, if it exists.<br/>';
+                $statement = $conn->prepare("SELECT * FROM WaiverTemplates WHERE Waiver IN (2)"); //Child waiver is hard-coded to 2 in Club Speed
+                $statement->execute();
+                $childWaiver = $statement->fetchAll();
+                if (isset($childWaiver[0]))
+                {
+                    echo '<em>Fetching existing Child Waiver to migrate into new Translations table...<br/></em>';
+                    $Value = $childWaiver[0]['WaiverText'];
+                    $updateStmt = $conn->prepare("UPDATE Translations SET Value = :Value WHERE Namespace = :Namespace AND Name = :Name AND Culture = :Culture");
+                    $updateStmt->bindParam(':Namespace', $Namespace);
+                    $updateStmt->bindParam(':Culture', $Culture);
+                    $updateStmt->bindParam(':Value', $Value);
+                    $updateStmt->bindParam(':Name', $Name);
+                    $updateStmt->execute();
+                    echo "Updating " . $Name . " (" . $Culture . ")<br/>";
+                }
             }
         }
         else
