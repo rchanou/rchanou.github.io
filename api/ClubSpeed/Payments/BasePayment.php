@@ -324,7 +324,7 @@ class BasePayment {
         // better way to collect the payment amount? this doesn't seem reliable.
         // need to use dbo.TransactionReferences moving forward
         $responseData = $response->getData();
-        $amount = $responseData['amount'];
+        //$amount = $responseData['amount'];
         $params['transactionReference'] = $response ? $response->getTransactionReference() : Enums::DB_NULL;
         $now = Convert::getDate();
 
