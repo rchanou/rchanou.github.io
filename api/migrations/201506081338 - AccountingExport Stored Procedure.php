@@ -22,91 +22,172 @@ CREATE PROCEDURE [dbo].[GetAccountingExport]
 AS 
 
 --Payments
-SELECT    REPLACE(UPPER('##' + PayType.TypeDescription + ' Payment##'), ' ', '_') AS AccountNumber, PayType.TypeDescription + ' Payment'  as Description, SUM(PayAmount) AS Debit, 0.00 as Credit
-FROM         Payment LEFT OUTER JOIN PayType ON Payment.PayType = PayType.ID
-WHERE     (PayStatus = 1) AND Payment.PayType<>2 AND Payment.PayType<>3 AND (PayDate BETWEEN @StDate AND @EndDate)
-GROUP BY PayType.TypeDescription
+SELECT
+      REPLACE(UPPER('##' + pt.TypeDescription + ' Payment##'), ' ', '_') AS AccountNumber
+    , pt.TypeDescription + ' Payment'  AS Description
+    , SUM(p.PayAmount) AS Debit
+    , 0.00 AS Credit
+FROM Payment p
+LEFT OUTER JOIN PayType pt
+    ON p.PayType = pt.ID
+WHERE
+    (p.PayStatus = 1)
+    AND p.PayType <> 2
+    AND p.PayType <> 3
+    AND (p.PayDate BETWEEN @StDate AND @EndDate)
+GROUP BY pt.TypeDescription
  
 UNION ALL
 
 --Credit Card Payments
-
-SELECT    REPLACE(UPPER('##' + ISNULL(Payment.CardType,'NA') + ' Credit Card Payment##'), ' ', '_') AS AccountNumber, ISNULL(Payment.CardType,'NA') + ' Credit Card Payment' as Description , SUM(Payment.PayAmount) AS Debit, 0.00 as Credit
-FROM         Payment 
-WHERE   (Payment.PayType = 2) AND   (Payment.PayStatus = 1) AND (Payment.PayDate BETWEEN @StDate AND @EndDate)
-GROUP BY  ISNULL(Payment.CardType,'NA')
+SELECT
+      REPLACE(UPPER('##' + ISNULL(p.CardType,'NA') + ' Credit Card Payment##'), ' ', '_') AS AccountNumber
+    , ISNULL(p.CardType,'NA') + ' Credit Card Payment' AS Description 
+    , SUM(p.PayAmount) AS Debit
+    , 0.00 AS Credit
+FROM Payment  p
+WHERE
+    (p.PayType = 2)
+    AND (p.PayStatus = 1)
+    AND (p.PayDate BETWEEN @StDate AND @EndDate)
+GROUP BY
+    ISNULL(p.CardType,'NA')
 
 UNION ALL
 
 --External Payments
-SELECT   REPLACE(UPPER('##' + ISNULL(Payment.ExtCardType,'NA') + ' External Payment##'), ' ', '_') AS AccountNumber, ISNULL(Payment.ExtCardType,'NA') + ' External Payment' as Description , SUM(Payment.PayAmount) AS Debit, 0.00 as Credit
-FROM         Payment 
-WHERE   (Payment.PayType = 3) AND   (Payment.PayStatus = 1) AND (Payment.PayDate BETWEEN @StDate AND @EndDate)
-GROUP BY  ISNULL(Payment.ExtCardType,'NA')
+SELECT
+      REPLACE(UPPER('##' + ISNULL(p.ExtCardType,'NA') + ' External Payment##'), ' ', '_') AS AccountNumber
+    , ISNULL(p.ExtCardType,'NA') + ' External Payment' AS Description
+    , SUM(p.PayAmount) AS Debit
+    , 0.00 AS Credit
+FROM Payment p
+WHERE
+    (p.PayType = 3)
+    AND (p.PayStatus = 1)
+    AND (p.PayDate BETWEEN @StDate AND @EndDate)
+GROUP BY 
+    ISNULL(p.ExtCardType,'NA')
 
 UNION ALL
 
 --SalesByClass-SalesByClassDiscount 
 
-SELECT ProductClasses.ExportName AS AccountNumber, ProductClasses.Description + ' Sales', 0.00 as Debit,  ISNULL(C.Amount,0) as Credit
-FROM ProductClasses 
+SELECT
+      pc.ExportName AS AccountNumber
+    , pc.Description + ' Sales'
+    , 0.00 AS Debit
+    , ISNULL(c.Amount, 0) + CASE WHEN dbo.UseSalesTax() = 0 THEN c.CheckDetailTax ELSE 0 END AS Credit
+FROM ProductClasses pc
 LEFT OUTER JOIN (
-	  SELECT -1 * SUM(ROUND((CheckDetails.UnitPrice * CheckDetails.Qty),2) ) AS Amount, 
-	  Products.ProductClassID
-	  FROM Checks INNER JOIN CheckDetails ON Checks.CheckID = CheckDetails.CheckID 
-	  INNER JOIN Products ON CheckDetails.ProductID = Products.ProductID 
-	  WHERE (Checks.CheckStatus = 1) AND (CheckDetails.Status <> 2) AND (Checks.ClosedDate BETWEEN @StDate AND @EndDate) 
-	  AND (CheckDetails.ProductID NOT IN (SELECT ProductID FROM Products WHERE ProductType = 7))
-	  GROUP BY Products.ProductClassID
-	  ) C 
-ON ProductClasses.ProductClassID = C.ProductClassID
-WHERE ISNULL(C.Amount,0)<>0
+    SELECT 
+        -1 * SUM( ROUND( ( ctv.UnitPrice * ctv.Qty ),2 ) ) AS Amount,
+        SUM(ctv.CheckDetailTax) AS CheckDetailTax,
+        p.ProductClassID
+    FROM CheckTotals_V ctv
+    INNER JOIN Products p
+        ON ctv.ProductID = p.ProductID 
+    WHERE
+        (ctv.CheckStatus = 1)
+        AND (ctv.CheckDetailStatus <> 2)
+        AND (ctv.ClosedDate BETWEEN @StDate AND @EndDate) 
+        AND (ctv.ProductID NOT IN (SELECT ProductID FROM Products WHERE ProductType = 7))
+    GROUP BY
+        p.ProductClassID
+) c
+    ON pc.ProductClassID = c.ProductClassID
+WHERE
+    ISNULL(c.Amount,0) <> 0
+
 
 UNION ALL
 
-SELECT '##ITEM_DISCOUNT##' AS AccountNumber, 'Item Discount', SUM(ROUND(CheckDetails.DiscountApplied,2)) AS Debit, 0.00 as Credit
-FROM Checks INNER JOIN CheckDetails ON Checks.CheckID = CheckDetails.CheckID 
-INNER JOIN Products ON CheckDetails.ProductID = Products.ProductID 
-WHERE (Checks.CheckStatus = 1) AND (CheckDetails.Status <> 2) AND (Checks.ClosedDate BETWEEN @StDate AND @EndDate) 
-AND (CheckDetails.ProductID NOT IN (SELECT ProductID FROM Products WHERE ProductType = 7))
+SELECT
+      '##ITEM_DISCOUNT##' AS AccountNumber
+    , 'Item Discount'
+    , ISNULL( SUM( ROUND( cd.DiscountApplied, 2 ) ), 0 ) AS Debit
+    , 0.00 AS Credit
+FROM Checks c
+INNER JOIN CheckDetails cd
+    ON c.CheckID = cd.CheckID 
+INNER JOIN Products p
+    ON cd.ProductID = p.ProductID 
+WHERE
+    (c.CheckStatus = 1)
+    AND (cd.Status <> 2)
+    AND (c.ClosedDate BETWEEN @StDate AND @EndDate) 
+    AND (cd.ProductID NOT IN (SELECT ProductID FROM Products WHERE ProductType = 7))
 
 UNION ALL
 
 --Taxes           
 
-SELECT '##TAXES##' AS AccountNumber, 'Taxes (Taxable Payment)',0 as Debit,ISNULL(SUM(Round(Round((UnitPrice * Qty) - DiscountApplied,2) * TaxPercent / 100.0,2)),0.00) *-1 as Credit
-FROM      Checks INNER JOIN   dbo.CheckDetails ON Checks.CheckID =  dbo.CheckDetails.CheckID
-WHERE     (dbo.CheckDetails.Status <> 2) AND    (dbo.Checks.ClosedDate BETWEEN @StDate  AND @EndDate )
+SELECT
+      '##TAXES##' AS AccountNumber
+    , 'Taxes(Taxable Payment)'
+    , 0 AS Debit
+    , ISNULL(SUM(ctv.CheckDetailTax)* -1 , 0) AS Credit
+FROM CheckTotals_V ctv
+WHERE 
+        (ctv.CheckDetailStatus <> 2)
+    AND (ctv.ClosedDate BETWEEN @StDate AND @EndDate)
 
 UNION ALL
 
 --PrePayments     
 
-SELECT '##PREPAYMENTS##' AS AccountNumber, 'Pre Payments', 0.00 as Debit, ISNULL(SUM(dbo.Payment.PayAmount), 0) * -1 as Credit
-FROM         dbo.Checks INNER JOIN
-			 dbo.Payment ON dbo.Checks.CheckID = dbo.Payment.CheckID
--- prepayments include the open Checks that paid today plus
-			--close Checks that paid after today
-WHERE     ((dbo.Checks.CheckStatus = 0) AND (dbo.Payment.PayStatus = 1) AND (dbo.Payment.PayDate BETWEEN @StDate AND  @EndDate)) OR 
-			 ((dbo.Checks.CheckStatus = 1) AND (dbo.Payment.PayStatus = 1) AND (dbo.Payment.PayDate BETWEEN @StDate AND  @EndDate ) AND (dbo.Checks.ClosedDate >  @EndDate ) )     
+SELECT
+      '##PREPAYMENTS##' AS AccountNumber
+    , 'Pre Payments'
+    , 0.00 AS Debit
+    , ISNULL(SUM(p.PayAmount), 0) * -1 AS Credit
+FROM dbo.Checks_V c
+INNER JOIN dbo.Payment p
+    ON c.CheckID = p.CheckID
+WHERE (
+    (
+        (c.CheckStatus = 0)
+        AND (p.PayStatus = 1)
+        AND (p.PayDate BETWEEN @StDate AND  @EndDate)
+    )
+    OR 
+    (
+        (c.CheckStatus = 1)
+        AND (p.PayStatus = 1)
+        AND (p.PayDate BETWEEN @StDate AND @EndDate )
+        AND (c.ClosedDate >  @EndDate )
+    )
+)
 
 UNION ALL
 
 --PrePaymentsUsed 
 
-SELECT '##PREPAYMENTS_USED##' AS AccountNumber, 'Pre Payments Used', ISNULL(SUM(dbo.Payment.PayAmount),0) as Debit, 0.00 as Credit
-FROM         dbo.Checks INNER JOIN
-					  dbo.Payment ON dbo.Checks.CheckID = dbo.Payment.CheckID
-WHERE     (dbo.Checks.CheckStatus = 1) AND (dbo.Payment.PayStatus = 1)
- AND (dbo.Checks.ClosedDate BETWEEN @StDate  AND  @EndDate) AND 
-					 (PayDate <  @StDate )
+SELECT
+      '##PREPAYMENTS_USED##' AS AccountNumber
+    , 'Pre Payments Used'
+    , ISNULL(SUM(p.PayAmount), 0) AS Debit
+    , 0.00 AS Credit
+FROM dbo.Checks_V c
+INNER JOIN dbo.Payment p
+    ON c.CheckID = p.CheckID
+WHERE
+    (c.CheckStatus = 1)
+    AND (p.PayStatus = 1)
+    AND (c.ClosedDate BETWEEN @StDate AND @EndDate)
+    AND (p.PayDate < @StDate)
 
 UNION ALL
 
 --Expenses        
-SELECT  '##EXPENSES##' AS AccountNumber, 'Expenses', ISNULL(SUM(Amount),0) as Debit, 0.00 as Credit
-FROM         dbo.Expenses
-WHERE [DATE] BETWEEN @StDate  AND  @EndDate
+SELECT
+      '##EXPENSES##' AS AccountNumber
+    , 'Expenses'
+    , ISNULL(SUM(e.Amount), 0) AS Debit
+    , ISNULL(SUM(e.Amount), 0) * -1 AS Credit
+FROM dbo.Expenses e
+WHERE
+    e.[Date] BETWEEN @StDate AND @EndDate
 
 UNION ALL
 
@@ -120,39 +201,60 @@ UNION ALL
 
 --GiftCard        
 
-SELECT  '##GIFTCARDS##' AS AccountNumber, 'Gift Card', 0.00 as Debit, ISNULL(Round(SUM((dbo.CheckDetails.UnitPrice * dbo.CheckDetails.Qty) - dbo.CheckDetails.DiscountApplied),2), 0) * -1 as Credit
-FROM  dbo.Checks INNER JOIN
-	  dbo.CheckDetails ON dbo.Checks.CheckID = dbo.CheckDetails.CheckID
-WHERE     (dbo.Checks.CheckStatus = 1) AND (CheckDetails.Status <> 2) AND 
-	  (dbo.Checks.ClosedDate BETWEEN @StDate  AND  @EndDate) 
-						AND (dbo.CheckDetails.ProductID IN
-						  (SELECT     ProductID
-							FROM          dbo.Products
-							WHERE   ProductType = 7
-				  ))
+SELECT
+      '##GIFTCARDS##' AS AccountNumber
+    , 'Gift Card'
+    , 0.00 AS Debit
+    , ISNULL(SUM(cd.CheckDetailSubtotal * -1), 0) AS Credit
+FROM dbo.Checks_V c
+INNER JOIN dbo.CheckDetails_V cd
+    ON c.CheckID = cd.CheckID
+WHERE
+    c.CheckStatus = 1
+    AND cd.CheckDetailStatus != 2
+    AND c.ClosedDate BETWEEN @StDate AND @EndDate
+    AND cd.ProductID IN (
+        SELECT ProductID
+        FROM dbo.Products
+        WHERE ProductType = 7
+    )
  
 UNION ALL
 
 --Gratuity  
 
-SELECT  '##GRATUITY##' AS AccountNumber, 'Gratuity', 0.00 as Debit, ISNULL(SUM(Gratuity),0)*-1 as Credit
-FROM      Checks 
-WHERE       (dbo.Checks.ClosedDate BETWEEN @StDate  AND  @EndDate)      
+SELECT
+      '##GRATUITY##' AS AccountNumber
+    , 'Gratuity'
+    , 0.00 AS Debit
+    , ISNULL(SUM(c.Gratuity),0 ) * -1 AS Credit
+FROM dbo.Checks c 
+WHERE
+    (c.ClosedDate BETWEEN @StDate AND @EndDate)
  
 UNION ALL
 
 --Fee 
-SELECT  '##FEE##' AS AccountNumber, 'Fee', 0.00 as Debit, ISNULL(SUM(Fee),0)*-1 as Credit
-FROM      Checks 
-WHERE       (dbo.Checks.ClosedDate BETWEEN @StDate  AND  @EndDate)      
+SELECT
+      '##FEE##' AS AccountNumber
+    , 'Fee', 0.00 AS Debit
+    , ISNULL(SUM(c.Fee), 0) * -1 AS Credit
+FROM dbo.Checks c 
+WHERE
+    (c.ClosedDate BETWEEN @StDate AND @EndDate)
      
 UNION ALL
 
 --CheckDiscount   
 
-SELECT  '##CHECK_DISCOUNT##' AS AccountNumber, 'Check Discount', ISNULL(SUM(Discount),0) as Debit, 0.00 as Credit
-FROM      Checks 
-WHERE       (dbo.Checks.ClosedDate BETWEEN @StDate  AND  @EndDate)
+SELECT
+      '##CHECK_DISCOUNT##' AS AccountNumber
+    , 'Check Discount'
+    , ISNULL(SUM(c.Discount), 0) AS Debit
+    , 0.00 AS Credit
+FROM dbo.Checks c 
+WHERE
+    (c.ClosedDate BETWEEN @StDate AND @EndDate)
 EOD;
 
 	error_reporting(E_ALL);
