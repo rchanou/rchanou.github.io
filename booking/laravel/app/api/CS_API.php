@@ -954,6 +954,12 @@ class CS_API
                     $errorMessage = $response->body->error;
                 }
 
+                if (strpos($url,'/logs') === false) //If the last call wasn't a simple log call, remember it
+                {
+                    $callInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $response);
+                    Session::put('callInfo',$callInfo);
+                }
+
                 $response = null;
                 return array('response' => $response,
                     'error' => $errorMessage);
@@ -978,6 +984,12 @@ class CS_API
                     $errorMessage = $response->body->error;
                 }
 
+                if (strpos($url,'/logs') === false) //If the last call wasn't a simple log call, remember it
+                {
+                    $callInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $response);
+                    Session::put('callInfo',$callInfo);
+                }
+
                 $response = null;
                 return array('response' => $response,
                     'error' => $errorMessage);
@@ -998,6 +1010,12 @@ class CS_API
                 if ($response !== null && property_exists($response, 'body') && property_exists($response->body, 'error'))
                 {
                     $errorMessage = $response->body->error;
+                }
+
+                if (strpos($url,'/logs') === false) //If the last call wasn't a simple log call, remember it
+                {
+                    $callInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $response);
+                    Session::put('callInfo',$callInfo);
                 }
 
                 $response = null;
