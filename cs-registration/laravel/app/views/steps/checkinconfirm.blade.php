@@ -33,7 +33,6 @@
 <!-- BEGIN FACEBOOK INTEGRATION -->
 <script>
     function statusChangeCallback(response) {
-        console.log(response);
         if (response != null && response.hasOwnProperty('authResponse') && typeof response.authResponse != "undefined" && response.authResponse.hasOwnProperty('accessToken'))
         {
             $('#facebookToken').val(response.authResponse.accessToken);
