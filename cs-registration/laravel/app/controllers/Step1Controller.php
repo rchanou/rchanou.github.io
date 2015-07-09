@@ -39,6 +39,7 @@ class Step1Controller extends BaseController
 
         if ($strings == false) //If Club Speed couldn't be reached, go to the Disconnected screen
         {
+            CS_API::log('ERROR :: Call to determine strings and culture failed!');
             return Redirect::to('/disconnected');
         }
         if (Session::has("currentCultureChanged")) //Change languages if requested to do so
@@ -70,6 +71,7 @@ class Step1Controller extends BaseController
         //Ensure that we can still connect to the Club Speed API. If not, direct to an error page.
         if (CS_API::cannotConnectToClubSpeedAPI())
         {
+            CS_API::log('ERROR :: Unable to reach Club Speed API! errorInfo: ' . print_r(Session::get('errorInfo'),true));
             return Redirect::to('/disconnected');
         }
 

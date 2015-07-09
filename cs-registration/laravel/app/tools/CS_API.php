@@ -506,7 +506,7 @@ class CS_API
         }
     }
 
-    public static function log($message, $terminal = 'Club Speed PHP API', $username = '')
+    public static function log($message, $terminal = 'Club Speed Registration', $username = '')
     {
         self::initialize();
 

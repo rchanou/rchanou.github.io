@@ -79,6 +79,7 @@ class CheckInController extends BaseController
 
         if ($customer === null) //If there was an error with the API call
         {
+            CS_API::log('ERROR :: Call to /primaryCustomers failed! errorInfo: ' . print_r(Session::get('errorInfo'),true));
             return Redirect::to('/disconnected'); //Redirect to an error page
         }
         else if ($customer === false) //If no customer was found matching the fields, report an error and redirect

@@ -221,6 +221,7 @@ class Step2Controller extends BaseController {
             $searchByEmail = CS_API::call("searchByEmail", array("email" => Input::get("email")));
             if ($searchByEmail === false) //If the call failed
             {
+                CS_API::log('ERROR :: API call to search for a duplicate e-mail failed! errorInfo: ' . print_r(Session::get('errorInfo'),true));
                 return Redirect::to('/disconnected'); //Redirect to an error page
             }
             $isEmailTaken = count($searchByEmail["racers"]) > 0;

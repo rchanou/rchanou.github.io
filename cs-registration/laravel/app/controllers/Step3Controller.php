@@ -195,6 +195,7 @@ class Step3Controller extends BaseController {
 
         if ($result === false) //If the call failed
         {
+            CS_API::log('ERROR :: Call to /register failed! errorInfo: ' . print_r(Session::get('errorInfo'),true));
             Session::put('registrationStatus','failed');
             return Redirect::to('/disconnected'); //Redirect to an error page
         }
