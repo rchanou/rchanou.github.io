@@ -56,7 +56,13 @@ App::error(function(Exception $exception, $code)
 
     if (Session::has('callInfo'))
     {
-        $mostRecentAPICallResult = json_encode(var_export(Session::get('callInfo'),true));
+        $callInfo = Session::get('callInfo');
+
+        //Prevent credit card information from being logged
+        if (isset($callInfo["params"]->card["number"])) { $callInfo["params"]->card["number"] = "XXXXXXXXXXXX".substr($callInfo["params"]->card["number"],-4); }
+        if (isset($callInfo["params"]->card["cvv"])) { $callInfo["params"]->card["cvv"] = "XXX"; }
+
+        $mostRecentAPICallResult = json_encode(var_export($callInfo,true));
     }
     CS_API::log('ERROR :: Online Booking user reached error page. Most recent API call results: ' . $mostRecentAPICallResult);
 
