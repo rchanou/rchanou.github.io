@@ -137,7 +137,7 @@
 <!-- PAGE CONTENT -->
 @section('content')
 
-{{ Form::open(array('action' => 'Step2Controller@postStep2', 'files' => 'true', 'style' => '')) }}
+{{ Form::open(array('action' => 'Step2Controller@postStep2', 'files' => 'true', 'style' => '', 'autocomplete' => 'off')) }}
 
 @if (count($errors) > 0) <!-- TODO: Move to errors.blade.php -->
 

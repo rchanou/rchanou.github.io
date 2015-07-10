@@ -91,7 +91,7 @@
 <!-- PAGE CONTENT -->
 @section('content')
 
-{{ Form::open(array('action' => 'CheckInController@postCheckInFinal', 'files' => 'true', 'style' => '')) }}
+{{ Form::open(array('action' => 'CheckInController@postCheckInFinal', 'files' => 'true', 'style' => '', 'autocomplete' => 'off')) }}
 
 @if (count($errors) > 0)
 

@@ -378,6 +378,10 @@ class CS_API
                     {
                         $parsedParameters = array();
                         $urlParts = parse_url($result["url"]); //Break the URL into its components
+                        if (!isset($urlParts['query']))
+                        {
+                            return null;
+                        }
                         parse_str($urlParts['query'],$parsedParameters); //Parse the 'query' component and put the results in $parsedParameters
 												
                         // Make a lowercased copy of the keys. This resolves inconsistent casing: CamIP, CamIp, CaMiP, et al

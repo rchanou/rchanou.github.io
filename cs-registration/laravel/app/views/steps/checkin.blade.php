@@ -24,7 +24,7 @@
 <!-- PAGE CONTENT -->
 @section('content')
 
-{{ Form::open(array('action' => 'CheckInController@postCheckIn', 'files' => 'true', 'style' => '')) }}
+{{ Form::open(array('action' => 'CheckInController@postCheckIn', 'files' => 'true', 'style' => '', 'autocomplete' => 'off')) }}
 
 @if (count($errors) > 0)
 
