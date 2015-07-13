@@ -463,7 +463,8 @@ class CustomersLogic extends BaseLogic {
 
         // grab the CustID using an internal SQL call (can't be done using @@IDENTITY or anything of the like, due to the IDs matching with a LocationID)
         $customer->CustID = $this->getNextCustId(); //$CustID;
-        $customer->CrdID = $this->generateCardId();
+        if (empty($customer->CrdID))
+            $customer->CrdID = $this->generateCardId();
         
         // insert the customer record
         $this->interface->create($customer);
@@ -517,7 +518,6 @@ class CustomersLogic extends BaseLogic {
     public function create($params = array()) {
         $newCustId = $this->getNextCustId(); // get out here for scoping issues
         $settings = $this->getSettings(); // get out here for scoping issues
-
         $db =& $this->db;
         $createReturn = parent::_create($params, function($customer) use (&$db, &$params, &$settings, &$newCustId) {
             // validate email
@@ -570,7 +570,8 @@ class CustomersLogic extends BaseLogic {
             $customer->TotalVisits = 1;
 
             $customer->CustID = $newCustId;
-            $customer->CrdID = $this->generateCardId();
+            if (empty($customer->CrdID))
+                $customer->CrdID = $this->generateCardId(); // php 5.3 scoping issue?
 
             // check for duplicate emails, or just let it through?
             return $customer;
