@@ -113,11 +113,9 @@
             });
 
             var getSchedule = function(options) {
-                var data = {
-                    // no items needed!
-                };
+                // no required options
                 return sendRequest({
-                    api: "races/upcoming.json",
+                    api: "races/schedule.json",
                     type: "GET",
                     data: {
                         track: options.track || getSchedule.defaults.track

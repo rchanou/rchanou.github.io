@@ -407,28 +407,23 @@
             if (z.check.isArray(data.races)) {
 
                 // default to taking 10 races
-                data.races = data.races
-                    .take(z.convert(parameters.limit, z.types.number) || 10)
-                    .select(function(x) { return x.race; });
+                data.races = data.races.take(z.convert(parameters.limit, z.types.number) || 10);
 
-                z.forEach(data.races, function(val, key) {
+                z.forEach(data.races, function(race, key) {
 
                     // calculate availability header
-                    var totalSpots = z.convert(val.total_spots, z.types.number);
-                    var usedSpots = z.check.exists(val.racers) ? val.racers.length : 0;
-                    if (usedSpots < totalSpots) {
-                        val.used_spots_text = usedSpots + " / " + totalSpots;
-                    }
-                    else {
-                        val.used_spots_text = "FULL";
-                    }
-
-                    var tempStartsAt = z.convert.toDate(val.starts_at_iso);
+                    var totalSpots = z.convert(race.total_spots, z.types.number);
+                    var usedSpots = race.used_spots;
+                    if (usedSpots < totalSpots)
+                        race.used_spots_text = usedSpots + " / " + totalSpots;
+                    else
+                        race.used_spots_text = "FULL";
+                    var tempStartsAt = z.convert.toDate(race.starts_at);
                     if (z.check.isDate(tempStartsAt))
-                        val.starts_at = tempStartsAt.toLocaleString(z.location.locale);
+                        race.starts_at = tempStartsAt.toLocaleString(z.location.locale);
 
                     // apply styling to the race_number
-                    val.race_number = (z.check.exists(val.race_number) ? "#" + val.race_number : "");
+                    race.race_number = (z.check.exists(race.race_number) ? "#" + race.race_number : "");
                 });
 
                 // add the label "race"
@@ -436,7 +431,7 @@
                     race_number: "Race #",
                     race_name: "Race Name",
                     used_spots_text: "Used Spots",
-                    starts_at: "Start Time"                 
+                    starts_at: "Start Time"
                 });
 
                 // calculate racer height and font size
