@@ -28,7 +28,10 @@ class Settings extends BaseApi
         ),
         'kiosk' => true,
         'ScotKart' => true,
-        'MobileApp' => true
+        'MobileApp' => true,
+        'Booking' => array(
+            'giftCardSalesEnabled' => true
+        )
     );
 
     private $settingsNotExistingInOlderVersions = array(
