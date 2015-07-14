@@ -229,7 +229,7 @@
 
             <div ng-repeat="fastestTime in fastestTimesThisWeek" class="topTimesTimeBox">
                 <div class="ellipsis">{{fastestTime.nickname}}</div>
-                <div class="dynamicData" ng-style="{{textDataColorStyle}}">{{fastestTime.lap_time}}</div>
+                <div class="dynamicData" ng-style="{{textDataColorStyle}}">{{fastestTime.lap_time | number:3}}</div>
             </div>
 
             <div class="topTimesNoneBox" ng-if="fastestTimesThisWeek.length == 0">
