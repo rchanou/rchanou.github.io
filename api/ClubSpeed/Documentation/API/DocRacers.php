@@ -21,7 +21,7 @@ class DocRacers Extends DocAPIBase {
             'info' => array(
                 'access' => 'Private',
                 'access_icon' => 'lock',
-                'url' => $this->root . '/create',
+                'subroute' => '/create',
                 'verb' => 'POST',
                 'verb_icon' => 'export',
                 'required' => array(
@@ -85,7 +85,8 @@ EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
 {
-  "customerId": 1000001
+  "customerId": 1000001,
+  "token": "1bf4e5844129d1fa84110e7aca16ca50576182c72bc3111dba60d615d0f9eb03"
 }
 EOS
             )
@@ -98,6 +99,7 @@ EOS
                 'access' => 'Private',
                 'access_icon' => 'lock',
                 'url' => $this->root . '/login',
+                'subroute' => '/login',
                 'verb' => 'POST',
                 'verb_icon' => 'export',
                 'required' => array(
@@ -124,7 +126,8 @@ EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
 {
-  "customerId": 1000001
+  "customerId": 1000001,
+  "token": "1bf4e5844129d1fa84110e7aca16ca50576182c72bc3111dba60d615d0f9eb03"
 }
 EOS
             )
@@ -137,6 +140,7 @@ EOS
                 'access' => 'Private',
                 'access_icon' => 'lock',
                 'url' => $this->root . '/fb_login',
+                'subroute' => '/fb_login',
                 'verb' => 'POST',
                 'verb_icon' => 'export',
                 'required' => array(
@@ -189,7 +193,8 @@ EOS
                 , 'response' => <<<EOS
 HTTP/1.1 200 OK
 {
-  "customerId": 1000001
+  "customerId": 1000001,
+  "token": "1bf4e5844129d1fa84110e7aca16ca50576182c72bc3111dba60d615d0f9eb03"
 }
 EOS
             ),

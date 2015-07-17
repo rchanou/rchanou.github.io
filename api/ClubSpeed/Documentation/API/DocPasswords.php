@@ -29,15 +29,16 @@ class DocPasswords Extends DocAPIBase {
           , 'usage' => <<<EOS
 <p>
   The method detailed below will generate and send a password reset token
-  to a provided email address. This email will contain a link and instructions
-  for the end-user to reset their password.
+  to a provided email address. This email will contain a provided url with appended token
+  and instructions for the end-user to reset their password.
 </p>
 EOS
           , 'examples' => array(
               'request' => <<<EOS
 POST http://{$_SERVER['SERVER_NAME']}/api/index.php/passwords HTTP/1.1
 {
-  "email": "bob@gmail.com"
+  "email": "bob@gmail.com",
+  "url": "http://link/to/append/token/to.html"
 }
 EOS
               , 'response' => <<<EOS
