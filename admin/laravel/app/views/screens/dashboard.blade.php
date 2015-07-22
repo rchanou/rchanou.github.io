@@ -23,21 +23,41 @@ Dashboard
 
 
 <div class="row">
-					<div class="col-xs-12 col-sm-6">
+	<div class="col-xs-12 col-sm-1 col-md-2 col-lg-3"></div>
+	<div class="col-xs-12 col-sm-10 col-md-8 col-lg-6">
+		<div class="widget-box">
+			<div class="widget-title">
+				<span class="icon">
+					<i class="fa fa-th-list"></i>
+				</span>
+				<h5>Solve common business challenges</h5>
+			</div>
+			<div class="widget-content" style="text-align: center;">
+				<iframe width="100%" height="315" style="max-width:560px;" src="https://www.youtube.com/embed/BRRZc97Eiwo" frameborder="0" allowfullscreen></iframe>
+				<p>
+					In this webinar we will show you how Club Speed's new EMV, Affiliate Tracking, SpeedText and New Registration can help you solve and automate the most common karting business challenges.
+				</p>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-1 col-md-2 col-lg-3"></div>
+</div>
+<div class="row">
+					<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
 						<div class="widget-box">
 							<div class="widget-title">
 								<span class="icon">
 									<i class="fa fa-th-list"></i>
 								</span>
-								<h5>Webinar 1</h5>
+								<h5>New Feature Highlights</h5>
 							</div>
 							<div class="widget-content" style="text-align: center;">
 <iframe width="100%" height="315" style="max-width:560px;"  src="https://www.youtube.com/embed/tSgZL0L_ATU" frameborder="0" allowfullscreen></iframe>
-<p>Watch the latest webinar to see our newest features in action. eGiftcards, the Mobile app for iOS and Android, Speed Screen HD and the new Enhanced Facebook integration.</p>
+<p>Watch this webinar to see our newest features in action. eGiftcards, the Mobile app for iOS and Android, Speed Screen HD and the new Enhanced Facebook integration.</p>
 							</div>
 						</div>
 					</div>
-					<div class="col-xs-12 col-sm-6">
+					<div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
 						<div class="widget-box">
 							<div class="widget-title">
 								<span class="icon">
@@ -46,7 +66,7 @@ Dashboard
 								<h5>Automate your Business</h5>
 							</div>
 							<div class="widget-content" style="text-align: center;">
-<iframe width="100%" height="315" style="max-width:560px;" src="https://www.youtube.com/embed/He8B49xZ49c" frameborder="0" allowfullscreen></iframe>								
+<iframe width="100%" height="315" style="max-width:560px;" src="https://www.youtube.com/embed/He8B49xZ49c" frameborder="0" allowfullscreen></iframe>
 <p>
          See how Club Speed can help lower your overhead and increase your customer's satisfaction with these 6 automation tools.
         </p>
