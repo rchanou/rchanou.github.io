@@ -178,7 +178,7 @@ EOS;
             ),
             'usage' => <<<EOS
 <p>
-    Executing this method will attempt to pay for all items on the provided checkId
+    Executing this method will attempt to pay for all items on the provided <code>checkId</code>
     using a combination of optional gift cards and an optional credit card.
     Note that the only time the credit card is optional is when the array of gift cards provided
     can fully cover the purchase. 
@@ -186,6 +186,26 @@ EOS;
 <p>
     This payment processor will accept a number of processors based on the <a href="https://github.com/thephpleague/omnipay">Omnipay</a> library.
     Each of these processors will require a different set of options, usually including a set of credentials, keys, or tokens.
+</p>
+<p>
+    If a reservation product is being purchased (Online Booking, for example),
+    then additional information will be needed in the <code>check.details</code> array.
+</p>
+<p>
+    For example, if a user has purchased a reservation product, then the API needs to receive an object
+    containing the <code>checkDetailId</code> for the check line item containing the reservation products,
+    as well as the <code>heatId</code> which was originally selected by the customer from the
+    <a href="#booking-availability-list">Booking Availability</a> list.
+</p>
+<p>
+    If the additional booking processing object is provided,
+    the purchaser will be automatically added to the race where possible,
+    and extra reservations will be made if multiple quantities were purchased.
+</p>
+<p>
+    See the example below for a representation of what
+    the additional processing objects should look like
+    in the case of a race purchase for a specific heat.
 </p>
 EOS
 ,
@@ -208,7 +228,6 @@ POST http://{$_SERVER['SERVER_NAME']}/api/index.php/processPayment HTTP/1.1
       {
         "checkDetailId": 7763,
         "heatId": 13,
-        "additionalReservations": 5
       }
     ]
   },

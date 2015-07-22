@@ -42,6 +42,10 @@ class DocTypicalUsage Extends DocAPIBase {
                 If the Booking containers are already created, then the result from this call should be used
                 to show customers which spaces are available for booking.
             </li>
+            <li>
+                When collecting these, special consideration should be taken for the <code>heatId</code> in the response,
+                as it will be needed when the customer checks out by using <a href=#process-payment-process>Process Payment</a>.
+            </li>
         </ul>
     </li>
     <li>

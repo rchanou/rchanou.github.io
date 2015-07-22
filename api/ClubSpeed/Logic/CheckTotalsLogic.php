@@ -145,6 +145,9 @@ class CheckTotalsLogic extends BaseLogic {
         $useSalesTax = $this->logic->helpers->useSalesTax();
 
         foreach($checks as $check) {
+
+            $check->UserID = $check->UserID ?: 1; // necessary to duplicate the fallback logic here, unfortunately.
+
             if (!isset($products[$check->ProductID])) {
                 if (!isset($check->ProductID))
                     throw new \CSException("CheckTotal Virtual requires a productId for every check details! Received ProductID: " . $check->ProductID);

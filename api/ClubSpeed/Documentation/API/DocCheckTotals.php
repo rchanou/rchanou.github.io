@@ -28,6 +28,7 @@ class DocCheckTotals Extends DocAPIBase {
         $virtual['header'] = 'Virtual';
         $virtual['id'] = 'virtual';
         $virtual['info']['url'] .= '/virtual';
+        $virtual['info']['subroute'] = '/virtual';
         $virtual['usage'] = <<<EOS
 <p>
     The virtual checkTotals call does <strong>not</strong> create a check in the database.
@@ -100,192 +101,227 @@ EOS;
         return array(
             array(
                   'name'        => 'checks'
-                , 'type'        => 'Array<Checks>'
+                , 'type'        => 'Array<Check>'
                 , 'description' => 'The container for Checks objects.'
                 , 'create'      => 'required'
             )
             , array(
-                  'name'        => 'check.customerId'
+                  'name'        => 'Check.customerId'
                 , 'type'        => 'Integer'
                 , 'description' => 'The id for the check\'s customer.'
                 , 'create'      => 'required'
             )
             , array(
-                  'name'        => 'check.userId'
+                  'name'        => 'Check.userId'
                 , 'type'        => 'Integer'
                 , 'description' => 'The id for the user who is creating the check.'
                 , 'create'      => 'required'
             )
             , array(
-                  'name'        => 'check.checkType'
+                  'name'        => 'Check.checkType'
                 , 'type'        => 'Integer'
                 , 'description' => 'The type of the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkStatus'
+                  'name'        => 'Check.checkStatus'
                 , 'type'        => 'Integer'
                 , 'description' => 'The status of the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.name'
+                  'name'        => 'Check.name'
                 , 'type'        => 'String'
                 , 'description' => 'The name of the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkTotalApplied'
+                  'name'        => 'Check.checkTotalApplied'
                 , 'type'        => 'String'
                 , 'description' => 'The total stored on the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.broker'
+                  'name'        => 'Check.broker'
                 , 'type'        => 'String'
                 , 'description' => 'The name of the broker for the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.notes'
+                  'name'        => 'Check.notes'
                 , 'type'        => 'String'
                 , 'description' => 'The name for the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.gratuity'
+                  'name'        => 'Check.gratuity'
                 , 'type'        => 'Double'
                 , 'description' => 'The gratuity to be applied to the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.fee'
+                  'name'        => 'Check.fee'
                 , 'type'        => 'Double'
                 , 'description' => 'The fee to be applied to the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.openedDate'
+                  'name'        => 'Check.openedDate'
                 , 'type'        => 'Double'
                 , 'description' => 'The date on which the Check was opened.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.closedDate'
+                  'name'        => 'Check.closedDate'
                 , 'type'        => 'Double'
                 , 'description' => 'The date on which the Check was closed.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.isTaxExempt'
+                  'name'        => 'Check.isTaxExempt'
                 , 'type'        => 'Boolean'
                 , 'description' => 'The override for the tax exemption of the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.discount'
-                , 'type'        => 'Double'
+                  'name'        => 'Check.discount'
+                , 'type'        => 'Decimal'
                 , 'description' => 'The discount to be applied to the Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkSubtotal'
+                  'name'        => 'Check.checkDiscountId'
+                , 'type'        => 'Integer'
+                , 'description' => 'The discount id for the Check.'
+            )
+            , array(
+                  'name'        => 'Check.checkDiscountNotes'
+                , 'type'        => 'String'
+                , 'description' => 'The notes for the Check discount.'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'Check.checkDiscountUserId'
+                , 'type'        => 'Integer'
+                , 'description' => 'The user id for the user who applied the Check discount.'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'Check.checkSubtotal'
                 , 'type'        => 'Double'
                 , 'description' => 'The calculated subtotal for the entire Check. Note that this calculation will use <i>live</i> product values.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkTax'
+                  'name'        => 'Check.checkTax'
                 , 'type'        => 'Double'
                 , 'description' => 'The calculated tax for the entire Check. Note that this calculation will use <i>live</i> tax values.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkTotal'
+                  'name'        => 'Check.checkTotal'
                 , 'type'        => 'Double'
                 , 'description' => 'The calculated total for the entire Check. Note that this calculation will use <i>live</i> tax and product values.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkPaidTax'
+                  'name'        => 'Check.checkPaidTax'
                 , 'type'        => 'Double'
                 , 'description' => 'The amount of tax which has already been paid for this Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkPaidTotal'
+                  'name'        => 'Check.checkPaidTotal'
                 , 'type'        => 'Double'
                 , 'description' => 'The amount of tax which has already been paid for this Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkRemainingTax'
+                  'name'        => 'Check.checkRemainingTax'
                 , 'type'        => 'Double'
                 , 'description' => 'The remaining tax to be paid for this Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.checkRemainingTotal'
+                  'name'        => 'Check.checkRemainingTotal'
                 , 'type'        => 'Double'
                 , 'description' => 'The remaining total to be paid for this Check.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'check.details'
-                , 'type'        => 'Array<CheckDetails>'
-                , 'description' => 'The container for CheckDetails objects.'
+                  'name'        => 'Check.details'
+                , 'type'        => 'Array<CheckDetail>'
+                , 'description' => 'The container for CheckDetail objects.'
                 , 'create'      => 'required'
             )
             , array(
-                  'name'        => 'detail.checkDetailId'
+                  'name'        => 'CheckDetail.checkDetailId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The id for the CheckDetails record.'
+                , 'description' => 'The unique identifier for the CheckDetails record, which represents a line item for the Check record.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'detail.checkDetailStatus'
+                  'name'        => 'CheckDetail.checkDetailStatus'
                 , 'type'        => 'Integer'
                 , 'description' => 'The status for the CheckDetails record.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'detail.checkDetailType'
+                  'name'        => 'CheckDetail.checkDetailType'
                 , 'type'        => 'Integer'
                 , 'description' => 'The type of the CheckDetails record.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'detail.productId'
+                  'name'        => 'CheckDetail.productId'
                 , 'type'        => 'Integer'
                 , 'description' => 'The id for the Product for the CheckDetails record.'
                 , 'create'      => 'required'
             )
             , array(
-                  'name'        => 'detail.productName'
+                  'name'        => 'CheckDetail.productName'
                 , 'type'        => 'Integer'
                 , 'description' => 'The name of the Product.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'detail.qty'
+                  'name'        => 'CheckDetail.qty'
                 , 'type'        => 'Integer'
                 , 'description' => 'The quantity of the Product for the CheckDetails record.'
                 , 'create'      => 'required'
             )
             , array(
-                  'name'        => 'detail.checkDetailSubtotal'
+                  'name'        => 'CheckDetail.checkDetailDiscountUserId'
+                , 'type'        => 'The user id for the user who applied the CheckDetail discount'
+                , 'description' => 'Integer'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'CheckDetail.checkDetailDiscountDesc'
+                , 'type'        => 'The description for the CheckDetail discount'
+                , 'description' => 'String'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'CheckDetail.checkDetailDiscountCalculateType'
+                , 'type'        => 'The calculation type for the CheckDetail discount'
+                , 'description' => 'String'
+                , 'create'      => 'unavailable'
+            )
+            , array(
+                  'name'        => 'CheckDetail.checkDetailSubtotal'
                 , 'type'        => 'Integer'
                 , 'description' => 'The calculated subtotal for the CheckDetails items. Note that this calculation will use <i>live</i> product values.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'detail.checkDetailTax'
+                  'name'        => 'CheckDetail.checkDetailTax'
                 , 'type'        => 'Integer'
                 , 'description' => 'The calculated tax for the CheckDetails items. Note that this calculation will use <i>live</i> tax values.'
                 , 'create'      => 'unavailable'
             )
             , array(
-                  'name'        => 'detail.checkDetailTotal'
+                  'name'        => 'CheckDetail.checkDetailTotal'
                 , 'type'        => 'Integer'
                 , 'description' => 'The calculated total for the CheckDetails items. Note that this calculation will use <i>live</i> tax and product values.'
                 , 'create'      => 'unavailable'

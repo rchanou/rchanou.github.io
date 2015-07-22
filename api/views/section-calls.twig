@@ -13,7 +13,7 @@
               <tr>
                 <td class="col-xs-2 text-right">Url</td>
                 <td class="col-xs-10">
-                  <span>{{section.url ? "/" ~ section.url : section.route ~ call.subroute ?: ''}}</span> <!-- twig's string concat is ~ -->
+                  <span>{{(section.url ? "/" ~ section.url : section.route) ~ call.info.subroute ?: ''}}</span> <!-- twig's string concat is ~ -->
                 </td>
               </tr>
               <tr>
