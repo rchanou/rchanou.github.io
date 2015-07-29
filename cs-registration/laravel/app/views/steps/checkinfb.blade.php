@@ -58,7 +58,7 @@
             </a>
         </div>
         <div class="col-sm-6 text-center" style="font-size: 20px;">
-            <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('checkin','checkinconfirm',Request::url())}}&scope=public_profile,email,user_birthday">
+            <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('checkin','checkinconfirm',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions">
                 <img src="{{$images['createAccountFacebook']}}"><br/>
             {{$strings['str_connectFacebookYes']}}
             </a>

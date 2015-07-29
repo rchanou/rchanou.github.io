@@ -53,9 +53,9 @@
         </div>
         <div class="{{$columnSize}} text-center" style="font-size: 20px;">
             @if(strpos(Request::url(),'step1') !== false)
-            <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('step1','step2',Request::url())}}&scope=public_profile,email,user_birthday">
+            <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('step1','step2',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions">
             @else
-                <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{Request::url()}}/step2&scope=public_profile,email,user_birthday">
+                <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{Request::url()}}/step2&scope=public_profile,email,user_birthday,publish_actions">
             @endif
                 <img src="{{$images['createAccountFacebook']}}"><br/>
             {{$strings['str_facebook']}}
