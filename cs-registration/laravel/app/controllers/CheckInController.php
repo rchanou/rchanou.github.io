@@ -166,6 +166,8 @@ class CheckInController extends BaseController
         //If the user decided to integrate Facebook and has an e-mail address
         if ($input['facebookId'] != "" && $input['facebookToken'] != "" && $userEmail != "" && $userEmail != null)
         {
+            $input['facebookToken'] = CS_API::extendFacebookToken($input['facebookToken']);
+
             //Update their Facebook token with Club Speed
             CS_API::updateFacebookToken($userEmail,$input['facebookId'],$input['facebookToken']);
         }
