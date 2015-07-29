@@ -53,68 +53,74 @@ class FacebookLogic extends BaseLogic {
         // super hacky, probably not reliable forever.
 
         if (!isset($fbId))
-            throw new \InvalidArgumentException("Facebook login requires fbId to be set!");
+            throw new \InvalidArgumentException('Facebook login requires fbId to be set!');
         if (!isset($customerId) || !is_int($customerId))
-            throw new \InvalidArgumentException("Facebook login requires requires numeric customerId! Received: $customerId");
+            throw new \InvalidArgumentException('Facebook login requires requires numeric customerId! Received: $customerId');
         if (!isset($fbAccessToken))
-            throw new \InvalidArgumentException("Facebook login requires fbAccessToken to be set!");
+            throw new \InvalidArgumentException('Facebook login requires fbAccessToken to be set!');
         if (!$this->logic->customers->customer_exists($customerId))
-            throw new \CustomerNotFoundException("Facebook login was unable to find customer in the database! Received customerId: $customerId");
+            throw new \CustomerNotFoundException('Facebook login was unable to find customer in the database! Received customerId: $customerId');
 
-        // use a merge statement to upsert into the FB_CUSTOMERS_NEW table
-        $sql = "DECLARE @UId            NVARCHAR(30);   SET @UId            = :UId;"
-            ."\nDECLARE @CustID         INT;            SET @CustID         = :CustID;"
-            ."\nDECLARE @Access_token   NVARCHAR(300);  SET @Access_token   = :Access_token;"
-            ."\nDECLARE @AllowEmail     BIT;            SET @AllowEmail     = :AllowEmail;"
-            ."\nDECLARE @AllowPost      BIT;            SET @AllowPost      = :AllowPost;"
-            ."\nDECLARE @Enabled        BIT;            SET @Enabled        = :Enabled;"
-            ."\nMERGE INTO dbo.FB_CUSTOMERS_NEW target_table"
-            ."\nUSING ("
-            ."\n    SELECT"
-            ."\n        @UId AS [UId]"
-            ."\n        , @CustID AS [CustID]"
-            ."\n) AS source_table"
-            ."\nON"
-            ."\n        source_table.UId    = target_table.UId"
-            ."\n    AND source_table.CustID = target_table.CustID"
-            ."\nWHEN MATCHED THEN"
-            ."\n    UPDATE"
-            ."\n    SET"
-            ."\n        target_table.Access_token = @Access_token"
-            ."\n        , target_table.AllowEmail = @AllowEmail"
-            ."\n        , target_table.AllowPost  = @AllowPost"
-            ."\n        , target_table.Enabled    = @Enabled"
-            ."\nWHEN NOT MATCHED THEN"
-            ."\n    INSERT ("
-            ."\n        UId"
-            ."\n        , CustID"
-            ."\n        , Access_token"
-            ."\n        , AllowEmail"
-            ."\n        , AllowPost"
-            ."\n        , Enabled"
-            ."\n    )"
-            ."\n    VALUES ("
-            ."\n        @UId"
-            ."\n        , @CustID"
-            ."\n        , @Access_token"
-            ."\n        , @AllowEmail"
-            ."\n        , @AllowPost"
-            ."\n        , @Enabled"
-            ."\n    );" // merge must end with semi-colon
-            ."\nUPDATE c"
-            ."\nSET c.Privacy4 = 1" // when facebook is being used, dbo.Customers.Privacy4 is expected to be set to 1
-            ."\nFROM dbo.CUSTOMERS c"
-            ."\nWHERE c.CustID = @CustID;"
-            ;
-        $params = array(
-              ':UId'            => $fbId
-            , ':CustID'         => $customerId
-            , ':Access_token'   => $fbAccessToken
-            , ':AllowEmail'     => $fbAllowEmail
-            , ':AllowPost'      => $fbAllowPost
-            , ':Enabled'        => $fbEnabled
-        );
-        $this->db->exec($sql, $params);
+        // if facebook does not allow post,
+        // then don't bother storing the token
+        // or accidentally overwriting a valid post token
+        if ($fbAllowPost) {
+            // use a merge statement to upsert into the FB_CUSTOMERS_NEW table
+            $sql = "DECLARE @UId            NVARCHAR(30);   SET @UId            = :UId;"
+                ."\nDECLARE @CustID         INT;            SET @CustID         = :CustID;"
+                ."\nDECLARE @Access_token   NVARCHAR(300);  SET @Access_token   = :Access_token;"
+                ."\nDECLARE @AllowEmail     BIT;            SET @AllowEmail     = :AllowEmail;"
+                ."\nDECLARE @AllowPost      BIT;            SET @AllowPost      = :AllowPost;"
+                ."\nDECLARE @Enabled        BIT;            SET @Enabled        = :Enabled;"
+                ."\nMERGE INTO dbo.FB_CUSTOMERS_NEW target_table"
+                ."\nUSING ("
+                ."\n    SELECT"
+                ."\n        @UId AS [UId]"
+                ."\n        , @CustID AS [CustID]"
+                ."\n) AS source_table"
+                ."\nON"
+                ."\n        source_table.UId    = target_table.UId"
+                ."\n    AND source_table.CustID = target_table.CustID"
+                ."\nWHEN MATCHED THEN"
+                ."\n    UPDATE"
+                ."\n    SET"
+                ."\n        target_table.Access_token = @Access_token"
+                ."\n        , target_table.AllowEmail = @AllowEmail"
+                ."\n        , target_table.AllowPost  = @AllowPost"
+                ."\n        , target_table.Enabled    = @Enabled"
+                ."\nWHEN NOT MATCHED THEN"
+                ."\n    INSERT ("
+                ."\n        UId"
+                ."\n        , CustID"
+                ."\n        , Access_token"
+                ."\n        , AllowEmail"
+                ."\n        , AllowPost"
+                ."\n        , Enabled"
+                ."\n    )"
+                ."\n    VALUES ("
+                ."\n        @UId"
+                ."\n        , @CustID"
+                ."\n        , @Access_token"
+                ."\n        , @AllowEmail"
+                ."\n        , @AllowPost"
+                ."\n        , @Enabled"
+                ."\n    );" // merge must end with semi-colon
+                ;
+            $params = array(
+                  ':UId'            => $fbId
+                , ':CustID'         => $customerId
+                , ':Access_token'   => $fbAccessToken
+                , ':AllowEmail'     => $fbAllowEmail
+                , ':AllowPost'      => $fbAllowPost
+                , ':Enabled'        => $fbEnabled
+            );
+            $this->db->exec($sql, $params);
+        }
+
+        // when facebook is being used, Privacy4 is expected to be set to 1
+        $this->logic->customers->update($customerId, array(
+            'Privacy4' => true
+        ));
 
         // use the logic class to match, for automatic expiry
         $authentication = $this->logic->authenticationTokens->match(array(
@@ -138,8 +144,8 @@ class FacebookLogic extends BaseLogic {
             $this->logic->authenticationTokens->update($authentication->AuthenticationTokensID, $authentication); // logic class will update ExpiresAt automatically
         }
         return array(
-              "customerId"  => $customerId
-            , "token"       => $token
+              'customerId'  => $customerId
+            , 'token'       => $token
         );
     }
 }
