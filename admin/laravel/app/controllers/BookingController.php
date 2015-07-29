@@ -73,6 +73,8 @@ class BookingController extends BaseController
             . '<b>Customer\'s Name:</b> {{customer}}<br/>'
             . '<b>Your Business Name:</b> {{business}}<br/>'
             . '<b>eGiftcard Number:</b> {{giftCardNo}}<br/>'
+						. '<b>eGiftcard Product Name:</b> {{description}}<br/>'
+						. '<b>eGiftcard Amount:</b> {{balance}}<br/>'
             . '<b>eGiftcard Barcode:</b> {{giftCardImage}}<br/>'
             . '<i class="fa fa-question-circle tip"
                             data-container="body" data-toggle="popover" data-placement="bottom" data-html="true"

@@ -96,7 +96,7 @@ RaceTicketTemplate.prototype.create = function(body) {
 
   // Print the heat number or sequence number
   if(options.showHeatNo && options.showHeatNo.toString().toLowerCase() !== 'false')
-      output += buildLine(resources.strHeatNumber, heat.heatNumber);
+      output += buildLine(resources.strHeatNumber,  heat.heatNumber.toString().substr(-2));
   else
       output += buildLine(resources.strHeatNumber, heat.sequenceNumber); // not really part of the heat -- it's actually part of the TimeslotHeat ViewModel..
   log.debug('show heat number');
