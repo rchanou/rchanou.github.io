@@ -4,11 +4,12 @@ namespace ClubSpeed\Payments\ProductHandlers;
 
 require_once(__DIR__.'/../../../vendors/barcode/DNS1D.php');
 
-use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Enums\Enums;
 use ClubSpeed\Logging\LogService as Log;
-use ClubSpeed\Templates\TemplateService as Templates;
 use ClubSpeed\Mail\MailService as Mail;
-use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Templates\TemplateService as Templates;
+use ClubSpeed\Utility\Convert;
+use ClubSpeed\Utility\Currency;
 use Dinesh\BarcodeAll\DNS1D;
 
 
@@ -102,6 +103,11 @@ class GiftCardProductHandler extends BaseProductHandler {
                 $emailFrom = $emailFrom[0];
                 $emailFrom = array($emailFrom->SettingValue => $businessName);
 
+                $giftCardBalance = $this->logic->giftCardBalance->match(array(
+                    'CrdID' => $giftCardCustomer->CrdID // not using `get` in case primary key changes
+                ));
+                $giftCardBalance = $giftCardBalance[0];
+
                 $barCodeUtil = new DNS1D(); //Bar-code generating library
 
                 $giftCardEmailBodyHtml = $this->logic->settings->match(array(
@@ -131,9 +137,11 @@ class GiftCardProductHandler extends BaseProductHandler {
                 );
 
                 $giftCardData = array(
-                    'customer' => $customer->FName . ' ' . $customer->LName,
-                    'giftCardNo' => $giftCardCustomer->CrdID,
-                    'business' => $businessName
+                    'customer'    => $customer->FName . ' ' . $customer->LName,
+                    'giftCardNo'  => $giftCardCustomer->CrdID,
+                    'description' => $product->Description,
+                    'balance'     => Currency::toCurrencyString($giftCardBalance->Money),
+                    'business'    => $businessName
                 );
 
                 $dateFormat = $this->findStringBetween($giftCardEmailBodyHtml,'{{date:','}}');
