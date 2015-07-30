@@ -1,0 +1,24 @@
+USE ClubspeedV8;
+SET XACT_ABORT ON;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN TRANSACTION;
+
+IF EXISTS (
+    SELECT *
+    FROM INFORMATION_SCHEMA.TABLES t
+    WHERE t.TABLE_NAME = 'Payment'
+)
+BEGIN
+    IF NOT EXISTS (
+        SELECT *
+        FROM INFORMATION_SCHEMA.COLUMNS c
+        WHERE c.TABLE_NAME = 'Payment'
+        AND c.COLUMN_NAME = 'TransactionReference'
+    )
+    BEGIN
+        ALTER TABLE dbo.OnlineBookingReservations
+        ADD OnlineBookingReservationStatusID NVARCHAR(MAX)
+    END;
+END;
+
+COMMIT;
