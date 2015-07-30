@@ -16,8 +16,8 @@ BEGIN
         AND c.COLUMN_NAME = 'TransactionReference'
     )
     BEGIN
-        ALTER TABLE dbo.OnlineBookingReservations
-        ADD OnlineBookingReservationStatusID NVARCHAR(MAX)
+        ALTER TABLE dbo.Payment
+        ADD TransactionReference NVARCHAR(MAX)
     END;
 END;
 
