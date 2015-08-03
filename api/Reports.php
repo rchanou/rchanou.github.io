@@ -103,6 +103,27 @@ EOS;
 				$data = $this->run_query($sql, $this->getDateRange());
         return $data;
     }
+		
+		/**
+     * @url GET /social
+		 * Get the customers using Facebook (could be expanded in the future
+		 * to other social media platforms).
+     */
+    public function social() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(401, "Invalid authorization!");
+
+        $sql = <<<EOS
+SELECT fb.UId AS facebookUserId, c.*
+  FROM dbo.FB_Customers_New fb 
+  LEFT JOIN Customers c ON
+  fb.CustId = c.custID
+  WHERE fb.Enabled = 1
+EOS;
+
+				$data = $this->run_query($sql);
+        return $data;
+    }
 
 	/**
 	 * DETAILED PAYMENTS REPORT
