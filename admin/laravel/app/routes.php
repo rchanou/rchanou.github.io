@@ -75,9 +75,15 @@ Route::group(array('before' => 'auth'), function()
 
 	/* Reports */
 	Route::get('reports', 'ReportsController@index');
+	Route::get('reports/overview', 'ReportsController@overview');
+	Route::post('reports/overview', 'ReportsController@overview');
 	Route::get('reports/payments', 'PaymentsReportController@index');
 	Route::post('reports/payments', 'PaymentsReportController@index');
 	Route::get('reports/payments/export/csv', 'PaymentsReportController@exportToCSV');
+
+	Route::get('reports/social', 'SocialReportController@index');
+	Route::post('reports/social', 'SocialReportController@index');
+	Route::get('reports/social/export/csv', 'SocialReportController@exportToCSV');
 
 	Route::get('reports/summary-payments', 'SummaryPaymentsReportController@index');
 	Route::post('reports/summary-payments', 'SummaryPaymentsReportController@index');

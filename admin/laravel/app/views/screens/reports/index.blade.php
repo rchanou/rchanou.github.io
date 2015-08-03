@@ -64,13 +64,13 @@ Reports
                     </div>
                   </div>
                   <div class="row">
-                  	<!--<div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                  	<div class="col-lg-3 col-sm-6 text-center paymentReportBox">
                         <a href="{{URL::to('reports/accounting')}}">
                             <i class="fa fa-dollar fa-4x"></i><p/>
                             <strong>Accounting Export</strong><p/>
                         </a>
                         <em>View and export journal entries for various accounting software</em>
-                    </div>-->
+                    </div>
                     <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
                         <a href="{{URL::to('reports/event-rep-sales')}}">
                             <i class="fa fa-users fa-4x"></i><p/>
@@ -84,6 +84,13 @@ Reports
                             <strong>Marketing Source Performance</strong><p/>
                         </a>
                         <em>Sales totals from your marketing campaigns</em>
+                    </div>
+                    <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                        <a href="{{URL::to('reports/social')}}">
+                            <i class="fa fa-facebook-square fa-4x"></i><p/>
+                            <strong>Social Media Usage</strong><p/>
+                        </a>
+                        <em>View customers that have linked their accounts with social media</em>
                     </div>
                   </div>
               </div>

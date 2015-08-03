@@ -330,7 +330,14 @@ class CS_API
         return self::getJSON("processPayment");
     }
 
-    public static function getReport_Payments($start = null, $end = null)
+    public static function getReport_Social()
+    {
+        self::initialize();
+
+        return self::getJSON("reports/social");
+    }
+		
+		public static function getReport_Payments($start = null, $end = null)
     {
         self::initialize();
         $params = array();
