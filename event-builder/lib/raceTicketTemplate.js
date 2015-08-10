@@ -1,16 +1,15 @@
-var _         = require('./underscore');
-var z         = require('./zana');
-var config    = require('./config-provider.js');
-var CONSTANTS = require('./constants.js');
-var utils     = require('./utils.js');
-var rpad      = utils.receipts.rpad;
-var lpad      = utils.receipts.lpad;
-var cpad      = utils.receipts.cpad;
-var buildLine = utils.receipts.buildLine;
-var log       = utils.logging.log;
-log.debug.on  = config.receipts.useDebugLogging;
-var RACE_BY   = CONSTANTS.RACE_BY;
-var WIN_BY    = CONSTANTS.WIN_BY;
+var z             = require('./zana');
+var config        = require('./config-provider.js');
+var CONSTANTS     = require('./constants.js');
+var utils         = require('./utils.js');
+var buildLine     = utils.receipts.buildLine;
+var length        = utils.receipts.length;
+var log           = utils.logging.log;
+log.debug.on      = config.receipts.useDebugLogging;
+var RACE_BY       = CONSTANTS.RACE_BY;
+var WIN_BY        = CONSTANTS.WIN_BY;
+var PLACEHOLDERS  = CONSTANTS.PLACEHOLDERS;
+var MAX_WIDTH     = CONSTANTS.SIZES.MAX_WIDTH;
 
 var defaults = {
     "data": {
@@ -68,7 +67,34 @@ RaceTicketTemplate.prototype.create = function(body) {
   var resources = receipt.resources;
   var options   = receipt.options;
 
-  // log('receipt:', receipt);
+  var resourceKeysForLength = {
+    strAge        : true,
+    strCustomer   : true,
+    strDuration   : true,
+    strEventName  : true,
+    strExperience : true,
+    strGrid       : true,
+    strHeatNumber : true,
+    strRoundNo    : true,
+    strTime       : true,
+    strVenue      : true,
+    strWinBy      : true
+  };
+
+  var resourceLength = 10;
+  for (var key in defaults.resources) {
+
+    if (!resourceKeysForLength[key])
+      continue; // skip any resources which are not going to be left-side keys
+
+    var val = resources[key];
+    var len = length(val);
+    if (len > resourceLength)
+      resourceLength = len;
+  }
+
+  utils.receipts.defaults.KEY_WIDTH = resourceLength;
+  utils.receipts.defaults.VALUE_WIDTH = MAX_WIDTH - utils.receipts.defaults.SEPARATOR.length - resourceLength;
 
   // Begin the receipt
   var output = '\n\n';
@@ -96,7 +122,7 @@ RaceTicketTemplate.prototype.create = function(body) {
 
   // Print the heat number or sequence number
   if(options.showHeatNo && options.showHeatNo.toString().toLowerCase() !== 'false')
-      output += buildLine(resources.strHeatNumber,  heat.heatNumber.toString().substr(-2));
+      output += buildLine(resources.strHeatNumber, heat.heatNumber ? heat.heatNumber.toString().substr(-2) : '');
   else
       output += buildLine(resources.strHeatNumber, heat.sequenceNumber); // not really part of the heat -- it's actually part of the TimeslotHeat ViewModel..
   log.debug('show heat number');
@@ -125,7 +151,7 @@ RaceTicketTemplate.prototype.create = function(body) {
   // Add customer name
   if (customer) {
     if (customer.fullName) {
-      output += buildLine(resources.strCustomer, customer.fullName, null, 10);
+      output += buildLine(resources.strCustomer, customer.fullName);
       // Add racer name (if racer name exists and not the same as their full name)
       if (customer.racerName && customer.racerName.trim().length > 0 && customer.racerName.toLowerCase() !== customer.fullName.toLowerCase())
         output += buildLine('', customer.racerName, '  ');
@@ -141,7 +167,7 @@ RaceTicketTemplate.prototype.create = function(body) {
     if(options.printGridOnRaceTicket && parseInt(customer.lineupPosition) > 0)
       output += buildLine(resources.strGrid, customer.lineupPosition);
     if(options.printAgeOnRaceTicket && customer.age)
-      output += buildLine(resources.strAge, customer.age, null, 10);
+      output += buildLine(resources.strAge, customer.age);
   }
   log.debug('customer info');
 

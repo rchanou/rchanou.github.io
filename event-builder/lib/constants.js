@@ -1,4 +1,7 @@
 var CONSTANTS = {
+
+    // vb enums
+
     CHECK_DETAIL_STATUS: {
           IS_NEW         : 1
         , HAS_VOIDED     : 2
@@ -56,6 +59,19 @@ var CONSTANTS = {
     WIN_BY: {
           TIME      : 0
         , POSITION  : 1
+    },
+
+    // receipt template constants
+
+    PLACEHOLDERS: {
+          CSLOGO      : "{{ClubSpeedLogo}}"
+        , COMPANYLOGO : "{{CompanyLogo}}"
+        , BARCODE     : "{{Barcode=###VAL###}}"
+        , CUTPAPER    : "{{CutPaper}}"
+        , SIGNATURE   : "{{SIGNATURE_SPLIT}}"
+    },
+    SIZES: {
+        MAX_WIDTH: 42
     }
 };
 

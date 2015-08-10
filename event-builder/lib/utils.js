@@ -1,18 +1,4 @@
-function buildFullLine(str, width, charToPadWith, lineEnding) {
-    str = str.toString();
-    width = width || 41;
-    charToPadWith = charToPadWith || ' ';
-    lineEnding = lineEnding || '\n';
-    return rpad(str, width, charToPadWith) + lineEnding;
-}
-
-function buildLine(key, value, separator, keyWidth, valueWidth, lineEnding) {
-    separator  = separator  || ': ';
-    keyWidth   = keyWidth   || 10;
-    valueWidth = valueWidth || 29;
-    lineEnding = lineEnding || '\n';
-    return lpad(key, keyWidth) + separator + rpad(value, valueWidth) + lineEnding;
-}
+"use strict";
 
 function isCJK(charCode) {
     if (charCode === 0xA5)
@@ -70,19 +56,42 @@ function padding(str, num, padChar) {
 }
 
 function lpad(str, num, padChar) {
-    // this won't really work if we intend to truncate CJK chars instead of padding them. fair warning. 
+    // this won't really work if we intend to truncate CJK chars instead of padding them. fair warning.
     return (padding(str, num, padChar) + (str ? str.toString() : '')).substr(-num);
 }
 
 function rpad(str, num, padChar) {
-    // this won't really work if we intend to truncate CJK chars instead of padding them. fair warning. 
-    return ((str ? str.toString() : '') + padding(str, num, padChar)).substr(0, num); 
+    // this won't really work if we intend to truncate CJK chars instead of padding them. fair warning.
+    return ((str ? str.toString() : '') + padding(str, num, padChar)).substr(0, num);
 }
 
 function cpad(str, totalLength, padChar) {
     var tempPadding = padding(str, totalLength, padChar);
     tempPadding = tempPadding.substr(0, length(tempPadding) / 2);
     return (tempPadding + (str ? str.toString() : '')).substr(0, totalLength);
+}
+
+function buildFullLine(str, width, charToPadWith, lineEnding) {
+    str = str.toString();
+    width = width || 41;
+    charToPadWith = charToPadWith || ' ';
+    lineEnding = lineEnding || '\n';
+    return rpad(str, width, charToPadWith) + lineEnding;
+}
+
+var LINE_DEFAULTS = {
+    KEY_WIDTH: 10,
+    VALUE_WIDTH: 29,
+    SEPARATOR: ': ',
+    LINE_ENDING: '\n'
+};
+
+function buildLine(key, value, separator, keyWidth, valueWidth, lineEnding) {
+    separator  = separator  || LINE_DEFAULTS.SEPARATOR;
+    keyWidth   = keyWidth   || LINE_DEFAULTS.KEY_WIDTH;
+    valueWidth = valueWidth || LINE_DEFAULTS.VALUE_WIDTH;
+    lineEnding = lineEnding || LINE_DEFAULTS.LINE_ENDING;
+    return lpad(key, keyWidth) + separator + rpad(value, valueWidth) + lineEnding;
 }
 
 var utils = {};
@@ -97,9 +106,9 @@ utils.receipts = {
     lpad          : lpad,
     cpad          : cpad,
     buildFullLine : buildFullLine,
-    buildLine     : buildLine
+    buildLine     : buildLine,
+    defaults      : LINE_DEFAULTS
 };
-
 
 var slice = Array.prototype.slice;
 var log = function() {
