@@ -1,0 +1,2483 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+Interfaces
+</name>
+</assembly>
+<members>
+<member name="M:Interfaces.BusinessLogic.Event.EventBL.GetEvent(System.Int32)">
+	<summary>
+ Gets the Event By Event ID
+ </summary>
+	<param name="eventID">Event ID of the event to retrieve the event by</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventBL.GetEventHeats(System.Int32)">
+	<summary>
+ Gets the Heats in the event
+ </summary>
+	<param name="eventID">ID of the event to filter by</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventBL.GetEventHeatsByRoundID(System.Int32)">
+	<summary>
+ Gets the Heats in an event round
+ </summary>
+	<param name="roundID">ID of the round to filter by</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventBL.AddNewEvent(EFDAL.Models.Event)">
+	<summary>
+ Add a new event to the database
+ </summary>
+	<param name="eventToAdd">the event to add</param>
+	<returns>returns the even that was passed in</returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventBL.GetAllHeatsInEvent(System.Int32)">
+	<summary>
+ Returns all the heats in an event
+ </summary>
+	<param name="eventID">id of the event</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventBL.RecalculateEventHeatScore(System.Int32)">
+	<summary>
+ Will recalculate a heat event scores when users edit heat results
+ </summary>
+	<param name="HeatNo">heat number</param>
+	<remarks></remarks>
+</member><member name="T:Interfaces.dsDlls.SourcesDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.HotelsDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.EventContactStatusLookupDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.CustomerStatusDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.MembershipTypesDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.SpeedLevelDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.TracksDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.ScoreSystemDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.RulesDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.AssignToHeatRulesDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.CellProviderDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.SourcesRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.HotelsRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.EventContactStatusLookupRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.CustomerStatusRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.MembershipTypesRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.SpeedLevelRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.TracksRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.ScoreSystemRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.RulesRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.AssignToHeatRulesRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.CellProviderRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsDlls.SourcesRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.HotelsRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.EventContactStatusLookupRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.CustomerStatusRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.MembershipTypesRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.SpeedLevelRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.TracksRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.ScoreSystemRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.RulesRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.AssignToHeatRulesRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls.CellProviderRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsDlls">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmClockOutResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmClockOutResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmClockOutResource.strBackToWork">
+	<summary>
+  Looks up a localized string similar to Back to work.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmClockOutResource.strTakeBreak">
+	<summary>
+  Looks up a localized string similar to Take a break.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmClockOutResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmConfirmationResources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmConfirmationResources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmConfirmationResources.strClose">
+	<summary>
+  Looks up a localized string similar to Close.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmConfirmationResources.strNo">
+	<summary>
+  Looks up a localized string similar to No.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmConfirmationResources.strOk">
+	<summary>
+  Looks up a localized string similar to Ok.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmConfirmationResources.strYes">
+	<summary>
+  Looks up a localized string similar to Yes.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmConfirmationResources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.BusinessLogic.OnlineBooking.OnlineBookingBL.CreateReservaton(System.Int32,System.Int32,System.Int32,System.DateTime,System.Int32,System.Int32)">
+	<summary>
+ Creates the event reservation (events, heats and event reservatio) for online booking
+ </summary>
+	<param name="eventTypeNo"></param>
+	<param name="eventStartTime"></param>
+	<param name="numOfDrivers"></param>
+	<param name="gapInMinutes"></param>
+	<returns>Event ID if successful</returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.OnlineBooking.OnlineBookingBL.removeCartItem(System.String,System.Int32)">
+	<summary>
+ Removes a cart item and also removes heats/events created
+ </summary>
+	<param name="sessionID"></param>
+	<param name="CartDetailsID"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="P:Interfaces.Resources.FrmAddNoteResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddNoteResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddNoteResource.strNA">
+	<summary>
+  Looks up a localized string similar to N/A.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmAddNoteResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="T:Interfaces.Internationalization.Resources.ResourceManagerSetter">
+	<summary>
+ ResourceManagerSetter is a component that initializes the resources local variable in
+ Form.InitializeComponent to a ResourceManagerProvider
+ </summary>
+	<remarks>ResourceManagerProvider is a provider for ResourceManagers. The purpose of the
+ ResourceManagerSetter is to free Windows Forms from a dependence on the ResourceManager class
+ that works solely with resources that are embedded in an assembly. The ResourceManagerSetter component
+ achieves this by injecting the following new line into the Form.InitializeComponent method:-
+ resources = Internationalization.Resources.ResourceManagerProvider.GetResourceManager(typeof(Form1));
+ </remarks>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerSetterSerializer.Deserialize(System.ComponentModel.Design.Serialization.IDesignerSerializationManager,System.Object)">
+	<summary>
+ Deserializes the specified serialized CodeDOM object into an object
+ </summary>
+	<param name="manager">A serialization manager interface that is used during the deserialization process</param>
+	<param name="codeDomObject">A serialized CodeDOM object to deserialize</param>
+	<returns>The deserialized CodeDOM object</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerSetterSerializer.Serialize(System.ComponentModel.Design.Serialization.IDesignerSerializationManager,System.Object)">
+	<summary>
+ Serializes the specified object into a CodeDOM object
+ </summary>
+	<param name="manager">The serialization manager to use during serialization</param>
+	<param name="value">The object to serialize</param>
+	<returns>A CodeDOM object representing the object that has been serialized</returns>
+</member><member name="T:Interfaces.Internationalization.Resources.ResourceManagerSetterSerializer">
+	<summary>
+ ResourceManagerSetterSerializer is a CodeDomSerializer which changes the Form.InitializeComponent method
+ </summary>
+</member><member name="T:Interfaces.Customer">
+	<summary>
+     The data container of a single Customer
+ </summary>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.#ctor">
+	<remarks/>
+</member><member name="E:Interfaces.ClubspeedServices.EventViewer.LogErrorCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.ClubspeedServices.EventViewer.LogErrorWithMailCompleted">
+	<remarks/>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.LogError(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.LogErrorAsync(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.LogErrorAsync(System.String,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.LogErrorWithMail(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.LogErrorWithMailAsync(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.LogErrorWithMailAsync(System.String,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.ClubspeedServices.EventViewer.CancelAsync(System.Object)">
+	<remarks/>
+</member><member name="T:Interfaces.ClubspeedServices.EventViewer">
+	<remarks/>
+</member><member name="T:Interfaces.ClubspeedServices.LogErrorCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.ClubspeedServices.LogErrorCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.ClubspeedServices.LogErrorCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.ClubspeedServices.LogErrorWithMailCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.ClubspeedServices.LogErrorWithMailCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.ClubspeedServices.LogErrorWithMailCompletedEventArgs">
+	<remarks/>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventGriddingBL.getParticipantGroupsForEventRound(System.Int32,Interfaces.ViewModels.Event.EventGridding.GridLineUpSettingViewModel)">
+	<summary>
+ This method returns racers in their groups with the distinct heats they ran
+ Grouping of customers is determined by their last race scheduled in a round
+ Modify this function so it returns the groups based on the race scheduled
+ </summary>
+	<param name="roundFromID"></param>
+	<param name="gridLineUpSetting"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventGriddingBL.getParticipantResultsForGridding(System.Collections.Generic.List{Interfaces.ViewModels.Event.EventGridding.GroupHeats},Interfaces.ViewModels.Event.EventGridding.GridLineUpSettingViewModel,System.Int32)">
+	<summary>
+ This function should return the results, it should also receive the gridding type
+ It shouldn't need to know which heats the round was run in, it will find it by the gridding type and the round id passed in
+ </summary>
+	<param name="GroupedParticipants"></param>
+	<param name="gridLineUpSetting"></param>
+	<param name="roundID"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.DbResourceManagerResourceProviderFactory.#ctor">
+	<summary>
+ Constructs a DbResourceManagerResourceProviderFactory object
+ </summary>
+</member><member name="M:Interfaces.DbResourceManagerResourceProviderFactory.CreateGlobalResourceProvider(System.String)">
+	<summary>
+ Creates a new global resource provider
+ </summary>
+	<param name="classKey">The resource class to create the global resource provider for</param>
+	<returns>A new global resource provider</returns>
+</member><member name="M:Interfaces.DbResourceManagerResourceProviderFactory.CreateLocalResourceProvider(System.String)">
+	<summary>
+ Creates a local resource provider
+ </summary>
+	<param name="virtualPath">The virtual path to create the local resource provider for</param>
+	<returns>A new local resource provider</returns>
+</member><member name="M:Interfaces.DbResourceManagerResourceProviderFactory.RemoveRoot(System.String)">
+	<summary>
+ RemoveRoot removes the root of a virtual path and returns the remainder
+ </summary>
+	<param name="virtualPath">The virtual path to remove the root from</param>
+	<returns>A virtual path without the root</returns>
+</member><member name="T:Interfaces.DbResourceManagerResourceProviderFactory">
+	<summary>
+ DbResourceManagerResourceProviderFactory is a ResourceProviderFactory for the DbResourceManager
+ </summary>
+</member><member name="M:Interfaces.DbResourceManagerResourceProvider.#ctor(System.String)">
+	<summary>
+ Constructs a new DbResourceManagerResourceProvider
+ </summary>
+	<param name="classKey">The class key to construct the resource provider for</param>
+</member><member name="P:Interfaces.DbResourceManagerResourceProvider.ResourceManager">
+	<summary>
+ ResourceManager is the resource manager used by the resource provider
+ </summary>
+</member><member name="M:Interfaces.DbResourceManagerResourceProvider.GetObject(System.String,System.Globalization.CultureInfo)">
+	<summary>
+ Gets the value of the specified Object resource for the specified culture
+ </summary>
+	<param name="resourceKey">The name of the resource to get</param>
+	<param name="culture">The CultureInfo object that represents the culture for which the resource is
+ localized</param>
+	<returns>The value of the resource, localized for the specified culture</returns>
+</member><member name="P:Interfaces.DbResourceManagerResourceProvider.ResourceReader">
+	<summary>
+ ResourceReader is the IResourceReader for the virtual path
+ </summary>
+</member><member name="T:Interfaces.DbResourceManagerResourceProvider">
+	<summary>
+ DbResourceManagerResourceProvider is a resource provider for DbResourceManager
+ </summary>
+</member><member name="T:Interfaces.dsControlPanel.ControlPanelDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsControlPanel.ControlPanelRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsControlPanel.ControlPanelRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsControlPanel">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="T:Interfaces.dsSummary.SummaryDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsSummary.SummaryRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsSummary.SummaryRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsSummary">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmLoginResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmLoginResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmLoginResource.strInvalidCard">
+	<summary>
+  Looks up a localized string similar to Invalid Card{0}{1}.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmLoginResource.strTimeOut">
+	<summary>
+  Looks up a localized string similar to Time Out.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmLoginResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strPayment">
+	<summary>
+  Looks up a localized string similar to {0} {1}.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strPaymentVoid">
+	<summary>
+  Looks up a localized string similar to {0} ({1}) {2}.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strUpdateCashPaymentDateFailed">
+	<summary>
+  Looks up a localized string similar to Failed to update cash payment date.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strUpdateCheckPaymentDateFailed">
+	<summary>
+  Looks up a localized string similar to Failed to update check payment date.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strUpdateComplementaryPaymentDateFailed">
+	<summary>
+  Looks up a localized string similar to Failed to update complementary payment date.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strUpdateExternalPaymentDateFailed">
+	<summary>
+  Looks up a localized string similar to Failed to update external payment date.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strUpdatePaypalFlowPaymentDateFailed">
+	<summary>
+  Looks up a localized string similar to Failed to update paypalflow payment date.
+</summary>
+</member><member name="P:Interfaces.Resources.payment.strUpdateVoucherPaymentDateFailed">
+	<summary>
+  Looks up a localized string similar to Failed to update voucher payment date.
+</summary>
+</member><member name="T:Interfaces.Resources.payment">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.CheckInService.CheckIn.#ctor">
+	<remarks/>
+</member><member name="E:Interfaces.CheckInService.CheckIn.getHelpPageCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.CheckInService.CheckIn.CallCheckInCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.CheckInService.CheckIn.GetExpirationDateCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.CheckInService.CheckIn.IPCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.CheckInService.CheckIn.RequestSupportCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.CheckInService.CheckIn.GetCurrentVersionCompleted">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.getHelpPage(System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.getHelpPageAsync(System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.getHelpPageAsync(System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.CallCheckIn(System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.CallCheckInAsync(System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.CallCheckInAsync(System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.GetExpirationDate(System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.GetExpirationDateAsync(System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.GetExpirationDateAsync(System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.IP">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.IPAsync">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.IPAsync(System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.RequestSupport(System.String,System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.RequestSupportAsync(System.String,System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.RequestSupportAsync(System.String,System.String,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.GetCurrentVersion">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.GetCurrentVersionAsync">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.GetCurrentVersionAsync(System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.CheckInService.CheckIn.CancelAsync(System.Object)">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.CheckIn">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.getHelpPageCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.CheckInService.getHelpPageCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.getHelpPageCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.CallCheckInCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.CheckInService.CallCheckInCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.CallCheckInCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.GetExpirationDateCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.CheckInService.GetExpirationDateCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.GetExpirationDateCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.IPCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.CheckInService.IPCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.IPCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.RequestSupportCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.CheckInService.RequestSupportCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.RequestSupportCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.GetCurrentVersionCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.CheckInService.GetCurrentVersionCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.CheckInService.GetCurrentVersionCompletedEventArgs">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.#ctor">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.AddRemovePointsToDBCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerHeatPointsCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerGiftCardBalanceCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.VoidHeatCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.VoidPointsFromCheckDetailCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.VoidSellGiftCardCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.InsertToDBCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.GetResponseTimeCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.GetPointHistoryDetailCompleted">
+	<remarks/>
+</member><member name="E:Interfaces.PointHistoryServices.PointHistoryServices.GetGiftCardHistoryDetailCompleted">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.AddRemovePointsToDB(System.Int32,System.Int32,System.Int32,System.Int32,System.DateTime,System.Int32,System.String,System.Int32,System.Int32,System.Boolean,System.Int32,System.Int32,System.String,System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.AddRemovePointsToDBAsync(System.Int32,System.Int32,System.Int32,System.Int32,System.DateTime,System.Int32,System.String,System.Int32,System.Int32,System.Boolean,System.Int32,System.Int32,System.String,System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.AddRemovePointsToDBAsync(System.Int32,System.Int32,System.Int32,System.Int32,System.DateTime,System.Int32,System.String,System.Int32,System.Int32,System.Boolean,System.Int32,System.Int32,System.String,System.String,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerHeatPoints(System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerHeatPointsAsync(System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerHeatPointsAsync(System.Int32,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerGiftCardBalance(System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerGiftCardBalanceAsync(System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetCustomerGiftCardBalanceAsync(System.Int32,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidHeat(System.Int32,System.Int32,System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidHeatAsync(System.Int32,System.Int32,System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidHeatAsync(System.Int32,System.Int32,System.Int32,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidPointsFromCheckDetail(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidPointsFromCheckDetailAsync(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidPointsFromCheckDetailAsync(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidSellGiftCard(System.Int32,System.Decimal,System.Int32,System.Int32,System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidSellGiftCardAsync(System.Int32,System.Decimal,System.Int32,System.Int32,System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.VoidSellGiftCardAsync(System.Int32,System.Decimal,System.Int32,System.Int32,System.String,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.InsertToDB(System.Int32,System.Int32,System.Decimal,System.Int32,System.String,System.Int32,System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.InsertToDBAsync(System.Int32,System.Int32,System.Decimal,System.Int32,System.String,System.Int32,System.Int32,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.InsertToDBAsync(System.Int32,System.Int32,System.Decimal,System.Int32,System.String,System.Int32,System.Int32,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetResponseTime(System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetResponseTimeAsync(System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetResponseTimeAsync(System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetPointHistoryDetail(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetPointHistoryDetailAsync(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetPointHistoryDetailAsync(System.String,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetGiftCardHistoryDetail(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetGiftCardHistoryDetailAsync(System.String,System.String,System.String)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.GetGiftCardHistoryDetailAsync(System.String,System.String,System.String,System.Object)">
+	<remarks/>
+</member><member name="M:Interfaces.PointHistoryServices.PointHistoryServices.CancelAsync(System.Object)">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.PointHistoryServices">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.AddRemovePointsToDBCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.AddRemovePointsToDBCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.AddRemovePointsToDBCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetCustomerHeatPointsCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.GetCustomerHeatPointsCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetCustomerHeatPointsCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetCustomerGiftCardBalanceCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.GetCustomerGiftCardBalanceCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetCustomerGiftCardBalanceCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.VoidHeatCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.VoidHeatCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.VoidHeatCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.VoidPointsFromCheckDetailCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.VoidPointsFromCheckDetailCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.VoidPointsFromCheckDetailCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.VoidSellGiftCardCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.VoidSellGiftCardCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.VoidSellGiftCardCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.InsertToDBCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.InsertToDBCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.InsertToDBCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetResponseTimeCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.GetResponseTimeCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetResponseTimeCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetPointHistoryDetailCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.GetPointHistoryDetailCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetPointHistoryDetailCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetGiftCardHistoryDetailCompletedEventHandler">
+	<remarks/>
+</member><member name="P:Interfaces.PointHistoryServices.GetGiftCardHistoryDetailCompletedEventArgs.Result">
+	<remarks/>
+</member><member name="T:Interfaces.PointHistoryServices.GetGiftCardHistoryDetailCompletedEventArgs">
+	<remarks/>
+</member><member name="T:Interfaces.DSHeatTypes.HeatTypesDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.DSHeatTypes.HeatTypesRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.DSHeatTypes.HeatTypesRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.DSHeatTypes">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="T:Interfaces.dsLightEvents.LightEventsDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsLightEvents.LightEventsRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsLightEvents.LightEventsRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsLightEvents">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.Internationalization.Resources.DbResourceManager.ConnectionString">
+	<summary>
+ ConnectionString is the connection string used to connect to the database
+ </summary>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceManager.Initialize(System.String,System.Reflection.Assembly)">
+	<summary>
+ Initialize initializes the new object
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">assembly is not used in this implementation</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceManager.#ctor(System.String,System.Reflection.Assembly)">
+	<summary>
+ Constructs a DbResourceManager object
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">assembly is not used in this implementation</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceManager.#ctor(System.String)">
+	<summary>
+ Constructs a DbResourceManager object
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceManager.#ctor(System.Type)">
+	<summary>
+ Constructs a DbResourceManager object
+ </summary>
+	<param name="resourceType">The Type for which resources should be read/written</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceManager.InternalGetResourceSet(System.Globalization.CultureInfo,System.Boolean,System.Boolean)">
+	<summary>
+ Provides the implementation for finding a ResourceSet
+ </summary>
+	<param name="cultureInfo">The CultureInfo to look for</param>
+	<param name="createIfNotExists">If true and if the ResourceSet has not been loaded yet, load it</param>
+	<param name="tryParents">If the ResourceSet cannot be loaded, try parent CultureInfo objects to see if they exist</param>
+	<returns>The specified ResourceSet</returns>
+</member><member name="T:Interfaces.Internationalization.Resources.DbResourceManager">
+	<summary>
+ DbResourceManager is a resource manager for reading and writing resources in a database
+ </summary>
+	<remarks>Set the static ConnectionString property to the connection string used to connect to the database.
+ The DbResourceManager works with SQL Server only in this implementation.</remarks>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceSet.#ctor(System.String,System.Globalization.CultureInfo)">
+	<summary>
+ Constructs a DbResourceSet object
+ </summary>
+	<param name="baseNameField">The base name of the resource set</param>
+	<param name="cultureInfo">The CultureInfo identifying the culture of the resources in the resource set</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceSet.GetDefaultReader">
+	<summary>
+ GetDefaultReader gets the Type of the resource reader
+ </summary>
+	<returns>The Type of the resource reader</returns>
+	<remarks>Use CreateDefaultReader instead because CreateDefaultReader passes the correct parameters
+ to the resource reader constructor</remarks>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceSet.GetDefaultWriter">
+	<summary>
+ GetDefaultWriter gets the Type of the resource writer
+ </summary>
+	<returns>The Type of the resource writer</returns>
+	<remarks>Use CreateDefaultWriter instead because CreateDefaultWriter passes the correct parameters
+ to the resource writer constructor</remarks>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceSet.CreateDefaultReader">
+	<summary>
+ CreateDefaultReader creates an IResourceReader for reading resources
+ </summary>
+	<returns>An IResourceReader for reading resources</returns>
+	<remarks>Use CreateDefaultReader instead of GetDefaultReader because CreateDefaultReader passes the
+ correct parameters to the resource reader constructor</remarks>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceSet.CreateDefaultWriter">
+	<summary>
+ CreateDefaultWriter creates an IResourceReader for writing resources
+ </summary>
+	<returns>An IResourceWriter for writing resources</returns>
+	<remarks>Use CreateDefaultWriter instead of GetDefaultWriter because CreateDefaultWriter passes the
+ correct parameters to the resource writer constructor</remarks>
+</member><member name="T:Interfaces.Internationalization.Resources.DbResourceSet">
+	<summary>
+ DbResourceSet is a CustomResourceSet for reading and writing to/from databases
+ </summary>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceReader.#ctor(System.String,System.Globalization.CultureInfo)">
+	<summary>
+ Constructs a DbResourceReader object
+ </summary>
+	<param name="baseNameField">The base name of the resource reader</param>
+	<param name="cultureInfo">The CultureInfo identifying the culture of the resources to be read</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceReader.GetEnumerator">
+	<summary>
+ Returns an IDictionaryEnumerator of the resources for this reader
+ </summary>
+	<returns>An IDictionaryEnumerator of the resources for this reader</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceReader.GetResourceValue(System.String,System.String)">
+	<summary>
+ GetResourceValue converts a resource value to a given type
+ </summary>
+	<param name="resourceValue">The string of the value to potentially convert</param>
+	<param name="resourceTypeName">The fully qualified Type name</param>
+	<returns>An object of the correct type for the value</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceReader.GetSelectCommand(System.Data.SqlClient.SqlConnection)">
+	<summary>
+ GetSelectcommand gets an SqlCommand for SELECTing the resources for the base name and culture
+ </summary>
+	<param name="connection">The SqlConnection to use for the command</param>
+	<returns>An SqlCommand for SELECTing the resources for the base name and culture</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceReader.Close">
+	<summary>
+ Closes the resource reader after releasing any resources associated with it
+ </summary>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceReader.System_Collections_IEnumerable_GetEnumerator">
+	<summary>
+ Returns an IDictionaryEnumerator of the resources for this reader
+ </summary>
+	<returns>An IDictionaryEnumerator of the resources for this reader</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceReader.Dispose">
+	<summary>
+ Releases all resources used by the object
+ </summary>
+</member><member name="T:Interfaces.Internationalization.Resources.DbResourceReader">
+	<summary>
+ DbResourceReader is an IResourceReader for reading resources from a database
+ </summary>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.#ctor(System.String,System.Globalization.CultureInfo)">
+	<summary>
+ Constructs a DbResourceWriter object
+ </summary>
+	<param name="baseNameField">The base name of the resource writer</param>
+	<param name="cultureInfo">The CultureInfo identifying the culture of the resources to be written</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.Close">
+	<summary>
+ Closes the resource writer after releasing any resources associated with it
+ </summary>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.Dispose">
+	<summary>
+ Releases all resources used by the object
+ </summary>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.Dispose(System.Boolean)">
+	<summary>
+ Releases all resources used by the object
+ </summary>
+	<param name="disposing">True if the object is being disposed</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.AddResourceObj(System.String,System.Object)">
+	<summary>
+ Adds a resource to the list of resources to be written to an output file or output stream
+ </summary>
+	<param name="name">The name of the resource</param>
+	<param name="value">The value of the resource</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.AddResource(System.String,System.String)">
+	<summary>
+ Adds a resource to the list of resources to be written to an output file or output stream
+ </summary>
+	<param name="name">The name of the resource</param>
+	<param name="value">The value of the resource</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.AddResource(System.String,System.Byte[])">
+	<summary>
+ Adds a resource to the list of resources to be written to an output file or output stream
+ </summary>
+	<param name="name">The name of the resource</param>
+	<param name="value">The value of the resource</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.DeleteExistingResource(System.Data.SqlClient.SqlTransaction)">
+	<summary>
+ DeleteExistingResource deletes the existing resource to make way for the new resource
+ </summary>
+	<param name="transaction">The SqlTransaction of which this process is a part</param>
+</member><member name="M:Interfaces.Internationalization.Resources.DbResourceWriter.InsertResource(System.Data.SqlClient.SqlTransaction,System.String,System.Object)">
+	<summary>
+ InsertResource inserts a given resource entry for the base name and culture
+ </summary>
+	<param name="transaction">The SqlTransaction of which this process is a part</param>
+	<param name="resourceName">The name of the resource</param>
+	<param name="resourceValue">The value of the resource</param>
+</member><member name="T:Interfaces.Internationalization.Resources.DbResourceWriter">
+	<summary>
+ DbResourceWriter is an IResourceWriter for writing resources to a database
+ </summary>
+</member><member name="M:Interfaces.Internationalization.Resources.CustomResourceSet.#ctor(System.Resources.IResourceReader)">
+	<summary>
+ Constructs a CustomResourceSet object
+ </summary>
+	<param name="resourceReader">The IResourceReader from which the resources should be read</param>
+</member><member name="M:Interfaces.Internationalization.Resources.CustomResourceSet.CreateDefaultReader">
+	<summary>
+ CreateDefaultReader creates an IResourceReader to read the resources
+ </summary>
+	<returns>An IResourceReader to read the resources</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.CustomResourceSet.CreateDefaultWriter">
+	<summary>
+ CreateDefaultWriter creates an IResourceWriter to write the resources
+ </summary>
+	<returns>An IResourceWriter to write the resources</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.CustomResourceSet.Add(System.String,System.Object)">
+	<summary>
+ Add adds an entry to the resources
+ </summary>
+	<param name="key">The key of the new resource entry</param>
+	<param name="value">The value of the new resource entry</param>
+</member><member name="P:Interfaces.Internationalization.Resources.CustomResourceSet.Table">
+	<summary>
+ Table is a Hashtable of the resource entries
+ </summary>
+</member><member name="P:Interfaces.Resources.FrmAddTaskResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddTaskResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddTaskResource.strEmailBody">
+	<summary>
+  Looks up a localized string similar to {0},{1}A {2} task with the following details has been assigned to you by {3}.{4}Priority: {5}{6}Due Date: {7}{8}Description: {9}.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddTaskResource.strEmailSubject">
+	<summary>
+  Looks up a localized string similar to A {0} task has been assigned to you..
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddTaskResource.strNA">
+	<summary>
+  Looks up a localized string similar to N/A.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddTaskResource.strTaskAdded">
+	<summary>
+  Looks up a localized string similar to Task has been added.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmAddTaskResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAdvancedResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAdvancedResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAdvancedResource.strTaskAdded">
+	<summary>
+  Looks up a localized string similar to Task has been added.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmAdvancedResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.Internationalization.Resources.RemotingServiceResourceManager.Initialize(System.String,System.Reflection.Assembly)">
+	<summary>
+ Initialize initializes the new object
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">assembly is not used in this implementation</param>
+</member><member name="M:Interfaces.Internationalization.Resources.RemotingServiceResourceManager.#ctor(System.String,System.Reflection.Assembly)">
+	<summary>
+ Constructs a DbResourceManager object
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">assembly is not used in this implementation</param>
+</member><member name="M:Interfaces.Internationalization.Resources.RemotingServiceResourceManager.#ctor(System.String)">
+	<summary>
+ Constructs a DbResourceManager object
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+</member><member name="M:Interfaces.Internationalization.Resources.RemotingServiceResourceManager.#ctor(System.Type)">
+	<summary>
+ Constructs a DbResourceManager object
+ </summary>
+	<param name="resourceType">The Type for which resources should be read/written</param>
+</member><member name="M:Interfaces.Internationalization.Resources.RemotingServiceResourceManager.InternalGetResourceSet(System.Globalization.CultureInfo,System.Boolean,System.Boolean)">
+	<summary>
+ Provides the implementation for finding a ResourceSet
+ </summary>
+	<param name="cultureInfo">The CultureInfo to look for</param>
+	<param name="createIfNotExists">If true and if the ResourceSet has not been loaded yet, load it</param>
+	<param name="tryParents">If the ResourceSet cannot be loaded, try parent CultureInfo objects to see if they exist</param>
+	<returns>The specified ResourceSet</returns>
+</member><member name="T:Interfaces.Internationalization.Resources.RemotingServiceResourceManager">
+	<summary>
+ DbResourceManager is a resource manager for reading and writing resources in a database
+ </summary>
+	<remarks>Set the static ConnectionString property to the connection string used to connect to the database.
+ The DbResourceManager works with SQL Server only in this implementation.</remarks>
+</member><member name="P:Interfaces.My.Resources.HeatDAL.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.My.Resources.HeatDAL.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="T:Interfaces.My.Resources.HeatDAL">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="T:Interfaces.dsScoreboard.RacingDataDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsScoreboard.ScoreBoardDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsScoreboard.RacingDataRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsScoreboard.ScoreBoardRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsScoreboard.RacingDataRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsScoreboard.ScoreBoardRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsScoreboard">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strEventItemAlreadyExists">
+	<summary>
+  Looks up a localized string similar to There is already an event item in your cart, this item cannot be added.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strEventNotFound">
+	<summary>
+  Looks up a localized string similar to Sorry that event was not found.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strHeatAndEventCannotExist">
+	<summary>
+  Looks up a localized string similar to Only one event item per cart is allowed. Heats and Events can't be added at the same time.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strItemNotAdded">
+	<summary>
+  Looks up a localized string similar to Item was not added. Please try later.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strItemNotFound">
+	<summary>
+  Looks up a localized string similar to Item in cart not found.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strNoHeatAvailable">
+	<summary>
+  Looks up a localized string similar to No heat is available at the time you requested.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strNotEnoughPoints">
+	<summary>
+  Looks up a localized string similar to This product doesn't have enough points to book a spot in this event.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strNotEnoughSpaceInEvent">
+	<summary>
+  Looks up a localized string similar to Not enough space available in the event.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBookingBLResource.strNotEnoughSpaceInHeat">
+	<summary>
+  Looks up a localized string similar to Not enough space available in the heats.
+</summary>
+</member><member name="T:Interfaces.Resources.OnlineBookingBLResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="T:Interfaces.DSEventScheduling.EventSchedulingDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.DSEventScheduling.EventSchedulingRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.DSEventScheduling.EventSchedulingRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.DSEventScheduling">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="T:Interfaces.DSPenalty.PenaltyDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.DSPenalty.PenaltyRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.DSPenalty.PenaltyRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.DSPenalty">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.DbResourceManagerResources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.DbResourceManagerResources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.DbResourceManagerResources.strInvalidOperationNoResources">
+	<summary>
+  Looks up a localized string similar to Invalid operation: no resources.
+</summary>
+</member><member name="P:Interfaces.DbResourceManagerResources.strTypeConverterNotFound">
+	<summary>
+  Looks up a localized string similar to TypeConverter not found or cannot convert from string for {0}.
+</summary>
+</member><member name="T:Interfaces.DbResourceManagerResources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.ResourceManagerProviderResources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.ResourceManagerProviderResources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.ResourceManagerProviderResources.strInvalidResourceManagerType">
+	<summary>
+  Looks up a localized string similar to ResourceManagerType must be a sub class of System.Resources.ResourceManager.
+</summary>
+</member><member name="T:Interfaces.ResourceManagerProviderResources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.HelperLog.AssignTerminalName(System.String)">
+	<summary>
+     If a Terminal Name was not provided by external callers then provide the name of the local machine.
+ </summary>
+	<param name="TerminalName" type="String">
+		<para>
+         The value of TerminalName that was provided to LogError() or LogErrorWithMail().
+     </para>
+	</param>
+	<returns>
+     A String value that is not empty.  This value will be either a non empty value passed in externally or will be the name of the local machine hosting this service.
+ </returns>
+</member><member name="M:Interfaces.HelperLog.AssignUserName(System.String)">
+	<summary>
+     Provide the external value assigned to UserName or a non-null string
+ </summary>
+	<param name="UserName" type="String">
+		<para>
+         The value of UserName provided by external callers to this service.
+     </para>
+	</param>
+	<returns>
+     A non-null String value.
+ </returns>
+</member><member name="P:Interfaces.Resources.LightItemResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.LightItemResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.LightItemResource.strStatus">
+	<summary>
+  Looks up a localized string similar to ID: {0} Status: {1}.
+</summary>
+</member><member name="T:Interfaces.Resources.LightItemResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.Resources.UnknownCard.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.UnknownCard.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.UnknownCard.strCardText">
+	<summary>
+  Looks up a localized string similar to Text: {0}.
+</summary>
+</member><member name="T:Interfaces.Resources.UnknownCard">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventHeatTypesBL.GetEventHeatType(System.Int32)">
+	<summary>
+ Gets the Event Heat Type By heatTypeNo
+ </summary>
+	<param name="eventHeatTypeNo">event heat type no of the event heat type to retrieve by</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="P:Interfaces.Resources.OnlineBooking.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBooking.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBooking.strConfirmEmailSubject">
+	<summary>
+  Looks up a localized string similar to Online Reservation Received({0}) at {1}.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBooking.strConflictsWith">
+	<summary>
+  Looks up a localized string similar to {0} conflicts with {1}.
+</summary>
+</member><member name="P:Interfaces.Resources.OnlineBooking.strScheduleOverlap">
+	<summary>
+  Looks up a localized string similar to {0}{1} schedule overlaps:.
+</summary>
+</member><member name="T:Interfaces.Resources.OnlineBooking">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="T:Interfaces.DSHeatDetails.HeatDetailsDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.DSHeatDetails.HeatDetailsRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.DSHeatDetails.HeatDetailsRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.DSHeatDetails">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strAs">
+	<summary>
+  Looks up a localized string similar to As.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strBreakEnd">
+	<summary>
+  Looks up a localized string similar to Welcome back.{0}Your ending break time is {1}.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strBreakStart">
+	<summary>
+  Looks up a localized string similar to Enjoy your break.{0}Your starting break time is {1}.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strCannotClockIn">
+	<summary>
+  Looks up a localized string similar to System cannot clock you in at this time. Please contact your manager..
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strCannotClockOut">
+	<summary>
+  Looks up a localized string similar to System cannot clock you out at this time. Please contact your manager..
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strCannotConnectToCCLServer">
+	<summary>
+  Looks up a localized string similar to Club Speed cannot connect to CoreCashLess Server.{0}Please try again.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strClockedIn">
+	<summary>
+  Looks up a localized string similar to You are now clocked in.{0}Your clock in time is {1}.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strClockedOut">
+	<summary>
+  Looks up a localized string similar to You are now clocked out.{0}Your clock in time is {1}.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strClockIn">
+	<summary>
+  Looks up a localized string similar to Clock In.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strErrorConnectToCCLServer">
+	<summary>
+  Looks up a localized string similar to There is error when Club Speed try to connect to CoreCashLess Server.{0}Please try again.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strHowManyTips">
+	<summary>
+  Looks up a localized string similar to How many tips did you get today?.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strInvalidCard">
+	<summary>
+  Looks up a localized string similar to Invalid Card.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strPickDuty">
+	<summary>
+  Looks up a localized string similar to Please pick your duty today..
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strPleaseSwipe">
+	<summary>
+  Looks up a localized string similar to Please Swipe Your Card or Type Your Password below.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strSystemErr">
+	<summary>
+  Looks up a localized string similar to System Error. Please contact your manager..
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strUsername">
+	<summary>
+  Looks up a localized string similar to User Name.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strWhatWouldYouLikeToDo">
+	<summary>
+  Looks up a localized string similar to Hi {0}, What would you like to do?.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strWouldYouLiketoClockIn">
+	<summary>
+  Looks up a localized string similar to Hi {0}. Would you like to clock in?.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmTimeClockResource.strWrongPassword">
+	<summary>
+  Looks up a localized string similar to Wrong Password.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmTimeClockResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strAddress">
+	<summary>
+  Looks up a localized string similar to Address.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strAmount">
+	<summary>
+  Looks up a localized string similar to Amount.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strBillingAddress">
+	<summary>
+  Looks up a localized string similar to Billing Address.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strBillingCity">
+	<summary>
+  Looks up a localized string similar to Billing City.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strBillingCountry">
+	<summary>
+  Looks up a localized string similar to Billing Country.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strBillingState">
+	<summary>
+  Looks up a localized string similar to Billing State.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strBillingZip">
+	<summary>
+  Looks up a localized string similar to Billing Zip.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strBonusValue">
+	<summary>
+  Looks up a localized string similar to Bonus Value.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strByAmount">
+	<summary>
+  Looks up a localized string similar to By Amount.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strByPercent">
+	<summary>
+  Looks up a localized string similar to By Percent.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCadetsPerHeat">
+	<summary>
+  Looks up a localized string similar to Cadets per heat.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCardID">
+	<summary>
+  Looks up a localized string similar to Card ID.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCategory">
+	<summary>
+  Looks up a localized string similar to Category.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCity">
+	<summary>
+  Looks up a localized string similar to City.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strComValue">
+	<summary>
+  Looks up a localized string similar to Com Value.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strConnected">
+	<summary>
+  Looks up a localized string similar to Connected.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCost">
+	<summary>
+  Looks up a localized string similar to Cost.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCountry">
+	<summary>
+  Looks up a localized string similar to Country.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCreditCardNo">
+	<summary>
+  Looks up a localized string similar to Credit Card No.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCurrencyName">
+	<summary>
+  Looks up a localized string similar to Currency Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCurrencyRate">
+	<summary>
+  Looks up a localized string similar to Currency Rate.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCurrencySymbol">
+	<summary>
+  Looks up a localized string similar to Currency Symbol.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strCVV">
+	<summary>
+  Looks up a localized string similar to CVV.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDataSaveFailed">
+	<summary>
+  Looks up a localized string similar to There was an error saving the data.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDataSaveSuccesful">
+	<summary>
+  Looks up a localized string similar to Data was saved successfully.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDate">
+	<summary>
+  Looks up a localized string similar to Date.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDateOfBirth">
+	<summary>
+  Looks up a localized string similar to Date of Birth.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDescription">
+	<summary>
+  Looks up a localized string similar to Description.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDisplayName">
+	<summary>
+  Looks up a localized string similar to Display Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDollars">
+	<summary>
+  Looks up a localized string similar to Dollars.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strDriversLicense">
+	<summary>
+  Looks up a localized string similar to Drivers License.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEmail">
+	<summary>
+  Looks up a localized string similar to Email Address.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEmailFrom">
+	<summary>
+  Looks up a localized string similar to Email from.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEmailTo">
+	<summary>
+  Looks up a localized string similar to Email to.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEmailType">
+	<summary>
+  Looks up a localized string similar to Email Type.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEndDate">
+	<summary>
+  Looks up a localized string similar to End Date.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEndX">
+	<summary>
+  Looks up a localized string similar to End X.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEntitle1">
+	<summary>
+  Looks up a localized string similar to Entitle1.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEntitle2">
+	<summary>
+  Looks up a localized string similar to Entitle 2.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEntitle3">
+	<summary>
+  Looks up a localized string similar to Entitle 3.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEntitle4">
+	<summary>
+  Looks up a localized string similar to Entitle 4.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEntitle5">
+	<summary>
+  Looks up a localized string similar to Entitle 5.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strEventTypes">
+	<summary>
+  Looks up a localized string similar to Event Type.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strExpirationDate">
+	<summary>
+  Looks up a localized string similar to Expiration Date.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strExportName">
+	<summary>
+  Looks up a localized string similar to Export Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strFileName">
+	<summary>
+  Looks up a localized string similar to File Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strFirstName">
+	<summary>
+  Looks up a localized string similar to First Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strFlagName">
+	<summary>
+  Looks up a localized string similar to Flag Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strFormName">
+	<summary>
+  Looks up a localized string similar to Form Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strGroupName">
+	<summary>
+  Looks up a localized string similar to Group Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strGST">
+	<summary>
+  Looks up a localized string similar to GST.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strGuardianMinorSignature">
+	<summary>
+  Looks up a localized string similar to Signature of Guardian and Minor.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strHeatTypeName">
+	<summary>
+  Looks up a localized string similar to Heat Type Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strHotelName">
+	<summary>
+  Looks up a localized string similar to Hotel Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strIgnoreIfBelow">
+	<summary>
+  Looks up a localized string similar to Ignore if below.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strIPAddress">
+	<summary>
+  Looks up a localized string similar to IP Address.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strItemNumber">
+	<summary>
+  Looks up a localized string similar to Item Number.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strKMeter">
+	<summary>
+  Looks up a localized string similar to Kilometer.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strKMeters">
+	<summary>
+  Looks up a localized string similar to KiloMeters.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strLapsOrMinutes">
+	<summary>
+  Looks up a localized string similar to Laps or Minutes.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strLastName">
+	<summary>
+  Looks up a localized string similar to Last Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strMeter">
+	<summary>
+  Looks up a localized string similar to Meter.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strMeters">
+	<summary>
+  Looks up a localized string similar to Meters.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strMile">
+	<summary>
+  Looks up a localized string similar to Mile.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strMiles">
+	<summary>
+  Looks up a localized string similar to Miles.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strMinorSignature">
+	<summary>
+  Looks up a localized string similar to Signature of Minor Participant.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strNA">
+	<summary>
+  Looks up a localized string similar to N/A.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strName">
+	<summary>
+  Looks up a localized string similar to Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strNo">
+	<summary>
+  Looks up a localized string similar to No.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strOrderDate">
+	<summary>
+  Looks up a localized string similar to Order Date.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strOtherPoint">
+	<summary>
+  Looks up a localized string similar to Other Point.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPaidValue">
+	<summary>
+  Looks up a localized string similar to Paid Value.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strParentPrintedName">
+	<summary>
+  Looks up a localized string similar to Printed Name of Parent/Guardian.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strParentSignature">
+	<summary>
+  Looks up a localized string similar to Signature of Parent/Guardian.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPassword">
+	<summary>
+  Looks up a localized string similar to Password.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPercentage">
+	<summary>
+  Looks up a localized string similar to Percentage.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPhoneNumber">
+	<summary>
+  Looks up a localized string similar to Phone Number.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPointByNumber">
+	<summary>
+  Looks up a localized string similar to Point {0}.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPointItem">
+	<summary>
+  Looks up a localized string similar to Point Item.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPoints">
+	<summary>
+  Looks up a localized string similar to Points.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPONumber">
+	<summary>
+  Looks up a localized string similar to PO Number.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPositionDescription">
+	<summary>
+  Looks up a localized string similar to Position Description.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPositionMinExpLevel">
+	<summary>
+  Looks up a localized string similar to Min. Exp Levl.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPositionName">
+	<summary>
+  Looks up a localized string similar to Position Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPrice1">
+	<summary>
+  Looks up a localized string similar to Price 1.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPrice2">
+	<summary>
+  Looks up a localized string similar to Price 2.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPrice3">
+	<summary>
+  Looks up a localized string similar to Price 3.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPrice4">
+	<summary>
+  Looks up a localized string similar to Price 4.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPrice5">
+	<summary>
+  Looks up a localized string similar to Price 5.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPriceCadet">
+	<summary>
+  Looks up a localized string similar to Price Cadet.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strPromotionCode">
+	<summary>
+  Looks up a localized string similar to Promotion Code.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strQuantity">
+	<summary>
+  Looks up a localized string similar to Quantity.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strRacerName">
+	<summary>
+  Looks up a localized string similar to Racer Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strRacersPerHeat">
+	<summary>
+  Looks up a localized string similar to Racers per heat.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strReceived">
+	<summary>
+  Looks up a localized string similar to Received.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strReceivedDate">
+	<summary>
+  Looks up a localized string similar to Received Date.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strReOrderPoint">
+	<summary>
+  Looks up a localized string similar to Reorder Point.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strRequired">
+	<summary>
+  Looks up a localized string similar to Required.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strRequiredDate">
+	<summary>
+  Looks up a localized string similar to Required Date.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strReservationPoints">
+	<summary>
+  Looks up a localized string similar to Reservation Points.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strScheduleDuration">
+	<summary>
+  Looks up a localized string similar to Schedule Duration.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strSetOf">
+	<summary>
+  Looks up a localized string similar to Set of.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strSettingValue">
+	<summary>
+  Looks up a localized string similar to Setting Value.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strShippingAddress">
+	<summary>
+  Looks up a localized string similar to Shipping Address.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strShippingCity">
+	<summary>
+  Looks up a localized string similar to Shipping City.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strShippingCountry">
+	<summary>
+  Looks up a localized string similar to Shipping Country.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strShippingState">
+	<summary>
+  Looks up a localized string similar to Shipping State.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strShippingZip">
+	<summary>
+  Looks up a localized string similar to Shipping Zip Code.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strSignHere">
+	<summary>
+  Looks up a localized string similar to Sign Name Here.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strSourceName">
+	<summary>
+  Looks up a localized string similar to Source Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strStartDate">
+	<summary>
+  Looks up a localized string similar to Start Date.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strStartFrom">
+	<summary>
+  Looks up a localized string similar to Start From.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strStartX">
+	<summary>
+  Looks up a localized string similar to Start X.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strState">
+	<summary>
+  Looks up a localized string similar to State.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strStock">
+	<summary>
+  Looks up a localized string similar to Stock.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strSubItem">
+	<summary>
+  Looks up a localized string similar to Sub Item.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strTaskName">
+	<summary>
+  Looks up a localized string similar to Task name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strTaxes">
+	<summary>
+  Looks up a localized string similar to Tax.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strTerminalName">
+	<summary>
+  Looks up a localized string similar to Terminal Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strToday">
+	<summary>
+  Looks up a localized string similar to Today.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strTrackLength">
+	<summary>
+  Looks up a localized string similar to Track Length.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strTrackNo">
+	<summary>
+  Looks up a localized string similar to Track No.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strUnitCost">
+	<summary>
+  Looks up a localized string similar to Unit Cost.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strUserName">
+	<summary>
+  Looks up a localized string similar to User Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strVolume">
+	<summary>
+  Looks up a localized string similar to Volume.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strVoucherCode">
+	<summary>
+  Looks up a localized string similar to Voucher Code.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strVoucherName">
+	<summary>
+  Looks up a localized string similar to Voucher Name.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strWebPassword">
+	<summary>
+  Looks up a localized string similar to Web Password.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strWidth">
+	<summary>
+  Looks up a localized string similar to Width.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strWinBy">
+	<summary>
+  Looks up a localized string similar to Win by.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.stryard">
+	<summary>
+  Looks up a localized string similar to Yard.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strYards">
+	<summary>
+  Looks up a localized string similar to Yards.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strYes">
+	<summary>
+  Looks up a localized string similar to Yes.
+</summary>
+</member><member name="P:Interfaces.Resources.Common.strZipCode">
+	<summary>
+  Looks up a localized string similar to Zip Code.
+</summary>
+</member><member name="T:Interfaces.Resources.Common">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventRoundsBL.GetEventRoundsByEventID(System.Int32)">
+	<summary>
+ Gets the Event Rounds By Event ID
+ </summary>
+	<param name="eventID">EventID of the Event Rounds</param>
+	<returns>Returns an Event Round, null if not found</returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Event.EventRoundsBL.Add(EFDAL.Models.EventRound)">
+	<summary>
+ Add a new event round to the database
+ </summary>
+	<param name="eventRound">event round to add</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.SignatureToImage.#ctor">
+	<summary>
+ Gets a new signature generator with the default options.
+ </summary>
+</member><member name="M:Interfaces.SignatureToImage.SigJsonToImage(System.String)">
+	<summary>
+ Draws a signature based on the JSON provided by Signature Pad.
+ </summary>
+	<param name="json">JSON string of line drawing commands.</param>
+	<returns>Bitmap image containing the signature.</returns>
+</member><member name="M:Interfaces.SignatureToImage.SigNameToImage(System.String,System.String)">
+	<summary>
+ Draws an approximation of a signature using a font.
+ </summary>
+	<param name="name">The string that will be drawn.</param>
+	<param name="fontPath">Full path of font file to be used if default font is not installed on the system.</param>
+	<returns>Bitmap image containing the user's signature.</returns>
+</member><member name="M:Interfaces.SignatureToImage.GetBlankCanvas">
+	<summary>
+ Get a blank bitmap using instance properties for dimensions and background color.
+ </summary>
+	<returns>Blank bitmap image.</returns>
+</member><member name="T:Interfaces.SignatureToImage.SignatureLine">
+	<summary>
+ Line drawing commands as generated by the Signature Pad JSON export option.
+ </summary>
+</member><member name="T:Interfaces.SignatureToImage">
+	<summary>
+ A supplemental class for Signature Pad (https://github.com/thomasjbradley/signature-pad)
+ that generates an image of the signature's JSON output server-side using C#. Alternately,
+ you can provide a name and generate an image that resembles a signature from a font.
+ Similar to Signature to Image PHP (https://github.com/thomasjbradley/signature-to-image)
+ </summary>
+</member><member name="T:Interfaces.DSHeatData.HeatMainDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.DSHeatData.HeatMainRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.DSHeatData.HeatMainRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.DSHeatData">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.close">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.Label1_Image">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.Logo">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.magtek_mini_card_reader">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.okay">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.passwordLogo">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.pinned">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.Play">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.SplashScreen">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.swiper">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="P:Interfaces.My.Resources.Resources.unpinned">
+	<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member><member name="T:Interfaces.My.Resources.Resources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strByBstLpTm">
+	<summary>
+  Looks up a localized string similar to By Best Lap Time.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strByBstLpTmInEvnt">
+	<summary>
+  Looks up a localized string similar to By Best Lap Time In Event.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strByBstScrInEvnt">
+	<summary>
+  Looks up a localized string similar to By Best Score In Event.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strByPts">
+	<summary>
+  Looks up a localized string similar to By Points.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strCharacterLessThan">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. Data must be less than {1} characters.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strDataRequired">
+	<summary>
+  Looks up a localized string similar to {0} is required.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strDoNotGrid">
+	<summary>
+  Looks up a localized string similar to Do Not Grid.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strFirstSuffix">
+	<summary>
+  Looks up a localized string similar to {0} st.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strHours">
+	<summary>
+  Looks up a localized string similar to {0} hours.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidBool">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. {1} is not a boolean value.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidCard">
+	<summary>
+  Looks up a localized string similar to Invalid Card.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidDate">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. {1} is not a valid date..
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidDouble">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. Data must be a whole number, decimals allowed.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidEmail">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. {1} is an invalid Email Address.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidInteger">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. Data must be whole numbers, no decimals.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidIPAddress">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. {1}  is an invalid IP Address.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidPercentage">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. Data must be a whole number, decimals allowed (0 - 100).
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidPhone">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. {1}  is an invalid Phone Number.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidPositiveDouble">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data. Data must be a positive number, decimals allowed.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strInvalidPositiveInteger">
+	<summary>
+  Looks up a localized string similar to {0} contains Invalid Data.  Data must be a positive number.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strNA">
+	<summary>
+  Looks up a localized string similar to N/A.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strOneHour">
+	<summary>
+  Looks up a localized string similar to 1 hour.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strQualWithCurrRnd">
+	<summary>
+  Looks up a localized string similar to Qualifier With Current Round.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strQualWithSameGrp">
+	<summary>
+  Looks up a localized string similar to Qualifier With Same Group.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strRandom">
+	<summary>
+  Looks up a localized string similar to Random.
+</summary>
+</member><member name="P:Interfaces.Resources.HelperResource.strUsrTmplt">
+	<summary>
+  Looks up a localized string similar to User Template.
+</summary>
+</member><member name="T:Interfaces.Resources.HelperResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.BusinessLogic.Heat.HeatTypeBL.getHeatTypeByHeatTypeID(System.Int32)">
+	<summary>
+ Gets the Heat Type by Heat Type No
+ </summary>
+	<param name="heatTypeNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:Interfaces.BusinessLogic.Heat.HeatTypeBL.getHeatType(System.Int32)">
+	<summary>
+ Duplicate functionality as the method getHeatTypeByHeatTypeID
+ </summary>
+	<param name="heatTypeNo"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:Interfaces.dsResources.dtResourcesDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.dsResources.dtResourcesRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.dsResources.dtResourcesRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.dsResources">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddSalesOpportunityResource.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddSalesOpportunityResource.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddSalesOpportunityResource.strAmountNotValid">
+	<summary>
+  Looks up a localized string similar to Proposed amount is not valid.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddSalesOpportunityResource.strEnterValidAmount">
+	<summary>
+  Looks up a localized string similar to Please enter a valid money amount.
+</summary>
+</member><member name="P:Interfaces.Resources.FrmAddSalesOpportunityResource.strSalesOppAdded">
+	<summary>
+  Looks up a localized string similar to Sales Opportunity has been added.
+</summary>
+</member><member name="T:Interfaces.Resources.FrmAddSalesOpportunityResource">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:Interfaces.Helper.BuildValidatedMsgForWeb(System.String,System.Text.StringBuilder@,System.Boolean,Interfaces.Helper.dataTypes,System.String,System.Int32)">
+	<summary>
+	</summary>
+	<param name="msgBuilder">msgbuilder will be used to build message</param>
+	<param name="required">is the value required</param>
+	<param name="dataType">what data type to validated against</param>
+	<param name="val">value to validate</param>
+	<param name="maxCharacterLength">maximum characters allowed, 0 will not check</param>
+	<returns>returns boolean if the value is valid or not</returns>
+	<remarks></remarks>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strAuthorizeNetError">
+	<summary>
+  Looks up a localized string similar to There was an error while processing the credit card in authorized.net..
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strAuthorizeNetHeldForReview">
+	<summary>
+  Looks up a localized string similar to This transaction is held for review by authorized.net..
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strFailedToConnectToCreditCardGriddingService">
+	<summary>
+  Looks up a localized string similar to Failed to connect to credit card gridding service..
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strFailedToParseFromCreditCardGriddingService">
+	<summary>
+  Looks up a localized string similar to Failed to parse response from the credit card gridding service..
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strFailedToSavePaymentLocally">
+	<summary>
+  Looks up a localized string similar to Failed to save payment locally..
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strTransactionDeclined">
+	<summary>
+  Looks up a localized string similar to The transaction has been declined..
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strTransactionNotSuccessful">
+	<summary>
+  Looks up a localized string similar to .
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strUnknownResponseCode">
+	<summary>
+  Looks up a localized string similar to Unknown response code of .
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strUnexpectedResponse">
+	<summary>
+  Looks up a localized string similar to The response recived from the credit card merchant was unexpected..
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strDeserializationFail">
+	<summary>
+  Looks up a localized string similar to Failed to Deserialize from Credit Card Processor.
+</summary>
+</member><member name="P:Interfaces.Resources.CreditCardProcessorResponse.strAggregateException">
+	<summary>
+  Looks up a localized string similar to Failed to Deserialize from Credit Card Processor.
+</summary>
+</member><member name="T:Interfaces.Resources.CreditCardProcessorResponse">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="P:Interfaces.Resources.FiscalPrinter.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.FiscalPrinter.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.FiscalPrinter.strCheckHasBeenOverPaid">
+	<summary>
+  Looks up a localized string similar to Check has been over paid. Fiscal printer requires check to be balanced.
+</summary>
+</member><member name="P:Interfaces.Resources.FiscalPrinter.strCheckNeedsToBeBalanced">
+	<summary>
+  Looks up a localized string similar to Check is not balanced. Fiscal printer requires check to be balanced.
+</summary>
+</member><member name="T:Interfaces.Resources.FiscalPrinter">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="T:Interfaces.DSCardPrinterSetting.CardPrinterSettingDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.DSCardPrinterSetting.CardPrinterSettingRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.DSCardPrinterSetting.CardPrinterSettingRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.DSCardPrinterSetting">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="F:Interfaces.ViewModels.Event.EventGridding.GridLineUpSettingViewModel._calculateMetricIn">
+	<summary>
+ Metric can be points, laps, finish positiong, lap position etc.
+ Where are calculating the metric in? 
+ In the round or event?
+ </summary>
+	<remarks></remarks>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.Type,System.ComponentModel.ComponentResourceManager@)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given Type
+ </summary>
+	<param name="type">The Type for which a ResourceManager should be returned</param>
+	<param name="resourceManager">resourceManager is set to a ComponentResourceManager for the given Type</param>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.String,System.Reflection.Assembly,System.ComponentModel.ComponentResourceManager@)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given base name and assembly
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">The assembly (if any) in which the resources are found</param>
+	<param name="resourceManager">resourceManager is set to a ComponentResourceManager for the given base name and assembly</param>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.String,System.Reflection.Assembly,System.Type,System.ComponentModel.ComponentResourceManager@)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given base name and assembly
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">The assembly (if any) in which the resources are found</param>
+	<param name="usingResourceSet">The Type of the ResourceSet (if different from the default Type)</param>
+	<param name="resourceManager">resourceManager is set to a ComponentResourceManager for the given base name and assembly</param>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.Type,System.Resources.ResourceManager@)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given Type
+ </summary>
+	<param name="type">The Type for which a ResourceManager should be returned</param>
+	<param name="resourceManager">resourceManager is set to a ResourceManager for the given Type</param>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.String,System.Reflection.Assembly,System.Resources.ResourceManager@)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given base name and assembly
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">The assembly (if any) in which the resources are found</param>
+	<param name="resourceManager">resourceManager is set to a ResourceManager for the given base name and assembly</param>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.String,System.Reflection.Assembly,System.Type,System.Resources.ResourceManager@)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given base name and assembly
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">The assembly (if any) in which the resources are found</param>
+	<param name="usingResourceSet">The Type of the ResourceSet (if different from the default Type)</param>
+	<param name="resourceManager">resourceManager is set to a ResourceManager for the given base name and assembly</param>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.Type)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given Type
+ </summary>
+	<param name="type">The Type for which a ResourceManager should be returned</param>
+	<returns>A ResourceManager for the given Type</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.String,System.Reflection.Assembly)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given base name and assembly
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">The assembly (if any) in which the resources are found</param>
+	<returns>A ResourceManager for the given base name and assembly</returns>
+</member><member name="M:Interfaces.Internationalization.Resources.ResourceManagerProvider.GetResourceManager(System.String,System.Reflection.Assembly,System.Type)">
+	<summary>
+ GetResourceManager returns a ResourceManager for the given base name and assembly
+ </summary>
+	<param name="baseName">The qualified base name which the resources represent</param>
+	<param name="assembly">The assembly (if any) in which the resources are found</param>
+	<param name="usingResourceSet">The Type of the ResourceSet (if different from the default Type)</param>
+	<returns>A ResourceManager for the given base name and assembly</returns>
+</member><member name="P:Interfaces.Internationalization.Resources.ResourceManagerProvider.ResourceManagerType">
+	<summary>
+ ResourceManagerType is the Type of the ResourceManager which the provider providers
+ </summary>
+	<remarks>The Type must be a ResourceManager or a descendant of ResourceManager</remarks>
+</member><member name="T:Interfaces.Internationalization.Resources.ResourceManagerProvider">
+	<summary>
+ ResourceManagerProvider provides ResourceManager objects according to the ResourceManager type set
+ </summary>
+	<remarks>ResourceManagerProvider provides an abstraction from the actual ResourceManager class used and 
+ therefore avoids hard coding the names of ResourceManager classes throughout an application.
+ </remarks>
+</member><member name="T:Interfaces.DSEventReservation.EventReservationsDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:Interfaces.DSEventReservation.EventReservationsRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:Interfaces.DSEventReservation.EventReservationsRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:Interfaces.DSEventReservation">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="P:Interfaces.Resources.CheckDetailSalesByLapOrTime.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:Interfaces.Resources.CheckDetailSalesByLapOrTime.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="P:Interfaces.Resources.CheckDetailSalesByLapOrTime.strNoOfLaps">
+	<summary>
+  Looks up a localized string similar to {0} laps.
+</summary>
+</member><member name="P:Interfaces.Resources.CheckDetailSalesByLapOrTime.strNoOfMins">
+	<summary>
+  Looks up a localized string similar to {0} mins.
+</summary>
+</member><member name="P:Interfaces.Resources.CheckDetailSalesByLapOrTime.strOnNoOfLaps">
+	<summary>
+  Looks up a localized string similar to {0} of {1} laps.
+</summary>
+</member><member name="P:Interfaces.Resources.CheckDetailSalesByLapOrTime.strOnNoOfMins">
+	<summary>
+  Looks up a localized string similar to {0} of {1} mins.
+</summary>
+</member><member name="T:Interfaces.Resources.CheckDetailSalesByLapOrTime">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+</members>
+</doc>
