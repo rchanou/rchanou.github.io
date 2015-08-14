@@ -38,10 +38,15 @@ $indexHTML = <<<EOT
      <div id="headerBar">
         <img src="home_ffffff_32.png" style="cursor: pointer;" onclick="resetInnerFrame()">
      </div>
-    <iframe id="innerFrame" src="$targetUrl" style="cursor: none;" frameborder="0" nwdisable nwfaketop></iframe>
+    <iframe id="innerFrame" src="$targetUrl" style="cursor: none;" frameborder="0" onload="disableFacebookAutoComplete()" nwdisable nwfaketop></iframe>
   </body>
   <script language="javascript">
 
+	function disableFacebookAutoComplete()
+	{
+		try { document.getElementById('innerFrame').contentDocument.getElementById('email').setAttribute('autocomplete', 'off'); }
+		catch(ex){  }
+	}
     function resetInnerFrame()
     {
         document.getElementById('innerFrame').src = "$targetUrl";
