@@ -27,6 +27,7 @@ var printer   = process.argv[3] && process.argv[3] !== 'default' ? '-print-to ' 
 var timeout   = process.argv[4] || 10000;
 var paperSize = process.argv[5] || '8.5in*11in'; //'8.5in*5.5in';
 var oldFileLifetimeInMs = 10*60*1000;
+var printJobDirectory = path.join(__dirname, 'print-jobs');
 
 // Overrides for testing specific sheets (also see paperSize variable)
 //var url = 'http://k1sandiego.clubspeedtiming.com/PrivateWWW/SpeedSheetK1.aspx?HeatNo=53780&CustID=17096126'
@@ -37,8 +38,13 @@ var oldFileLifetimeInMs = 10*60*1000;
 var d = new Date();
 var n = d.getTime() + '-' + Math.floor((Math.random() * 10000) + 1);
 
-var filename    = path.join(__dirname, 'output', n + '-page.pdf');
-var logFilename = path.join(__dirname, 'output', n + '-log.txt');
+// Create print job directory (if it doesn't exist)
+if (!fs.existsSync(printJobDirectory)){
+    fs.mkdirSync(printJobDirectory);
+}
+
+var filename    = path.join(printJobDirectory, n + '-page.pdf');
+var logFilename = path.join(printJobDirectory, n + '-log.txt');
 
 var phantomjsBinPath = phantomjs.path
 var phantomjsArgs = [
