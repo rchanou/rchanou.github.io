@@ -70,14 +70,8 @@ abstract class BaseApi {
                 return $interface->create($mapped);
             });
         }
-        catch (RestException $e) {
-            throw $e;
-        }
-        catch (CSException $e) {
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
-        }
         catch (Exception $e) {
-            throw new RestException(500, $e->getMessage());
+            $this->_error($e);
         }
     }
 
@@ -110,14 +104,8 @@ abstract class BaseApi {
                 });
             }
         }
-        catch (RestException $e) {
-            throw $e;
-        }
-        catch (CSException $e) {
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
-        }
         catch (Exception $e) {
-            throw new RestException(500, $e->getMessage());
+            $this->_error($e);
         }
     }
 
@@ -138,14 +126,8 @@ abstract class BaseApi {
             array_push($mutateArgs, $callback);
             return call_user_func_array(array($this->mapper, 'mutate'), $mutateArgs);
         }
-        catch (RestException $e) {
-            throw $e;
-        }
-        catch (CSException $e) {
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
-        }
         catch (Exception $e) {
-            throw new RestException(500, $e->getMessage());
+            $this->_error($e);
         }
     }
 
@@ -177,14 +159,8 @@ abstract class BaseApi {
             array_push($mutateArgs, $callback);
             return call_user_func_array(array($this->mapper, 'mutate'), $mutateArgs);
         }
-        catch (RestException $e) {
-            throw $e;
-        }
-        catch (CSException $e) {
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
-        }
         catch (Exception $e) {
-            throw new RestException(500, $e->getMessage());
+            $this->_error($e);
         }
     }
 
@@ -211,14 +187,8 @@ abstract class BaseApi {
             array_push($mutateArgs, $callback);
             return call_user_func_array(array($this->mapper, 'mutate'), $mutateArgs);
         }
-        catch (RestException $e) {
-            throw $e;
-        }
-        catch (CSException $e) {
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
-        }
         catch (Exception $e) {
-            throw new RestException(500, $e->getMessage());
+            $this->_error($e);
         }
     }
 
@@ -228,5 +198,23 @@ abstract class BaseApi {
     public function delete1($id1) {
         $this->validate('delete');
         return call_user_func_array(array($this, '_delete'), func_get_args());
+    }
+
+    /**
+     * @access private
+     *
+     * Abstracted error handler.
+     * Use to convert internal exceptions to RestExceptions as necessary.
+     *
+     * Note, @access doesn't actually work with Restler 2.0.
+     * Holding on to it for documentation purposes.
+     * The function is named with an underscore to keep it out of the exposed API calls.
+     */
+    protected final function _error($e) {
+        if ($e instanceof RestException)
+            throw $e;
+        if ($e instanceof CSException)
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        throw new RestException(500, $e->getMessage());
     }
 }

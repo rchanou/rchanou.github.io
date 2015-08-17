@@ -102,6 +102,10 @@ class Arrays {
         return false;
     }
 
+    public static function join($arr = array(), $glue = ',') {
+        return implode($glue, $arr);
+    }
+
     public static function &mapRecursive($arr, $predicate) {
         foreach($arr as $key => $val) {
             if (is_array($val))

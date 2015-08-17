@@ -1,11 +1,7 @@
 -- Note: PDO does NOT accept GO statements, and CREATE VIEW must be the first statement in a batch
 
 CREATE VIEW [dbo].[Checks_V] AS
-WITH CONSTANTS AS (
-    SELECT
-        CAST(dbo.UseSalesTax() AS BIT) AS USE_SALES_TAX
-)
-, CheckSums1 AS (
+WITH CheckSums1 AS (
     SELECT
           cds.CheckID
         , SUM(cds.CheckDetailTax) AS CheckTax
@@ -44,7 +40,6 @@ WITH CONSTANTS AS (
     FROM ChecksTemp1 ct
     LEFT OUTER JOIN dbo.Checks c
         ON ct.CheckID = c.CheckID
-    OUTER APPLY CONSTANTS
 )
 , ChecksOverride AS (
     SELECT
@@ -57,7 +52,6 @@ WITH CONSTANTS AS (
     FROM ChecksTemp2 ct
     INNER JOIN dbo.Checks c
         ON c.CheckID = ct.CheckID
-    OUTER APPLY CONSTANTS
 )
 SELECT
       c.CheckID
@@ -93,4 +87,3 @@ LEFT OUTER JOIN CheckPayments_V cpv
     ON c.CheckID = cpv.CheckID
 LEFT OUTER JOIN ChecksOverride ct
     ON c.CheckID = ct.CheckID
-OUTER APPLY CONSTANTS

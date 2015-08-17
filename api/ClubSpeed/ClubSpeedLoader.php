@@ -40,7 +40,7 @@ MailService::initialize($logic); // ~ 1ms
 MailService::useInterface('Swift');
 
 // inject the LogicService into the static ProductHandlerService class
-ProductHandlerService::initialize($logic);
+ProductHandlerService::initialize($logic, $db);
 
 // DefinitionService::initialize();
 

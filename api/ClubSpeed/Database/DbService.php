@@ -62,4 +62,16 @@ class DbService {
     public function exec($sql, $params = array()) {
         return $this->conn->exec($sql, $params); // pass through
     }
+
+    public function begin() {
+        return $this->conn->begin();
+    }
+
+    public function commit() {
+        return $this->conn->commit();
+    }
+
+    public function rollback() {
+        return $this->conn->rollback();
+    }
 }

@@ -3,13 +3,12 @@
         "name": "dbo.CustomerStatus",
         "alias": "cs"
     },
-    "keys": [
-        "StatusID"
-    ],
     "columns": [
         {
               "name": "StatusID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "Description"

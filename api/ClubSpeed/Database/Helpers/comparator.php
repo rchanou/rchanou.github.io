@@ -47,7 +47,14 @@ class Comparator {
         , '$lk'         => 'LIKE'
         , '$nlk'        => 'NOT LIKE'
         , '$in'         => 'IN'
-        , '$has'        => 'LIKE' // special extension which will automatically surround value in %'s
+        , '$notin'      => 'NOT IN'
+        , '$has'        => '$has' // special extension which will automatically surround value in %'s, then use the LIKE operator
+        , '$contains'   => '$has'
+
+        // these probably belong in another class.
+        // putting here for now, until we have a better spot.
+        , '$and'        => 'AND'
+        , '$or'         => 'OR'
     );
 
     public function __construct($data) {
@@ -57,9 +64,8 @@ class Comparator {
 
     public function parse($string) {
         $groups = preg_split(self::$pattern, $string, -1, PREG_SPLIT_DELIM_CAPTURE);
-        foreach($groups as $key => $group) {
+        foreach($groups as $key => $group)
             $groups[$key] = trim($group);
-        }
         if (count($groups) === 3) {
             $this->left     = $groups[0];
             $this->operator = @self::$operators[strtolower($groups[1])];
@@ -75,9 +81,8 @@ class Comparator {
                 }, $this->right);
             }
         }
-        else {
+        else
             throw new \CSException("Comparator was unable to parse the provided string! Received: " . $string);
-        }
     }
 
     public function validate() {

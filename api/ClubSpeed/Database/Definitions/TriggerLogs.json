@@ -3,13 +3,12 @@
         "name": "dbo.TriggerLogs",
         "alias": "trgl"
     },
-    "keys": [
-        "ID"
-    ],
     "columns": [
         {
               "name": "ID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CustID"

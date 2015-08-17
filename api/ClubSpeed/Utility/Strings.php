@@ -9,6 +9,12 @@ class Strings {
      */
     private function __construct() {} // prevent any initialization of this class
 
+    public static function split($str = '', $delimiter = ',') {
+        if (empty($str))
+            return array();
+        return explode($delimiter, $str); // since i'm sick of trying to remember why PHP keeps swapping parameter order
+    }
+
     public static function rangeToCSV($str) {
         $str = preg_replace('/\s+/', '', $str); // just get rid of all whitespace immediately
         $full = array();

@@ -40,9 +40,9 @@ class DbCollection {
             $record = $data;
         else
             $record = $this->reflection->newInstance($data);
-        $insert = \ClubSpeed\Database\Helpers\SqlBuilder::buildInsert($record);
+        $insert = SqlBuilder::buildInsert($record);
         $lastId = $this->conn->exec($insert['statement'], $insert['values']);
-        $lastId = \ClubSpeed\Utility\Convert::toNumber($lastId);
+        $lastId = Convert::toNumber($lastId);
         return $lastId;
     }
 
@@ -55,9 +55,26 @@ class DbCollection {
         switch($uow->action) {
             case 'create':
                 $lastId = $this->conn->exec($query['statement'], $query['values']);
-                $lastId = \ClubSpeed\Utility\Convert::toNumber($lastId);
-                $uow->data->load($lastId); // note that this might not match exactly what is in the database. careful(!!!)
-                $uow->table_id = $lastId;  // the equality will depend on whether we have defaults being set by the database.
+                $lastId = Convert::toNumber($lastId);
+                if (!empty($lastId)) {
+                    $uow->data->load($lastId); // note that this might not match exactly what is in the database. careful(!!!)
+                    $uow->table_id = $lastId;  // the equality will depend on whether we have defaults being set by the database.
+                }
+                else {
+                    $keys = $this->keys;
+                    if (count($keys) === 1) {
+                        $key = Arrays::first($keys);
+                        $key = $uow->data->{$key['name']};
+                        $uow->table_id = $key;
+                    }
+                    else {
+                        $uow->table_id = array();
+                        foreach($keys as $keyDefinition) {
+                            $key = $uow->data->{$keyDefinition['name']};
+                            $uow->table_id[] = $key;
+                        }
+                    }
+                }
                 return $uow;
             case 'all':
                 $results = $this->conn->query($query['statement'], $query['values']);
@@ -138,7 +155,7 @@ class DbCollection {
             // note -- if we need more performance out of this,
             // we can build this into a single insert statement
             // by using something similar to the following line:
-            //      $batch = \ClubSpeed\Database\Helpers\SqlBuilder::buildBatchInsert($records);
+            //      $batch = SqlBuilder::buildBatchInsert($records);
             //
             // for now, just looping and running creates on each
             try {
@@ -152,7 +169,7 @@ class DbCollection {
     }
 
     public function all() {
-        $select = \ClubSpeed\Database\Helpers\SqlBuilder::buildSelect($this->reflection->newInstance());
+        $select = SqlBuilder::buildSelect($this->reflection->newInstance());
         $results = $this->conn->query($select['statement']);
         $all = array();
         foreach($results as $result) {
@@ -164,7 +181,7 @@ class DbCollection {
     public function get() {
         $ids = func_get_args();
         $instance = $this->reflection->newInstanceArgs($ids);
-        $get = \ClubSpeed\Database\Helpers\SqlBuilder::buildGet($instance);
+        $get = SqlBuilder::buildGet($instance);
         $results = $this->conn->query($get['statement'], $get['values']);
         $get = array();
         foreach($results as $result) {
@@ -183,7 +200,7 @@ class DbCollection {
             $record = $data;
         else
             $record = $this->reflection->newInstance($data);
-        $match = \ClubSpeed\Database\Helpers\SqlBuilder::buildFind($record); // note we are using buildFind at this point
+        $match = SqlBuilder::buildFind($record); // note we are using buildFind at this point
         $results = $this->conn->query($match['statement'], @$match['values']);
         $match = array();
         foreach($results as $result) {
@@ -197,7 +214,7 @@ class DbCollection {
             $comparators = new \ClubSpeed\Database\Helpers\GroupedComparator($comparators);
         if (!$this->validateComparators($comparators))
             throw new \CSException("Unable to validate querystring comparators! Check the syntax of the filter querystring.");
-        $find = \ClubSpeed\Database\Helpers\SqlBuilder::buildFind($this->reflection->newInstance(), $comparators);
+        $find = SqlBuilder::buildFind($this->reflection->newInstance(), $comparators);
         $results = $this->conn->query($find['statement'], @$find['values']);
         $find = array();
         foreach($results as $result) {
@@ -223,7 +240,7 @@ class DbCollection {
             $record = $data;
         else
             $record = $this->reflection->newInstance($data);
-        $update = \ClubSpeed\Database\Helpers\SqlBuilder::buildUpdate($record);
+        $update = SqlBuilder::buildUpdate($record);
         $affected = $this->conn->exec($update['statement'], @$update['values']);
         // return $affected;
     }
@@ -241,7 +258,7 @@ class DbCollection {
             // $record = $this->reflection->newInstance($data);
         else
             $record = $this->reflection->newInstanceArgs($args);
-        $delete = \ClubSpeed\Database\Helpers\SqlBuilder::buildDelete($record);
+        $delete = SqlBuilder::buildDelete($record);
         $affected = $this->conn->exec($delete['statement'], $delete['values']);
         // return $affected;
     }
@@ -253,19 +270,31 @@ class DbCollection {
             $record = $data; // if the first arg is already the right instance, just use it
         else
             $record = $this->reflection->newInstanceArgs($args); // otherwise, pass the stuff on -- note that this may be multiple ids (hence, the arg issues)
-        $exists = \ClubSpeed\Database\Helpers\SqlBuilder::buildExists($record);
+        $exists = SqlBuilder::buildExists($record);
         $results = $this->conn->query($exists['statement'], $exists['values']);
         if (!is_null($results) && !empty($results) && isset($results[0])) {
             $result = $results[0];
             if (isset($result['Exists'])) {
-                return \ClubSpeed\Utility\Convert::toBoolean($result['Exists']);
+                return Convert::toBoolean($result['Exists']);
             }
         }
         return false;
     }
 
+    private function validateWhere($where) {
+        foreach($where as $key => $val) {
+            if ($key === '$and' || $key === '$or') {
+                if (!is_array($val))
+                    throw new \CSException('Received a UnitOfWork with a where in an invalid format! Expected array for $and or $or key, received: ' . print_r($val, true));
+                foreach($val as $grouped)
+                    $this->validateWhere($grouped);
+            }
+            else if (!$this->reflection->hasProperty($key))
+                throw new \CSException("Received a UnitOfWork with a where and a column not in the table definition! Attempted to use: [" . $this->table . "].[" . $key . "]");
+        }
+    }
+
     public function validate(&$uow) {
-        // items to handle (note that while we are using mapper, this shouldn't be necessary for client validation.)
         // 1. select
         // 2. where
         // 3. order
@@ -281,11 +310,7 @@ class DbCollection {
         if (!empty($uow->where)) {
             if (!is_array($uow->where) && !$uow->where instanceof \ClubSpeed\Database\Records\BaseRecord)
                 throw new \CSException('Received a UnitOfWork with a where in an invalid format! Expected associative array or BaseRecord, received: ' . print_r($uow->where, true));
-            foreach($uow->where as $key => $val) {
-                if (!$this->reflection->hasProperty($key))
-                    throw new \CSException("Received a UnitOfWork with a where and a column not in the table definition! Attempted to use: [" . $this->table . "].[" . $key . "]");
-                // todo: run any necessary conversions on $where, since we can't convert them with the BaseRecord structure
-            }
+            $this->validateWhere($uow->where);
         }
         if (!empty($uow->order)) {
             if (!is_array($uow->order))
@@ -300,7 +325,6 @@ class DbCollection {
     public function validateComparators($comparators) {
         if (!$comparators->validate())// validate structure
             throw new \CSException('Unable to validate comparator structure!');
-            // return false;
         foreach($comparators->comparators as $key => $val) { // validate column names
             // at least one of the filter items must be a column name
             // allow both to be column names?

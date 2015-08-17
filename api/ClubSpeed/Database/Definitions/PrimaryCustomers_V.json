@@ -3,13 +3,11 @@
         "name": "dbo.PrimaryCustomers_V",
         "alias": "pc_v"
     },
-    "keys": [
-        "CustID"
-    ],
     "columns": [
         {
               "name": "CustID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "FName"

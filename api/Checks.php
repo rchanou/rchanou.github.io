@@ -10,45 +10,45 @@ class Checks extends BaseApi {
         $this->interface                    = $this->logic->checks;
         $this->access['all']                = Enums::API_NO_ACCESS;
         $this->access['delete']             = Enums::API_NO_ACCESS;
-        // $this->access['applyCheckTotal']    = Enums::API_PRIVATE_ACCESS;
         $this->access['applyCheckTotal']    = Enums::API_PRIVATE_ACCESS;
     }
 
-    // /**
-    //  * @url PUT /:id/applyCheckTotal
-    //  */
-    // public function applyCheckTotal($id, $request_data = null) {
-    //     $this->validate('applyCheckTotal');
-    //     try {
-    //         $this->interface->applyCheckTotal($id); // expose this, or call by default?
-    //     }
-    //     catch (RestException $e) {
-    //         throw $e;
-    //     }
-    //     catch (CSException $e) {
-    //         throw new RestException($e->getCode() ?: 412, $e->getMessage());
-    //     }
-    //     catch (Exception $e) {
-    //         throw new RestException(500, $e->getMessage());
-    //     }
-    // }
-
     /**
-     * @url PUT /:id/void
+     * @url POST /:id/void
      */
     public function void($id, $request_data = null) {
         $this->validate('void');
         try {
             $this->interface->void($id); // expose this, or call by default?
         }
-        catch (RestException $e) {
-            throw $e;
+        catch (Exception $e) {
+            $this->_error($e);
         }
-        catch (CSException $e) {
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+    }
+
+    /**
+     * @url POST /:id/finalize
+     */
+    public function finalize($id, $request_data = array()) {
+        $this->validate('finalize');
+        try {
+            return $this->interface->finalize($id, $request_data);
         }
         catch (Exception $e) {
-            throw new RestException(500, $e->getMessage());
+            $this->_error($e);
+        }
+    }
+
+    /**
+     * @url POST /:id/receipt
+     */
+    public function receipt($id, $request_data = array()) {
+        $this->validate('receipt');
+        try {
+            return $this->interface->receipt($id);
+        }
+        catch (Exception $e) {
+            $this->_error($e);
         }
     }
 }

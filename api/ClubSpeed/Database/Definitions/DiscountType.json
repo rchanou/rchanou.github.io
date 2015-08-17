@@ -3,13 +3,12 @@
         "name": "dbo.DiscountType",
         "alias": "dt"
     },
-    "keys": [
-        "DiscountID"
-    ],
     "columns": [
         {
               "name": "DiscountID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "Description"

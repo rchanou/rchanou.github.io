@@ -2,9 +2,13 @@
 
 namespace ClubSpeed\Database\Helpers;
 use ClubSpeed\Database\Helpers\Comparator;
+use ClubSpeed\Database\Records\BaseRecord;
+use ClubSpeed\Database\Statements\StatementFactory;
 use ClubSpeed\Enums\Enums;
+use ClubSpeed\Structures\TreeNode;
 use ClubSpeed\Utility\Arrays;
 use ClubSpeed\Utility\Objects;
+
 
 class SqlBuilder {
 
@@ -26,25 +30,23 @@ class SqlBuilder {
         // return a copy of the record only containing everything BUT primary keys and their values
         $tempRecord = clone $record;
         $def = $record->definition();
-        $keys = $def['keys'];
-        // $keys = $tempRecord::$key;
+        $keys = Arrays::select($def['keys'], function($x) { return $x['name']; });
         if (!is_array($keys))
-            $keys = array($keys);
-        foreach($tempRecord as $key => $val) {
-            if ($callback($key, $keys))
-                $tempRecord->$key = null;
+            $keys = array($keys); // shouldn't be hit
+        foreach($tempRecord as $prop => $val) {
+            if ($callback($prop, $keys))
+                $tempRecord->$prop = null;
         }
         return $tempRecord;
     }
 
     private static function allKeysSet($record) {
-        // $keys = $record::$key;
         $def = $record->definition();
         $keys = $def['keys'];
         if (!is_array($keys))
             $keys = array($keys);
         foreach($keys as $key) {
-            if (is_null($record->{$key}))
+            if (is_null($record->{$key['name']}))
                 return false;
         }
         return true;
@@ -76,7 +78,7 @@ class SqlBuilder {
     public static function buildUowCreate(&$uow) {
         if (!$uow instanceof \ClubSpeed\Database\Helpers\UnitOfWork)
             throw new \InvalidArgumentException("Attempted to build sql insert statement from a non UnitOfWork! Received: " . print_r($uow, true));
-        if (!$uow->data instanceof \ClubSpeed\Database\Records\BaseRecord) // either throw exception, or try to make the base record ourselves
+        if (!$uow->data instanceof BaseRecord) // either throw exception, or try to make the base record ourselves
             $uow->data = $uow->table->newInstance($uow->data);
             // throw new \InvalidArgumentException("Attempted to build a sql create query with a non BaseRecord! Received: " . print_r($uow->data, true));
         if (Objects::isEmpty($uow->data))
@@ -87,21 +89,29 @@ class SqlBuilder {
             , 'aliases' => array()
         );
         $table = $uow->definition['table']['name'];
+        $keys = $uow->definition['keys'];
+        $hasIdentityKey = false;
+        $identityKeys = Arrays::where($keys, function($x) { return isset($x['identity']) && $x['identity'] === true; });
         foreach($uow->data as $name => $value) {
             if (isset($value) && $value !== Enums::DB_NULL) {
-                $create['names'][]      = $name;
-                $create['values'][]     = $value;
-                $create['aliases'][]    = ":" . $name;
+                $create['names'][]   = $name;
+                $create['values'][]  = $value;
+                $create['aliases'][] = ":" . $name;
+                if (Arrays::contains($identityKeys, function($x) use ($name) { return $x['name'] === $name; }))
+                    $hasIdentityKey = true; // we are attempting to insert a primary key. allow it, but set IDENTITY_INSERT on
             }
         }
         $create['statement'] = ""
+            . ($hasIdentityKey ? "\nSET IDENTITY_INSERT " . $table . " ON;" : '')
             ."\nINSERT INTO " . $table . " ("
             ."\n      " . implode("\n    , ", $create['names'])
             ."\n)"
             ."\nVALUES ("
             ."\n      " . implode("\n    , ", $create['aliases'])
             ."\n)"
+            . ($hasIdentityKey ? "\nSET IDENTITY_INSERT " . $table . " OFF;" : '')
             ;
+
         return $create;
     }
 
@@ -109,8 +119,8 @@ class SqlBuilder {
         if (!$uow instanceof \ClubSpeed\Database\Helpers\UnitOfWork)
             throw new \InvalidArgumentException("Attempted to build sql all query from a non UnitOfWork! Received: " . $uow);
         $all = array(
-              'statement'   => ''
-            , 'values'      => array()
+              'statement' => ''
+            , 'values'    => array()
         );
 
         $keys  = $uow->definition['keys']; // check to see if we have legitimate primary keys before building pagination?
@@ -126,7 +136,7 @@ class SqlBuilder {
         else {
             // no order is provided. just use the key ascending for the ROW_NUMBER().
             foreach($keys as $column)
-                $order[] = $alias . "." . $column . " ASC";
+                $order[] = $alias . "." . $column['name'] . " ASC";
         }
         $order = implode(', ', $order);
 
@@ -233,7 +243,7 @@ class SqlBuilder {
             throw new \InvalidArgumentException("Attempted to build sql update query from a non UnitOfWork! Received: " . print_r($uow, true));
         if (is_null($uow->table_id) || empty($uow->table_id))
             throw new \InvalidArgumentValueException("Attempted to build a sql update statement on " . $uow->table->getShortName() . " using a UnitOfWork with null or empty table_id(s)!");
-        if (!$uow->data instanceof \ClubSpeed\Database\Records\BaseRecord)
+        if (!$uow->data instanceof BaseRecord)
             $uow->data = $uow->table->newInstance($uow->data); // either throw exception, or try to make the base record ourselves
         $uow->data = self::stripRecordIdentity($uow->data); // disallow any attempts to update a primary key
         if (Objects::isEmpty($uow->data))
@@ -341,139 +351,129 @@ class SqlBuilder {
     }
 
     public static function buildUowWhere(&$uow) {
-        $table      = $uow->definition['table']['name'];
-        $alias      = $uow->definition['table']['alias'];
-        $operators  = Comparator::$operators;
-        $where      = array(
-              'statement' => ''
-            , 'values'    => array()
-        );
-        // what about if uow->table_id? just bypass all logic and return the single?
-        // or specific logic for the single, that doesn't even touch this function? <-- probably this.
-        $valueCounter = 0; // switching to value counter, since a count is no longer sufficient with support for the IN keyword
-        $paramIterator = function() use (&$valueCounter) {
-            return ':p' . $valueCounter++;
-        };
-        $getConnector = function() use (&$where) {
-            return (count($where['values']) < 1 ? '    ' : 'AND ');
-            // return ($valueCounter === 0 ? '    ' : 'AND '); // also works, but only if $getConnector() comes before $paramIterator()
-        };
-        if (!is_null($uow->where) && !empty($uow->where)) {
-            foreach($uow->where as $key => $data) {
-                if (Arrays::isAssociative($data)) {
-                    // then we know we have the "mongo" style statements
-                    // make sure we do the loop -- we could have multiple applied to one column.
-                    foreach($data as $comparatorKey => $comparatorValue) {
-                        if (isset($operators[$comparatorKey])) {
-                            $operator = $operators[$comparatorKey];
-                            $tempColumn = array(
-                                  'connector'   => $getConnector()
-                                , 'left'        => $alias . '.' . $key
-                                , 'operator'    => ' '. $operator . ' '
-                            );
-                            switch($operator) {
-                                case $operators['$is']:
-                                case $operators['$isnot']:
-                                    // force the comparator value to be NULL.
-                                    // we can't parameterize null, so don't bother accepting
-                                    // any sort of user input. should ensure injection safety, as well.
-                                    // (there's no need to, with sql server - see https://msdn.microsoft.com/en-us/library/ms188795.aspx)
-                                    $tempColumn['right'] = 'NULL';
-                                    break;
-                                case $operators['$in']:
-                                    if (is_string($comparatorValue)) {
-                                        $comparatorValue = array_map(
-                                            function($x) { return trim(x); }
-                                            , explode(",", $comparatorValue)
-                                        );
-                                    }
-                                    $tempParams = array();
-                                    foreach($comparatorValue as $rightVal) {
-                                        // load the values, store parameter names
-                                        $param = $paramIterator();
-                                        $where['values'][$param] = $rightVal;
-                                        $tempParams[] = $param;
-                                    }
-                                    // put the list of parameter names in for the statement
-                                    $tempColumn['right'] = '(' . implode(', ', $tempParams) . ')';
-                                    break;
-                                case $operators['$like']:
-                                    $param = $paramIterator();
-                                    $tempColumn['right'] = $param;
-                                    // account for extension key $has -- automatically wrap value in % signs, if it's being used
-                                    // note that we could really use a fall-through here,
-                                    // the only difference for default and $like is the $has extension.
-                                    $where['values'][$param] = ($comparatorKey === '$has' ? '%'.$comparatorValue.'%' : $comparatorValue);
-                                    break;
-                                default:
-                                    // can be handled with standard parameterization
-                                    // 1. $gt
-                                    // 2. $gte
-                                    // 3. $lt
-                                    // 4. $lte
-                                    // 5. $eq
-                                    // 6. $neq
-                                    // 7. $lk
-                                    // 8. $nlk
-                                    $param = $paramIterator();
-                                    $tempColumn['right'] = $param;
-                                    $where['values'][$param] = $comparatorValue;
-                            }
-                            if (!empty($tempColumn))
-                                $where['columns'][] = $tempColumn;
-                        }
-                    }
-                }
-                else if (is_array($data)) {
-                    // assume we have an "IN" / contains style statement,
-                    // since we had an array from json that was NOT an object
-                    $tempColumn = array(
-                          'connector'   => $getConnector()
-                        , 'left'        => $alias . '.' . $key
-                        , 'operator'    => ' IN '
-                    );
-                    $tempParams = array();
-                    foreach($data as $rightVal) {
-                        $param = $paramIterator();
-                        // load the values, store parameter names
-                        // $param = ':p' . $valueCounter++;
-                        $where['values'][$param] = $rightVal;
-                        $tempParams[] = $param;
-                    }
-                    // put the list of parameter names in for the statement
-                    $tempColumn['right'] = '(' . implode(', ', $tempParams) . ')';
-                    $where['columns'][] = $tempColumn;
-                }
-                else {
-                    if (!is_null($data)) {
-                        // we just want to check for direct equality
-                        $param = $paramIterator();
-                        $where['columns'][] = array(
-                              'connector' => $getConnector()
-                            , 'left'      => $alias . "." . $key
-                            , 'operator'  => ' ' . $operators['$eq'] . ' '
-                            , 'right'     => $param
-                        );
-                        $where['values'][$param] = $data;
-                    }
-                }
+        if ($uow->where instanceof BaseRecord) {
+            $query = (array)$uow->where;
+            // strip any nulls from the record, since they will default to null
+            // convert any DB_NULLS to be nulls for the tree parser to use
+            foreach($query as $key => $val) {
+                if (is_null($val))
+                    unset($query[$key]);
+                else if ($val === Enums::DB_NULL)
+                    $query[$key] = null;
             }
+            $uow->where = $query;
         }
-        // build the sql clause, if necessary
-        if (!empty($where['columns'])) {
-            foreach($where['columns'] as $key => $val) {
-                $where['columns'][$key] = "\n        "
-                    . @$val['connector'] . ''
-                    . $val['left']
-                    . $val['operator']
-                    . $val['right']
-                    ;
-            }
-            $where['statement'] = "WHERE" . implode("", $where['columns']);
+
+        if (empty($uow->where)) {
+            return array(
+                'statement' => '',
+                'values' => array()
+            );
         }
-        return $where;
+        else {
+            $tree = self::makeQueryTree($uow->where);
+            $where = self::parseTree($tree, $uow->definition['table']['alias']);
+            $where['statement'] = empty($where['statement']) ? '' : ("WHERE " . $where['statement']);
+            return $where;
+        }
     }
 
+    private static function makeQueryTree($where) {
+        $operators = Comparator::$operators; // consider making parameter
+        $children = array();
+        foreach ($where as $key => $val) {
+            if ($key === '$and' || $key === '$or') {
+                // special case, should always have its own children
+                $_node = new TreeNode(array('connector' => $operators[$key]));
+                foreach($val as $obj)
+                    $_node->add(self::makeQueryTree($obj));
+                if (!$_node->isLeaf()) // only add if the node had parsable children
+                    $children[] = $_node;
+            }
+            else {
+                if (Arrays::isAssociative($val)) {
+                    $left = $key;
+                    foreach($val as $opKey => $right) {
+                        $operator = $operators[$opKey];
+                        $statement = StatementFactory::make(array(
+                              'left'     => $left
+                            , 'operator' => $operator
+                            , 'right'    => $right
+                        ));
+                        $children[] = new TreeNode($statement);
+                    }
+                }
+                else if (is_array($val)) {
+                    $statement = StatementFactory::make(array(
+                          'left'     => $key
+                        , 'operator' => $operators['$in']
+                        , 'right'    => $val
+                    ));
+                    $children[] = new TreeNode($statement);
+                }
+                else {
+                    $statement = StatementFactory::make(array(
+                          'left'     => $key
+                        , 'operator' => $operators['$eq']
+                        , 'right'    => $val
+                    ));
+                    $children[] = new TreeNode($statement);
+                }
+            }
+        }
+
+        // count the number of children we have.
+        // if we have more than one, then we need to connect them
+        // using an additional '$and' node for the implied connector
+        if (count($children) === 1)
+            $node = $children[0];
+        else {
+            $node = new TreeNode(array('connector' => $operators['$and']));
+            foreach ($children as $child)
+                $node->add($child);
+        }
+
+        return $node;
+    }
+
+    private static function indent($depth = 0) {
+        return str_repeat(" ", $depth * 4);
+    }
+
+    private static function parseTree($node, $alias, $depth = 1, $counter = 0) {
+        // do we need the "empty" base case to be taken care of, or do we catch it early?
+        $statements = array();
+        $values = array();
+        if (!$node->isLeaf()) {
+            $connector = $node->value['connector'];
+            foreach($node->children as $child) {
+                $parsed = self::parseTree($child, $alias, $depth + 1, $counter);
+                $statements[] = $parsed['statement'];
+                $values = array_merge($values, $parsed['values']);
+                $counter += count($parsed['values']);
+            }
+            $statement = "(\n"
+                . self::indent($depth + 1)
+                . Arrays::join(
+                    $statements,
+                    (
+                        "\n"
+                        . self::indent($depth + 1)
+                        . $connector
+                        . ' '
+                    )
+                )
+                . "\n"
+                . self::indent($depth)
+                . ")";
+            return array(
+                'statement' => $statement,
+                'values' => $values
+            );
+        }
+        else
+            return $node->value->build();
+    }
 
     // -------------------
     // BEGIN OLD METHODS
@@ -506,6 +506,7 @@ class SqlBuilder {
             ."\n    " . implode(", ", $insert['aliases'])
             ."\n)"
             ;
+
         return $insert;
     }
 

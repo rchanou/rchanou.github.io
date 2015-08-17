@@ -48,7 +48,7 @@
         @if ($currentOnlineBookingState == 'missing_translations')
         <div class="alert alert-warning">
             <p>(Note: Online Booking is <strong>missing some translations</strong> for the current culture. They will default to English (US).)</p>
-            Please proceed to the <a href="{{URL::to('translations')}}">Translations section</a> and update those translations.
+            Please proceed to the <a href="{{URL::to('booking/translations')}}">Translations section</a> and update those translations.
         </div>
         @endif
         <div class="widget-box">

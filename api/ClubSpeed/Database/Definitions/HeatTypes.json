@@ -3,13 +3,12 @@
         "name": "dbo.HeatTypes",
         "alias": "ht"
     },
-    "keys": [
-        "HeatTypeNo"
-    ],
     "columns": [
         {
               "name": "HeatTypeNo"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "TrackNo"

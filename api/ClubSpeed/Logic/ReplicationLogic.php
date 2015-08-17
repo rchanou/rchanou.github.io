@@ -1,6 +1,7 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Utility\Convert;
 
 /**
  * The business logic class
@@ -63,6 +64,8 @@ class ReplicationLogic extends BaseLogic {
      */
     public function insertReplicationLogs($customerId, $table, $type) {
         // any other variations of trigger logs?
+
+        // should these be logic on TriggerLogsLogic? probably. consider moving in the future.
         if (!isset($customerId) || !is_int($customerId))
             throw new \InvalidArgumentException("Insert replication logs requires customerId to be an integer! Received: " . $customerId);
         if (!isset($table) || empty($table) || !is_string($table))
@@ -87,23 +90,12 @@ class ReplicationLogic extends BaseLogic {
             default:
                 throw new \InvalidArgumentException("Insert replication logs requires a valid type! Received: " . $type);
         }
-        $sql = "INSERT INTO dbo.TriggerLogs ("
-            ."\n    CustID"
-            ."\n    , LastUpdated"
-            ."\n    , TableName"
-            ."\n    , [Type]"
-            ."\n)"
-            ."\nSELECT"
-            ."\n    ?"
-            ."\n    , GETDATE()"
-            ."\n    , ?"
-            ."\n    , ?"
-            ;
-        $paramsValues = array(
-            $customerId,
-            $table, 
-            $actualType
-        );
-        $this->db->exec($sql, $paramsValues);
+
+        $this->logic->triggerlogs->create(array(
+              'CustID'      => $customerId
+            , 'LastUpdated' => Convert::getDate()
+            , 'TableName'   => $table
+            , 'Type'        => $actualType
+        ));
     }
 }

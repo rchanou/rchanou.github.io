@@ -3,13 +3,12 @@
         "name": "dbo.FB_Customers_New",
         "alias": "fbcn"
     },
-    "keys": [
-        "FB_CustId"
-    ],
     "columns": [
         {
               "name": "FB_CustId"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CustId"

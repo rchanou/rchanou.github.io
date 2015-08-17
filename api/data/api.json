@@ -130,7 +130,6 @@
             "id": "checkDetails", 
             "header": "Check Details",
             "route": "/checkDetails",
-            "model": "checkDetails",
             "calls": [
                 {
                     "id": "list",
@@ -161,6 +160,10 @@
                 {
                     "id": "create",
                     "verb": "POST"
+                },
+                {
+                    "id": "list",
+                    "verb": "GET"
                 }
             ]
         },
@@ -177,6 +180,11 @@
                 {
                     "id": "list",
                     "verb": "GET"
+                },
+                {
+                    "id": "update",
+                    "subroute": "/:namespace/:settingName",
+                    "verb": "PUT"
                 }
             ]
         },
@@ -212,6 +220,40 @@
                     "id": "delete",
                     "verb": "DELETE",
                     "subroute": "/:id"
+                }
+            ]
+        },
+        {
+            "id": "discountType",
+            "route": "/discountType",
+            "calls": [
+                {
+                    "id": "create",
+                    "verb": "POST"
+                },
+                {
+                    "id": "list",
+                    "verb": "GET"
+                },
+                {
+                    "id": "count",
+                    "subroute": "/count",
+                    "verb": "GET"
+                },
+                {
+                    "id": "get",
+                    "subroute": "/:id",
+                    "verb": "GET"
+                },
+                {
+                    "id": "update",
+                    "subroute": "/:id",
+                    "verb": "PUT"
+                },
+                {
+                    "id": "delete",
+                    "subroute": "/:id",
+                    "verb": "DELETE"
                 }
             ]
         },
@@ -291,6 +333,41 @@
                     "id": "delete",
                     "subroute": "/:id",
                     "verb": "DELETE"
+                }
+            ]
+        },
+        {
+            "id": "membershipTypes",
+            "header": "Membership Types",
+            "route": "/membershipTypes",
+            "calls": [
+                {
+                    "id": "create",
+                    "verb": "POST"
+                },
+                {
+                    "id": "list",
+                    "verb": "GET"
+                },
+                {
+                    "id": "get",
+                    "subroute": "/:id",
+                    "verb": "GET"
+                },
+                {
+                    "id": "update",
+                    "subroute": "/:id",
+                    "verb": "PUT"
+                },
+                {
+                    "id": "delete",
+                    "subroute": "/:id",
+                    "verb": "DELETE"
+                },
+                {
+                    "id": "count",
+                    "subroute": "/count",
+                    "verb": "GET"
                 }
             ]
         },
@@ -563,6 +640,41 @@
             ]
         },
         {
+            "id": "sources",
+            "header": "Sources",
+            "route": "/sources",
+            "calls": [
+                {
+                    "id": "create",
+                    "verb": "POST"
+                },
+                {
+                    "id": "list",
+                    "verb": "GET"
+                },
+                {
+                    "id": "get",
+                    "verb": "GET",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "update",
+                    "verb": "PUT",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "delete",
+                    "verb": "DELETE",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "count",
+                    "verb": "GET",
+                    "subroute": "/count"
+                }
+            ]
+        },
+        {
             "id": "tracks",
             "header": "Tracks",
             "route": "/tracks",
@@ -616,6 +728,76 @@
                     "id": "delete",
                     "subroute": "/:id",
                     "verb": "DELETE"
+                }
+            ]
+        },
+        {
+            "id": "triggerLogs",
+            "header": "Trigger Logs",
+            "route": "/triggerLogs",
+            "calls": [
+                {
+                    "id": "create",
+                    "verb": "POST"
+                },
+                {
+                    "id": "list",
+                    "verb": "GET"
+                },
+                {
+                    "id": "get",
+                    "verb": "GET",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "update",
+                    "verb": "PUT",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "delete",
+                    "verb": "DELETE",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "count",
+                    "verb": "GET",
+                    "subroute": "/count"
+                }
+            ]
+        },
+        {
+            "id": "triggerMemberships",
+            "header": "Trigger Memberships",
+            "route": "/triggerMemberships",
+            "calls": [
+                {
+                    "id": "create",
+                    "verb": "POST"
+                },
+                {
+                    "id": "list",
+                    "verb": "GET"
+                },
+                {
+                    "id": "get",
+                    "verb": "GET",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "update",
+                    "verb": "PUT",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "delete",
+                    "verb": "DELETE",
+                    "subroute": "/:id"
+                },
+                {
+                    "id": "count",
+                    "verb": "GET",
+                    "subroute": "/count"
                 }
             ]
         }
@@ -1187,104 +1369,108 @@
         }
     ],
     "constants": {
+        "CALCULATE_TYPE": {
+              "AMOUNT"  : 1
+            , "PERCENT" : 2
+        },
         "CHECK_DETAIL_STATUS": {
-            "NEW": 1,
-            "VOID": 2,
-            "CLOSED": 3
+              "NEW"    : 1
+            , "VOID"   : 2
+            , "CLOSED" : 3
         },
         "CHECK_DETAIL_TYPE": {
-              "REGULAR_ITEM": 1
-            , "POINT_ITEM": 2
-            , "FOOD_ITEM": 3
-            , "RESERVATION_ITEM": 4
-            , "GAME_CARD_ITEM": 5
-            , "MEMBERSHIP_ITEM": 6
-            , "GIFT_CARD_ITEM": 7
-            , "ENTITLE_ITEM": 8
+              "REGULAR_ITEM"     : 1
+            , "POINT_ITEM"       : 2
+            , "FOOD_ITEM"        : 3
+            , "RESERVATION_ITEM" : 4
+            , "GAME_CARD_ITEM"   : 5
+            , "MEMBERSHIP_ITEM"  : 6
+            , "GIFT_CARD_ITEM"   : 7
+            , "ENTITLE_ITEM"     : 8
         },
         "CHECK_STATUS": {
-            "OPEN": 0,
-            "CLOSED": 1
+              "OPEN"   : 0
+            , "CLOSED" : 1
         },
         "CHECK_TYPE": {
-            "SHOW_ALL": 0,
-            "REGULAR": 1,
-            "EVENT": 2
+              "SHOW_ALL" : 0
+            , "REGULAR"  : 1
+            , "EVENT"    : 2
         },
         "HEAT_STATUS": {
-            "OPEN": 0,
-            "RACING": 1,
-            "FINISHED": 2,
-            "ABORTED": 3,
-            "CLOSED": 4
+              "OPEN"     : 0
+            , "RACING"   : 1
+            , "FINISHED" : 2
+            , "ABORTED"  : 3
+            , "CLOSED"   : 4
         },
         "GENDER": {
-            "OTHER": 0,
-            "MALE": 1,
-            "FEMALE": 2
+              "OTHER"  : 0
+            , "MALE"   : 1
+            , "FEMALE" : 2
         },
         "GIFT_CARD_HISTORY": {
-            "SELL": 0,
-            "TRANSFER_IN": 1,
-            "VOID_SELL": 9,
-            "PAY_BY_GIFT_CARD": 10,
-            "VOID_PAY_BY_GIFT_CARD": 11,
-            "REFUND_TO_GIFT_CARD": 12,
-            "SELL_GIFT_CARD_EXTERNAL": 13,
-            "VOID_SELL_EXTERNAL": 14,
-            "PAY_BY_GIFT_CARD_EXTERNAL": 15,
-            "VOID_PAY_BY_GIFT_CARD_EXTERNAL": 16,
-            "REFUND_TO_GIFT_CARD_EXTERNAL": 17
+              "SELL"                           : 0
+            , "TRANSFER_IN"                    : 1
+            , "VOID_SELL"                      : 9
+            , "PAY_BY_GIFT_CARD"               : 10
+            , "VOID_PAY_BY_GIFT_CARD"          : 11
+            , "REFUND_TO_GIFT_CARD"            : 12
+            , "SELL_GIFT_CARD_EXTERNAL"        : 13
+            , "VOID_SELL_EXTERNAL"             : 14
+            , "PAY_BY_GIFT_CARD_EXTERNAL"      : 15
+            , "VOID_PAY_BY_GIFT_CARD_EXTERNAL" : 16
+            , "REFUND_TO_GIFT_CARD_EXTERNAL"   : 17
         },
         "ONLINE_BOOKING_RESERVATION_STATUS": {
-            "TEMPORARY": 1,
-            "PERMANENT": 2
+              "TEMPORARY" : 1
+            , "PERMANENT" : 2
         },
         "PAY_STATUS": {
-            "PAID": 1,
-            "VOID": 2
+              "PAID" : 1
+            , "VOID" : 2
         },
         "PAY_TYPE": {
-            "CASH": 1,
-            "CREDIT_CARD": 2,
-            "EXTERNAL": 3,
-            "GIFT_CARD": 4,
-            "VOUCHER": 5,
-            "COMPLIMENTARY": 6,
-            "CHECK": 7,
-            "GAME_CARD": 8,
-            "DEBIT": 9,
-            "SAGE_PAY": 10,
-            "PAY_PAL_PAY_FLOW_PRO": 11
+              "CASH"                 : 1
+            , "CREDIT_CARD"          : 2
+            , "EXTERNAL"             : 3
+            , "GIFT_CARD"            : 4
+            , "VOUCHER"              : 5
+            , "COMPLIMENTARY"        : 6
+            , "CHECK"                : 7
+            , "GAME_CARD"            : 8
+            , "DEBIT"                : 9
+            , "SAGE_PAY"             : 10
+            , "PAY_PAL_PAY_FLOW_PRO" : 11
         },
         "POINT_HISTORY_TYPE": {
-            "BUY": 0,
-            "TRANSFER_IN": 1,
-            "TRANSFER_OUT": 2, 
-            "HEAT": 3,
-            "ADD": 4,
-            "SUBTRACT": 5,
-            "VOID_HEAT": 6,
-            "TRANSFER_FOR_RESERVATION": 7,
-            "VOID_BUY": 9,
-            "PAY_BY_GIFT_CARD": 10,
-            "VOID_PAY_BY_GIFT_CARD": 11,
-            "REFUND_TO_GIFT_CARD": 12,
-            "BUY_POINTS_EXTERNAL": 13,
-            "VOID_BUY_POINTS_EXTERNAL": 14,
-            "USE_POINTS_EXTERNAL": 15,
-            "VOID_USE_POINTS_EXTERNAL": 16,
-            "REFUND_USE_POINTS_EXTERNAL": 17
+              "BUY"                        : 0
+            , "TRANSFER_IN"                : 1
+            , "TRANSFER_OUT"               : 2
+            , "HEAT"                       : 3
+            , "ADD"                        : 4
+            , "SUBTRACT"                   : 5
+            , "VOID_HEAT"                  : 6
+            , "TRANSFER_FOR_RESERVATION"   : 7
+            , "VOID_BUY"                   : 9
+            , "PAY_BY_GIFT_CARD"           : 10
+            , "VOID_PAY_BY_GIFT_CARD"      : 11
+            , "REFUND_TO_GIFT_CARD"        : 12
+            , "BUY_POINTS_EXTERNAL"        : 13
+            , "VOID_BUY_POINTS_EXTERNAL"   : 14
+            , "USE_POINTS_EXTERNAL"        : 15
+            , "VOID_USE_POINTS_EXTERNAL"   : 16
+            , "REFUND_USE_POINTS_EXTERNAL" : 17
         },
         "PRODUCT_TYPE": {
-            "REGULAR": 1,
-            "POINT": 2,
-            "FOOD": 3,
-            "RESERVATION": 4,
-            "GAME_CARD": 5,
-            "MEMBERSHIP": 6,
-            "GIFT_CARD": 7,
-            "ENTITLE": 8
+              "REGULAR"     : 1
+            , "POINT"       : 2
+            , "FOOD"        : 3
+            , "RESERVATION" : 4
+            , "GAME_CARD"   : 5
+            , "MEMBERSHIP"  : 6
+            , "GIFT_CARD"   : 7
+            , "ENTITLE"     : 8
         }
     }
 }

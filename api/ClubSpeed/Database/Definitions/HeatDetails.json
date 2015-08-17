@@ -3,18 +3,16 @@
         "name": "dbo.HeatDetails",
         "alias": "hd"
     },
-    "keys": [
-        "HeatNo",
-        "CustID"
-    ],
     "columns": [
         {
               "name": "HeatNo"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "CustID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "AutoNo"

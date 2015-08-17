@@ -7,8 +7,8 @@ class Version
 		
 		// Versions of various applications and modules
 		public $speedscreenVersion = '2.0.0';
-		public $apiVersion = '1.4.0';
-		public $apiLastUpdatedAt = '5/4/2015 9:26';
+        public $apiVersion = '1.5.0';
+        public $apiLastUpdatedAt = '8/17/2015 10:30';
 
     function __construct(){
         $this->logic = $GLOBALS['logic'];

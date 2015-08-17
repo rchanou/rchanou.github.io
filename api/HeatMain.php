@@ -1,10 +1,9 @@
 <?php
 
-class HeatMain extends BaseApi {
+class HeatMain extends BaseUowApi {
 
     function __construct() {
         parent::__construct();
-        $this->mapper = new \ClubSpeed\Mappers\HeatMainMapper();
-        $this->interface = $this->logic->heatMain; // already exists
+        $this->resource = 'HeatMain';
     }
 }

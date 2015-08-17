@@ -3,13 +3,12 @@
         "name": "dbo.OnlineBookingReservations",
         "alias": "obr"
     },
-    "keys": [
-        "OnlineBookingReservationsID"
-    ],
     "columns": [
         {
               "name": "OnlineBookingReservationsID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "OnlineBookingsID"

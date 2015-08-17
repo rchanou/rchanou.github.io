@@ -8,6 +8,9 @@ namespace ClubSpeed\Connection;
  */
 abstract class BaseConnection {
 
+    protected $_connection;
+    protected $_transaction;
+
     /**
      * Builds and returns an associative array of connection information for use with the internal PDO creation.
      *
@@ -44,18 +47,20 @@ abstract class BaseConnection {
      */
     protected function conn() {
         try {
-            // param1 = DSN / connectionString
-            // param2 = username
-            // param3 = password
-            // param4 = array of options
-            $info = $this->getInfo();
-            $conn = new \PDO(
-                $info['dsn']
-                , $info['username']
-                , $info['password']
-            );
-            $conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            return $conn;
+            if (is_null($this->_connection)) {
+                $info = $this->getInfo();
+                // param1 = DSN / connectionString
+                // param2 = username
+                // param3 = password
+                // param4 = array of options
+                $this->_connection = new \PDO(
+                      $info['dsn']
+                    , $info['username']
+                    , $info['password']
+                );
+                $this->_connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            }
+            return $this->_connection; // re-use the same connection over and over? performance improvement, or bottleneck / bad idea?
         }
         catch (Exception $e) {
             $this->handle($e);
@@ -92,6 +97,24 @@ abstract class BaseConnection {
             $this->handle($e);
         }
     }
+
+    public function begin() {
+        $conn = $this->conn();
+        $this->_transaction = $conn->beginTransaction(); // does this even return anything?
+    }
+
+    public function commit() {
+        $conn = $this->conn();
+        $conn->commit();
+        $this->_transaction = null;
+    }
+
+    public function rollback() {
+        $conn = $this->conn();
+        $conn->rollback();
+        $this->_transaction = null;
+    }
+
 
     /**
      * Executes a SQL statement.
@@ -131,13 +154,6 @@ abstract class BaseConnection {
             $stmt = $conn->prepare($tsql);
             $stmt->execute($params);
             return $stmt->fetchAll(\PDO::FETCH_ASSOC); // will return as an array instead of a single-use lazy loading enumerable
-            // // NOTE! the following yield structure would require PHP 5.5
-            // // use the global "from" function to convert generator to enumerable?
-            // return \zutil\from(function() use ($stmt) {
-            //     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            //         yield $row;
-            //     }
-            // });
         }
         catch (Exception $e) {
             $this->handle($e);

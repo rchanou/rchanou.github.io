@@ -22,7 +22,5 @@ class TriggerMembershipsLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->triggerMemberships;
-
-        // $this->on('uow', function($uow) { });
     }
 }

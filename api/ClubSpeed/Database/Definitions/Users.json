@@ -3,13 +3,12 @@
         "name": "dbo.Users",
         "alias": "usrs"
     },
-    "keys": [
-        "UserID"
-    ],
     "columns": [
         {
               "name": "UserID"
             , "type": "Integer"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "FName"

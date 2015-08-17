@@ -327,7 +327,7 @@ class CS_API
     public static function getSupportedPaymentTypes()
     {
         self::initialize();
-        return self::getJSON("processPayment");
+        return self::getJSON("omnipay");
     }
 
     public static function getReport_Social()
@@ -561,9 +561,9 @@ class CS_API
 
         if ($response !== null)
         {
-            if (isset($response->body->translations))
+            if ((isset($response->code) && $response->code == 200) && !isset($response->body->translations->error))
             {
-                return $response->body->translations;
+                return true;
             }
             else
             {

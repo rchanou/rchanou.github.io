@@ -10,12 +10,14 @@ use Omnipay\Omnipay;
 class PaymentService {
 
     private $logic;
+    private $db;
     public $handlers;
     private $_lazy;
     private $allowed;
 
-    public function __construct(&$CSLogic) {
+    public function __construct(&$CSLogic, &$db) {
         $this->logic = $CSLogic;
+        $this->db = $db;
         $this->_lazy = array();
         $this->allowed = array(
             'Dummy',
@@ -48,7 +50,7 @@ class PaymentService {
     private function load($prop) {
         $prop = '\ClubSpeed\Payments\\' . ucfirst($prop) . 'Payment';
         if (!isset($this->_lazy[$prop])) {
-            $this->_lazy[$prop] = new $prop($this->logic, $this);
+            $this->_lazy[$prop] = new $prop($this->logic, $this->db, $this);
         }
         return $this->_lazy[$prop];
     }

@@ -1,8 +1,9 @@
 <?php
 
 namespace ClubSpeed\Logic;
-use ClubSpeed\Utility\Arrays as Arrays;
-use ClubSpeed\Utility\Strings as Strings;
+use ClubSpeed\Utility\Arrays;
+use ClubSpeed\Utility\Strings;
+use ClubSpeed\Enums\Enums;
 
 /**
  * The business logic class
@@ -29,7 +30,7 @@ class GiftCardHistoryLogic extends BaseLogic {
         return $this->_create($params, function($giftCardHistory) use (&$interface) {
             $giftCardHistory->TransactionDate = \ClubSpeed\Utility\Convert::getDate();
             if (!isset($giftCardHistory->Type))
-                $giftCardHistory->Type = 0; // or should this be enforced? equivalent to GiftCardHistoryType.SellGiftCard
+                $giftCardHistory->Type = Enums::GIFT_CARD_HISTORY_SELL_GIFT_CARD; // or should this be enforced?
             if (!isset($giftCardHistory->UserID))
                 $giftCardHistory->UserID = 0;
             return $giftCardHistory;

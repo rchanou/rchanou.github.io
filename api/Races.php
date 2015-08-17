@@ -1140,9 +1140,8 @@ EOS;
      * @return array
      */
     public function race($heatId) {
-        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess())
             throw new RestException(401, "Invalid authorization!");
-        }
 
         if(!is_numeric($heatId) && !in_array($heatId, array('current', 'next'))) throw new RestException(412,'Heat ID is not a number, "next" or "current"');
         $output = array();
@@ -1157,6 +1156,7 @@ EOS;
         {
             $tsql = 'GetNextHeatInfo' . ' ' . $track_id;
         }
+
         //$tsql_params = array(&$track_id);
         $rowsRace = $this->run_query($tsql);
         if (empty($rowsRace))
@@ -1172,17 +1172,44 @@ EOS;
 
         //$tsql = 'GetNextHeatRacersInfo';
         $tsql_params = array(&$heatId);
-        $tsql = 'Select hd.CustID id, hd.RPMDiff AS rpm_change, hd.LineUpPosition start_position, CASE autono WHEN -1 then hd.historyautono ELSE autono END AS kart_number, hd.RPM rpm, case when c.TotalRaces > 1 then 0 else 1 end is_first_time, hd.FinishPosition finish_position, c.RacerName nickname, c.FName first_name, c.LName last_name From HeatMain hm inner join HeatTypes ht on hm.HeatTypeNo = ht.HeatTypeNo inner join SpeedLevel sl on hm.SpeedLevel = sl.SpeedLevel inner join Tracks t on hm.trackno = t.TrackNo inner join HeatDetails hd on hm.heatno = hd.heatno inner join Customers c on hd.CustID = c.CustID Where hd.HeatNo = ? order by hd.LineUpPosition';
+        $tsql = <<<EOS
+Select
+      hd.CustID id
+    , hd.RPMDiff AS rpm_change
+    , hd.LineUpPosition start_position
+    , CASE autono WHEN -1 then hd.historyautono ELSE autono END AS kart_number
+    , hd.RPM rpm
+    , case when c.TotalRaces > 1 then 0 else 1 end is_first_time
+    , hd.FinishPosition finish_position
+    , c.RacerName nickname
+    , c.FName first_name
+    , c.LName last_name
+    , c.TotalVisits total_visits
+    , c.TotalRaces total_races
+From HeatMain hm
+inner join HeatTypes ht
+    on hm.HeatTypeNo = ht.HeatTypeNo
+inner join SpeedLevel sl
+    on hm.SpeedLevel = sl.SpeedLevel
+inner join Tracks t
+    on hm.trackno = t.TrackNo
+inner join HeatDetails hd
+    on hm.heatno = hd.heatno
+inner join Customers c
+on hd.CustID = c.CustID
+Where 
+    hd.HeatNo = ?
+order by
+    hd.LineUpPosition
+EOS;
         $rowsRacers = $this->run_query($tsql, $tsql_params);
         $output['race']['racers'] = $rowsRacers;
-
         foreach($output['race']['racers'] as $key => $racer) {
-            $racerInfo = $this->run_query('GetRacerProfile '.(int)$racer['id'].', ' . (int)$heatId, array());
-            $output['race']['racers'][$key]['total_customers'] = $racerInfo[0]['TotalCustomers'];
-            $output['race']['racers'][$key]['ranking_by_rpm'] = $racerInfo[0]['RankingByRPM'];
-            $output['race']['racers'][$key]['group_id'] = $racerInfo[0]['GroupID'];
-            $output['race']['racers'][$key]['total_visits'] = $racerInfo[0]['TotalVisits'];
-            $output['race']['racers'][$key]['total_races'] = $racerInfo[0]['TotalRaces'];
+            $output['race']['racers'][$key]['total_customers'] = 0; // or get a count once to mimic the old stored proc (unnecessary? not in use.)
+            $output['race']['racers'][$key]['ranking_by_rpm'] = 0; // push for deprecation, not in use in any code
+            $output['race']['racers'][$key]['group_id'] = 0; // always going to be 0 with the stored proc and given input. again, push for deprecation.
+            // total_visits already included in above query
+            // total_races already included in above query
             $output['race']['racers'][$key]['photo_url'] = $this->getCustomerPhoto($racer['id']);
         }
 

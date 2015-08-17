@@ -3,18 +3,16 @@
         "name": "dbo.ControlPanel",
         "alias": "cntrlpnl"
     },
-    "keys": [
-        "TerminalName",
-        "SettingName"
-    ],
     "columns": [
         {
               "name": "TerminalName"
             , "type": "nvarchar"
+            , "primaryKey": true
         }
         , {
               "name": "SettingName"
             , "type": "nvarchar"
+            , "primaryKey": true
         }
         , {
               "name": "DataType"

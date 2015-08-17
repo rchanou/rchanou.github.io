@@ -73,6 +73,14 @@ class AuthorizeRequest extends AbstractRequest
         return $this->setParameter('comment2', $value);
     }
 
+    public function getCurrency() {
+        return $this->getParameter('currency');
+    }
+
+    public function setCurrency($value) {
+        return $this->setParameter('currency', $value);
+    }
+
     protected function getBaseData()
     {
         $data = array();

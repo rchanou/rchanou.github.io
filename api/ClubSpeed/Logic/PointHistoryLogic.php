@@ -20,27 +20,24 @@ class PointHistoryLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->pointHistory;
-    }
 
-    // override and check for foreign keys, apply defaults
-    public function create($params = array()) {
-        $db =& $this->db;
-        return parent::_create($params, function($pointHistory) use (&$db) {
-            if (!isset($pointHistory->CustID))
-                throw new \RequiredArgumentMissingException("PointHistory create requires a CustID!");
-
-            // require not null, non-zero PointAmount?
-            if (isset($PointHistory->CheckID) && isset($PointHistory->CheckDetailID)) {
-                // note that CheckID/CheckDetailID are not always required -- ie, when deducting points from a customer, 
-                $existingPointHistory = $this->db->match(array(
-                    "CheckID" => $pointHistory->CheckID,
-                    "CheckDetailID" => $pointHistory->CheckDetailID
-                ));
-                if (!empty($existingPointHistory))
-                    throw new \CSException("PointHistory create is attempting to add points from CheckDetails which have already been applied!");
+        $this->before('uow', function($uow) use ($db) {
+            switch($uow->action) {
+                case 'create':
+                    $pointHistory =& $uow->data;
+                    if (empty($pointHistory) || empty($pointHistory->CustID))
+                        throw new \RequiredArgumentMissingException("PointHistory create requires a CustID!");
+                    if (isset($pointHistory->CheckID) && isset($pointHistory->CheckDetailID)) {
+                        // note that CheckID/CheckDetailID are not always required -- ie, when deducting points from a customer, 
+                        $existingPointHistory = $this->db->match(array(
+                            "CheckID" => $pointHistory->CheckID,
+                            "CheckDetailID" => $pointHistory->CheckDetailID
+                        ));
+                        if (!empty($existingPointHistory))
+                            throw new \CSException("PointHistory create is attempting to add points from CheckDetails which have already been applied!");
+                    }
+                    break;
             }
-            
-            return $pointHistory;
         });
     }
 }

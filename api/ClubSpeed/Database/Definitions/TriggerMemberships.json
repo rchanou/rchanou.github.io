@@ -3,13 +3,12 @@
         "name": "dbo.TriggerMemberships",
         "alias": "trgm"
     },
-    "keys": [
-        "ID"
-    ],
     "columns": [
         {
               "name": "ID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CustID"

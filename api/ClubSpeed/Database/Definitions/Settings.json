@@ -1,15 +1,14 @@
 {
     "table": {
         "name": "dbo.Settings",
-        "alias": "gcb_v"
+        "alias": "sts"
     },
-    "keys": [
-        "SettingsID"
-    ],
     "columns": [
         {
               "name": "SettingsID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "Namespace"

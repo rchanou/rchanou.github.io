@@ -24,6 +24,7 @@ class Enums {
     const NSP_REGISTRATION = 'Club Speed Registration';
     const NSP_PASSWORD     = 'Club Speed Password Reset';
     const NSP_WEBAPI       = 'Club Speed WebAPI';
+    const NSP_PAYMENTS     = 'Club Speed Payments';
 
     /**
      * The constant signifying an explicitly set database null.

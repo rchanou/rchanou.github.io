@@ -15,8 +15,8 @@ use Dinesh\BarcodeAll\DNS1D;
 
 class GiftCardProductHandler extends BaseProductHandler {
 
-    public function __construct(&$logic) {
-        parent::__construct($logic);
+    public function __construct(&$logic, &$db) {
+        parent::__construct($logic, $db);
     }
 
     private function generateCardId() {
@@ -62,10 +62,9 @@ class GiftCardProductHandler extends BaseProductHandler {
                 // note that we can't really add the giftCardHistory if we don't have this customerId -- break early (??)
                 $message = $logPrefix . 'Unable to create customer record for the gift card! ' . $e->getMessage();
                 Log::error($message, Enums::NSP_BOOKING);
-                return array(
-                    'error' => $message // support message?
-                );
+                throw new \Exception($message);
             }
+
             try {
                 $giftCardHistory = $this->logic->giftCardHistory->dummy();
                 $product = $this->logic->products->get($checkTotal->ProductID);
@@ -81,9 +80,7 @@ class GiftCardProductHandler extends BaseProductHandler {
             catch(\Exception $e) {
                 $message = $logPrefix . 'Unable to create gift card history record for gift card #'. $giftCardCustomer->CrdID . '!' . $e->getMessage();
                 Log::error($message, Enums::NSP_BOOKING);
-                return array(
-                    'error' => $message // or include more information?
-                );
+                throw new \Exception($message);
             }
 
             try {
@@ -170,14 +167,14 @@ class GiftCardProductHandler extends BaseProductHandler {
             catch(\Exception $e) {
                 $message = $logPrefix . 'Unable to send gift card email! ' . $e->getMessage();
                 Log::error($message, Enums::NSP_BOOKING);
-                return array(
-                    'error' => $message // or include more information?
-                );
+                throw new \Exception($message);
             }
         }
 
+        // update check notes to include all gift cards?
+
         $return['success'] = implode(', ', $return['success']);
-        return $return;
+        return $return['success'];
     }
 
     private function findStringBetween($string, $start, $end)

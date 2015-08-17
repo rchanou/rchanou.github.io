@@ -15,6 +15,27 @@ class Customers extends BaseUowApi {
     }
 
     /**
+     * @url GET /primary
+     */
+    public function primary($request_data) {
+        try {
+            $this->validate('all');
+            $uow = UnitOfWork::build($request_data);
+            $mapper = $this->mappers->{$this->resource};
+            $mapper->uowIn($uow);
+            $where = $uow->where;
+            if (empty($where))
+                throw new CSException('Attempted to find primary customer without any where clause!');
+            $uow->data = $this->logic->{$this->resource}->primary($where);
+            $mapper->uowOut($uow);
+            return $uow->data;
+        }
+        catch(Exception $e) {
+            $this->_error($e);
+        }
+    }
+
+    /**
      * @url GET /:id
      *
      * Take over the BaseAPI functionality to test/prove out the UnitOfWork structure.
@@ -48,14 +69,8 @@ class Customers extends BaseUowApi {
             else
                 return $this->logic->customers->login($username, $password);
         }
-        catch (RestException $e) {
-            throw $e;
-        }
-        catch (CSException $e) {
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
-        }
         catch (Exception $e) {
-            throw new RestException(500, $e->getMessage());
+            $this->_error($e);
         }
     }
 }

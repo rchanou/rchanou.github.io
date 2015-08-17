@@ -3,13 +3,11 @@
         "name": "dbo.CheckTotals_V",
         "alias": "ct_v"
     },
-    "keys": [
-        "CheckID"
-    ],
     "columns": [
         {
               "name": "CheckID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "CustID"

@@ -40,8 +40,11 @@ abstract class BaseRecord {
             $json = json_decode($string, true);
             if (empty($json))
                 throw new \CSException('Attempted to use ' . get_called_class() . ' with an un-parseable record definition at ' . $filename . '!');
+            $json['keys'] = array();
             foreach($json['columns'] as $key => $column) {
                 $json['columns'][$column['name']] = $column; // make columns accessible by name
+                if (isset($column['primaryKey']) && $column['primaryKey'] === true)
+                    $json['keys'][] = $column;
                 unset($json['columns'][$key]); // drop the integer indices
             }
             static::$_definition = $json;
@@ -148,16 +151,9 @@ abstract class BaseRecord {
                         return;
                     $c = count($keyNames);
                     for($i = 0; $i < $c; $i++) {
-                        $keyName = $keyNames[$i];
+                        $keyName = $keyNames[$i]['name'];
                         $keyValue = $keyValues[$i];
-                        $keyType = Arrays::where($definition['columns'], function($x) use ($keyName) {
-                            return $x && $x['name'] === $keyName;
-                        });
-                        $keyType = Arrays::select($keyType, function($x) {
-                            return $x['type'];
-                        });
-                        $keyType = Arrays::first($keyType);
-                        $this->{$keyNames[$i]} = $keyValues[$i]; // Convert::convert($keys[$i], self::$definition[self::$key[$i]]);
+                        $this->{$keyName} = $keyValues[$i];
                     }
                 }
             }

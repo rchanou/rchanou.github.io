@@ -22,7 +22,5 @@ class SourcesLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->sources;
-
-        // $this->on('uow', function($uow) { });
     }
 }

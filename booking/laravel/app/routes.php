@@ -28,6 +28,10 @@ Route::group(array('before' => 'checkIfDisabled'), function()
     Route::post('/pay','CheckoutController@pay');
     Route::get('/success','SuccessController@success');
 
+    Route::get('/pay/redirect', 'CheckoutController@payRedirect');
+    Route::get('/pay/redirect/return', 'CheckoutController@payRedirectReturn');
+    Route::post('/pay/redirect/return', 'CheckoutController@payRedirectReturn'); //TODO: May need to separate out, depending on the payment provider
+
     Route::get('/logout','LogoutController@entry');
 });
 

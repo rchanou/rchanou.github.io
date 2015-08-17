@@ -3,13 +3,11 @@
         "name": "dbo.Logs",
         "alias": "lgs"
     },
-    "keys": [
-        "LogID"
-    ],
     "columns": [
         {
               "name": "LogID"
             , "type": "Integer"
+            , "primaryKey": true
         }
         , {
               "name": "Message"

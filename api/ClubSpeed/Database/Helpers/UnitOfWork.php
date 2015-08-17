@@ -47,6 +47,7 @@ class UnitOfWork {
     public $table;      // table -- use a string if possible, convert to definition later
     public $table_id;   // required for update and delete, return from create (and possibly use with create, if we have it ahead of time -- IE customers)
     public $data;       // used by create and update. update should be non destructive for non-provided items.
+    public $existing;   // used by update. contains the currently existing record in the database. (performance concern?)
     public $select;     // for column selection. assume * if empty?
     public $where;      // only available for selects? mass updates? mass deletes?
     public $order;      // only available for selects?
@@ -109,6 +110,11 @@ class UnitOfWork {
                 $data = null; // empty array, after reserved items were taken out?
         }
         $this->data = $data;
+        return $this;
+    }
+
+    public function existing($existing) {
+        $this->existing = $existing;
         return $this;
     }
 

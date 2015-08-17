@@ -3,13 +3,12 @@
         "name": "dbo.GiftCardHistory",
         "alias": "gch"
     },
-    "keys": [
-        "HistoryID"
-    ],
     "columns": [
         {
               "name": "HistoryID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CustID"

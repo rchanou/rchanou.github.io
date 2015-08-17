@@ -3,11 +3,13 @@
         "name": "dbo.OnlineBookingAvailability_V",
         "alias": "oba_v"
     },
-    "keys": [
-        "OnlineBookingsID"
-    ],
     "columns": [
         {
+              "name": "OnlineBookingsID"
+            , "type": "int"
+            , "primaryKey": true
+        }
+        , {
               "name": "HeatNo"
             , "type": "int"
         }
@@ -26,10 +28,6 @@
         , {
               "name": "HeatEndsAt"
             , "type": "datetime"
-        }
-        , {
-              "name": "OnlineBookingsID"
-            , "type": "int"
         }
         , {
               "name": "IsPublic"

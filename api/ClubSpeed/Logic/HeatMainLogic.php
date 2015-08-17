@@ -23,7 +23,7 @@ class HeatMainLogic extends BaseLogic {
         parent::__construct($logic, $db);
         $this->interface = $this->db->heatMain;
 
-        $this->on('uow', function($uow) {
+        $this->before('uow', function($uow) use ($db) {
             switch($uow->action) {
                 case 'create':
                     if (!empty($uow->data)) {
@@ -46,7 +46,7 @@ class HeatMainLogic extends BaseLogic {
                                 ->action('get')
                                 ->table('HeatTypes')
                                 ->table_id($heat->HeatTypeNo);
-                            $this->db->heatTypes->uow($heatTypeUow);
+                            $db->heatTypes->uow($heatTypeUow);
                             $heatType = $heatTypeUow->data;
                         }
                         catch(\RecordNotFoundException $e) {

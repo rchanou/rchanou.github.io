@@ -1,0 +1,34 @@
+{
+    "table": {
+        "name": "dbo.Memberships",
+        "alias": "msp"
+    },
+    "columns": [
+        {
+              "name": "CustID"
+            , "type": "int"
+            , "primaryKey": true
+        }
+        , {
+              "name": "MembershipTypeID"
+            , "type": "int"
+            , "primaryKey": true
+        }
+        , {
+              "name": "LastChanged"
+            , "type": "datetime"
+        }
+        , {
+              "name": "ExpirationDate"
+            , "type": "datetime"
+        }
+        , {
+              "name": "Notes"
+            , "type": "ntext"
+        }
+        , {
+              "name": "ByUserID"
+            , "type": "int"
+        }
+    ]
+}

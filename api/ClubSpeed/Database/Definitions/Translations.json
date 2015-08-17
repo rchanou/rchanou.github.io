@@ -3,13 +3,12 @@
         "name": "dbo.Translations",
         "alias": "trns"
     },
-    "keys": [
-        "TranslationsID"
-    ],
     "columns": [
         {
               "name": "TranslationsID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "Namespace"

@@ -39,8 +39,8 @@ class DocCheckTotals Extends DocAPIBase {
     data structure for <a href="#check-totals-create">Create</a> to the /virtual route.
 </p>
 <p>
-    If you are unable to map the return data by productId due to a repeat in product,
-    then the details array will also accept fake and temporary checkDetailIds
+    If you are unable to map the return data by <code>productId</code> due to a repeat in product,
+    then the details array will also accept fake and temporary <code>checkDetailId</code> properties
     to assist with mapping the return data.
 </p>
 <p>
@@ -115,7 +115,7 @@ EOS;
                   'name'        => 'Check.userId'
                 , 'type'        => 'Integer'
                 , 'description' => 'The id for the user who is creating the check.'
-                , 'create'      => 'required'
+                , 'create'      => 'optional'
             )
             , array(
                   'name'        => 'Check.checkType'
@@ -337,12 +337,8 @@ EOS;
             , 'usage' => <<<EOS
 <p>
     While CheckTotals is a mapping to a read-only set of info to the database,
-    posting to CheckTotals is a method to create underlying Checks and CheckDetails records
-    with one API call.
-</p>
-<p>
-    Note that the id for the Check record will be the only id returned when using this call,
-    and CheckDetails ids will not be returned here.
+    posting to /checkTotals is a helper method to dynamically create all relevant Checks and CheckDetails records
+    by using the <code>customer</code>, <code>productId</code>, and <code>qty</code> fields to populate the records internally.
 </p>
 EOS
             , 'examples' => array(
@@ -352,7 +348,6 @@ POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals?debug=1 HTTP/1.
   "checks": [
     {
       "customerId": 1000001,
-      "userId": 1,
       "details": [
         {
           "productId": 3,

@@ -3,13 +3,12 @@
         "name": "dbo.Payment",
         "alias": "pmnt"
     },
-    "keys": [
-        "PayID"
-    ],
     "columns": [
         {
               "name": "PayID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CheckID"
@@ -174,6 +173,10 @@
         , {
               "name": "Tender"
             , "type": "decimal"
+        }
+        , {
+              "name": "TransactionReference"
+            , "type": "nvarchar"
         }
     ]
 }

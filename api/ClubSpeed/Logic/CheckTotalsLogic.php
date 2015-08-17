@@ -45,7 +45,8 @@ class CheckTotalsLogic extends BaseLogic {
         $checkCreateData = null;
         foreach($calculated as $calc) {
             $calc = (array)$calc; // convert to array for check and check detail creation
-            if ($calc[$this->interface->keys[0]] != $tempCheckId) {
+            $keyname = $this->interface->keys[0]['name'];
+            if ($calc[$keyname] != $tempCheckId) {
                 // we need to create a new check -- this is either the first checkTotals record, or the client passed multiple checks
                 $check = $this->logic->checks->dummy($calc);
                 // map columns manually for any check discounts
@@ -55,9 +56,9 @@ class CheckTotalsLogic extends BaseLogic {
                 $tempCheckId = $check->CheckID;
                 $check->CheckID = null;
                 $checkCreateData = $this->logic->checks->create($check);
-                $actualCheckId = $checkCreateData[$this->interface->keys[0]];
+                $actualCheckId = $checkCreateData[$keyname];
             }
-            $calc[$this->interface->keys[0]] = $actualCheckId; // tie the new details record back to the new CheckID
+            $calc[$keyname] = $actualCheckId; // tie the new details record back to the new CheckID
 
             $checkDetail = $this->logic->checkDetails->dummy($calc);
             // map columns manually for any line discounts
@@ -249,8 +250,6 @@ class CheckTotalsLogic extends BaseLogic {
                 $check->CheckTotal += $check->CheckTax;
             $check->CheckTotal += $check->Gratuity;
             $check->CheckTotal += $check->Fee;
-
-            // pr($check);
 
             if (isset($check->CheckDiscountID)) {
                 $discount = $this->loadDiscount($check->CheckDiscountID);

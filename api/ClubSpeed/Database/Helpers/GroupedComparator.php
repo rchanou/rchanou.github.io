@@ -1,7 +1,9 @@
 <?php
 
 namespace ClubSpeed\Database\Helpers;
+use ClubSpeed\Database\Helpers\Comparator;
 use ClubSpeed\Database\Records\BaseRecord;
+use ClubSpeed\Utility\Objects;
 
 class GroupedComparator { // could implement iterator aggregate, but we need to modify the values during a foreach for JSON map functionality
 
@@ -17,7 +19,7 @@ class GroupedComparator { // could implement iterator aggregate, but we need to 
         if (isset($data)) {
             if (is_string($data))
                 $this->parse($data);
-            else if ($data instanceof \ClubSpeed\Database\Records\BaseRecord)
+            else if ($data instanceof BaseRecord)
                 $this->load($data);
         }
     }
@@ -34,20 +36,20 @@ class GroupedComparator { // could implement iterator aggregate, but we need to 
         if (count($groups) > 0) {
             $i = 0;
             $this->comparators[] = array(
-                'comparator' => new \ClubSpeed\Database\Helpers\Comparator($groups[$i])
+                'comparator' => new Comparator($groups[$i])
             );
             $i+=1;
             for (; $i < (count($groups)); $i+=2) {
                 $this->comparators[] = array(
                     'connector'     => @self::$connectors[@$groups[$i]] // will hit an undefined offset at the end -- move to outside of loop?
-                    , 'comparator'  => new \ClubSpeed\Database\Helpers\Comparator($groups[$i+1])
+                    , 'comparator'  => new Comparator($groups[$i+1])
                 );
             }
         }
     }
 
     public function load($record) {
-        if (!\ClubSpeed\Utility\Objects::isEmpty($record)) {
+        if (!Objects::isEmpty($record)) {
             $strings = array();
             foreach($record as $key => $val) { // build a string, then parse it, or just build in-line?
                 // building string for now, for simplicity's sake
@@ -66,7 +68,7 @@ class GroupedComparator { // could implement iterator aggregate, but we need to 
     public function validate() {
         // TODO: VALIDATE STRUCTURE
         foreach($this->comparators as $key => $val) {
-            if (!isset($val['comparator']) || !$val['comparator'] instanceof \ClubSpeed\Database\Helpers\Comparator)
+            if (!isset($val['comparator']) || !$val['comparator'] instanceof Comparator)
                 return false;
             if (!$val['comparator']->validate())
                 return false;

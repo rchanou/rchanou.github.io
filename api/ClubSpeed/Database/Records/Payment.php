@@ -47,4 +47,5 @@ class Payment extends BaseRecord {
     public $InvoicePaidHistoryID;
     public $ExtCardType;
     public $Tender;
+    public $TransactionReference;
 }

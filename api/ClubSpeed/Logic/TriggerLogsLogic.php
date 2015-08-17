@@ -22,7 +22,5 @@ class TriggerLogsLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->triggerLogs;
-
-        // $this->on('uow', function($uow) { });
     }
 }

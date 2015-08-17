@@ -1,5 +1,4 @@
 -- Note: PDO does NOT accept GO statements, and CREATE VIEW must be the first statement in a batch
-
 CREATE VIEW [dbo].[UserTasks_V] AS
 SELECT
     u.UserID

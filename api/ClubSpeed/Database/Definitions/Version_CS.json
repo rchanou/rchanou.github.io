@@ -3,13 +3,12 @@
         "name": "dbo.Version_CS",
         "alias": "vcs"
     },
-    "keys": [
-        "ID"
-    ],
     "columns": [
         {
               "name": "ID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "VersionNumber"

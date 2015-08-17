@@ -3,13 +3,12 @@
         "name": "dbo.TransactionReferences",
         "alias": "tr"
     },
-    "keys": [
-        "TransactionReferencesID"
-    ],
     "columns": [
         {
               "name": "TransactionReferencesID"
             , "type": "Integer"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CheckID"

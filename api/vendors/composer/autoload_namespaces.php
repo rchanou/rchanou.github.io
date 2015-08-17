@@ -14,6 +14,7 @@ return array(
     'Omnipay\\Mollie\\' => array($vendorDir . '/omnipay/mollie/src'),
     'Omnipay\\Common\\' => array($vendorDir . '/omnipay/common/src'),
     'Omnipay\\Buckaroo\\' => array($vendorDir . '/omnipay/buckaroo/src'),
+    'Omnipay\\iDEAL\\' => array($vendorDir . '/omnipay/ideal/src'),
     'Omnipay\\WorldPayXML\\' => array($vendorDir . '/omnipay/worldpayxml/src'),
     'Mockery' => array($vendorDir . '/mockery/mockery/library'),
     'Guzzle\\Stream' => array($vendorDir . '/guzzle/stream'),

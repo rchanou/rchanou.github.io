@@ -1,0 +1,22 @@
+{
+    "table": {
+        "name": "dbo.WaiverTemplates",
+        "alias": "src"
+    },
+    "columns": [
+        {
+              "name": "Waiver"
+            , "type": "int"
+            , "primaryKey": true
+            , "identity": true
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "WaiverText"
+            , "type": "ntext"
+        }
+    ]
+}

@@ -191,13 +191,21 @@ WHERE
 
 UNION ALL
 
---OverPaid        
+--Overpayments
+SELECT
+      '##OVERPAYMENTS##' AS AccountNumber
+    , 'Overpayment Liability'
+    , 0 AS Debit
+    , ISNULL(SUM(ISNULL(c.CheckTotal, 0) - ISNULL(p.PaidTotal, 0)), 0) AS Credit
+FROM dbo.Checks c
+LEFT OUTER JOIN dbo.CheckPayments_V p
+    ON c.CheckID = p.CheckID
+WHERE
+        (c.CheckStatus = 1)
+    AND (c.ClosedDate BETWEEN @StDate AND @EndDate)
+    AND (ISNULL(c.CheckTotal, 0) - ISNULL(p.PaidTotal, 0) < 0)
 
---SELECT 'Over Paid', 0.00 as Debit, ISNULL(SUM(Overpaid)  ,0)*-1 as Credit
---FROM         OverPaid 
---WHERE  CheckID IN (SELECT CheckID FROM Checks WHERE    (dbo.Checks.ClosedDate BETWEEN @StDate  AND  @EndDate) AND (dbo.Checks.CheckStatus = 1))
-
---UNION ALL
+UNION ALL
 
 --GiftCard        
 

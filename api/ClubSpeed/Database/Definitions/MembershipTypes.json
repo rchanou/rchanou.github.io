@@ -3,13 +3,11 @@
         "name": "dbo.MembershipTypes",
         "alias": "mt"
     },
-    "keys": [
-        "MembershipTypeID"
-    ],
     "columns": [
         {
               "name": "MembershipTypeID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "Description"

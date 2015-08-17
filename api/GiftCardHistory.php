@@ -2,12 +2,10 @@
 
 use ClubSpeed\Enums\Enums as Enums;
 
-class GiftCardHistory extends BaseApi {
+class GiftCardHistory extends BaseUowApi {
 
     function __construct() {
         parent::__construct();
-        $this->mapper           = new \ClubSpeed\Mappers\GiftCardHistoryMapper();
-        $this->interface        = $this->logic->giftCardHistory;
-        $this->access['delete'] = Enums::API_NO_ACCESS;
+        $this->resource = 'giftCardHistory';
     }
 }

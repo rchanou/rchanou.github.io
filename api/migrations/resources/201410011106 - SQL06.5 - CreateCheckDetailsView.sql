@@ -2,10 +2,12 @@
 
 CREATE VIEW [dbo].[CheckDetails_V] AS
 WITH CONSTANTS1 AS (
-    -- separate so we are absolutely sure we don't accidentally lose UseSalesTax
-    -- from a potentially missing DiscountBeforeTaxes setting
     SELECT
-        CAST(dbo.UseSalesTax() AS BIT) AS USE_SALES_TAX
+        CAST(cp.SettingValue AS BIT) AS USE_SALES_TAX
+    FROM dbo.ControlPanel cp
+    WHERE
+        cp.TerminalName = 'MainEngine'
+        AND cp.SettingName = 'UseSalesTax'
 )
 , CONSTANTS2 AS (
     SELECT TOP 1
@@ -169,7 +171,7 @@ WITH CONSTANTS1 AS (
                 WHEN CHECK_CALCULATION_SWITCHOVER_DATE_V1552 < c.ClosedDate  AND  c.ClosedDate <= CONSTANTS.CHECK_CALCULATION_SWITCHOVER_DATE_V1554 THEN
                   --BETWEEN
                   CASE
-                        WHEN dbo.UseSalesTax() = 1 THEN
+                        WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                             -- ((SUBTOTAL * COMPOUND RATE) / 100.0)
                             (ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - ROUND(cd.DiscountApplied,2)), 0)) * ((((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100) / 100.00
                         ELSE
@@ -180,7 +182,7 @@ WITH CONSTANTS1 AS (
                     --OLD
                     ROUND(
                         CASE
-                            WHEN dbo.UseSalesTax() = 1 THEN
+                            WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                                 -- ((SUBTOTAL * COMPOUND RATE) / 100.0)
                                 ((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * ((((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100)) / 100.0
                             ELSE
@@ -198,7 +200,7 @@ WITH CONSTANTS1 AS (
                     cds.CheckDetailGST
                 WHEN CHECK_CALCULATION_SWITCHOVER_DATE_V1552 < c.ClosedDate  AND  c.ClosedDate <= CONSTANTS.CHECK_CALCULATION_SWITCHOVER_DATE_V1554 THEN
                   CASE
-                        WHEN dbo.UseSalesTax() = 1 THEN
+                        WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                             -- ((SUBTOTAL * GST) / 100.0)
                             (((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * cd.GST) / 100.0)
                         ELSE
@@ -208,7 +210,7 @@ WITH CONSTANTS1 AS (
                 ELSE
                     ROUND(   
                         CASE
-                            WHEN dbo.UseSalesTax() = 1 THEN
+                            WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                                 -- ((SUBTOTAL * GST) / 100.0)
                                 (((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * cd.GST) / 100.0)
                             ELSE
@@ -227,7 +229,7 @@ WITH CONSTANTS1 AS (
                     cds.CheckDetailPST
                 WHEN CHECK_CALCULATION_SWITCHOVER_DATE_V1552 < c.ClosedDate  AND  c.ClosedDate <= CONSTANTS.CHECK_CALCULATION_SWITCHOVER_DATE_V1554 THEN
                     CASE
-                        WHEN dbo.UseSalesTax() = 1 THEN
+                        WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                             -- (TOTALTAX) - (TOTALGST)
                               (((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * ((((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100)) / 100.0)
                             - (((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * cd.GST) / 100.0)
@@ -241,7 +243,7 @@ WITH CONSTANTS1 AS (
                     -- calculations taken from Interfaces\Models\Check\CheckDetail.vb
                     ROUND( 
                         CASE
-                            WHEN dbo.UseSalesTax() = 1 THEN
+                            WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                                 -- (TOTALTAX) - (TOTALGST)
                                   (((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * ((((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100)) / 100.0)
                                 - (((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * cd.GST) / 100.0)
@@ -262,7 +264,7 @@ WITH CONSTANTS1 AS (
                 WHEN CHECK_CALCULATION_SWITCHOVER_DATE_V1552 < c.ClosedDate  AND  c.ClosedDate <= CONSTANTS.CHECK_CALCULATION_SWITCHOVER_DATE_V1554 THEN
                     ISNULL((UnitPrice * (Qty + CadetQty) -  round(DiscountApplied,2)), 0)
                     + CASE
-                        WHEN dbo.UseSalesTax() = 1 THEN
+                        WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                             -- ((SUBTOTAL * COMPOUND RATE) / 100.0)
                             (ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - round(cd.DiscountApplied,2)), 0)) * ((((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100) / 100.00
                         ELSE
@@ -274,7 +276,7 @@ WITH CONSTANTS1 AS (
                     ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0) -- subtotal
                     + ROUND(
                         CASE
-                            WHEN dbo.UseSalesTax() = 1 THEN
+                            WHEN CONSTANTS.USE_SALES_TAX = 1 THEN
                                 -- ((SUBTOTAL * COMPOUND RATE) / 100.0)
                                 ((ISNULL((cd.UnitPrice * (cd.Qty + cd.CadetQty) - cd.DiscountApplied), 0)) * ((((1 + cd.GST / 100) * (1 + (cd.TaxPercent - cd.GST) / 100)) - 1) * 100)) / 100.0
                             ELSE

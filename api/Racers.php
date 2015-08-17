@@ -191,9 +191,8 @@ class Racers
      * @return int[string] An associative array containing the customerId at 'CustID'.
      */
     public final function postregister($request_data) {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+        if (!Authenticate::privateAccess())
             throw new RestException(401, "Invalid authorization!");
-        }
         // this needs to handle create, add to event, add to event group, send email, etc, etc
         try {
             $params = $this->mapCreateParams($request_data);
@@ -255,7 +254,7 @@ class Racers
      *  Auto_Bill_Failed = 8
      */
     public function getapplyRule($customerId, $ruleId) {
-        if (!\ClubSpeed\Security\Authenticate::privateAccess()) {
+        if (!Authenticate::privateAccess()) {
             throw new RestException(401, 'Invalid authorization');
         }
 
@@ -460,7 +459,7 @@ class Racers
                     Log::info("Did not send welcome email to: " . $customer->EmailAddress . "! Customer.DoNotMail was \"true\"!", Enums::NSP_REGISTRATION);
             }
             else
-                Log::info("Unable to send welcome email! Customer had an empty email!", Enums::NSP_REGISTRATION);
+                Log::info("Unable to send welcome email! Customer #" . $racer_id . " had an empty email!", Enums::NSP_REGISTRATION);
         }
         catch(Exception $e) {
             $this->_error($e);

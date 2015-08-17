@@ -106,24 +106,6 @@ abstract class BaseUowApi extends BaseApi {
     /**
      * @access private
      *
-     * Abstracted error handler.
-     * Use to convert internal exceptions to RestExceptions as necessary.
-     *
-     * Note, @access doesn't actually work with Restler 3.0.
-     * Holding on to it for documentation purposes.
-     * The function is named with an underscore to keep it out of the exposed API calls.
-     */
-    protected final function _error($e) {
-        if ($e instanceof RestException)
-            throw $e;
-        if ($e instanceof CSException)
-            throw new RestException($e->getCode() ?: 412, $e->getMessage());
-        throw new RestException(500, $e->getMessage());
-    }
-
-    /**
-     * @access private
-     *
      * Boo. @access only works with Restler 3.0.
      * The _ in the function name should be enough
      * to protect it from being called externally. I think.

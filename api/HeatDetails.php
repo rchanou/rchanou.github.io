@@ -6,7 +6,7 @@ class HeatDetails extends BaseUowApi {
 
     function __construct() {
         parent::__construct();
-        $this->resource = 'heatDetails';
+        $this->resource = 'HeatDetails';
     }
 
     public function get1($id1, $request_data = null) {

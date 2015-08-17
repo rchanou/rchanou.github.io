@@ -3,13 +3,12 @@
         "name": "dbo.SpeedScreenChannels",
         "alias": "ssc"
     },
-    "keys": [
-        "ChannelID"
-    ],
     "columns": [
         {
               "name": "ChannelID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "ChannelNumber"

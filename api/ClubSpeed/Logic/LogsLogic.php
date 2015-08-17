@@ -24,7 +24,7 @@ class LogsLogic extends BaseLogic implements \ClubSpeed\Logging\LogInterface {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->logs;
-        $this->on('uow', function($uow) {
+        $this->before('uow', function($uow) {
             switch($uow->action) {
                 case 'create':
                     if (is_null($uow->data->LogDate))

@@ -3,13 +3,12 @@
         "name": "dbo.AuthenticationTokens",
         "alias": "at"
     },
-    "keys": [
-        "AuthenticationTokensID"
-    ],
     "columns": [
         {
               "name": "AuthenticationTokensID"
             , "type": "Integer"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CustomersID"

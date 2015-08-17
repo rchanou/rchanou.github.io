@@ -2,19 +2,20 @@
 
 namespace ClubSpeed\Payments;
 use Omnipay\Omnipay;
-use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Enums\Enums;
 use ClubSpeed\Mail\MailService as Mail;
 use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Templates\TemplateService as Templates;
-use ClubSpeed\Utility\Arrays as Arrays;
-use ClubSpeed\Utility\Convert as Convert;
+use ClubSpeed\Utility\Arrays;
+use ClubSpeed\Utility\Convert;
 use ClubSpeed\Payments\ProductHandlers\ProductHandlerService as Handlers;
-use ClubSpeed\Utility\Tokens as Tokens;
-
+use ClubSpeed\Utility\Tokens;
+use ClubSpeed\Database\Helpers\UnitOfWork;
 
 class BasePayment {
 
     protected $logic;
+    protected $db;
     protected $handlers;
     protected $paymentService;
     protected $gateway;
@@ -26,8 +27,9 @@ class BasePayment {
     protected $formatter;
     protected $locale;
 
-    public function __construct(&$logic, &$paymentService) {
+    public function __construct(&$logic, &$db, &$paymentService) {
         $this->logic = $logic;
+        $this->db = $db;
         $this->paymentService = $paymentService;
     }
 
@@ -168,6 +170,7 @@ class BasePayment {
                         , 'clientIp'             => $this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
                         , 'session'              => Tokens::generate()
                     );
+                    Log::info($this->logPrefix . 'Charging card for ' . $options['amount'] . ' ' . $options['currency']);
                     $response = $callback($options); // the actual omnipay call
                 }
                 catch(\Exception $e) {
@@ -324,7 +327,6 @@ class BasePayment {
         // better way to collect the payment amount? this doesn't seem reliable.
         // need to use dbo.TransactionReferences moving forward
         $responseData = $response->getData();
-        //$amount = $responseData['amount'];
         $params['transactionReference'] = $response ? $response->getTransactionReference() : Enums::DB_NULL;
         $now = Convert::getDate();
 
@@ -352,12 +354,17 @@ class BasePayment {
                 $payment->PayTerminal           = 'api';// use this?
                 $payment->PayType               = Enums::PAY_TYPE_EXTERNAL;
                 $payment->TransactionDate       = $now;
-                $payment->ReferenceNumber       = $params['transactionReference'];
+                $payment->TransactionReference  = $params['transactionReference'];
                 $payment->ExternalAccountNumber = ''; // front end logs error if this is null
                 $payment->ExternalAccountName   = ''; // front end logs error if this is null
                 $payment->UserID                = 1; // probably should be non-nullable, onlinebooking userId?
-                $paymentId = $this->logic->payment->create($payment); // what if this fails? credit card will be charged, but payment record could not be created (!!!)
-                Log::info($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId['PayID'], Enums::NSP_BOOKING);
+
+                $uow = UnitOfWork::build()
+                    ->action('create')
+                    ->data((array)$payment);
+                $this->logic->payment->uow($uow);
+                $paymentId = $uow->table_id; // some day we'll get to gank the root logic/db functions and use them to abstract away direct UoW creation..
+                Log::info($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId, Enums::NSP_BOOKING);
             }
             else {
                 Log::warn($this->logPrefix . "Attempted to apply payment, but there was nothing left to be paid!", Enums::NSP_BOOKING); // todo: extend error properly
@@ -365,7 +372,7 @@ class BasePayment {
             }
         }
         catch (\Exception $e) {
-            Log::error($this->logPrefix . 'Omnipay has registered a successful payment but we were unable to apply the payment to the Payments table! Transaction reference was: ' . $transactionReference, Enums::NSP_BOOKING, $e);
+            Log::error($this->logPrefix . 'Omnipay has registered a successful payment but we were unable to apply the payment to the Payments table! Transaction reference was: ' . $params['transactionReference'], Enums::NSP_BOOKING, $e);
             // continue at this point?
             // if we continue, the check will be closed,
             // all line items will be processed (gift cards, etc),
@@ -375,208 +382,20 @@ class BasePayment {
     }
 
     public function finalizeCheck($checkId, $params) {
-        // consider the check to be closed at this point --
-        // once all payments have been added to the database
-        // update the check
+        $metadata = (isset($params['check']) ? $params['check'] : array());
+        if (isset($params['sendCustomerReceiptEmail']))
+            $metadata['sendCustomerReceiptEmail'] = $params['sendCustomerReceiptEmail']; // gross.
         try {
-            $checkStatus = Enums::CHECK_STATUS_CLOSED;
-            $closedDate = Convert::getDate();
-            $checkDetails = $this->logic->checkDetails->find(
-                'CheckID $eq ' . $checkId
-            );
-            foreach ($checkDetails as $checkDetail) {
-                if (!is_null($checkDetail->R_Points)) {
-                    $checkStatus = Enums::CHECK_STATUS_OPEN; // if any line items have R_Points as non-null, then we have to leave the check open for the front end (!!!)
-                    $closedDate = Enums::DB_NULL;
-                }
-                $this->logic->checkdetails->update($checkDetail->CheckDetailID, array(
-                    'Status' => Enums::CHECK_DETAIL_STATUS_CANNOT_DELETED
-                ));
-            }
-            $check = $this->logic->checks->get($checkId);
-            $check = $check[0];
-            $check->CheckStatus = $checkStatus;
-            // $check->Notes = (isset($params['transactionReference']) ? 'Transaction Reference #' . $params['transactionReference'] : 'No Transaction Reference');
-            $check->ClosedDate = $closedDate;
-            $this->logic->checks->update($check->CheckID, $check);
-            Log::info($this->logPrefix . 'Closed Check', Enums::NSP_BOOKING);
+            $receiptData = $this->logic->checks->finalize($checkId, $metadata); // hacky
+            return $receiptData;
         }
-        catch (\Exception $e) {
-            Log::error($this->logPrefix . 'Unable to update check!', Enums::NSP_BOOKING, $e);
+        catch(\Exception $e) {
+            // at this point, the payment is already taken and saved,
+            // but the check was unable to finalize.
+
+            // how should we handle these exceptions? support email? track email?
+            // exception should already be logged by checks->finalize() and rethrown back to here.
         }
-
-        $handled = array();
-        $errored = array();
-        $checkData = @$params['check']; // look for check metadata
-        $checkTotals = $this->logic->checkTotals->get($checkId); // refresh only returns the single object, we want all check details items as well
-        foreach($checkTotals as $checkTotal) {
-            try {
-                $metadata = Arrays::first($checkData['details'], function($val, $key, $arr) use ($checkTotal) {
-                    return isset($val['checkDetailId']) && $val['checkDetailId'] == $checkTotal->CheckDetailID;
-                });
-                $handle = Handlers::handle($checkTotal, $metadata);
-                if (isset($handle['error']))
-                    $errored[] = $handle;
-                else
-                    $handled[$checkTotal->CheckDetailID] = $handle['success'];
-            }
-            catch (\Exception $e) {
-                $errored[] = $e->getMessage(); // to be used for debugging purposes?
-            }
-        }
-        Log::info($this->logPrefix . "Finished processing check details", Enums::NSP_BOOKING);
-        try {
-            $notes = $check->Notes ?: '';
-            foreach($handled as $note) {
-                $notes .= ' ' . $note;
-            }
-            $this->logic->checks->update($check->CheckID, array(
-                'Notes' => $notes
-            ));
-        }
-        catch (\Exception $e) {
-            Log::error($this->logPrefix . 'Unable to set check notes!', Enums::NSP_BOOKING, $e);
-        }
-
-        $receiptData = array();
-        try {
-            $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
-            $businessName = $businessName[0];
-            $businessName = $businessName->SettingValue;
-
-            $customer = $this->logic->customers->get($checkTotal->CustID);
-            $customer = $customer[0];
-            $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
-
-            $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
-            $emailFrom = $emailFrom[0];
-            $emailFrom = array($emailFrom->SettingValue => $businessName);
-
-            $snapshot = $params['checkSnapshot'];
-            $receiptData = array(
-                'checkId'         => $checkTotal->CheckID
-                , 'customer'      => $customer->FName . ' ' . $customer->LName
-                , 'business'      => $businessName
-                , 'checkSubtotal' => $this->getAsCurrency($snapshot->CheckSubtotal)
-                , 'checkTotal'    => $this->getAsCurrency($snapshot->CheckRemainingTotal)
-                , 'checkTax'      => $this->getAsCurrency($snapshot->CheckTax)
-                , 'details'       => array()
-            );
-            foreach($checkTotals as $checkTotal) {
-                $note = (isset($handled[$checkTotal->CheckDetailID]) && !empty($handled[$checkTotal->CheckDetailID])) ? $handled[$checkTotal->CheckDetailID] : '';
-                $productName = !empty($checkTotal->ProductName) ? $checkTotal->ProductName : '(No product name!)';
-                $receiptData['details'][] = array(
-                      'note'        => $note
-                    , 'productName' => $productName
-                    , 'description' => trim($productName . ': ' . $note) // for backwards compatibility and convenience
-                    , 'quantity'    => $checkTotal->Qty
-                    , 'price'       => $this->getAsCurrency($checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
-                );
-            }
-
-            $giftCardPayments = $this->logic->payment->match(array(
-                "PayType" => Enums::PAY_TYPE_GIFT_CARD,
-                "CheckID" => $checkId
-            ));
-            if (!empty($giftCardPayments)) {
-                $receiptData['giftCardTotal'] = 0;
-                foreach($giftCardPayments as $giftCard) {
-                    $receiptData['giftCardTotal'] += $giftCard->PayAmount;
-                }
-            }
-
-            $receiptEmailBodyHtml = $this->logic->settings->match(array(
-                'Namespace' => 'Booking',
-                'Name' => 'receiptEmailBodyHtml'
-            ));
-            $receiptEmailBodyHtml = $receiptEmailBodyHtml[0];
-            $receiptEmailBodyHtml = $receiptEmailBodyHtml->Value;
-            // $receiptEmailBodyHtml = file_get_contents(__DIR__.'/../../migrations/resources/201411041100 - HTML01 - receipt.html'); // for testing purposes
-            $receiptEmailBodyHtml = Templates::buildFromString($receiptEmailBodyHtml, $receiptData);
-
-            $receiptEmailBodyText = $this->logic->settings->match(array(
-                'Namespace' => 'Booking',
-                'Name' => 'receiptEmailBodyText'
-            ));
-            $receiptEmailBodyText = $receiptEmailBodyText[0];
-            $receiptEmailBodyText = $receiptEmailBodyText->Value;
-            // $receiptEmailBodyText = file_get_contents(__DIR__.'/../../migrations/resources/201411041100 - TEXT01 - receipt.txt'); // for testing purposes
-            $receiptEmailBodyText = Templates::buildFromString($receiptEmailBodyText, $receiptData); // use twig to build the text template -- hacky, but works fine (note: don't use HTML comments in the text file for the twig logic, it doesn't get parsed properly)
-
-            $receiptEmailSubject = $this->logic->settings->match(array(
-                'Namespace' => 'Booking',
-                'Name' => 'receiptEmailSubject'
-            ));
-            $receiptEmailSubject = $receiptEmailSubject[0];
-            $receiptEmailSubject = $receiptEmailSubject->Value;
-            $receiptEmailSubject = str_replace(
-                array('{{businessName}}', '{{checkId}}'),
-                array($businessName, $checkId),
-                $receiptEmailSubject
-            );
-
-            // embed the email sending logic, as we can't really send an email if we can't build the template
-            try {
-                $sendCustomerReceiptEmail = isset($params['sendCustomerReceiptEmail']) ? Convert::toBoolean($params['sendCustomerReceiptEmail']) : true; // default to true
-                if (!$sendCustomerReceiptEmail)
-                    Log::info($this->logPrefix . 'API Call has opted out of sending the customer a receipt email!', Enums::NSP_BOOKING);
-                else
-                    Log::info($this->logPrefix . 'Receipt will be emailed to Customer #' . $customer->CustID . ' at ' . $customer->EmailAddress, Enums::NSP_BOOKING);
-
-                $sendReceiptCopyTo = $this->logic->controlPanel->match(array(
-                    'TerminalName' => 'Booking',
-                    'SettingName' => 'sendReceiptCopyTo'
-                ));
-                if (!empty($sendReceiptCopyTo)) {
-                    $sendReceiptCopyTo = $sendReceiptCopyTo[0];
-                    $sendReceiptCopyTo = $sendReceiptCopyTo->SettingValue; // this will default to an empty string
-                    if (!empty($sendReceiptCopyTo)) {
-                        $sendReceiptCopyTo = explode(",", $sendReceiptCopyTo); // we should be able to use this directly as the BCC
-                        array_walk($sendReceiptCopyTo, function(&$val) {
-                            $val = trim($val); // get rid of any additional whitespace in the comma-delimited list of emails
-                        });
-                    }
-                }
-                if (!empty($sendReceiptCopyTo)) // check again to see if its still empty
-                    Log::info($this->logPrefix . 'Receipt copies will be sent to the following addresses: ' . print_r($sendReceiptCopyTo, true), Enums::NSP_BOOKING);
-                else
-                    Log::info($this->logPrefix . 'No BCC list was found for receipt copies!', Enums::NSP_BOOKING);
-
-                // check to see if we have no override, or a BCC list
-                // if we have either or, then attempt to send the mail
-                if ($sendCustomerReceiptEmail || !empty($sendReceiptCopyTo)) {
-                    $mail = Mail::builder()
-                        ->subject($receiptEmailSubject)
-                        ->from($emailFrom)
-                        ->body($receiptEmailBodyHtml)
-                        ->alternate($receiptEmailBodyText);
-                    if ($sendCustomerReceiptEmail)
-                        $mail->to($emailTo);
-                    if (!empty($sendReceiptCopyTo))
-                        $mail->bcc($sendReceiptCopyTo);
-                    Mail::send($mail);
-
-                    // update this message - the email may or may not have been sent, should we signify this?
-                    Log::info($this->logPrefix . 'Receipt email was sent for Customer #' . $customer->CustID, Enums::NSP_BOOKING);
-                }
-                else
-                    Log::info($this->logPrefix . 'Receipt email was not sent, since no valid BCC list was found and the API opted out of sending the customer a receipt!', Enums::NSP_BOOKING);
-            }
-            catch (\Exception $e) {
-                Log::error($this->logPrefix . "Receipt email could not be sent to Customer #" . $customer->CustID . '!', Enums::NSP_BOOKING, $e);
-            }
-        }
-        catch (\Exception $e) {
-            Log::error($this->logPrefix . "Receipt email could not be built!", Enums::NSP_BOOKING, $e);
-        }
-
-        if (!empty($errored)) {
-            // pr("found errors!");
-            // die($errored); // or should we attach this to receipt data? these are at least logged in the logs database.
-            // TODO -- send off a support email if product handlers had errors?
-        }
-
-        return $receiptData;
     }
 
     public function handleRedirect($check, $response) {
@@ -637,7 +456,8 @@ class BasePayment {
         }
         try {
             $this->logic->checks->update($checkId, array(
-                'CheckStatus' => Enums::CHECK_STATUS_CLOSED
+                'CheckStatus' => Enums::CHECK_STATUS_CLOSED,
+                'ClosedDate'  => Convert::getDate()
             ));
             Log::info($this->logPrefix . 'Closed check after failed payment!', Enums::NSP_BOOKING);
         }
@@ -699,7 +519,7 @@ class BasePayment {
             }
         }
 
-        throw new \Exception($message); // or return data with a 200? client probably expects an array of data
+        throw new \CSException($message); // or return data with a 200? client probably expects an array of data
 
         // return array(
         //     'error' => array(

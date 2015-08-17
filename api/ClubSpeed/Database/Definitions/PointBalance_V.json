@@ -1,0 +1,22 @@
+{
+    "table": {
+        "name": "dbo.PointBalance_V",
+        "alias": "pbv"
+    },
+    "columns": [
+        {
+              "name": "CustID"
+            , "type": "int"
+            , "primaryKey": true
+            , "identity": true
+        }
+        , {
+              "name": "CrdID"
+            , "type": "bigint"
+        }
+        , {
+              "name": "Balance"
+            , "type": "money"
+        }
+    ]
+}

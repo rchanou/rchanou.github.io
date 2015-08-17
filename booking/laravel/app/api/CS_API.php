@@ -664,11 +664,12 @@ class CS_API
     }
 
     /*
-    ###########
-    # PAYMENT #
-    ###########
+    ########################
+    # PAYMENT AND CHECKOUT #
+    ########################
     */
 
+    //Old method - processPayment, Club Speed specifics were handled automatically
     public static function makePayment($paymentProcessorSettings,$check,$paymentInformation)
     {
         self::initialize();
@@ -705,6 +706,186 @@ class CS_API
         }
     }
 
+    //New method - just makes the payment via Omnipay
+    public static function pay($paymentProcessorSettings,$check,$paymentInformation)
+    {
+        self::initialize();
+
+        $formattedData = $paymentProcessorSettings;
+        $formattedData->check = $check;
+        $formattedData->card = $paymentInformation;
+
+        $url = self::$apiURL . '/omnipay/purchase?&key=' . self::$privateKey;
+
+        $result = self::call($url,$formattedData,'POST');
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if (isset($result->body))
+        {
+            return $result->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function getProcessorType($processorName)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . '/omnipay?&key=' . self::$privateKey;
+
+        $result = self::call($url);
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if (isset($result->body))
+        {
+            foreach($result->body as $processor)
+            {
+                if ($processor->name === $processorName)
+                {
+                    if (isset($processor->type))
+                    {
+                        return $processor->type;
+                    }
+                    else
+                    {
+                        return 'direct';
+                    }
+                }
+            }
+            return 'direct';
+        }
+        else
+        {
+            return 'direct';
+        }
+    }
+
+
+    public static function complete($paymentProcessorSettings, $params)
+    {
+        self::initialize();
+
+        $formattedData = $paymentProcessorSettings;
+        $urlParams = http_build_query($params);
+
+        $url = self::$apiURL . '/omnipay/complete?&key=' . self::$privateKey . '&' . $urlParams;
+
+        $result = self::call($url,$formattedData,'POST');
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if (isset($result->body))
+        {
+            return $result->body;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function insertPaymentRecord($checkId,$payAmount,$transaction)
+    {
+        self::initialize();
+
+        $formattedData = array(
+            "checkId" => $checkId,
+            "payAmount" => $payAmount,
+            "transaction" => $transaction
+        );
+
+        $url = self::$apiURL . '/payments?&key=' . self::$privateKey;
+
+        $result = self::call($url,$formattedData,'POST');
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if (isset($result->code))
+        {
+            if ($result->code == 200)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function finalizeCheck($checkId,$checkDetails)
+    {
+        self::initialize();
+
+        $formattedData = array(
+            "details" => $checkDetails
+        );
+
+        $url = self::$apiURL . "/checks/$checkId/finalize?&key=" . self::$privateKey;
+
+        $result = self::call($url,$formattedData,'POST');
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if (isset($result->code))
+        {
+            if ($result->code == 200)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function voidCheck($checkId)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . "/checks/$checkId/void?&key=" . self::$privateKey;
+
+        $result = self::call($url,null,'POST');
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if (isset($result->code))
+        {
+            if ($result->code == 200)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /*
     ############
     # SETTINGS #
@@ -715,7 +896,7 @@ class CS_API
     {
         self::initialize();
 
-        $url = self::$apiURL . "/settings/get.json?group=kiosk&key=" . self::$privateKey; //TODO: group=kiosk? Investigate.
+        $url = self::$apiURL . "/settings/get.json?group=kiosk&key=" . self::$privateKey;
 
         $result = self::call($url);
 
@@ -1023,7 +1204,7 @@ class CS_API
                     'error' => $errorMessage);
             }
         }
-        if ($response === null || !property_exists($response, 'code') || $response->code != 200)
+        if ($response === null || !property_exists($response, 'code'))
         {
 
             //If there was an error, store debugging information in the session

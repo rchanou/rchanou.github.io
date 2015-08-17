@@ -283,9 +283,15 @@ class Strings
             'str_haveAnAffiliateCode' => 'Have an affiliate code? Enter it below!',
             'str_enterAffiliateCode' => 'Enter affiliate code',
             'str_apply' => 'Apply',
-            'str_affiliateCodeUpdated' => 'Affiliate code updated!'
+            'str_affiliateCodeUpdated' => 'Affiliate code updated!',
 
+            //Redirection to payment processor
+            'str_redirecting' => 'Redirecting...',
+            'str_youAreBeingRedirected' => 'You are being directed to an external payment processor.',
 
+            //Receipt from external payment processor
+            'str_finalizing' => 'Finalizing...',
+            'str_yourTransactionIsBeingFinalized' => 'Your transaction is being finalized.'
 
 
             //'str_' => '',

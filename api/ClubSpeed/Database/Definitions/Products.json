@@ -3,13 +3,12 @@
         "name": "dbo.Products",
         "alias": "prdcts"
     },
-    "keys": [
-        "ProductID"
-    ],
     "columns": [
         {
               "name": "ProductID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "ProductType"

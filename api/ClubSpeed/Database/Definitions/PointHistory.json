@@ -3,13 +3,12 @@
         "name": "dbo.PointHistory",
         "alias": "ph"
     },
-    "keys": [
-        "PointHistoryID"
-    ],
     "columns": [
         {
               "name": "PointHistoryID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CustID"

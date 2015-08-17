@@ -4,10 +4,11 @@ namespace ClubSpeed\Logic;
 require_once(__DIR__.'/../../Settings.php');
 require_once(__DIR__.'/../../Queues.php');
 
-use ClubSpeed\Enums\Enums as Enums;
-use ClubSpeed\Utility\Convert as Convert;
-use ClubSpeed\Utility\Tokens as Tokens;
-use ClubSpeed\Security\Hasher as Hasher;
+use ClubSpeed\Enums\Enums;
+use ClubSpeed\Utility\Convert;
+use ClubSpeed\Utility\Tokens;
+use ClubSpeed\Security\Hasher;
+use ClubSpeed\Database\Helpers\UnitOfWork;
 
 /**
  * The business logic class
@@ -50,6 +51,25 @@ class CustomersLogic extends BaseLogic {
         parent::__construct($logic, $db);
         $this->settings = new \Settings();
         $this->interface = $this->db->customers;
+
+        $self =& $this;
+        $befores = array(
+            'create' => array($self, 'beforeCreate'),
+            'update' => array($self, 'beforeUpdate')
+        );
+        $this->before('uow', function($uow) use (&$befores)  {
+            if (isset($befores[$uow->action]))
+                call_user_func($befores[$uow->action], $uow);
+        });
+
+        $afters = array(
+            'create' => array($self, 'afterCreate'),
+            'update' => array($self, 'afterUpdate')
+        );
+        $this->after('uow', function($uow) use (&$afters) {
+            if (isset($afters[$uow->action]))
+                call_user_func($afters[$uow->action], $uow);
+        });
     }
 
     /**
@@ -465,7 +485,7 @@ class CustomersLogic extends BaseLogic {
         $customer->CustID = $this->getNextCustId(); //$CustID;
         if (empty($customer->CrdID))
             $customer->CrdID = $this->generateCardId();
-        
+
         // insert the customer record
         $this->interface->create($customer);
         
@@ -475,6 +495,122 @@ class CustomersLogic extends BaseLogic {
         }
 
         return $customer->CustID; // need to return this way, since dbo.Customers does not use an autoincrement ID
+    }
+
+    function beforeCreate($uow) {
+        $customer =& $uow->data;
+        if (!isset($customer->FName) || empty($customer->FName))
+            throw new \RequiredArgumentMissingException("Customer create received a null or empty FName!");
+        if (!isset($customer->LName) || empty($customer->LName))
+            throw new \RequiredArgumentMissingException("Customer create received a null or empty LName!");
+        if (!isset($customer->Gender)) // Gender of 0 is allowed, and PHP considers this to be empty - only check for isset
+            throw new \RequiredArgumentMissingException("Customer create received a null Gender!");
+
+        // validate email
+        if (isset($customer->EmailAddress) && !empty($customer->EmailAddress)) {
+
+            // check the email formatting
+            if (!\ClubSpeed\Security\Authenticate::isValidEmailFormat($customer->EmailAddress))
+                throw new \InvalidEmailException("Customer create found an invalid EmailAddress! Received: " . $customer->EmailAddress);
+            
+            $allowDuplicateEmail = $this->logic->controlPanel->get('MainEngine', 'AllowDuplicateEmail');
+            $allowDuplicateEmail = $allowDuplicateEmail[0];
+            $allowDuplicateEmail = Convert::toBoolean($allowDuplicateEmail->SettingValue);
+            if (!$allowDuplicateEmail && $this->email_exists($customer->EmailAddress))
+                throw new \EmailAlreadyExistsException("Customer create found an email which already exists! Received: " . $customer->EmailAddress);
+        }
+
+        // validate password strength, then hash it
+        if (isset($customer->Hash) && !empty($customer->Hash)) {
+            if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($customer->Hash))
+                throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
+            $customer->Hash = Hasher::hash($customer->Hash);
+        }
+
+        // convert the gender to the expected gender "id" on the database
+        if (isset($params['Gender']) && !empty($params['Gender'])) {
+            $gender = strtolower($params['Gender']);
+            $genderChar = $gender[0];
+            switch ($genderChar) {
+                case "m": // male
+                    $customer->Gender = 1;
+                    break;
+                case "f": // female
+                    $customer->Gender = 2;
+                    break;
+                case "o": // other
+                    $customer->Gender = 0;
+                    break;
+            }
+        }
+
+        // if RacerName is missing, use FName + " " + LName
+        if (!isset($customer->RacerName) || empty($customer->RacerName))
+            $customer->RacerName = $customer->FName . " " . $customer->LName;
+
+        // grab the CustID using an internal SQL call (can't be done using @@IDENTITY or anything of the like, due to the IDs matching with a LocationID)
+        $customer->CustID = $this->getNextCustId(); //$CustID;
+        if (empty($customer->CrdID))
+            $customer->CrdID = $this->generateCardId();
+        return $customer;
+    }
+
+    function beforeUpdate($uow) {
+        $old =& $uow->existing;
+        $new =& $uow->data;
+
+        // // validate email
+        if (isset($new->EmailAddress) && !empty($new->EmailAddress) && $new->EmailAddress != $old->EmailAddress) {
+
+            // check the email formatting
+            if (!\ClubSpeed\Security\Authenticate::isValidEmailFormat($new->EmailAddress))
+                throw new \InvalidEmailException("Customer update found an invalid EmailAddress! Received: " . $new->EmailAddress);
+            
+            // check AllowDuplicateEmail settings
+            // $settings = $self->getSettings(); // collect kiosk settings
+            $allowDuplicateEmail = Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
+            if (!$allowDuplicateEmail) {
+                $customersWithEmail = $db->customers->match(array(
+                    'EmailAddress' => $new->EmailAddress
+                ));
+                if (!empty($customersWithEmail))
+                    throw new \EmailAlreadyExistsException("Customer update found an email which already exists! Received: " . $new->EmailAddress);
+            }
+        }
+
+        // use $params for gender, since creating the dummy customer record will have already converted gender to some sort of int
+        if (isset($params['Gender']) && !empty($params['Gender'])) {
+            $gender = strtolower($params['Gender']);
+            $genderChar = $gender[0];
+            switch ($genderChar) {
+                case "m": // male
+                    $new->Gender = 1;
+                    break;
+                case "f": // female
+                    $new->Gender = 2;
+                    break;
+                case "o": // other
+                    $new->Gender = 0;
+                    break;
+            }
+        }
+        if (isset($new->Hash) && !empty($new->Hash)) {
+            if (!\ClubSpeed\Security\Authenticate::isAllowablePassword($new->Hash))
+                throw new \InvalidArgumentException("Customer create found a password which is not strong enough!");
+            $new->Hash = Hasher::hash($new->Hash);
+        }
+    }
+
+    function afterCreate($uow) {
+        $customer =& $uow->data;
+        if ($this->logic->replication->isReplicationEnabled())
+            $this->logic->replication->insertReplicationLogs($customer->CustID, 'Customers', 'insert');
+    }
+
+    function afterUpdate($uow) {
+        $customerId = (int)$uow->table_id;
+        if ($this->logic->replication->isReplicationEnabled())
+            $this->logic->replication->insertReplicationLogs($customerId, 'Customers', 'update');
     }
 
     /**
@@ -651,5 +787,73 @@ class CustomersLogic extends BaseLogic {
                 $cardId = $tempCardId; // card id was not being used yet, we can use this one
         }
         return $cardId;
+    }
+
+    public function primary($where = array()) {
+        $uow = UnitOfWork::build()
+            ->action('all')
+            ->table('Customers')
+            ->where($where)
+            ;
+
+        $this->uow($uow);
+        $customers = $uow->data;
+
+        foreach($customers as &$customer) {
+            $customer = (array)$customer;
+            $pointBalances = $this->db->pointBalance_V->get($customer['CustID']);
+            $pointBalance = $pointBalances[0];
+            if (empty($pointBalance))
+                $customer['Balance'] = 0;
+            else
+                $customer['Balance'] = $pointBalance->Balance;
+        }
+        
+        usort($customers, function($c1, $c2) {
+
+            // push empty hashes to the back
+            if (!empty($c1['Hash']) && empty($c2['Hash']))
+                return -1;
+            if (empty($c1['Hash']) && !empty($c2['Hash']))
+                return 1;
+
+            // push empty emails to the back
+            if (!empty($c1['EmailAddress']) && empty($c2['EmailAddress']))
+                return -1;
+            if (empty($c1['EmailAddress']) && !empty($c2['EmailAddress']))
+                return 1;
+
+            // sort by points descending
+            if ($c1['Balance'] > $c2['Balance'])
+                return -1;
+            if ($c1['Balance'] < $c2['Balance'])
+                return 1;
+
+            // then by total races descending
+            if ($c1['TotalRaces'] > $c2['TotalRaces'])
+                return -1;
+            if ($c1['TotalRaces'] < $c2['TotalRaces'])
+                return 1;
+
+            // then by last visited descending
+            if ($c1['LastVisited'] > $c2['LastVisited'])
+                return -1;
+            if ($c1['LastVisited'] < $c2['LastVisited'])
+                return 1;
+
+            // then by rpm descending
+            if ($c1['RPM'] > $c2['RPM'])
+                return -1;
+            if ($c1['RPM'] < $c2['RPM'])
+                return 1;
+
+            // or consider equal
+            return 0;
+        });
+
+        // and if there are no customers that match? return 404?
+        if (empty($customers))
+            throw new \RecordNotFoundException('Unable to find record on dbo.Customers matching the given criteria: (' . json_encode($where) . ')');
+        return $customers[0];
     }
 }

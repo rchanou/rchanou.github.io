@@ -3,14 +3,11 @@
         "name": "dbo.FacebookRaces_V",
         "alias": "fr_v"
     },
-    "keys": [
-        "HeatNo"
-        , "CustID"
-    ],
     "columns": [
         {
               "name": "CustID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "Access_Token"

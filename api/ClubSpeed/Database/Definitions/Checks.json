@@ -3,13 +3,12 @@
         "name": "dbo.Checks",
         "alias": "chcks"
     },
-    "keys": [
-        "CheckID"
-    ],
     "columns": [
         {
               "name": "CheckID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "CustID"

@@ -34,6 +34,7 @@ $r->setSupportedFormats('JsonFormat', 'XmlFormat', 'JsonpFormat');
 $r->addAPIClass('Karting', ''); // index.php return
 
 $r->addAPIClass('ActiveRaceLapCount');
+$r->addAPIClass('AMB');
 $r->addAPIClass('AuthenticationTokens');
 $r->addAPIClass('Booking');
 $r->addAPIClass('BookingAvailability');
@@ -47,6 +48,7 @@ $r->addAPIClass('Customers');
 $r->addAPIClass('CustomerStatus');
 $r->addAPIClass('Definition');
 $r->addAPIClass('DiscountType');
+$r->addAPIClass('EventContactStatusLookup');
 $r->addAPIClass('Events');
 $r->addAPIClass('Facebook');
 $r->addAPIClass('FacebookRaces');
@@ -55,8 +57,11 @@ $r->addAPIClass('GiftCardHistory');
 $r->addAPIClass('HeatDetails');
 $r->addAPIClass('HeatMain');
 $r->addAPIClass('HeatTypes');
+$r->addAPIClass('Locations');
 $r->addAPIClass('Logs');
+$r->addAPIClass('Memberships');
 $r->addAPIClass('MembershipTypes');
+$r->addAPIClass('Omnipay');
 $r->addAPIClass('Passwords');
 $r->addAPIClass('Payments');
 $r->addAPIClass('PointHistory');
@@ -85,6 +90,7 @@ $r->addAPIClass('TriggerMemberships');
 $r->addAPIClass('Users');
 $r->addAPIClass('UserTasks');
 $r->addAPIClass('Version');
+$r->addAPIClass('WaiverTemplates');
 
 // $r->addAuthenticationClass('SimpleAuth');
 $r->handle();

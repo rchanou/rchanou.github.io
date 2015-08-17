@@ -1,0 +1,26 @@
+{
+    "table": {
+        "name": "dbo.AMB",
+        "alias": "amb"
+    },
+    "columns": [
+        {
+              "name": "AMBID"
+            , "type": "int"
+            , "primaryKey": true
+            , "identity": true
+        }
+        , {
+              "name": "AMBNumber"
+            , "type": "nchar"
+        }
+        , {
+              "name": "AMBDescription"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "AutoNo"
+            , "type": "int"
+        }
+    ]
+}

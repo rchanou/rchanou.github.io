@@ -3,13 +3,12 @@
         "name": "dbo.ScreenTemplateDetail",
         "alias": "std"
     },
-    "keys": [
-        "ID"
-    ],
     "columns": [
         {
               "name": "ID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "TemplateID"

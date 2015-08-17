@@ -3,13 +3,11 @@
         "name": "dbo.ResourceSets",
         "alias": "rs"
     },
-    "keys": [
-        "ResourceID"
-    ],
     "columns": [
         {
               "name": "ResourceID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "ResourceSetName"

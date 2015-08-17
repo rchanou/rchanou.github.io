@@ -3,15 +3,11 @@
         "name": "dbo.UserTasks_V",
         "alias": "ut_v"
     },
-    "keys": [
-        "UserID",
-        "RoleID",
-        "TaskID"
-    ],
     "columns": [
         {
               "name": "UserID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "UserName"
@@ -24,6 +20,7 @@
         , {
               "name": "RoleID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "RoleName"
@@ -32,6 +29,7 @@
         , {
               "name": "TaskID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "TaskDescription"

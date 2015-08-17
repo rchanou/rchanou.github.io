@@ -1,15 +1,14 @@
 {
     "table": {
         "name": "dbo.Sources",
-        "alias": "src"
+        "alias": "srcs"
     },
-    "keys": [
-        "SourceID"
-    ],
     "columns": [
         {
               "name": "SourceID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "SourceName"

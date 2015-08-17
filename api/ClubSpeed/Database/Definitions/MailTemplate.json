@@ -3,13 +3,11 @@
         "name": "dbo.MailTemplate",
         "alias": "mltmp"
     },
-    "keys": [
-        "EmailTemplateID"
-    ],
     "columns": [
         {
               "name": "EmailTemplateID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "Text"

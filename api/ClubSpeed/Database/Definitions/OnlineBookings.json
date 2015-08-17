@@ -3,13 +3,12 @@
         "name": "dbo.OnlineBookings",
         "alias": "ob"
     },
-    "keys": [
-        "OnlineBookingsID"
-    ],
     "columns": [
         {
               "name": "OnlineBookingsID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "HeatMainID"

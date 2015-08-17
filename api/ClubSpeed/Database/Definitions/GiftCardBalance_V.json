@@ -3,13 +3,11 @@
         "name": "dbo.GiftCardBalance_V",
         "alias": "gcb_v"
     },
-    "keys": [
-        "CrdID"
-    ],
     "columns": [
         {
               "name": "CrdID"
             , "type": "bigint"
+            , "primaryKey": true
         }
         , {
               "name": "IsGiftCard"

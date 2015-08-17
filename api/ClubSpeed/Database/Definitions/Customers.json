@@ -3,13 +3,11 @@
         "name": "dbo.Customers",
         "alias": "cst"
     },
-    "keys": [
-        "CustID"
-    ],
     "columns": [
         {
               "name": "CustID"
             , "type": "int"
+            , "primaryKey": true
         }
         , {
               "name": "Company"

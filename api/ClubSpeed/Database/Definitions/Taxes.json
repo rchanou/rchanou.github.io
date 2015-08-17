@@ -3,13 +3,12 @@
         "name": "dbo.Taxes",
         "alias": "txs"
     },
-    "keys": [
-        "TaxID"
-    ],
     "columns": [
         {
               "name": "TaxID"
             , "type": "int"
+            , "primaryKey": true
+            , "identity": true
         }
         , {
               "name": "Description"

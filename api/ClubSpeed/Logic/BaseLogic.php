@@ -2,6 +2,7 @@
 
 namespace ClubSpeed\Logic;
 use ClubSpeed\Database\Records\BaseRecord;
+use ClubSpeed\Database\Helpers\UnitOfWork;
 
 /**
  * The base class for ClubSpeed API logic classes.
@@ -32,14 +33,17 @@ abstract class BaseLogic {
      */
     protected $insertable;
 
-    private $callbacks;
+    private $befores;
+    private $afters;
+
 
     public function __construct(&$logic, &$db) {
         $this->logic = $logic;
         $this->db = $db;
         $this->updatable = array(); // okay, since parent constructor gets called first
         $this->insertable = array(); // okay, same as above
-        $this->callbacks = array();
+        $this->befores = array();
+        $this->afters = array();
     }
 
     public function dummy($params = array()) {
@@ -60,8 +64,9 @@ abstract class BaseLogic {
         $id = $this->interface->create($dummy);
         $keys = $this->interface->keys;
         if (count($keys) === 1 && $id > 0) { // haaaaacky. php pdo doesn't give us anything back for lastInsertedId with composite keys.
+            $key = $keys[0];
             return array(
-                $keys[0] => $id
+                $key['name'] => $id
             );
         }
         else {
@@ -132,15 +137,31 @@ abstract class BaseLogic {
         return call_user_func_array(array($this->interface, "exists"), $args);
     }
 
-    public function on($namespace, $callback) {
-        $this->callbacks[$namespace][] = $callback;
+    public function before($namespace, $callback) {
+        $this->befores[$namespace][] = $callback;
     }
 
-    protected function emit() {
+    public function after($namespace, $callback) {
+        $this->afters[$namespace][] = $callback;
+    }
+
+    protected function emitBefore() {
         $args = func_get_args(); // namespace, data1, data2, ... , dataN
-        $namespace = array_shift($args);
-        if (isset($this->callbacks[$namespace]) && !empty($this->callbacks[$namespace])) {
-            foreach($this->callbacks[$namespace] as $callback)
+        $callbacks = $this->befores;
+        if (isset($callbacks) && !empty($callbacks)) {
+            $namespace = array_shift($args);
+            foreach($callbacks[$namespace] as $callback)
+                call_user_func_array($callback, $args);
+        }
+    }
+
+    protected function emitAfter() {
+        // de-duplicate code later.. might not be worth it, for the php 5.3 shenanigans we'd have to jump through
+        $args = func_get_args(); // namespace, data1, data2, ... , dataN
+        $callbacks = $this->afters;
+        if (isset($callbacks) && !empty($callbacks)) {
+            $namespace = array_shift($args);
+            foreach($callbacks[$namespace] as $callback)
                 call_user_func_array($callback, $args);
         }
     }
@@ -154,12 +175,21 @@ abstract class BaseLogic {
                 break;
             case 'update':
                 $uow->data = $this->interface->dummy($this->updatable($uow->data));
+                $existing = UnitOfWork::build()
+                    ->table($this->interface->table)
+                    ->table_id($uow->table_id)
+                    ->action('get')
+                    ;
+                $this->uow($existing); // scurry.
+                $uow->existing = $existing->data;
                 break;
             // any other defaults for incoming data?
             // what about batchCreate and batchUpdate? probably need to loop with dummy.
         }
-        $this->emit('uow', $uow); // allow callbacks to mutate the data, as business logic requires.
-        return $this->interface->uow($uow);
+        $this->emitBefore('uow', $uow);
+        $uow = $this->interface->uow($uow);
+        $this->emitAfter('uow', $uow);
+        return $uow;
     }
 
     protected function insertable($mapped) {

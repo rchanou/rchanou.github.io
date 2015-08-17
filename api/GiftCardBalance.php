@@ -2,12 +2,11 @@
 
 use ClubSpeed\Enums\Enums as Enums;
 
-class GiftCardBalance extends BaseApi {
+class GiftCardBalance extends BaseUowApi {
     
     function __construct() {
         parent::__construct();
-        $this->mapper               = new \ClubSpeed\Mappers\GiftCardBalanceMapper();
-        $this->interface            = $this->logic->giftCardBalance;
+        $this->resource = 'giftCardBalance';
         $this->access['delete']     = Enums::API_NO_ACCESS;
         $this->access['post']       = Enums::API_NO_ACCESS;
         $this->access['put']        = Enums::API_NO_ACCESS;

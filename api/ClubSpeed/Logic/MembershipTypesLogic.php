@@ -22,7 +22,5 @@ class MembershipTypesLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->membershipTypes;
-
-        // $this->on('uow', function($uow) { });
     }
 }

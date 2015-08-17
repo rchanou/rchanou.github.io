@@ -1,6 +1,11 @@
 <?php
 
 namespace ClubSpeed\Mappers;
+use ClubSpeed\Containers\ParamsContainer;
+use ClubSpeed\Database\Helpers\Comparator;
+use ClubSpeed\Database\Helpers\GroupedComparator;
+use ClubSpeed\Database\Helpers\UnitOfWork;
+use ClubSpeed\Database\Records\BaseRecord;
 use ClubSpeed\Utility\Arrays;
 
 class BaseMapper {
@@ -13,7 +18,7 @@ class BaseMapper {
     }
 
     public function in($data = array()) {
-        $clean = $this->map('server', new \ClubSpeed\Containers\ParamsContainer($data));
+        $clean = $this->map('server', new ParamsContainer($data));
         if (!is_null($clean->select))
             $this->limit('client', $clean->select);
         return $clean;
@@ -59,7 +64,7 @@ class BaseMapper {
 
     public function uowOut(&$uow) {
         // only re-map uow->data on the way out
-        if ((is_array($uow->data) || $uow->data instanceof \ClubSpeed\Database\Records\BaseRecord) && !empty($uow->data))
+        if ((is_array($uow->data) || $uow->data instanceof BaseRecord) && !empty($uow->data))
             $uow->data = $this->uowMap('client', $uow->data);
         return $uow;
     }
@@ -78,7 +83,7 @@ class BaseMapper {
         if (is_null($data))
             throw new \RequiredArgumentMissingException("BaseMapper uowMap() received null data!");
         $map = $this->_map[$type];
-        if ($data instanceof \ClubSpeed\Database\Helpers\UnitOfWork) {
+        if ($data instanceof UnitOfWork) {
             if (!is_null($data->data)) // used by create, update
                 $data->data = $this->uowMap($type, $data->data);
             if (!is_null($data->select)) // conditionally used by get, all
@@ -91,20 +96,32 @@ class BaseMapper {
         }
         else if (is_array($data) || is_object($data)) {
             $mapped = array();
-            if ($data instanceof \ClubSpeed\Database\Records\BaseRecord || Arrays::isAssociative($data)) {
+            if ($data instanceof BaseRecord || Arrays::isAssociative($data)) {
                 foreach($data as $key => $val) {
                     // 1. $uow->where
                     // 2. $uow->order
                     // 3. $uow->data (incoming, single)
                     // 4. $uow->data[index] (outgoing, single)
-                    $mappedKey = $this->uowMap($type, $key); // ditch the recursive call, if performance is an issue
-                    if ($mappedKey)
-                        $mapped[$mappedKey] = $val;
+
+                    // treat $or and $and as special cases
+                    if ($key === '$or' || $key === '$and') {
+                        $mapped[$key] = array();
+                        foreach($val as $groupedComparator) {
+                            $tempObj = $this->uowMap($type, $groupedComparator);
+                            if (!empty($tempObj))
+                                $mapped[$key][] = $tempObj;
+                        }
+                    }
+                    else {
+                       $mappedKey = $this->uowMap($type, $key); // ditch the recursive call, if performance is an issue
+                        if ($mappedKey)
+                            $mapped[$mappedKey] = $val; 
+                    }
                 }
             }
             else {
                 foreach($data as $key => $val) {
-                    if ($val instanceof \ClubSpeed\Database\Records\BaseRecord) {
+                    if ($val instanceof BaseRecord) {
                         // 5. $uow->data (outgoing, multiple)
                         $mapped[$key] = $this->uowMap($type, $val);
                     }
@@ -128,7 +145,7 @@ class BaseMapper {
         if (is_null($data))
             throw new \RequiredArgumentMissingException("MapBase map() received null data!");
         $currentMap = $this->_map[$type];
-        if ($data instanceof \ClubSpeed\Containers\ParamsContainer) {
+        if ($data instanceof ParamsContainer) {
             if (!is_null($data->filter))
                 $data->filter = $this->map($type, $data->filter);
             if (!is_null($data->params))
@@ -136,13 +153,13 @@ class BaseMapper {
             // don't map $data->select -- we want this to stay in the client json parameter format
             return $data;
         }
-        else if ($data instanceof \ClubSpeed\Database\Helpers\GroupedComparator) {
+        else if ($data instanceof GroupedComparator) {
             foreach($data->comparators as $key => $val) {
                 $data->comparators[$key]['comparator'] = $this->map($type, $val['comparator']);
             }
             return $data;
         }
-        else if ($data instanceof \ClubSpeed\Database\Helpers\Comparator) {
+        else if ($data instanceof Comparator) {
             if (isset($data->left) && is_string($data->left)) {
                 if (isset($currentMap[$data->left]))
                     $data->left = $currentMap[$data->left];
