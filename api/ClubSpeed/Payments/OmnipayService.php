@@ -28,6 +28,7 @@ class OmnipayService {
         $this->allowed = array(
             'AuthorizeNet_AIM' => 'direct'
             , 'Dummy'            => 'direct'
+            , 'iDEAL'            => 'redirect'
             , 'Payflow_Pro'      => 'direct'
             , 'PayPal_Express'   => 'redirect'
             , 'PayPal_Pro'       => 'direct'
