@@ -46,6 +46,7 @@ $indexHTML = <<<EOT
 	{
 		try { document.getElementById('innerFrame').contentDocument.getElementById('email').setAttribute('autocomplete', 'off'); }
 		catch(ex){  }
+		window.scrollTo(0,0);
 	}
     function resetInnerFrame()
     {
