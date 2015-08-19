@@ -49,8 +49,8 @@ Log::useFiles(storage_path().'/logs/laravel.log');
 
 App::error(function(Exception $exception, $code)
 {
-	Log::error($exception);
-    $result = CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code, 'Club Speed Registration'); //DB logging;
+    Log::error($exception);
+    $result = CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code . ' Message: ' . ($exception ? $exception->getMessage() : ''), 'Club Speed Registration'); //DB logging;
     return Redirect::to('/disconnected'); //Redirect to an error page
 });
 
