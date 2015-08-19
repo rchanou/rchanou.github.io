@@ -155,18 +155,20 @@ class CS_API
         return true;
     }
 
-    public static function getExistingCustomerMatching($firstname,$lastname,$birthDate)
+    public static function getExistingCustomerMatching($firstname,$lastname,$birthdate)
     {
         self::initialize();
 
         $urlParams = array(
-            'firstname' => $firstname,
-            'lastname' => $lastname,
-            'birthDate' => $birthDate,
+            'where' => array(
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'birthdate' => $birthdate
+            ),
             'key' => self::$privateKey
         );
 
-        $url = self::$baseAPIURL. '/primaryCustomers.json?' . http_build_query($urlParams);
+        $url = self::$baseAPIURL. '/customers/primary.json?' . http_build_query($urlParams);
 
         //Set up headers
         $options = array(
@@ -181,6 +183,11 @@ class CS_API
 
         curl_setopt_array($ch, $options);
         $result = curl_exec($ch);
+
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($status !== 200)
+            return false;
+
         $result = json_decode($result,true);
 
         $errorInfo = array('url' => $url, 'params' => $urlParams, 'response' => $result);
@@ -189,22 +196,7 @@ class CS_API
         Session::put('errorParams',$urlParams);
         Session::put('errorResponse',$result);
 
-        if ($result !== null)
-        {
-            if (isset($result['customers']) && count($result['customers']) > 0)
-            {
-                return $result['customers'][0];
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return null;
-        }
-
+        return $result;
     }
 
     public static function extendFacebookToken($shortLivedToken)
