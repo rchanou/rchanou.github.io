@@ -82,6 +82,7 @@ Create a Registration Application
                        <strong>No Camera:</strong> Do not use a camera.<br/>
                        <strong>Local Camera:</strong> Built-in or USB camera attached to the Computer.<br/>
                        <strong>Reg#:</strong> Uses an IP-based camera. Ex. Setup in the <a href="/sp_admin" target="_blank">SP_Admin</a> "Control Panel > Reg1" under the "url" setting. "camip" is set at the end of the URL as "?camip=ip.add.re.ss/path/to/image.jpg".
+                           <br/><strong><em>If using an IP-based camera, we may need to add the name of the image ("image.url") to a whitelist in the API. If so, contact the devs.</em></strong>
                        </span>
                      </div>
                    </div>
