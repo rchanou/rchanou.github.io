@@ -163,7 +163,7 @@ class CS_API
             'where' => array(
                 'firstname' => $firstname,
                 'lastname' => $lastname,
-                'birthdate' => $birthdate
+                'birthdate' => $birthdate . 'T00:00:00'
             ),
             'key' => self::$privateKey
         );
