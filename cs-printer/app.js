@@ -18,15 +18,24 @@
 // Dim btnLogin As System.Windows.Forms.HtmlElement = WebBrowser1.Document.GetElementById("btnLogin")
 
 var path = require('path')
-var childProcess = require('child_process')
-var phantomjs = require('phantomjs')
-var fs = require('fs');
+  , childProcess = require('child_process')
+  , phantomjs = require('phantomjs')
+  , fs = require('fs');
+
+// Load variables from file (if it exists)
+var config = {};
+if (fs.existsSync(path.join(__dirname, 'config.js'))) {
+	config = require(path.join(__dirname, 'config.js'));
+} else {
+	config.paperSize = '8.5in*11in';
+	config.retentionTimeInMinutes = 10;
+}
 
 var url       = process.argv[2];
 var printer   = process.argv[3] && process.argv[3] !== 'default' ? '-print-to ' + process.argv[3] : '-print-to-default'
 var timeout   = process.argv[4] || 10000;
-var paperSize = process.argv[5] || '8.5in*11in'; //'8.5in*5.5in';
-var oldFileLifetimeInMs = 10*60*1000;
+var paperSize = process.argv[5] || config.paperSize || '8.5in*11in';
+var oldFileLifetimeInMs = (config.retentionTimeInMinutes || 10)*60*1000;
 var printJobDirectory = path.join(__dirname, 'print-jobs');
 
 // Overrides for testing specific sheets (also see paperSize variable)

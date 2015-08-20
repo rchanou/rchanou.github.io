@@ -54,3 +54,5 @@ facebook/db.json
 /event-builder/node_modules/
 /facebook/node_modules/
 /speed-text/node_modules/
+
+cs-printer/config.js
