@@ -41,7 +41,7 @@ if(!function_exists('mime_content_type')) {
  *
  * Usage: http://vm-122.clubspeedtiming.com/api/shot/shot.php?base64=192.168.111.133/image.jpg
  */
-$whitelist = 'image.jpg'; // Could be turned into an array of regex's later?
+$whitelist = array('image.jpg','jpeg.cgi'); // Could be turned into an array of regex's later?
 $timeoutInSeconds = 5; // Timeout if image cannot be reached -- in seconds
 
 if(isset($_REQUEST['base64'])) {
@@ -54,8 +54,18 @@ if(isset($_REQUEST['base64'])) {
 	// Parse URL
 	$imagePath = parse_url($url, PHP_URL_PATH);
 
-	// Enforce Whitelist -- can be expanded as more types arise
-	if ($whitelist !== substr($url, -9)) exit('Image URL not supported.');
+	// Enforce Whitelist
+    $fileName = basename($url);
+    $fileNameIsInWhiteList = false;
+    foreach($whitelist as $currentNameInWhitelist)
+    {
+        if ($fileName === $currentNameInWhitelist)
+        {
+            $fileNameIsInWhiteList = true;
+            break;
+        }
+    }
+	if (!$fileNameIsInWhiteList) exit('Image URL not supported.');
 	
 	// Get image data or return an error.
 	$imageData = file_get_contents($url);
