@@ -346,7 +346,7 @@ class CheckoutController extends BaseController
             }
             else
             {
-                CS_API::log("ERROR :: Online Booking failed to insert a payment record! (Check ID: $checkId, Total: $formattedTotalAmount, Transaction: $transactionId) Customer was charged already, so proceeding as normal, but skipping check finalization.");
+                CS_API::log("ERROR :: Online Booking failed to insert a payment record! (Check ID: $checkId, Total: $formattedTotalAmount, Transaction: $transactionId, Details: " . print_r($details,true) . ") Customer was charged already, so proceeding as normal, but skipping check finalization.");
             }
 
             //Direct to success page
