@@ -101,10 +101,10 @@ class LoginController extends BaseController
         //Attempt to login
         $loginResults = CS_API::loginToClubSpeed($input['EmailAddress'],$input['Password']);
 
-        if ($loginResults != null) //If the login call did not encounter an error
+        if ($loginResults !== null) //If the login call did not encounter an error
         {
             //If a customerId is received, they're logged in.
-            if (property_exists($loginResults,'customerId') && is_numeric($loginResults->customerId))
+            if ($loginResults !== false && property_exists($loginResults,'customerId') && is_numeric($loginResults->customerId))
             {
                 //If success, if a booking is being attempted, direct to booking call
                 $customerId = $loginResults->customerId;

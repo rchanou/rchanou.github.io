@@ -207,8 +207,8 @@ class CS_API
         $url = self::$apiURL . '/racers/create.json?key=' . self::$privateKey;
         $result = self::call($url,$customerData,'POST');
 
-        $errorMessage = $result['error'];
         $result = $result['response'];
+        $errorMessage = isset($result->body->error->message) ? $result->body->error->message : null;
 
         if ($result !== null && property_exists($result, 'body') && property_exists($result->body, 'customerId'))
         {
