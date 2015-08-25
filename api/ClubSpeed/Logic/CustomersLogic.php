@@ -853,7 +853,7 @@ class CustomersLogic extends BaseLogic {
 
         // and if there are no customers that match? return 404?
         if (empty($customers))
-            throw new \RecordNotFoundException('Unable to find record on dbo.Customers matching the given criteria: (' . json_encode($where) . ')');
+            throw new \CSException('Unable to find record on dbo.Customers matching the given criteria: (' . json_encode($where) . ')', 404);
         return $customers[0];
     }
 }

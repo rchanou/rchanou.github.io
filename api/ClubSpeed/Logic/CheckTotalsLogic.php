@@ -91,7 +91,7 @@ class CheckTotalsLogic extends BaseLogic {
             foreach($giftCards as $giftCardId) {
                 $giftCardBalance = $this->logic->giftCardBalance->find("CrdID = " . $giftCardId);
                 if (empty($giftCardBalance))
-                    throw new \RecordNotFoundException("Unable to find gift card by CustID: " . $giftCardCustomer->CustID);
+                    throw new \RecordNotFoundException('GiftCardBalance_V', $giftCardCustomer->CustID);
                 $giftCardBalance = $giftCardBalance[0];
                 $paid += $giftCardBalance->Money; // or do we use Points?
             }
@@ -112,7 +112,7 @@ class CheckTotalsLogic extends BaseLogic {
         if (!isset($this->_discounts[$discountId])) {
             $discount = $this->db->discountType->get($discountId);
             if (is_null($discount) || empty($discount))
-                throw new \RecordNotFoundException("CheckTotalsLogic received a DiscountID which could not be found! Received CheckDetailDiscountID: " . $check->CheckDetailDiscountID);
+                throw new \RecordNotFoundException('DiscountType', $check->CheckDetailDiscountID);
             $discount = $discount[0];
             $this->_discounts[$discountId] = $discount;
         }
@@ -154,7 +154,7 @@ class CheckTotalsLogic extends BaseLogic {
                     throw new \CSException("CheckTotal Virtual requires a productId for every check details! Received ProductID: " . $check->ProductID);
                 $product = $this->db->products->get($check->ProductID);
                 if (is_null($product) || empty($product))
-                    throw new \RecordNotFoundException("CheckTotal Virtual received a ProductID which could not be found! Received ProductID: " . $check->ProductID);
+                    throw new \RecordNotFoundException('Products', $check->ProductID);
                 $product = $product[0];
                 $products[$check->ProductID] = $product;
             }
@@ -162,7 +162,7 @@ class CheckTotalsLogic extends BaseLogic {
             if (!isset($taxes[$product->TaxID])) {
                 $tax = $this->db->taxes->get($product->TaxID);
                 if (is_null($tax) || empty($tax)) // this should really never happen
-                    throw new \RecordNotFoundException("CheckTotal Virtual received a ProductID which had a TaxID that could not be found! Received TaxID: " . $product->TaxID);
+                    throw new \RecordNotFoundException('Taxes', $product->TaxID);
                 $tax = $tax[0];
                 $taxes[$product->TaxID] = $tax;
             }

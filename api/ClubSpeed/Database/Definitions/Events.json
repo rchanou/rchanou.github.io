@@ -1,0 +1,93 @@
+{
+    "table": {
+        "name": "dbo.Events",
+        "alias": "evs"
+    },
+    "columns": [
+        {
+              "name": "EventID"
+            , "type": "int"
+            , "primaryKey": true
+            , "identity": true
+        }
+        , {
+              "name": "EventTypeID"
+            , "type": "int"
+            , "nullable": true
+        }
+        , {
+              "name": "MemberOnly"
+            , "type": "bit"
+        }
+        , {
+              "name": "EventTheme"
+            , "type": "int"
+        }
+        , {
+              "name": "TotalRacers"
+            , "type": "int"
+        }
+        , {
+              "name": "EventDesc"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "EventTypeName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "EventDuration"
+            , "type": "int"
+        }
+        , {
+              "name": "EventScheduledTime"
+            , "type": "datetime"
+        }
+        , {
+              "name": "DisplayAtRegistration"
+            , "type": "bit"
+        }
+        , {
+              "name": "CheckID"
+            , "type": "int"
+        }
+        , {
+              "name": "IsEventClosure"
+            , "type": "bit"
+        }
+        , {
+              "name": "RoundNum"
+            , "type": "int"
+        }
+        , {
+              "name": "EventNotes"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "ReservationID"
+            , "type": "int"
+        }
+        , {
+              "name": "OnlineCode"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "TrackNo"
+            , "type": "int"
+        }
+        , {
+              "name": "CreatedHeatSpots"
+            , "type": "int"
+            , "nullable": true
+        }
+        , {
+              "name": "CreatedHeatTime"
+            , "type": "datetime"
+            , "nullable": true
+        }
+        , {
+              "name": "TotalCadetRacers"
+            , "type": "int"
+        }
+    ]
+}

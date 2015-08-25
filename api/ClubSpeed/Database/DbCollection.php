@@ -91,7 +91,7 @@ class DbCollection {
                 // just use $results to determine whether or not to throw RecordNotFoundException
                 if (count($results) < 1) {
                     $ids = (is_array($uow->table_id) ? implode(", ", $uow->table_id) : $uow->table_id);
-                    throw new \RecordNotFoundException($this->table . " (" . $ids . ")");
+                    throw new \RecordNotFoundException($this->table, $ids);
                 }
                 $get = (count($results) > 0 ? $this->reflection->newInstance(Arrays::first($results)) : null);
                 $uow->data = $get;
@@ -122,7 +122,7 @@ class DbCollection {
                 $exists = $this->uow($cloned);
                 if (!$exists->data) {
                     $ids = (is_array($uow->table_id) ? implode(", ", $uow->table_id) : $uow->table_id);
-                    throw new \RecordNotFoundException($this->table . " (" . $ids . ")");
+                    throw new \RecordNotFoundException($this->table, $ids);
                 }
                 $affected = $this->conn->exec($query['statement'], $query['values']);
                 // store $affected?
@@ -133,7 +133,7 @@ class DbCollection {
                 $exists = $this->uow($cloned);
                 if (!$exists->data) {
                     $ids = (is_array($uow->table_id) ? implode(", ", $uow->table_id) : $uow->table_id);
-                    throw new \RecordNotFoundException($this->table . " (" . $ids . ")");
+                    throw new \RecordNotFoundException($this->table, $ids);
                 }
                 $affected = $this->conn->exec($query['statement'], $query['values']);
                 // store $affected?

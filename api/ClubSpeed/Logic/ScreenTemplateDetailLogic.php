@@ -27,7 +27,7 @@ class ScreenTemplateDetailLogic extends BaseLogic {
         return parent::_create($params, function($screenTemplateDetail) use (&$db) {
             $screenTemplate = $db->screenTemplate->get($screenTemplateDetail->TemplateID);
             if (is_null($screenTemplate) || empty($screenTemplate))
-                throw new \RecordNotFoundException("Create screen template detail attempted to use a non-existent screenTemplateId! Received: " . $screenTemplateDetail->TemplateID);
+                throw new \CSException("Create screen template detail attempted to use a non-existent screenTemplateId! Received: " . $screenTemplateDetail->TemplateID, 404);
             return $screenTemplateDetail;
         });
     }

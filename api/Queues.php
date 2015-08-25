@@ -1,5 +1,7 @@
 <?php
 
+use ClubSpeed\Database\Helpers\UnitOfWork;
+
 class Queues
 {
     public $restler;
@@ -24,11 +26,15 @@ class Queues
                 $checkId    = (int)@$request_data['checkId'];
                 if (isset($eventId) && $eventId > 0) {
                     // we have an event queue
-                    $this->logic->events->add_to_queue(
-                          $eventId
-                        , $customerId
-                        , $checkId
-                    );
+                    $uow = UnitOfWork::build()
+                        ->table('EventHeatDetails')
+                        ->action('create')
+                        ->data(array(
+                            'EventID' => $eventId,
+                            'CustID' => $customerId,
+                            'CheckID' => $checkId
+                        ));
+                    $this->logic->eventHeatDetails->uow($uow);
                 }
                 else {
                     // assume we have a base customer queue

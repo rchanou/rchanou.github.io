@@ -1,0 +1,38 @@
+{
+    "table": {
+        "name": "dbo.EventHeatDetails",
+        "alias": "ehd"
+    },
+    "columns": [
+        {
+              "name": "EventID"
+            , "type": "int"
+            , "primaryKey": true
+        }
+        , {
+              "name": "CustID"
+            , "type": "int"
+            , "primaryKey": true
+        }
+        , {
+              "name": "RPM"
+            , "type": "int"
+        }
+        , {
+              "name": "DateAdded"
+            , "type": "datetime"
+        }
+        , {
+              "name": "RoundLoseNum"
+            , "type": "int"
+        }
+        , {
+              "name": "CheckID"
+            , "type": "int"
+        }
+        , {
+              "name": "TotalRacesInEvent"
+            , "type": "int"
+        }
+    ]
+}
