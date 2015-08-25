@@ -877,9 +877,8 @@ EOS;
      * @return array
      */
     public function fastest() {
-        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess())
             throw new RestException(401, "Invalid authorization!");
-        }
 
         /*
         /results?range=day    " fastest of day
@@ -1048,7 +1047,8 @@ EOS;
                 'track_id' => $row['TrackNo'],
                 'track_name' => $row['TrackName'],
                 'timestamp' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['TimeStamp'])),
-                                'photo_url' => $this->getCustomerPhoto($row['CustID'])
+                'timestamp_iso' => Convert::toDate($row['TimeStamp']),
+                'photo_url' => $this->getCustomerPhoto($row['CustID'])
             );
 
         }
