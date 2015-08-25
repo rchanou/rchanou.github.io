@@ -176,6 +176,9 @@ function sendMessage(to, message, fromArray) {
 		case 'twilio':
 			sendTwilioMessage(to, message, fromArray, config.textMessaging.providerOptions);
 			break;
+		case 'cm.nl':
+			sendCMNLMessage(to, message, fromArray, config.textMessaging.providerOptions);
+			break;
 		case 'bulksms':
 			sendBulkSMSMessage(to, message, fromArray, config.textMessaging.providerOptions);
 			break;
@@ -250,6 +253,63 @@ function sendBulkSMSMessage(to, message, fromArray, opts) {
 				if(err) return log(JSON.stringify(err), 'ERROR');
 				
 				log(body);
+		});
+
+}
+
+function sendCMNLMessage(to, message, fromArray, opts) {
+		// Remove anything not number
+		to = to.replace(/[^0-9]/g, '');
+		
+		// Remove leading 0s
+		to = to.replace(/\b0+/g, '');
+		
+		// If country code override is set, and string doesn't start with a +, append one.
+		// Also realize that country codes can be 1, 2 or 3 (or more?) digits.
+		//
+		// Three cases to cover (using +61 Australia as an example):
+		//   1. 650978523 (append 0031)
+		//   2. 31650978523 (append 00)
+		//   3. 0031650978523 (pass through)
+		//   ?. Consider non-NL numbers?
+		if(config.prependCountryCode) {
+			var countryCode = config.prependCountryCode; // Returns just "31"
+			if(to.indexOf(countryCode) === 0) { // Number starts with "31", needs a "00"
+				to = '00'.concat(to);
+			} else if(to.indexOf('00' + countryCode) === 0) { // Number starts with "0031", do nothing
+				to = to;
+			} else { // Number does not start with 31, needs "0031"
+				to = '00' + config.prependCountryCode.concat(to);
+			}
+		}
+	
+		log('Attempting to send "' + message + '" to "' + to + '"', 'INFO');
+		
+		if(config.disableSending) return log('Sending disabled in config file!', 'INFO');
+		if(opts.username.length == 0) return log('No CM.nl username given', 'ERROR');
+		if(opts.password.length == 0) return log('No CM.nl password given', 'ERROR');
+		if(opts.customerId.length == 0) return log('No CM.nl customerId given', 'ERROR');
+		var fromNumber = (typeof fromArray === 'string') ? fromArray : fromArray[0];
+		if(fromNumber.length == 0) return log('No CM.nl from given', 'ERROR');
+		
+		var url = opts.url || 'https://sgw01.cm.nl/gateway.ashx';
+		var msgXml = '<?xml version="1.0"?>\r\n' +
+		  '<MESSAGES>\r\n' +
+		  ' <CUSTOMER ID="' + opts.customerId + '"/>\r\n' +
+		  ' <USER LOGIN="' + opts.username + '" PASSWORD="' + opts.password + '" />\r\n' +
+		  ' <MSG>\r\n' +
+		  ' <FROM>' + fromNumber + '</FROM>\r\n' +
+		  ' <BODY TYPE="TEXT">' + message + '</BODY>\r\n' +
+		  ' <TO>' + to + '</TO>\r\n' +
+		  ' </MSG>\r\n' +
+		  '</MESSAGES>';
+
+		request.post({url: url, body: msgXml }, function(err, res, body) {
+				if(err) return log(JSON.stringify(err), 'ERROR');
+				if(res.statusCode !== 200) return log(JSON.stringify(res) + JSON.stringify(body), 'ERROR');
+				if(body.length > 0) return log(JSON.stringify(body), 'ERROR'); // If there is something in the body it is an error
+				
+				log('Successfully sent: ' + JSON.stringify(msgXml), 'INFO');
 		});
 
 }
