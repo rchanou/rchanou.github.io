@@ -42,6 +42,8 @@ $indexHTML = <<<EOT
   </body>
   <script language="javascript">
 
+	console.log("Current locale: " + window.navigator.language);
+
 	function disableFacebookAutoComplete()
 	{
 		try { document.getElementById('innerFrame').contentDocument.getElementById('email').setAttribute('autocomplete', 'off'); }
