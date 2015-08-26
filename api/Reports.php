@@ -356,6 +356,27 @@ WHEN cd.Status = 2 THEN 'Voided'
 ELSE ''
 END
 AS "Void Status",
+cd.CreatedDate AS "Line Item Created At",
+case 
+   when exists (
+      SELECT 1 
+      FROM Sys.columns c 
+      WHERE c.[object_id] = OBJECT_ID('dbo.CheckDetails') 
+         AND c.name = 'CreatedOn'
+   ) 
+   then cd.CreatedOn
+   else null
+END  AS 'Line Item Created On',
+case 
+   when exists (
+      SELECT 1 
+      FROM Sys.columns c 
+      WHERE c.[object_id] = OBJECT_ID('dbo.CheckDetails') 
+         AND c.name = 'CreatedBy'
+   ) 
+   then cd.CreatedBy
+   else null
+END  AS 'Line Item Created By',
 products.ProductClassID AS "Product Class ID",
 pc.Description AS "Product Class Description",
 pc.ExportName AS "Product Class Export",
