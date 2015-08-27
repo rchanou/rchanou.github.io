@@ -12,7 +12,6 @@ class LocationsMapper extends BaseMapper {
             , 'LocationName'    => 'name'
             , 'IPAddress'       => 'ipAddress'
             , 'TimeoutMS'       => 'timeoutInMs'
-            , 'IsCentralServer' => ''
         ));
     }
 }

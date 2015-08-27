@@ -21,9 +21,5 @@
               "name": "TimeoutMS"
             , "type": "int"
         }
-        , {
-              "name": "IsCentralServer"
-            , "type": "bit"
-        }
     ]
 }
