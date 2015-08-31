@@ -53,8 +53,10 @@ Log::useFiles(storage_path().'/logs/laravel.log');
 App::error(function(Exception $exception, $code)
 {
 	Log::error($exception); //Local logging (laravel.log)
-    CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() . '. Error code: ' . $code, 'Club Speed Admin Panel'); //DB logging
-
+    CS_API::log('ERROR :: Laravel error occurred at ' .  Request::url() .
+        '. Error code: ' . $code .
+        '. Exception : ' . utf8_encode($exception), 'Club Speed Admin Panel'); //DB logging
+    
     return Response::make(View::make('/errorpages/error',
         array(
             'images' => Images::getImageAssets(),
