@@ -66,7 +66,9 @@ $translationsSplitByCulture = array(
         'str_clickARacer'=> '(Click a racer to expand!)',
         'str_raceNeverFinished'=> 'This race was never concluded and there is no more data to display.',
         'str_poweredBy'=> 'Powered By',
-        'str_missingCardId' => 'Please have the track assign a Card ID to your account'
+        'str_missingCardId' => 'Please have the track assign a Card ID to your account',
+        "str_switchSpeedLevel" => "Switch speed level:",
+        "str_allSpeedLevels" => "All Speed Levels"
     )
 );
 

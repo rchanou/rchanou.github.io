@@ -19,17 +19,35 @@ angular.module('clubSpeedOnlineApp.services', [])
         }
 
         return {
-            getFastestLapTimes_Day: function(track) {
+            getFastestLapTimes_Day: function(track,speed_level) {
                 track = defaultFor(track,1);
-                return $http.get(apiURL + '/races/fastest.json?range=day&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey);
+                speed_level = defaultFor(speed_level,'all');
+
+                return $http.get(apiURL + '/races/fastest.json?range=day&track='
+                    + track +
+                    (excludeEmployees ? '&exclude_employees=1' : '')
+                    + (speed_level == 'all' ? '' : '&speed_level=' + speed_level)
+                    + '&key=' + apiKey);
             },
-            getFastestLapTimes_Week: function(track) {
+            getFastestLapTimes_Week: function(track,speed_level) {
                 track = defaultFor(track,1);
-                return $http.get(apiURL + '/races/fastest.json?range=week&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey)
+                speed_level = defaultFor(speed_level,'all');
+
+                return $http.get(apiURL + '/races/fastest.json?range=week&track='
+                    + track +
+                    (excludeEmployees ? '&exclude_employees=1' : '')
+                    + (speed_level == 'all' ? '' : '&speed_level=' + speed_level)
+                    + '&key=' + apiKey);
             },
-            getFastestLapTimes_Month: function(track) {
+            getFastestLapTimes_Month: function(track,speed_level) {
                 track = defaultFor(track,1);
-                return $http.get(apiURL + '/races/fastest.json?range=month&track=' + track + (excludeEmployees ? '&exclude_employees=1' : '') + '&key=' + apiKey);
+                speed_level = defaultFor(speed_level,'all');
+
+                return $http.get(apiURL + '/races/fastest.json?range=month&track='
+                    + track +
+                    (excludeEmployees ? '&exclude_employees=1' : '')
+                    + (speed_level == 'all' ? '' : '&speed_level=' + speed_level)
+                    + '&key=' + apiKey);
             },
             getTopRPMScores: function() {
                 return $http.get(apiURL + '/racers/toprpm.json?key=' + apiKey);
@@ -67,6 +85,9 @@ angular.module('clubSpeedOnlineApp.services', [])
             },
             getCurrentCulture: function() {
                 return $http.get(apiURL + '/settings/get.json?group=MobileApp&setting=currentCulture&key=' + apiKey);
+            },
+            getSpeedLevels: function() {
+                return $http.get(apiURL + '/speedlevel?&key=' + apiKey);
             }
         };
     }]);

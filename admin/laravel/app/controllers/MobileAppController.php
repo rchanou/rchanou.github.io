@@ -104,6 +104,17 @@ class MobileAppController extends BaseController
 
         Session::put('mobileControlPanelSettings',$mobileControlPanelSettingsData);
 
+        //Speed Levels
+        $speedLevels = CS_API::getSpeedLevels();
+        $speedLevelsWithInclusionStatus = array();
+        if (isset($mobileSettingsData['speedLevelsToInclude']))
+        {
+            $speedLevelsToInclude = json_decode($mobileSettingsData['speedLevelsToInclude']);
+            foreach($speedLevels as $currentSpeedLevelName => $currentSpeedLevelDescription)
+            {
+                $speedLevelsWithInclusionStatus[$currentSpeedLevelName] = in_array($currentSpeedLevelName,$speedLevelsToInclude);
+            }
+        }
 
         return View::make('/screens/mobileApp/settings',
             array('controller' => 'MobileAppController',
@@ -111,7 +122,9 @@ class MobileAppController extends BaseController
                 'mobileSettings' => $mobileSettingsData,
                 'isCheckedControlPanel' => $mobileControlPanelSettingsCheckedData,
                 'mobileControlPanelSettings' => $mobileControlPanelSettingsData,
-                'listOfTracks' => $listOfTracks
+                'listOfTracks' => $listOfTracks,
+                'speedLevels' => $speedLevels,
+                'speedLevelsWithInclusionStatus' => $speedLevelsWithInclusionStatus
             ));
     }
 
@@ -127,6 +140,28 @@ class MobileAppController extends BaseController
         $newSettings['forceLogin'] = isset($input['forceLogin']) ? 1 : 0;
         $newSettings['defaultApiKey'] = isset($input['defaultApiKey']) ? $input['defaultApiKey'] : '';
         $newSettings['defaultTrack'] = isset($input['defaultTrack']) ? $input['defaultTrack'] : 1;
+        if (isset($input['defaultSpeedLevel']))
+        {
+            $newSettings['defaultSpeedLevel'] = $input['defaultSpeedLevel'];
+            $newSettings['showSpeedLevelDropdown'] = isset($input['showSpeedLevelDropdown']) ? true : false;
+        }
+
+        //Identify which speedLevels to include in the dropdown menu
+        $speedLevelsToInclude = array();
+        foreach($input as $currentInputKey => $currentInputValue)
+        {
+            if (strpos($currentInputKey,'speedLevelsToInclude_') !== false)
+            {
+                $speedLevelName = str_replace('speedLevelsToInclude_','',$currentInputKey);
+                $speedLevelsToInclude[] = $speedLevelName;
+            }
+        }
+        $speedLevelsToIncludeString = json_encode($speedLevelsToInclude);
+        if (count($speedLevelsToInclude) > 0)
+        {
+            $newSettings['speedLevelsToInclude'] = $speedLevelsToIncludeString;
+        }
+
         //End formatting
 
         //Identify the settings that actually changed and need to be sent to Club Speed

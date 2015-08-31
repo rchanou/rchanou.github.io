@@ -57,7 +57,7 @@
 			.when('/racesummary/:race_id', {templateUrl : 'pages/racesummary.html'})
 			.when('/livetiming', {templateUrl : 'pages/livetiming.html'})
 			.when('/livetiming/:desiredTable', {templateUrl : 'pages/livetiming.html'})
-            .when('/livetiming/:desiredTable/:desiredTrack', {templateUrl : 'pages/livetiming.html'})
+            .when('/livetiming/:desiredTable/:desiredTrack/:desiredSpeedLevel?', {templateUrl : 'pages/livetiming.html'})
             .when('/livescoreboard', {templateUrl : 'pages/livescoreboard.html'})
             .when('/livescoreboard/:desiredTrack', {templateUrl : 'pages/livescoreboard.html'})
 			;

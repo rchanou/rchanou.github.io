@@ -74,6 +74,33 @@ $settings = array(
         'Value'        => 1,
         'Description'  => 'The default track to show on the mobile app',
         'IsPublic'     => true
+    ),
+    array(
+        'Namespace'    => 'MobileApp',
+        'Name'         => 'showSpeedLevelDropdown',
+        'Type'         => 'Boolean',
+        'DefaultValue' => false,
+        'Value'        => false,
+        'Description'  => 'Whether to show the speed level dropdown in the mobile app',
+        'IsPublic'     => true
+    ),
+    array(
+        'Namespace'    => 'MobileApp',
+        'Name'         => 'defaultSpeedLevel',
+        'Type'         => 'String',
+        'DefaultValue' => 'all',
+        'Value'        => 'all',
+        'Description'  => 'The default speed level to show in the mobile app',
+        'IsPublic'     => true
+    ),
+    array(
+        'Namespace'    => 'MobileApp',
+        'Name'         => 'speedLevelsToInclude',
+        'Type'         => 'String',
+        'DefaultValue' => '[]',
+        'Value'        => '[]',
+        'Description'  => 'Speed levels to include in the mobile app\'s dropdown menu',
+        'IsPublic'     => true
     )
 );
 

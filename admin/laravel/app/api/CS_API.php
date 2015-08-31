@@ -823,6 +823,31 @@ class CS_API
 
     }
 
+    public static function getSpeedLevels()
+    {
+        self::initialize();
+
+        $result = self::getJSON('speedlevel'); //'/tracks/index.json?&key=
+
+        if (isset($result))
+        {
+            $formattedSpeedLevels = array('all' => 'All');
+            foreach($result as $currentSpeedLevel)
+            {
+                if (!$currentSpeedLevel->deleted)
+                {
+                    $formattedSpeedLevels[$currentSpeedLevel->speedLevel] = $currentSpeedLevel->description;
+                }
+            }
+            return $formattedSpeedLevels;
+        }
+        else
+        {
+            return array('all' => 'All');
+        }
+    }
+
+
     public static function updateGiftCardBalances($params)
     {
         self::initialize();

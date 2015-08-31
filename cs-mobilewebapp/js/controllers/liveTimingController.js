@@ -3,13 +3,52 @@ clubSpeedOnlineApp.controller('liveTimingController', function($rootScope, $scop
     $scope.spinnerActive = 1;
 
     ClubSpeedJSONService.getSettings().success(function (data) {
+        ClubSpeedJSONService.getSpeedLevels().success(function(data){
+            var preFilteredSpeedLevels = data;
+            $scope.speedLevels = {};
+            if (typeof($scope.speedLevelsToInclude) != "undefined")
+            {
+                if ($scope.speedLevelsToInclude.indexOf('all') != -1)
+                {
+                    $scope.speedLevels['all'] = {'description' : $rootScope.strings["str_allSpeedLevels"], speedLevel: 'all', deleted: false};
+                }
+                for (var i = 0; i < preFilteredSpeedLevels.length; i++)
+                {
+                    if (!preFilteredSpeedLevels[i].deleted && $scope.speedLevelsToInclude.indexOf(preFilteredSpeedLevels[i].speedLevel) != -1)
+                    {
+                        $scope.speedLevels[preFilteredSpeedLevels[i].speedLevel] = JSON.parse(JSON.stringify(preFilteredSpeedLevels[i]));
+                    }
+                }
+            }
+        });
+
         for(var i = 0; i < Object.size(data.settings); i++)
         {
             if ((data.settings[i].name == 'defaultTrack'))
             {
                 $scope.defaultTrack = data.settings[i].value;
-                break;
             }
+            if ((data.settings[i].name == 'defaultSpeedLevel'))
+            {
+                $scope.defaultSpeedLevel = data.settings[i].value;
+            }
+            if ((data.settings[i].name == 'speedLevelsToInclude'))
+            {
+                $scope.speedLevelsToInclude = data.settings[i].value;
+            }
+            if ((data.settings[i].name == 'showSpeedLevelDropdown'))
+            {
+                $scope.showSpeedLevelDropdown = data.settings[i].value;
+            }
+        }
+
+        if (typeof($scope.currentSpeedLevel) == "undefined" && typeof($routeParams.desiredSpeedLevel) == "undefined")
+        {
+            $scope.currentSpeedLevel = defaultFor($scope.defaultSpeedLevel,'all');
+        }
+        else
+        {
+            $scope.currentSpeedLevel = $routeParams.desiredSpeedLevel;
         }
 
         if (typeof config !== "undefined") //Check if the default track is overridden in the config file
@@ -52,7 +91,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($rootScope, $scop
         {
             $scope.tableType = "fastestTimesTable";
             $scope.tableCaption = $rootScope.strings["str_fastestTimesThisMonth"];
-            ClubSpeedJSONService.getFastestLapTimes_Month($scope.currentTrackId).success(function (data) {
+            ClubSpeedJSONService.getFastestLapTimes_Month($scope.currentTrackId,$scope.currentSpeedLevel).success(function (data) {
                 $scope.jsonData = data;
                 $scope.spinnerActive = 0;
             });
@@ -63,7 +102,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($rootScope, $scop
         {
             $scope.tableType = "fastestTimesTable";
             $scope.tableCaption = $rootScope.strings["str_fastestTimesThisWeek"];
-            ClubSpeedJSONService.getFastestLapTimes_Week($scope.currentTrackId).success(function (data) {
+            ClubSpeedJSONService.getFastestLapTimes_Week($scope.currentTrackId,$scope.currentSpeedLevel).success(function (data) {
                 $scope.jsonData = data;
                 $scope.spinnerActive = 0;
             });
@@ -74,7 +113,7 @@ clubSpeedOnlineApp.controller('liveTimingController', function($rootScope, $scop
         {
             $scope.tableType = "fastestTimesTable";
             $scope.tableCaption = $rootScope.strings["str_fastestTimesToday"];
-            ClubSpeedJSONService.getFastestLapTimes_Day($scope.currentTrackId).success(function (data) {
+            ClubSpeedJSONService.getFastestLapTimes_Day($scope.currentTrackId,$scope.currentSpeedLevel).success(function (data) {
                 $scope.jsonData = data;
                 $scope.spinnerActive = 0;
             });
@@ -95,10 +134,20 @@ clubSpeedOnlineApp.controller('liveTimingController', function($rootScope, $scop
 
     //Used to route to a specific track
     $scope.goToLiveTimingTrack = function ( desiredTrack ) {
-        $location.path( '/livetiming/' + $routeParams.desiredTable + '/' + desiredTrack );
+        desiredTrack = defaultFor(desiredTrack,$scope.currentTrackId)
+        var desiredSpeedLevel = $scope.currentSpeedLevel;
+        $location.path( '/livetiming/' + $routeParams.desiredTable + '/' + desiredTrack + '/' + desiredSpeedLevel );
     };
 
-    Object.size = function(obj) {
+    //Used to route to a specific speed level
+    $scope.goToLiveTimingSpeedLevel = function ( desiredSpeedLevel ) {
+        var desiredTrack = $scope.currentTrackId;
+        desiredSpeedLevel = defaultFor(desiredSpeedLevel,$scope.currentSpeedLevel);
+        $scope.currentSpeedLevel = desiredSpeedLevel;
+        $location.path( '/livetiming/' + $routeParams.desiredTable + '/' + desiredTrack + '/' + desiredSpeedLevel );
+    };
+
+    $scope.sizeof = Object.size = function(obj) {
         var size = 0, key;
         for (key in obj) {
             if (obj.hasOwnProperty(key)) size++;

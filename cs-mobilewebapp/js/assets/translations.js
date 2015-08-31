@@ -45,7 +45,9 @@ var translations = {
       "str_lapTimesByRacer": "Lap Times by Racer",
       "str_clickARacer": "(Click a racer to expand!)",
       "str_raceNeverFinished": "This race was never concluded and there is no more data to display.",
-      "str_poweredBy": "Powered By"
+      "str_poweredBy": "Powered By",
+      "str_switchSpeedLevel": "Switch speed level:",
+      "str_allSpeedLevels": "All Speed Levels"
       //str_bestLapTime
   }
 };

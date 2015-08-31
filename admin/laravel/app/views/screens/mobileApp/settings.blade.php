@@ -225,6 +225,94 @@ Mobile App Settings
                   </div>
               </div>
             </div>
+
+                <div class="widget-box">
+                    <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                        <h5>Speed Levels</h5>
+                    </div>
+                    <div class="widget-content">
+                        <div class="row">
+                            @if(isset($mobileSettings['showSpeedLevelDropdown']))
+                                <div class="col-sm-6">
+                                    @if(isset($mobileSettings['showSpeedLevelDropdown']))
+                                        <div class="form-group">
+                                            <label class="col-sm-4 col-md-4 col-lg-4 control-label">Show Speed Level Dropdown</label>
+                                            <div class="col-sm-8 col-md-8 col-lg-8">
+                                                <input type="checkbox" id="showSpeedLevelDropdown" name="showSpeedLevelDropdown" {{$isChecked['showSpeedLevelDropdown']}}>
+                                                <span class="help-block text-left">If checked, users of the mobile app may select the current Speed Level via a dropdown menu.</span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col-sm-6">
+                                    @if(isset($mobileSettings['defaultSpeedLevel']))
+                                        <div class="form-group">
+                                            <label class="col-sm-4 col-md-4 col-lg-4 control-label">Default Speed Level</label>
+                                            <div class="col-sm-8 col-md-8 col-lg-8">
+                                                {{Form::select('defaultSpeedLevel',$speedLevels,$mobileSettings['defaultSpeedLevel'])}}
+                                       <span class="help-block text-left">
+                                           The default Speed Level to show on the mobile app. If "All" is selected, then they are grouped together.
+                                       </span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col-sm-6">
+                                    @if(isset($mobileSettings['speedLevelsToInclude']))
+                                        <div class="form-group">
+                                            <label class="col-sm-4 col-md-4 col-lg-4 control-label">Speed Levels In Dropdown</label>
+                                            <div class="col-sm-8 col-md-8 col-lg-8">
+                                                <span class="help-block text-left">
+                                                If checked, each Speed Level option will appear in the Speed Level dropdown:<br/>
+                                                </span>
+                                                <table class="table table-bordered table-striped table-hover text-center">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Speed Level Option</th>
+                                                        <th style="width: 33%">Shown</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach($speedLevelsWithInclusionStatus as $speedLevelName => $isCurrentSpeedLevelChecked)
+                                                        <tr>
+                                                            <td>{{$speedLevels[$speedLevelName]}}</td>
+                                                            <td><input id="speedLevelsToInclude_{{$speedLevelName}}" name="speedLevelsToInclude_{{$speedLevelName}}" type="checkbox" {{$isCurrentSpeedLevelChecked ? 'checked' : ''}}></td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-actions" style="margin-bottom: 10px;">
+                                        {{ Form::submit('Save Changes', array('class' => 'btn btn-info')) }}
+                                    </div>
+                                </div>
+                            @else
+                                <div class="col-sm-12">
+                                    <div class="alert alert-warning">
+                                        <p>To install the new Speed Levels feature for your mobile app, please contact Club Speed Support.</p>
+                                        <br/>
+                                        @if(Session::has('user') && strtolower(Session::get('user')) == 'support')
+                                            <img src="{{asset('img/support_only.png')}}" style="cursor: help" title="This information is only visible to Club Speed Staff.">
+                                            <strong>Support:</strong>
+                                            <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/api/migrations/201411181527%20-%20Mobile%20App%20Setting%20Defaults.php'}}" target="_blank">
+                                                Click this link
+                                            </a>
+                                            to install the Speed Levels feature, then refresh this page.
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
           </div>
 
 

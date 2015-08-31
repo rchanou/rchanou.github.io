@@ -27,12 +27,19 @@
         <span class="dataHeader">
             {{tableCaption}}
             <br/>
-            <em class="dataSubHeaderSmall">{{currentTrackName}}</em>
+            <em class="dataSubHeaderSmall">{{currentTrackName}}</em> <em class="dataSubHeaderSmall" ng-if="showSpeedLevelDropdown && speedLevels != null && sizeof(speedLevels) > 0">({{speedLevels[currentSpeedLevel].description}})</em>
         </span>
+        <br/> <br/>
         <div ng-if="tracks != null">
             <select class="darkDropdown" ng-model="desiredTrack" ng-change="goToLiveTimingTrack(desiredTrack)">
                 <option value="">{{$root.strings["str_switchTrack"]}}</option>
                 <option ng-repeat="track in tracks" value="{{track.id}}">{{track.name}}</option>
+            </select>
+        </div>
+        <div ng-if="speedLevels != null && showSpeedLevelDropdown && sizeof(speedLevels) > 0">
+            <select class="darkDropdown" ng-model="desiredSpeedLevel" ng-change="goToLiveTimingSpeedLevel(desiredSpeedLevel)"> <!-- TODO: Make this update the speed level, change routing -->
+                <option value="">{{$root.strings["str_switchSpeedLevel"]}}</option>
+                <option ng-repeat="speedLevel in speedLevels" value="{{speedLevel.speedLevel}}">{{speedLevel.description}}</option>
             </select>
         </div>
         <div class="dataWrapper" ng-repeat="racer in jsonData.fastest">
