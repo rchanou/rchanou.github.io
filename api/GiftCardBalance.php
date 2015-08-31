@@ -19,8 +19,7 @@ class GiftCardBalance extends BaseUowApi {
     function register($request_data) {
         $this->validate('register');
         try {
-            // do any mapping here?
-            $this->interface->register($request_data);
+            $this->logic->giftcardbalance->register($request_data);
         }
         catch (RestException $e) {
             throw $e;

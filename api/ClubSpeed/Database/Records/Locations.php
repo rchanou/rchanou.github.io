@@ -9,5 +9,4 @@ class Locations extends BaseRecord {
     public $LocationName;
     public $IPAddress;
     public $TimeoutMS;
-    public $IsCentralServer;
 }

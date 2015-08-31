@@ -63,8 +63,14 @@ class UserNotFoundException extends \CSException {}
  * but none matching the criteria was available.
  */
 class RecordNotFoundException extends \CSException {
-    public function __construct($message = null, $code = 404, \Exception $previous = null) {
-        parent::__construct($message, $code, $previous);
+    public function __construct($table, $ids = null, \Exception $previous = null) {
+        // default message?
+        if (!$ids)
+            $ids = array();
+        if (!is_array($ids))
+            $ids = array($ids);
+        $message = 'Unable to find record on ' . $table . ' with key: (' . implode(',', $ids) . ')';
+        parent::__construct($message, 404, $previous);
     }
 }
 

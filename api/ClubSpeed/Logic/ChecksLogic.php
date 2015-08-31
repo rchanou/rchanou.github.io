@@ -84,14 +84,14 @@ class ChecksLogic extends BaseLogic {
             // validate the customer "foreign key", as the database does not actually have a foreign key
             $customer = $db->customers->get($check->CustID);
             if (is_null($customer))
-                throw new \RecordNotFoundException("Check create could not find customer in the database for the given customerId! Received: " . $check->CustID);
+                throw new \RecordNotFoundException('Customers', $check->CustID);
             
             // validate the user "foreign key", as the database does not actually have a foreign key
             if (empty($check->UserID))
                 $check->UserID = 1; // just cheat and use 1
             $user = $db->users->get($check->UserID);
             if (is_null($user))
-                throw new \RecordNotFoundException("Check create could not find user in the database for the given userId! Received: " . $check->UserID);
+                throw new \RecordNotFoundException('Users', $check->UserID);
             $check->CheckType = Enums::CHECK_TYPE_REGULAR;
             $check->CheckStatus = Enums::CHECK_STATUS_OPEN;
             $check->OpenedDate = Convert::getDate();

@@ -356,6 +356,27 @@ WHEN cd.Status = 2 THEN 'Voided'
 ELSE ''
 END
 AS "Void Status",
+cd.CreatedDate AS "Line Item Created At",
+case 
+   when exists (
+      SELECT 1 
+      FROM Sys.columns c 
+      WHERE c.[object_id] = OBJECT_ID('dbo.CheckDetails') 
+         AND c.name = 'CreatedOn'
+   ) 
+   then cd.CreatedOn
+   else null
+END AS 'Line Item Created On',
+case 
+   when exists (
+      SELECT 1 
+      FROM Sys.columns c 
+      WHERE c.[object_id] = OBJECT_ID('dbo.CheckDetails') 
+         AND c.name = 'CreatedBy'
+   ) 
+   then cd.CreatedBy
+   else null
+END AS 'Line Item Created By',
 products.ProductClassID AS "Product Class ID",
 pc.Description AS "Product Class Description",
 pc.ExportName AS "Product Class Export",
@@ -400,8 +421,39 @@ EOD;
 
 		return $data;
 	}
+
+	/**
+	 * SALES BY POS, PRODUCT CLASS
+	 *
+	 * Shows the sales grouped by POS and Product Class
+	 *
+	 */
+	public function sales_by_pos_and_class() {
+		if (!\ClubSpeed\Security\Authenticate::privateAccess())
+				throw new RestException(401, "Invalid authorization!");
+		
+		$tsql = <<<EOD
+SELECT
+MAX(cd.CreatedOn) AS 'POS',
+MAX(pc.Description) AS 'Category',
+SUM(cdv.CheckDetailTax) AS 'Total Pre-tax',
+SUM(cdv.CheckDetailTotal) AS 'Total Post-tax'
+FROM CheckDetails_V cdv
+LEFT JOIN CheckDetails cd ON cdv.CheckDetailID = cd.CheckDetailID
+LEFT JOIN Products ON Products.ProductID = cd.ProductID
+LEFT JOIN ProductClasses pc ON pc.ProductClassID = products.ProductClassID
+WHERE cdv.CreatedDate BETWEEN :start AND :end
+GROUP BY cd.CreatedOn, pc.ProductClassID
+ORDER BY cd.CreatedOn, pc.ProductClassID
+EOD;
+		$params = array(&$start, &$end);
+    $data = $this->run_query($tsql, $this->getDateRange());
+
+		return $data;
+	}
+
 	
-		/**
+	/**
 	 * EVENT SALES REP REPORT
 	 *
 	 * Shows the checks by each sales rep.

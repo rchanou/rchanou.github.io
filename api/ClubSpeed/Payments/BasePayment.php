@@ -202,7 +202,7 @@ class BasePayment {
                     $giftCardBalance = $this->logic->giftCardBalance->find('CrdID = ' . $giftCardId);
                     if (empty($giftCardBalance)) {
                         Log::error($this->logPrefix . "Customer " . $checkTotals->CustID . " attempted to use gift card #" . $giftCardId . " but it could not be found in the gift card history sums view!", Enums::NSP_BOOKING);
-                        throw new \RecordNotFoundException("Unable to find a gift card history sum with a CrdID of " . $giftCardId);
+                        throw new \RecordNotFoundException('GiftCardBalance_V', $giftCardId);
                     }
                     $giftCardBalance = $giftCardBalance[0];
                     if ($giftCardBalance->Balance <= 0) {

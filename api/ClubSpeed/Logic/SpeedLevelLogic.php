@@ -4,14 +4,14 @@ namespace ClubSpeed\Logic;
 
 /**
  * The business logic class
- * for ClubSpeed events.
+ * for ClubSpeed SpeedLevel.
  */
-class EventsLogic extends BaseLogic {
+class SpeedLevelLogic extends BaseLogic {
 
     /**
-     * Constructs a new instance of the EventsLogic class.
+     * Constructs a new instance of the SpeedLevelLogic class.
      *
-     * The EventsLogic constructor requires an instantiated DbService class for injection,
+     * The SpeedLevelLogic constructor requires an instantiated DbService class for injection,
      * as well as a reference to the LogicService container where this class will be stored.
      *
      * @param LogicService $logic The parent logic service container.
@@ -19,6 +19,6 @@ class EventsLogic extends BaseLogic {
      */
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
-        $this->interface = $this->db->events;
+        $this->interface = $this->db->speedLevel;
     }
 }

@@ -82,7 +82,7 @@ abstract class BaseLogic {
         $args = func_get_args();
         $get = call_user_func_array(array($this->interface, 'get'), $args);
         if (is_null($get) || empty($get))
-            throw new \RecordNotFoundException("Unable to find record on " . $this->interface->table . " with key: (" . implode(",", $args) . ")");
+            throw new \RecordNotFoundException($this->interface->table, $args);
         return $get;
     }
 
@@ -128,7 +128,7 @@ abstract class BaseLogic {
     public function delete() {
         $args = func_get_args();
         if (!call_user_func_array(array($this, 'exists'), $args))
-            throw new \RecordNotFoundException("Unable to find record on " . $this->interface->table . " with key: (" . implode(",", $args) . ")");
+            throw new \RecordNotFoundException($this->interface->table, $args);
         call_user_func_array(array($this->interface, 'delete'), $args); // just call, don't return?
     }
 

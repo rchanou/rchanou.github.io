@@ -46,6 +46,12 @@ class SpeedTextController extends BaseController
 					'bulksms' => array(
 						array('key' => 'username', 'label' => 'Username', 'type' => 'text', 'tip' => 'The username for your BulkSMS account.'),
 						array('key' => 'password', 'label' => 'Password', 'type' => 'text', 'tip' => 'The password for your BulkSMS account')
+					),
+					'cm.nl' => array(
+						array('key' => 'username', 'label' => 'Username', 'type' => 'text', 'tip' => 'The username for your CM.nl account.'),
+						array('key' => 'password', 'label' => 'Password', 'type' => 'text', 'tip' => 'The password for your CM.nl account'),
+						array('key' => 'customerId', 'label' => 'Customer ID', 'type' => 'text', 'tip' => 'The customer ID for your CM.nl account'),
+						array('key' => 'from', 'label' => 'From', 'type' => 'text', 'tip' => 'The "from" name for your CM.nl account')
 					)
 				);
 
@@ -92,7 +98,7 @@ class SpeedTextController extends BaseController
         Session::put('settingsIds', $settingsIds);
 				Session::put('providerOptionDetails', $providerOptionDetails);
 
-        $supportedProviders = array('twilio' => 'Twilio', 'bulksms' => 'BulkSMS');
+        $supportedProviders = array('twilio' => 'Twilio', 'bulksms' => 'BulkSMS', 'cm.nl' => 'CM.nl');
 
         return View::make('/screens/speedtext/settings',
             array('controller' => 'SpeedTextController',

@@ -1,0 +1,22 @@
+{
+    "table": {
+        "name": "dbo.SpeedLevel",
+        "alias": "sl"
+    },
+    "columns": [
+        {
+              "name": "SpeedLevel"
+            , "type": "int"
+            , "primaryKey": true
+            , "identity": true
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "Deleted"
+            , "type": "bit"
+        }
+    ]
+}

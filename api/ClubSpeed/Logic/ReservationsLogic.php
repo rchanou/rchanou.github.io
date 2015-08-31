@@ -66,7 +66,7 @@ class ReservationsLogic extends BaseLogic {
         $closure = function($old, $new) use (&$logic) {
             $availability = $logic->bookingAvailability->get($new->OnlineBookingsID);
             if (is_null($availability))
-                throw new \RecordNotFoundException("Update reservation for online booking attempted to use a non-existent onlineBookingsId! Received: " . $reservation->OnlineBookingsID);
+                throw new \CSException("Update reservation for online booking attempted to use a non-existent onlineBookingsId! Received: " . $reservation->OnlineBookingsID, 404);
             $availability = $availability[0];
 
             if ($new->Quantity < 1)
