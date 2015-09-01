@@ -67,9 +67,10 @@ class Step2Controller extends BaseController
         {
             $races = CS_API::getAvailableBookings();
         }
-        else //If not searching for today's results, just list all results for that day
+        else //If not searching for today's results, just list all results JUST for that day
         {
-            $races = CS_API::getAvailableBookings($start);
+            $endDate = $start . 'T23:59:59';
+            $races = CS_API::getAvailableBookings($start,$endDate);
         }
         $this->recordProductInfo($races); //Remember every race and its details and store them in the session
 

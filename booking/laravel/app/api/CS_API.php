@@ -135,11 +135,9 @@ class CS_API
 
         $url = self::$apiURL . '/bookingavailability/range.json?key=' . self::$privateKey
             . ($startDate === null ? '' : '&start=' . $startDate)
-            . ($endDate === null ? '' : '&endDate=' . $endDate);
+            . ($endDate === null ? '' : '&end=' . $endDate);
 
         $result = self::call($url);
-
-
 
         $result = $result['response'];
         if ($result !== null && isset($result->body->bookings))
