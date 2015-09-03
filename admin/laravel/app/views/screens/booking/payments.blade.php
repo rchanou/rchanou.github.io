@@ -74,29 +74,50 @@ Payment Processors
                                         </select><p/>
                                         @foreach($supportedPaymentTypes as $paymentType)
                                         {{ Form::open(array('action'=>'BookingController@updatePaymentSettings','files' => false, 'class' => 'form-horizontal')) }}
+
                                             <div id="{{$paymentType->name}}_box" class="paymentOptionsBox">
-                                            @if ($paymentType->options != null)
-                                                <table class="table table-bordered table-striped table-hover text-center">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Setting</th>
-                                                            <th>Value</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                 @foreach($paymentType->options as $option)
-                                                     <tr>
-                                                        <td><label>{{$option}}</label></td><td><input type="text" class="text-center" name="{{$option}}" value="{{isset($currentSavedSettings[$paymentType->name]['options'][$option]) ? $currentSavedSettings[$paymentType->name]['options'][$option]: ""}}"></td>
-                                                     </tr>
-                                                 @endforeach
-                                                        </tbody>
-                                                    </table>
-                                             @else
+																						@if ($paymentType != null)
+                                                @if (!empty($paymentType->overview))
+                                                <div class="alert alert-info">{{ $paymentType->overview }}</div>
+                                                @endif
+                                                @if (Session::get('user') === 'support' && property_exists($paymentType, 'supportOnly'))
+                                                <div class="alert alert-danger">{{ $paymentType->supportOnly }}</div>
+                                                @endif
+                                                @foreach($paymentType->options as $option)
+                                                  <div class="form-group">
+                                                  <label class="col-sm-3 col-md-3 col-lg-2 control-label"><label for="$option['name']" id="" class="">
+                                                  @if (is_array($option))
+                                                    {{ isset($option['friendlyName']) ? $option['friendlyName'] : $option['name'] }}
+                                                  @else
+                                                    {{ $option }}
+                                                  @endif</label></label>
+                                                  <div class="col-sm-9 col-md-9 col-lg-10">
+                                                  @if (is_array($option) && array_key_exists('type', $option) && $option['type'] == 'select')
+                                                    {{Form::select($option['name'], $option['values'], isset($currentSavedSettings[$paymentType->name]['options'][$option['name']]) ? $currentSavedSettings[$paymentType->name]['options'][$option['name']]: "")}}
+                                                    @elseif (is_array($option))
+                                                    <input type="text" class="text-center" name="{{$option['name']}}" value="{{isset($currentSavedSettings[$paymentType->name]['options'][$option['name']]) ? $currentSavedSettings[$paymentType->name]['options'][$option['name']]: ""}}">
+                                                    @else
+                                                    
+                                                    <input type="text" class="text-center" name="{{$option}}" value="{{isset($currentSavedSettings[$paymentType->name]['options'][$option]) ? $currentSavedSettings[$paymentType->name]['options'][$option]: ""}}">
+                                                    @endif
+                                                    @if (is_array($option) && !empty($option['hint']))
+                                                    <i class="fa fa-question-circle tip" data-container="body" data-toggle="popover" data-placement="top" data-html="true" data-content="{{$option['hint']}}" data-original-title="" title=""></i>
+                                                    @endif
+                                                  @if (is_array($option) && !empty($option['subtitle']))
+                                                  	<span class="help-block text-left">{{ $option['subtitle'] }}</span>
+                                                  @endif
+                                                  </div>
+                                                  </div>
+                                                @endforeach
+																						@else
                                                 <div class="alert alert-info">No custom settings are required for this payment processor.</div>
-                                             @endif
-                                             <input type="hidden" name="paymentProcessor" value="{{$paymentType->name}}">
-                                            {{ Form::submit('Apply Changes', array('class' => 'btn btn-info')) }}
-                                            {{ Form::close() }}
+                                            @endif
+                                            <div class="form-actions">
+                                            	<input type="hidden" name="paymentProcessor" value="{{$paymentType->name}}">
+                                            	{{ Form::submit('Apply Changes', array('class' => 'btn btn-info')) }}
+                                            	{{ Form::close() }}
+                                            </div>
+                                             
                                             </div>
                                         @endforeach
                                         </div>

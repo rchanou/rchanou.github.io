@@ -542,12 +542,192 @@ class BookingController extends BaseController
 
     }
 
+		private function applyPaymentTypeOptionNotes($notes, $optionName) {
+			$option = array();
+			
+			$option['name'] = $optionName;
+			$option['type'] = isset($notes[$optionName]['type']) ? $notes[$optionName]['type'] : 'text';
+			if($option['type'] === 'select') $option['values'] = $notes[$optionName]['values'];
+			$option['friendlyName'] = isset($notes[$optionName]['friendlyName']) ? $notes[$optionName]['friendlyName'] : preg_replace('/(?<=\\w)(?=[A-Z])/'," $1", ucfirst($optionName));
+			if(isset($notes[$optionName]['hint'])) $option['hint'] = $notes[$optionName]['hint'];
+			if(isset($notes[$optionName]['subtitle'])) $option['subtitle'] = $notes[$optionName]['subtitle'];
+			
+			return $option;
+		}
+		
+		private function applyPaymentTypeNotes($paymentType) {
+			$paymentType->friendlyName = str_replace('_', ' ', $paymentType->name);
+			
+			$notes = array();
+
+			switch($paymentType->name) {
+				case 'iDEAL':
+					$paymentType->overview = 'This is the iDEAL payment processor provided by the ABN-AMRO bank.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://internetkassa.abnamro.nl/Ncol/Test/BackOffice/login/index" target="_blank">Admin Portal</a>
+                    | ' . link_to('/docs/Club Speed - ABN-AMRO iDEAL Online Booking Integration.pdf','Setup Guide', array('target' => '_blank')); // Customer-facing overview of the driver
+					$paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor takes the customer offsite to make payments. Upon completing the purchase, they are redirected back to the Online Booking page. <br/><br/>The check isn\'t closed, and they are not added to any heats or issued any gift cards, until this happens.'; // Support information (test credentials?)
+					
+					/**
+					 * Notes and overrides for the params...
+					 * friendlyName = Friendly name to show (defaults to Title Cased params... thisVar -> This Var)
+					 * type = select (defaults to text). See "values" below
+					 * values = array of key/value pairs. array('key' => 'value)
+					 * hint = Text/html to show inside of a popup balloon
+					 * subtitle = Text to show beneath input/select box
+					 */
+					$notes = array(
+						'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                            'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.'),
+						'pspId'    => array('friendlyName' => 'PSP ID', 'subtitle' => '<strong>(Required) </strong>The account name used to log in to ABN-AMRO\'s Admin Portal.'),
+                        'currency'    => array('subtitle' => '<strong>(Required) </strong>The currency used to charge the customer. In most cases, it will be EUR. It may also be USD.', 'type' => 'select', 'values' => array('EUR' => 'EUR (Euro)', 'USD' => 'USD (Dollars)')),
+                        'language'    => array('subtitle' => '<strong>(Required) </strong>The language the offsite payment site will use. Valid values: nl_NL (Dutch), en_US (English).', 'type' => 'select', 'values' => array('nl_NL' => 'nl_NL (Dutch)', 'en_US' => 'en_US (English)')),
+                        'shaIn'    => array('subtitle' => '<strong>(Required) </strong>This corresponds to the "SHA-IN" passphrase in your account. See the '
+                            . link_to('/docs/Club Speed - ABN-AMRO iDEAL Online Booking Integration.pdf','Setup Guide', array('target' => '_blank')) . ' for more details.'),
+                        'shaOut'    => array('subtitle' => '<strong>(Required) </strong>This corresponds to the "SHA-OUT" passphrase in your account. See the ' .
+                            link_to('/docs/Club Speed - ABN-AMRO iDEAL Online Booking Integration.pdf','Setup Guide', array('target' => '_blank')) . ' for more details.')
+						);
+					break;
+                case 'AuthorizeNet_AIM':
+                    $paymentType->overview = 'This is Authorize.Net\'s Advanced Integration Method (AIM).<br/><br/>
+                    <strong>Useful links: </strong><a href="https://account.authorize.net/" target="_blank">Admin Portal</a>';
+
+                    $notes = array(
+                        'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                                    'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.'),
+                        'apiLoginId' => array('friendlyName' => 'API Login ID', 'subtitle' => '<strong>(Required) </strong>Used to authenticate web transactions. For setup instructions, ' .
+                                    link_to('https://www.authorize.net/support/CP/helpfiles/Account/Settings/Security_Settings/General_Settings/API_Login_ID_and_Transaction_Key.htm','click here', array('target' => '_blank')) . '.'),
+                        'transactionKey' => array('friendlyName' => 'Transaction Key', 'subtitle' => '<strong>(Required) </strong>Also used to authenticate web transactions. For setup instructions, ' .
+                            link_to('https://www.authorize.net/support/CP/helpfiles/Account/Settings/Security_Settings/General_Settings/API_Login_ID_and_Transaction_Key.htm','click here', array('target' => '_blank')) . '.'),
+                        'developerMode' => array('friendlyName' => 'Development Mode',
+                                            'subtitle' => '<em>(Optional) </em> You may ignore this option. It\'s used for testing purposes by developers.'),
+                    );
+                    break;
+                case 'AuthorizeNet_SIM':
+                    $paymentType->overview = 'This is Authorize.Net\'s Server Integration Method (SIM).<br/><br/>
+                    <strong>Useful links: </strong><a href="https://account.authorize.net/" target="_blank">Admin Portal</a>';
+
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor is not supported at this time. Please recommend Authorize.Net\'s AIM method.';
+
+                    break;
+
+                case 'Dummy':
+                    $paymentType->overview = 'This is a test payment provider. Your Online Booking will be disabled while this processor is set to current.<br/><br/>
+
+                    To test successful transactions, use the following credit card information:<br/><br/>
+
+                    Number: 4242424242424242<br/>
+                    CVV: 162<br/>
+                    Expiration: Any date in the future.';
+
+                    break;
+
+                case 'Payflow_Pro':
+                    $paymentType->overview = 'This is the Payflow Pro on-site payment processor provided by PayPal.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://manager.paypal.com" target="_blank">Admin Portal</a>';
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor does NOT take the customer offsite to make payments.';
+
+                    $notes = array(
+                        'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                            'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.'),
+                        'partner'    => array('friendlyName' => 'Partner', 'subtitle' => '<strong>(Required) </strong>This should be set to PayPal unless you are instructed to do otherwise.'),
+                        'username'    => array('friendlyName' => 'Username', 'subtitle' => '<strong>(Required) </strong>The ID that you specified when you got the Payflow account.'),
+                        'vendor'    => array('friendlyName' => 'Vendor', 'subtitle' => '<strong>(Required) </strong>Also the ID that you specified when you got the Payflow account. This will be the same as Username in most cases.'),
+                        'password' => array('friendlyName' => 'Password', 'subtitle' => '<strong>(Required) </strong>The password that you specified when you got the Payflow account.')
+                    );
+                    break;
+
+                case 'PayPal_Express':
+                    $paymentType->overview = 'This is the PayPal Express off-site payment processor provided by PayPal. It requires a PayPal Business account.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://www.paypal.com/" target="_blank">Admin Portal</a>';
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor takes the customer offsite to make payments. The purchase is finalized when they are redirected back to the Online Booking page.';
+
+                    $notes = array(
+                        'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                                        'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.'),
+                        'username' => array('friendlyName' => 'Username', 'subtitle' => '<strong>(Required) </strong>The username generated when you request API credentials in your PayPal account. For more information, <a href="https://developer.paypal.com/docs/classic/api/apiCredentials/#creating-classic-api-credentials" target="_blank">click here.</a>'),
+                        'password' => array('friendlyName' => 'Password', 'subtitle' => '<strong>(Required) </strong>The password generated when you request API credentials in your PayPal account. For more information, <a href="https://developer.paypal.com/docs/classic/api/apiCredentials/#creating-classic-api-credentials" target="_blank">click here.</a>'),
+                        'signature' => array('friendlyName' => 'Signature', 'subtitle' => '<strong>(Required) </strong>The signature generated when you request API credentials in your PayPal account. For more information, <a href="https://developer.paypal.com/docs/classic/api/apiCredentials/#creating-classic-api-credentials" target="_blank">click here.</a>'),
+                        'solutionType' => array('friendlyName' => 'Solution Type', 'subtitle' => '<em>(Optional) </em>Do not use this setting unless instructed to do so. It controls advanced checkout options.'),
+                        'landingPage' => array('friendlyName' => 'Landing Page', 'subtitle' => '<em>(Optional) </em>Do not use this setting unless instructed to do so. It controls advanced checkout options.'),
+                        'brandName' => array('friendlyName' => 'Brand Name', 'subtitle' => '<em>(Optional) </em>A label that overrides the business name in the PayPal account on the PayPal hosted checkout pages. Character length and limitations: 127 single-byte alphanumeric characters.'),
+                        'headerImageUrl' => array('friendlyName' => 'Header Image URL', 'subtitle' => '<em>(Optional) </em>URL for the image you want to appear at the top left of the payment page. The image has a maximum size of 750 pixels wide by 90 pixels high. PayPal recommends that you provide an image that is stored on a secure (https) server. If you do not specify an image, the business name displays. Character length and limitations: 127 single-byte alphanumeric characters.')
+                    );
+                    break;
+
+                case 'PayPal_Pro':
+                    $paymentType->overview = 'This is the PayPal Pro on-site payment processor provided by PayPal. It requires a PayPal Business Pro account.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://www.paypal.com/" target="_blank">Admin Portal</a>';
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor does NOT take the customer offsite to make payments. It requires a PayPal Business account that has been upgraded to Pro.';
+
+                    $notes = array(
+                        'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                            'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.'),
+                        'username' => array('friendlyName' => 'Username', 'subtitle' => '<strong>(Required) </strong>The username generated when you request API credentials in your PayPal account. For more information, <a href="https://www.paypal.com/us/cgi-bin/webscr?cmd=xpt/cps/merchant/wppro/WPProIntegrationSteps-outside#SectionB" target="_blank">click here.</a>'),
+                        'password' => array('friendlyName' => 'Password', 'subtitle' => '<strong>(Required) </strong>The password generated when you request API credentials in your PayPal account. For more information, <a href="https://www.paypal.com/us/cgi-bin/webscr?cmd=xpt/cps/merchant/wppro/WPProIntegrationSteps-outside#SectionB" target="_blank">click here.</a>'),
+                        'signature' => array('friendlyName' => 'Signature', 'subtitle' => '<strong>(Required) </strong>The signature generated when you request API credentials in your PayPal account. For more information, <a href="https://www.paypal.com/us/cgi-bin/webscr?cmd=xpt/cps/merchant/wppro/WPProIntegrationSteps-outside#SectionB" target="_blank">click here.</a>')
+                    );
+                    break;
+
+                case 'SagePay_Direct':
+                    $paymentType->overview = 'This is Sage Pay\'s Direct Integration method.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://live.sagepay.com/mysagepay/login.msp" target="_blank">Admin Portal</a>';
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>This is SagePay version 3.0. <strong>The customer must whitelist their server\'s public IP address within SagePay\'s settings.</strong>';
+
+                    $notes = array(
+                        'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                            'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.'),
+                        'vendor' => array('friendlyName' => 'Vendor', 'subtitle' => '<strong>(Required) </strong>Your vendor name with Sage Pay.'),
+                        'referrerId' => array('friendlyName' => 'Referrer ID', 'subtitle' => '<em>(Optional) </em>This is for Sage Pay vendors who are linked with one of Sage Pay\'s partners.')
+                    );
+                    break;
+
+                case 'SagePay_Server':
+                    $paymentType->overview = 'This is Sage Pay\'s offsite Server Integration method.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://live.sagepay.com/mysagepay/login.msp" target="_blank">Admin Portal</a>';
+
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor is not supported at this time. Please recommend Sage Pay\'s Direct Integration method.';
+
+                    break;
+
+                case 'Stripe':
+                    $paymentType->overview = 'This is Stripe\'s payment processing service.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://dashboard.stripe.com/login" target="_blank">Admin Portal</a>';
+
+                    $notes = array(
+                        'apiKey' => array('friendlyName' => 'API Key', 'subtitle' => '<strong>(Required) </strong>This is the API key associated with your Stripe account. For more information, <a href="https://support.stripe.com/questions/where-do-i-find-my-api-keys" target="_blank">click here.</a>')
+                    );
+                    break;
+
+                case 'WorldPayXML':
+                    $paymentType->overview = 'This is WorldPay\'s UK payment processing service.';
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>We have yet to get a test account with WorldPay. These docs will be fleshed out once we do so.';
+
+                    $notes = array(
+                        'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                            'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.')
+                    );
+                    break;
+
+			}
+            
+			foreach($paymentType->options as $id => $option) {
+				$paymentType->options[$id] = $this->applyPaymentTypeOptionNotes($notes, $option);
+			}
+			
+			return $paymentType;
+		}
+
     public function payments()
     {
         $supportedPaymentTypes = CS_API::getSupportedPaymentTypes();
         if ($supportedPaymentTypes === null)
         {
             return Redirect::to('/disconnected');
+        }
+
+        // Populate Payment Types with descriptions, etc
+        foreach($supportedPaymentTypes as $i => $paymentType) {
+            $supportedPaymentTypes[$i] = $this->applyPaymentTypeNotes($paymentType);
         }
 
         $bookingSettings = CS_API::getSettingsFor('Booking');
