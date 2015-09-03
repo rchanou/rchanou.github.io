@@ -287,7 +287,7 @@ class CheckoutController extends BaseController
             }
         }
         $checkFormatted["details"] = $details;
-        $formattedTotalAmount = number_format($actualTotal,2);
+        $formattedTotalAmount = number_format($actualTotal,2,'.','');
         $onlineBookingPaymentProcessorSettings->amount = $formattedTotalAmount;
 
         //Added for SagePay
@@ -480,7 +480,7 @@ class CheckoutController extends BaseController
             $checkFormatted["details"] = $details;
             Session::put('details',$details);
 
-            $formattedTotalAmount = number_format($actualTotal,2);
+            $formattedTotalAmount = number_format($actualTotal,2,'.','');
             Session::put('formattedTotalAmount',$formattedTotalAmount);
             $onlineBookingPaymentProcessorSettings->amount = $formattedTotalAmount;
             Session::put('completePaymentProcessorSettings',$onlineBookingPaymentProcessorSettings);
