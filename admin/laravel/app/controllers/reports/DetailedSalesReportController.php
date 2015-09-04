@@ -23,7 +23,7 @@ class DetailedSalesReportController extends BaseController
 			
 			$settings = CS_API::getSettingsFor('MainEngine');
 			$currentCulture = isset($settings->{'settings'}->{'CurrentCulture'}) ? $settings->{'settings'}->{'CurrentCulture'}->{'SettingValue'} : 'en-US';
-			
+
 			if($currentCulture === 'en-US' || empty($currentCulture)) return $report; // No need to format
 			
 			$formatter = new \NumberFormatter($currentCulture, \NumberFormatter::DECIMAL); 
@@ -73,7 +73,7 @@ class DetailedSalesReportController extends BaseController
 
         $dataToExport = Session::get('mostRecentReport_DetailedSales');
 
-        Exports::toCSV(localizeData($dataToExport, $this->formatters), 'Detailed Sales Report');
+        Exports::toCSV($this->localizeData($dataToExport, $this->formatters), 'Detailed Sales Report');
 
     }
 
