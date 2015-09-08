@@ -295,6 +295,7 @@ class CheckoutController extends BaseController
         $onlineBookingPaymentProcessorSettings->Description = "Club Speed Online Booking Transaction - Check $checkId";
 
         $result = CS_API::pay($onlineBookingPaymentProcessorSettings,$checkFormatted,$paymentInformation);
+
         if ($result === null)
         {
             CS_API::log('ERROR :: Online Booking failed at the make payment step.');
@@ -718,14 +719,14 @@ class CheckoutController extends BaseController
             {
                 $newItem['productId'] = $cartItem['data']->products[0]->productsId;
                 $newItem['qty'] = $cartItem['quantity'];
-                $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                //$newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
                 $checkDetails['checks'][0]['details'][] = $newItem;
             }
             if ($cartItem['type'] == 'product')
             {
                 $newItem['productId'] = $cartItem['itemId'];
                 $newItem['qty'] = $cartItem['quantity'];
-                $newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
+                //$newItem['checkDetailId'] = $cartItemIndex; //Used to map the cart to the resulting check details
                 $checkDetails['checks'][0]['details'][] = $newItem;
             }
         }
