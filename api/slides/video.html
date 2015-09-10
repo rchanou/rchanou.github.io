@@ -19,6 +19,7 @@
         var assert = z.assert;
         var sw = z.sw;
         var parameters = z.location.parameters;
+        var loop = (z.location.parameters.loop != 'undefined' && z.location.parameters.loop == true) ? 'loop' : '';
         var events = z.events;
         var equals = z.equals;
     </script>
@@ -61,7 +62,7 @@
 
     var src = '' +
             '<div id="wrapper">'
-        +   '   <video id="speedScreenVideo" preload="auto" autoplay="autoplay">'
+        +   '   <video id="speedScreenVideo" preload="auto" autoplay="autoplay" ' + loop + '>'
         +   '       <source src={{videoUrl}}>'
         +   '   </video>'
         +   '</div>';
