@@ -47,11 +47,10 @@ function convertRaceDetailsToGoogleChartFormat(jsonData, strings)
     for (var i=0; i < jsonData.race.laps.length; i++)
     {
         var currentLap = jsonData.race.laps[i];
-        if (currentLap.lap_number != 0 && racers[currentLap.racer_id] !== undefined)
+        if (currentLap.lap_number != 0 && typeof racers[currentLap.racer_id] !== "undefined")
         {
             racers[currentLap.racer_id].laptimes[currentLap.lap_number] = currentLap.lap_time;
-
-            if (currentLap.lap_number > totalNumberOfLaps) //Find out the greatest number of laps
+            if (parseInt(currentLap.lap_number) > parseInt(totalNumberOfLaps)) //Find out the greatest number of laps
             {
                 totalNumberOfLaps = currentLap.lap_number;
             }
