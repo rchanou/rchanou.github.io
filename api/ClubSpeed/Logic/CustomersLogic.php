@@ -187,11 +187,9 @@ class CustomersLogic extends BaseLogic {
         if (!isset($password) || !is_string($password))
             throw new \InvalidArgumentException("Customer login requires password to be a string!");
 
-        $primaryCustomer = $this->find_primary_account($email); // ~ 143ms
-        if(empty($primaryCustomer)) {
-            // Customer email could not be found in the database
-            throw new \UnauthorizedException("Invalid credentials!");
-        }
+        $primaryCustomer = $this->primary(array('EmailAddress' => $email));
+        if (empty($primaryCustomer)) // should be throwing an exception as above. leaving for now.
+            throw new \UnauthorizedException("Invalid credentials!"); // Email was not found
         $customerId = $primaryCustomer->CustID; // password is not exposed on primaryCustomer -- grab the underlying customer record
         $customer = $this->interface->get($customerId);
         $customer = $customer[0];
@@ -559,7 +557,7 @@ class CustomersLogic extends BaseLogic {
         $old =& $uow->existing;
         $new =& $uow->data;
 
-        // // validate email
+        // validate email
         if (isset($new->EmailAddress) && !empty($new->EmailAddress) && $new->EmailAddress != $old->EmailAddress) {
 
             // check the email formatting
@@ -570,10 +568,9 @@ class CustomersLogic extends BaseLogic {
             // $settings = $self->getSettings(); // collect kiosk settings
             $allowDuplicateEmail = Convert::toBoolean($settings['MainEngine']['AllowDuplicateEmail']);
             if (!$allowDuplicateEmail) {
-                $customersWithEmail = $db->customers->match(array(
-                    'EmailAddress' => $new->EmailAddress
-                ));
-                if (!empty($customersWithEmail))
+                $customersWithEmail = UnitOfWork::build()->action('all')->where(array('EmailAddress' => $new->EmailAddress));
+                $this->uow($customersWithEmail);
+                if (!empty($customersWithEmail->data))
                     throw new \EmailAlreadyExistsException("Customer update found an email which already exists! Received: " . $new->EmailAddress);
             }
         }
@@ -851,9 +848,8 @@ class CustomersLogic extends BaseLogic {
             return 0;
         });
 
-        // and if there are no customers that match? return 404?
         if (empty($customers))
-            throw new \CSException('Unable to find record on dbo.Customers matching the given criteria: (' . json_encode($where) . ')', 404);
-        return $customers[0];
+            return null;
+        return $this->logic->customers->dummy($customers[0]);
     }
 }

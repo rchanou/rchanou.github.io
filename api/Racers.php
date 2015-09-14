@@ -95,7 +95,7 @@ class Racers
             if (empty($params['Standard']['EmailAddress']))
                 throw new CSException('Attempted facebook login without providing an email address!');
             // should customer existence be checked here, or inside facebook->fb_login ??
-            $account = $this->logic->customers->find_primary_account($params['Standard']['EmailAddress']);
+            $account = $this->logic->customers->primary(array('EmailAddress' => $params['Standard']['EmailAddress']));
             if (empty($account))
                 $customerId = $this->logic->customers->create_v0($params['Standard']); // use the old, non restful version of the call
             else
@@ -867,7 +867,7 @@ class Racers
             if (!Authenticate::customerAccess($racer_id))
                 throw new RestException(401, "Invalid authorization!");
             if (!$this->logic->customers->exists($racer_id))
-                throw new \RecordNotFoundException("Unable to find record on Customers with key: ($racer_id)");
+                throw new \RecordNotFoundException('Customers', $racer_id);
             if (isset($request_data['profilephoto'])) {
                 $photo = $request_data['profilephoto'];
                 if (!empty($photo)) {

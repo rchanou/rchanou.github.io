@@ -1,10 +1,13 @@
 <?php
 
 namespace ClubSpeed\Logic;
-use ClubSpeed\Enums\Enums as Enums;
+use ClubSpeed\Enums\Enums;
 use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Mail\MailService as Mail;
-use ClubSpeed\Utility\Tokens as Tokens;
+use ClubSpeed\Utility\Tokens;
+use ClubSpeed\Utility\Params;
+use ClubSpeed\Security\Hasher;
+use ClubSpeed\Database\Helpers\UnitOfWork;
 
 /**
  * The business logic class
@@ -34,10 +37,10 @@ class PasswordsLogic extends BaseLogic {
         if (!isset($params['url']) || is_null($params['url']) || empty($params['url']))
             throw new \RequiredArgumentMissingException("Password reset did not receive the URL to e-mail!");
         try {
-            $params = \ClubSpeed\Utility\Params::nonReservedData($params);
-            $email = $params['email'];
-            $url = $params['url'];
-            $customer = $this->logic->customers->find_primary_account($email); // REQUIRED
+            $params   = Params::nonReservedData($params);
+            $email    = $params['email'];
+            $url      = $params['url'];
+            $customer = $this->logic->customers->primary(array('EmailAddress' => $email)); // REQUIRED
             if (is_null($customer) || empty($customer)) {
                 Log::warn('Password reset received an email address which could not be found! Received: ' . $email, Enums::NSP_PASSWORD);
                 // for security purposes, return without throwing an error
@@ -51,24 +54,40 @@ class PasswordsLogic extends BaseLogic {
             $authentication = $this->db->authenticationTokens->dummy();
             $authentication->CustomersID = $customerId;
             $authentication->TokenType = Enums::TOKEN_TYPE_PASSWORD_RESET;
-            $existingAuthentications = $this->db->authenticationTokens->find($authentication);
+            $uow = UnitOfWork::build()
+                ->table('AuthenticationTokens')
+                ->action('all')
+                ->where(array(
+                    'CustomersID' => $customerId,
+                    'TokenType' => Enums::TOKEN_TYPE_PASSWORD_RESET
+                ));
+            $this->logic->authenticationTokens->uow($uow);
+            $existingAuthentications = $uow->data;
             if (!empty($existingAuthentications)) {
                 // should we update the existing token here?
                 // or consider this an error for security purposes?
                 // probably update the existing token -- seems to be how most sites handle this
                 $authentication = $existingAuthentications[0];
                 $authentication->Token = Tokens::generate();
-                $authentication->RemoteUserID = "RemoteUserUPDATED";
-                $affected = $this->db->authenticationTokens->update($authentication);
+                $authentication->RemoteUserID = 'RemoteUserUPDATED';
+                $uow = UnitOfWork::build()
+                    ->table('AuthenticationTokens')
+                    ->action('update')
+                    ->table_id($authentication->AuthenticationTokensID)
+                    ->data($authentication);
+                $this->logic->authenticationTokens->uow($uow);
                 Log::info('Password reset updated token for Customer ID: ' . $customerId, Enums::NSP_PASSWORD);
             }
             else {
                 $authentication->RemoteUserID = "RemoteUserINSERTED";
                 $authentication->Token = Tokens::generate();
-                $this->db->authenticationTokens->create($authentication);
+                $uow = UnitOfWork::build()
+                    ->action('create')
+                    ->data($authentication)
+                    ;
+                $this->logic->authenticationTokens->uow($uow);
                 Log::info('Password reset inserted new token for Customer ID: ' . $customerId, Enums::NSP_PASSWORD);
             }
-
             $emailTo = array($email => $customer->FName . ' ' . $customer->LName);
 
             // grab email address information for the track, using the EmailWelcomeFrom setting
@@ -144,7 +163,7 @@ class PasswordsLogic extends BaseLogic {
         $password   = $params['password'];
 
         // validate the token by searching for the entry on the database
-        $results = $this->db->authenticationTokens->match(array(
+        $results = $this->logic->authenticationTokens->match(array(
             'Token' => $token
         ));
         if (count($results) < 1) {
@@ -162,7 +181,7 @@ class PasswordsLogic extends BaseLogic {
         $customer = $customer[0];
         // update the customer
         try {
-            $customer->Hash = \ClubSpeed\Security\Hasher::hash($password);
+            $customer->Hash = Hasher::hash($password);
             $affected = $this->db->customers->update($customer);
             Log::info('Password reset has updated password for Customer ID: ' . $customer->CustID, Enums::NSP_PASSWORD);
         }

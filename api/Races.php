@@ -1243,15 +1243,6 @@ EOS;
                 $output = $output + $this->scoreboard(-1, (int)($heatId));
             }
         }
-
-        // // if racer has no laps, then drop them from the return
-        // $racers =& $output['race']['racers'];
-        // $c = count($racers);
-        // for ($i = 0; $i < $c; $i++) {
-        //     $racer = $racers[$i];
-        //     if (!isset($racer['laps']) || empty($racer['laps']))
-        //         array_splice($racers, $i, 1);
-        // }
         return $output;
     }
 

@@ -267,12 +267,13 @@ class ChecksLogic extends BaseLogic {
                 // $note = (isset($handled[$checkTotal->CheckDetailID]) && !empty($handled[$checkTotal->CheckDetailID])) ? $handled[$checkTotal->CheckDetailID] : '';
                 $productName = !empty($checkTotal->ProductName) ? $checkTotal->ProductName : '(No product name!)';
                 $receiptData['details'][] = array(
-                      'note'        => $note
-                    , 'productName' => $productName
-                    , 'description' => trim($productName . ': ' . $note) // for backwards compatibility and convenience
-                    , 'quantity'    => $checkTotal->Qty
-                    , 'price'       => Currency::toCurrencyString($checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
-                    , 'heatId'      => $heatId
+                      'checkDetailId' => $checkTotal->CheckDetailID
+                    , 'note'          => $note
+                    , 'productName'   => $productName
+                    , 'description'   => trim($productName . ': ' . $note) // for backwards compatibility and convenience
+                    , 'quantity'      => $checkTotal->Qty
+                    , 'price'         => Currency::toCurrencyString($checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
+                    , 'heatId'        => $heatId
                     , 'scheduledTime' => $scheduledTime
                 );
             }

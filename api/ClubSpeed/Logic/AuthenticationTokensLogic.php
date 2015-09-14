@@ -26,6 +26,39 @@ class AuthenticationTokensLogic extends BaseLogic {
         $this->interface = $this->db->authenticationTokens;
         $this->expire(); // expire on any authenticationTokens construct
         $this->expiresAtInterval = "+24 hours";
+
+        $self =& $this;
+        $befores = array(
+            'create' => array($self, 'beforeCreate'),
+            'update' => array($self, 'beforeUpdate')
+        );
+        $this->before('uow', function($uow) use (&$befores)  {
+            if (isset($befores[$uow->action]))
+                call_user_func($befores[$uow->action], $uow);
+        });
+    }
+
+    function beforeCreate($uow) {
+        $authenticationToken = $uow->data;
+        $expiresAtInterval = $this->expiresAtInterval;
+        $authenticationToken->CreatedAt = Convert::getDate(); // db also has a default
+        if (empty($authenticationToken->ExpiresAt)) // allow ExpiresAt to be overwritten as necessary
+            $authenticationToken->ExpiresAt = Convert::getDate(strtotime($expiresAtInterval));
+        if (empty($authenticationToken->Token))
+            $authenticationToken->Token = Tokens::generate();
+        if (empty($authenticationToken->TokenType))
+            $authenticationToken->TokenType = Enums::TOKEN_TYPE_PUBLIC;
+        if (empty($authenticationToken->RemoteUserID))
+            $authenticationToken->RemoteUserID = 1; // non-nullable. why did we do this again?
+    }
+
+    function beforeUpdate($uow) {
+        $new = $uow->data;
+        $old = $uow->existing;
+        $expiresAtInterval = $this->expiresAtInterval;
+        $newExpiresAt = Convert::getDate(strtotime($expiresAtInterval));
+        if ($old->ExpiresAt < $newExpiresAt)
+            $new->ExpiresAt = $newExpiresAt;
     }
 
     public function create($params = array()) {

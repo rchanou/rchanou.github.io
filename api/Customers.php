@@ -26,6 +26,9 @@ class Customers extends BaseUowApi {
             $where = $uow->where;
             if (empty($where))
                 throw new CSException('Attempted to find primary customer without any where clause!');
+            $primary = $this->logic->{$this->resource}->primary($where);
+            if (empty($primary))
+                throw new CSException('Unable to find primary customer matching the given criteria: (' . json_encode($where) . ')', 404);
             $uow->data = $this->logic->{$this->resource}->primary($where);
             $mapper->uowOut($uow);
             return $uow->data;
