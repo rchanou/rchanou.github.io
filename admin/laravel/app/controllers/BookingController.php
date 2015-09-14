@@ -67,7 +67,10 @@ class BookingController extends BaseController
                             data-content="This is shorthand for {{detail.productName}}: {{detail.note}}">
                         </i> {{detail.description}}<br/>'
                     . '<b>Item Quantity:</b> {{detail.quantity}}<br/>'
-                    . '<b>Item Price:</b> {{detail.price}}';
+                    . '<b>Item Price:</b> {{detail.price}}<br/><br/>'
+                    . '<b>Heat ID:</b> <br/>&#60;!-- {% if detail.heatId %} --&#62; <br/>{{detail.heatId}}<br/> &#60;!-- {% endif %} --&#62;<br/><br/>'
+                    . '<b>Scheduled Time:</b> <br/>&#60;!-- {% if detail.scheduledTime %} --&#62; <br/>{{detail.scheduledTime}}<br/> &#60;!-- {% endif %}--&#62;<br/>'
+      ;
 
         $giftCardEmailNote = 'The following can be inserted into this template:<br/><br/>'
             . '<b>Customer\'s Name:</b> {{customer}}<br/>'

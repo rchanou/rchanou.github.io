@@ -284,12 +284,14 @@ class ReservationProductHandler extends BaseProductHandler {
                 }
 
                 $scheduledTime = new \DateTime($heatMain->ScheduledTime);
-                $message = 'Heat #' . $heatId . ' scheduled at ' . $scheduledTime->format($dateDisplayFormat . ' ' . $timeDisplayFormat);
+                $scheduledTimeFormatted = $scheduledTime->format($dateDisplayFormat . ' ' . $timeDisplayFormat);
+                $message = 'Heat #' . $heatId . ' scheduled at ' . $scheduledTimeFormatted;
                 $notes = (!empty($checkTotal->Notes) ? $checkTotal->Notes . ', ' : '') . $message;
                 $this->logic->checks->update($checkTotal->CheckID, array(
                     'Notes' => $notes
                 ));
-                return $message;
+
+                return array('message' => $message, 'heatId' => $heatId, 'scheduledTime' => $scheduledTimeFormatted);
             }
         }
     }

@@ -257,10 +257,13 @@ class ChecksLogic extends BaseLogic {
             foreach($checkTotals as $checkTotal) {
                 // see if we can just use the check note instead of this handler nonsense.
 
-                $note = Arrays::first($handled, function($x) use ($checkTotal) {
+                $handlerResult = Arrays::first($handled, function($x) use ($checkTotal) {
                     return $x['checkDetailId'] === $checkTotal->CheckDetailID;
                 });
-                $note = (empty($note) ? '' : $note['description']);
+                $note = (empty($handlerResult) ? '' : $handlerResult['description']);
+                $heatId = isset($handlerResult['heatId']) ? $handlerResult['heatId'] : null;
+                $scheduledTime = isset($handlerResult['scheduledTime']) ? $handlerResult['scheduledTime'] : null;
+
                 // $note = (isset($handled[$checkTotal->CheckDetailID]) && !empty($handled[$checkTotal->CheckDetailID])) ? $handled[$checkTotal->CheckDetailID] : '';
                 $productName = !empty($checkTotal->ProductName) ? $checkTotal->ProductName : '(No product name!)';
                 $receiptData['details'][] = array(
@@ -269,6 +272,8 @@ class ChecksLogic extends BaseLogic {
                     , 'description' => trim($productName . ': ' . $note) // for backwards compatibility and convenience
                     , 'quantity'    => $checkTotal->Qty
                     , 'price'       => Currency::toCurrencyString($checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
+                    , 'heatId'      => $heatId
+                    , 'scheduledTime' => $scheduledTime
                 );
             }
             $checkPayments = $this->logic->payment->match(array(
