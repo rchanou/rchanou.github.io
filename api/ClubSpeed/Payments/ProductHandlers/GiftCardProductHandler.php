@@ -54,7 +54,7 @@ class GiftCardProductHandler extends BaseProductHandler {
                 $giftCardCustomer->EmailAddress = 'giftcard' . $giftCardCustomer->CrdID . '@clubspeed.com'; // hack to satisfy customer interface logic
                 $giftCardCustomer->Gender = 0; // hack to satisfy customer interface logic
 
-                $customerId = $this->logic->customers->create_v0((array)$giftCardCustomer); // convert back to array for the params to be handled properly with the old customer interface
+                $giftCardCustomerId = $this->logic->customers->create_v0((array)$giftCardCustomer); // convert back to array for the params to be handled properly with the old customer interface
                 $return['success'][] = '#' . $giftCardCustomer->CrdID; // use # to prevent tel: interpretation in html?
                 Log::info($logPrefix . 'Created customer representation of gift card #' . $giftCardCustomer->CrdID, Enums::NSP_BOOKING);
             }
@@ -66,11 +66,22 @@ class GiftCardProductHandler extends BaseProductHandler {
             }
 
             try {
+                $this->logic->checkDetails->update($checkTotal->CheckDetailID, array(
+                    'G_CustID' => $giftCardCustomerId
+                ));
+            }
+            catch(\Exception $e) {
+                $message = $logPrefix . 'Unable to update check details to point to the gift card customer! ' . $e->getMessage();
+                Log::error($message, Enums::NSP_BOOKING);
+                throw new \Exception($message);
+            }
+
+            try {
                 $giftCardHistory = $this->logic->giftCardHistory->dummy();
                 $product = $this->logic->products->get($checkTotal->ProductID);
                 $product = $product[0];
-                $giftCardHistory->CustID = $customerId;
-                $giftCardHistory->Points = $product->Price1; // using price1 for now, G_Points is also a possibility (what's the difference?)
+                $giftCardHistory->CustID = $giftCardCustomerId;
+                $giftCardHistory->Points = $checkTotal->G_Points; // use G_Points for consistency, also use the piece on the check itself, not the product in case it has been manually manipulated.
                 $giftCardHistory->Notes = 'Reload at Check ID ' . $checkTotal->CheckID;
                 $giftCardHistory->CheckID = $checkTotal->CheckID;
                 $giftCardHistory->CheckDetailID = $checkTotal->CheckDetailID;
