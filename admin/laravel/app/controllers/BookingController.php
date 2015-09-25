@@ -590,6 +590,26 @@ class BookingController extends BaseController
                             link_to('/docs/Club Speed - ABN-AMRO iDEAL Online Booking Integration.pdf','Setup Guide', array('target' => '_blank')) . ' for more details.')
 						);
 					break;
+                case 'Rabobank':
+                    $paymentType->overview = 'This is the Rabobank payment processor, which supports iDEAL among other payment types.<br/><br/>
+                    <strong>Useful links: </strong><a href="https://download.omnikassa.rabobank.nl/" target="_blank">Admin Portal</a>
+                    | <a href="https://cas.merchant-extranet.sips-atos.com/cas/login?service=https%3A%2F%2Fdashboard.omnikassa.rabobank.nl%2Fportal%2Fhome" target="_blank">Transaction Manager</a>';
+                    $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor takes the customer offsite to make payments. Upon completing the purchase, they are redirected back to the Online Booking page. <br/><br/>The check isn\'t closed, and they are not added to any heats or issued any gift cards, until this happens.'; // Support information (test credentials?)
+
+                    $notes = array(
+                        'testMode' => array('friendlyName' => 'Test Mode', 'type' => 'select', 'values' => array('1' => 'Test Mode', '0' => 'Live Mode'),
+                            'subtitle' => '<strong>(Required) </strong>Use "Test Mode" while testing, and "Live Mode" when you\'re ready to charge customers.'),
+                        'merchantId'    => array('friendlyName' => 'Merchant ID', 'subtitle' => '<strong>(Required) </strong>The Merchant ID for your account.
+                        This can be found in the "Secret Keys" section of the Admin Panel.<br><br>
+                        If in <strong>Test Mode</strong>, use the following: 002020000000001'),
+                        'keyVersion'    => array('friendlyName' => 'Key Version', 'subtitle' => '<strong>(Required) </strong>The Key Version for your account.
+                        This can be found in the "Secret Keys" section of the Admin Panel, in the Version column.<br><br>
+                        If in <strong>Test Mode</strong>, use the following: 1'),
+                        'secretKey'    => array('friendlyName' => 'Secret Key', 'subtitle' => '<strong>(Required) </strong>The Secret Key for your account.
+                        This can be found in the "Secret Keys" section of the Admin Panel, in the Key column. <strong>These keys expire yearly and must be recreated.</strong><br><br>
+                        If in <strong>Test Mode</strong>, use the following: 002020000000001_KEY1'),
+                    );
+                    break;
                 case 'AuthorizeNet_AIM':
                     $paymentType->overview = 'This is Authorize.Net\'s Advanced Integration Method (AIM).<br/><br/>
                     <strong>Useful links: </strong><a href="https://account.authorize.net/" target="_blank">Admin Portal</a>';

@@ -70,6 +70,7 @@
             "SagePay_Server",
             "SecurePay_DirectPost",
             "Stripe",
+            "Rabobank",
             "TargetPay_Directebanking",
             "TargetPay_Ideal",
             "TargetPay_Mrcash",
