@@ -131,6 +131,9 @@ Route::group(array('before' => 'auth'), function()
 	Route::post('reports/logs/data', 'LogsController@data');
 	Route::get('reports/logs/data', 'LogsController@data');
 
+	Route::get('reports/sales-by-pos-and-class', 'SalesByPosAndClassReportController@index');
+	Route::post('reports/sales-by-pos-and-class', 'SalesByPosAndClassReportController@index');
+	Route::get('reports/sales-by-pos-and-class/export/csv', 'SalesByPosAndClassReportController@exportToCSV');
 
 	/* Facebook */
 	Route::get('facebook', 'FacebookController@afterRaceSettings');

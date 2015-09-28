@@ -410,6 +410,16 @@ class CS_API
 
         return self::getJSON("reports/payments_summary", $params);
     }
+		
+		public static function getReport_SalesByPOSAndClass($start = null, $end = null)
+    {
+        self::initialize();
+        $params = array();
+        if ($start != null) { $params['start'] = $start; }
+        if ($end   != null) { $params['end']   = $end;   }
+
+        return self::getJSON("reports/sales_by_pos_and_class", $params);
+    }
 
     public static function getReport_EurekasPayments($start = null, $end = null)
     {

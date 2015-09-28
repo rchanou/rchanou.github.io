@@ -93,6 +93,15 @@ Reports
                         <em>View customers that have linked their accounts with social media</em>
                     </div>
                   </div>
+                  <div class="row">
+                  	<div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                        <a href="{{URL::to('reports/sales-by-pos-and-class')}}">
+                            <i class="fa fa-bar-chart fa-4x"></i><p/>
+                            <strong>Sales By POS and Class</strong><p/>
+                        </a>
+                        <em>Sales, grouped by Point of Sale and Accounting Class</em>
+                    </div>
+                  </div>
               </div>
             </div>
 
