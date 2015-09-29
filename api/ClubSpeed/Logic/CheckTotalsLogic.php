@@ -145,8 +145,34 @@ class CheckTotalsLogic extends BaseLogic {
 
         $useSalesTax = $this->logic->helpers->useSalesTax();
 
-        foreach($checks as $check) {
+        // when we have a gift card with quantity > 1,
+        // then break the qty into multiple line items 
+        // each with a quantity of only 1
+        $checksExpanded = array();
+        $count = count($checks);
+        for ($i = 0; $i < $count; $i++) {
+            $check = $checks[$i];
+            if (!isset($check->ProductID))
+                throw new \CSException("CheckTotal requires a productId for every detail! Received ProductID: " . $check->ProductID);
+            $product = $this->db->products->get($check->ProductID);
+            if (is_null($product) || empty($product))
+                throw new \RecordNotFoundException('Products', $check->ProductID);
+            $product = $product[0];
+            $products[$check->ProductID] = $product;
+            if ($check->Qty + $check->CadetQty < 2 || $product->ProductType !== Enums::PRODUCT_TYPE_GIFT_CARD) {
+                $checksExpanded[] = $check;
+            }
+            else {
+                for($j = 0; $j < ($check->Qty + $check->CadetQty); $j++) {
+                    $clone = $this->interface->dummy((array)$check);
+                    $clone->Qty = 1;
+                    $clone->CadetQty = 0; // scary?
+                    $checksExpanded[] = $clone;
+                }
+            }
+        }
 
+        foreach($checksExpanded as $check) {
             $check->UserID = $check->UserID ?: 1; // necessary to duplicate the fallback logic here, unfortunately.
 
             if (!isset($products[$check->ProductID])) {
@@ -194,8 +220,8 @@ class CheckTotalsLogic extends BaseLogic {
             else
                 $check->DiscountApplied = 0; // ensure the return is always a number
 
-            $check->Gratuity        = $check->Gratuity ?: 0;
-            $check->Fee             = $check->Fee ?: 0;
+            $check->Gratuity = $check->Gratuity ?: 0;
+            $check->Fee      = $check->Fee ?: 0;
             // $check->Discount        = $check->Discount ?: 0;
             // $check->DiscountApplied = $check->DiscountApplied ?: 0; // ensure the return is always a number
 
@@ -229,10 +255,10 @@ class CheckTotalsLogic extends BaseLogic {
 
             if (!isset($running[$check->CheckID])) {
                 $running[$check->CheckID] = array(
-                      'subtotal'    => 0
-                    , 'tax'         => 0
-                    , 'pst'         => 0
-                    , 'gst'         => 0
+                      'subtotal' => 0
+                    , 'tax'      => 0
+                    , 'pst'      => 0
+                    , 'gst'      => 0
                 );
             }
             $running[$check->CheckID]['subtotal'] += $check->CheckDetailSubtotal;
@@ -240,7 +266,8 @@ class CheckTotalsLogic extends BaseLogic {
             $running[$check->CheckID]['gst'] += $check->CheckDetailGST;
             $running[$check->CheckID]['pst'] += $check->CheckDetailPST;
         }
-        foreach($checks as $check) {
+
+        foreach($checksExpanded as $check) {
             $check->CheckSubtotal = $running[$check->CheckID]['subtotal']; // + $check->Fee + $check->Gratuity - $check->Discount;
             $check->CheckTax = $running[$check->CheckID]['tax'];
             $check->CheckGST = $running[$check->CheckID]['gst'];
@@ -274,6 +301,6 @@ class CheckTotalsLogic extends BaseLogic {
                 $check->CheckRemainingTotal = 0; // these could actually be negatives with refunds. careful, if we need to support that.
         }
 
-        return $checks;
+        return $checksExpanded;
     }
 }

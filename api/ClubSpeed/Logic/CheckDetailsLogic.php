@@ -38,6 +38,8 @@ class CheckDetailsLogic extends BaseLogic {
                 $checkDetails->Qty = 0;
             if (isset($checkDetails->CadetQty) && $checkDetails->CadetQty < 0) // disallow negative quantities
                 $checkDetails->CadetQty = 0;
+            if ($product->ProductType === Enums::PRODUCT_TYPE_GIFT_CARD && $checkDetails->Qty + $checkDetails->CadetQty !== 1)
+                throw new \CSException("CheckDetails create with a gift card product must have a quantity of 1! Received Qty: " . $checkDetails->Qty . " and CadetQty: " . $checkDetails->CadetQty);
             $checkDetails->TaxID = $tax->TaxID;
             $checkDetails->TaxPercent = $tax->Amount;
             $checkDetails->Status = Enums::CHECK_DETAIL_STATUS_IS_NEW;
