@@ -436,8 +436,8 @@ EOD;
 SELECT
 MAX(cd.CreatedOn) AS 'POS',
 MAX(pc.Description) AS 'Category',
-SUM(cdv.CheckDetailTax) AS 'Total Pre-tax',
-SUM(cdv.CheckDetailTotal) AS 'Total Post-tax'
+SUM(cdv.CheckDetailTax) AS 'Tax',
+SUM(cdv.CheckDetailTotal) AS 'Total'
 FROM CheckDetails_V cdv
 LEFT JOIN CheckDetails cd ON cdv.CheckDetailID = cd.CheckDetailID
 LEFT JOIN Products ON Products.ProductID = cd.ProductID

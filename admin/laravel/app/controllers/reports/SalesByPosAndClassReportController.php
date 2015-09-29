@@ -10,8 +10,8 @@ class SalesByPosAndClassReportController extends BaseController
 		{
 				$this->beforeFilter('validatePermission:View Reports Module');
 				$this->formatters = array(
-					'Total Pre-tax'    => \NumberFormatter::PATTERN_DECIMAL,
-					'Total Post-tax'    => \NumberFormatter::PATTERN_DECIMAL,
+					'Tax'   => \NumberFormatter::PATTERN_DECIMAL,
+					'Total' => \NumberFormatter::PATTERN_DECIMAL,
 					);
 		}
 		
