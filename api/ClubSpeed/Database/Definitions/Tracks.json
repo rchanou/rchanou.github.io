@@ -1,0 +1,62 @@
+{
+    "table": {
+        "name": "dbo.Tracks",
+        "alias": "trcks"
+    },
+    "columns": [
+        {
+              "name": "TrackNo"
+            , "type": "int"
+            , "primaryKey": true
+            , "identity": false
+        }
+        , {
+              "name": "Description"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "MainLoopID"
+            , "type": "int"
+        }
+        , {
+              "name": "PitEnterLoopID"
+            , "type": "int"
+        }
+        , {
+              "name": "AssignKartLoopID"
+            , "type": "int"
+        }
+        , {
+              "name": "PenaltyBoxLoopID"
+            , "type": "int"
+        }
+        , {
+              "name": "PrinterName"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "TrackLength"
+            , "type": "float"
+        }
+        , {
+              "name": "UnitLength"
+            , "type": "nvarchar"
+        }
+        , {
+              "name": "GridSize"
+            , "type": "int"
+        }
+        , {
+              "name": "AutoRun"
+            , "type": "bit"
+        }
+        , {
+              "name": "SportID"
+            , "type": "int"
+        }
+        , {
+              "name": "AllowAddOnRacing"
+            , "type": "bit"
+        }
+    ]
+}

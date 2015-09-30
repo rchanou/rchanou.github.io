@@ -263,6 +263,7 @@ class ChecksLogic extends BaseLogic {
                 $note = (empty($handlerResult) ? '' : $handlerResult['description']);
                 $heatId = isset($handlerResult['heatId']) ? $handlerResult['heatId'] : null;
                 $scheduledTime = isset($handlerResult['scheduledTime']) ? $handlerResult['scheduledTime'] : null;
+                $trackName = isset($handlerResult['trackName']) ? $handlerResult['trackName'] : null;
 
                 // $note = (isset($handled[$checkTotal->CheckDetailID]) && !empty($handled[$checkTotal->CheckDetailID])) ? $handled[$checkTotal->CheckDetailID] : '';
                 $productName = !empty($checkTotal->ProductName) ? $checkTotal->ProductName : '(No product name!)';
@@ -275,6 +276,7 @@ class ChecksLogic extends BaseLogic {
                     , 'price'         => Currency::toCurrencyString($checkTotal->CheckDetailSubtotal / $checkTotal->Qty) // use CheckDetailSubtotal or UnitPrice (coming from the product table)
                     , 'heatId'        => $heatId
                     , 'scheduledTime' => $scheduledTime
+                    , 'trackName'     => $trackName
                 );
             }
             $checkPayments = $this->logic->payment->match(array(

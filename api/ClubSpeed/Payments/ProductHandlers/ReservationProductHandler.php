@@ -240,7 +240,7 @@ class ReservationProductHandler extends BaseProductHandler {
                 // attempt to add any additional reservations by incrementing the heat's NumberOfReservation
                 try {
                     if (!empty($remainingQty)) { // use the running total, since autoaddracertoheat doesn't necessarily signify that we will reduce by 1
-                        $heat                      = $this->logic->heatMain->get($heatId);
+                        $heat                      = $this->logic->heatMain->get($heatId); // we already have this at $heatMain. unnecessary lookup.
                         $heat                      = $heat[0];
                         $heat->NumberOfReservation = ($heat->NumberOfReservation ?: 0) + $remainingQty;
                         $this->logic->heatMain->update($heat->HeatNo, $heat);
@@ -259,7 +259,7 @@ class ReservationProductHandler extends BaseProductHandler {
                 try {
                     $GLOBALS['webapi']->clearCache();
                 }
-                catch (\Exception $e) {
+                catch(\Exception $e) {
                     $message = $logPrefix . 'Unable to clear WebAPI cache! Received code: ' . $e->getCode(); // . $e->getMessage();
                     Log::error($message, Enums::NSP_BOOKING);
                     throw new \Exception($message);
@@ -271,7 +271,7 @@ class ReservationProductHandler extends BaseProductHandler {
                     $dateDisplayFormat = $dateDisplayFormat[0];
                     $dateDisplayFormat = $dateDisplayFormat->SettingValue ?: $dateDisplayFormat->DefaultSetting;
                 }
-                catch (\Exception $e) {
+                catch(\Exception $e) {
                     $dateDisplayFormat = 'Y-m-d';
                 }
                 try {
@@ -279,8 +279,20 @@ class ReservationProductHandler extends BaseProductHandler {
                     $timeDisplayFormat = $timeDisplayFormat[0];
                     $timeDisplayFormat = $timeDisplayFormat->SettingValue ?: $timeDisplayFormat->DefaultSetting;
                 }
-                catch (\Exception $e) {
+                catch(\Exception $e) {
                     $timeDisplayFormat = 'H.i'; // fallback!
+                }
+
+                try {
+                    $trackNo = $heatMain->TrackNo;
+                    $tracks = $this->logic->tracks->get($trackNo);
+                    $track = $tracks[0];
+                    $trackName = $track->Description;
+                }
+                catch(\Exception $e) {
+                    $message = $logPrefix . 'Unable to find track for heat #' . $heatId . '! Attempted to find track #' . $heatMain->TrackNo . '! ' . $e->getMessage();
+                    Log::error($message, Enums::NSP_BOOKING);
+                    throw new \Exception($message);
                 }
 
                 $scheduledTime = new \DateTime($heatMain->ScheduledTime);
@@ -291,7 +303,13 @@ class ReservationProductHandler extends BaseProductHandler {
                     'Notes' => $notes
                 ));
 
-                return array('message' => $message, 'heatId' => $heatId, 'scheduledTime' => $scheduledTimeFormatted);
+                $result = array();
+                $result['message'] = $message;
+                $result['heatId'] = $heatId;
+                $result['scheduledTime'] = $scheduledTimeFormatted;
+                if (isset($trackName))
+                    $result['trackName'] = $trackName;
+                return $result;
             }
         }
     }
