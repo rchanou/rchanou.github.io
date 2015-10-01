@@ -876,9 +876,10 @@
                 console.log(URL.createObjectURL(stream));
             }
 
-            function onFail()
+            function onFail(err)
             {
-                console.log('could not connect stream');
+                console.log('Unable to connect to the local camera. Error:');
+                console.log(err);
             }
 
             function updateLocalCamSnapshot()
