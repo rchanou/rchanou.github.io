@@ -520,3 +520,10 @@ img.flag { border:none; vertical-align:baseline; margin-left:10px;}
 .currentCultureString {
     display: inline-block;
 }
+
+/* Fix for URLs being visible when printing a page */
+@media print {
+    a[href]:after {
+        content: "" !important;
+    }
+}
