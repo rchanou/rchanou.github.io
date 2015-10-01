@@ -1014,6 +1014,8 @@
                                 failureMessage: "{{$strings['str_invalidZipCode']}}"
                             }
                     );
+                    Zip.add( Validate.Presence,
+                            { failureMessage: "{{$strings['str_required']}}" } );
                 }
                 else
                 {
