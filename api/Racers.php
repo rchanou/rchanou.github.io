@@ -92,10 +92,26 @@ class Racers
         // leave fb login open, for permissions -- same as regular login.
         try {
             $params = $this->mapCreateParams($request_data);
-            if (empty($params['Standard']['EmailAddress']))
-                throw new CSException('Attempted facebook login without providing an email address!');
+            if (empty($params['Standard']['EmailAddress'])) {
+                // then we need to get primary customer by firstname, lastname, and birthdate
+                if (
+                       empty($params['Standard']['FName'])
+                    && empty($params['Standard']['LName'])
+                    && empty($params['Standard']['BirthDate'])
+                ) {
+                    // we need either email, or the grouping of fname, lname, and birthdate
+                    throw new CSException('Attempted facebook login without providing either an email address, or all of first name, last name, and birthdate!');
+                }
+                $account = $this->logic->customers->primary(array(
+                      'FName'     => $params['Standard']['FName']
+                    , 'LName'     => $params['Standard']['LName']
+                    , 'BirthDate' => $params['Standard']['BirthDate']
+                ));
+            }
+            else {
+                $account = $this->logic->customers->primary(array('EmailAddress' => $params['Standard']['EmailAddress']));
+            }
             // should customer existence be checked here, or inside facebook->fb_login ??
-            $account = $this->logic->customers->primary(array('EmailAddress' => $params['Standard']['EmailAddress']));
             if (empty($account))
                 $customerId = $this->logic->customers->create_v0($params['Standard']); // use the old, non restful version of the call
             else
