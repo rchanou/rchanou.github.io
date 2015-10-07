@@ -123,7 +123,7 @@ class Step3Controller extends BaseController {
 
         $settings = Session::get("settings");
         $clubSpeedCustomerData = array(
-            "birthdate" => isset($formInput["birthdate"]) ? $formInput["birthdate"] : "",
+            "birthdate" => isset($formInput["birthdate"]) ? $formInput["birthdate"] . "T00:00:00": "",
             "mobilephone" => isset($formInput["mobilephone"]) ? $formInput["mobilephone"] : "",
             "howdidyouhearaboutus" => isset($formInput["howdidyouhearaboutus"]) ? $formInput["howdidyouhearaboutus"] : "",
             "firstname" => isset($formInput["firstname"]) ? $formInput["firstname"] : "",
