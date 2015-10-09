@@ -518,7 +518,8 @@
         deferred.push(api.getTopTimes({
             track: parameters.trackId,
             range: parameters.range,
-            limit: parameters.limit
+            limit: parameters.limit,
+            speed_level: parameters.speedLevel
         })
         .then(function(data) {
             cache[data.url] = data.deepCopy(); // store unmutated data for polling comparison
@@ -826,6 +827,7 @@
             track: parameters.trackId,
             range: parameters.range,
             limit: parameters.limit,
+            speed_level: parameters.speedLevel,
             callback: function(data) {
                 if (!z.equals(data, cache[data.url])) {
                     window.location.reload();
