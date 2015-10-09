@@ -179,12 +179,24 @@ WHERE
 
 UNION ALL
 
---Expenses        
+--Expense In
 SELECT
-      '##EXPENSES##' AS AccountNumber
-    , 'Expenses'
-    , ISNULL(SUM(e.Amount), 0) AS Debit
+      '##EXPENSE_IN##' AS AccountNumber
+    , 'Expense In'
+    , 0.00 AS Debit
     , ISNULL(SUM(e.Amount), 0) * -1 AS Credit
+FROM dbo.Expenses e
+WHERE
+    e.[Date] BETWEEN @StDate AND @EndDate
+
+UNION ALL
+
+--Expense Out
+SELECT
+      '##EXPENSE_OUT##' AS AccountNumber
+    , 'Expense Out'
+    , ISNULL(SUM(e.Amount), 0) AS Debit
+    , 0.00
 FROM dbo.Expenses e
 WHERE
     e.[Date] BETWEEN @StDate AND @EndDate
