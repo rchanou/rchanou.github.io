@@ -21,6 +21,7 @@ class BookingAvailabilityLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->onlineBookingAvailability_V;
+        $this->logic->reservations->expire();
     }
 
     public final function create($params = array(), $callback = null) {
