@@ -41,7 +41,7 @@ if(!function_exists('mime_content_type')) {
  *
  * Usage: http://vm-122.clubspeedtiming.com/api/shot/shot.php?base64=192.168.111.133/image.jpg
  */
-$whitelist = array('image.jpg','jpeg.cgi'); // Could be turned into an array of regex's later?
+$whitelist = array('image.jpg','jpeg.cgi','IMAGE.JPG'); // Could be turned into an array of regex's later?
 $timeoutInSeconds = 5; // Timeout if image cannot be reached -- in seconds
 
 if(isset($_REQUEST['base64'])) {
