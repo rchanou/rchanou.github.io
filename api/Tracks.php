@@ -37,8 +37,29 @@ class Tracks
         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
-        
-        $tsql = "SELECT TrackNo AS id, Description AS name FROM Tracks";
+
+        /*
+         * HACK: Determine if track has the new "Enabled" column in the Tracks table. In an ideal world,
+         * we would update the schema of all of the tracks.
+         *
+         */
+        $tsql = "SELECT (CASE WHEN COL_LENGTH('Tracks','Enabled') IS NULL
+                              THEN 0
+                              ELSE 1
+                         END) AS EnabledExists
+                ";
+        $result = $this->run_query($tsql, array());
+        $enabledColumnExists = $result[0]["EnabledExists"] === "1" ? true : false;
+
+        if ($enabledColumnExists) //If the new Enabled column exists, filter out disabled tracks
+        {
+            $tsql = "SELECT TrackNo AS id, Description AS name FROM Tracks WHERE Enabled = 1";
+        }
+        else
+        {
+            $tsql = "SELECT TrackNo AS id, Description AS name FROM Tracks";
+        }
+
         $rows = $this->run_query($tsql, array());
         return array('tracks' => $rows);    
     }
