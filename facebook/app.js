@@ -99,8 +99,8 @@ function postToFacebook(race) {
 		//message: applyTemplate(config.facebook.message, race), // Disabled per Facebook's rules
 		link: applyTemplate(config.facebook.link, race),
 		picture: applyTemplate(config.facebook.photoUrl, race),
-		name: applyTemplate(config.facebook.name, race),
-		description: applyTemplate(config.facebook.description, race),
+		//name: applyTemplate(config.facebook.name, race), // Deprecated in Facebook API v2.5
+		//description: applyTemplate(config.facebook.description, race), // Deprecated in Facebook API v2.5
 		caption: applyTemplate(config.facebook.caption, race)
 		};
 	log('Posting ' + util.inspect(fbPost) + ' for ' + util.inspect(race), 'DEBUG');
