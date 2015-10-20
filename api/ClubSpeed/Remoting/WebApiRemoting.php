@@ -44,7 +44,7 @@ class WebApiRemoting {
         $this->apiBase = implode($this->apiInfo);
     }
 
-    public function canUse() {
+    public function canUse($wait = 30) {
         // items to check for:
         // 1. existence of username / password
         // 2. username / password match in the database
@@ -93,26 +93,20 @@ class WebApiRemoting {
         }
 
         // make a call to ClubSpeedCache/clear in order to determine whether or not we have valid credentials
-        $callName = '/ClubSpeedCache/clear';
-        $apiUrl = $this->getApiUrl($callName);
         try {
-            $response = \Httpful\Request::get($apiUrl)
-                ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
-                ->timeoutIn(30) // timeout after 30 seconds
-                ->send();
+            $response = $this->clearCache();
+            if ($response['code'] == 200)
+                return true;
+            if ($response['code'] == 401)
+                Log::warn("Attempted to use WebAPI Remoting, but the apiUsername and apiPassword were invalid! Check the API config and Users table for proper credentials! Info: " . $response['info'], Enums::NSP_WEBAPI);
+            else
+                Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Info: " . $response['info'], Enums::NSP_WEBAPI);
+            return false;
         }
         catch(\Exception $e) {
             Log::warn("Attempted to use WebAPI Remoting, but the test call threw an exception! Error: " . $e->getMessage());
             return false;
         }
-        if($response->code != '200') {
-            if ($response->code == '401')
-                Log::warn("Attempted to use WebAPI Remoting, but the apiUsername and apiPassword were invalid! Check the API config and Users table for proper credentials! Received status code: " . $response->code, Enums::NSP_WEBAPI);
-            else
-                Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Received status code: " . $response->code, Enums::NSP_WEBAPI);
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -199,16 +193,45 @@ class WebApiRemoting {
      *
      * @return void
      */
-    public function clearCache() {
+    public function clearCache($wait = 60) {
         // should we also have a version check here before attempting to call?
         $this->checkUsernamePasswordAreSet();
         $callName = '/ClubSpeedCache/clear';
         $apiUrl = $this->getApiUrl($callName);
-        $response = \Httpful\Request::get($apiUrl)
-            ->authenticateWith($GLOBALS['apiUsername'], $GLOBALS['apiPassword'])
-            ->timeoutIn(30) // timeout after 30 seconds
-            ->send();
-        return $this->handleResponse($response);
+
+        $ch = curl_init(); // make curl handle
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => $apiUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => $wait,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_USERPWD => $GLOBALS['apiUsername'] . ":" . $GLOBALS['apiPassword'],
+            CURLOPT_SSL_VERIFYPEER => false, // bypass the need for a ca cert verification. OPENS US UP TO MITM ATTACKS (technically). this is what httpful was doing anyways.
+            CURLOPT_HTTPHEADER => array(
+                "cache-control: no-cache",
+                "content-type: application/json"
+            )
+        ));
+        $response = curl_exec($ch);
+        $err = curl_error($ch);
+        $info = curl_getinfo($ch);
+        $code = $info['http_code'];
+        curl_close($ch);
+        if ($err) {
+            Log::error("Received status code " . $code . " back from WebAPI! Response: " . $response . ", Err: " . $err . ", Info: " . print_r($info, true), Enums::NSP_WEBAPI);
+            throw new \CSException($response, $code); // find a better way to handle this??
+        }
+        else {
+            Log::info("WebAPI successful cache clear: " . $response . ", " . print_r($info, true), Enums::NSP_WEBAPI);
+        }
+        return array(
+            'message' => $response,
+            'info' => $info,
+            'code' => $code
+        );
     }
 
     /**
