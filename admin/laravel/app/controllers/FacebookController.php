@@ -65,10 +65,10 @@ class FacebookController extends BaseController
 				}
         $newSettings['postingIsEnabled'] = isset($input['postingIsEnabled']) ? 1 : 0;
         $newSettings['link'] = isset($input['link']) ? $input['link'] : '';
-        //$newSettings['message'] = isset($input['message']) ? $input['message'] : ''; // Disabling per Facebook's rules
+        //$newSettings['message'] = isset($input['message']) ? $input['message'] : ''; // Disabling, disallowed per Facebook
         $newSettings['photoUrl'] = isset($input['photoUrl']) ? $input['photoUrl'] : '';
-        $newSettings['name'] = isset($input['name']) ? $input['name'] : '';
-        $newSettings['description'] = isset($input['description']) ? $input['description'] : '';
+        //$newSettings['name'] = isset($input['name']) ? $input['name'] : ''; // Deprecated in Facebook API v2.5
+        //$newSettings['description'] = isset($input['description']) ? $input['description'] : ''; // Deprecated in Facebook API v2.5
         $newSettings['caption'] = isset($input['caption']) ? $input['caption'] : '';
         //End formatting
 
