@@ -31,7 +31,7 @@ class PaymentLogic extends BaseLogic {
                 case 'create':
                     if (!empty($uow->data)) {
                         $payment =& $uow->data;
-                        if (is_null($payment->PayAmount) || Convert::convert($payment->PayAmount, Types::$integer) === 0)
+                        if (is_null($payment->PayAmount) || Convert::convert($payment->PayAmount, Types::$double) === 0)
                             throw new \RequiredArgumentMissingException('Attempted to create a payment record without a PayAmount!');
                         if (is_null($payment->CheckID))
                             throw new \RequiredArgumentMissingException('Attempted to create a payment record without a CheckID!');
