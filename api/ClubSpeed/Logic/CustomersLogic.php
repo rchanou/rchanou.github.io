@@ -787,6 +787,9 @@ class CustomersLogic extends BaseLogic {
     }
 
     public function primary($where = array()) {
+        if (!isset($where['Deleted']))
+            $where['Deleted'] = 0;
+
         $uow = UnitOfWork::build()
             ->action('all')
             ->table('Customers')
