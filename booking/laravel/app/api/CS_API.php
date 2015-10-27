@@ -790,15 +790,17 @@ class CS_API
         }
     }
 
-    public static function insertPaymentRecord($checkId,$payAmount,$transaction)
+    public static function insertPaymentRecord($checkId,$payAmount,$transaction,$processorName)
     {
         self::initialize();
 
         $formattedData = array(
             "checkId" => $checkId,
             "payAmount" => $payAmount,
-            "transaction" => $transaction
+            "transaction" => $transaction,
+            "extCardType" => $processorName
         );
+
 
         $url = self::$apiURL . '/payments?&key=' . self::$privateKey;
 

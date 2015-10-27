@@ -46,6 +46,17 @@ class CartController extends BaseController
                 $heatId = Input::get('heatId');
                 $quantity = Input::get('quantity');
 
+                if (!array_key_exists($heatId, $productInfo)) //If the site hasn't cached this heat product yet (maybe it's far in the future)
+                {
+                    //Grab up to the next year worth of products and cache their data - restricted by booking availability window
+                    $currentDateTime = new DateTime();
+                    $today = $currentDateTime->format('Y-m-d') . 'T23:59:59';
+                    $currentDateTime->add(new DateInterval('P1Y')); //Period 1 Year
+                    $yearFromToday = $currentDateTime->format('Y-m-d') . 'T23:59:59';
+                    $races = CS_API::getAvailableBookings($today,$yearFromToday);
+                    $this->recordProductInfo($races); //Remember every race and its details and store them in the session
+                    $productInfo = Session::get('productInfo');
+                }
                 if (array_key_exists($heatId,$productInfo)) //If the item exists in our handy list of available products and their information
                 {
                     //Package all of the item's relevant data

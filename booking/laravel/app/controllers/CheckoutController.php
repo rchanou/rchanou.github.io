@@ -294,6 +294,10 @@ class CheckoutController extends BaseController
         $onlineBookingPaymentProcessorSettings->transactionId = $checkId;
         $onlineBookingPaymentProcessorSettings->Description = "Club Speed Online Booking Transaction - Check $checkId";
 
+        //Added for WorldPayXML
+        $onlineBookingPaymentProcessorSettings->session = Session::getId();
+        $onlineBookingPaymentProcessorSettings->clientIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+
         $result = CS_API::pay($onlineBookingPaymentProcessorSettings,$checkFormatted,$paymentInformation);
 
         if ($result === null)
@@ -335,7 +339,7 @@ class CheckoutController extends BaseController
             }
 
             //Insert a payment record
-            $paymentInsertionSucceeded = CS_API::insertPaymentRecord($checkId,$formattedTotalAmount,$transactionId);
+            $paymentInsertionSucceeded = CS_API::insertPaymentRecord($checkId,$formattedTotalAmount,$transactionId, $onlineBookingPaymentProcessorSettings->name);
             if ($paymentInsertionSucceeded)
             {
                 //Finalize the check
@@ -588,7 +592,7 @@ class CheckoutController extends BaseController
                 $paymentInformation = array();
 
                 //Insert a payment record
-                $paymentInsertionSucceeded = CS_API::insertPaymentRecord($checkId, $formattedTotalAmount, $transactionId);
+                $paymentInsertionSucceeded = CS_API::insertPaymentRecord($checkId, $formattedTotalAmount, $transactionId, $paymentProcessorSettings->name);
                 if ($paymentInsertionSucceeded) {
                     //Finalize the check
                     $checkFinalizationSucceeded = CS_API::finalizeCheck($checkId, $details);
@@ -597,6 +601,19 @@ class CheckoutController extends BaseController
                     }
                 } else {
                     CS_API::log("ERROR :: Online Booking failed to insert a payment record! (Check ID: $checkId, Total: $formattedTotalAmount, Transaction: $transactionId) Customer was charged already, so proceeding as normal, but skipping check finalization.");
+                    $mostRecentAPICallResult = 'None!';
+
+                    if (Session::has('callInfo'))
+                    {
+                        $callInfo = Session::get('callInfo');
+
+                        //Prevent credit card information from being logged
+                        if (isset($callInfo["params"]->card["number"])) { $callInfo["params"]->card["number"] = "XXXXXXXXXXXX".substr($callInfo["params"]->card["number"],-4); }
+                        if (isset($callInfo["params"]->card["cvv"])) { $callInfo["params"]->card["cvv"] = "XXX"; }
+
+                        $mostRecentAPICallResult = json_encode(var_export($callInfo,true));
+                    }
+                    CS_API::log('ERROR :: Online Booking user had an error: ' . $mostRecentAPICallResult);
                 }
 
                 //Direct to success page
