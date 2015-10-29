@@ -90,7 +90,7 @@ Reports
                             <i class="fa fa-facebook-square fa-4x"></i><p/>
                             <strong>Social Media Usage</strong><p/>
                         </a>
-                        <em>View customers that have linked their accounts with social media</em>
+                        <em>View active customers in the last 60 days (length of token) that have linked their accounts with Facebook</em>
                     </div>
                   </div>
                   <div class="row">

@@ -118,7 +118,7 @@ SELECT fb.UId AS facebookUserId, c.*
   FROM dbo.FB_Customers_New fb 
   LEFT JOIN Customers c ON
   fb.CustId = c.custID
-  WHERE fb.Enabled = 1
+  WHERE fb.Enabled = 1  and c.LastVisited >= dateadd(day,-60, cast(getdate() as date))
 EOS;
 
 				$data = $this->run_query($sql);
