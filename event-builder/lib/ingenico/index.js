@@ -165,7 +165,7 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 				} else if(result.TRANRESP.TRANSUCCESS[0] === 'TRUE') {
 					return resolve({
 						'success': true,
-						'transactionId': result.TRANRESP.TRANSARMORTOKEN[0],
+						'transactionId': retrieveTransactionId(result),
 						'_original': result
 						});
 				} else {
@@ -221,7 +221,7 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 				} else if(result.TRANRESP.TRANSUCCESS[0] === 'TRUE') {
 					return resolve({
 						'success': true,
-						'transactionId': result.TRANRESP.TRANSARMORTOKEN[0],
+						'transactionId': retrieveTransactionId(result),
 						'_original': result
 						});
 				} else {
@@ -240,6 +240,18 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 
 Ingenico.prototype.voidTransaction = function voidTransaction(order, creditCard, prospect, other) {
 	throw new Error('VOID is not supported');
+}
+
+function retrieveTransactionId(result) {
+	// Use result.TRANRESP.TRANSARMORTOKEN[0], if it's not there, use result.TRANRESP.CCSYSTEMCODE[0], else null
+	if(result && result.TRANRESP && result.TRANRESP.TRANSARMORTOKEN && result.TRANRESP.TRANSARMORTOKEN.length > 0) {
+		return result.TRANRESP.TRANSARMORTOKEN[0];
+	} else if(result && result.TRANRESP && result.TRANRESP.CCSYSTEMCODE && result.TRANRESP.CCSYSTEMCODE.length > 0) {
+		return result.TRANRESP.CCSYSTEMCODE[0];
+	} else {
+		return null;
+	}
+
 }
 
 function convertToDecimal(amount) {
