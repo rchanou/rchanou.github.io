@@ -119,7 +119,7 @@
                     <li>{{link_to('/mobileApp/settings','Settings')}}</li>
                     <li>{{link_to('/mobileApp/translations','Translations')}}</li>
                     <li>{{link_to('/mobileApp/templates','Templates')}}</li>
-                    <li>{{link_to('/docs/Club Speed - iOS Application Instructions.pdf','Setup Instructions', array('target' => '_blank'))}}</li>
+                    <li>{{link_to('/docs/Club Speed - iOS and Android App Instructions.pdf','Setup Instructions', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
             @if (@$controller == 'GiftCardsController')
