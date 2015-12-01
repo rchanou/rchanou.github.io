@@ -1038,8 +1038,9 @@ EOS;
         phpFastCache::setup("storage", "files");
         phpFastCache::setup("path", dirname(__FILE__) . DIRECTORY_SEPARATOR . 'temp'); // Path For Cache Files
         $cache = phpFastCache();
+        $cacheKey = md5($tsql . json_encode($tsql_params));
         
-        $output = $cache->get($tsql);
+        $output = $cache->get($cacheKey);
         if($output == null) {
             $rows = $this->run_query($tsql, $tsql_params);
             $output = array();
@@ -1061,7 +1062,7 @@ EOS;
                 );
 
             }
-            $cache->set($tsql, $output, 5*60);
+            $cache->set($cacheKey, $output, 5*60);
         }
 
         return array('fastest' => $output);
