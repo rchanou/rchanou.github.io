@@ -1,0 +1,36 @@
+{
+  "name": "timeout-callback",
+  "version": "0.0.4",
+  "description": "callback function wrapper with timeout functionality",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jakubknejzlik/node-timeout-callback.git"
+  },
+  "gitHead": "20291eedd9a6607f19ac3c132c8b2a5a5d15721d",
+  "bugs": {
+    "url": "https://github.com/jakubknejzlik/node-timeout-callback/issues"
+  },
+  "homepage": "https://github.com/jakubknejzlik/node-timeout-callback",
+  "_id": "timeout-callback@0.0.4",
+  "scripts": {},
+  "_shasum": "89a92017f1fa8805361437e04eda72dbfc2a5bce",
+  "_from": "timeout-callback@*",
+  "_npmVersion": "2.5.0",
+  "_nodeVersion": "0.10.21",
+  "_npmUser": {
+    "name": "jakub.knejzlik",
+    "email": "jakub.knejzlik@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "jakub.knejzlik",
+      "email": "jakub.knejzlik@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "89a92017f1fa8805361437e04eda72dbfc2a5bce",
+    "tarball": "http://registry.npmjs.org/timeout-callback/-/timeout-callback-0.0.4.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/timeout-callback/-/timeout-callback-0.0.4.tgz"
+}

@@ -9,12 +9,14 @@
   },
   "devDependencies": {
     "chai": "~2.2.0",
-    "gulp": "^3.8.11",
-    "gulp-jshint": "^1.10.0",
+    "gulp": "^3.9.0",
+    "gulp-cached": "^1.1.0",
+    "gulp-eslint": "^0.14.0",
     "gulp-mocha": "^2.0.1",
     "gulp-task-listing": "^1.0.0",
     "jshint-stylish": "^1.0.1",
-    "mocha": "~1.12"
+    "mocha": "~1.12",
+    "run-sequence": "^1.1.2"
   },
   "optionalDependencies": {},
   "engines": {

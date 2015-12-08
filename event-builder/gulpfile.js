@@ -1,73 +1,94 @@
+"use strict";
+/* eslint no-trailing-spaces:0 */
 var gulp        = require('gulp');
 var mocha       = require('gulp-mocha');
-var jshint      = require('gulp-jshint');
 var taskListing = require('gulp-task-listing');
 var fs          = require('fs');
-var path        = require('path');
+var cached      = require('gulp-cached');
+var eslint      = require('gulp-eslint');
+var seq         = require('run-sequence');
 
-var jshConfig = {
-    reporter: 'jshint-stylish',
-    options: {
-        eqnull   : true, // for intended single equal comparisons to null (!= null). see: http://www.jshint.com/docs/options/#eqnull
-        laxcomma : true, // for comma-first style warnings. see: http://www.jshint.com/docs/options/#laxcomma
-        laxbreak : true  // for line break warnings (usually with strings). see: http://www.jshint.com/docs/options/#laxbreak
-    }
-}
+var testDir = './test/';
+var testGlob = testDir + '*.js';
+
+var srcDir  = './lib/';
+var srcGlob = [srcDir + '*.js', './gulpfile.js'];
+
+var mochaOptions = {
+      reporter  : 'spec'
+};
+
+var log = console.log.bind(console); // eslint-disable-line no-unused-vars
 
 gulp.task('help', taskListing);
 
 gulp.task('lint', function() {
-    return gulp.src([
-        './lib/*.js' // allow tests to lint themselves
-        , './test/*.js'
-    ])
-    .pipe(jshint(jshConfig.options))
-    .pipe(jshint.reporter(jshConfig.reporter, {verbose: true}));
+    return gulp.src(srcGlob)
+        .pipe(cached('src'))
+        .pipe(eslint()) // eslint options in .eslintrc
+        .pipe(eslint.format());
+        //.pipe(eslint.failOnError()); // fail on src lints
 });
 
-gulp.task('test', ['lint'], function() {
-    return gulp.src([
-        './test/*.js'
-    ])
-    .pipe(jshint(jshConfig.options))
-    .pipe(jshint.reporter(jshConfig.reporter))
-    .pipe(mocha({reporter: 'spec'}));
+gulp.task('test', function() {
+    return gulp.src(testGlob)
+        .pipe(cached('test'))
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(mocha(mochaOptions));
 });
 
-(function(undefined) {
-    // batched receipt tests
-    var testDir = 'test/';
-    var testFiles = fs.readdirSync(testDir);
-    var receiptFiles = [];
-    testFiles.forEach(function(fileName, key, arr) {
-        var filePath = path.parse(fileName);
-        if (filePath.name.slice(0, 7) === 'receipt')
-            receiptFiles.push(testDir + filePath.base);
-    });
-    gulp.task('test-receipts', function() {
-        return gulp.src(receiptFiles)
-            .pipe(jshint(jshConfig.options))
-            .pipe(jshint.reporter(jshConfig.reporter))
-            .pipe(mocha({ reporter: 'spec' }));
-    });
-}());
-
-(function(undefined) {
+(function() {
     // single tests
     var rootDir = 'test/';
-    var files = fs.readdirSync(rootDir);
-    fs.readdirSync('test/').forEach(function(fileName, key, arr) {
+    fs.readdirSync(rootDir).forEach(function(fileName) {
         var taskName = fileName.slice(0, -3); // remove the file extension
         taskName = 'test-' + taskName.replace('.spec', '');
         gulp.task(taskName, function() {
             return gulp.src(rootDir + fileName)
-                .pipe(jshint(jshConfig.options))
-                .pipe(jshint.reporter(jshConfig.reporter))
-                .pipe(mocha({ reporter: 'spec' }));
+                .pipe(cached('test'))
+				.pipe(eslint())
+				.pipe(eslint.format())
+				.pipe(mocha(mochaOptions));
         });
     });
 }());
 
-gulp.task('default', [
-    'test'
-]);
+gulp.task('watch', function() {
+    gulp.watch(srcGlob).on('change', function(event) {
+        /*
+            we want to run unit tests whenever a file is saved,
+            regardless of whether or not the code itself changed
+            due to integration streamlining (code may have changed on the api)
+
+            as such, if watch triggers for a file, remove it from the test cache
+            even if no change actually occurred
+        */
+        if (cached.caches && cached.caches.src)
+            delete cached.caches.src[event.path];
+		return seq('lint');
+    });
+
+    gulp.watch(testGlob).on('change', function(event) {
+        /*
+            we want to run unit tests whenever a file is saved,
+            regardless of whether or not the code itself changed
+            due to integration streamlining (code may have changed on the api)
+
+            as such, if watch triggers for a file, remove it from the test cache
+            even if no change actually occurred
+        */
+        if (cached.caches && cached.caches.test)
+            delete cached.caches.test[event.path];
+		return seq('test');
+    });
+});
+
+gulp.task('default', function(callback) {
+	seq(
+		'lint',
+        'test',
+		'watch',
+		callback
+	);
+});

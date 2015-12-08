@@ -1,3 +1,5 @@
+"use strict";
+
 var z             = require('./zana');
 var config        = require('./config-provider.js');
 var CONSTANTS     = require('./constants.js');
@@ -107,7 +109,7 @@ RaceTicketTemplate.prototype.create = function(body) {
   // log('output:', output);
 
   // If we are karting (sportId = 1), show "Win By" line
-  if(track && track.sportId == 1) {
+  if(track && +track.sportId === 1) {
     var winByValue = (heat.winBy === WIN_BY.TIME ? resources.strBestLap : resources.strPosition);
     output += buildLine(resources.strWinBy, winByValue);
   }
@@ -151,7 +153,7 @@ RaceTicketTemplate.prototype.create = function(body) {
   // Add customer name
   if (customer) {
     if (customer.fullName) {
-      output += buildLine(resources.strCustomer, customer.fullName);
+      output += buildLine(resources.strCustomer, customer.fullName, '');
       // Add racer name (if racer name exists and not the same as their full name)
       if (customer.racerName && customer.racerName.trim().length > 0 && customer.racerName.toLowerCase() !== customer.fullName.toLowerCase())
         output += buildLine('', customer.racerName, '  ');
@@ -164,10 +166,10 @@ RaceTicketTemplate.prototype.create = function(body) {
       customer.totalRaces = 0;
     var experienceValue = customer.totalRaces === 0 ? resources.strNew : (customer.totalRaces + ' ' + resources.strSessions);
     output += buildLine(resources.strExperience, experienceValue);
-    if(options.printGridOnRaceTicket && parseInt(customer.lineupPosition) > 0)
+    if(options.printGridOnRaceTicket && options.printGridOnRaceTicket.toString().toLowerCase() !== 'false' && parseInt(customer.lineupPosition) > 0)
       output += buildLine(resources.strGrid, customer.lineupPosition);
-    if(options.printAgeOnRaceTicket && customer.age)
-      output += buildLine(resources.strAge, customer.age);
+    if(options.printAgeOnRaceTicket && options.printAgeOnRaceTicket.toString().toLowerCase() !== 'false' && customer.age)
+      output += buildLine(resources.strAge, customer.age, '');
   }
   log.debug('customer info');
 
@@ -184,7 +186,7 @@ RaceTicketTemplate.prototype.create = function(body) {
 
   // Feed and Cut Paper
   output += '\n\n\n\n\n\n';
-  output += ('\x1d\x56\x01');
+  output += PLACEHOLDERS.CUTPAPER;
   log.debug('feed & cut');
 
   log.debug('output:\n', output);

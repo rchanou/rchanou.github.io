@@ -1,13 +1,15 @@
-var _         = require('./underscore');
-var z         = require('./zana');
-var config    = require('./config-provider.js');
-var CONSTANTS = require('./constants.js');
-var utils     = require('./utils.js');
-var rpad      = utils.receipts.rpad;
-var lpad      = utils.receipts.lpad;
-var cpad      = utils.receipts.cpad;
-var log       = utils.logging.log;
-log.debug.on  = config.receipts.useDebugLogging;
+"use strict";
+
+var z               = require('./zana');
+var config          = require('./config-provider.js');
+var CONSTANTS       = require('./constants.js');
+var utils           = require('./utils.js');
+var rpad            = utils.receipts.rpad;
+var lpad            = utils.receipts.lpad;
+var cpad            = utils.receipts.cpad;
+var log             = utils.logging.log;
+log.debug.on        = config.receipts.useDebugLogging;
+var PLACEHOLDERS    = CONSTANTS.PLACEHOLDERS;
 
 var defaults = {
     "data": {
@@ -52,8 +54,8 @@ ExpenseTemplater.prototype.create = function(body) {
 
     // Feed and Cut Paper
     output += '\n\n\n\n\n\n';
-    output += ('\x1d\x56\x01');
-  
+    output += PLACEHOLDERS.CUTPAPER;
+
     log.debug('output:\n', output);
     return output;
 };

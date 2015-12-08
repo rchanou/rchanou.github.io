@@ -1,4 +1,6 @@
-/*jshint expr: true*/
+/* eslint no-unused-expressions:0 */ // for chai-expect
+
+"use strict";
 
 var expect = require("chai").expect;
 var builder = require("../lib/entitleItemTemplate.js");
@@ -44,7 +46,7 @@ describe("Entitle Item Receipt Template", function() {
             "nowDateShort": "4/20/2015",
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\n       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}";
+        var expected = "\n\n\n\n       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -71,7 +73,7 @@ describe("Entitle Item Receipt Template", function() {
             "nowDateShort": "4/20/2015",
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\n       ID: 1\n     Type: Minutes Product\n  Minutes: 90.50\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}";
+        var expected = "\n\n\n\n       ID: 1\n     Type: Minutes Product\n  Minutes: 90.50\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -102,7 +104,7 @@ describe("Entitle Item Receipt Template", function() {
             "nowDateShort": "4/20/2015",
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\n       ID: 1\n     Type: Minutes Product\n  Minutes: 90.5\n     Time: 4/20/2015 10:00AM\n\nTICKET LINE 1\nTICKET LINE 2\nTICKET LINE 3\nTICKET LINE 4\n\n{{BARCODE=1}}";
+        var expected = "\n\n\n\n       ID: 1\n     Type: Minutes Product\n  Minutes: 90.5\n     Time: 4/20/2015 10:00AM\n\nTICKET LINE 1\nTICKET LINE 2\nTICKET LINE 3\nTICKET LINE 4\n\n{{Barcode=1}}\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -129,7 +131,7 @@ describe("Entitle Item Receipt Template", function() {
             "nowDateShort": "4/20/2015",
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\n       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}";
+        var expected = "\n\n\n\n       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}\n\n       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -156,7 +158,7 @@ describe("Entitle Item Receipt Template", function() {
             "nowDateShort": "4/20/2015",
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\n       ID: 1\n     Type: Laps Product(1)\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}       ID: 1\n     Type: Laps Product(2)\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}";
+        var expected = "\n\n\n\n       ID: 1\n     Type: Laps Product(1)\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}\n\n       ID: 1\n     Type: Laps Product(2)\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -191,7 +193,7 @@ describe("Entitle Item Receipt Template", function() {
             "nowDateShort": "4/20/2015",
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\n       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}       ID: 2\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=2}}";
+        var expected = "\n\n\n\n       ID: 1\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}\n\n       ID: 2\n     Type: Laps Product\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=2}}\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -226,8 +228,8 @@ describe("Entitle Item Receipt Template", function() {
             "nowDateShort": "4/20/2015",
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\n       ID: 1\n     Type: Laps Product 1\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}       ID: 1\n     Type: Laps Product 1\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=1}}       ID: 2\n     Type: Minutes Product 2(1)\n  Minutes: 33.33\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=2}}       ID: 2\n     Type: Minutes Product 2(2)\n  Minutes: 33.33\n     Time: 4/20/2015 10:00AM\n\n\n{{BARCODE=2}}";
+        var expected = "\n\n\n\n       ID: 1\n     Type: Laps Product 1\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}\n\n       ID: 1\n     Type: Laps Product 1\n     Laps: 5\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=1}}\n{{CutPaper}}\n\n       ID: 2\n     Type: Minutes Product 2(1)\n  Minutes: 33.33\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=2}}\n{{CutPaper}}\n\n       ID: 2\n     Type: Minutes Product 2(2)\n  Minutes: 33.33\n     Time: 4/20/2015 10:00AM\n\n\n{{Barcode=2}}\n{{CutPaper}}";
         compare(input, expected);
     });
-    
+
 });

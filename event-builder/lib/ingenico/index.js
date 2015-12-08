@@ -18,6 +18,7 @@ function Ingenico (opts) {
 	this.opts.SUPRESSUI     = opts.provider.options.SUPRESSUI     || 'False';
 	this.opts.TAXAMOUNT     = opts.provider.options.TAXAMOUNT     || null;
 	this.opts.CUSTIDENT     = opts.provider.options.CUSTIDENT     || null;
+	this.opts.LEGALTEXT     = opts.provider.options.LEGALTEXT     || '';
 	
 	// INTERACTIVEISSUECREDIT OPTIONS
 	this.opts.INTERACTIVEISSUECREDITTYPE    = opts.provider.options.INTERACTIVEISSUECREDITTYPE    || 'SWIPEONLY';
@@ -39,7 +40,7 @@ function Ingenico (opts) {
 	request = request.defaults({
 		url: 'http://' + this.opts.host + ':' + this.opts.port,
 		method: 'POST',
-		timeout: (this.opts.timeout * 1000) + 2000,
+		timeout: 2*60*1000 + (this.opts.timeout * 1000), // "User Interactive" timeout from Ingenico is unreliable. Setting 2 min above Ingenico's to be safe.
 		headers: { 'Content-Type': 'text/plain' }
 		});
 }
@@ -57,7 +58,7 @@ Ingenico.prototype.signature = function signature(signature) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('SIG REQUEST ERROR', err, self.opts);
-				return reject({ message: err.code + ' ' + self.opts.host, error: err });
+				return reject({ message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err });
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 
@@ -124,6 +125,7 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 			'  <TRANSACTIONTYPE>INTERACTIVECREDITAUTH</TRANSACTIONTYPE>' +
 			'￼￼<INTERACTIVETIMEOUT>' + parseInt(self.opts.timeout) + '</INTERACTIVETIMEOUT>' +
 			'￼￼<CREDITAMT>'     + convertToDecimal(order.amount)   + '</CREDITAMT>' +
+			'￼￼<LEGALTEXT>' + this.opts.LEGALTEXT + '</LEGALTEXT>' +
 			'￼￼<RECEIPTCOUNT>'  + this.opts.RECEIPTCOUNT   + '</RECEIPTCOUNT>' +
 			'￼￼<CONFIRMAMOUNT>' + this.opts.CONFIRMAMOUNT  + '</CONFIRMAMOUNT>' +
 			'￼￼<SUPRESSUI>'  + this.opts.SUPRESSUI  + '</SUPRESSUI>' +
@@ -139,12 +141,12 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 			'￼￼<DISABLEAVS>' + this.opts.DISABLEAVS + '</DISABLEAVS>' +
 			'￼￼<INTERACTIVECREDITAUTHTYPE>' + this.opts.INTERACTIVECREDITAUTHTYPE + '</INTERACTIVECREDITAUTHTYPE>' +
 			'</TRANSACTION>';
-
+	console.log(req);
 	return new Promise(function(resolve, reject) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('CHARGE REQUEST ERROR', err, self.opts);
-				return reject({ message: err.code + ' ' + self.opts.host, error: err });
+				return reject({ message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err });
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 
@@ -181,10 +183,24 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 	});
 }
 
+function retrieveTransactionId(result) {
+	// Use result.TRANRESP.TRANSARMORTOKEN[0], if it's not there, use result.TRANRESP.CCSYSTEMCODE[0], else null
+	if(result && result.TRANRESP && result.TRANRESP.TRANSARMORTOKEN && result.TRANRESP.TRANSARMORTOKEN.length > 0) {
+		return result.TRANRESP.TRANSARMORTOKEN[0];
+	} else if(result && result.TRANRESP && result.TRANRESP.CCSYSTEMCODE && result.TRANRESP.CCSYSTEMCODE.length > 0) {
+		return result.TRANRESP.CCSYSTEMCODE[0];
+	} else {
+		return null;
+	}
+
+}
+
+
 Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 	var self = this;
 	var req = '<TRANSACTION>' +
     '  <TRANSACTIONTYPE>INTERACTIVEISSUECREDIT</TRANSACTIONTYPE>' +
+		'  <LEGALTEXT>' + this.opts.LEGALTEXT + '</LEGALTEXT>' +
     '  <CREDITAMT>' + convertToDecimal(order.amount) + '</CREDITAMT>' +
 		'￼￼<INTERACTIVETIMEOUT>' + parseInt(self.opts.timeout) + '</INTERACTIVETIMEOUT>' +
 		'￼￼<INTERACTIVEISSUECREDIT>' + this.opts.INTERACTIVEISSUECREDIT + '</INTERACTIVEISSUECREDIT>' +
@@ -199,7 +215,7 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('REFUND REQUEST ERROR', err, self.opts);
-				return reject({ message: err.code + ' ' + self.opts.host, error: err });
+				return reject({ message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err });
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 			
@@ -240,18 +256,6 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 
 Ingenico.prototype.voidTransaction = function voidTransaction(order, creditCard, prospect, other) {
 	throw new Error('VOID is not supported');
-}
-
-function retrieveTransactionId(result) {
-	// Use result.TRANRESP.TRANSARMORTOKEN[0], if it's not there, use result.TRANRESP.CCSYSTEMCODE[0], else null
-	if(result && result.TRANRESP && result.TRANRESP.TRANSARMORTOKEN && result.TRANRESP.TRANSARMORTOKEN.length > 0) {
-		return result.TRANRESP.TRANSARMORTOKEN[0];
-	} else if(result && result.TRANRESP && result.TRANRESP.CCSYSTEMCODE && result.TRANRESP.CCSYSTEMCODE.length > 0) {
-		return result.TRANRESP.CCSYSTEMCODE[0];
-	} else {
-		return null;
-	}
-
 }
 
 function convertToDecimal(amount) {

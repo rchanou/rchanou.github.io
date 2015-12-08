@@ -1,4 +1,6 @@
-/*jshint expr: true*/
+/* eslint no-unused-expressions: 0 */ // for chai
+
+"use strict";
 
 var expect  = require("chai").expect;
 var builder = require("../lib/tillReportTemplate.js");
@@ -17,7 +19,7 @@ describe("Till Report Template", function() {
 
     it("should gracefully handle empty input", function() {
         var input = null;
-        var expected = "\n\n           ### TILL REPORT ###           \nTerminal:                                \n                                         \n\nShift  Payment Type                Amount\nCash in Drawer                           \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n           ### TILL REPORT ###           \nTerminal:                                \n                                         \n\nShift  Payment Type                Amount\nCash in Drawer                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -27,7 +29,7 @@ describe("Till Report Template", function() {
             "nowTimeShort" : "12:00PM",
             "terminalName" : "POS2"
         };
-        var expected = "\n\n           ### TILL REPORT ###           \nTerminal: POS2                           \nApril 20, 2015 12:00PM                   \n\nShift  Payment Type                Amount\nCash in Drawer                           \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n           ### TILL REPORT ###           \nTerminal: POS2                           \nApril 20, 2015 12:00PM                   \n\nShift  Payment Type                Amount\nCash in Drawer                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -42,7 +44,7 @@ describe("Till Report Template", function() {
                 ]
             }
         };
-        var expected = "\n\n           ### TILL REPORT ###           \nTerminal:                                \n                                         \n\nShift  Payment Type                Amount\n1      Cash                        $10.00\nCash in Drawer                           \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n           ### TILL REPORT ###           \nTerminal:                                \n                                         \n\nShift  Payment Type                Amount\n1      Cash                        $10.00\nCash in Drawer                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -56,12 +58,12 @@ describe("Till Report Template", function() {
                     },
                     {
                         "paymentType": "Credit Card",
-                        "paymentAmountCurrency": "$100.00"
+                        "paymentAmountCurrency": "10,000.00 kr"
                     }
                 ]
             }
         };
-        var expected = "\n\n           ### TILL REPORT ###           \nTerminal:                                \n                                         \n\nShift  Payment Type                Amount\n1      Expense                     $10.00\n1      Credit Card                $100.00\nCash in Drawer                           \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n           ### TILL REPORT ###           \nTerminal:                                \n                                         \n\nShift  Payment Type                Amount\n1      Expense                     $10.00\n1      Credit Card           10,000.00 kr\nCash in Drawer                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -97,8 +99,7 @@ describe("Till Report Template", function() {
                 "strTerminal"     : "Terminal"
             }
         };
-        var expected = "\n\n           ### TILL REPORT ###           \nTerminal: POS1                           \n2015年4月14日 16:17                      \n\nShift  Payment Type                Amount\n1      Cash                        ¥5.00\n1      Expense                   ¥-23.00\nCash in Drawer                           \n\n\n\n\n\n\n\u001dV\u0001";
-        output = builder.create(input);
+        var expected = "\n\n           ### TILL REPORT ###           \nTerminal: POS1                           \n2015年4月14日 16:17                      \n\nShift  Payment Type                Amount\n1      Cash                        ¥5.00\n1      Expense                   ¥-23.00\nCash in Drawer                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
