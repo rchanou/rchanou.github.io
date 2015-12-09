@@ -45,8 +45,8 @@ Accounting Export
                     <table class="table table-bordered table-striped table-hover text-center">
                       <thead>
                         <tr>
-                            <th>Start Date</th>
-                            <th>End Date</th>
+                            <th>Start Date/Time</th>
+                            <th>End Date/Time</th>
                             <th>Replacements <i class="fa fa-question-circle tip" title="<strong>Instructions</strong>" data-container="body" data-toggle="popover" data-placement="left" data-html="true" data-content="
                               <p><strong>Overview</strong></p>
 <p>Club Speed provides a flexible export system that allows for custom field name replacements at export time.</p>
@@ -111,10 +111,16 @@ Accounting Export
                       <tbody>
                         <tr>
                             <td>
-                                <input type="date" name="start" id="start" value="{{$start}}">
+                                <input type="date" name="start" id="start" value="{{$start}}"><br/>
+                                {{Form::select('startHour', array('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'), $startHour, array('class' => 'normal'))}}
+                                :
+                                {{Form::select('startMinute', array('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59'), $startMinute, array('class' => 'normal'))}}
                             </td>
                             <td>
-                                <input type="date" name="end" id="end" value="{{$end}}">
+                                <input type="date" name="end" id="end" value="{{$end}}"><br/>
+                                {{Form::select('endHour', array('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'), $endHour, array('class' => 'normal'))}}
+                                :
+                                {{Form::select('endMinute', array('00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59'), $endMinute, array('class' => 'normal'))}}
                             </td>
                             <td>
                                 <textarea name="fieldMappings">{{$fieldMappings}}</textarea>
@@ -143,9 +149,9 @@ Accounting Export
                 <span class="icon">
                   <i class="fa fa-align-justify"></i>
                 </span>
-                @if(isset($start) && isset($end) && $start != "" && $end != "")
-                    <h5>Accounting Export - From {{$start}} to {{$end}}</h5>
-                @elseif (isset($start) && $start != "")
+                @if(isset($startFormatted) && isset($endFormatted) && $startFormatted != "" && $endFormatted != "")
+                    <h5>Accounting Export - From {{$startFormatted}} to {{$endFormatted}}</h5>
+                @elseif (isset($startFormatted) && $startFormatted != "")
                     <h5>Accounting Export - {{$start}}</h5>
                 @else
                     <h5>Accounting Export - Today</h5>
