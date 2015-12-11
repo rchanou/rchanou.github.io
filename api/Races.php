@@ -381,7 +381,7 @@ EOS;
 
         // TODO Filter by Speed Level
 
-        $tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY Begining DESC) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (2,3) AND Begining <= (SELECT TOP(1) hm.Begining AS started_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (2) ORDER BY hm.Begining DESC ) ) SELECT c.* FROM CTE c WHERE Rank = ?';
+        $tsql = 'WITH CTE AS (SELECT *, ROW_NUMBER() OVER (ORDER BY Begining DESC) AS Rank FROM HeatMain WHERE TrackNo = ? AND HeatStatus IN (2,3) AND Begining <= (SELECT TOP(1) hm.Begining AS started_at FROM HeatMain hm WHERE hm.TrackNo = ? AND hm.HeatStatus IN (2,3) ORDER BY hm.Begining DESC ) ) SELECT c.* FROM CTE c WHERE Rank = ?';
         $tsql_params = array(&$track_id, &$track_id, &$offset);
         $rows = $this->run_query($tsql, $tsql_params);
         
