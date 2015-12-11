@@ -1,4 +1,6 @@
-/*jshint expr: true*/
+/* eslint no-unused-expressions: 0 */ // for chai
+
+"use strict";
 
 var expect = require("chai").expect;
 var builder = require("../lib/raceTicketTemplate.js");
@@ -17,7 +19,7 @@ describe("Race Ticket Template", function() {
 
     it("should gracefully handle empty input", function() {
         var input = null;
-        var expected = "\n\n      Time:                              \n  Heat No.:                              \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -32,7 +34,7 @@ describe("Race Ticket Template", function() {
                 "numberOfTracks": 2
             }
         };
-        var expected = "\n\n     Venue: Track 2                      \n      Time:                              \n  Heat No.:                              \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n     Venue: Track 2                       \n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -49,7 +51,7 @@ describe("Race Ticket Template", function() {
                 }
             }
         };
-        var expected = "\n\n    Win By: Best Lap                     \n      Time:                              \n  Heat No.:                              \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n    Win By: Best Lap                      \n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -66,7 +68,24 @@ describe("Race Ticket Template", function() {
                 }
             }
         };
-        var expected = "\n\n    Win By: Position                     \n      Time:                              \n  Heat No.:                              \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n    Win By: Position                      \n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
+    it("should ignore the win by line when sport id is not 1", function() {
+        var input = {
+            "data": {
+                "track": {
+                    "trackId": 2,
+                    "sportId": 2,
+                    "description": "laz0rtag"
+                },
+                "heat": {
+                    "winBy": 1
+                }
+            }
+        };
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -76,7 +95,7 @@ describe("Race Ticket Template", function() {
                 "showScheduledTime": false
             }
         };
-        var expected = "\n\n  Heat No.:                              \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -85,14 +104,14 @@ describe("Race Ticket Template", function() {
             "data": {
                 "heat": {
                       "heatNumber"     : "10601"
-                    , "sequenceNumber" : "01"
+                    , "sequenceNumber" : "09"
                 }
             },
             "options": {
                 "showHeatNumber": true
             }
         };
-        var expected = "\n\n      Time:                              \n  Heat No.: 10601                        \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.: 01                            \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -101,14 +120,14 @@ describe("Race Ticket Template", function() {
             "data": {
                 "heat": {
                       "heatNumber"     : "10601"
-                    , "sequenceNumber" : "01"
+                    , "sequenceNumber" : "09"
                 }
             },
             "options": {
-                "showHeatNumber": false
+                "showHeatNo": false
             }
         };
-        var expected = "\n\n      Time:                              \n  Heat No.: 01                           \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.: 09                            \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -124,7 +143,7 @@ describe("Race Ticket Template", function() {
                 "showHeatNumber": false
             }
         };
-        var expected = "\n\n      Time:                              \n  Heat No.:                              \n  Duration: 10 Laps                      \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: 10 Laps                       \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -140,7 +159,7 @@ describe("Race Ticket Template", function() {
                 "showHeatNumber": false
             }
         };
-        var expected = "\n\n      Time:                              \n  Heat No.:                              \n  Duration: 15 Minutes                   \n\nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: 15 Minutes                    \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -149,7 +168,7 @@ describe("Race Ticket Template", function() {
             "eventName": "Event 1",
             "roundNumber": 1
         };
-        var expected = "\n\n      Time:                              \n  Heat No.:                              \n  Duration: N/A Minutes                  \n\nEvent Name: Event 1                      \n Round No.: 1                            \nExperience: New                          \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nEvent Name: Event 1                       \n Round No.: 1                             \nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -164,7 +183,37 @@ describe("Race Ticket Template", function() {
                 }
             }
         };
-        var expected = "\n\n      Time:                              \n  Heat No.:                              \n  Duration: N/A Minutes                  \n\n  Customer: Jim Bob                      \n            Bobblehead                   \n            Supermember                  \nExperience: 5 sessions                   \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\n  Customer: Jim Bob                       \n            Bobblehead                    \n            Supermember                   \nExperience: 5 sessions                    \n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
+    it("should skip grid by option", function() {
+        var input = {
+            "data": {
+                "customer": {
+                    "lineupPosition" : 1,
+                }
+            },
+            "options": {
+                "printGridOnRaceTicket" : "false"
+            }
+        };
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
+    it("should skip age by option", function() {
+        var input = {
+            "data": {
+                "customer": {
+                    "age" : 16
+                }
+            },
+            "options": {
+                "printAgeOnRaceTicket" : "false"
+            }
+        };
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -177,12 +226,22 @@ describe("Race Ticket Template", function() {
                 , "raceTicketLine4" : "TICKET LINE 4"
             }
         };
-        var expected = "\n\n      Time:                              \n  Heat No.:                              \n  Duration: N/A Minutes                  \n\nExperience: New                          \n\nTICKET LINE 1\nTICKET LINE 2\nTICKET LINE 3\nTICKET LINE 4\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\nTICKET LINE 1\nTICKET LINE 2\nTICKET LINE 3\nTICKET LINE 4\n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
+    it("should stretch key length with longer resources", function() {
+        var input = {
+            "resources": {
+                "strExperience": "EXPEEEEEEERIENCE"
+            }
+        };
+        var expected = "\n\n            Time:                         \n        Heat No.:                         \n        Duration: N/A Minutes             \n\nEXPEEEEEEERIENCE: New                     \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
     it("should handle standard input", function() {
-        input = {
+        var input = {
             "data": {
                 "heat": {
                     "trackName"          : "Track 1",
@@ -288,7 +347,7 @@ describe("Race Ticket Template", function() {
                 "useESign"                     : true
             }
         };
-        expected = "\n\n     Venue: Track 1                      \n    Win By: Best Lap                     \n  Heat No.: 35                           \n  Duration: 6 Minutes                    \n\nEvent Name: Event 2                      \n Round No.: 5                            \n  Customer: Chris Webb                   \nExperience: 7 sessions                   \n      Grid: 1                            \n\nPlease present this ticket to track\n staff 5 minutes before your race \n time above. Enjoy!!!\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n     Venue: Track 1                       \n    Win By: Best Lap                      \n  Heat No.: 35                            \n  Duration: 6 Minutes                     \n\nEvent Name: Event 2                       \n Round No.: 5                             \n  Customer: Chris Webb                    \nExperience: 7 sessions                    \n      Grid: 1                             \n\nPlease present this ticket to track\n staff 5 minutes before your race \n time above. Enjoy!!!\n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 

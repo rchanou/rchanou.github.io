@@ -1,3 +1,5 @@
+"use strict";
+
 var _                   = require('./underscore');
 var z                   = require('./zana');
 var config              = require('./config-provider.js');
@@ -9,6 +11,7 @@ var log                 = utils.logging.log;
 log.debug.on            = config.receipts.useDebugLogging;
 var CHECK_DETAIL_STATUS = CONSTANTS.CHECK_DETAIL_STATUS;
 var PRODUCT_TYPE        = CONSTANTS.PRODUCT_TYPE;
+var PLACEHOLDERS        = CONSTANTS.PLACEHOLDERS;
 
 var defaults = {
     "data": {
@@ -61,12 +64,12 @@ exports.create = function(body) {
             if (product && product.productType === PRODUCT_TYPE.FOOD) {
                 var strProductName = detail.productName;
                 if (strProductName.length >= 23) // switched to 23, not 20
-                    strProductName = strProductName.substring(0,20) + '...';
+                    strProductName = strProductName.substring(0, 20) + '...';
                 if (detail.qty > 1)
                     strProductName = detail.qty + ')' + strProductName;
                 var strTemp = rpad(strProductName, 25) + lpad(detail.checkDetailSubtotalCurrency, 8) + '\n';
                 var subitems = _.filter(foodSubitems, function(x) {
-                    return x.checkDetailId == detail.checkDetailId;
+                    return x.checkDetailId === detail.checkDetailId;
                 });
                 subitems.forEach(function(subitem) {
                     strTemp += '  ' + subitem.description + '\n';
@@ -82,7 +85,7 @@ exports.create = function(body) {
 
     // Feed and Cut Paper
     output += '\n\n\n\n\n\n';
-    output += ('\x1d\x56\x01');
+    output += PLACEHOLDERS.CUTPAPER;
     log.debug('feed & cut');
 
     log.debug('output:\n', output);

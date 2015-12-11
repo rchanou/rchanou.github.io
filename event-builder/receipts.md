@@ -255,6 +255,9 @@ Note that whenever a resource contains a string template variable (such as `{0}`
 		* `CompanyLogoPath`
 			* Default -> `""`
 			* If non empty, then print a placeholder template variable at the top for the company's logo. VB code will replace the template variable with the picture at the given path
+		* `ClubSpeedLogoPath`
+			* Default -> `""`
+			* If non empty, then print a placeholder template variable at the bottom for the ClubSpeed logo. VB code will replace the template variable with the picture at the given path.
 * **Additional Logic**
 	*  `printDetail`
 		*  Default -> `true`

@@ -1032,25 +1032,37 @@ FROM racing_data_cte rdc
 WHERE rdc.PersonalRank = 1
 ORDER BY rdc.LTime
 EOS;
-        $rows = $this->run_query($tsql, $tsql_params);
-        $output = array();
-        foreach($rows as $row) {
-            $output[] = array('racer_id' => $row['CustID'],
-                'nickname' => $row['RacerName'],
-                'first_name' => $row['FirstName'],
-                'rpm' => $row['rpm'],
-                'last_name' => $row['LastName'],
-                'lap_time' => round($row['LTime'] / 1000, 3),
-                'lap_number' => $row['LapNum'],
-                'total_races' => $row['TotalRaces'],
-                'speed_level' => $row['SpeedLevel'],
-                'track_id' => $row['TrackNo'],
-                'track_name' => $row['TrackName'],
-                'timestamp' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['TimeStamp'])),
-                'timestamp_iso' => Convert::toDate($row['TimeStamp']),
-                'photo_url' => $this->getCustomerPhoto($row['CustID'])
-            );
 
+        // TODO -- Put this in index.php?
+        require_once("./vendors/phpfastcache/phpfastcache.php");
+        phpFastCache::setup("storage", "files");
+        phpFastCache::setup("path", dirname(__FILE__) . DIRECTORY_SEPARATOR . 'temp'); // Path For Cache Files
+        $cache = phpFastCache();
+        $cacheKey = md5($tsql . json_encode($tsql_params));
+        
+        $output = $cache->get($cacheKey);
+        if($output == null) {
+            $rows = $this->run_query($tsql, $tsql_params);
+            $output = array();
+            foreach($rows as $row) {
+                $output[] = array('racer_id' => $row['CustID'],
+                    'nickname' => $row['RacerName'],
+                    'first_name' => $row['FirstName'],
+                    'rpm' => $row['rpm'],
+                    'last_name' => $row['LastName'],
+                    'lap_time' => round($row['LTime'] / 1000, 3),
+                    'lap_number' => $row['LapNum'],
+                    'total_races' => $row['TotalRaces'],
+                    'speed_level' => $row['SpeedLevel'],
+                    'track_id' => $row['TrackNo'],
+                    'track_name' => $row['TrackName'],
+                    'timestamp' => date($GLOBALS['dateFormat'] . ' H:i:s', strtotime($row['TimeStamp'])),
+                    'timestamp_iso' => Convert::toDate($row['TimeStamp']),
+                    'photo_url' => $this->getCustomerPhoto($row['CustID'])
+                );
+
+            }
+            $cache->set($cacheKey, $output, 5*60);
         }
 
         return array('fastest' => $output);

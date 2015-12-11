@@ -1,14 +1,15 @@
-var _                   = require('./underscore');
+"use strict";
+
 var z                   = require('./zana');
 var config              = require('./config-provider.js');
 var CONSTANTS           = require('./constants.js');
 var utils               = require('./utils.js');
-var rpad                = utils.receipts.rpad;
 var lpad                = utils.receipts.lpad;
 var log                 = utils.logging.log;
 log.debug.on            = config.receipts.useDebugLogging;
 var CHECK_DETAIL_STATUS = CONSTANTS.CHECK_DETAIL_STATUS;
 var SALE_BY             = CONSTANTS.SALE_BY;
+var PLACEHOLDERS        = CONSTANTS.PLACEHOLDERS;
 
 var defaults = {
     "data": {
@@ -50,8 +51,9 @@ EntitleItemTemplater.prototype.create = function(body) {
                 // assume we only have CheckDetailSalesByLapOrTime? isn't really a way to determine this from just the data, i think.
                 for (var i = 0; i < detail.qty; i++) {
                     for (var k = 0; k < detail.s_vol; k++) { // type safety?
+                        output += '\n\n';
                         output += lpad(resources.strId, 10) + ' ' + detail.checkDetailId + '\n';
-                        output += lpad(resources.strType, 10) + ' ' + detail.productName + (detail.s_vol > 1 ? '(' + (k+1) + ')' : '') + '\n';
+                        output += lpad(resources.strType, 10) + ' ' + detail.productName + (detail.s_vol > 1 ? '(' + (k + 1) + ')' : '') + '\n';
                         if (detail.s_saleBy === SALE_BY.LAPS)
                             output += lpad(resources.strLaps, 10) + ' ' + detail.s_laps + '\n';
                         else
@@ -69,13 +71,15 @@ EntitleItemTemplater.prototype.create = function(body) {
                         if (resources.raceTicketLine4)
                             output += resources.raceTicketLine4 + '\n';
                         output += '\n';
-                        output += "{{BARCODE=" + detail.checkDetailId + "}}"; // newline?
+                        output += PLACEHOLDERS.BARCODE.replace('###VAL###', detail.checkDetailId);
+                        output += '\n';
+                        output += PLACEHOLDERS.CUTPAPER;
                     }
                 }
             }
         });
     }
-  
+
     log.debug('output:\n', output);
     return output;
 };

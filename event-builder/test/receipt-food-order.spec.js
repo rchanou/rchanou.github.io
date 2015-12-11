@@ -1,4 +1,6 @@
-/*jshint expr: true*/
+/* eslint no-unused-expressions: 0 */ // for chai
+
+"use strict";
 
 var expect = require("chai").expect;
 var builder = require("../lib/foodOrderTemplate.js");
@@ -17,7 +19,7 @@ describe("Food Order Template", function() {
 
     it("should gracefully handle empty input", function() {
         var input = null;
-        var expected = "\n\nCheck # N/A                      \n---------------------------------\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # N/A                      \n---------------------------------\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -30,7 +32,7 @@ describe("Food Order Template", function() {
             },
             "nowTimeShort": "10:00AM"
         };
-        var expected = "\n\nCheck # 1                 10:00AM\n---------------------------------\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # 1                 10:00AM\n---------------------------------\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -47,7 +49,7 @@ describe("Food Order Template", function() {
                 }
             }
         };
-        var expected = "\n\nCustomer                  Jim Bob\nCheck # 1                        \n---------------------------------\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCustomer                  Jim Bob\nCheck # 1                        \n---------------------------------\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -70,7 +72,7 @@ describe("Food Order Template", function() {
                 ]
             }
         };
-        var expected = "\n\nCheck # N/A                      \n---------------------------------\nFood Product 1             $10.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # N/A                      \n---------------------------------\nFood Product 1             $10.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -112,7 +114,7 @@ describe("Food Order Template", function() {
                 ]
             }
         };
-        var expected = "\n\nCheck # N/A                      \n---------------------------------\nFood Product 1             $10.00\nFood Product 1             $10.00\nFood Product 2             $12.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # N/A                      \n---------------------------------\nFood Product 1             $10.00\nFood Product 1             $10.00\nFood Product 2             $12.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -136,7 +138,7 @@ describe("Food Order Template", function() {
                 ]
             }
         };
-        var expected = "\n\nCheck # N/A                      \n---------------------------------\n2)Food Product 1           $10.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # N/A                      \n---------------------------------\n2)Food Product 1           $10.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -171,7 +173,7 @@ describe("Food Order Template", function() {
                 ]
             }
         };
-        var expected = "\n\nCheck # N/A                      \n---------------------------------\n2)Food Product 1           $10.00\n  Subitem 1\n  Subitem 2\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # N/A                      \n---------------------------------\n2)Food Product 1           $10.00\n  Subitem 1\n  Subitem 2\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -184,7 +186,7 @@ describe("Food Order Template", function() {
             },
             "terminalName": "POS1"
         };
-        var expected = "\n\nCheck # N/A                      \n---------------------------------\n---------------------------------\nUser                      support\nTerminal                     POS1\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # N/A                      \n---------------------------------\n---------------------------------\nUser                      support\nTerminal                     POS1\n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -226,8 +228,8 @@ describe("Food Order Template", function() {
                 ]
             }
         };
-        var expected = "\n\nCheck # N/A                      \n---------------------------------\nFood Product 2             $12.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\nCheck # N/A                      \n---------------------------------\nFood Product 2             $12.00\n---------------------------------\nUser                             \nTerminal                         \n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
-    
+
 });

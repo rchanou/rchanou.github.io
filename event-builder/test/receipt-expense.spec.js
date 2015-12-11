@@ -1,4 +1,6 @@
-/*jshint expr: true*/
+/* eslint no-unused-expressions: 0 */ // for chai
+
+"use strict";
 
 var expect = require("chai").expect;
 var builder = require("../lib/expenseTemplate.js");
@@ -17,7 +19,7 @@ describe("Expense Receipt Template", function() {
 
     it("should gracefully handle empty input", function() {
         var input = null;
-        var expected = "\n\n              ###EXPENSE###\nTerminal: \n \nShift: 0\n\n                                \n          \n\n\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n              ###EXPENSE###\nTerminal: \n \nShift: 0\n\n                                \n          \n\n\n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 
@@ -39,7 +41,7 @@ describe("Expense Receipt Template", function() {
             , "nowDateShort" : "04/13/2015"
             , "nowTimeShort" : "2:18PM"
         };
-        var expected = "\n\n              ###EXPENSE###\nTerminal: POS1\n04/13/2015 2:18PM\nShift: 1\n\nSome Description                \n $1,200.34\n\n\n\n\n\n\n\n\n\u001dV\u0001";
+        var expected = "\n\n              ###EXPENSE###\nTerminal: POS1\n04/13/2015 2:18PM\nShift: 1\n\nSome Description                \n $1,200.34\n\n\n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 

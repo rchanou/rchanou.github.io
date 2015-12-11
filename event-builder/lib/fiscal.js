@@ -160,7 +160,7 @@ exports.print = function print(input, callback) {
      * SCU100 -- Default: 9600 8N1 No Flow Control
      */
 
-		// Code for SCU100 removed as this model never worked
+        // Code for SCU100 removed as this model never worked
 
 
     /**
@@ -201,7 +201,7 @@ exports.print = function print(input, callback) {
 
             manufacturingIdCode: null,
 
-						terminal: null // If provided will override terminal name
+                        terminal: null // If provided will override terminal name
 
         }
 
@@ -225,151 +225,151 @@ exports.print = function print(input, callback) {
 
 
 
-						completeData += rawData;
+                        completeData += rawData;
 
-						var dataArray = completeData.split('\r');
+                        var dataArray = completeData.split('\r');
 
-						if(dataArray.length > 1) { //If our data was split into several pieces, we have a complete chunk saved in the 0th position in the array
+                        if(dataArray.length > 1) { //If our data was split into several pieces, we have a complete chunk saved in the 0th position in the array
 
-								completeData = dataArray[1];
+                                completeData = dataArray[1];
 
-								processCleanCashResponse(dataArray[0], printerOptions);
+                                processCleanCashResponse(dataArray[0], printerOptions);
 
-						}
+                        }
 
         });
 
 
 
-				function processCleanCashResponse(rawData, printerOptions) {
+                function processCleanCashResponse(rawData, printerOptions) {
 
-					data = rawData.split('#');
+                    data = rawData.split('#');
 
-					switch(data[3]) {
+                    switch(data[3]) {
 
-							case 'IR':
+                            case 'IR':
 
-									console.log('Received Printer Identity');
+                                    console.log('Received Printer Identity');
 
-									console.log(rawData);
+                                    console.log(rawData);
 
-									printerOptions.manufacturingIdCode = data[4];
+                                    printerOptions.manufacturingIdCode = data[4];
 
-									break;
+                                    break;
 
-							case 'ACK':
+                            case 'ACK':
 
-									console.log('Received Positive Acknowledgement');
+                                    console.log('Received Positive Acknowledgement');
 
-									console.log(rawData);
+                                    console.log(rawData);
 
-									break;
+                                    break;
 
-							case 'NAK':
+                            case 'NAK':
 
-									var errorMessages = {
+                                    var errorMessages = {
 
-											'001': 'Invalid LRC',
+                                            '001': 'Invalid LRC',
 
-											'002': 'Unknown message type',
+                                            '002': 'Unknown message type',
 
-											'003': 'Invalid data/parameter',
+                                            '003': 'Invalid data/parameter',
 
-											'004': 'Invalid sequence',
+                                            '004': 'Invalid sequence',
 
-											'005': 'Deprecated (Not used)',
+                                            '005': 'Deprecated (Not used)',
 
-											'006': 'CleanCash Not operationa',
+                                            '006': 'CleanCash Not operationa',
 
-											'007': 'Invalid POS ID',
+                                            '007': 'Invalid POS ID',
 
-											'008': 'Internal error',
+                                            '008': 'Internal error',
 
-											'009': 'License exceeded (CCSP v2)',
+                                            '009': 'License exceeded (CCSP v2)',
 
-											'010': 'Internal storage full (CCSP v2)',
+                                            '010': 'Internal storage full (CCSP v2)',
 
-											'011': 'Invalid sequence number'
+                                            '011': 'Invalid sequence number'
 
-									}
+                                    }
 
-									console.log('Fiscal error: ' + errorMessages[data[4]]);
+                                    console.log('Fiscal error: ' + errorMessages[data[4]]);
 
-				
+                
 
-									var result = {
+                                    var result = {
 
-											success: false,
+                                            success: false,
 
-											message: errorMessages[data[4]]
+                                            message: errorMessages[data[4]]
 
-									};
+                                    };
 
-				
+                
 
-									callback(result);
+                                    callback(result);
 
-									printer.destroy();
+                                    printer.destroy();
 
-									break;
+                                    break;
 
-							case 'SR':
+                            case 'SR':
 
-									// Parse out the IR "#!#00D#SR#12312312312312312312123123123123123123121231231231231231231#7D\r"
+                                    // Parse out the IR "#!#00D#SR#12312312312312312312123123123123123123121231231231231231231#7D\r"
 
-									printerOptions.signatureCode = data[4];
+                                    printerOptions.signatureCode = data[4];
 
-				
+                
 
-									console.log('Received Signature Code');
+                                    console.log('Received Signature Code');
 
-									console.log(rawData);
+                                    console.log(rawData);
 
-				
+                
 
-									var result = {
+                                    var result = {
 
-											success: true,
+                                            success: true,
 
-											message: "",
+                                            message: "",
 
-											serialCode: printerOptions.manufacturingIdCode,
+                                            serialCode: printerOptions.manufacturingIdCode,
 
-											receiptCode: printerOptions.signatureCode,
+                                            receiptCode: printerOptions.signatureCode,
 
-											organizationNumber: printerOptions.organizationNumber
+                                            organizationNumber: printerOptions.organizationNumber
 
-									};
+                                    };
 
-				
+                
 
-									console.log('Sending success');
+                                    console.log('Sending success');
 
-									console.log(result);
+                                    console.log(result);
 
-				
+                
 
-									console.log('Closing fiscal');
+                                    console.log('Closing fiscal');
 
-									printer.destroy();
+                                    printer.destroy();
 
-				
+                
 
-									callback(null, result);
+                                    callback(null, result);
 
-									return;
+                                    return;
 
-									break;
+                                    break;
 
-							default:
+                            default:
 
-									console.log('Caught unhandled message:');
+                                    console.log('Caught unhandled message:');
 
-									console.log(rawData);
+                                    console.log(rawData);
 
-					}
+                    }
 
-				}
+                }
 
 
 
@@ -595,31 +595,31 @@ exports.print = function print(input, callback) {
 
                 
 
-								// Validate organization number (10 digits, only numbers)
+                                // Validate organization number (10 digits, only numbers)
 
-								if(input.printer.options.organizationNumber.length !== 10
+                                if(input.printer.options.organizationNumber.length !== 10
 
-									|| (input.printer.options.organizationNumber !== (input.printer.options.organizationNumber).replace(/\D/g,''))
+                                    || (input.printer.options.organizationNumber !== (input.printer.options.organizationNumber).replace(/\D/g,''))
 
-									) {
+                                    ) {
 
-									var result = {
+                                    var result = {
 
-											success: false,
+                                            success: false,
 
-											message: 'Organization number given (' + input.printer.options.organizationNumber + ') should be exactly 10 numeric-only digits.'
+                                            message: 'Organization number given (' + input.printer.options.organizationNumber + ') should be exactly 10 numeric-only digits.'
 
-									};
+                                    };
 
-									printer.destroy();
+                                    printer.destroy();
 
-									return callback(result);
+                                    return callback(result);
 
-								}
+                                }
 
-								
+                                
 
-								var organizationNumber = input.printer.options.organizationNumber; // Max 10
+                                var organizationNumber = input.printer.options.organizationNumber; // Max 10
 
                 var receiptTotal = input.check.total;
 
@@ -805,9 +805,9 @@ exports.print = function print(input, callback) {
 
     }
 
-		/**
-		 * POSNET Poland Fiscal Printer
-		 */
+        /**
+         * POSNET Poland Fiscal Printer
+         */
 
 
     if(input.printer.type == 'posnet') {
