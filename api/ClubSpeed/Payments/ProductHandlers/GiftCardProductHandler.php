@@ -167,11 +167,32 @@ class GiftCardProductHandler extends BaseProductHandler {
 
                 $receiptBody = Templates::buildFromString($giftCardEmailBodyHtml, $giftCardData);
 
+                $sendReceiptCopyTo = $this->logic->controlPanel->match(array(
+                    'TerminalName' => 'Booking',
+                    'SettingName' => 'sendReceiptCopyTo'
+                ));
+                if (!empty($sendReceiptCopyTo)) {
+                    $sendReceiptCopyTo = $sendReceiptCopyTo[0];
+                    $sendReceiptCopyTo = $sendReceiptCopyTo->SettingValue; // this will default to an empty string
+                    if (!empty($sendReceiptCopyTo)) {
+                        $sendReceiptCopyTo = explode(",", $sendReceiptCopyTo); // we should be able to use this directly as the BCC
+                        array_walk($sendReceiptCopyTo, function(&$val) {
+                            $val = trim($val); // get rid of any additional whitespace in the comma-delimited list of emails
+                        });
+                    }
+                }
+
                 $mail = Mail::builder()
                     ->subject($giftCardEmailSubject)
                     ->from($emailFrom)
                     ->to($emailTo)
                     ->body($receiptBody);
+
+                if (!empty($sendReceiptCopyTo)) {
+                    Log::info($logPrefix . 'Gift card receipt copies will be sent to the following addresses: ' . print_r($sendReceiptCopyTo, true), Enums::NSP_BOOKING);
+                    $mail->bcc($sendReceiptCopyTo);
+                }
+
                 Mail::sendWithInlineImages($mail, array('giftCardImage' => $barCodeUtil->getBarcodePNG($giftCardCustomer->CrdID, "C128",2,60)));
                 Log::info($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID, Enums::NSP_BOOKING);
             }
