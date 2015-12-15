@@ -350,7 +350,7 @@ WITH LAST_RACE_CTE AS (
             hm.TrackNo = ?
         AND hm.HeatStatus IN (0,4)
         AND hm.ScheduledTime > lrc.ScheduledTime
-        AND hm.ScheduledTime > DATEADD(HOUR, -2, GETDATE())
+        AND hm.ScheduledTime > DATEADD(HOUR, -6, GETDATE())
 )
 SELECT c.*
 FROM NEXT_RACES_CTE c
