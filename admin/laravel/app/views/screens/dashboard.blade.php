@@ -21,6 +21,25 @@
         </div>
     </div>
     <div class="row">
+        <div class="col-sm-2 col-md-2 col-lg-3"></div>
+        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-6">
+            <div class="widget-box">
+                <div class="widget-title">
+                    <span class="icon">
+                        <i class="fa fa-th-list"></i>
+                    </span>
+                    <h5>Utilizing the API to enhance your business</h5>
+                </div>
+                <div class="widget-content" style="text-align: center;">
+                    <iframe width="100%" height="315" style="max-width:560px;"
+                            src="https://www.youtube.com/embed/eXGdip862h8" frameborder="0" allowfullscreen></iframe>
+                    <p>Spend a couple minutes with McKenna where she shows you some of the amazing things our customers are doing with their API access!</p><br/>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-3"></div>
+    </div>
+    <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
             <div class="widget-box">
                 <div class="widget-title">
@@ -55,8 +74,6 @@
             </div>
         </div>
     </div>
-
-
     <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
             <div class="widget-box">
