@@ -30,37 +30,37 @@
 <div id="wrapper">
     <div id="header">
         <h1><a href="{{URL::to('dashboard')}}">@yield('pageHeader','REPLACE_PAGE_TITLE')</a></h1>
-        <a id="menu-trigger" href="#"><i class="fa fa-bars"></i></a>
+        <a id="menu-trigger" href="#"><i class="fa fa-fw fa-bars"></i></a>
     </div>
 
     <div id="user-nav">
         <ul class="btn-group">
             <li class="btn"><a href="#">Logged in as: {{Session::get('user')}}</a></li>
-            <li class="btn"><a title="" href="{{action('LoginController@logout')}}"><i class="fa fa-share"></i> <span class="text">Logout</span></a></li>
+            <li class="btn"><a title="" href="{{action('LoginController@logout')}}"><i class="fa fa-fw fa-share"></i> <span class="text">Logout</span></a></li>
         </ul>
     </div>
 
     <div id="sidebar">
         <!--<div id="search">
-            <input type="text" placeholder="Search here..."/><button type="submit" class="tip-right" title="Search"><i class="fa fa-search"></i></button>
+            <input type="text" placeholder="Search here..."/><button type="submit" class="tip-right" title="Search"><i class="fa fa-fw fa-search"></i></button>
         </div>-->
         <ul>
-            <li><a href="{{URL::to('dashboard')}}"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
+            <li><a href="{{URL::to('dashboard')}}"><i class="fa fa-fw fa-home"></i> <span>Dashboard</span></a></li>
             <!--<li class="submenu">
-                <a href="#"><i class="fa fa-flask"></i> <span>Sub-Menu 1</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <a href="#"><i class="fa fa-fw fa-flask"></i> <span>Sub-Menu 1</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
                 <ul>
                     <li><a href="#">Sub Item</a></li>
                     <li><a href="#">Sub Item</a></li>
                     <li><a href="#">Sub Item</a></li>
                 </ul>
             </li>
-            <li><a href="#"><i class="fa fa-th"></i> <span>Direct Link Item</span></a></li>-->
+            <li><a href="#"><i class="fa fa-fw fa-th"></i> <span>Direct Link Item</span></a></li>-->
             @if (@$controller == 'ChannelController')
             <li class="active open submenu">
             @else
             <li class="submenu">
             @endif
-                <a href="#"><i class="fa fa-desktop"></i> <span>Speed Screens</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <a href="#"><i class="fa fa-fw fa-desktop"></i> <span>Speed Screens</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/channel','Channels')}}</li>
                     <li>{{link_to('/channelSettings','Settings')}}</li> <!-- TODO: Rename to channel/settings -->
@@ -73,7 +73,7 @@
             @else
             <li class="submenu">
             @endif
-                <a href="#"><i class="fa fa-calendar"></i> <span>Online Bookings</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <a href="#"><i class="fa fa-fw fa-calendar"></i> <span>Online Bookings</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/booking','Manage Bookings')}}</li>
                     <li>{{link_to('/booking/settings','Settings')}}</li>
@@ -90,7 +90,7 @@
             @else
             <li class="submenu">
             @endif
-                <a href="#"><i class="fa fa-tablet"></i> <span>Registrations</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <a href="#"><i class="fa fa-fw fa-tablet"></i> <span>Registrations</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/registration/settings','Settings')}}</li>
                     <li>{{link_to('/registration/translations', 'Translations')}}</li>
@@ -106,14 +106,14 @@
             @else
             <li>
             @endif
-                <a href="{{URL::to('reports')}}"><i class="fa fa-file-o"></i> <span>Reports</span></a>
+                <a href="{{URL::to('reports')}}"><i class="fa fa-fw fa-file-o"></i> <span>Reports</span></a>
             </li>
             @if (@$controller == 'MobileAppController')
             <li class="active open">
             @else
             <li class="submenu">
             @endif
-                <a href="#"><i class="fa fa-mobile"></i> <span>Mobile App</span> <i class="arrow fa fa-chevron-right"></i></a>
+                <a href="#"><i class="fa fa-fw fa-mobile"></i> <span>Mobile App</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
                 <ul>
                     <li>{{link_to('/mobileApp/menuItems','Menu Items')}}</li>
                     <li>{{link_to('/mobileApp/settings','Settings')}}</li>
@@ -127,7 +127,7 @@
             @else
                 <li class="submenu">
             @endif
-                    <a href="#"><i class="fa fa-credit-card"></i> <span>Gift Cards</span> <i class="arrow fa fa-chevron-right"></i></a>
+                    <a href="#"><i class="fa fa-fw fa-credit-card"></i> <span>Gift Cards</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
                     <ul>
                         <li>{{link_to('/giftcards/manage','Manage')}}</li>
                         <li>{{link_to('/giftcards/reports','Reports')}}</li>
@@ -138,7 +138,7 @@
 						@else
 							<li class="submenu">
 						@endif
-							<a href="#"><i class="fa fa-facebook-square"></i> <span>Facebook</span> <i class="arrow fa fa-chevron-right"></i></a>
+							<a href="#"><i class="fa fa-fw fa-facebook-square"></i> <span>Facebook</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
 							<ul>
 								<li>{{link_to('/facebook/after-race-settings','After Race Posting Settings')}}</li>
                 <li>{{link_to('/facebook/logs','Logs')}}</li>
@@ -149,7 +149,7 @@
 						@else
 							<li class="submenu">
 						@endif
-							<a href="#"><i class="fa fa-comments"></i> <span>SpeedText</span> <i class="arrow fa fa-chevron-right"></i></a>
+							<a href="#"><i class="fa fa-fw fa-comments"></i> <span>SpeedText</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
 							<ul>
 								<li>{{link_to('/speedtext/settings','Settings')}}</li>
                 <li>{{link_to('/speedtext/logs','Logs')}}</li>
