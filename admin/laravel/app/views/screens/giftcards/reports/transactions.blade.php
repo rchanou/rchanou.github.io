@@ -68,7 +68,8 @@ Transaction History Report
                     <textarea rows="5" name="listOfGiftCards" class="form-control">{{Input::old('listOfGiftCards') !== null ? Input::old('listOfGiftCards') : ''}}</textarea>
                       <span class="help-block text-left">
                           A comma-separated list of desired gift card numbers for the transaction history report. May also be represented as ranges with a dash. Enters/newlines are not allowed.<p/><p/>
-                          <strong>Example: </strong> 1354,1355,1358,1500-2001,2050
+                          <strong>Example: </strong> 1354,1355,1358,1500-2001,2050<p/><p/>
+                          <em>There is a limit of 2000 gift cards per report.</em>
                       </span>
                 </div>
                   <div class="col-sm-12">
