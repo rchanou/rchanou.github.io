@@ -216,14 +216,30 @@ class Racers
             if ($this->is_fb_registration($params)) {
                 // facebook registration
                 $customer = $this->postfb_login($request_data);
+                $this->run_new_account_logic($request_data, $params, $customer['customerId']);
             }
             else {
                 // standard registration
                 $customer = $this->postCreate($request_data);
+                $customerId = $customer['customerId'];
+                $params['customerId'] = $customerId;
+
+                // dont run all new account logic, just the queue part of it
+                if ($this->is_event_registration($params)) {
+                    $this->getapplyRule(
+                        $customerId
+                        , Enums::RULE_ADD_EVENT_CUSTOMER_FROM_ONLINE_REGISTRATION
+                    );
+                }
+                else {
+                    $this->getapplyRule(
+                        $customerId
+                        , Enums::RULE_ADD_CUSTOMER_FROM_REGISTRATION_TERMINAL
+                    );
+                }
             }
 
             // send new account emails and create waivers
-            $this->run_new_account_logic($request_data, $params, $customer['customerId']);
 
             // add to event or customer queue
             
