@@ -308,8 +308,8 @@ SELECT
     , cd.ProductID
     , cd.ProductName
     , cd.CreatedDate
-    , cd.CreatedOn
-    , cd.CreatedBy
+    -- , cd.CreatedOn
+    -- , cd.CreatedBy
     , cd.Qty
     , cd.UnitPrice
     , cd.UnitPrice2
