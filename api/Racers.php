@@ -174,8 +174,7 @@ class Racers
                 , 'Token'           => $token
             ));
             Authenticate::impersonate($token); // impersonate customer for the remaining calls
-            if (isset($request_data['profilephoto']))
-                $this->profile_photo($customerId, $request_data);
+            $this->create_photos($request_data, $customerId);
             if (isset($request_data['email']))
                 $this->welcome($customerId, $request_data);
             return array(
