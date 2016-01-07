@@ -824,7 +824,7 @@ class Racers
      */
     public function waivers($racer_id, $request_data = array()) {
         try {
-            if (!Authenticate::privateAccess())
+            if (!Authenticate::customerAccess($racer_id))
                 throw new RestException(401, "Invalid authorization!");
             $customer = $this->logic->customers->get($racer_id);
             $customer = $customer[0];
