@@ -447,6 +447,43 @@ describe("Transaction Receipt Template", function() {
         compare(input, expected);
     });
 
+    it("should parse check detail level discounts on event checks", function() {
+        var input = {
+            "data": {
+                "check": {
+                    "checkId": 1,
+                    "checkType": 2
+                },
+                "customers": [
+                    {
+                        "custId" : 1000006
+                    }
+                ],
+                "checkDetails": [
+                    {
+                          "checkDetailId"               : 1
+                        , "checkDetailSubtotalCurrency" : "$16.25"
+                        , "checkId"                     : 1
+                        , "productId"                   : 6
+                        , "productName"                 : "Some Product"
+                        , "qty"                         : 1
+                        , "discountApplied"             : 6.0
+                        , "discountAppliedCurrency"     : "$6.00"
+                        , "discountDesc"                : "$6 coupon"
+                    }
+                ],
+                "products": [
+                    {
+                        "productId"   : 6,
+                        "productType" : 6
+                    }
+                ]
+            }
+        };
+        var expected = "\n\n\nReceipt Number 1                          \n------------------------------------------\nSome Product                        $16.25\n  $6 coupon($6.00)\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n{{Barcode=1}}\n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
     it("should not parse voided check details", function() {
         var input = {
             "data": {
