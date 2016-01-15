@@ -241,6 +241,8 @@ exports.create = function(body) {
             description = detail.qty + ')' + description; // or actualQty? qty + cadetQty?
           output += rpad(description, 30) + lpad(detail.checkDetailSubtotalCurrency, 12) + '\n';
         }
+        if (detail.discountApplied && +detail.discountApplied > 0)
+          output += '  ' + detail.discountDesc + '(' + detail.discountAppliedCurrency + ')' + '\n';
         /*
           End GetPrintEventCheckDetail
         */
