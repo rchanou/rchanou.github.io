@@ -37,9 +37,6 @@
         }
     }
 
-    // This function is called when someone finishes with the Login
-    // Button.  See the onlogin handler attached to it in the sample
-    // code below.
     function checkLoginState() {
         FB.getLoginStatus(function(response) {
             statusChangeCallback(response);
@@ -48,12 +45,10 @@
 
     window.fbAsyncInit = function() {
         FB.init({
-            //appId      : '1407866362829010',
             appId      : '296582647086963',
-            cookie     : true,  // enable cookies to allow the server to access
-            // the session
-            xfbml      : true,  // parse social plugins on this page
-            version    : 'v2.0' // use version 2.0
+            cookie     : true,
+            xfbml      : true,
+            version    : 'v2.0'
         });
 
         FB.getLoginStatus(function(response) {
@@ -62,7 +57,6 @@
 
     };
 
-    // Load the SDK asynchronously
     (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
         if (d.getElementById(id)) return;
