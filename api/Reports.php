@@ -339,6 +339,11 @@ EOS;
         if (!\ClubSpeed\Security\Authenticate::privateAccess())
             throw new RestException(401, "Invalid authorization!");
 		
+        // Perform a quick select and see if CreatedOn and CreatedBy exist for usage below
+        $data = $this->run_query('SELECT TOP(1) * FROM CheckDetails');
+        $createdOn = array_key_exists('CreatedOn', $data) ? "cd.CreatedOn AS 'Line Item Created On'," : '';
+        $createdBy = array_key_exists('CreatedBy', $data) ? "cd.CreatedBy AS 'Line Item Created By'," : '';
+
 		$opened_or_closed_date = isset($_REQUEST['show_by_opened_date']) && $_REQUEST['show_by_opened_date'] === 'true' ? 'c.OpenedDate' : 'c.ClosedDate';
 		$tsql = <<<EOD
 select
@@ -357,26 +362,8 @@ ELSE ''
 END
 AS "Void Status",
 cd.CreatedDate AS "Line Item Created At",
-case 
-   when exists (
-      SELECT 1 
-      FROM Sys.columns c 
-      WHERE c.[object_id] = OBJECT_ID('dbo.CheckDetails') 
-         AND c.name = 'CreatedOn'
-   ) 
-   then cd.CreatedOn
-   else null
-END AS 'Line Item Created On',
-case 
-   when exists (
-      SELECT 1 
-      FROM Sys.columns c 
-      WHERE c.[object_id] = OBJECT_ID('dbo.CheckDetails') 
-         AND c.name = 'CreatedBy'
-   ) 
-   then cd.CreatedBy
-   else null
-END AS 'Line Item Created By',
+{$createdOn}
+{$createdBy}
 products.ProductClassID AS "Product Class ID",
 pc.Description AS "Product Class Description",
 pc.ExportName AS "Product Class Export",
@@ -431,8 +418,13 @@ EOD;
 	public function sales_by_pos_and_class() {
 		if (!\ClubSpeed\Security\Authenticate::privateAccess())
 				throw new RestException(401, "Invalid authorization!");
-		
-		$tsql = <<<EOD
+	
+        // Perform a quick select and see if CreatedOn and CreatedBy exist for usage below
+        $data = $this->run_query('SELECT TOP(1) * FROM CheckDetails');
+        $createdOn = array_key_exists('CreatedOn', $data);
+
+        if($createdOn) {
+		    $tsql = <<<EOD
 SELECT
 MAX(cd.CreatedOn) AS 'POS',
 MAX(pc.Description) AS 'Category',
@@ -446,6 +438,22 @@ WHERE cdv.CreatedDate BETWEEN :start AND :end
 GROUP BY cd.CreatedOn, pc.ProductClassID
 ORDER BY cd.CreatedOn, pc.ProductClassID
 EOD;
+        } else {
+            $tsql = <<<EOD
+SELECT
+null AS 'POS',
+MAX(pc.Description) AS 'Category',
+SUM(cdv.CheckDetailTax) AS 'Tax',
+SUM(cdv.CheckDetailTotal) AS 'Total'
+FROM CheckDetails_V cdv
+LEFT JOIN CheckDetails cd ON cdv.CheckDetailID = cd.CheckDetailID
+LEFT JOIN Products ON Products.ProductID = cd.ProductID
+LEFT JOIN ProductClasses pc ON pc.ProductClassID = products.ProductClassID
+WHERE cdv.CreatedDate BETWEEN :start AND :end
+GROUP BY pc.ProductClassID
+ORDER BY pc.ProductClassID
+EOD;
+        }
 		$params = array(&$start, &$end);
     $data = $this->run_query($tsql, $this->getDateRange());
 
