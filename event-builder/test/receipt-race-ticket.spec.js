@@ -191,7 +191,7 @@ describe("Race Ticket Template", function() {
         var input = {
             "data": {
                 "customer": {
-                    "lineupPosition" : 1,
+                    "lineupPosition" : 1
                 }
             },
             "options": {

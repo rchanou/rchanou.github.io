@@ -791,7 +791,7 @@ describe("Transaction Receipt Template", function() {
         compare(input, expected);
     });
 
-    it("should skip gift card # line when crdId is -1", function() {
+    it("should include customer full name line even when crdId is -1", function() {
         var input = {
             "data": {
                 "customers": [
@@ -826,7 +826,7 @@ describe("Transaction Receipt Template", function() {
                 ]
             }
         };
-        var expected = "\n\n\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nGift Card Payment(4/20/2015)        $10.00\n  $50.00 Balance remaining.\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n{{Barcode=1}}\n\n\n\n\n\n\n{{CutPaper}}";
+        var expected = "\n\n\nReceipt Number 1                          \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nGift Card Payment(4/20/2015)        $10.00\n  Jim Bob\n  $50.00 Balance remaining.\n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n{{Barcode=1}}\n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 

@@ -383,11 +383,12 @@ exports.create = function(body) {
       case PAY_TYPE.GIFT_CARD:
         var giftCard = _.find(giftCards, function(gc) { return gc.custId === payment.custId; });
         if (giftCard) {
-          var giftCardCustomer = _.find(customers, function(cst) { return cst.crdId === giftCard.crdId; });
+          var giftCardCustomer = _.find(customers, function(cst) { return cst.custId === giftCard.custId; });
           var balanceResource = '';
           var accountResource = '';
           var giftCardName = '';
           if (giftCardCustomer) {
+            giftCardName = giftCardCustomer.fullName;
             if (giftCardCustomer.isGiftCard) {
               accountResource = resources.strGC;
               balanceResource = resources.strBalanceRemaining;
@@ -396,8 +397,6 @@ exports.create = function(body) {
               accountResource = resources.strCustomer;
               balanceResource = resources.strAccBalance;
             }
-            if (giftCardCustomer.crdId !== -1)
-              giftCardName = giftCardCustomer.fullName;
           }
           else {
             log.debug('received gift card payment, but no matching gift card customer');
@@ -530,7 +529,7 @@ exports.create = function(body) {
   */
 
   if (user && user.userName)
-    output += rpad(resources.strUser, 5) + lpad(user.userName, 37) + '\n';
+    output += rpad(resources.strUser, 12) + lpad(user.userName, 30) + '\n';
   if (terminal)
     output += rpad(resources.strTerminal, 9) + lpad(terminal, 33) + '\n';
   output += line + '\n';
