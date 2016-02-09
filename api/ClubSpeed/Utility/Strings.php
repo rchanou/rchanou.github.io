@@ -18,7 +18,8 @@ class Strings {
     public static function rangeToCSV($str) {
         $str = preg_replace('/\s+/', '', $str); // just get rid of all whitespace immediately
         $full = array();
-        foreach(explode(',', $str) as $token) {
+        $exploded = explode(',', $str);
+        foreach($exploded as $token) {
             if (strpos($token, '-')) {
                 $split = explode('-', $token);
                 if (!is_numeric($split[0]))
@@ -35,7 +36,8 @@ class Strings {
             else {
                 if (!is_numeric($token))
                     throw new \CSException("Range token provided in string was non-numeric! Received: " . $token);
-                $full[] = $token;
+                if ($token > 0)
+                    $full[] = $token; // silently drop negatives? or should we throw an error?
             }
         }
         sort($full);

@@ -854,6 +854,8 @@ ORDER BY p.Description";
                 throw new \CSException('Cards must be provided to the gift card balance report!');
             $cards = $request_data['cards'];
             $range = Strings::rangeToCSV($cards);
+            if (empty($range))
+                throw new \CSException('Cards must be provided to the gift card balance report!');
             $data = $this->logic->giftCardBalance->find('CrdID IN ' . $range);
             $mapper = new \ClubSpeed\Mappers\GiftCardBalanceMapper();
             $out = $mapper->out($data);
