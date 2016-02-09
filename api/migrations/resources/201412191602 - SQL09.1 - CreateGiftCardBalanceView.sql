@@ -12,4 +12,3 @@ LEFT OUTER JOIN dbo.GiftCardMoney_V gcmv
     ON c.CrdID = gcmv.CrdID
 LEFT OUTER JOIN dbo.GiftCardPoints_V gcpv
     ON c.CrdID = gcpv.CrdID
-WHERE c.CrdID > -1

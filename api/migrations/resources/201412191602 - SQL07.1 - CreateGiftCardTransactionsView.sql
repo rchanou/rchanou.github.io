@@ -9,8 +9,6 @@ WITH GiftCardTransactions AS (
     FROM dbo.Customers c
     INNER JOIN dbo.PointHistory ph
         ON c.CustID = ph.CustID
-    WHERE
-        c.CustID > -1
 
     UNION ALL
 
@@ -23,8 +21,6 @@ WITH GiftCardTransactions AS (
     FROM dbo.Customers c
     INNER JOIN dbo.GiftCardHistory gch
         ON c.CustID = gch.CustID
-    WHERE
-        c.CustID > -1
 )
 SELECT
     gct.CrdID

@@ -16,4 +16,3 @@ SELECT
 FROM GiftCardMoney gcb
 INNER JOIN dbo.Customers c
     ON c.CustID = gcb.CustID
-WHERE c.CrdID > -1
