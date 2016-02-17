@@ -98,5 +98,5 @@ childProcess.execFile(phantomjsBinPath, phantomjsArgs, function(phantomErr, phan
 
 // Remove older files
 var findRemoveSync = require('find-remove');
-var deletedFiles = findRemoveSync('output', {age: {seconds: (oldFileLifetimeInMs / 1000) }, extensions: ['.txt', '.pdf']});
+var deletedFiles = findRemoveSync(printJobDirectory, {age: {seconds: (oldFileLifetimeInMs / 1000) }, extensions: ['.txt', '.pdf']});
 console.log('Cleaned up older files:', deletedFiles);
