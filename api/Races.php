@@ -920,12 +920,33 @@ EOS;
             $limit = 50;
         }
 
-        $starttime = '00:00:00';
-        $endtime = '23:59:59';
         $isoDateFormat = 'Y-m-d';
 
         if(isset($_GET['range'])) {
-            
+
+            $settings = new Settings();
+            $cutoffHourSetting = $settings->getSettings('MainEngine', array('Cutoff'));
+            $cutoffHour = 4; // default
+            if (isset($cutoffHourSetting->settings->SettingValue)) {
+                $cutoffHour = (int)$cutoffHourSetting->settings->SettingValue;
+                // enforce valid values 0-23
+                if ($cutoffHour > 23) {
+                    $cutoffHour = 23;
+                }
+                if ($cutoffHour < 0) {
+                    $cutoffHour = 0;
+                }
+            }
+            $cutOffHourPrior = $cutoffHour - 1;
+            if ($cutOffHourPrior < 0) { // Going from 00:00:00 to 23:59:59
+                $cutOffHourPrior = 23;
+            }
+            $cutoffStartTimeHour = str_pad($cutoffHour, 2, '0', STR_PAD_LEFT);
+            $cutoffEndTimeHour = str_pad($cutOffHourPrior, 2, '0', STR_PAD_LEFT);
+
+            $starttime = $cutoffStartTimeHour . ':00:00'; // the same day (default: 04:00:00)
+            $endtime = $cutoffEndTimeHour . ':59:59'; // the following day (default: 03:59:59)
+
             switch($_GET['range']) {
                 case 'day':
                     $start = date($isoDateFormat) . 'T' . $starttime;
@@ -942,11 +963,13 @@ EOS;
                 default:
                     throw new RestException(412,'Invalid range given');
             }
-            $end = date($isoDateFormat) . 'T' . $endtime;
-            $tsql_range = 'AND rd.TimeStamp BETWEEN ? AND ?';
+            $end = date($isoDateFormat, strtotime('tomorrow')) . 'T' . $endtime;
+            $tsql_range = 'AND rd.TimeStamp >= ? AND rd.TimeStamp < ?';
             $tsql_params[] = &$start;
             $tsql_params[] = &$end;
         } elseif(isset($_GET['start']) && isset($_GET['end'])) {
+            $starttime = '00:00:00';
+            $endtime = '23:59:59';
             $start = date($isoDateFormat, strtotime($_GET['start'])) . 'T' . $starttime;
             $end = date($isoDateFormat, strtotime($_GET['end'])) . 'T' . $endtime;
             $tsql_range = 'AND rd.TimeStamp BETWEEN ? AND ?';
