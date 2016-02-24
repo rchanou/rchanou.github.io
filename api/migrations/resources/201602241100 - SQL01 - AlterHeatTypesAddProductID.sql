@@ -1,0 +1,24 @@
+SET XACT_ABORT ON;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN TRANSACTION;
+
+IF EXISTS (
+    SELECT *
+    FROM INFORMATION_SCHEMA.TABLES t
+    WHERE t.TABLE_NAME = 'HeatTypes'
+)
+BEGIN
+    IF NOT EXISTS (
+        SELECT *
+        FROM INFORMATION_SCHEMA.COLUMNS c
+        WHERE
+                c.TABLE_NAME  = 'HeatTypes'
+            AND c.COLUMN_NAME = 'ProductID'
+    )
+    BEGIN
+        ALTER TABLE HeatTypes 
+        ADD ProductID Int 
+    END;
+END;
+
+COMMIT;
