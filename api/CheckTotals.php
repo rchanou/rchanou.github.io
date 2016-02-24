@@ -8,7 +8,6 @@ class CheckTotals extends BaseApi {
         parent::__construct();
         $this->mapper            = new \ClubSpeed\Mappers\CheckTotalsMapper();
         $this->interface         = $this->logic->checkTotals;
-        $this->access['all']     = Enums::API_NO_ACCESS;
         $this->access['put']     = Enums::API_NO_ACCESS;
         $this->access['delete']  = Enums::API_NO_ACCESS;
         $this->access['virtual'] = Enums::API_PRIVATE_ACCESS;
