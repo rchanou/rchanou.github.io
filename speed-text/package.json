@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "jsonfile": "^2.0.0",
     "request": "^2.53.0",
     "twilio": "^1.10.0"
   }
