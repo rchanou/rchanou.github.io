@@ -1,5 +1,5 @@
 var config = require('./config');
-var jf = require('jsonfile');
+var jf = require('./libs/jsonfile');
 var request = require('request');
 var util = require('util');
 var FB = require('fb');
