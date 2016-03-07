@@ -68,6 +68,7 @@ $r->addAPIClass('Payments');
 $r->addAPIClass('PointHistory');
 $r->addAPIClass('PrimaryCustomers');
 $r->addAPIClass('ProcessPayment');
+$r->addAPIClass('ProductClasses');
 $r->addAPIClass('Products');
 $r->addAPIClass('Queues');
 $r->addAPIClass('Racers');
