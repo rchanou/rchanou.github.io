@@ -176,10 +176,10 @@ describe("Race Ticket Template", function() {
         var input = {
             "data": {
                 "customer": {
-                    "fullName"           : "Jim Bob",
-                    "racerName"          : "Bobblehead",
-                    "membershipTextLong" : "Supermember",
-                    "totalRaces"         : 5
+                    "fullName"       : "Jim Bob",
+                    "racerName"      : "Bobblehead",
+                    "membershipText" : "Supermember",
+                    "totalRaces"     : 5
                 }
             }
         };
@@ -299,28 +299,28 @@ describe("Race Ticket Template", function() {
                     "allowAddOnRacing" : false
                 },
                 "customer": {
-                    "custId"             : 1000002,
-                    "lastName"           : "Webb",
-                    "firstName"          : "Chris",
-                    "racerName"          : "Chris Webb",
-                    "totalRaces"         : 7,
-                    "birthDate"          : "2/2/1980",
-                    "rpm"                : 1205,
-                    "membershipTextLong" : "Super VIP",
-                    "status1"            : 2,
-                    "status2"            : 0,
-                    "status3"            : 0,
-                    "status4"            : 0,
-                    "kartNumber"         : -1,
-                    "lineupPosition"     : 1,
-                    "finishPosition"     : -1,
-                    "pointHistoryId"     : 0,
-                    "groupId"            : 0,
-                    "cell"               : "",
-                    "privacy3"           : false,
-                    "custom3"            : "",
-                    "fullName"           : "Chris Webb",
-                    "customerAge"        : "35"
+                    "custId"         : 1000002,
+                    "lastName"       : "Webb",
+                    "firstName"      : "Chris",
+                    "racerName"      : "Chris Webb",
+                    "totalRaces"     : 7,
+                    "birthDate"      : "2/2/1980",
+                    "rpm"            : 1205,
+                    "membershipText" : "Super VIP",
+                    "status1"        : 2,
+                    "status2"        : 0,
+                    "status3"        : 0,
+                    "status4"        : 0,
+                    "kartNumber"     : -1,
+                    "lineupPosition" : 1,
+                    "finishPosition" : -1,
+                    "pointHistoryId" : 0,
+                    "groupId"        : 0,
+                    "cell"           : "",
+                    "privacy3"       : false,
+                    "custom3"        : "",
+                    "fullName"       : "Chris Webb",
+                    "customerAge"    : "35"
                 }
             },
             "eventName"      : "Event 2",

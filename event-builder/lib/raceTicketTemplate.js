@@ -159,8 +159,8 @@ RaceTicketTemplate.prototype.create = function(body) {
         output += buildLine('', customer.racerName, '  ');
     }
     // Add membership text
-    if (customer.membershipTextLong && customer.membershipTextLong.trim().length > 0)
-      output += buildLine('', customer.membershipTextLong, '  ');
+    if (customer.membershipText && customer.membershipText.trim().length > 0)
+      output += buildLine('', customer.membershipText, '  ');
     customer.totalRaces = +customer.totalRaces;
     if (isNaN(customer.totalRaces))
       customer.totalRaces = 0;
