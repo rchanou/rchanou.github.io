@@ -176,10 +176,10 @@ describe("Race Ticket Template", function() {
         var input = {
             "data": {
                 "customer": {
-                    "fullName"       : "Jim Bob",
-                    "racerName"      : "Bobblehead",
-                    "membershipText" : "Supermember",
-                    "totalRaces"     : 5
+                    "fullName"           : "Jim Bob",
+                    "racerName"          : "Bobblehead",
+                    "membershipTextLong" : "Supermember",
+                    "totalRaces"         : 5
                 }
             }
         };
@@ -202,11 +202,38 @@ describe("Race Ticket Template", function() {
         compare(input, expected);
     });
 
+    it("should include age by default", function() {
+        var input = {
+            "data": {
+                "customer": {
+                    "customerAge": 16
+                }
+            }
+        };
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n       Age: 16                            \n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
+    it("should include age by option", function() {
+        var input = {
+            "data": {
+                "customer": {
+                    "customerAge": 16
+                }
+            },
+            "options": {
+                "printAgeOnRaceTicket": "true"
+            }
+        };
+        var expected = "\n\n      Time:                               \n  Heat No.:                               \n  Duration: N/A Minutes                   \n\nExperience: New                           \n       Age: 16                            \n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
     it("should skip age by option", function() {
         var input = {
             "data": {
                 "customer": {
-                    "age" : 16
+                    "customerAge" : 16
                 }
             },
             "options": {
@@ -272,28 +299,28 @@ describe("Race Ticket Template", function() {
                     "allowAddOnRacing" : false
                 },
                 "customer": {
-                    "custId"         : 1000002,
-                    "lastName"       : "Webb",
-                    "firstName"      : "Chris",
-                    "racerName"      : "Chris Webb",
-                    "totalRaces"     : 7,
-                    "birthDate"      : "2/2/1980",
-                    "rpm"            : 1205,
-                    "membershipText" : "",
-                    "status1"        : 2,
-                    "status2"        : 0,
-                    "status3"        : 0,
-                    "status4"        : 0,
-                    "kartNumber"     : -1,
-                    "lineupPosition" : 1,
-                    "finishPosition" : -1,
-                    "pointHistoryId" : 0,
-                    "groupId"        : 0,
-                    "cell"           : "",
-                    "privacy3"       : false,
-                    "custom3"        : "",
-                    "fullName"       : "Chris Webb",
-                    "customerAge"    : "35"
+                    "custId"             : 1000002,
+                    "lastName"           : "Webb",
+                    "firstName"          : "Chris",
+                    "racerName"          : "Chris Webb",
+                    "totalRaces"         : 7,
+                    "birthDate"          : "2/2/1980",
+                    "rpm"                : 1205,
+                    "membershipTextLong" : "Super VIP",
+                    "status1"            : 2,
+                    "status2"            : 0,
+                    "status3"            : 0,
+                    "status4"            : 0,
+                    "kartNumber"         : -1,
+                    "lineupPosition"     : 1,
+                    "finishPosition"     : -1,
+                    "pointHistoryId"     : 0,
+                    "groupId"            : 0,
+                    "cell"               : "",
+                    "privacy3"           : false,
+                    "custom3"            : "",
+                    "fullName"           : "Chris Webb",
+                    "customerAge"        : "35"
                 }
             },
             "eventName"      : "Event 2",
@@ -347,7 +374,7 @@ describe("Race Ticket Template", function() {
                 "useESign"                     : true
             }
         };
-        var expected = "\n\n     Venue: Track 1                       \n    Win By: Best Lap                      \n  Heat No.: 35                            \n  Duration: 6 Minutes                     \n\nEvent Name: Event 2                       \n Round No.: 5                             \n  Customer: Chris Webb                    \nExperience: 7 sessions                    \n      Grid: 1                             \n\nPlease present this ticket to track\n staff 5 minutes before your race \n time above. Enjoy!!!\n\n\n\n\n\n\n{{CutPaper}}";
+        var expected = "\n\n     Venue: Track 1                       \n    Win By: Best Lap                      \n  Heat No.: 35                            \n  Duration: 6 Minutes                     \n\nEvent Name: Event 2                       \n Round No.: 5                             \n  Customer: Chris Webb                    \n            Super VIP                     \nExperience: 7 sessions                    \n      Grid: 1                             \n\nPlease present this ticket to track\n staff 5 minutes before your race \n time above. Enjoy!!!\n\n\n\n\n\n\n{{CutPaper}}";
         compare(input, expected);
     });
 

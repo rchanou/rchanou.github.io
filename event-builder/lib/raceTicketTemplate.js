@@ -159,8 +159,8 @@ RaceTicketTemplate.prototype.create = function(body) {
         output += buildLine('', customer.racerName, '  ');
     }
     // Add membership text
-    if (customer.membershipText && customer.membershipText.trim().length > 0)
-      output += buildLine('', customer.membershipText, '  ');
+    if (customer.membershipTextLong && customer.membershipTextLong.trim().length > 0)
+      output += buildLine('', customer.membershipTextLong, '  ');
     customer.totalRaces = +customer.totalRaces;
     if (isNaN(customer.totalRaces))
       customer.totalRaces = 0;
@@ -168,8 +168,8 @@ RaceTicketTemplate.prototype.create = function(body) {
     output += buildLine(resources.strExperience, experienceValue);
     if(options.printGridOnRaceTicket && options.printGridOnRaceTicket.toString().toLowerCase() !== 'false' && parseInt(customer.lineupPosition) > 0)
       output += buildLine(resources.strGrid, customer.lineupPosition);
-    if(options.printAgeOnRaceTicket && options.printAgeOnRaceTicket.toString().toLowerCase() !== 'false' && customer.age)
-      output += buildLine(resources.strAge, customer.age, '');
+    if(options.printAgeOnRaceTicket && options.printAgeOnRaceTicket.toString().toLowerCase() !== 'false' && customer.customerAge)
+      output += buildLine(resources.strAge, customer.customerAge, '');
   }
   log.debug('customer info');
 
