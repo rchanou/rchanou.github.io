@@ -343,6 +343,16 @@ class CS_API
                 $result = self::callApi($url);
 
                 break;
+            case 'getLocationID':
+                $url = $url . '/settings/get.json?group=MainEngine&setting=LocationID&key=' .self::$privateKey;
+                $result = self::callApi($url);
+                if (isset($result["settings"]["LocationID"]["SettingValue"])) {
+                    $result = (int)$result["settings"]["LocationID"]["SettingValue"];
+                }
+                else {
+                    $result = 1;
+                }
+                break;
             case 'getCameraIP':
                 $terminalName = $params["terminalName"]; //The terminal to pull the camera's IP from
 

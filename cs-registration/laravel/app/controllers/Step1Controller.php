@@ -226,6 +226,7 @@ class Step1Controller extends BaseController
     private function determineSettings()
     {
         $settings = CS_API::call("getSettings");
+        $locationID = CS_API::call("getLocationID");
 
         if ($settings === false) //If we couldn't pull any settings from Club Speed
         {
@@ -241,7 +242,10 @@ class Step1Controller extends BaseController
             $settings['dropdownOptions']['0'] = $strings['str_defaultSourceText'];
             foreach($settings["Sources"] as $currentSource)
             {
-                $settings['dropdownOptions'][$currentSource["SourceID"]] = $currentSource["SourceName"];
+                if ($locationID == $currentSource["LocationID"])
+                {
+                    $settings['dropdownOptions'][$currentSource["SourceID"]] = $currentSource["SourceName"];
+                }
             }
 
             $settings['eventGroupIDOptions'] = array();
