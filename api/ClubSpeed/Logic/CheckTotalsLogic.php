@@ -43,6 +43,24 @@ class CheckTotalsLogic extends BaseLogic {
         $calculated = $this->applyCheckTotal($calculated);
         $tempCheckId = -1;
         $checkCreateData = null;
+
+        // run pre-validation validation to validate that the validation won't fail.
+        // yay extension methods.
+
+        // note: we can't use transactions for this (unfortunately),
+        // because germany needs CheckIDs to be sequential without any holes.
+        // a rolled back transaction will still increment any
+        // auto incrementing ids (such as CheckID), 
+        // even if the insert is rolled back.
+
+        // for now, just make sure that quantity is always positive. extend as necessary.
+        foreach($calculated as $calc) {
+
+            // mimic CheckDetails Qty validation, but run it before the Check is created.
+            if ((is_null($calc->Qty) || !is_int($calc->Qty) || $calc->Qty < 1) && (is_null($calc->CadetQty) || !is_int($calc->CadetQty) || $calc->CadetQty < 1))
+                throw new \RequiredArgumentMissingException("CheckTotals create requires a positive Qty or CadetQty! Received Qty: " . $calc->Qty . " and CadetQty: " . $calc->CadetQty);
+        }
+
         foreach($calculated as $calc) {
             $calc = (array)$calc; // convert to array for check and check detail creation
             $keyname = $this->interface->keys[0]['name'];
