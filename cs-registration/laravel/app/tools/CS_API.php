@@ -336,6 +336,23 @@ class CS_API
                     {
                         $result[$currentSettingKey] = $resultBeforeProcessing["settings"][$currentSettingKey]["SettingValue"];
                     }
+
+                    $url = self::$baseAPIURL . '/sources.json' . '?key=' .self::$privateKey;
+
+                    $sources = self::callApi($url);
+
+                    $sourcesFiltered = array();
+                    if ($sources != null && (is_array($sources) && !array_key_exists("error",$resultBeforeProcessing))) {
+                        foreach($sources as $source) {
+                            if ($source["enabled"] && !$source["deleted"]) {
+                                if (!array_key_exists('locationId', $source)) { // for older Club Speed versions
+                                    $source["locationId"] = 1;
+                                }
+                                $sourcesFiltered[] = $source;
+                            }
+                        }
+                    }
+                    $result["Sources"] = $sourcesFiltered;
                 }
                 break;
             case 'checkAPI':

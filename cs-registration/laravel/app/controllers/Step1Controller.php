@@ -242,9 +242,9 @@ class Step1Controller extends BaseController
             $settings['dropdownOptions']['0'] = $strings['str_defaultSourceText'];
             foreach($settings["Sources"] as $currentSource)
             {
-                if ($locationID == $currentSource["LocationID"])
+                if ($locationID == $currentSource["locationId"])
                 {
-                    $settings['dropdownOptions'][$currentSource["SourceID"]] = $currentSource["SourceName"];
+                    $settings['dropdownOptions'][$currentSource["sourceId"]] = $currentSource["name"];
                 }
             }
 
