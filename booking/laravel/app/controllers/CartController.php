@@ -103,6 +103,10 @@ class CartController extends BaseController
             {
                 $productId = Input::get('productId');
                 $quantity = Input::get('quantity');
+                if ($quantity <= 0)
+                {
+                    $quantity = 1;
+                }
 
                 if (array_key_exists($productId,$nonHeatProductInfo)) //If the item exists in our handy list of available non-heat products and their information
                 {
