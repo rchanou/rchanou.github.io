@@ -384,17 +384,32 @@ class SqlBuilder {
         foreach ($where as $key => $val) {
             if ($key === '$and' || $key === '$or') {
                 // special case, should always have its own children
+                // $val *must* be an array
                 $_node = new TreeNode(array('connector' => $operators[$key]));
                 foreach($val as $obj)
                     $_node->add(self::makeQueryTree($obj));
                 if (!$_node->isLeaf()) // only add if the node had parsable children
                     $children[] = $_node;
             }
+            else if ($key === '$not') {
+                // $val *must* be an object.
+                $_node = new TreeNode(array('connector' => $operators['$not']));
+                $_node->add(self::makeQueryTree($val)); // only one child -- could be $and or $or, though.
+                $children[] = $_node;
+            }
             else {
                 if (Arrays::isAssociative($val)) {
                     $left = $key;
                     foreach($val as $opKey => $right) {
                         $operator = $operators[$opKey];
+                        // special conversion: if we have $eq or $neq null,
+                        // we need to use $is and $isnot instead, respectively
+                        if ($right === null || $right === Enums::DB_NULL) {
+                            if ($operator === $operators['$eq'])
+                                $operator = $operators['$is'];
+                            else if ($operator === $operators['$ne'])
+                                $operator = $operators['$isnot'];
+                        }
                         $statement = StatementFactory::make(array(
                               'left'     => $left
                             , 'operator' => $operator
@@ -412,9 +427,12 @@ class SqlBuilder {
                     $children[] = new TreeNode($statement);
                 }
                 else {
+                    $operator = ($val === null || $val === Enums::DB_NULL)
+                        ? $operators['$is']
+                        : $operators['$eq'];
                     $statement = StatementFactory::make(array(
                           'left'     => $key
-                        , 'operator' => $operators['$eq']
+                        , 'operator' => $operator
                         , 'right'    => $val
                     ));
                     $children[] = new TreeNode($statement);
@@ -444,28 +462,42 @@ class SqlBuilder {
         // do we need the "empty" base case to be taken care of, or do we catch it early?
         $statements = array();
         $values = array();
+        $operators = Comparator::$operators; // consider making parameter
         if (!$node->isLeaf()) {
-            $connector = $node->value['connector'];
-            foreach($node->children as $child) {
+            $connector = $node->value['connector']; // what about when connector is $not ?
+            if ($connector === $operators['$not']) {
+                $child = $node->children[0];
                 $parsed = self::parseTree($child, $alias, $depth + 1, $counter);
-                $statements[] = $parsed['statement'];
+                $statement = "NOT (\n"
+                    . self::indent($depth + 1)
+                    . $parsed['statement']
+                    . "\n"
+                    . self::indent($depth)
+                    . ")";
                 $values = array_merge($values, $parsed['values']);
-                $counter += count($parsed['values']);
             }
-            $statement = "(\n"
-                . self::indent($depth + 1)
-                . Arrays::join(
-                    $statements,
-                    (
-                        "\n"
-                        . self::indent($depth + 1)
-                        . $connector
-                        . ' '
+            else /* $and, $or */ {
+                foreach($node->children as $child) {
+                    $parsed = self::parseTree($child, $alias, $depth + 1, $counter);
+                    $statements[] = $parsed['statement'];
+                    $values = array_merge($values, $parsed['values']);
+                    $counter += count($parsed['values']);
+                }
+                $statement = "(\n"
+                    . self::indent($depth + 1)
+                    . Arrays::join(
+                        $statements,
+                        (
+                            "\n"
+                            . self::indent($depth + 1)
+                            . $connector
+                            . ' '
+                        )
                     )
-                )
-                . "\n"
-                . self::indent($depth)
-                . ")";
+                    . "\n"
+                    . self::indent($depth)
+                    . ")";
+            }
             return array(
                 'statement' => $statement,
                 'values' => $values

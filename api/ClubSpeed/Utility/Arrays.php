@@ -1,7 +1,7 @@
 <?php
 
-namespace ClubSpeed\Utility;
 use ClubSpeed\Enums\Enums as Enums;
+namespace ClubSpeed\Utility;
 
 class Arrays {
 

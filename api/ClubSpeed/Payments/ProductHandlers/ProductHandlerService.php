@@ -60,7 +60,8 @@ class ProductHandlerService {
                         'checkDetailId' => $checkTotal->CheckDetailID,
                         'description' => (is_array($result) && isset($result['message'])) ? $result['message'] : $result,
                         'heatId' => (is_array($result) && isset($result['heatId'])) ? $result['heatId'] : null,
-                        'scheduledTime' => (is_array($result) && isset($result['scheduledTime'])) ? $result['scheduledTime'] : null
+                        'scheduledTime' => (is_array($result) && isset($result['scheduledTime'])) ? $result['scheduledTime'] : null,
+                        'trackName' => (is_array($result) && isset($result['trackName'])) ? $result['trackName'] : null
                     );
                 }
             }

@@ -26,8 +26,8 @@
   <body data-spy="scroll" data-target="#sidebar">
     <div class="jumbotron" id="main-header">
       <div class="container">
-          <h1>Club Speed API<h1>
-          <p><em>Have any questions or need support? <a href="mailto:support@clubspeed.com">Contact us.</a></em></p>
+        <h1>Club Speed API</h1>
+        <p><em>Have any questions or need support? <a href="mailto:support@clubspeed.com">Contact us.</a></em></p>
       </div>
     </div>
     <div class="container">
@@ -97,9 +97,15 @@
                         <li><strong>Find Racer's Races:</strong> <code>/racers/1000002/races</code> (<a href="index.php/racers/1000002/races.json?key={{daily_key}}">JSON</a>, <a href="index.php/racers/1000002/races.js?key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers.xml/1000002/races?key={{daily_key}}">XML</a>)</li>
                         <li><strong>Top RPM Ranking</strong>
                             <ul>
-                                <li><strong>Limt:</strong> <code>/racers/toprpm?limit=5</code> (<a href="index.php/racers/toprpm.json?limit=5&key={{daily_key}}">JSON</a>, <a href="index.php/racers/toprpm.js?limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/toprpm.xml?limit=5&key={{daily_key}}">XML</a>)</code></li>
-                                <li><strong>Gender (m: Male, f: Female):</strong> <code>/racers/toprpm?gender=m</code> (<a href="index.php/racers/toprpm.json?gender=f&key={{daily_key}}">JSON</a>, <a href="index.php/racers/toprpm.js?gender=f&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/toprpm.xml?gender=f&key={{daily_key}}">XML</a>)</code></li>
-                                <li><strong>Most Improved RPM (range: (month or year); month; year):</strong> <code>/racers/most_improved_rpm?range=month&month=6&year=2014&limit=5</code> (<a href="index.php/racers/most_improved_rpm.json?range=month&month=6&year=2014&limit=5&key={{daily_key}}">JSON</a>, <a href="index.php/racers/most_improved_rpm.js?range=month&month=6&year=2014&limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/most_improved_rpm.xml?range=month&month=6&year=2014&limit=5&key={{daily_key}}">XML</a>)</code></li>
+                                <li><strong>Limt:</strong> <code>/racers/toprpm?limit=5</code> (<a href="index.php/racers/toprpm.json?limit=5&key={{daily_key}}">JSON</a>, <a href="index.php/racers/toprpm.js?limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/toprpm.xml?limit=5&key={{daily_key}}">XML</a>)</li>
+                                <li><strong>Gender (m: Male, f: Female):</strong> <code>/racers/toprpm?gender=m</code> (<a href="index.php/racers/toprpm.json?gender=f&key={{daily_key}}">JSON</a>, <a href="index.php/racers/toprpm.js?gender=f&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/toprpm.xml?gender=f&key={{daily_key}}">XML</a>)</li>
+                                <li>
+                                  <strong>Most Improved RPM (range: (month or year); month; year):</strong>
+                                  <code>/racers/most_improved_rpm?range=month&month=6&year=2014&limit=5</code>
+                                  (<a href="index.php/racers/most_improved_rpm.json?range=month&month=6&year=2014&limit=5&key={{daily_key}}">JSON</a>,
+                                  <a href="index.php/racers/most_improved_rpm.js?range=month&month=6&year=2014&limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>,
+                                  <a href="index.php/racers/most_improved_rpm.xml?range=month&month=6&year=2014&limit=5&key={{daily_key}}">XML</a>)
+                                </li>
                             </ul>
                         </li>
                         <li><strong>Find by last updated:</strong> <code>/racers/last_updated?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999</code> (<a href="index.php/racers/last_updated.json?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999&key={{daily_key}}">JSON</a>, <a href="index.php/racers/last_updated.js?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/last_updated.xml?start=2012-09-01+00:00:00&limit=1000&end=2019-11-01+00:00:00&startCustId=1000000&endCustId=1999999&key={{daily_key}}">XML</a>)</li>
@@ -149,9 +155,7 @@
                     <h4><i class="glyphicon glyphicon-plus"></i> Races - Final positions</h4>
                     <p class="description">Find out the final positions for each racer in a finished heat</p>
                     <ul>
-                        <li><strong>Final positions of heat:</strong> <code>/races/final_positions?&race_id=1000</code> (<a href="index.php/races/final_positions.json?&race_id=1000&key={{daily_key}}">JSON</a>,
-                        <a href="index.php/races/final_positions.js?&race_id=1000&key={{daily_key}}&callback=myCallback">JSONP</a>,
-                         <a href="index.php/races/final_positions.xml?&race_id=1000&key={{daily_key}}">XML</a>)</li>
+                        <li><strong>Final positions of heat:</strong> <code>/races/final_positions?&race_id=1000</code> (<a href="index.php/races/final_positions.json?&race_id=1000&key={{daily_key}}">JSON</a>,<a href="index.php/races/final_positions.js?&race_id=1000&key={{daily_key}}&callback=myCallback">JSONP</a>,<a href="index.php/races/final_positions.xml?&race_id=1000&key={{daily_key}}">XML</a>)</li>
                     </ul>
 
                     <h4><i class="glyphicon glyphicon-plus"></i> Races - Fastest Laps</h4>
@@ -353,7 +357,6 @@ Content-Type: text/html
         {% include 'side-nav.twig' %}
       </div><!--/row-->
     </div><!--/.container-->
-
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/myresume.js"></script>

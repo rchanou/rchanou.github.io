@@ -8,14 +8,15 @@ class ReservationsMapper extends BaseMapper {
         parent::__construct();
         $this->namespace = 'reservations';
         $this->register(array(
-            'OnlineBookingReservationsID'           => 'onlineBookingReservationsId'
-            , 'OnlineBookingsID'                    => 'onlineBookingsId'
-            , 'CustomersID'                         => 'customersId'
-            , 'SessionID'                           => 'sessionId'
-            , 'Quantity'                            => 'quantity'
-            , 'CreatedAt'                           => 'createdAt'
-            , 'ExpiresAt'                           => 'expiresAt'
-            , 'OnlineBookingReservationStatusID'    => 'onlineBookingReservationStatusId'
+              'OnlineBookingReservationsID'      => 'onlineBookingReservationsId'
+            , 'OnlineBookingsID'                 => 'onlineBookingsId'
+            , 'CustomersID'                      => 'customersId'
+            , 'SessionID'                        => 'sessionId'
+            , 'Quantity'                         => 'quantity'
+            , 'CreatedAt'                        => 'createdAt'
+            , 'ExpiresAt'                        => 'expiresAt'
+            , 'OnlineBookingReservationStatusID' => 'onlineBookingReservationStatusId'
+            , 'CheckID'                          => 'checkId'
         ));
     }
 }

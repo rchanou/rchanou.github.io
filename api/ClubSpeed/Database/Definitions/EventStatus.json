@@ -1,0 +1,34 @@
+{
+    "table": {
+        "name": "EventStatus",
+        "alias": "es"
+    },
+    "columns": [
+        {
+            "name": "ID",
+            "type": "int",
+            "nullable": false,
+            "primaryKey": true,
+            "identity": true,
+            "length": 10
+        },
+        {
+            "name": "ColorID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "Seq",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "Status",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": 50
+        }
+    ]
+}

@@ -1,7 +1,9 @@
 <?php
 
 namespace ClubSpeed\Database;
+use ClubSpeed\Database\Helpers\GroupedComparator;
 use ClubSpeed\Database\Helpers\SqlBuilder; // we will want to inject this if we ever want to use something other than Sql Server.
+use ClubSpeed\Database\Records\BaseRecord;
 use ClubSpeed\Utility\Arrays;
 use ClubSpeed\Utility\Convert;
 
@@ -210,8 +212,8 @@ class DbCollection {
     }
 
     public function find($comparators = array()) {
-        if (!$comparators instanceof \ClubSpeed\Database\Helpers\GroupedComparator)
-            $comparators = new \ClubSpeed\Database\Helpers\GroupedComparator($comparators);
+        if (!$comparators instanceof GroupedComparator)
+            $comparators = new GroupedComparator($comparators);
         if (!$this->validateComparators($comparators))
             throw new \CSException("Unable to validate querystring comparators! Check the syntax of the filter querystring.");
         $find = SqlBuilder::buildFind($this->reflection->newInstance(), $comparators);
@@ -286,8 +288,15 @@ class DbCollection {
             if ($key === '$and' || $key === '$or') {
                 if (!is_array($val))
                     throw new \CSException('Received a UnitOfWork with a where in an invalid format! Expected array for $and or $or key, received: ' . print_r($val, true));
+                if (empty($val))
+                    throw new \CSException('Received a UnitOfWork with a connected where without any children! Expected non-empty array for $and or $or key, received: ' . print_r($val, true));
                 foreach($val as $grouped)
                     $this->validateWhere($grouped);
+            }
+            else if ($key === '$not') {
+                if (!is_array($val))
+                    throw new \CSException('Received a UnitOfWork with a where in an invalid format! Expected object for $not key, received: ' . print_r($val, true));
+                $this->validateWhere($val);
             }
             else if (!$this->reflection->hasProperty($key))
                 throw new \CSException("Received a UnitOfWork with a where and a column not in the table definition! Attempted to use: [" . $this->table . "].[" . $key . "]");
@@ -308,7 +317,7 @@ class DbCollection {
             }
         }
         if (!empty($uow->where)) {
-            if (!is_array($uow->where) && !$uow->where instanceof \ClubSpeed\Database\Records\BaseRecord)
+            if (!is_array($uow->where) && !$uow->where instanceof BaseRecord)
                 throw new \CSException('Received a UnitOfWork with a where in an invalid format! Expected associative array or BaseRecord, received: ' . print_r($uow->where, true));
             $this->validateWhere($uow->where);
         }
@@ -328,7 +337,13 @@ class DbCollection {
         foreach($comparators->comparators as $key => $val) { // validate column names
             // at least one of the filter items must be a column name
             // allow both to be column names?
-            if (!$this->reflection->hasProperty($val['comparator']->left) && !$this->reflection->hasProperty($val['comparator']->right))
+            if (
+                !$this->reflection->hasProperty($val['comparator']->left)
+                && !(
+                    is_array($val['comparator']->right)
+                    || $this->reflection->hasProperty($val['comparator']->right)
+                )
+            )
                 return false;
         }
         return true;

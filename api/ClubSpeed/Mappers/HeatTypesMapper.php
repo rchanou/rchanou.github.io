@@ -32,6 +32,7 @@ class HeatTypesMapper extends BaseMapper {
             , 'PrintResult'            => ''
             , 'EntitleHeat'            => ''
             , 'CadetsPerHeat'          => ''
+            , 'ProductID'              => 'productId'
         ));
     }
 }

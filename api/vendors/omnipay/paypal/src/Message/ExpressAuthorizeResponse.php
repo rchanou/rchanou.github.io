@@ -40,7 +40,7 @@ class ExpressAuthorizeResponse extends Response implements RedirectResponseInter
 
     public function getRedirectMethod()
     {
-        return 'GET';
+        return 'POST';
     }
 
     public function getRedirectData()

@@ -20,6 +20,24 @@ class Shim {
     }
 
     /**
+     * @url POST /warmup
+     */
+    public function warmup() {
+        if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            throw new RestException(403, "Invalid authorization");
+        try {
+            $this->webapi->canUse(1); // fire off canUse, but only wait for 1 second.
+        }
+        catch(Exception $e) {
+            // don't do anything with it.
+            // note that this has a high chance of throwing
+            // a timeout error or something similar,
+            // which we want to ignore, since it will still
+            // cause the webapi to start spinning up.
+        }
+    }
+
+    /**
      * @url POST /clear_cache
      */
     public function clear_cache() {

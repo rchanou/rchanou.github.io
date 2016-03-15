@@ -5,6 +5,50 @@
   </div> <!-- panel-heading -->
   <div class="panel-body">
     <div class="row call-info">
+
+      {% if section.preface %}
+        <div class="col-xs-12">
+          {{section.preface | raw }}
+        </div>
+      {% endif %}
+
+      <div class="col-xs-12">
+        <h4> Endpoint </h4>
+        <div class="panel panel-default"> <!-- wrap in panel as hackish way to give table rounded corners -->
+          <table class="table table-hover table-bordered">
+            <tbody>
+              <tr>
+                <td class="col-xs-2 text-right">Url</td>
+                <td class="col-xs-10">
+                  <span>{{(section.url ? "/" ~ section.url : section.route) ~ section.endpoint.subroute ?: ''}}</span> <!-- twig's string concat is ~ -->
+                </td>
+              </tr>
+              <tr>
+                <td class="col-xs-2 text-right">Version</td>
+                <td class="col-sx-10">{% if section.version %}{{section.version}}{% else %}{{'V1'}}{% endif %}</td>
+              </tr>
+              <tr>
+                <td class="col-xs-2 text-right">Access</td>
+                <td class="col-xs-10">
+                    <span>
+                      <span class="glyphicon glyphicon-{% if section.access_icon %}{{section.access_icon}}{% else %}{{'lock'}}{% endif %}"></span>
+                      {% if section.access %}{{section.access}}{% else %}{{'Private'}}{% endif %}
+                    </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if section.json %}
+      <div class="col-xs-12">
+        <h4>Example JSON</h4>
+        <pre class="prettyprint">{{section.json}}</pre>
+      </div>
+      {% endif %} <!-- if section.json -->
+
+      {% if section.info %}
       <div class="col-xs-12">
         <h4> Fields </h4>
         <div class="panel panel-default">
@@ -37,6 +81,8 @@
           </table>
         </div>
       </div>
+      {% endif %} <!-- if section.info -->
+
     </div>
   </div>
 </div> <!-- panel-info -->

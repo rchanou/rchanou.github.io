@@ -493,6 +493,7 @@ class Racers
                 Log::info("Unable to send welcome email! Customer #" . $racer_id . " had an empty email!", Enums::NSP_REGISTRATION);
         }
         catch(Exception $e) {
+            Log::error("Unable to send welcome email to Customer #" . $racer_id, Enums::NSP_REGISTRATION, $e);
             $this->_error($e);
         }
     }

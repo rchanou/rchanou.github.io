@@ -11,13 +11,57 @@ class DocChecks Extends DocAPIBase {
         $this->header          = 'Checks';
         $this->url             = 'checks';
         $this->info            = $this->info();
-        $this->calls['create'] = $this->create();
-        $this->calls['single'] = $this->single();
-        $this->calls['match']  = $this->match();
-        $this->calls['search'] = $this->search();
-        $this->calls['update'] = $this->update(); // this adds a delete section. why???
-        $this->expand(); // expand before delete is added
-        $this->calls['delete'] = $this->delete();
+        // $this->calls['create'] = $this->create();
+        // $this->calls['single'] = $this->single();
+        // $this->calls['match']  = $this->match();
+        // $this->calls['search'] = $this->search();
+        // $this->calls['update'] = $this->update(); // this adds a delete section. why???
+        // $this->calls['delete'] = $this->delete();
+
+        $this->expand();
+        $this->calls['void'] = $this->_void();
+
+        $this->preface = $this->preface();
+        $this->json = $this->json();
+    }
+
+    private function preface() {
+        return <<<EOS
+<h4>Description</h4>
+<p>
+    A <code class="prettyprint">Check</code> record is a representation of a financial invoice.
+</p>
+EOS;
+    }
+
+    private function json() {
+        return <<<EOS
+{
+  "checks": [
+    {
+      "checkId": 1234,
+      "customerId": 0,
+      "type": 1,
+      "status": 1,
+      "name": "",
+      "userId": 6,
+      "total": 16,
+      "broker": "",
+      "notes": "",
+      "gratuity": 0,
+      "fee": 0,
+      "openedDate": "2014-03-22T11:50:28.68",
+      "closedDate": "2014-03-22T11:56:04.82",
+      "isTaxExempt": false,
+      "discount": 0,
+      "discountId": 0,
+      "discountNotes": "",
+      "discountUserId": 0,
+      "invoiceDate": null
+    }
+  ]
+}
+EOS;
     }
 
     private function info() {
@@ -182,6 +226,32 @@ class DocChecks Extends DocAPIBase {
                 , 'create'      => 'available'
                 , 'description' => 'The timestamp on which the invoice was handled.'
             )
+        );
+    }
+
+    private function _void() {
+        return array(
+            'header' => 'Void',
+            'header_icon' => 'ban-circle',
+            'type' => 'delete',
+            'info' => array(
+                'access' => 'Private',
+                'access_icon' => 'lock',
+                'verb' => 'POST',
+                'verb_icon' => 'export',
+                'subroute' => '/:id/void'
+            ),
+            'usage' => <<<EOS
+<p>
+    This will close the <code class="prettyprint">Check</code>
+    and void any existing <code class="prettyprint">CheckDetails</code>.
+</p>
+<p>
+    Any <code class="prettyprint">Payment</code>
+    attached to the <code class="prettyprint">Check</code> will remain untouched,
+    and should be handled separately.
+</p>
+EOS
         );
     }
 

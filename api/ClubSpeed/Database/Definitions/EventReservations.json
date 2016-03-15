@@ -1,0 +1,160 @@
+{
+    "table": {
+        "name": "EventReservations",
+        "alias": "er"
+    },
+    "columns": [
+        {
+            "name": "ID",
+            "type": "int",
+            "nullable": false,
+            "primaryKey": true,
+            "identity": true,
+            "length": 10
+        },
+        {
+            "name": "AllowOnlineReservation",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "CheckID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "CustID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "CustomerName",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": 255
+        },
+        {
+            "name": "Deleted",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "Description",
+            "type": "nvarchar",
+            "nullable": true,
+            "length": -1
+        },
+        {
+            "name": "EndTime",
+            "type": "datetime",
+            "nullable": true
+        },
+        {
+            "name": "EventTypeID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "IsEventClosure",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "IsMixed",
+            "type": "bit",
+            "nullable": true
+        },
+        {
+            "name": "Label",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        },
+        {
+            "name": "MainID",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        },
+        {
+            "name": "MinNoOfAdultsPerBooking",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "MinNoOfCadetsPerBooking",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "NoOfCadetRacers",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "NoOfRacers",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "NoOfTotalRacers",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "Notes",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": -1
+        },
+        {
+            "name": "PtsPerReservation",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        },
+        {
+            "name": "RepID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "StartTime",
+            "type": "datetime",
+            "nullable": true
+        },
+        {
+            "name": "Status",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        },
+        {
+            "name": "Subject",
+            "type": "nvarchar",
+            "nullable": true,
+            "length": 255
+        },
+        {
+            "name": "TypeID",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        },
+        {
+            "name": "UserID",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        }
+    ]
+}

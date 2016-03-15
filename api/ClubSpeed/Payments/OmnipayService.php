@@ -27,6 +27,7 @@ class OmnipayService {
         $this->db = $db;
         $this->allowed = array(
               'AuthorizeNet_AIM' => 'direct'
+            , 'AuthorizeNet_SIM' => 'redirect'
             , 'Dummy'            => 'direct'
             , 'iDEAL'            => 'redirect'
             , 'Payflow_Pro'      => 'direct'
@@ -34,6 +35,7 @@ class OmnipayService {
             , 'PayPal_Pro'       => 'direct'
             , 'Rabobank'         => 'redirect'
             , 'SagePay_Direct'   => 'direct'
+            , 'SagePay_Server'   => 'redirect'
             , 'Stripe'           => 'direct'
             , 'WorldPayXML'      => 'direct'
         );

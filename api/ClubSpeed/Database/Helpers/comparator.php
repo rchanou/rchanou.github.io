@@ -7,6 +7,7 @@ class Comparator {
     public $left;
     public $operator;
     public $right;
+    protected $_originalOperator;
 
     // general rundown of the pattern:
     // 1. accept standard symbol operators, don't require spaces on either side
@@ -40,6 +41,7 @@ class Comparator {
         , '$gte'        => '>='
         , '$eq'         => '='
         , '$neq'        => '!='
+        , '$ne'         => '!='
         , '$is'         => 'IS' // need a way to handle IS and ISNOT from json object format
         , '$isnot'      => 'IS NOT'
         , '$like'       => 'LIKE'
@@ -48,6 +50,7 @@ class Comparator {
         , '$nlk'        => 'NOT LIKE'
         , '$in'         => 'IN'
         , '$notin'      => 'NOT IN'
+        , '$nin'        => 'NOT IN'
         , '$has'        => '$has' // special extension which will automatically surround value in %'s, then use the LIKE operator
         , '$contains'   => '$has'
 
@@ -55,6 +58,7 @@ class Comparator {
         // putting here for now, until we have a better spot.
         , '$and'        => 'AND'
         , '$or'         => 'OR'
+        , '$not'        => 'NOT'
     );
 
     public function __construct($data) {
@@ -67,9 +71,10 @@ class Comparator {
         foreach($groups as $key => $group)
             $groups[$key] = trim($group);
         if (count($groups) === 3) {
-            $this->left     = $groups[0];
-            $this->operator = @self::$operators[strtolower($groups[1])];
-            $this->right    = $groups[2];
+            $this->left              = $groups[0];
+            $this->_originalOperator = $groups[1];
+            $this->operator          = @self::$operators[strtolower($groups[1])];
+            $this->right             = $groups[2];
 
             // IN is its own strange beast.. modify into an array now for later usage, or allow sql builder to do it (?)
             if (stristr($this->operator, "IN") !== false && !empty($this->right)) {
@@ -83,6 +88,12 @@ class Comparator {
         }
         else
             throw new \CSException("Comparator was unable to parse the provided string! Received: " . $string);
+    }
+
+    public function toJSON() {
+        return array(
+            $this->left => array( $this->_originalOperator => $this->right )
+        );
     }
 
     public function validate() {

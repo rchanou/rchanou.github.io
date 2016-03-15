@@ -377,6 +377,7 @@ cust.FName AS 'Customer First Name',
 c.BrokerName AS 'Broker/Affiliate',
 u.UserName AS 'Created By',
 c.checktotal AS 'Check Total',
+c.gratuity AS 'Check Gratuity',
 c.BrokerName AS 'Broker/Affiliate Code',
 c.DiscountNotes AS 'Discount Notes'
 

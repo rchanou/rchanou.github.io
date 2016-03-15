@@ -105,12 +105,17 @@ class BaseMapper {
 
                     // treat $or and $and as special cases
                     if ($key === '$or' || $key === '$and') {
-                        $mapped[$key] = array();
+                        $grouped = array();
                         foreach($val as $groupedComparator) {
                             $tempObj = $this->uowMap($type, $groupedComparator);
                             if (!empty($tempObj))
-                                $mapped[$key][] = $tempObj;
+                                $grouped[] = $tempObj;
                         }
+                        if (!empty($grouped))
+                            $mapped[$key] = $grouped;
+                    }
+                    else if ($key === '$not') {
+                        $mapped[$key] = $this->uowMap($type, $val); // check for empty?
                     }
                     else {
                        $mappedKey = $this->uowMap($type, $key); // ditch the recursive call, if performance is an issue

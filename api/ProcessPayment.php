@@ -33,14 +33,7 @@ class ProcessPayment {
             throw new RestException(401, "Invalid authorization!");
         }
         try {
-            // // need a method for determining between purchase/authorize/completePurchase, etc.
-            // $name = $request_data['name'];
-            // if (strtolower($name) == 'pccharge') // hijack pccharge and send directly to the webapi, not omnipay
-            //     return $this->webapi->processPayment($request_data);
-            // else {
-                // who determines what type of purchase this is? heat purchase? 
-                return $this->payments->base->purchase($request_data);
-            // }
+            return $this->payments->base->purchase($request_data);
         }
         catch (CSException $e) {
             throw new RestException($e->getCode() ?: 412, $e->getMessage());

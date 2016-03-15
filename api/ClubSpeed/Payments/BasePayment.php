@@ -361,7 +361,7 @@ class BasePayment {
 
                 $uow = UnitOfWork::build()
                     ->action('create')
-                    ->data((array)$payment);
+                    ->data($payment);
                 $this->logic->payment->uow($uow);
                 $paymentId = $uow->table_id; // some day we'll get to gank the root logic/db functions and use them to abstract away direct UoW creation..
                 Log::info($this->logPrefix . "Applied payment of " . $payment->PayAmount . " at Payment #" . $paymentId, Enums::NSP_BOOKING);

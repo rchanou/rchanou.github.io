@@ -102,5 +102,10 @@
               "name": "CadetsPerHeat"
             , "type": "int"
         }
+        , {
+              "name": "ProductID"
+            , "type": "int"
+            , "nullable": true
+          }
     ]
 }

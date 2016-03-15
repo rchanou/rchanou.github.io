@@ -4,7 +4,10 @@ use ClubSpeed\Enums\Enums as Enums;
 use ClubSpeed\Logging\LogService as Log;
 use ClubSpeed\Security\Authenticate as Authenticate;
 use ClubSpeed\Database\Helpers\UnitOfWork as UnitOfWork;
+use ClubSpeed\Database\Helpers\Comparator as Comparator;
 use ClubSpeed\Utility\Params;
+use ClubSpeed\Containers\ParamsContainer;
+use ClubSpeed\Utility\Arrays;
 
 abstract class BaseApi {
 
@@ -54,7 +57,7 @@ abstract class BaseApi {
             }
         }
         else {
-            if (!\ClubSpeed\Security\Authenticate::privateAccess())
+            if (!Authenticate::privateAccess())
                 throw new RestException(403, "Invalid authorization!");
         }
     }
@@ -76,6 +79,27 @@ abstract class BaseApi {
     }
 
     /**
+     * @url GET /count
+     */
+    public function getCount($request_data = null) {
+        try {
+            $this->validate('get'); // same access permissions as get (?)
+            $uow = UnitOfWork::build($request_data)->action('count');
+
+            // patch backwards so we can call /count on old style methods.
+            $mapper =& $this->mapper;
+            $interface =& $this->interface;
+            $uow = $mapper->uow($uow, function($mapped) use (&$interface) {
+                $interface->uow($mapped);
+            });
+            return $uow->data;
+        }
+        catch (Exception $e) {
+            $this->_error($e);
+        }
+    }
+
+    /**
      * @url GET /
      */
     public function get($request_data = null) {
@@ -83,25 +107,125 @@ abstract class BaseApi {
         // figure out which call the user actually wants - all, match, or filter
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
+            if (!isset($request_data['limit']) || is_null($request_data['limit'])) {
+                // if limit is null, set it to something very high,
+                // so we don't inadvertantly introduce limits for old calls
+                // which didn't previously have limits.
+                // this is done for backwards compatibility
+                // with existing 3rd party integrations.
+                $MAX_INT = 2147483647;
+                $request_data['limit'] = $MAX_INT; // or max 32 bit int, anyways.
+            }
             if (Params::hasNonReservedData($request_data)) {
                 if (Params::isFilter($request_data)) {
+                    // hijack filter syntax, convert to JSON object query syntax,
+                    // then use unitofwork for backwards compatibility.
                     $this->validate('filter');
-                    return $this->mapper->mutate($request_data, function($mapped = array()) use (&$interface) {
-                        return $interface->find($mapped);
-                    });
+
+                    $operators = Comparator::$operators;
+                    $pattern = '/ (AND|OR) /i';
+                    $string = $request_data['filter'];
+                    if (!$string)
+                        throw new \CSException('Received a get by filter request with an empty filter! Received: ' . $request_data['filter']);
+
+                    $groups = preg_split($pattern, $string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+                    $c = count($groups);
+                    if ($c === 0)
+                        throw new \CSException('Received a get by filter request with an unparsable filter! Received: ' . $request_data['filter']);
+
+                    $json = null;
+                    if ($c === 1) {
+                        // shortcut - no grouping required.
+                        $group = $groups[0];
+                        $comparator = new Comparator($group);
+                        $json = $comparator->toJSON();
+                    }
+                    else {
+                        $comparators = array();
+                        $connectors = array();
+                        for ($i = 0; $i < $c; $i += 2) {
+                            $comparator = new Comparator($groups[$i]);
+                            $comparators[] = $comparator->toJSON();
+                        }
+                        for ($i = 1; $i < $c - 1; $i += 2) {
+                            $connector = $groups[$i];
+                            $connectors[] = $connector;
+                        }
+                        while ($connector = array_pop($connectors)) {
+                            $connector = strtolower($connector);
+                            if ($connector === 'and')
+                                $connector = '$and';
+                            else if ($connector === 'or')
+                                $connector = '$or';
+                            $right = array_pop($comparators);
+                            $left = array_pop($comparators);
+                            $_json = array(
+                                $connector => array(
+                                    $left,
+                                    $right
+                                )
+                            );
+                            array_push($comparators, $_json);
+                        }
+                        $json = $comparators[0];
+                    }
+                    $request_data['where'] = json_encode($json);
+                    $uow = UnitOfWork::build($request_data)->action('all');
+                    $mapper =& $this->mapper;
+                    $interface =& $this->interface;
+                    $mapper->uowIn($uow);
+                    $interface->uow($uow);
+                    $data = $mapper->out($uow->data);
+                    return $data;
+                }
+                else if (Params::isWhere($request_data)) {
+                    // allow where syntax with old methods,
+                    // but still use $mapper->out()
+                    // in order to hoist the json data into a property
+                    // this is done for backwards compatibility and
+                    // consistency with the expectation for the other calls.
+
+                    $this->validate('all');
+                    $uow = UnitOfWork::build($request_data)->action('all');
+                    $mapper =& $this->mapper;
+                    $interface =& $this->interface;
+                    $mapper->uowIn($uow);
+                    $interface->uow($uow);
+                    $data = $mapper->out($uow->data);
+                    return $data;
                 }
                 else {
+                    // hijack match syntax, convert to JSON object query syntax,
+                    // then use unitofwork for backwards compatibility.
                     $this->validate('match');
-                    return $this->mapper->mutate($request_data, function($mapped = array()) use (&$interface) {
-                        return $interface->match($mapped);
+                    $container = new ParamsContainer($request_data);
+                    $params = $container->params;
+                    $where = Arrays::select($params, function($val, $key, $arr) {
+                        return array( $key => array ( '$eq' => $val ) );
                     });
+                    if (!empty($where)) {
+                        $json = array( '$and' => $where );
+                        $request_data['where'] = json_encode($json);
+                    }
+                    $uow = UnitOfWork::build($request_data)->action('all');
+                    $mapper =& $this->mapper;
+                    $interface =& $this->interface;
+                    $mapper->uowIn($uow);
+                    $interface->uow($uow);
+                    $data = $mapper->out($uow->data);
+                    return $data;
                 }
             }
             else {
+                // just use unitofwork with all, as well.
                 $this->validate('all');
-                return $this->mapper->mutate($request_data, function() use (&$interface) {
-                    return $interface->all();
-                });
+                $mapper =& $this->mapper;
+                $interface =& $this->interface;
+                $uow = UnitOfWork::build($request_data)->action('all');
+                $mapper->uowIn($uow);
+                $interface->uow($uow);
+                $data = $mapper->out($uow->data);
+                return $data;
             }
         }
         catch (Exception $e) {

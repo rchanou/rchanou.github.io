@@ -54,6 +54,14 @@ class Params {
         return false;
     }
 
+    public static function isWhere($data) {
+        if (is_null($data) || empty($data))
+            return false;
+        if (isset($data['where']))
+            return true;
+        return false;
+    }
+
     // for use with params coming from the api
     // cleanParams (below) should be deprecated 
     // at some point for the newer structure

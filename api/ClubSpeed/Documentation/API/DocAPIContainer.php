@@ -104,22 +104,33 @@ class DocAPIContainer {
             'sections' => array()
         );
         $data['sections'][] = new DocAuthentication();
-        $data['sections'][] = new DocTypicalUsage();
+        $data['sections'][] = new DocRESTful();
         $data['sections'][] = new DocQueryOperations();
+        $data['sections'][] = new DocTypicalUsage();
 
         // $data['sections'][] = self::$data['resources'][0]; // not yet complete: to be used in the future
         
         $data['sections'][] = new DocBooking();
-
         $data['sections'][] = new DocBookingAvailability();
-        $data['sections'][] = new DocChecks();
         $data['sections'][] = new DocCheckDetails();
+        $data['sections'][] = new DocChecks();
         $data['sections'][] = new DocCheckTotals();
+        $data['sections'][] = new DocEventReservationLink();
+        $data['sections'][] = new DocEventReservations();
+        $data['sections'][] = new DocEvents();
+        $data['sections'][] = new DocEventStatus();
+        $data['sections'][] = new DocEventTypes();
+        $data['sections'][] = new DocHeatDetails();
+        $data['sections'][] = new DocHeatMain();
         $data['sections'][] = new DocPasswords();
+        $data['sections'][] = new DocPayment();
         $data['sections'][] = new DocProcessPayment();
+        $data['sections'][] = new DocProducts();
         $data['sections'][] = new DocRacers();
         $data['sections'][] = new DocReservations();
         $data['sections'][] = new DocScreenTemplate();
+        $data['sections'][] = new DocCustomers();
+
         return $data;
     }
 }

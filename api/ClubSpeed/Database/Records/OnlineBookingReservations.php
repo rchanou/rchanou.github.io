@@ -1,7 +1,6 @@
 <?php
 
 namespace ClubSpeed\Database\Records;
-use ClubSpeed\Utility\Convert;
 
 class OnlineBookingReservations extends BaseRecord {
     protected static $_definition;
@@ -14,4 +13,5 @@ class OnlineBookingReservations extends BaseRecord {
     public $CreatedAt;
     public $ExpiresAt;
     public $OnlineBookingReservationStatusID;
+    public $CheckID;
 }

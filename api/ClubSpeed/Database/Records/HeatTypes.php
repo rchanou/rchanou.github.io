@@ -31,4 +31,5 @@ class HeatTypes extends BaseRecord {
     public $PrintResult;
     public $EntitleHeat;
     public $CadetsPerHeat;
+    public $ProductID;
 }

@@ -1,6 +1,8 @@
 <?php
 
 namespace ClubSpeed\Logic;
+use ClubSpeed\Utility\Convert;
+use ClubSpeed\Database\Helpers\UnitOfWork;
 
 /**
  * The business logic class
@@ -20,23 +22,6 @@ class ReservationsLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->onlineBookingReservations;
-
-        $this->insertable = array(
-              'ExpiresAt'
-            , 'OnlineBookingsID'
-            , 'Quantity'
-            , 'SessionID'
-            , 'CustomersID'
-        );
-
-        $this->updatable = array(
-              'ExpiresAt'
-            , 'OnlineBookingsID'
-            , 'Quantity'
-            , 'OnlineBookingReservationStatusID'
-            , 'CustomersID'
-        );
-
         $this->expire(); // call expire on any reservations construct (note: construct will not be hit unless reservations is attempted to be used)
     }
 
@@ -78,7 +63,7 @@ class ReservationsLogic extends BaseLogic {
                     throw new \InvalidArgumentValueException("Update reservation attempted to use a quantity higher than what was available! Requested: " . $new->Quantity . " :: Available: " . ($availability->ProductSpotsAvailableOnline + $old->Quantity));
             }
             if ($new->OnlineBookingReservationStatusID === 2) // permanent -- MAKE THIS A LOOKUP LATER
-                $new->ExpiresAt = \ClubSpeed\Utility\Convert::toDateForServer('2038-01-18');
+                $new->ExpiresAt = Convert::toDateForServer('2038-01-18');
             
             return $new;
         };
@@ -88,15 +73,30 @@ class ReservationsLogic extends BaseLogic {
 
     public function expire() {
         // cheat and just use a sql statement for performance purposes
-        $sql = ""
-            ."\nDELETE obr"
-            ."\nFROM dbo.OnlineBookingReservations obr"
-            ."\nINNER JOIN dbo.OnlineBookingReservationStatus obrs"
-            ."\n    ON obr.OnlineBookingReservationStatusID = obrs.OnlineBookingReservationStatusID"
-            ."\nWHERE"
-            ."\n    obr.ExpiresAt < GETDATE()"
-            ."\n    AND obrs.Status = 'TEMPORARY'"
-            ;
-        $this->db->exec($sql);
+
+        $statuses = $this->db->onlineBookingReservationStatus->match(array(
+            'Status' => 'TEMPORARY'
+        ));
+        $status = $statuses[0];
+        $statusId = $status->OnlineBookingReservationStatusID;
+        $uow = $this->db->onlineBookingReservations->uow(
+            UnitOfWork::build()
+                ->action('all')
+                ->where(array(
+                    'OnlineBookingReservationStatusID' => $statusId,
+                    'ExpiresAt' => array(
+                        '$lt' => Convert::getDate()
+                    )
+                ))
+        );
+        $reservations = $uow->data;
+        foreach($reservations as $reservation) {
+            $reservationId = $reservation->OnlineBookingReservationsID;
+            $this->db->onlineBookingReservations->delete($reservationId);
+            $checkId = $reservation->CheckID;
+            if (!is_null($checkId)) {
+                $this->logic->checks->void($checkId);
+            }
+        }
     }
 }

@@ -2,8 +2,6 @@
 
 namespace ClubSpeed\Database\Helpers;
 use ClubSpeed\Database\Records\BaseRecord;
-use ClubSpeed\Logic\LogicService as Logic;
-use ClubSpeed\Mappers\MapperService as Mappers;
 use ClubSpeed\Utility\Arrays;
 use ClubSpeed\Utility\Convert;
 use ClubSpeed\Enums\Enums;
@@ -43,7 +41,7 @@ class UnitOfWork {
     // -> return from API
 
     public $action;     // create, update, delete, select, get, all (?)
-    public $definition; // the json definitino of the table
+    public $definition; // the json definition of the table
     public $table;      // table -- use a string if possible, convert to definition later
     public $table_id;   // required for update and delete, return from create (and possibly use with create, if we have it ahead of time -- IE customers)
     public $data;       // used by create and update. update should be non destructive for non-provided items.
@@ -98,7 +96,11 @@ class UnitOfWork {
         // restler dumps the query string and the body
         // into the same array, so we have to manually
         // keep track of which is going to be which.
-        if (is_array($data) || is_object($data)) {
+
+        if ($data instanceof BaseRecord) {
+            $this->data = $data;
+        }
+        else if (is_array($data) || is_object($data)) {
             foreach($data as $key => $val) {
                 if (Arrays::contains(self::$reserved, function($x) use ($key) {
                     return $x === $key;
@@ -106,10 +108,27 @@ class UnitOfWork {
                     unset($data[$key]); // careful, not sure this will work with classes / BaseRecord.
                 }
             }
-            if (empty($data))
-                $data = null; // empty array, after reserved items were taken out?
+            if (empty($data)) {
+                $this->data = null; // empty set of data after trimming invalid properties
+            }
+            else {
+                // if data is coming from JSON format as opposed to baserecord,
+                // (since classes will have all unset values as null, via PHP standards)
+                // and if we receive an explicit null value, cast it as DB_NULL
+                // to signify that the intention is to use a null in the database
+                // (including updating / inserting values as null)
+                foreach($data as $key => $val) {
+                    if ($val === null)
+                        $data[$key] = Enums::DB_NULL;
+                }
+                $this->data = $data;
+            }
         }
-        $this->data = $data;
+        else {
+            // invalid type. throw?
+            $this->data = null;
+        }
+
         return $this;
     }
 

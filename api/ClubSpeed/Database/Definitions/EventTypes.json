@@ -1,0 +1,72 @@
+{
+    "table": {
+        "name": "EventTypes",
+        "alias": "et"
+    },
+    "columns": [
+        {
+            "name": "EventTypeID",
+            "type": "int",
+            "nullable": false,
+            "primaryKey": true,
+            "identity": true,
+            "length": 10
+        },
+        {
+            "name": "Deleted",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "Description",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": 500
+        },
+        {
+            "name": "DisplayAtRegistration",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "Enabled",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "EventTypeName",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": 50
+        },
+        {
+            "name": "EventTypeTheme",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "MemberOnly",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "OnlineProductID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "PtsPerReservation",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        },
+        {
+            "name": "TrackNo",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        }
+    ]
+}

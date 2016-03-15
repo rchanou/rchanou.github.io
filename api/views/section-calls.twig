@@ -3,6 +3,13 @@
     <h4 class="panel-title"><span class="glyphicon glyphicon-{{call.header_icon}}"></span> {{call.header}}</h4>
   </div> <!-- panel-heading -->
   <div class="panel-body">
+    {% if call.preface %}
+      <div class="row call-preface">
+        <div class="col-xs-12">
+          {{call.preface | raw }}
+        </div>
+      </div>
+    {% endif %} <!-- if call.preface -->
     {% if call.info %}
     <div class="row call-information">
       <div class="col-xs-12">

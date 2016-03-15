@@ -113,12 +113,14 @@ class ChecksLogic extends BaseLogic {
         // also include void message?
         $check = $this->interface->get($checkId);
         $check = $check[0];
-        $voidNotes = 'Voided from API at ' . Convert::getDate();
+        $timestamp = Convert::getDate();
+        $voidNotes = 'Voided from API at ' . $timestamp;
 
         $notes = $check->Notes;
         if (!empty($notes) && is_string($notes))
             $notes = trim($notes);
         $check->Notes = (empty($notes) ? $voidNotes : ($notes . ' :: ' . $voidNotes));
+        $check->ClosedDate = $timestamp;
 
         $check->CheckStatus = Enums::CHECK_STATUS_CLOSED;
         $this->interface->update($check);
@@ -126,6 +128,7 @@ class ChecksLogic extends BaseLogic {
             'CheckID' => $checkId
         ));
         foreach($checkDetails as $checkDetail) {
+            $checkDetailId = $checkDetail->CheckDetailID;
             $checkDetail->Status = Enums::CHECK_DETAIL_STATUS_HAS_VOIDED;
             $checkDetail->VoidNotes = (empty($checkDetail->VoidNotes) ? '' : ' :: ' ) . $voidNotes;
             $this->db->checkDetails->update($checkDetail);

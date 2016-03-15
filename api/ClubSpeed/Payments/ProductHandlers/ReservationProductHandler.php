@@ -232,10 +232,10 @@ class ReservationProductHandler extends BaseProductHandler {
                         }
                     }
                     else
-                        Log::info($logPrefix . 'Customer #' . $customer->CustID . ' was not added directly to race #' . $heatId . ' since the webapi is not accessible!');
+                        Log::info($logPrefix . 'Customer #' . $customer->CustID . ' was not added directly to race #' . $heatId . ' since the webapi is not accessible!', Enums::NSP_BOOKING);
                 }
                 else
-                    Log::info($logPrefix . 'Customer #' . $customer->CustID . ' was not added directly to race #' . $heatId . ' since the Booking.autoAddRacerToHeat setting was false!');
+                    Log::info($logPrefix . 'Customer #' . $customer->CustID . ' was not added directly to race #' . $heatId . ' since the Booking.autoAddRacerToHeat setting was false!', Enums::NSP_BOOKING);
 
                 // attempt to add any additional reservations by incrementing the heat's NumberOfReservation
                 try {

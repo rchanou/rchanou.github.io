@@ -102,7 +102,7 @@ class PasswordsLogic extends BaseLogic {
             // grab business name
             $business = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
             if (empty($business))
-                throw new \CSException('Password token create was unable to find the setting for Main.resetEmailBodyHtml!');
+                throw new \CSException('Password token create was unable to find the setting for Main.BusinessName!');
             $business = $business[0];
             $business = $business->SettingValue;
 

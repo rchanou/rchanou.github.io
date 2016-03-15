@@ -38,5 +38,9 @@
               "name": "OnlineBookingReservationStatusID"
             , "type": "int"
         }
+        , {
+              "name": "CheckID"
+            , "type": "int"
+        }
     ]
 }
