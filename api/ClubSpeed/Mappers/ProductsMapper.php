@@ -56,8 +56,6 @@ class ProductsMapper extends BaseMapper {
             // , 'S_CustID'             => ''
             // , 'S_Vol'                => ''
             , 'PriceCadet'           => ''
-            // , 'DateCreated'          => ''
-            // , 'WebShop'              => ''
         ));
     }
 }

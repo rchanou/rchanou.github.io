@@ -199,10 +199,6 @@
             , "type": "money"
         }
         , {
-              "name": "WebShop"
-            , "type": "bit"
-        }
-        , {
               "name": "Custom1"
             , "type": "nvarchar"
         }
