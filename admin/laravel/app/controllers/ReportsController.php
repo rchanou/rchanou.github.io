@@ -13,9 +13,24 @@ class ReportsController extends BaseController
     {
         $serverHasEurekas = CS_API::doesServerHaveEurekas();
 
+        $ingenicoTerminals = CS_API::getJSON('controlPanel',array('filter' => 'name = cardpresentprocessor AND value = ingenico'));
+
+        $serverHasEMV = false;
+        if (isset($ingenicoTerminals->controlPanel) && count($ingenicoTerminals->controlPanel) > 0)
+        {
+          $serverHasEMV = true;
+          $ingenicoTerminals = $ingenicoTerminals->controlPanel;
+        }
+        else {
+          $ingenicoTerminals = array();
+        }
+
+
         return View::make('/screens/reports/index',
             array('controller' => 'ReportsController',
                   'serverHasEurekas' => $serverHasEurekas,
+                  'serverHasEMV' => $serverHasEMV,
+                  'ingenicoTerminals' => $ingenicoTerminals,
 									'user' => strtolower(Session::get('user'))
             ));
     }

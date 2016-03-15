@@ -170,6 +170,36 @@ Reports
           </div>
           @endif
 
+          @if($serverHasEMV)
+              <div class="col-sm-12">
+                  <div class="widget-box">
+                      <div class="widget-title">
+                        <span class="icon">
+                          <i class="fa fa-credit-card"></i>
+                        </span>
+                        <h5>EMV Terminals</h5>
+                      </div>
+                      <div class="widget-content">
+                          <div class="row">
+                              @foreach($ingenicoTerminals as $terminal)
+                              <div class="col-lg-3 col-sm-6 text-center paymentReportBox">
+                                      <i class="fa fa-calculator fa-4x"></i><p/>
+                                      <strong>{{strtoupper($terminal->namespace)}}</strong><p/>
+                                  <em>
+                                      <strong>
+                                      <a href="{{URL::to('reports/emv/configuration/' . strtolower($terminal->namespace))}}" target="_blank">Configuration Report</a>
+                                      <br/>
+                                      <a href="{{URL::to('reports/emv/chip/' . strtolower($terminal->namespace))}}" target="_blank">Chip Report</a>
+                                      </strong>
+                                  </em>
+                              </div>
+                              @endforeach
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          @endif
+
       </div>
     </div>
 @stop
