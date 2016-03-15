@@ -176,5 +176,9 @@ Route::group(array('before' => 'auth'), function()
 	Route::post('giftcards/reports/transactions', 'GiftCardsController@getTransactionReport');
 	Route::get('giftcards/reports/transactions/csv', 'GiftCardsController@getTransactionReportCSV');
 
+	/* QuickPOS */
+	Route::get('quickpos/settings', 'QuickPOSController@settings');
+	Route::post('quickpos/settings/update', 'QuickPOSController@updateSettings');
+
 
 }); // End PROTECTED routes

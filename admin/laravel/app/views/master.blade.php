@@ -101,6 +101,17 @@
                     <li>{{link_to('/docs/Club Speed - Club Speed Registration Kiosk Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
                 </ul>
             </li>
+            @if (@$controller == 'QuickPOSController')
+                <li class="active open submenu">
+            @else
+                <li class="submenu">
+            @endif
+                    <a href="#"><i class="fa fa-fw fa-tachometer"></i> <span>QuickPOS</span> <i class="arrow fa fa-fw fa-chevron-right"></i></a>
+                    <ul>
+                        <li>{{link_to('/quickpos/settings','Settings')}}</li>
+                        <li>{{link_to('/docs/Club Speed - QuickPOS Guide.pdf','Documentation', array('target' => '_blank'))}}</li>
+                    </ul>
+                </li>
             @if (@$controller == 'ReportsController')
             <li class="active open">
             @else
@@ -191,6 +202,7 @@
 {{ HTML::script('js/jquery-ui.custom.js') }}
 {{ HTML::script('js/bootstrap.min.js') }}
 {{ HTML::script('js/jquery.flot.min.js') }}
+{{ HTML::script('js/jquery.flot.pie.min.js') }}
 {{ HTML::script('js/jquery.flot.resize.min.js') }}
 {{ HTML::script('js/jquery.sparkline.min.js') }}
 {{ HTML::script('js/fullcalendar.min.js') }}

@@ -97,7 +97,7 @@ Waivers
                                     <div class="col-sm-12">
                                         <div class="alert alert-warning">
                                             The <strong>Use New Waivers</strong> setting is disabled.<p/><p/>
-                                            You can access your current waivers via the <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/sp_admin'}}" target="_blank">old Admin Panel</a>.<p/><p/>
+                                            You can access your current waivers via <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/sp_admin'}}" target="_blank">sp_admin</a>.<p/><p/>
                                             To switch to the new waiver system and edit them here, enable <strong>Use New Waivers</strong> in the {{link_to('/registration/settings','Settings')}} page.
                                         </div>
                                     </div>
@@ -107,7 +107,7 @@ Waivers
                                     <div class="col-sm-12">
                                         <div class="alert alert-warning">
                                            Your server needs to have the new waivers installed. Please contact <a href="mailto:support@clubspeed.com">support@clubspeed.com</a> to request this feature.<p/><p/>
-                                            In the meanwhile, you can access your current waivers via the <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/sp_admin'}}" target="_blank">old Admin Panel</a>.
+                                            In the meanwhile, you can access your current waivers via <a href="{{'http://' . $_SERVER['HTTP_HOST'] . '/sp_admin'}}" target="_blank">sp_admin</a>.
                                         </div>
                                     </div>
                                 </div>
