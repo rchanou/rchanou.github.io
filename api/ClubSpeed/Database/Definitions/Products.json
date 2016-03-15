@@ -199,10 +199,6 @@
             , "type": "money"
         }
         , {
-              "name": "DateCreated"
-            , "type": "datetime"
-        }
-        , {
               "name": "WebShop"
             , "type": "bit"
         }

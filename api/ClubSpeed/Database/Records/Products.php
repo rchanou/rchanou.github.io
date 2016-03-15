@@ -53,6 +53,5 @@ class Products extends BaseRecord {
     public $S_CustID;
     public $S_Vol;
     public $PriceCadet;
-    public $DateCreated;
     public $WebShop;
 }

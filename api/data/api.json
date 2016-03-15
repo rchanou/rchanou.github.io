@@ -1275,12 +1275,6 @@
                       "name"        : "priceCadet"
                     , "type"        : "Double"
                     , "description" : "The cadet price of the product."
-                },
-                {
-                      "name"        : "dateCreated"
-                    , "type"        : "DateTime"
-                    , "default"     : "{Date.Now}"
-                    , "description" : "The timestamp when the product was created."
                 }
             ]
         },
