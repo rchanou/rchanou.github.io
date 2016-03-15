@@ -207,6 +207,24 @@ class CheckoutController extends BaseController
 
         Session::put('checkId',$checkId);
 
+        //Bind the checkId to every onlineBookingReservation related to an item in the cart
+        if ($cart !== null)
+        {
+            foreach ($cart as $cartItemId => $cartItem)
+            {
+                if ($cartItem['type'] == 'heat')
+                {
+                    $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
+                    $result = CS_API::bindCheckToOnlineReservation($onlineBookingsReservationId,$checkId);
+
+                    if ($result === null)
+                    {
+                        CS_API::log("ERROR :: Online Booking failed to bind the checkId ($checkId) to the onlineBookingReservation ($onlineBookingsReservationId)! Customer was charged already, so proceeding as normal.");
+                    }
+                }
+            }
+        }
+
         //Fetch the newly created check
         $check = CS_API::getCheck($checkId);
         if ($check === null || !property_exists($check,'checks'))
@@ -434,6 +452,24 @@ class CheckoutController extends BaseController
             }
 
             Session::put('checkId',$checkId);
+
+            //Bind the checkId to every onlineBookingReservation related to an item in the cart
+            if ($cart !== null)
+            {
+                foreach ($cart as $cartItemId => $cartItem)
+                {
+                    if ($cartItem['type'] == 'heat')
+                    {
+                        $onlineBookingsReservationId = Cart::getOnlineBookingsReservationId($cartItemId);
+                        $result = CS_API::bindCheckToOnlineReservation($onlineBookingsReservationId,$checkId);
+
+                        if ($result === null)
+                        {
+                            CS_API::log("ERROR :: Online Booking failed to bind the checkId ($checkId) to the onlineBookingReservation ($onlineBookingsReservationId)! Customer was charged already, so proceeding as normal.");
+                        }
+                    }
+                }
+            }
 
             //Fetch the newly created check
             $check = CS_API::getCheck($checkId);

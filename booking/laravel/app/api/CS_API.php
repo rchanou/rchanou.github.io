@@ -445,7 +445,8 @@ class CS_API
             'onlineBookingsId' => $onlineBookingsId,
             'quantity' => $quantity,
             'sessionId' => $sessionId,
-            'customersId' => $customersId
+            'customersId' => $customersId,
+            'checkId' => null
         );
 
         $url = self::$apiURL . '/reservations/?key=' . self::$privateKey;
@@ -508,6 +509,34 @@ class CS_API
 
         $putData = array(
             "onlineBookingReservationStatusId" => 2
+        );
+
+        $result = self::call($url,$putData,'PUT');
+
+        $error = $result['error'];
+        $result = $result['response'];
+
+        if ($result !== null && property_exists($result, 'code')) {
+            if ($result->code == 200) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if ($error !== null) {
+            return $error;
+        } else {
+            return null;
+        }
+    }
+
+    public static function bindCheckToOnlineReservation($onlineBookingsReservationId,$checkId)
+    {
+        self::initialize();
+
+        $url = self::$apiURL . "/reservations/$onlineBookingsReservationId?key=" . self::$privateKey;
+
+        $putData = array(
+          "checkId" => $checkId
         );
 
         $result = self::call($url,$putData,'PUT');
