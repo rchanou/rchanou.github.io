@@ -265,10 +265,10 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 				}
 				var hoistedVars = {
 					transactionId: retrieveTransactionId(result),
-                    resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]'),
+                    resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]') || '',
 					//isApproved: (_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE'), // Removed per Justin, using 'success' instead
-					requestAmount: _.get(result, 'TRANRESP.REQUESTEDAMOUNT[0]') || null,
-					authorizeAmount: _.get(result, 'TRANRESP.AUTHORIZEDAMOUNT[0]') || null,
+					requestAmount: order.amount, //_.get(result, 'TRANRESP.REQUESTEDAMOUNT[0]') || null,
+					authorizeAmount: order.amount, //_.get(result, 'TRANRESP.AUTHORIZEDAMOUNT[0]') || null,
 					creditCardAccount: _.get(result, 'TRANRESP.CCACCOUNT[0]') || null,
 					creditCardType: _.get(result, 'TRANRESP.CCCARDTYPE[0]') || null,
 					creditCardAuthorizationCode: _.get(result, 'TRANRESP.TRANSARMORTOKENTYPE[0]') || null,
