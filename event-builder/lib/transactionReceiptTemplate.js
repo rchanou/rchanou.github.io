@@ -103,9 +103,9 @@ var defaults = {
         "clubSpeedLogoPath"            : "",
         "printDetail"                  : true
     },
-    "fiscalResponse" : null,
-    "type"           : "transactionReceipt",
-    "terminalName"   : ""
+    "fiscalResponse"        : null,
+    "type"                  : "transactionReceipt",
+    "terminalName"          : ""
 };
 
 exports.create = function(body) {
@@ -133,6 +133,7 @@ exports.create = function(body) {
   var foodSubitems = data.foodSubitems;
   var user         = data.user;
   var taxes        = data.taxes;
+  var creditCardPaymentResponses = data.listCreditCardPaymentResponse;
 
   // Ensure no null/undefined customers are in the array
   // (potentially from poor referential integrity in CS)
@@ -356,7 +357,7 @@ exports.create = function(body) {
   log.debug('end print tax & total');
 
   /*
-    Print Payments
+    GetPrintPayments
   */
   var getPayment = function getPayment(payment) {
     var tempOutput = '';
@@ -479,7 +480,6 @@ exports.create = function(body) {
   */
   log.debug('end print payments');
 
-
   /*
     Print Discount
   */
@@ -590,6 +590,25 @@ exports.create = function(body) {
       output += "Kontrollkod: " + fiscal.serial + '\n';
       output += "Kontrollenhet: " + fiscal.receiptCode + '\n';
       output += '\n';
+  }
+
+  if (creditCardPaymentResponses && creditCardPaymentResponses.length > 0) {
+    creditCardPaymentResponses.forEach(function(res) {
+      if (res.response && res.response.result && res.response.result.emvReceiptRequirement) {
+        output += '\n';
+        var emv = res.response.result.emvReceiptRequirement;
+        // emv will be in the form of KEY:VAL\TKEY:VAL\TKEY:VAL.
+        // split into key/val, run some padding, and print as separate lines.
+        var emvLines = emv.split('\t');
+        emvLines.forEach(function(emvLine) {
+          var emvLineSplit = emvLine.split(':');
+          var emvLineKey = emvLineSplit[0];
+          var emvLineVal = emvLineSplit[1];
+          output += lpad(emvLineKey, 4) + ': ' + emvLineVal + '\n';
+        });
+        output += '\n';
+      }
+    });
   }
 
   if (options.printBarcodeOnReceipt && check.checkId) {

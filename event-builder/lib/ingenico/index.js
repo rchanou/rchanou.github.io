@@ -2,6 +2,7 @@ var Promise = require("bluebird");
 var request = require('request');
 var toJson = require('xml2js').parseString;
 var xml2js = require('xml2js');
+var _ = require('lodash');
 Promise.longStackTraces();
 var opts;
 
@@ -37,6 +38,26 @@ function Ingenico (opts) {
 	// INTERACTIVEGETSIGRESP OPTIONS
 	this.opts.SIGTYPE = opts.provider.options.SIGTYPE || 'INITIALS'; // "Initials" prompts non-initials?
 	
+	// Variables Justin/VB code expects to always exist.
+	this.opts.defaultHoistedVars = {
+		success: false,
+		transactionId: null,
+        resultCode: null,
+		requestAmount: null,
+		authorizeAmount: null,
+		creditCardAccount: null,
+		creditCardType: null,
+		creditCardAuthorizationCode: null,
+		creditCardExpirationDate: null,
+		resultCode: null,
+		troutD: null,
+		emvReceiptRequirement: null,
+		error: null,
+		code: null,
+        message: null,
+		_original: null
+	}
+
 	request = request.defaults({
 		url: 'http://' + this.opts.host + ':' + this.opts.port,
 		method: 'POST',
@@ -58,7 +79,8 @@ Ingenico.prototype.signature = function signature(signature) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('SIG REQUEST ERROR', err, self.opts);
-				return reject({ message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err });
+				var response = { message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err };
+				return reject(_.merge({ result: response }, response));
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 
@@ -66,7 +88,8 @@ Ingenico.prototype.signature = function signature(signature) {
 				if(self.opts.debug) console.log('PARSED BODY', JSON.stringify(result));
 				if(err) {
 					console.log('SIG PARSING ERROR', err);
-					return reject({ message: err.code, error: err });
+					var response = { message: err.code, error: err };
+					return reject(_.merge({ result: response }, response));
 				}
 				
 				if(result.TRANRESP.TRANSUCCESS[0] === 'FALSE') {
@@ -141,12 +164,13 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 			'￼￼<DISABLEAVS>' + this.opts.DISABLEAVS + '</DISABLEAVS>' +
 			'￼￼<INTERACTIVECREDITAUTHTYPE>' + this.opts.INTERACTIVECREDITAUTHTYPE + '</INTERACTIVECREDITAUTHTYPE>' +
 			'</TRANSACTION>';
-	console.log(req);
+	console.log('REQUEST', req);
 	return new Promise(function(resolve, reject) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('CHARGE REQUEST ERROR', err, self.opts);
-				return reject({ message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err });
+				var response = _.merge(self.opts.defaultHoistedVars, { message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err })
+				return reject(_.merge({ result: response }, response));
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 
@@ -154,29 +178,41 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 				if(self.opts.debug) console.log('PARSED BODY', JSON.stringify(result));
 				if(err) {
 					console.log('CHARGE PARSING ERROR', err);
-					return reject({ message: err.code, error: err });
+					var response = _.merge(self.opts.defaultHoistedVars, { message: err.code, error: err })
+					return reject(_.merge({ result: response }, response));
 				}
-				if(result.TRANRESP.TRANSUCCESS[0] === 'FALSE') {
-					return resolve({
-						'message': result.TRANRESP.TRANRESPMESSAGE[0],
-						'code': result.TRANRESP.hasOwnProperty('TRANRESPERRCODE') ? result.TRANRESP.TRANRESPERRCODE[0] : null,
-						'success': false,
-						'transactionId': null,
-						'_original': result
-						});		
-				} else if(result.TRANRESP.TRANSUCCESS[0] === 'TRUE') {
-					return resolve({
-						'success': true,
-						'transactionId': retrieveTransactionId(result),
-						'_original': result
-						});
+				var TRANSUCCESS = _.get(result, 'TRANRESP.TRANSUCCESS[0]');
+				var hoistedVars = {
+					transactionId: retrieveTransactionId(result),
+                    resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]'),
+					//isApproved: (_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE'), // Removed per Justin, using 'success' instead
+					requestAmount: _.get(result, 'TRANRESP.REQUESTEDAMOUNT[0]') || null,
+					authorizeAmount: _.get(result, 'TRANRESP.AUTHORIZEDAMOUNT[0]') || null,
+					creditCardAccount: _.get(result, 'TRANRESP.CCACCOUNT[0]') || null,
+					creditCardType: _.get(result, 'TRANRESP.CCCARDTYPE[0]') || null,
+					creditCardAuthorizationCode: _.get(result, 'TRANRESP.TRANSARMORTOKENTYPE[0]') || null,
+					creditCardExpirationDate: _.get(result, 'TRANRESP.CCEXP[0]') || null,
+					resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]') || null,
+					troutD: _.get(result, 'TRANRESP.TRANSARMORTOKEN[0]') || null,
+					emvReceiptRequirement: _.get(result, 'TRANRESP.EMVRECEIPTREQ[0]') || null,
+					code: _.get(result, 'TRANRESP.TRANRESPERRCODE[0]') || null,
+                    message: _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || null,
+					_original: result
+				};
+
+				if(TRANSUCCESS === 'FALSE') {
+					return resolve(_.merge(self.opts.defaultHoistedVars, {
+						success: false,
+						}, hoistedVars));		
+				} else if(TRANSUCCESS === 'TRUE') {
+					return resolve(_.merge(self.opts.defaultHoistedVars, {
+						success: true,
+						}, hoistedVars));
 				} else {
 					// Unsure if we can get to this case?
-					return resolve({
-						'success': false,
-						'transactionId': null,
-						'_original': result
-						});
+					return resolve(_.merge(self.opts.defaultHoistedVars, {
+						success: false,
+						}, hoistedVars));
 				}
 			});
 		});
@@ -215,7 +251,8 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
 				console.log('REFUND REQUEST ERROR', err, self.opts);
-				return reject({ message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err });
+				var response = _.merge(self.opts.defaultHoistedVars, { message: 'Could not contact the Ingenico device at: ' + self.opts.host, error: err });
+				return reject(_.merge({ result: response}, response));
 			}
 			if(self.opts.debug) console.log('RAW BODY', body);
 			
@@ -223,30 +260,54 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 				if(self.opts.debug) console.log('PARSED BODY', JSON.stringify(result));
 				if(err) {
 					console.log('REFUND PARSING ERROR', err);
-					return reject({ message: err.code, error: err });
+					var response = _.merge(self.opts.defaultHoistedVars, { result: self.opts.defaultHoistedVars }, { message: err.code, error: err });
+					return reject(_.merge({ result: response}, response));
 				}
+				var hoistedVars = {
+					transactionId: retrieveTransactionId(result),
+                    resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]'),
+					//isApproved: (_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE'), // Removed per Justin, using 'success' instead
+					requestAmount: _.get(result, 'TRANRESP.REQUESTEDAMOUNT[0]') || null,
+					authorizeAmount: _.get(result, 'TRANRESP.AUTHORIZEDAMOUNT[0]') || null,
+					creditCardAccount: _.get(result, 'TRANRESP.CCACCOUNT[0]') || null,
+					creditCardType: _.get(result, 'TRANRESP.CCCARDTYPE[0]') || null,
+					creditCardAuthorizationCode: _.get(result, 'TRANRESP.TRANSARMORTOKENTYPE[0]') || null,
+					creditCardExpirationDate: _.get(result, 'TRANRESP.CCEXP[0]') || null,
+					resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]') || null,
+					troutD: _.get(result, 'TRANRESP.TRANSARMORTOKEN[0]') || null,
+					emvReceiptRequirement: _.get(result, 'TRANRESP.EMVRECEIPTREQ[0]') || null,
+					code: _.get(result, 'TRANRESP.TRANRESPERRCODE[0]') || null,
+                    message: _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || null,
+					_original: result
+				};
+
 				// {"TRANRESP":{"RESPTYPE":["CCCREDRESP"],"TRANSUCCESS":["FALSE"],"TRANRESPMESSAGE":["User Cancel or Timeout"],"TRANRESPERRCODE":["-100"]}}
 				if(result.TRANRESP.TRANSUCCESS[0] === 'FALSE') {
-					return resolve({
-						'message': result.TRANRESP.TRANRESPMESSAGE[0],
-						'code': result.TRANRESP.hasOwnProperty('TRANRESPERRCODE') ? result.TRANRESP.TRANRESPERRCODE[0] : null,
+					return resolve(_.merge(self.opts.defaultHoistedVars, hoistedVars, {
+						'message': _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || '',
+						'code': _.get(result, 'TRANRESP.TRANRESPERRCODE[0]'),
 						'success': false,
 						'transactionId': null,
+						'emvReceiptRequirement': _.get(result, 'TRANRESP.EMVRECEIPTREQ[0]'),
 						'_original': result
-						});		
+						}));		
 				} else if(result.TRANRESP.TRANSUCCESS[0] === 'TRUE') {
-					return resolve({
-						'success': true,
+					return resolve(_.merge(self.opts.defaultHoistedVars, hoistedVars, {
+						'message': _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || '',
+                        'success': true,
 						'transactionId': retrieveTransactionId(result),
+						'emvReceiptRequirement': _.get(result, 'TRANRESP.EMVRECEIPTREQ[0]'),
 						'_original': result
-						});
+						}));
 				} else {
 					// Unsure if we can get to this case?
-					return resolve({
-						'success': false,
+					return resolve(_.merge(self.opts.defaultHoistedVars, hoistedVars, {
+						'message': _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || '',
+                        'success': false,
 						'transactionId': null,
+						'emvReceiptRequirement': _.get(result, 'TRANRESP.EMVRECEIPTREQ[0]'),
 						'_original': result
-						});
+						}));
 				}
 						
 			});
