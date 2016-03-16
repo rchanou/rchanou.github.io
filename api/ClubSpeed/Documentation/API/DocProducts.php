@@ -376,7 +376,7 @@ EOS;
                 "default" => "",
                 "create" => "available",
                 "update" => "available",
-                "description" => "The ID of the reporting product class for the product"
+                "description" => "The ID of the reporting <a href=\"#product-classes\">product class</a> for the product"
             ),
             array(
                 "name" => "productType",
@@ -384,7 +384,20 @@ EOS;
                 "default" => "",
                 "create" => "available",
                 "update" => "available",
-                "description" => "The type of the product"
+                'description' => ''
+                    ."\n<span>"
+                    ."\n  The type of the product"
+                    ."\n</span>"
+                    ."\n<ol>"
+                    ."\n  <li>Regular</li>"
+                    ."\n  <li>Point</li>"
+                    ."\n  <li>Food</li>"
+                    ."\n  <li>Reservation</li>"
+                    ."\n  <li>GameCard</li>"
+                    ."\n  <li>Membership</li>"
+                    ."\n  <li>Gift Card</li>"
+                    ."\n  <li>Entitle</li>"
+                    ."\n</ol>"
             ),
             // array(
             //     "name" => "rLocalOnly",

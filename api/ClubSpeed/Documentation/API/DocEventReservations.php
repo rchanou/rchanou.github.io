@@ -14,6 +14,68 @@ class DocEventReservations Extends DocAPIBase {
         $this->info            = $this->info();
         $this->json            = $this->json();
         $this->expand();
+
+        $this->calls['update-event-status'] = $this->updateEventStatus();
+    }
+
+    private function updateEventStatus() {
+        $rootUrl = $this->root . $this->url;
+        return array(
+              'header'      => 'Update Event Status'
+            , 'header_icon' => 'pencil'
+            , 'id'          => 'update-event-status'
+            , 'type'        => 'update'
+            , 'info' => array(
+                  'url'         => $rootUrl . '/:id'
+                , 'verb'        => 'PUT'
+                , 'verb_icon'   => 'pencil'
+                , 'access'      => 'Private'
+                , 'access_icon' => 'lock'
+                , 'subroute'    => '/:id'
+            )
+            , 'usage' => <<<EOS
+<p>
+    The <code class="prettyprint">EventReservation</code> expects a linked
+    <code class="prettyprint">EventReservation.status</code> to be in a specific format.
+    Namely, the <code class="prettyprint">status</code> field should be set to be the <strong>index</strong> of the given
+    <code class="prettyprint">EventStatus</code>
+    when ordered by <code class="prettyprint">EventStatus.seq ASC, EventStatus.status ASC</code>.
+</p>
+<p>
+  For example, assume the following example response from <code class="prettyprint">GET /eventstatuses?order=seq,status</code>
+</p>
+<pre class="prettyprint">
+[
+  {
+    "eventStatusId": 1,
+    "colorId": -16711898,
+    "seq": 1,
+    "status": "Race Paid"
+  },
+  {
+    "eventStatusId": 2,
+    "colorId": -37120,
+    "seq": 3,
+    "status": "A&D Paid"
+  }
+]
+</pre>
+<p>
+    In order to give an EventReservation a status of "A&D Paid", the following call should be made:
+</p>
+<pre class="prettyprint">
+PUT /eventreservations/:id
+{
+    "status": 1
+}
+</pre>
+<p>
+    Take special note that the <code class="prettyprint">EventReservation.status</code>
+    value is of the <strong>array index</strong> of the original return,
+    and <em>not</em> the same value as the <code class="prettyprint">EventStatus.eventStatusId</code>.
+</p>
+EOS
+        );
     }
 
     private function json() {
@@ -27,7 +89,6 @@ class DocEventReservations Extends DocAPIBase {
   "eventTypeId": 1,
   "isEventClosure": false,
   "isMixed": null,
-  "label": 3,
   "mainId": null,
   "minNoOfAdultsPerBooking": 0,
   "minNoOfCadetsPerBooking": 0,
@@ -38,7 +99,7 @@ class DocEventReservations Extends DocAPIBase {
   "ptsPerReservation": 1,
   "repId": 3,
   "startTime": "2013-11-26T18:30:00.00",
-  "status": 0,
+  "status": 3,
   "subject": "",
   "typeId": 1,
   "userId": 5
@@ -136,14 +197,14 @@ EOS;
             //     "update" => "available",
             //     "description" => ""
             // ),
-            array(
-                "name" => "label",
-                "type" => "String",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The label for the event"
-            ),
+            // array(
+            //     "name" => "label",
+            //     "type" => "String",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => "The label for the event"
+            // ),
             // array(
             //     "name" => "mainId",
             //     "type" => "int",
@@ -238,7 +299,7 @@ EOS;
                 "default" => "",
                 "create" => "available",
                 "update" => "available",
-                "description" => "The subject for the event"
+                "description" => "The name for the event"
             ),
             array(
                 "name" => "typeId",

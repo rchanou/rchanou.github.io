@@ -7,296 +7,611 @@ class DocCheckDetails Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id              = 'check-details';
-        $this->header          = 'Check Details';
-        $this->url             = 'checkDetails';
-        $this->info            = $this->info();
-        $this->calls['create'] = $this->create();
-        $this->calls['single'] = $this->single();
-        $this->calls['match']  = $this->match(); // leave match out for now?
-        $this->calls['search'] = $this->search(); // leave search out for now?
-        $this->calls['update'] = $this->update();
-        $this->calls['delete'] = $this->delete();
-        $this->expand();
+        $this->id      = 'check-details';
+        $this->header  = 'Check Details';
+        $this->url     = 'checkDetails';
+        $this->info    = $this->info();
+        $this->preface = $this->preface();
+        $this->json    = $this->json();
     }
 
-    private function info() {
+        private function preface() {
+        return <<<EOS
+<h4>Description</h4>
+<p>
+    A <code class="prettyprint">CheckDetail</code> record represents a line item and quantity
+    attached to a <code class="prettyprint">Check</code>.
+</p>
+<p>
+    To attach a new line item to a check, insert a <code class="prettyprint">CheckDetail</code>
+    using the relevant <code class="prettyprint">checkId</code>, <code class="prettyprint">productId</code>, and <code class="prettyprint">qty</code>,
+    typically allowing the API to auto-populate the remainder of the information from the <code class="prettyprint">Product</code> definition.
+</p>
+stuff
+EOS;
+    }
+
+    private function json() {
+        return <<<EOS
+{
+  "checkDetails": [
+    {
+      "checkDetailId": 12863,
+      "checkId": 6779,
+      "status": 1,
+      "type": 1,
+      "productId": 1002,
+      "productName": "Rotax Helmet Case",
+      "createdDate": "2015-09-08T09:17:05.00",
+      "qty": 1,
+      "unitPrice": 30000,
+      "unitPrice2": 0,
+      "discountApplied": 0,
+      "taxId": 1,
+      "taxPercent": 0,
+      "voidNotes": "",
+      "cId": null,
+      "vId": null,
+      "bonusValue": null,
+      "paidValue": null,
+      "comValue": null,
+      "entitle1": null,
+      "entitle2": null,
+      "entitle3": null,
+      "entitle4": null,
+      "entitle5": null,
+      "entitle6": null,
+      "entitle7": null,
+      "entitle8": null,
+      "m_Points": null,
+      "m_CustId": null,
+      "m_OldMembershiptypeId": null,
+      "m_NewMembershiptypeId": null,
+      "m_Days": null,
+      "m_PrimaryMembership": null,
+      "p_PointTypeId": null,
+      "p_Points": 0,
+      "p_CustId": null,
+      "r_Points": null,
+      "discountUserId": null,
+      "discountDesc": null,
+      "calculateType": null,
+      "discountId": null,
+      "discountNotes": null,
+      "g_Points": 0,
+      "g_CustId": null,
+      "gst": 0,
+      "m_DaysAdded": null,
+      "s_SaleBy": null,
+      "s_NoOfLapsOrSeconds": null,
+      "s_CustId": null,
+      "s_Vol": null,
+      "cadetQty": 0
+    }
+  ]
+}
+EOS;
+    }
+
+    // private function info() {
+    //     return array(
+    //         array(
+    //               'name'        => 'checkDetailsId'
+    //             , 'type'        => 'Integer'
+    //             , 'default'     => '{Generated}'
+    //             , 'create'      => 'unavailable'
+    //             , 'update'      => 'unavailable'
+    //             , 'required'    => true
+    //             , 'description' => 'The primary key for the record'
+    //         )
+    //         , array(
+    //               'name'        => 'checkId'
+    //             , 'type'        => 'Integer'
+    //             , 'default'     => ''
+    //             , 'create'      => 'required'
+    //             , 'update'      => 'unavailable'
+    //             , 'required'    => true
+    //             , 'description' => 'The ID of the parent <a href="#checks">check</a>'
+    //         )
+    //         , array(
+    //               'name'        => 'productId'
+    //             , 'type'        => 'Integer'
+    //             , 'default'     => ''
+    //             , 'create'      => 'required'
+    //             , 'update'      => 'unavailable'
+    //             , 'required'    => true
+    //             , 'description' => 'The ID of the <a href="#products">product</a> for the check detail'
+    //         )
+    //         , array(
+    //               'name'        => 'productName'
+    //             , 'type'        => 'String'
+    //             , 'default'     => '{Lookup}'
+    //             , 'create'      => 'unavailable'
+    //             , 'update'      => 'unavailable'
+    //             , 'description' => 'The name for the <a href="#products">product</a> for the check detail'
+    //         )
+            // , array(
+            //       'name'        => 'status'
+            //     , 'type'        => 'Integer'
+            //     , 'default'     => '1'
+            //     , 'create'      => 'available'
+            //     , 'update'      => 'available'
+            //     , 'description' => ""
+            //         ."\n<span>"
+            //         ."\n  The status of the check detail"
+            //         ."\n</span>"
+            //         ."\n<ol>"
+            //         ."\n  <li>New</li>"
+            //         ."\n  <li>Voided</li>"
+            //         ."\n  <li>Permanent</li>"
+            //         ."\n</ol>"
+            //         ."\n<span>Note that when creating a new check detail, this will always be set to 1.</span>"
+            // )
+    //         , array(
+    //               'name'        => 'type'
+    //             , 'type'        => 'Integer'
+    //             , 'default'     => '1'
+    //             , 'create'      => 'available'
+    //             , 'update'      => 'available'
+    //             , 'description' => ''
+    //                 ."\n<span>"
+    //                 ."\n  The type for the <a href=\"#products\">product</a> attached to the check detail"
+    //                 ."\n</span>"
+    //                 ."\n<ol>"
+    //                 ."\n  <li>Regular</li>"
+    //                 ."\n  <li>Point</li>"
+    //                 ."\n  <li>Food</li>"
+    //                 ."\n  <li>Reservation</li>"
+    //                 ."\n  <li>GameCard</li>"
+    //                 ."\n  <li>Membership</li>"
+    //                 ."\n  <li>Gift Card</li>"
+    //                 ."\n  <li>Entitle</li>"
+    //                 ."\n</ol>"
+    //         )
+    //         , array(
+    //               'name'        => 'qty'
+    //             , 'type'        => 'Integer'
+    //             , 'icon'        => 'warning-sign orange'
+    //             , 'create'      => 'available'
+    //             , 'update'      => 'available'
+    //             , 'default'     => '0'
+    //             , 'description' => 'The quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero.'
+    //         )
+    //         , array(
+    //               'name'        => 'cadetQty'
+    //             , 'type'        => 'Integer'
+    //             , 'icon'        => 'warning-sign orange'
+    //             , 'create'      => 'available'
+    //             , 'update'      => 'available'
+    //             , 'default'     => '0'
+    //             , 'description' => 'The cadet quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero.'
+    //         )
+    //         , array(
+    //               'name'        => 'createdDate'
+    //             , 'type'        => 'DateTime'
+    //             , 'default'     => '{Date.Now}'
+    //             , 'create'      => 'unavailable'
+    //             , 'update'      => 'unavailable'
+    //             , 'description' => 'The timestamp indicating when the check detail was created'
+    //         )
+    //     );
+    // }
+
+        private function info() {
         return array(
             array(
-                  'name'        => 'checkDetailsId'
-                , 'type'        => 'Integer'
-                , 'default'     => '{Generated}'
-                , 'create'      => 'unavailable'
-                , 'update'      => 'unavailable'
-                , 'description' => 'The ID for the CheckDetails record.'
-            )
-            , array(
-                  'name'        => 'checkId'
-                , 'type'        => 'Integer'
-                , 'default'     => ''
-                , 'create'      => 'required'
-                , 'update'      => 'unavailable'
-                , 'description' => 'The ID of the parent Check. This CheckID must already exist.'
-            )
-            , array(
-                  'name'        => 'productId'
-                , 'type'        => 'Integer'
-                , 'default'     => ''
-                , 'create'      => 'required'
-                , 'update'      => 'unavailable'
-                , 'description' => 'The ID of the product.'
-            )
-            , array(
-                  'name'        => 'productName'
-                , 'type'        => 'String'
-                , 'default'     => '{Lookup}'
-                , 'create'      => 'unavailable'
-                , 'update'      => 'unavailable'
-                , 'description' => 'The name for the underlying product.'
-            )
-            , array(
-                  'name'        => 'status'
-                , 'type'        => 'Integer'
-                , 'default'     => '1'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'description' => ""
-                    ."\n<span>"
-                    ."\n  The status of the CheckDetails."
-                    ."\n</span>"
-                    ."\n<ol>"
-                    ."\n  <li>IsNew</li>"
-                    ."\n  <li>HasVoided</li>"
-                    ."\n  <li>CannotDeleted</li>"
-                    ."\n</ol>"
-                    ."\n<span>Note that when creating a new CheckDetails record, this will always be set to 1.</span>"
-            )
-            , array(
-                  'name'        => 'type'
-                , 'type'        => 'Integer'
-                , 'default'     => '1'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'description' => ''
-                    ."\n<span>"
-                    ."\n  The type for the CheckDetails."
-                    ."\n</span>"
-                    ."\n<ol>"
-                    ."\n  <li>RegularItem</li>"
-                    ."\n  <li>PointItem</li>"
-                    ."\n  <li>FoodItem</li>"
-                    ."\n  <li>ReservationItem</li>"
-                    ."\n  <li>GameCardItem</li>"
-                    ."\n  <li>MembershipItem</li>"
-                    ."\n  <li>GiftCardItem</li>"
-                    ."\n  <li>EntitleItem</li>"
-                    ."\n</ol>"
-            )
-            , array(
-                  'name'        => 'qty'
-                , 'type'        => 'Integer'
-                , 'icon'        => 'warning-sign orange'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'default'     => '0'
-                , 'description' => 'The quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero.'
-            )
-            , array(
-                  'name'        => 'cadetQty'
-                , 'type'        => 'Integer'
-                , 'icon'        => 'warning-sign orange'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'default'     => '0'
-                , 'description' => 'The cadet quantity of the product to be added to check details. Either qty or cadetQty must be provided and greater than zero.'
-            )
-            , array(
-                  'name'        => 'createdDate'
-                , 'type'        => 'DateTime'
-                , 'default'     => '{Date.Now}'
-                , 'create'      => 'unavailable'
-                , 'update'      => 'unavailable'
-                , 'description' => 'The timestamp indicating when the CheckDetails record was created.'
-            )
-        );
-    }
-
-    private function create() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            )
-            , 'examples' => array(
-                'request' => <<<EOS
-POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails HTTP/1.1
-{
-    "checkId": 2288,
-    "type": 1,
-    "productId": 8,
-    "qty": 5
-}
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-    "checkDetailId": 7558
-}
-EOS
-            )
-        );
-    }
-
-    private function single() {
-        return array(
-            'info' => array(
-                'access' => 'private'
+                "name" => "checkDetailId",
+                "type" => "Integer",
+                "default" => "{Generated}",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The primary key for the record"
             ),
-            'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7556 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-    "checkDetails": [
-        {
-            "checkDetailId": 7556,
-            "checkId": 2288,
-            "status": 1,
-            "type": 1,
-            "productId": 8,
-            "productName": "",
-            "createdDate": "2014-09-15",
-            "qty": 5,
-            "cadetQty": 0
-        }
-    ]
-}
-EOS
+            array(
+                "name" => "bonusValue",
+                "type" => "Double",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => ""
+            ),
+            array(
+                "name" => "cadetQty",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => ""
+            ),
+            array(
+                "name" => "calculateType",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The type of application for an applied discount"
+            ),
+            array(
+                "name" => "checkId",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The ID for the parent check of the check detail"
+            ),
+            // array(
+            //     "name" => "cid",
+            //     "type" => "String",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "comValue",
+            //     "type" => "Double",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "createdBy",
+            //     "type" => "String",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            array(
+                "name" => "createdDate",
+                "type" => "DateTime",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The timestamp at which the check detail was created"
+            ),
+            // array(
+            //     "name" => "createdOn",
+            //     "type" => "String",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => "The "
+            // ),
+            array(
+                "name" => "discountApplied",
+                "type" => "Double",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The amount of the discount which was applied"
+            ),
+            array(
+                "name" => "discountDesc",
+                "type" => "String",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The description of the discount which was applied"
+            ),
+            array(
+                "name" => "discountId",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The ID of the discount which was applied"
+            ),
+            array(
+                "name" => "discountNotes",
+                "type" => "String",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "Notes regarding the application of the discount"
+            ),
+            array(
+                "name" => "discountUserId",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The ID for the user who applied the discount"
+            ),
+            // array(
+            //     "name" => "entitle1",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "entitle2",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "entitle3",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "entitle4",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "entitle5",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "entitle6",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "entitle7",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "entitle8",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            array(
+                "name" => "g_CustId",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The ID of the <a href=\"#customers\">customer</a> on which to apply points on purchase. Note that this ID may reference a gift card"
+            ),
+            array(
+                "name" => "g_Points",
+                "type" => "Double",
+                "default" => "",
+                "description" => "The amount of money to be applied to <code class=\"prettyprint\">CheckDetail.g_CustId on purchase</code>, which corresponds to <code class=\"prettyprint\">Product.g_Points</code>"
+            ),
+            array(
+                "name" => "gst",
+                "type" => "Double",
+                "default" => "",
+                "required" => false,
+                "description" => "The percent of the <a href=\"#taxes\">tax</a> to be applied as GST, which corresponds to <code class=\"prettyprint\">Tax.gst</code>"
+            ),
+            // array(
+            //     "name" => "mCustId",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "mDays",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "mDaysAdded",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "mNewMembershiptypeId",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "mOldMembershiptypeId",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "mPoints",
+            //     "type" => "Double",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "mPrimaryMembership",
+            //     "type" => "Boolean",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            array(
+                "name" => "p_CustId",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The ID of the <a href=\"#customers\">customer</a> on which to apply points on purchase"
+            ),
+            array(
+                "name" => "p_Points",
+                "type" => "Double",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The number of points to be applied on purchase, which corresponds to <code class=\"prettyprint\">Product.p_Points</code>"
+            ),
+            // array(
+            //     "name" => "pPointTypeId",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "paidValue",
+            //     "type" => "Double",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            array(
+                "name" => "productId",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The ID for the <a href=\"#products\">product</a> on the check detail"
+            ),
+            array(
+                "name" => "productName",
+                "type" => "String",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The name of the <a href=\"#products\">product</a> on the check detail"
+            ),
+            array(
+                "name" => "qty",
+                "type" => "Integer",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The regular quantity of the <a href=\"#products\">product</a> on the check detail"
+            ),
+            array(
+                "name" => "r_Points",
+                "type" => "Double",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The number of reservation points to be applied on purchase, which corresponds to <code class=\"prettyprint\">Product.r_Points</code>"
+            ),
+            // array(
+            //     "name" => "sCustId",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "sNoOfLapsOrSeconds",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "s_SaleBy",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "sVol",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "description" => ""
+            // ),
+           array(
+                  "name"        => "status"
+                , "type"        => "Integer"
+                , "default"     => "1"
+                , "create"      => "available"
+                , "update"      => "available"
+                , "description" => ""
+                    ."\n<span>"
+                    ."\n  The status of the check detail"
+                    ."\n</span>"
+                    ."\n<ol>"
+                    ."\n  <li>New</li>"
+                    ."\n  <li>Voided</li>"
+                    ."\n  <li>Permanent</li>"
+                    ."\n</ol>"
+                    ."\n<span>Note that when creating a new check detail, this will always be set to 1.</span>"
+            ),
+            array(
+                "name" => "taxId",
+                "type" => "Integer",
+                "default" => "",
+                "description" => "The id for the <a href=\"#taxes\">tax</a> to be applied"
+            ),
+            array(
+                "name" => "taxPercent",
+                "type" => "Double",
+                "default" => "",
+                "description" => "The percent of the <a href=\"#taxes\">tax</a> to be applied, which corresponds to <code class=\"prettyprint\">Tax.amount</code>"
+            ),
+            array(
+                "name" => "type",
+                "type" => "Integer",
+                "default" => "",
+                "description" => ""
+            ),
+            array(
+                "name" => "unitPrice",
+                "type" => "Double",
+                "default" => "",
+                "description" => ""
+            ),
+            // array(
+            //     "name" => "unitPrice2",
+            //     "type" => "Double",
+            //     "default" => "",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "vid",
+            //     "type" => "String",
+            //     "default" => "",
+            //     "description" => ""
+            // ),
+            array(
+                "name" => "voidNotes",
+                "type" => "String",
+                "default" => "",
+                "description" => ""
             )
         );
-    }
 
-    private function match() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            )
-            , 'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails?qty=5&productId=43 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-    "checkDetails": [
-        {
-            "checkDetailId": 2564,
-            "checkId": 645,
-            "status": 3,
-            "type": 4,
-            "productId": 43,
-            "productName": "Online 20 Min Arrive n Drive",
-            "createdDate": "2014-01-23",
-            "qty": 5,
-            "cadetQty": 0
-        },
-        {
-            "checkDetailId": 5254,
-            "checkId": 1537,
-            "status": 3,
-            "type": 4,
-            "productId": 43,
-            "productName": "Online 20 Min Arrive n Drive",
-            "createdDate": "2014-04-25",
-            "qty": 5,
-            "cadetQty": 0
-        }
-    ]
-}
-EOS
-            )
-        );
-    }
-
-    private function search() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            )
-            , 'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails?filter=3%3CqtyANDqty%3C%3D5ANDcreatedDate%3E2014-08-01 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-    "checkDetails": [
-        {
-            "checkDetailId": 7556,
-            "checkId": 2288,
-            "status": 1,
-            "type": 1,
-            "productId": 8,
-            "productName": "",
-            "createdDate": "2014-09-15",
-            "qty": 5,
-            "cadetQty": 0
-        },
-        {
-            "checkDetailId": 7557,
-            "checkId": 2288,
-            "status": 1,
-            "type": 1,
-            "productId": 8,
-            "productName": "",
-            "createdDate": "2014-09-15",
-            "qty": 5,
-            "cadetQty": 0
-        }
-    ]
-}
-EOS
-            )
-        );
-    }
-
-    private function update() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            )
-            , 'examples' => array(
-                'request' => <<<EOS
-PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7564 HTTP/1.1
-{
-    "status": 2,
-    "type": 2, 
-    "productId": 11,
-    "qty": 0,
-    "cadetQty": 3
-}
-EOS
-          , 'response' => <<<EOS
-HTTP/1.1 200 OK
-EOS
-            )
-        );
-    }
-
-    private function delete() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            )
-            , 'examples' => array(
-                'request' => <<<EOS
-DELETE https://{$_SERVER['SERVER_NAME']}/api/index.php/checkDetails/7560 HTTP/1.1
-EOS
-          , 'response' => <<<EOS
-HTTP/1.1 200 OK
-EOS
-            )
-        );
     }
 }
