@@ -34,7 +34,7 @@ if (fs.existsSync(path.join(__dirname, 'config.js'))) {
 var url       = process.argv[2];
 var printer   = process.argv[3] && process.argv[3] !== 'default' ? '-print-to ' + process.argv[3] : '-print-to-default'
 var timeout   = process.argv[4] || 10000;
-var paperSize = process.argv[5] || config.paperSize || '8.5in*11in';
+var paperSize = process.argv[5] || config.paperSize || '9in*12in';
 var oldFileLifetimeInMs = (config.retentionTimeInMinutes || 10)*60*1000;
 var printJobDirectory = path.join(__dirname, 'print-jobs');
 
