@@ -291,7 +291,7 @@ EOS;
                 "default" => "",
                 "create" => "available",
                 "update" => "available",
-                "description" => "The ID for the event status of the event reservation"
+                "description" => "The index for the event status of the event reservation. Please see <a href=\"#event-reservations-update-event-status\">here</a> for additional information"
             ),
             array(
                 "name" => "subject",

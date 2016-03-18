@@ -377,6 +377,10 @@ EOS
   an empty result will be returned. This parameter is entirely optional.
 </p>
 <p>
+Note that <code class="prettyprint">offset</code> can be used as an alias for <code class="prettyprint">skip</code>,
+and <code class="prettyprint">take</code> can be used as an alias for <code class="prettyprint">limit</code>
+</p>
+<p>
   These pagination parameters work in tandem with <a href="#query-operations-record-filtering-v2">Record Filtering</a>
   and <a href="#query-operations-ordering">Ordering</a>.
 </p>
@@ -391,6 +395,12 @@ EOS
   </div>
   <div class="col-xs-12">
     <pre class="prettyprint"> ?limit=50&skip=50 </pre>
+  </div>
+  <div class="col-xs-12">
+    <pre class="prettyprint"> ?where={"amount":{"\$gte":50}}&skip=50&take=10 </pre>
+  </div>
+  <div class="col-xs-12">
+    <pre class="prettyprint"> ?limit=10&order=recordId DESC </pre>
   </div>
 </div>
 EOS

@@ -176,9 +176,13 @@ class Authenticate {
             if (in_array($key, $GLOBALS['authentication_keys']) && $key != md5(date('Y-m-d')))
                 return true;
 
-						// Lookup by ACL -- looking for "public" keyword
-						if(array_key_exists('aclKeys', $GLOBALS) && array_key_exists($key, $GLOBALS['aclKeys']) && in_array('public', $GLOBALS['aclKeys'][$key]))
-								return true;
+            // Lookup by ACL -- looking for "public" keyword
+            if (
+                array_key_exists('aclKeys', $GLOBALS)
+                && array_key_exists($key, $GLOBALS['aclKeys'])
+                && in_array('public', $GLOBALS['aclKeys'][$key])
+            )
+                return true;
 
             $authenticationToken = self::$logic->authenticationTokens->match(array(
                 'Token' => $key
@@ -198,29 +202,29 @@ class Authenticate {
      * @return boolean True if the key has at least private access, false if not.
      */
     private static function isValidPrivateKey(&$key) {
-				// Lookup by legacy "$privateKey"
-				if (isset($key) && $key === @$GLOBALS['privateKey'])
+        // Lookup by legacy "$privateKey"
+        if (isset($key) && $key === @$GLOBALS['privateKey'])
             return true;
 
-				// Lookup by ACL regex -- Test/create your regex here: http://www.phpliveregex.com/
-				if(isset($key) && array_key_exists('aclKeys', $GLOBALS) && array_key_exists($key, $GLOBALS['aclKeys']) && is_array($GLOBALS['aclKeys'][$key])) {
-						
-						// Build the $requestedApiEndpoint to regex against
-						// Example: GET:/customers/1000001.json
-						$requestedApiEndpoint = $_SERVER['REQUEST_METHOD'] . ':' . strtolower($_SERVER['PATH_INFO']);
-						
-						// Loop each regex looking for a match
-						foreach($GLOBALS['aclKeys'][$key] as $regex) {
-								// Ignore keyword "public" while looking for a "private" match
-								if($regex === 'public')
-										continue;
+        // Lookup by ACL regex -- Test/create your regex here: http://www.phpliveregex.com/
+        if(isset($key) && array_key_exists('aclKeys', $GLOBALS) && array_key_exists($key, $GLOBALS['aclKeys']) && is_array($GLOBALS['aclKeys'][$key])) {
+                
+            // Build the $requestedApiEndpoint to regex against
+            // Example: GET:/customers/1000001.json
+            $requestedApiEndpoint = $_SERVER['REQUEST_METHOD'] . ':' . strtolower($_SERVER['PATH_INFO']);
+            
+            // Loop each regex looking for a match
+            foreach($GLOBALS['aclKeys'][$key] as $regex) {
+                // Ignore keyword "public" while looking for a "private" match
+                if ($regex === 'public')
+                    continue;
 
-								// If we find a matching regex, allow access
-								$foundMatch = preg_match($regex, $requestedApiEndpoint, $matches);
-								if($foundMatch)
-										return true;
-						}
-				}
+                // If we find a matching regex, allow access
+                $foundMatch = preg_match($regex, $requestedApiEndpoint, $matches);
+                if($foundMatch)
+                    return true;
+            }
+        }
         return false;
     }
 

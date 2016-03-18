@@ -107,7 +107,10 @@ abstract class BaseApi {
         // figure out which call the user actually wants - all, match, or filter
         try {
             $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            if (!isset($request_data['limit']) || is_null($request_data['limit'])) {
+            if (
+                   (!isset($request_data['limit']) || is_null($request_data['limit']))
+                && (!isset($request_data['take'])  || is_null($request_data['take']))
+            ) {
                 // if limit is null, set it to something very high,
                 // so we don't inadvertantly introduce limits for old calls
                 // which didn't previously have limits.

@@ -15,6 +15,11 @@ class ParamsContainer extends BaseContainer {
         'key'
         , 'debug'
         , 'select'
+        , 'skip'
+        , 'limit'
+        , 'take'
+        , 'offset'
+        , 'page'
         , 'XDEBUG_PROFILE'
     );
 
@@ -24,6 +29,7 @@ class ParamsContainer extends BaseContainer {
 
     public function __construct($data = array()) {
         // parent::__construct($data);
+        $this->params = array();
         $this->load($data);
     }
 

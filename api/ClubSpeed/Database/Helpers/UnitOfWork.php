@@ -20,6 +20,8 @@ class UnitOfWork {
         , 'limit'
         , 'offset'
         , 'debug'
+        , 'skip'
+        , 'take'
     );
 
     public function __construct($data = null) {
@@ -214,9 +216,9 @@ class UnitOfWork {
         $this->action(@$data['action'] ?: null);
         $this->table(@$data['table'] ?: null);
         $this->select(@$data['select'] ?: null);
-        $this->limit(@$data['limit'] ?: null);
-        $this->page(@$data['page'] ?: null); // ORDER MATTERS HERE - DO PAGE FIRST
-        $this->offset(@$data['offset'] ?: null); // AND OFFSET SECOND
+        $this->limit(@$data['limit'] ?: @$data['take'] ?: null);
+        $this->page(@$data['page'] ?: null); // ORDER MATTERS HERE - DO PAGE AFTER LIMIT
+        $this->offset(@$data['offset'] ?: @$data['skip'] ?: null); // AND OFFSET/SKIP SECOND (so it overrides page, if necessary)
         $this->order(@$data['order'] ?: null);
         $this->where(@$data['where'] ?: null);
         $this->data($data);
