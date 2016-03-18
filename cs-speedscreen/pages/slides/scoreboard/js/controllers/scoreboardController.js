@@ -272,7 +272,7 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
     // ############################
 
     $scope.timerInterpolationInterval = $interval(function() {
-        if ($scope.scoreboardState == 'race_running' && Object.size($scope.racersOnScoreboard) > 0)
+        if ($scope.scoreboardState == 'race_running')
         {
             if ($scope.seconds == 0) {
                 $scope.minutes -= 1;
