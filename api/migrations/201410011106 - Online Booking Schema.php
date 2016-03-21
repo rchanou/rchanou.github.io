@@ -6,6 +6,9 @@ require_once('../config.php');
 require_once('../vendors/autoload.php');
 require_once('../ClubSpeed/ClubSpeedLoader.php');
 $_REQUEST['debug'] = true;
+use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
+Log::info('Running ' . basename(__FILE__, '.php') . ' migrations', Enums::NSP_MIGRATIONS);
 
 $resourceDir = './resources/';
 $files = scandir($resourceDir);

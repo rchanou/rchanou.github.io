@@ -3,6 +3,13 @@
  * This script installs the config.php for the new booking site using
  * the private key from the API.
  */
+require_once('../config.php');
+require_once('../vendors/autoload.php');
+require_once('../ClubSpeed/ClubSpeedLoader.php');
+$_REQUEST['debug'] = true;
+use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
+Log::info('Running ' . basename(__FILE__, '.php') . ' migrations', Enums::NSP_MIGRATIONS);
 
 $path_to_booking_config_directory = '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'booking' . DIRECTORY_SEPARATOR . 'laravel' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
 

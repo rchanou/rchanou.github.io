@@ -3,6 +3,9 @@ require_once('../config.php');
 require_once('../vendors/autoload.php');
 require_once('../ClubSpeed/ClubSpeedLoader.php');
 $_REQUEST['debug'] = true;
+use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
+Log::info('Running ' . basename(__FILE__, '.php') . ' migrations', Enums::NSP_MIGRATIONS);
 
 $giftCardHtml = file_get_contents(__DIR__.'/resources/201501021500 - HTML01 - gift card.html');
 $giftCardHtml = str_replace('##TRACKURL##',$_SERVER['HTTP_HOST'],$giftCardHtml);

@@ -2,6 +2,13 @@
 /**
  * This script checks the if the php_intl DLL is loaded and also checks if the web.config includes the proper verbs.
  */
+require_once('../config.php');
+require_once('../vendors/autoload.php');
+require_once('../ClubSpeed/ClubSpeedLoader.php');
+$_REQUEST['debug'] = true;
+use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
+Log::info('Running ' . basename(__FILE__, '.php') . ' migrations', Enums::NSP_MIGRATIONS);
 
 // Check if php_intl is loaded
 if(!extension_loaded('intl')) {

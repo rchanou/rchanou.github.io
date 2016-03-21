@@ -7,6 +7,9 @@ require_once('../config.php');
 require_once('../vendors/autoload.php');
 require_once('../ClubSpeed/ClubSpeedLoader.php');
 $_REQUEST['debug'] = true;
+use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
+Log::info('Running ' . basename(__FILE__, '.php') . ' migrations', Enums::NSP_MIGRATIONS);
 
 $dropProcedure = <<<EOD
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[UpdateCheckDetailsGpoints]') AND type in (N'P', N'PC'))

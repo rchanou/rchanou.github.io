@@ -3,6 +3,13 @@
  * Export deprecated Registration settings from CfgRegistration and config.php to Registration namespace in ControlPanel table.
  *
  */
+require_once('../config.php');
+require_once('../vendors/autoload.php');
+require_once('../ClubSpeed/ClubSpeedLoader.php');
+$_REQUEST['debug'] = true;
+use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
+Log::info('Running ' . basename(__FILE__, '.php') . ' migrations', Enums::NSP_MIGRATIONS);
 
 $path_to_registration_config_directory = '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'cs-registration' . DIRECTORY_SEPARATOR . 'laravel' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
 

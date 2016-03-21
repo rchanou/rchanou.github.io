@@ -4,6 +4,9 @@ require_once('../config.php');
 require_once('../vendors/autoload.php');
 require_once('../ClubSpeed/ClubSpeedLoader.php');
 $_REQUEST['debug'] = true;
+use ClubSpeed\Logging\LogService as Log;
+use ClubSpeed\Enums\Enums;
+Log::info('Running ' . basename(__FILE__, '.php') . ' migrations', Enums::NSP_MIGRATIONS);
 
 //If 'overwriteWaivers=1' is in the URL, the import will overwrite/update the new waivers with the current values of the old waivers
 $shouldOverwriteWaivers = (isset($_GET['overwriteWaivers']) && $_GET['overwriteWaivers'] == 1) ? true : false;
