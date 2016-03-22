@@ -35,6 +35,8 @@ class Version
                 break;
             case "eurekas":
                 return $this->eurekas();
+            case "booking":
+                return $this->booking();
             default:
                 throw new RestException(401, "Invalid version parameter!");
         }
@@ -113,6 +115,35 @@ class Version
         return;
     }
 
+    public function booking() {
+        if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
+        $tsql = "SELECT SettingName, SettingValue FROM ControlPanel WHERE TerminalName = 'Booking' AND SettingName IN ('onlineBookingPaymentProcessorSettings', 'registrationEnabled')";
+        $tsql_params = array();
+        $rows = $this->run_query($tsql, $tsql_params);
+        $settings = array();
+        foreach($rows as $currentSetting)
+        {
+            $settings[$currentSetting["SettingName"]] = $currentSetting["SettingValue"];
+        }
+        if (isset($settings['onlineBookingPaymentProcessorSettings']))
+        {
+            $settings['onlineBookingPaymentProcessorSettings'] = json_decode($settings['onlineBookingPaymentProcessorSettings']);
+        }
+
+        $paymentProcessor = isset($settings["onlineBookingPaymentProcessorSettings"]->name) ? $settings["onlineBookingPaymentProcessorSettings"]->name : null;
+        $testMode = isset($settings["onlineBookingPaymentProcessorSettings"]->options->testMode) ? (bool)$settings["onlineBookingPaymentProcessorSettings"]->options->testMode : null;
+        $registrationEnabled = isset($settings["registrationEnabled"]) ? (bool)$settings["registrationEnabled"] : null;
+
+        $output = array(
+          'PaymentProcessor' => $paymentProcessor,
+          'TestMode' => $testMode,
+          'Enabled' => $registrationEnabled
+        );
+        return $output;
+    }
     private function run_query($tsql, $params = array()) {
         $tsql_original = $tsql . ' ';
         // Connect
