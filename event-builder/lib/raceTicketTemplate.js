@@ -47,7 +47,8 @@ var defaults = {
           "showScheduledTime"       : true
         , "printGridOnRaceTicket"   : true
         , "printAgeOnRaceTicket"    : true
-        , "showHeatNo"              : true
+        // , "showHeatNumber"          : true // intentionally leave undefined for backwards compatibility issues
+        // , "showHeatNo"              : true // intentionally leave undefined for backwards compatibility issues
         , "useHeatNumber"           : true
         , "numberOfTracks"          : 1
     }
@@ -123,7 +124,18 @@ RaceTicketTemplate.prototype.create = function(body) {
   log.debug('scheduled time');
 
   // Print the heat number or sequence number
-  if(options.showHeatNo && options.showHeatNo.toString().toLowerCase() !== 'false')
+  // backwards compatibility -- used to be showHeatNo, switched to showHeatNumber, we need to support both.
+  var showHeatNumber = (
+    options.showHeatNumber !== undefined && options.showHeatNumber !== null
+      ? options.showHeatNumber
+      : options.showHeatNo !== undefined && options.showHeatNo !== null
+        ? options.showHeatNo
+        : true // default to true
+  );
+  // used to be possible for showHeatNumber to be the string 'false', more backwards compat stuff
+  if (typeof showHeatNumber === 'string' && showHeatNumber.toLowerCase() === 'false')
+    showHeatNumber = false;
+  if(showHeatNumber)
       output += buildLine(resources.strHeatNumber, heat.heatNumber ? heat.heatNumber.toString().substr(-2) : '');
   else
       output += buildLine(resources.strHeatNumber, heat.sequenceNumber); // not really part of the heat -- it's actually part of the TimeslotHeat ViewModel..
