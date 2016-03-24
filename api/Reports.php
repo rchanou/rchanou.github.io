@@ -163,7 +163,9 @@ when p.PayType = 8 then 'Game Card'
 when p.PayType = 9 then 'Debit Card' 
 end as Tender,
 
-p.PayTerminal AS 'Pay Terminal', p.PayDate AS 'Paid On'
+p.PayTerminal AS 'Pay Terminal', p.PayDate AS 'Paid On',
+p.VoucherNotes AS 'Voucher Notes',
+p.VoidNotes AS 'Void Notes'
 
 from Checks c
 left join Customers cust on c.CustID = cust.CustID
