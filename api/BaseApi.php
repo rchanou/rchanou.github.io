@@ -272,25 +272,6 @@ abstract class BaseApi {
         return call_user_func_array(array($this, '_get'), func_get_args()); // ~ 9ms
     }
 
-    protected function _put() {
-        $putArgs = func_get_args();
-        $validateId = @$putArgs[0] ?: null; // only look for the first one, for the bandaid customer authentication
-        $this->validate('put', $validateId);
-        try {
-            $interface =& $this->interface; // PHP 5.3 hack for callbacks and $this
-            $callback = function() use (&$interface) {
-                $closureArgs = func_get_args();
-                return call_user_func_array(array($interface, 'update'), $closureArgs);
-            };
-            $mutateArgs = func_get_args();
-            array_push($mutateArgs, $callback);
-            return call_user_func_array(array($this->mapper, 'mutate'), $mutateArgs);
-        }
-        catch (Exception $e) {
-            $this->_error($e);
-        }
-    }
-
     /**
      * @url PUT /:id1
      *
@@ -299,7 +280,20 @@ abstract class BaseApi {
      *       which can be used by any number of ids.
      */
     public function put1($id1, $request_data) {
-        return call_user_func_array(array($this, '_put'), func_get_args());
+        try {
+            $this->validate('put', $id1); // pass the id along -- we need to be able to do this for customers to own their own data
+            $uow = UnitOfWork::build($request_data)
+                ->action('update')
+                ->table_id($id1);
+            $mapper =& $this->mapper;
+            $interface =& $this->interface;
+            $mapper->uowIn($uow);
+            $interface->uow($uow);
+            return; // empty body return
+        }
+        catch (Exception $e) {
+            $this->_error($e);
+        }
     }
 
     protected function _delete() {

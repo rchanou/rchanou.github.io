@@ -23,6 +23,51 @@ class ReservationsLogic extends BaseLogic {
         parent::__construct($logic, $db);
         $this->interface = $this->db->onlineBookingReservations;
         $this->expire(); // call expire on any reservations construct (note: construct will not be hit unless reservations is attempted to be used)
+
+        $self =& $this;
+        $befores = array(
+            'create' => array($self, 'beforeCreate'),
+            'update' => array($self, 'beforeUpdate')
+        );
+        $this->before('uow', function($uow) use (&$befores)  {
+            if (isset($befores[$uow->action]))
+                call_user_func($befores[$uow->action], $uow);
+        });
+    }
+
+    function beforeCreate($uow) {
+        $logic = $this->logic; // i think?
+        $reservation = $uow->data;
+        if (empty($reservation->OnlineBookingsID))
+            throw new \RequiredArgumentMissingException("Create reservation was missing OnlineBookingsID!");
+        $availability = $logic->bookingAvailability->get($reservation->OnlineBookingsID);
+        $availability = $availability[0];
+        if($availability->ProductSpotsAvailableOnline < $reservation->Quantity)
+            throw new \InvalidArgumentValueException("Create reservation attempted to use a quantity higher than what was available! Requested: " . $reservation->Quantity . " :: Available: " . $availability->ProductSpotsAvailableOnline);
+        
+        if ($reservation->Quantity < 1)
+            throw new \InvalidArgumentValueException("Create reservation attempted to use a quantity less than 1! Received: " . $reservation->Quantity);
+
+        $reservation->OnlineBookingReservationStatusID = 1; // hard coded to 1 (temporary) -- make a lookup from dbo.OnlineBookingReservationStatus eventually
+    }
+
+    function beforeUpdate($uow) {
+        $new = $uow->data;
+        $old = $uow->existing;
+        $logic = $this->logic;
+        $availability = $logic->bookingAvailability->get($new->OnlineBookingsID ?: $old->OnlineBookingsID);
+        if (is_null($availability))
+            throw new \CSException("Update reservation for online booking attempted to use a non-existent onlineBookingsId! Received: " . $reservation->OnlineBookingsID, 404);
+        $availability = $availability[0];
+        if (!is_null($new->Quantity) && $new->Quantity < 1)
+            throw new \InvalidArgumentValueException("Update reservation attempted to use a quantity less than 1! Received: " . $new->Quantity);
+        if ($old->Quantity < $new->Quantity) {
+            // attempting to increase quantity
+            if ($availability->ProductSpotsAvailableOnline < $new->Quantity - $old->Quantity)
+                throw new \InvalidArgumentValueException("Update reservation attempted to use a quantity higher than what was available! Requested: " . $new->Quantity . " :: Available: " . ($availability->ProductSpotsAvailableOnline + $old->Quantity));
+        }
+        if ($new->OnlineBookingReservationStatusID === 2) // permanent -- MAKE THIS A LOOKUP LATER
+            $new->ExpiresAt = Convert::toDateForServer('2038-01-18');
     }
 
     public function create($params = array()) {
@@ -49,7 +94,7 @@ class ReservationsLogic extends BaseLogic {
         $args = func_get_args();
         $logic =& $this->logic;
         $closure = function($old, $new) use (&$logic) {
-            $availability = $logic->bookingAvailability->get($new->OnlineBookingsID);
+            $availability = $logic->bookingAvailability->get($new->OnlineBookingsID ?: $old->OnlineBookingsID);
             if (is_null($availability))
                 throw new \CSException("Update reservation for online booking attempted to use a non-existent onlineBookingsId! Received: " . $reservation->OnlineBookingsID, 404);
             $availability = $availability[0];
