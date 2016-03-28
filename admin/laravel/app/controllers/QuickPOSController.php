@@ -53,6 +53,38 @@ class QuickPOSController extends BaseController
         {
             return Redirect::to('/disconnected');
         }
+
+        $heatTypeProductsTableExists = true;
+        $heatTypeProducts = CS_API::getJSON('heattypeproducts');
+        $heatTypeProductsGrouped = array();
+        if ($heatTypeProducts === null)
+        {
+            $heatTypeProductsTableExists = false;
+        }
+        else
+        {
+            foreach($heatTypeProducts as $heatTypeProduct)
+            {
+                $heatTypeId = $heatTypeProduct->heatTypeId;
+                $productId = $heatTypeProduct->productId;
+                $heatTypeProductId = $heatTypeProduct->heatTypeProductId;
+                if (!array_key_exists($heatTypeId, $heatTypeProductsGrouped))
+                {
+                    $heatTypeProductsGrouped[$heatTypeId] = array();
+                }
+                if (!array_key_exists($productId, $heatTypeProductsGrouped[$heatTypeId]))
+                {
+                    $heatTypeProductsGrouped[$heatTypeId][$productId] = array();
+                }
+                $heatTypeProductsGrouped[$heatTypeId][$productId] = array(
+                    'heatTypeProductId' => $heatTypeProductId,
+                    'heatTypeId' => $heatTypeId,
+                    'productId' => $productId
+                );
+            }
+        }
+        Session::put('heatTypeProducts', $heatTypeProductsGrouped);
+
         $heatTypesFiltered = array();
         foreach($heatTypes as $heatType)
         {
@@ -84,6 +116,7 @@ class QuickPOSController extends BaseController
             }
         }
 
+
         return View::make('/screens/quickpos/settings',
             array('controller' => 'QuickPOSController',
                 'isChecked' => $quickPOSSettingsCheckedData,
@@ -93,7 +126,9 @@ class QuickPOSController extends BaseController
                 'heatTypes' => $heatTypesFiltered,
                 'products' => $productsFiltered,
                 'quickPOSSettings' => $quickPOSSettingsData,
-                'heatTypesMigrationWasRun' => $heatTypesMigrationWasRun
+                'heatTypesMigrationWasRun' => $heatTypesMigrationWasRun,
+                'heatTypeProductsTableExists' => $heatTypeProductsTableExists,
+                'heatTypeProducts' => $heatTypeProductsGrouped
             ));
     }
 
@@ -103,31 +138,83 @@ class QuickPOSController extends BaseController
 
         $quickPOSSettings = array();
         $quickPOSSettings['QuickPOSAddCustomer'] = isset($input['QuickPOSAddCustomer']) ? 1 : 0;
-        $quickPOSSettings['QuickPOSTrackNumbers'] = isset($input['QuickPOSTrackNumbers']) ? implode(',',$input['QuickPOSTrackNumbers']) : '';
+        $quickPOSSettings['QuickPOSTrackNumbers'] = isset($input['QuickPOSTrackNumbers']) ? implode(',', $input['QuickPOSTrackNumbers']) : '';
         $quickPOSSettings['QuickPOSDefaultCategoryId'] = $input['QuickPOSDefaultCategoryId'];
 
-        $result = CS_API::updateSettingsFor('MainEngine',$quickPOSSettings);
+        $result = CS_API::updateSettingsFor('MainEngine', $quickPOSSettings);
 
-        if ($result === false)
-        {
-            return Redirect::to('quickpos/settings')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
-        }
-        else if ($result === null)
-        {
+        if ($result === false) {
+            return Redirect::to('quickpos/settings')->with(array('error' => 'One or more settings could not be updated. Please try again.'));
+        } else if ($result === null) {
             return Redirect::to('/disconnected');
         }
 
-        foreach($input as $currentInputKey => $currentInputValue)
+        $heatTypeProductsGroupedSubmitted = array();
+        foreach ($input as $currentInputKey => $currentInputValue)
         {
-            if (str_contains($currentInputKey,'defaultProductForHeatTypesId-'))
+            if (str_contains($currentInputKey, 'defaultProductForHeatTypesId-'))
             {
-                $heatTypeId = (int)str_replace('defaultProductForHeatTypesId-','',$currentInputKey);
+                $heatTypeId = (int)str_replace('defaultProductForHeatTypesId-', '', $currentInputKey);
                 $productId = $currentInputValue;
                 if ($productId === 'null')
                 {
                     $productId = null;
                 }
-                $result = CS_API::update('heattypes',$heatTypeId,array('productId' => $productId));
+                $result = CS_API::update('heattypes', $heatTypeId, array('productId' => $productId));
+                if ($result === false)
+                {
+                    return Redirect::to('quickpos/settings')->with(array('error' => 'One or more settings could not be updated. Please try again.'));
+                }
+                else if ($result === null)
+                {
+                    return Redirect::to('/disconnected');
+                }
+            }
+            else if (str_contains($currentInputKey, 'alternateProductsForHeatTypesId-'))
+            {
+                $heatTypeId = (int)str_replace('alternateProductsForHeatTypesId-', '', $currentInputKey);
+                $productIds = $currentInputValue;
+                if (!array_key_exists($heatTypeId, $heatTypeProductsGroupedSubmitted))
+                {
+                    $heatTypeProductsGroupedSubmitted[$heatTypeId] = array();
+                }
+                foreach($productIds as $productId)
+                {
+                    if (!array_key_exists($productId, $heatTypeProductsGroupedSubmitted[$heatTypeId]))
+                    {
+                        $heatTypeProductsGroupedSubmitted[$heatTypeId][$productId] = array();
+                    }
+                    $heatTypeProductsGroupedSubmitted[$heatTypeId][$productId] = array(
+                      'heatTypeId' => $heatTypeId,
+                      'productId' => $productId
+                    );
+                }
+            }
+        }
+        $heatTypeProductsGroupedOld = Session::get('heatTypeProducts');
+
+        $heatTypeProductsToCreate = array_diff_key($heatTypeProductsGroupedSubmitted,$heatTypeProductsGroupedOld);
+        $heatTypeProductsToDelete = array_diff_key($heatTypeProductsGroupedOld,$heatTypeProductsGroupedSubmitted);
+        $heatTypeProductsToPotentiallyUpdate = array_intersect_key($heatTypeProductsGroupedSubmitted,$heatTypeProductsGroupedOld);
+        foreach($heatTypeProductsToPotentiallyUpdate as $heatTypeId => $heatTypeProducts)
+        {
+            $deletionCandidates = array_diff_key($heatTypeProductsGroupedOld[$heatTypeId],$heatTypeProductsToPotentiallyUpdate[$heatTypeId]);
+            foreach($deletionCandidates as $productId => $heatTypeProduct)
+            {
+                $heatTypeProductsToDelete[$heatTypeId][$productId] = $heatTypeProduct;
+            }
+            $creationCandidates = array_diff_key($heatTypeProductsGroupedSubmitted[$heatTypeId],$heatTypeProductsGroupedOld[$heatTypeId]);
+            foreach($creationCandidates as $productId => $heatTypeProduct)
+            {
+                $heatTypeProductsToCreate[$heatTypeId][$productId] = $heatTypeProduct;
+            }
+        }
+
+        foreach($heatTypeProductsToDelete as $heatTypeId => $products)
+        {
+            foreach($products as $productId => $heatTypeProduct)
+            {
+                $result = CS_API::delete('HeatTypeProducts', $heatTypeProduct['heatTypeProductId']);
                 if ($result === false)
                 {
                     return Redirect::to('quickpos/settings')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
@@ -138,6 +225,27 @@ class QuickPOSController extends BaseController
                 }
             }
         }
-        return Redirect::to('quickpos/settings')->with( array('message' => 'Settings updated successfully!'));
+
+        foreach($heatTypeProductsToCreate as $heatTypeId => $products)
+        {
+            foreach($products as $productId => $heatTypeProduct)
+            {
+                $heatTypeId = $heatTypeProduct['heatTypeId'];
+                $productId = $heatTypeProduct['productId'];
+                $result = CS_API::create('HeatTypeProducts', array(
+                  'heatTypeId' => $heatTypeId,
+                  'productId' => $productId
+                ));
+                if ($result === false)
+                {
+                    return Redirect::to('quickpos/settings')->with( array('error' => 'One or more settings could not be updated. Please try again.'));
+                }
+                else if ($result === null)
+                {
+                    return Redirect::to('/disconnected');
+                }
+            }
+        }
+        return Redirect::to('quickpos/settings')->with(array('message' => 'Settings updated successfully!'));
     }
 }

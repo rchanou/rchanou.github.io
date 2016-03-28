@@ -62,6 +62,7 @@ $r->addAPIClass('GiftCardBalance');
 $r->addAPIClass('GiftCardHistory');
 $r->addAPIClass('HeatDetails');
 $r->addAPIClass('HeatMain');
+$r->addAPIClass('HeatTypeProducts');
 $r->addAPIClass('HeatTypes');
 $r->addAPIClass('Locations');
 $r->addAPIClass('Logs');

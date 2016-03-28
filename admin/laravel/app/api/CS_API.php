@@ -96,6 +96,30 @@ class CS_API
                     'error' => $errorMessage);
             }
         }
+        else if ($verb == 'DELETE')
+        {
+            try {
+                $response = \Httpful\Request::delete($url)
+                  ->body($params)
+                  ->sendsJson()
+                  ->send();
+            }
+            catch (Exception $e)
+            {
+                //If there was an error, store debugging information in the session
+                $errorInfo = array('url' => $url, 'params' => $params, 'verb' => $verb, 'response' => $e->getMessage());
+                Session::put('errorInfo', $errorInfo);
+
+                if ($response !== null && property_exists($response, 'body') && property_exists($response->body, 'error'))
+                {
+                    $errorMessage = $response->body->error;
+                }
+
+                $response = null;
+                return array('response' => $response,
+                  'error' => $errorMessage);
+            }
+        }
 
         if ($response === null || !property_exists($response, 'code') || $response->code != 200)
         {
@@ -157,6 +181,50 @@ class CS_API
         self::initialize();
         $url = self::$apiURL . "/" . $resource . "/" . $id . "?" . http_build_query(array('key' => self::$privateKey));
         $result = self::call($url, $params, 'PUT');
+        $response = $result['response'];
+
+        if (isset($response->code) && $response->code == 200)
+        {
+            return true;
+        }
+        else if ($response !== null)
+        {
+            return false;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function create($resource, $object)
+    {
+        $result =  self::call(
+          self::$apiURL . "/$resource?key=" . self::$privateKey,
+          $object,
+          'POST'
+        );
+        $response = $result['response'];
+
+        if (isset($response->code) && $response->code == 200)
+        {
+            return true;
+        }
+        else if ($response !== null)
+        {
+            return false;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static function delete($resource, $id)
+    {
+        self::initialize();
+        $url = self::$apiURL . "/" . $resource . "/" . $id . "?" . http_build_query(array('key' => self::$privateKey));
+        $result = self::call($url, null, 'DELETE');
         $response = $result['response'];
 
         if (isset($response->code) && $response->code == 200)

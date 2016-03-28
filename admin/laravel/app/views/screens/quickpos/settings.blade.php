@@ -132,7 +132,7 @@ QuickPOS Settings
                     <span class="icon">
                       <i class="fa fa-align-justify"></i>
                     </span>
-                    <h5>Default Products for Heat Types</h5>
+                    <h5>Products for Heat Types</h5>
                     </div>
                     <div class="widget-content">
                         <div class="row">
@@ -144,14 +144,25 @@ QuickPOS Settings
                                         <br><small><em>Track {{$heatType->trackId}}&nbsp;</em></small>
                                         </label>
                                         <div class="col-sm-8 col-md-8 col-lg-8">
-                                            <select name="defaultProductForHeatTypesId-{{$heatType->heatTypesId}}" value="{{isset($heatType->productId) ?: ""}}}">
+                                            <label class="control-label">Default Product: </label>
+                                            <select style="width: 100%;" name="defaultProductForHeatTypesId-{{$heatType->heatTypesId}}" value="{{isset($heatType->productId) ?: ""}}">
                                                 <option value="null">None</option>
                                                 @foreach($products as $product)
                                                     <option value="{{$product->productId}}" @if($product->productId == $heatType->productId)selected="selected"@endif>
                                                         {{$product->description}}
                                                     </option>
                                                 @endforeach
+                                            </select><br/>
+                                            @if($heatTypeProductsTableExists)
+                                            <label class="control-label">Alternate Products: </label>
+                                            <select style="width: 100%;" multiple name="alternateProductsForHeatTypesId-{{$heatType->heatTypesId}}[]" value="">
+                                                @foreach($products as $product)
+                                                    <option value="{{$product->productId}}" @if(isset($heatTypeProducts[$heatType->heatTypesId][$product->productId]))selected="selected"@endif>
+                                                        {{$product->description}}
+                                                    </option>
+                                                @endforeach
                                             </select>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
