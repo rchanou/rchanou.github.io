@@ -29,7 +29,7 @@ class PointHistoryLogic extends BaseLogic {
                         throw new \RequiredArgumentMissingException("PointHistory create requires a CustID!");
                     if (isset($pointHistory->CheckID) && isset($pointHistory->CheckDetailID)) {
                         // note that CheckID/CheckDetailID are not always required -- ie, when deducting points from a customer, 
-                        $existingPointHistory = $this->db->match(array(
+                        $existingPointHistory = $db->pointHistory->match(array(
                             "CheckID" => $pointHistory->CheckID,
                             "CheckDetailID" => $pointHistory->CheckDetailID
                         ));
