@@ -138,10 +138,11 @@ QuickPOS Settings
                         <div class="row">
                             @if($heatTypesMigrationWasRun)
                                 @foreach($heatTypes as $heatType)
+                                    @if(isset($trackNames[$heatType->trackId]))
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label class="col-sm-4 col-md-4 col-lg-4 control-label">{{$heatType->name}}
-                                        <br><small><em>{{$trackNames[$heatType->trackId]}} Track&nbsp;</em></small>
+                                        <br><small><em>{{$trackNames[$heatType->trackId]}}&nbsp;</em></small>
                                         </label>
                                         <div class="col-sm-8 col-md-8 col-lg-8">
                                             <label class="control-label">Default Product: </label>
@@ -166,6 +167,7 @@ QuickPOS Settings
                                         </div>
                                     </div>
                                 </div>
+                                    @endif
                                 @endforeach
                                 <div class="col-sm-12">
                                     <div class="alert alert-info">
