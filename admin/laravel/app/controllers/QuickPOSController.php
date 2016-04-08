@@ -48,6 +48,12 @@ class QuickPOSController extends BaseController
         }
         $tracks = $tracks->tracks;
 
+        $trackNames = array();
+        foreach($tracks as $track)
+        {
+            $trackNames[$track->id] = $track->name;
+        }
+
         $heatTypes = CS_API::getJSON('heattypes', array('order' => 'name', 'limit' => 999));
         if ($heatTypes === null)
         {
@@ -123,6 +129,7 @@ class QuickPOSController extends BaseController
                 'categories' => $categoriesFiltered,
                 'tracks' => $tracks,
                 'trackIds' => $trackIds,
+                'trackNames' => $trackNames,
                 'heatTypes' => $heatTypesFiltered,
                 'products' => $productsFiltered,
                 'quickPOSSettings' => $quickPOSSettingsData,
