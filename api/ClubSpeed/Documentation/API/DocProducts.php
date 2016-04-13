@@ -7,13 +7,12 @@ class DocProducts Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id              = 'products';
-        $this->header          = 'Products';
-        $this->url             = 'products';
-        $this->info            = $this->info();
-        $this->version         = 'V1';
-        $this->json            = $this->json();
-        $this->expand();
+        $this->id      = 'products';
+        $this->header  = 'Products';
+        $this->url     = 'products';
+        $this->info    = $this->info();
+        $this->version = 'V1';
+        $this->json    = $this->json();
     }
 
     private function json() {
@@ -46,8 +45,7 @@ EOS;
                 "name" => "productId",
                 "type" => "Integer",
                 "default" => "{Generated}",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "The primary key for the record"
             ),
             // array(
@@ -102,32 +100,24 @@ EOS;
                 "name" => "custom1",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "Custom data holder 1"
             ),
             array(
                 "name" => "custom2",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "Custom data holder 2"
             ),
             array(
                 "name" => "custom3",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "Custom data holder 3"
             ),
             array(
                 "name" => "custom4",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "Custom data holder 4"
             ),
             // array(
@@ -141,25 +131,19 @@ EOS;
             array(
                 "name" => "deleted",
                 "type" => "Boolean",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "default" => "false",
                 "description" => "Flag indicating whether the product has been soft deleted"
             ),
             array(
                 "name" => "description",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "Description for the product"
             ),
             array(
                 "name" => "enabled",
                 "type" => "Boolean",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "default" => "true",
                 "description" => "Flag indicating whether the product is currently enabled"
             ),
             // array(
@@ -230,8 +214,6 @@ EOS;
                 "name" => "g_Points",
                 "type" => "Double",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "The amount of gift card points provided when this product is purchased"
             ),
             // array(
@@ -302,8 +284,6 @@ EOS;
                 "name" => "p_Points",
                 "type" => "Double",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "The number of points provided when this product is purchased"
             ),
             // array(
@@ -326,8 +306,6 @@ EOS;
                 "name" => "price1",
                 "type" => "Double",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "The price of the product"
             ),
             // array(
@@ -374,16 +352,13 @@ EOS;
                 "name" => "productClassId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "The ID of the reporting <a href=\"#product-classes\">product class</a> for the product"
             ),
             array(
                 "name" => "productType",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 'description' => ''
                     ."\n<span>"
                     ."\n  The type of the product"
@@ -411,8 +386,6 @@ EOS;
                 "name" => "r_Points",
                 "type" => "Double",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
                 "description" => "The amount of reservation points provided when this product is purchased"
             ),
             // array(
@@ -475,9 +448,7 @@ EOS;
                 "name" => "taxId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The ID of the tax for the product"
+                "description" => "The ID of the <a href=\"#taxes\">tax</a> for the product"
             ),
             // array(
             //     "name" => "vendorId",

@@ -27,7 +27,7 @@ class DocTaxes Extends DocAPIBase {
     To use a <code class="prettyprint">Tax</code> record, <code class="prettyprint">Tax.taxId</code>
     should be linked by setting it as <code class="prettyprint">Product.taxId</code>,
     and the values will be automatically calculated
-    during check calculation time.
+    during <code class="prettyprint">Check</code> calculation time.
 </p>
 EOS;
     }
@@ -62,7 +62,7 @@ EOS;
                 "type" => "Double",
                 "default" => "",
                 "required" => true,
-                "description" => "The percentage of the tax, where <code class=\"prettyprint\">6.25</code> would indicate 6.25% percent"
+                "description" => "The percentage of the tax, where <code class=\"prettyprint\">6.25</code> would indicate 6.25%"
             ),
             array(
                 "name" => "deleted",

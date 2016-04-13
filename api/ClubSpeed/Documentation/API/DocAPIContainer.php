@@ -123,6 +123,10 @@ class DocAPIContainer {
         $data['sections'][] = new DocEventTypes();
         $data['sections'][] = new DocHeatDetails();
         $data['sections'][] = new DocHeatMain();
+        $data['sections'][] = new DocHeatTypes();
+        $data['sections'][] = new DocMemberships();
+        $data['sections'][] = new DocMembershipTypes();
+        $data['sections'][] = new DocOmnipay();
         $data['sections'][] = new DocPasswords();
         $data['sections'][] = new DocPayment();
         $data['sections'][] = new DocProcessPayment();
@@ -130,7 +134,8 @@ class DocAPIContainer {
         $data['sections'][] = new DocProducts();
         $data['sections'][] = new DocRacers();
         $data['sections'][] = new DocReservations();
-        $data['sections'][] = new DocScreenTemplate();
+        // $data['sections'][] = new DocScreenTemplate();
+        $data['sections'][] = new DocSources();
         $data['sections'][] = new DocTaxes();
 
         return $data;

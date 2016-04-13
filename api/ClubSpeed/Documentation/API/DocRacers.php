@@ -62,7 +62,7 @@ EOS
             'type' => 'create',
             'examples' => array(
                 'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/racers/create HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/racers/create HTTP/1.1
 {
   "racername": "JimBobbyJoe",
   "email": "bob@clubspeed.com",
@@ -117,7 +117,7 @@ EOS
             'type' => 'update',
             'examples' => array(
                 'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/racers/login HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/racers/login HTTP/1.1
 {
     "username": "bob@clubspeed.com",
     "password": "bobssupersecretpassword"
@@ -179,7 +179,7 @@ EOS
             'type' => 'update',
             'examples' => array(
                 'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/racers/fb_login HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/racers/fb_login HTTP/1.1
 {
   "email": "bob@clubspeed.com",
   "facebookId": "652712592679",

@@ -7,263 +7,120 @@ class DocReservations Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id              = 'reservations';
-        $this->header          = 'Reservations';
-        $this->url             = 'reservations';
-        $this->info            = $this->info();
-        $this->calls['create'] = $this->create();
-        $this->calls['list']   = $this->all(); // list is a reserved keyword in php
-        $this->calls['single'] = $this->single();
-        $this->calls['match']  = $this->match();
-        $this->calls['search'] = $this->search();
-        $this->calls['update'] = $this->update();
-        $this->calls['delete'] = $this->delete();
-        $this->expand();
+        $this->id      = 'reservations';
+        $this->header  = 'Reservations';
+        $this->url     = 'reservations';
+        $this->info    = $this->info();
+        $this->version = 'V2';
+        $this->json    = $this->json();
+        $this->preface = $this->preface();
+    }
+
+    private function preface() {
+      return <<<EOS
+<h4>Description</h4>
+<p>
+  A <code class="prettyprint">Reservation</code> is an indication that a <code class="prettyprint">Customer</code> is either
+  looking to purchase a spot in a Booking, or has already purchased a spot in a <code class="prettyprint">Booking</code>.
+  <code class="prettyprint">Reservations</code>
+  should be used by creating a new temporary <code class="prettyprint">Reservation</code>
+  whenever a <code class="prettyprint">Customer</code> adds a <code class="prettyprint">Booking</code> to their kart,
+  and then updated to be made permanent whenever the purchase has been successfully made.
+</p>
+EOS;
+    }
+
+    private function json() {
+        return <<<EOS
+{
+  "reservations": [
+    {
+      "onlineBookingReservationsId": 428,
+      "onlineBookingsId": 514,
+      "customersId": 1232722,
+      "sessionId": "3e123f90551bf2feaadce4ea53482f4fa23f6cc5",
+      "quantity": 1,
+      "createdAt": "2015-12-09T16:19:05.17",
+      "expiresAt": "2016-12-09T17:19:05.17",
+      "onlineBookingReservationStatusId": 1,
+      "checkId": 17349
+    }
+  ]
+}
+EOS;
     }
 
     private function info() {
         return array(
             array(
-                  'name'        => 'onlineBookingReservationsId'
-                , 'type'        => 'Integer'
-                , 'default'     => '{Generated}'
-                , 'description' => 'The ID for the reservation.'
-            )
-            , array(
-                  'name'        => 'onlineBookingsId'
-                , 'type'        => 'Integer'
-                , 'create'      => 'required'
-                , 'update'      => 'available'
-                , 'description' => 'The ID of the booking for the reservation.'
-            )
-            , array(
-                  'name'        => 'customersId'
-                , 'type'        => 'Integer'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'description' => "The ID of the customer for the reservation."
-            )
-            , array(
-                  'name'        => 'sessionId'
-                , 'type'        => 'String'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'description' => "The session ID for the reservation, used for documentation and debugging purposes."
-            )
-            , array(
-                  'name'        => 'quantity'
-                , 'type'        => 'Integer'
-                , 'create'      => 'required'
-                , 'update'      => 'available'
-                , 'description' => "The quantity of reservations to hold. This number must be a positive integer."
-            )
-            , array(
-                  'name'        => 'createdAt'
-                , 'type'        => 'DateTime'
-                , 'default'     => '{Now}'
-                , 'create'      => 'available'
-                , 'description' => "The number of available bookings. This must be a positive integer."
-            )
-            , array(
-                  'name'        => 'expiresAt'
-                , 'type'        => 'DateTime'
-                , 'default'     => '{Now + default defined in ControlPanel}'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'description' => "The number of available bookings. This must be a positive integer."
-            )
-            , array(
-                  'name'        => 'onlineBookingReservationStatusId'
-                , 'type'        => 'Integer'
-                , 'default'     => '1'
-                , 'create'      => 'available'
-                , 'update'      => 'available'
-                , 'description' => ''
+                "name" => "onlineBookingReservationId",
+                "type" => "Integer",
+                "default" => "{Generated}",
+                "required" => false,
+                "description" => "The primary key for the record"
+            ),
+            array(
+                "name" => "checkId",
+                "type" => "Integer",
+                "default" => "",
+                "required" => false,
+                "description" => "The ID of the <a href=\"#checks\">check</a> for the reservation, where applicable. If a relevant checkId is available, it should be set, as this enables auto-voiding abandoned checks with offsite payment processors."
+            ),
+            array(
+                "name" => "createdAt",
+                "type" => "DateTime",
+                "default" => "{Now}",
+                "required" => false,
+                "description" => "The timestamp at which the reservation was created"
+            ),
+            array(
+                "name" => "customersId",
+                "type" => "Integer",
+                "default" => "",
+                "required" => true,
+                "description" => "The ID of the <a href=\"#customers\">customer</a> for the reservation"
+            ),
+            array(
+                "name" => "expiresAt",
+                "type" => "DateTime",
+                "default" => "{Now + default length from control panel}",
+                "required" => false,
+                "description" => "The timestamp at which the reservation will be automatically expired, if status is not set to Permanent"
+            ),
+            array(
+                "name" => "onlineBookingReservationStatusId",
+                "type" => "Integer",
+                "default" => "1",
+                "required" => false,
+                'description' => ''
                   ."\n<p>"
-                  ."\n  The ID for the status of the reservation. Statuses should be set to permanent while the underlying kart is open, and set to permanent after the purchase has been made."
+                  ."\n  The ID for the status of the reservation. Statuses should be set to Temporary while the underlying kart is open, and set to Permanent after the purchase has been made"
                   ."\n</p>"
                   ."\n<ol>"
                   ."\n  <li>Temporary</li>"
                   ."\n  <li>Permanent</li>"
                   ."\n</ol>"
-            )
-        );
-    }
-
-    private function create() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            )
-            , 'examples' => array(
-                'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/reservations HTTP/1.1
-{
-  "onlineBookingsId": 2,
-  "quantity": 2,
-  "sessionId": "my_session_id"
-}
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "onlineBookingReservationsId": 5
-}
-EOS
-            )
-        );
-    }
-
-    private function all() {
-        return array(
-            'info' => array(
-                'access' => 'private'
             ),
-            'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/reservations HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-{
-  "reservations": [
-    {
-      "onlineBookingReservationsId": 5,
-      "onlineBookingsId": 2,
-      "customersId": null,
-      "sessionId": "my_session_id",
-      "quantity": 2,
-      "createdAt": "2014-10-23 15:06:01.220",
-      "expiresAt": "2014-10-23 15:36:01.220",
-      "onlineBookingReservationStatusId": 1
-    }
-  ]
-}
-EOS
-            )
-        );
-    }
-
-    private function single() {
-        return array(
-            'info' => array(
-                'access' => 'private'
+            array(
+                "name" => "onlineBookingsId",
+                "type" => "Integer",
+                "default" => "",
+                "required" => true,
+                "description" => "The ID of the <a href=\"#bookings\">booking</a> for the reservation"
             ),
-            'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/reservations/5 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "reservations": [
-    {
-      "onlineBookingReservationsId": 5,
-      "onlineBookingsId": 2,
-      "customersId": null,
-      "sessionId": "my_session_id",
-      "quantity": 2,
-      "createdAt": "2014-10-23 15:06:01.220",
-      "expiresAt": "2014-10-23 15:36:01.220",
-      "onlineBookingReservationStatusId": 1
-    }
-  ]
-}
-EOS
-            )
-        );
-    }
-
-    private function match() {
-        return array(
-            'info' => array(
-                'access' => 'private'
+            array(
+                "name" => "quantity",
+                "type" => "Integer",
+                "default" => "",
+                "required" => false,
+                "description" => "The quantity of reservations to hold"
             ),
-            'examples' => array(
-                'request' => <<<EOS
-GET http://{$_SERVER['SERVER_NAME']}/api/index.php/reservations?session_id=my_session_id HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "reservations": [
-    {
-      "onlineBookingReservationsId": 5,
-      "onlineBookingsId": 2,
-      "customersId": null,
-      "sessionId": "my_session_id",
-      "quantity": 2,
-      "createdAt": "2014-10-23 15:06:01.220",
-      "expiresAt": "2014-10-23 15:36:01.220",
-      "onlineBookingReservationStatusId": 1
-    }
-  ]
-}
-EOS
-            )
-        );
-    }
-
-    private function search() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            ),
-            'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/reservations?filter=createdAt \$gt 2014-10-23 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "reservations": [
-    {
-      "onlineBookingReservationsId": 5,
-      "onlineBookingsId": 2,
-      "customersId": null,
-      "sessionId": "my_session_id",
-      "quantity": 2,
-      "createdAt": "2014-10-23 15:06:01.220",
-      "expiresAt": "2014-10-23 15:36:01.220",
-      "onlineBookingReservationStatusId": 1
-    }
-  ]
-}
-EOS
-            )
-        );
-    }
-
-    private function update() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            ),
-            'examples' => array(
-                'request' => <<<EOS
-PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/reservations/5 HTTP/1.1
-{
-    "quantity": 1
-}
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-EOS
-            )
-        );
-    }
-
-    private function delete() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            ),
-            'examples' => array(
-                'request' => <<<EOS
-DELETE https://{$_SERVER['SERVER_NAME']}/api/index.php/reservations/5 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-EOS
+            array(
+                "name" => "sessionId",
+                "type" => "String",
+                "default" => "",
+                "required" => false,
+                "description" => "An optional session identifier to be used for documentation and debugging purposes, typically generated by an external website"
             )
         );
     }

@@ -7,21 +7,19 @@ class DocCheckTotals Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id                  = 'check-totals';
-        $this->header              = 'Check Totals';
-        $this->url                 = 'checkTotals';
-        $this->info                = $this->info();
-        $this->calls['create']     = $this->create();
-        $this->calls['single']     = $this->single();
-        // $this->calls['match']   = $this->match(); // leave match out for now?
-        // $this->calls['search']  = $this->search(); // leave search out for now?
+        $this->id              = 'check-totals';
+        $this->header          = 'Check Totals';
+        $this->url             = 'checkTotals';
+        $this->readonly        = true;
+        $this->info            = $this->info();
+        $this->calls['create'] = $this->create();
         $this->expand();
-    }
-
-    protected function expand() {
-        parent::expand();
         $this->calls['virtual'] = $this->virtual(); // expand virtual after parent -- uses a copy of create's expanded data
     }
+
+    // protected function expand() {
+    //     parent::expand();
+    // }
 
     private function virtual() {
         $virtual = (array)($this->calls['create']); // grab a copy
@@ -39,13 +37,15 @@ class DocCheckTotals Extends DocAPIBase {
     data structure for <a href="#check-totals-create">Create</a> to the /virtual route.
 </p>
 <p>
-    If you are unable to map the return data by <code>productId</code> due to a repeat in product,
-    then the details array will also accept fake and temporary <code>checkDetailId</code> properties
+    If you are unable to map the return data by <code class="prettyprint">productId</code> due to a repeat in product,
+    then the details array will also accept fake and temporary <code class="prettyprint">checkDetailId</code> properties
     to assist with mapping the return data.
 </p>
 <p>
     Please note that the Query Operations for <a href="#query-operations-column-selection">Column Selection</a>
-    are available for this query.
+    are available for this query. To add a column to the select list, add the name of the property <em>only</em>.
+    This includes any properties which are part of the <code class="prettyprint">details</code> array.
+    See the example request and response below for a full example.
 </p>
 EOS;
         $virtual['examples']['request'] = <<<EOS
@@ -102,229 +102,198 @@ EOS;
             array(
                   'name'        => 'checks'
                 , 'type'        => 'Array<Check>'
-                , 'description' => 'The container for Checks objects.'
+                , 'description' => 'The container for check objects'
                 , 'create'      => 'required'
             )
             , array(
                   'name'        => 'Check.customerId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The id for the check\'s customer.'
+                , 'description' => 'The id of the <a href="#customers">customer</a> for the <a href="#checks">check</a>'
                 , 'create'      => 'required'
             )
             , array(
                   'name'        => 'Check.userId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The id for the user who is creating the check.'
+                , 'description' => 'The id for the user who is creating the <a href="#checks">check</a>'
                 , 'create'      => 'optional'
             )
             , array(
                   'name'        => 'Check.checkType'
                 , 'type'        => 'Integer'
-                , 'description' => 'The type of the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The type of the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkStatus'
                 , 'type'        => 'Integer'
-                , 'description' => 'The status of the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The status of the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.name'
                 , 'type'        => 'String'
-                , 'description' => 'The name of the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The name of the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkTotalApplied'
                 , 'type'        => 'String'
-                , 'description' => 'The total stored on the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The total stored on the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.broker'
                 , 'type'        => 'String'
-                , 'description' => 'The name of the broker for the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The name of the broker for the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.notes'
                 , 'type'        => 'String'
-                , 'description' => 'The name for the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The name for the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.gratuity'
                 , 'type'        => 'Double'
-                , 'description' => 'The gratuity to be applied to the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The gratuity to be applied to the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.fee'
                 , 'type'        => 'Double'
-                , 'description' => 'The fee to be applied to the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The fee to be applied to the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.openedDate'
                 , 'type'        => 'Double'
-                , 'description' => 'The date on which the Check was opened.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The date on which the <a href="#checks">check</a> was opened'
             )
             , array(
                   'name'        => 'Check.closedDate'
                 , 'type'        => 'Double'
-                , 'description' => 'The date on which the Check was closed.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The date on which the <a href="#checks">check</a> was closed'
             )
             , array(
                   'name'        => 'Check.isTaxExempt'
                 , 'type'        => 'Boolean'
-                , 'description' => 'The override for the tax exemption of the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The override for the tax exemption of the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.discount'
                 , 'type'        => 'Decimal'
-                , 'description' => 'The discount to be applied to the Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The discount to be applied to the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkDiscountId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The discount id for the Check.'
+                , 'description' => 'The discount id for the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkDiscountNotes'
                 , 'type'        => 'String'
-                , 'description' => 'The notes for the Check discount.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The notes for the discount on the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkDiscountUserId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The user id for the user who applied the Check discount.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The id for the user that applied the discount to the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkSubtotal'
                 , 'type'        => 'Double'
-                , 'description' => 'The calculated subtotal for the entire Check. Note that this calculation will use <i>live</i> product values.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The calculated subtotal for the entire <a href="#checks">check</a>. Note that this calculation will use <i>live</i> <a href="#products">product</a> values'
             )
             , array(
                   'name'        => 'Check.checkTax'
                 , 'type'        => 'Double'
-                , 'description' => 'The calculated tax for the entire Check. Note that this calculation will use <i>live</i> tax values.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The calculated tax for the entire <a href="#checks">check</a>. Note that this calculation will use <i>live</i> <a href="#taxes">tax</a> values'
             )
             , array(
                   'name'        => 'Check.checkTotal'
                 , 'type'        => 'Double'
-                , 'description' => 'The calculated total for the entire Check. Note that this calculation will use <i>live</i> tax and product values.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The calculated total for the entire <a href="#checks">check</a>. Note that this calculation will use <i>live</i> <a href="#taxes">tax</a> and <a href="#products">product</a> values'
             )
             , array(
                   'name'        => 'Check.checkPaidTax'
                 , 'type'        => 'Double'
-                , 'description' => 'The amount of tax which has already been paid for this Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The amount of tax which has already been paid for this <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkPaidTotal'
                 , 'type'        => 'Double'
-                , 'description' => 'The amount of tax which has already been paid for this Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The amount of tax which has already been paid for this <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkRemainingTax'
                 , 'type'        => 'Double'
-                , 'description' => 'The remaining tax to be paid for this Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The remaining tax to be paid for this <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkRemainingTotal'
                 , 'type'        => 'Double'
-                , 'description' => 'The remaining total to be paid for this Check.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The remaining total to be paid for this <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.details'
                 , 'type'        => 'Array<CheckDetail>'
-                , 'description' => 'The container for CheckDetail objects.'
+                , 'description' => 'The container for check detail objects'
                 , 'create'      => 'required'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The unique identifier for the CheckDetails record, which represents a line item for the Check record.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The unique identifier for the <a href="#check-details">check detail</a>, which represents a line item for the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailStatus'
                 , 'type'        => 'Integer'
-                , 'description' => 'The status for the CheckDetails record.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The status for the <a href="#check-details">check detail</a>'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailType'
                 , 'type'        => 'Integer'
-                , 'description' => 'The type of the CheckDetails record.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The type of the <a href="#check-details">check detail</a>'
             )
             , array(
                   'name'        => 'CheckDetail.productId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The id for the Product for the CheckDetails record.'
+                , 'description' => 'The id for the <a href="#products">product</a> for the <a href="#check-details">check detail</a>'
                 , 'create'      => 'required'
             )
             , array(
                   'name'        => 'CheckDetail.productName'
                 , 'type'        => 'Integer'
-                , 'description' => 'The name of the Product.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The name of the <a href="#products">product</a>'
             )
             , array(
                   'name'        => 'CheckDetail.qty'
                 , 'type'        => 'Integer'
-                , 'description' => 'The quantity of the Product for the CheckDetails record.'
+                , 'description' => 'The quantity of the <a href="#products">product</a> for the <a href="#check-details">check detail</a>'
                 , 'create'      => 'required'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailDiscountUserId'
-                , 'type'        => 'The user id for the user who applied the CheckDetail discount'
-                , 'description' => 'Integer'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The id for the user who applied the <a href="#check-details">check detail</a> discount'
+                , 'type'        => 'Integer'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailDiscountDesc'
-                , 'type'        => 'The description for the CheckDetail discount'
-                , 'description' => 'String'
-                , 'create'      => 'unavailable'
+                , 'type'        => 'String'
+                , 'description' => 'The description for the <a href="#check-details">check detail</a> discount'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailDiscountCalculateType'
-                , 'type'        => 'The calculation type for the CheckDetail discount'
-                , 'description' => 'String'
-                , 'create'      => 'unavailable'
+                , 'type'        => 'String'
+                , 'description' => 'The calculation type for the <a href="#check-details">check detail</a> discount'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailSubtotal'
                 , 'type'        => 'Integer'
-                , 'description' => 'The calculated subtotal for the CheckDetails items. Note that this calculation will use <i>live</i> product values.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The calculated subtotal for the <a href="#check-details">check detail</a> items. Note that this calculation will use <i>live</i> <a href="#products">product</a> values'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailTax'
                 , 'type'        => 'Integer'
-                , 'description' => 'The calculated tax for the CheckDetails items. Note that this calculation will use <i>live</i> tax values.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The calculated tax for the <a href="#check-details">check detail</a> items. Note that this calculation will use <i>live</i> <a href="#taxes">tax</a> values'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailTotal'
                 , 'type'        => 'Integer'
-                , 'description' => 'The calculated total for the CheckDetails items. Note that this calculation will use <i>live</i> tax and product values.'
-                , 'create'      => 'unavailable'
+                , 'description' => 'The calculated total for the <a href="#check-details">check detail</a> items. Note that this calculation will use <i>live</i> <a href="#taxes">tax</a> and <a href="#products">product</a> values'
             )
         );
     }
@@ -336,9 +305,12 @@ EOS;
             )
             , 'usage' => <<<EOS
 <p>
-    While CheckTotals is a mapping to a read-only set of info to the database,
-    posting to /checkTotals is a helper method to dynamically create all relevant Checks and CheckDetails records
-    by using the <code>customer</code>, <code>productId</code>, and <code>qty</code> fields to populate the records internally.
+    While <code class="prettyprint">CheckTotals</code> is technically a read-only
+    set of <code class="prettyprint">Check</code> information from the database,
+    posting to /checkTotals is available as an extension method
+    to dynamically create and populate all relevant <code class="prettyprint">Check</code> and <code class="prettyprint">CheckDetails</code> records
+    by using the <code class="prettyprint">customerId</code>, <code class="prettyprint">productId</code>,
+    and <code class="prettyprint">qty</code> fields.
 </p>
 EOS
             , 'examples' => array(
