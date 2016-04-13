@@ -51,12 +51,13 @@ class MailService {
 
     private static function getSettings() {
         $settings = array(
-              'SMTPServer'                       => self::getSetting('SMTPServer')                       ?: '127.0.0.1'
-            , 'SMTPServerAuthenticationPassword' => self::getSetting('SMTPServerAuthenticationPassword') ?: ''
-            , 'SMTPServerAuthenticationUserName' => self::getSetting('SMTPServerAuthenticationUserName') ?: ''
-            , 'SMTPServerPort'                   => self::getSetting('SMTPServerPort')                   ?: '25'
-            , 'SMTPServerUseAuthentiation'       => self::getSetting('SMTPServerUseAuthentiation')       ?: false
-            , 'SMTPServerUseSSL'                 => self::getSetting('SMTPServerUseSSL')                 ?: false
+              'SMTPServer'                       => self::getSetting('SMTPServer')                           ?: '127.0.0.1'
+            , 'SMTPServerAuthenticationPassword' => self::getSetting('SMTPServerAuthenticationPassword')     ?: ''
+            , 'SMTPServerAuthenticationUserName' => self::getSetting('SMTPServerAuthenticationUserName')     ?: ''
+            , 'SMTPServerPort'                   => self::getSetting('SMTPServerPort')                       ?: '25'
+            , 'SMTPServerUseAuthentiation'       => self::getSetting('SMTPServerUseAuthentiation') /*[sic]*/ ?: false
+            , 'SMTPServerUseSSL'                 => self::getSetting('SMTPServerUseSSL')                     ?: false
+            , 'SMTPServerEncryptionType'         => self::getSetting('SMTPServerEncryptionType')             ?: 'ssl'
         );
         return $settings;
     }
