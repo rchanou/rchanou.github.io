@@ -156,6 +156,7 @@ exec("del app.exe");
 
 chdir("generatedGenericExes");
 header('Content-Type: application/x-msdownload');
+header('Content-Length: ' . filesize("./$appName.exe"));
 header("Content-Disposition: attachment; filename=\"$appName.exe\"");
 header("Content-Transfer-Encoding: binary");
 header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0"); // HTTP/1.1

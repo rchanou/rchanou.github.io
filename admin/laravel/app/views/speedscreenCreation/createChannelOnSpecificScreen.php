@@ -154,6 +154,7 @@ exec("del app.exe");
 
 chdir("generatedChannels");
 header('Content-Type: application/x-msdownload');
+header('Content-Length: ' . filesize("./channel$channelNumber" . "screen" . $targetMonitor . ".exe"));
 header("Content-Disposition: attachment; filename=\"channel$channelNumber" . "screen" . $targetMonitor . ".exe\"");
 header("Content-Transfer-Encoding: binary");
 header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0"); // HTTP/1.1
