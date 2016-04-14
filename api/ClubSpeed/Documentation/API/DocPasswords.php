@@ -35,7 +35,7 @@ class DocPasswords Extends DocAPIBase {
 EOS
           , 'examples' => array(
               'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/passwords HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/passwords HTTP/1.1
 {
   "email": "bob@gmail.com",
   "url": "http://link/to/append/token/to.html"
@@ -67,7 +67,7 @@ EOS
 EOS
           , 'examples' => array(
               'request' => <<<EOS
-PUT http://{$_SERVER['SERVER_NAME']}/api/index.php/passwords HTTP/1.1
+PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/passwords HTTP/1.1
 {
     "token": "81f6fde27692402fb2139f971b8accb29b1b20c6",
     "password": "some_new_password"

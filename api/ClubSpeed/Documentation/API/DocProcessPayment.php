@@ -76,11 +76,6 @@ class DocProcessPayment Extends DocAPIBase {
         "description": "The ID for the Check to be paid."
     },
     {
-        "name": "giftCards",
-        "type" : "Array<Integer>",
-        "description": "An optional array of gift card ids to be applied to this payment."
-    },
-    {
         "name": "card",
         "type" : "Object",
         "description": "The credit card object."
@@ -170,7 +165,6 @@ EOS;
                     'check.checkId'
                 ),
                 'available' => array(
-                    'giftCards',
                     'card'
                 ),
                 'unavailable' => array(
@@ -178,10 +172,8 @@ EOS;
             ),
             'usage' => <<<EOS
 <p>
-    Executing this method will attempt to pay for all items on the provided <code>checkId</code>
-    using a combination of optional gift cards and an optional credit card.
-    Note that the only time the credit card is optional is when the array of gift cards provided
-    can fully cover the purchase. 
+    Executing this method will attempt to pay for all items on the provided <code class="prettyprint">checkId</code>
+    using the provided credit card.
 </p>
 <p>
     This payment processor will accept a number of processors based on the <a href="https://github.com/thephpleague/omnipay">Omnipay</a> library.
@@ -189,12 +181,12 @@ EOS;
 </p>
 <p>
     If a reservation product is being purchased (Online Booking, for example),
-    then additional information will be needed in the <code>check.details</code> array.
+    then additional information will be needed in the <code class="prettyprint">check.details</code> array.
 </p>
 <p>
     For example, if a user has purchased a reservation product, then the API needs to receive an object
-    containing the <code>checkDetailId</code> for the check line item containing the reservation products,
-    as well as the <code>heatId</code> which was originally selected by the customer from the
+    containing the <code class="prettyprint">checkDetailId</code> for the check line item containing the reservation products,
+    as well as the <code class="prettyprint">heatId</code> which was originally selected by the customer from the
     <a href="#booking-availability-list">Booking Availability</a> list.
 </p>
 <p>
@@ -215,7 +207,7 @@ EOS
             'type' => 'create',
             'examples' => array(
                 'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/processPayment HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/processPayment HTTP/1.1
 {
   "name": "SagePay_Direct",
   "options": {
@@ -282,7 +274,7 @@ EOS
             'type' => 'update',
             'examples' => array(
                 'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/racers/login HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/racers/login HTTP/1.1
 {
     "username": "bob@clubspeed.com",
     "password": "bobssupersecretpassword"
@@ -342,7 +334,7 @@ EOS
             'type' => 'update',
             'examples' => array(
                 'request' => <<<EOS
-POST http://{$_SERVER['SERVER_NAME']}/api/index.php/racers/fb_login HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/racers/fb_login HTTP/1.1
 {
   "email": "bob@clubspeed.com",
   "facebookId": "652712592679",

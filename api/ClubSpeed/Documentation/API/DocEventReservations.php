@@ -7,15 +7,26 @@ class DocEventReservations Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id              = 'event-reservations';
-        $this->header          = 'Event Reservations';
-        $this->url             = 'eventReservations';
-        $this->version         = 'V2';
-        $this->info            = $this->info();
-        $this->json            = $this->json();
-        $this->expand();
+        $this->id      = 'event-reservations';
+        $this->header  = 'Event Reservations';
+        $this->url     = 'eventReservations';
+        $this->version = 'V2';
+        $this->info    = $this->info();
+        $this->json    = $this->json();
+        $this->preface = $this->preface();
 
         $this->calls['update-event-status'] = $this->updateEventStatus();
+    }
+
+    private function preface() {
+        return <<<EOS
+<h4>Description</h4>
+<p>
+    An <code class="prettyprint">EventReservation</code> is paired
+    to an <code class="prettyprint">Event</code> as a way of storing
+    and indicating specific reservation values for an <code class="prettyprint">Event</code>. 
+</p>
+EOS;
     }
 
     private function updateEventStatus() {
@@ -42,9 +53,10 @@ class DocEventReservations Extends DocAPIBase {
     when ordered by <code class="prettyprint">EventStatus.seq ASC, EventStatus.status ASC</code>.
 </p>
 <p>
-  For example, assume the following example response from <code class="prettyprint">GET /eventstatuses?order=seq,status</code>
+  For example, assume the following example response:
 </p>
 <pre class="prettyprint">
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/eventstatuses?order=seq,status HTTP/1.1
 [
   {
     "eventStatusId": 1,
@@ -60,11 +72,12 @@ class DocEventReservations Extends DocAPIBase {
   }
 ]
 </pre>
+<br>
 <p>
     In order to give an EventReservation a status of "A&D Paid", the following call should be made:
 </p>
 <pre class="prettyprint">
-PUT /eventreservations/:id
+PUT https://{$_SERVER['SERVER_NAME']}/api/index.php/eventreservations/:id HTTP/1.1
 {
     "status": 1
 }
@@ -91,10 +104,7 @@ EOS
   "isMixed": null,
   "mainId": null,
   "minNoOfAdultsPerBooking": 0,
-  "minNoOfCadetsPerBooking": 0,
-  "noOfCadetRacers": 0,
   "noOfRacers": 22,
-  "noOfTotalRacers": 22,
   "notes": "Notes!",
   "ptsPerReservation": 1,
   "repId": 3,
@@ -113,17 +123,15 @@ EOS;
                 "name" => "eventReservationId",
                 "type" => "Integer",
                 "default" => "{Generated}",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "The ID for the event reservation"
             ),
             array(
                 "name" => "allowOnlineReservation",
                 "type" => "Boolean",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "Whether or not reservations can be made online."
+                "required" => false,
+                "description" => "Flag indicating whether reservations can be made online."
             ),
             // array(
             //     "name" => "checkId",
@@ -152,34 +160,30 @@ EOS;
             array(
                 "name" => "deleted",
                 "type" => "Boolean",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "default" => "false",
+                "required" => false,
                 "description" => "Flag indicating whether or not the reservation has been soft deleted"
             ),
             array(
                 "name" => "description",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The description for the event reservation"
             ),
             array(
                 "name" => "endTime",
                 "type" => "DateTime",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The time at which the event reservation is expected to end"
             ),
             array(
                 "name" => "eventTypeId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The ID for the type of the event"
+                "required" => false,
+                "description" => "The ID for the <a href=\"#event-types\">event type</a> of the <a href=\"#events\">event</a>"
             ),
             // array(
             //     "name" => "isEventClosure",
@@ -205,68 +209,47 @@ EOS;
             //     "update" => "available",
             //     "description" => "The label for the event"
             // ),
-            // array(
-            //     "name" => "mainId",
-            //     "type" => "int",
-            //     "default" => "",
-            //     "create" => "available",
-            //     "update" => "available",
-            //     "description" => ""
-            // ),
+            array(
+                "name" => "mainId",
+                "type" => "int",
+                "default" => "",
+                "create" => "available",
+                "update" => "available",
+                "description" => "The ID for the parent event reservation, where relevant"
+            ),
             array(
                 "name" => "minNoOfAdultsPerBooking",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The minimum number of adults per booking"
-            ),
-            array(
-                "name" => "minNoOfCadetsPerBooking",
-                "type" => "Integer",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The minimum number of cadets per booking"
-            ),
-            array(
-                "name" => "noOfCadetRacers",
-                "type" => "Integer",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The current number of booked cadets"
+                "required" => false,
+                "description" => "The minimum number of customers per booking"
             ),
             array(
                 "name" => "noOfRacers",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The current number of booked racers"
+                "required" => false,
+                "description" => "The current number of booked customers"
             ),
-            array(
-                "name" => "noOfTotalRacers",
-                "type" => "Integer",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The current number of booked racers and cadets"
-            ),
+            // array(
+            //     "name" => "noOfTotalRacers",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "required" => false,
+            //     "description" => "The max number of booked customers"
+            // ),
             array(
                 "name" => "notes",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The notes for the event reservation"
             ),
             array(
                 "name" => "ptsPerReservation",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The number of points required to make a reservation"
             ),
             // array(
@@ -281,40 +264,35 @@ EOS;
                 "name" => "startTime",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The expected start time of the event"
+                "required" => false,
+                "description" => "The expected start time of the event reservation"
             ),
             array(
                 "name" => "status",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The index for the event status of the event reservation. Please see <a href=\"#event-reservations-update-event-status\">here</a> for additional information"
             ),
             array(
                 "name" => "subject",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The name for the event"
+                "required" => false,
+                "description" => "The name for the event reservation"
             ),
             array(
                 "name" => "typeId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The ID for the type of the event reservation"
+                "required" => false,
+                "description" => "The ID for the event reservation type"
             ),
             array(
                 "name" => "userId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The ID for the user that made the event reservation"
             )
         );

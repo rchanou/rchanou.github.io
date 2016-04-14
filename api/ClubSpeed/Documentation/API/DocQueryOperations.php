@@ -55,36 +55,32 @@ EOS
 <br>
 <br>
 <p>
-  For example, if we need a list of Online Bookings in order to see
-  which types of products are currently available online,
-  we could make the following call (note the URI encoding, and the select= portion of the query string): 
+  For example, if we want to select <code class="prettyprint">paymentId</code>,
+  <code class="prettyprint">payDate</code>, <code class="prettyprint">payAmount</code>,
+  and <code class="prettyprint">payTax</code> from the Payments resource,
+  the following call could be made.
 </p>
-EOS
-            , 'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/booking?debug=1&select=heatId,%20productsId,%20productType HTTP/1.1
-EOS
-                , 'response' => <<<EOS
+<pre class="prettyprint">
+GET https://{$_SERVER['SERVER_NAME']}/api/index.php/payments?select=paymentId,payDate,payAmount,payTax HTTP/1.1
+</pre>
+<pre class="prettyprint">
 HTTP/1.1 200 OK
-{
-  "bookings": [
-    {
-      "heatId": 2,
-      "products": [
-        {
-          "productsId": 8,
-          "productType": "MembershipItem"
-        },
-        {
-          "productsId": 11,
-          "productType": "MembershipItem"
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "paymentId": 5048,
+    "payDate": "2016-03-07T11:46:22.00",
+    "payAmount": 2,
+    "payTax": 0.14
+  },
+  {
+    "paymentId": 5049,
+    "payDate": "2016-03-07T11:46:25.00",
+    "payAmount": 2,
+    "payTax": 0.14
+  }
+]
+</pre>
 EOS
-            )
         );
 
         $this->calls['record-filtering-v2'] = array(
@@ -403,6 +399,91 @@ and <code class="prettyprint">take</code> can be used as an alias for <code clas
     <pre class="prettyprint"> ?limit=10&order=recordId DESC </pre>
   </div>
 </div>
+EOS
+        );
+
+        $this->calls['response-types'] = array(
+            'type'          => 'info'
+            , 'id'          => 'response-types'
+            , 'header'      => 'Response Types'
+            , 'header_icon' => 'info-sign'
+            , 'preface'       => <<<EOS
+<p>
+  For any response which returns a response body, the output can be formatted as either JSON or XML.
+</p>
+<p>
+  In order to pick the response body content type, you can do one of two things:
+</p>
+<ol>
+  <li>Supply the <code class="prettyprint">Accept</code> header</li>
+  <li>Add <code class="prettyprint">.json</code> or <code class="prettyprint">.xml</code> to the resource route</li>
+</ol>
+<p>
+  We recommend using the <code class="prettyprint">Accept</code> header for both performance and standards compliance, but both methods are functional.
+</p>
+<br>
+<p>
+  For example, the next two code blocks show HTTP calls which request a <code class="prettyprint">JSON</code> encoded response body
+</p>
+<pre class="prettyprint">
+GET /api/index.php/payments HTTP/1.1
+Accept: application/json
+</pre>
+<pre class="prettyprint">
+GET /api/index.php/payments.json HTTP/1.1
+</pre>
+<p>
+  And the response would look similar to this:
+</p>
+<pre class="prettyprint">
+[
+  {
+    "paymentId": 1,
+    "payDate": "2006-05-24T16:58:18.00",
+    "payAmount": 20,
+    "payTax": 0
+  },
+  {
+    "paymentId": 2,
+    "payDate": "2006-05-24T16:59:29.00",
+    "payAmount": 20,
+    "payTax": 0
+  }
+]
+</pre>
+<br>
+<p>
+  Whereas the next two code blocks show HTTP calls which request an <code class="prettyprint">XML</code> encoded response body
+</p>
+<pre class="prettyprint">
+GET /api/index.php/payments HTTP/1.1
+Accept: application/xml
+</pre>
+<pre class="prettyprint">
+GET /api/index.php/payments.xml HTTP/1.1
+</pre>
+<p>
+  And the response would look similar to this:
+</p>
+<pre class="prettyprint">
+HTTP/1.1 200 OK
+Content-Type: application/xml
+&lt;?xml version="1.0"?&gt;
+&lt;response&gt;
+    &lt;item&gt;
+        &lt;paymentId&gt;1&lt;/paymentId&gt;
+        &lt;payDate&gt;2006-05-24T16:58:18.00&lt;/payDate&gt;
+        &lt;payAmount&gt;20&lt;/payAmount&gt;
+        &lt;payTax&gt;0&lt;/payTax&gt;
+    &lt;/item&gt;
+    &lt;item&gt;
+        &lt;paymentId&gt;2&lt;/paymentId&gt;
+        &lt;payDate&gt;2006-05-24T16:59:29.00&lt;/payDate&gt;
+        &lt;payAmount&gt;20&lt;/payAmount&gt;
+        &lt;payTax&gt;0&lt;/payTax&gt;
+    &lt;/item&gt;
+&lt;/response&gt;
+</pre>
 EOS
         );
 

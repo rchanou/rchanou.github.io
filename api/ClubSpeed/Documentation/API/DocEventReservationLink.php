@@ -44,24 +44,21 @@ EOS;
                 "name" => "eventReservationLinkId",
                 "type" => "Integer",
                 "default" => "{Generated}",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "The primary key for the record"
             ),
             array(
                 "name" => "checkId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "The ID for a check linked to a reservation."
             ),
             array(
                 "name" => "reservationId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "The ID for the event reservation."
             )
         );

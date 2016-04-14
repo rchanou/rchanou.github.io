@@ -19,10 +19,11 @@ class SwiftMailer implements MailerInterface {
             SMTPServerPort
             SMTPServerUseAuthentiation
             SMTPServerUseSSL
+            SMTPServerEncryptionType
         */
         if ($settings['SMTPServerUseAuthentiation']) { // "intentional" misspell of authentication
             if ($settings['SMTPServerUseSSL']) {
-                $this->transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'], 'ssl')
+                $this->transport = \Swift_SmtpTransport::newInstance($settings['SMTPServer'], $settings['SMTPServerPort'], $settings['SMTPServerEncryptionType'])
                     ->setUsername($settings['SMTPServerAuthenticationUserName'])
                     ->setPassword($settings['SMTPServerAuthenticationPassword']);
             }

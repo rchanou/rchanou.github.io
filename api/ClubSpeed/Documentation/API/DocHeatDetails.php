@@ -23,20 +23,18 @@ class DocHeatDetails Extends DocAPIBase {
   "heatId": 3,
   "customerId": 1000001,
   "autoNo": null,
-  "lineUpPosition": 2,
-  "groupId": 0,
-  "proskill": 1200,
-  "pointHistoryId": 0,
-  "firstTime": true,
-  "userId": 5,
   "finishPosition": null,
+  "firstTime": true,
   "groupFinishPosition": null,
-  "proskillDiff": null,
+  "groupId": 0,
+  "lineUpPosition": 2,
+  "pointHistoryId": 0,
   "positionEditedDate": null,
-  "historyAutoNo": null,
+  "proskill": 1200,
+  "proskillDiff": null,
   "scores": 0,
   "timeAdded": "2013-11-26T00:18:42.43",
-  "assignedtoEntitleHeat": true
+  "userId": 5,
 }
 EOS;
     }
@@ -66,137 +64,99 @@ EOS;
                 "name" => "heatId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "Part of the composite primary key for the record"
             ),
             array(
                 "name" => "customerId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "Part of the composite primary key for the record"
-            ),
-            array(
-                "name" => "assignedtoEntitleHeat",
-                "type" => "Boolean",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
             ),
             array(
                 "name" => "autoNo",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The kart number for the <a href=\"#customers\">customer</a>. Note that this will not be assigned until during / after the <a href=\"#heat-main\">heat</a>"
             ),
             array(
                 "name" => "finishPosition",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The finish position for the <a href=\"#customers\">customer</a>"
             ),
             array(
                 "name" => "firstTime",
                 "type" => "Boolean",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "Denormalized flag indicating whether or not this is the first race of the <a href=\"#customers\">customer</a>"
             ),
             array(
                 "name" => "groupFinishPosition",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The finish position of the <a href=\"#customers\">customer</a> relative to their group, where applicable"
             ),
             array(
                 "name" => "groupId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
-            ),
-            array(
-                "name" => "historyAutoNo",
-                "type" => "Integer",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The ID of the group to which the racer belongs, where applicable"
             ),
             array(
                 "name" => "lineUpPosition",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The line up position selected for the <a href=\"#customers\">customer</a>"
             ),
             array(
                 "name" => "pointHistoryId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The ID of the point history utilized to add this <a href=\"#customers\">customer</a> to the <a href=\"#heat-main\">heat</a>, where applicable"
             ),
             array(
                 "name" => "positionEditedDate",
                 "type" => "DateTime",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The timestamp at which the position was edited"
             ),
             array(
                 "name" => "proskill",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The denormalized proskill of the <a href=\"#customers\">customer</a>"
             ),
             array(
                 "name" => "proskillDiff",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
-            ),
-            array(
-                "name" => "scores",
-                "type" => "Integer",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The amount at which the proskill of the <a href=\"#customers\">customer</a> changed as an outcome of the <a href=\"#heat-main\">heat</a>"
             ),
             array(
                 "name" => "timeAdded",
                 "type" => "DateTime",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The time at which the <a href=\"#customers\">customer</a> was added to the <a href=\"#heat-main\">heat</a>"
             ),
             array(
                 "name" => "userId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
+                "required" => false,
+                "description" => "The ID of the user that added the <a href=\"#customers\">customer</a> to the <a href=\"#heat-main\">heat</a>"
             )
         );
     }

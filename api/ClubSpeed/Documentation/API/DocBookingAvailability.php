@@ -7,14 +7,54 @@ class DocBookingAvailability Extends DocAPIBase {
     public function __construct() {
         parent::__construct();
 
-        $this->id              = 'booking-availability';
-        $this->header          = 'Booking Availability';
-        $this->url             = 'bookingAvailability';
-        $this->info            = $this->info();
-        $this->calls['list']   = $this->all(); // list is a reserved keyword in php
-        $this->calls['match']  = $this->match();
-        $this->calls['search'] = $this->search();
-        $this->expand(); // expand before delete is added
+        $this->id       = 'booking-availability';
+        $this->header   = 'Booking Availability';
+        $this->url      = 'bookingAvailability';
+        $this->json     = $this->json();
+        $this->preface  = $this->preface();
+        $this->info     = $this->info();
+        $this->readonly = true;
+    }
+
+    private function preface() {
+      return <<<EOS
+<h4>Description</h4>
+<p>
+  <code class="prettyprint">BookingAvailability</code> is a helper, read-only resource designed
+  to handle collecting the current availability for an online <code class="prettyprint">Booking</code>,
+  which takes into account both online and local bookings and reservations.
+</p>
+EOS;
+    }
+
+    private function json() {
+      return <<<EOS
+{
+  "bookings": [
+    {
+      "heatId": 4344,
+      "heatDescription": "12 Minute Session",
+      "heatStartsAt": "2014-10-08T20:20:00.00",
+      "heatSpotsTotalActual": 22,
+      "heatSpotsAvailableCombined": 21,
+      "heatSpotsAvailableOnline": 21,
+      "heatTypeId": 23,
+      "isPublic": true,
+      "products": [
+        {
+          "onlineBookingsId": 4,
+          "price1": 35,
+          "productDescription": "SK 10 Minutes",
+          "productsId": 5,
+          "productSpotsAvailableOnline": 5,
+          "productSpotsTotal": 5,
+          "productType": "PointItem"
+        }
+      ]
+    }
+  ]
+}
+EOS;
     }
 
     private function info() {
@@ -22,32 +62,32 @@ class DocBookingAvailability Extends DocAPIBase {
             array(
                   'name'        => 'heatId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The ID of the heat for the booking.'
+                , 'description' => 'The ID of the <a href="#heat-main">heat</a> for the <a href="#booking">booking</a>.'
             )
             , array(
                   'name'        => 'heatDescription'
                 , 'type'        => 'String'
-                , 'description' => 'The description of the heat.'
+                , 'description' => 'The description of the <a href="#heat-main">heat</a>.'
             )
             , array(
                   'name'        => 'heatStartsAt'
                 , 'type'        => 'DateTime'
-                , 'description' => 'The start time for the heat.'
+                , 'description' => 'The start time for the <a href="#heat-main">heat</a>.'
             )
             , array(
                   'name'        => 'heatSpotsTotalActual'
                 , 'type'        => 'Integer'
-                , 'description' => 'The original total spots for the heat.'
+                , 'description' => 'The original total spots for the <a href="#heat-main">heat</a>.'
             )
             , array(
                   'name'        => 'heatSpotsAvailableCombined'
                 , 'type'        => 'Integer'
-                , 'description' => 'The ID of the heat for the booking.'
+                , 'description' => 'The ID of the <a href="#heat-main">heat</a> for the <a href="#booking">booking</a>.'
             )
             , array(
                   'name'        => 'heatSpotsAvailableOnline'
                 , 'type'        => 'Integer'
-                , 'description' => 'The number of spots intended to be exposed to the online interface for the entire heat.'
+                , 'description' => 'The number of spots intended to be exposed to the online interface for the entire <a href="#heat-main">heat</a>.'
             )
             , array(
                   'name'        => 'products'
@@ -57,197 +97,37 @@ class DocBookingAvailability Extends DocAPIBase {
             , array(
                   'name'        => 'products.onlineBookingsId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The ID for the booking.'
+                , 'description' => 'The ID for the <a href="#booking">booking</a>.'
             )
             , array(
                   'name'        => 'products.price1'
                 , 'type'        => 'Double'
-                , 'description' => 'The price of the product for the booking.'
+                , 'description' => 'The price of the <a href="#products">product</a> for the <a href="#booking">booking</a>.'
             )
             , array(
                   'name'        => 'products.productDescription'
                 , 'type'        => 'String'
-                , 'description' => 'The description of the product for the booking.'
+                , 'description' => 'The description of the <a href="#products">product</a> for the <a href="#booking">booking</a>.'
             )
             , array(
                   'name'        => 'products.productsId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The ID of the product for the booking.'
+                , 'description' => 'The ID of the <a href="#products">product</a> for the <a href="#booking">booking</a>.'
             )
             , array(
                   'name'        => 'products.productSpotsAvailableOnline'
                 , 'type'        => 'Integer'
-                , 'description' => 'The number of spots intended to be exposed to the online interface for this specific product.'
+                , 'description' => 'The number of spots intended to be exposed to the online interface for this specific <a href="#products">product</a>.'
             )
             , array(
                   'name'        => 'products.productSpotsTotal'
                 , 'type'        => 'Integer'
-                , 'description' => 'The ID of the heat for the booking.'
+                , 'description' => 'The total number of spots originally made available through this <a href="#products">product</a> pairing.'
             )
             , array(
                   'name'        => 'products.productType'
                 , 'type'        => 'Integer'
-                , 'description' => 'The ID of the type for the product.'
-            )
-        );
-    }
-
-    private function all() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            ),
-            'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/bookingAvailability HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "bookings": [
-    {
-      "heatId": 3,
-      "heatDescription": "Event 10 min Qualifer",
-      "heatStartsAt": "2013-11-25 23:30:00.000",
-      "heatSpotsTotalActual": 10,
-      "heatSpotsAvailableCombined": 3,
-      "heatSpotsAvailableOnline": 5,
-      "heatTypeId": 6,
-      "products": [
-        {
-          "onlineBookingsId": 2,
-          "price1": 5,
-          "productDescription": "Cadet Member",
-          "productsId": 11,
-          "productSpotsAvailableOnline": 3,
-          "productSpotsTotal": 5,
-          "productType": "MembershipItem"
-        }
-      ]
-    },
-    {
-      "heatId": 5,
-      "heatDescription": "Event 10 min Qualifer",
-      "heatStartsAt": "2013-11-25 22:45:00.000",
-      "heatSpotsTotalActual": 10,
-      "heatSpotsAvailableCombined": 4,
-      "heatSpotsAvailableOnline": 3,
-      "heatTypeId": 6,
-      "products": [
-        {
-          "onlineBookingsId": 3,
-          "price1": 10,
-          "productDescription": "10 Minute AnD",
-          "productsId": 2,
-          "productSpotsAvailableOnline": 3,
-          "productSpotsTotal": 3,
-          "productType": "PointItem"
-        }
-      ]
-    },
-    {
-      "heatId": 2,
-      "heatDescription": "AnD 10 Min",
-      "heatStartsAt": "2013-11-26 00:15:00.000",
-      "heatSpotsTotalActual": 16,
-      "heatSpotsAvailableCombined": 11,
-      "heatSpotsAvailableOnline": 5,
-      "heatTypeId": 1,
-      "products": [
-        {
-          "onlineBookingsId": 4,
-          "price1": 15,
-          "productDescription": "Adult Member",
-          "productsId": 8,
-          "productSpotsAvailableOnline": 5,
-          "productSpotsTotal": 5,
-          "productType": "MembershipItem"
-        }
-      ]
-    }
-  ]
-}
-EOS
-            )
-        );
-    }
-
-    private function match() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            ),
-            'examples' => array(
-                'request' => <<<EOS
-GET http://{$_SERVER['SERVER_NAME']}/api/index.php/bookingAvailability?heatId=3 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "bookings": [
-    {
-      "heatId": 3,
-      "heatDescription": "Event 10 min Qualifer",
-      "heatStartsAt": "2013-11-25 23:30:00.000",
-      "heatSpotsTotalActual": 10,
-      "heatSpotsAvailableCombined": 3,
-      "heatSpotsAvailableOnline": 5,
-      "heatTypeId": 6,
-      "products": [
-        {
-          "onlineBookingsId": 2,
-          "price1": 5,
-          "productDescription": "Cadet Member",
-          "productsId": 11,
-          "productSpotsAvailableOnline": 3,
-          "productSpotsTotal": 5,
-          "productType": "MembershipItem"
-        }
-      ]
-    }
-  ]
-}
-EOS
-            )
-        );
-    }
-
-    private function search() {
-        return array(
-            'info' => array(
-                'access' => 'private'
-            ),
-            'examples' => array(
-                'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/bookingAvailability?filter=productSpotsAvailableOnline \$gte 5 HTTP/1.1
-EOS
-                , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "bookings": [
-    {
-      "heatId": 2,
-      "heatDescription": "AnD 10 Min",
-      "heatStartsAt": "2013-11-26 00:15:00.000",
-      "heatSpotsTotalActual": 16,
-      "heatSpotsAvailableCombined": 11,
-      "heatSpotsAvailableOnline": 5,
-      "heatTypeId": 1,
-      "products": [
-        {
-          "onlineBookingsId": 4,
-          "price1": 15,
-          "productDescription": "Adult Member",
-          "productsId": 8,
-          "productSpotsAvailableOnline": 5,
-          "productSpotsTotal": 5,
-          "productType": "MembershipItem"
-        }
-      ]
-    }
-  ]
-}
-EOS
+                , 'description' => 'The ID of the type for the <a href="#products">product</a>.'
             )
         );
     }

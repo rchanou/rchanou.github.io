@@ -49,27 +49,8 @@ EOS;
       "discountApplied": 0,
       "taxId": 1,
       "taxPercent": 0,
+      "gst": 0,
       "voidNotes": "",
-      "cId": null,
-      "vId": null,
-      "bonusValue": null,
-      "paidValue": null,
-      "comValue": null,
-      "entitle1": null,
-      "entitle2": null,
-      "entitle3": null,
-      "entitle4": null,
-      "entitle5": null,
-      "entitle6": null,
-      "entitle7": null,
-      "entitle8": null,
-      "m_Points": null,
-      "m_CustId": null,
-      "m_OldMembershiptypeId": null,
-      "m_NewMembershiptypeId": null,
-      "m_Days": null,
-      "m_PrimaryMembership": null,
-      "p_PointTypeId": null,
       "p_Points": 0,
       "p_CustId": null,
       "r_Points": null,
@@ -80,13 +61,11 @@ EOS;
       "discountNotes": null,
       "g_Points": 0,
       "g_CustId": null,
-      "gst": 0,
       "m_DaysAdded": null,
       "s_SaleBy": null,
       "s_NoOfLapsOrSeconds": null,
       "s_CustId": null,
-      "s_Vol": null,
-      "cadetQty": 0
+      "s_Vol": null
     }
   ]
 }
@@ -203,41 +182,37 @@ EOS;
                 "name" => "checkDetailId",
                 "type" => "Integer",
                 "default" => "{Generated}",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "The primary key for the record"
             ),
-            array(
-                "name" => "bonusValue",
-                "type" => "Double",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
-            ),
-            array(
-                "name" => "cadetQty",
-                "type" => "Integer",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => ""
-            ),
+            // array(
+            //     "name" => "bonusValue",
+            //     "type" => "Double",
+            //     "default" => "",
+            //     "create" => "available",
+            //     "update" => "available",
+            //     "description" => ""
+            // ),
+            // array(
+            //     "name" => "cadetQty",
+            //     "type" => "Integer",
+            //     "default" => "",
+            //     "required" => false,
+            //     "description" => ""
+            // ),
             array(
                 "name" => "calculateType",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The type of application for an applied discount"
             ),
             array(
                 "name" => "checkId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The ID for the parent check of the check detail"
+                "required" => true,
+                "description" => "The ID for the parent <a href=\"#checks\">check</a> of the check detail"
             ),
             // array(
             //     "name" => "cid",
@@ -266,9 +241,8 @@ EOS;
             array(
                 "name" => "createdDate",
                 "type" => "DateTime",
-                "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "default" => "{Now}",
+                "required" => false,
                 "description" => "The timestamp at which the check detail was created"
             ),
             // array(
@@ -283,40 +257,35 @@ EOS;
                 "name" => "discountApplied",
                 "type" => "Double",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The amount of the discount which was applied"
             ),
             array(
                 "name" => "discountDesc",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The description of the discount which was applied"
             ),
             array(
                 "name" => "discountId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The ID of the discount which was applied"
             ),
             array(
                 "name" => "discountNotes",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "Notes regarding the application of the discount"
             ),
             array(
                 "name" => "discountUserId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The ID for the user who applied the discount"
             ),
             // array(
@@ -387,8 +356,7 @@ EOS;
                 "name" => "g_CustId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The ID of the <a href=\"#customers\">customer</a> on which to apply points on purchase. Note that this ID may reference a gift card"
             ),
             array(
@@ -464,16 +432,14 @@ EOS;
                 "name" => "p_CustId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The ID of the <a href=\"#customers\">customer</a> on which to apply points on purchase"
             ),
             array(
                 "name" => "p_Points",
                 "type" => "Double",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The number of points to be applied on purchase, which corresponds to <code class=\"prettyprint\">Product.p_Points</code>"
             ),
             // array(
@@ -496,32 +462,28 @@ EOS;
                 "name" => "productId",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => true,
                 "description" => "The ID for the <a href=\"#products\">product</a> on the check detail"
             ),
             array(
                 "name" => "productName",
                 "type" => "String",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The name of the <a href=\"#products\">product</a> on the check detail"
             ),
             array(
                 "name" => "qty",
                 "type" => "Integer",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
-                "description" => "The regular quantity of the <a href=\"#products\">product</a> on the check detail"
+                "required" => true,
+                "description" => "The quantity of the <a href=\"#products\">product</a> on the check detail"
             ),
             array(
                 "name" => "r_Points",
                 "type" => "Double",
                 "default" => "",
-                "create" => "available",
-                "update" => "available",
+                "required" => false,
                 "description" => "The number of reservation points to be applied on purchase, which corresponds to <code class=\"prettyprint\">Product.r_Points</code>"
             ),
             // array(
@@ -573,7 +535,7 @@ EOS;
                 "name" => "taxId",
                 "type" => "Integer",
                 "default" => "",
-                "description" => "The id for the <a href=\"#taxes\">tax</a> to be applied"
+                "description" => "The ID for the <a href=\"#taxes\">tax</a> to be applied"
             ),
             array(
                 "name" => "taxPercent",
@@ -585,13 +547,26 @@ EOS;
                 "name" => "type",
                 "type" => "Integer",
                 "default" => "",
-                "description" => ""
+                'description' => ''
+                    ."\n<span>"
+                    ."\n  The type of the <a href=\"#products\">product</a>, which corresponds to <code class=\"prettyprint\">Product.productType</code>"
+                    ."\n</span>"
+                    ."\n<ol>"
+                    ."\n  <li>Regular</li>"
+                    ."\n  <li>Point</li>"
+                    ."\n  <li>Food</li>"
+                    ."\n  <li>Reservation</li>"
+                    ."\n  <li>GameCard</li>"
+                    ."\n  <li>Membership</li>"
+                    ."\n  <li>Gift Card</li>"
+                    ."\n  <li>Entitle</li>"
+                    ."\n</ol>"
             ),
             array(
                 "name" => "unitPrice",
                 "type" => "Double",
                 "default" => "",
-                "description" => ""
+                "description" => "The unitPrice of the <a href=\"#products\">product</a>, which corresponds to <code class=\"prettyprint\">Product.price1</code>"
             ),
             // array(
             //     "name" => "unitPrice2",
@@ -609,7 +584,7 @@ EOS;
                 "name" => "voidNotes",
                 "type" => "String",
                 "default" => "",
-                "description" => ""
+                "description" => "Any notes which were added while voiding the check detail"
             )
         );
 
