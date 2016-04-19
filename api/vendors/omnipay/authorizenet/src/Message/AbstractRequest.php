@@ -7,7 +7,7 @@ namespace Omnipay\AuthorizeNet\Message;
  */
 abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 {
-    protected $liveEndpoint = 'https://secure.authorize.net/gateway/transact.dll';
+    protected $liveEndpoint = 'https://secure2.authorize.net/gateway/transact.dll';
     protected $developerEndpoint = 'https://test.authorize.net/gateway/transact.dll';
 
     public function getApiLoginId()
