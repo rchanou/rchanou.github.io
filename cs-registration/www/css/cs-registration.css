@@ -57,7 +57,7 @@ input {
     }*/
     .container {
         width: 1024px;
-        height: 728px;
+        height: 738px;
     }
 }
 
@@ -211,6 +211,7 @@ only screen and (min-device-pixel-ratio: 1.5){
 .footer {
     position: absolute; /* Required for footer to be sticky within the container */
     font-size: 24px;
+    margin-bottom: 20px;
 }
 .bottomLeftFooter {
     text-align: center;
