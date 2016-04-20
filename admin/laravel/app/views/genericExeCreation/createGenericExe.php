@@ -38,12 +38,12 @@ $indexHTML = <<<EOT
      <div id="headerBar">
         <img src="home_ffffff_32.png" style="cursor: pointer;" onclick="resetInnerFrame()">
      </div>
-    <iframe id="innerFrame" src="$targetUrl" style="cursor: none;" frameborder="0" onload="disableFacebookAutoComplete()" nwdisable nwfaketop></iframe>
+    <iframe id="innerFrame" src="$targetUrl" onLoad="handleCookiesAndFacebook(this.contentWindow.location.href);" style="cursor: none;" frameborder="0" nwdisable nwfaketop></iframe>
   </body>
   <script language="javascript">
 
 	console.log("Current locale: " + window.navigator.language);
-
+  
 	function disableFacebookAutoComplete()
 	{
 		try { document.getElementById('innerFrame').contentDocument.getElementById('email').setAttribute('autocomplete', 'off'); }
@@ -52,12 +52,68 @@ $indexHTML = <<<EOT
 	}
     function resetInnerFrame()
     {
+        deleteAllCookiesNwJs();
         document.getElementById('innerFrame').src = "$targetUrl";
     }
 	// Load native UI library
 	var gui = require('nw.gui');
     gui.App.clearCache();
 
+    function deleteCookieNwJs(cookie)
+    {
+        var lurl = "http" + (cookie.secure ? "s" : "") + "://" + cookie.domain + cookie.path;
+        var nwWin = gui.Window.get();
+        nwWin.cookies.remove({
+                    url: lurl,
+                    name: cookie.name
+                },
+                function(result) {
+                    if (result) {
+                        if (!result.name) {
+                            result = result[0];
+                        }
+                        console.log('Cookie removed: ' + result.name + ' ' +
+                                result.url);
+                    } else {
+                        console.log('Cookie could not be removed!');
+                    }
+                });
+    }
+    function deleteAllCookiesNwJs() {
+        if (typeof gui !== "undefined") {
+            gui.App.clearCache();
+            var nwWin = gui.Window.get();
+            nwWin.cookies.getAll({},
+                function(cookies) {
+                    console.log('Attempting to remove up to '+cookies.length+' cookie(s)...');
+                    for (var i=0; i<cookies.length; i++) {
+                        if (cookies[i].name != 'laravel_session_registration') {
+                          deleteCookieNwJs(cookies[i]);
+                        }
+                        else {
+                          console.log('Skipping laravel session cookie.');
+                        }
+                }
+            });
+        }
+    }
+    function endsWith(str, suffix) {
+      return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
+    function checkForCookieDeletion(url) {
+      url = url.split('?')[0]; // remove url params
+      if (endsWith(url, '/cs-registration/') || endsWith(url, '/cs-registration') || 
+          endsWith(url, '/step1') || endsWith(url, '/step1/')) {
+            deleteAllCookiesNwJs(); // only delete cookies when back on the main screen
+          }
+    
+    }
+    function handleCookiesAndFacebook(url) {
+      disableFacebookAutoComplete();
+      checkForCookieDeletion(url);
+    }
+    deleteAllCookiesNwJs();
+    
 	function ScreenToString(screen) {
 		var string = "";
 		string += "screen " + screen.id + " ";
