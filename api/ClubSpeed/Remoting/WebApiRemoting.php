@@ -209,7 +209,11 @@ class WebApiRemoting {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
             CURLOPT_USERPWD => $GLOBALS['apiUsername'] . ":" . $GLOBALS['apiPassword'],
-            CURLOPT_SSL_VERIFYPEER => false, // bypass the need for a ca cert verification. OPENS US UP TO MITM ATTACKS (technically). this is what httpful was doing anyways.
+
+            // note: see http://stackoverflow.com/questions/13740933/security-consequences-of-disabling-curlopt-ssl-verifyhost-libcurl-openssl
+            CURLOPT_SSL_VERIFYPEER => 0, // bypass checks that the remote certificate is valid (we don't have cacert.pem files locally anyways. httpful was doing this by default.)
+            CURLOPT_SSL_VERIFYHOST => 0, // bypass checks that the cert was issued to the correct identity
+            
             CURLOPT_HTTPHEADER => array(
                 "cache-control: no-cache",
                 "content-type: application/json"
