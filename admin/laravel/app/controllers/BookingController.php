@@ -1233,7 +1233,7 @@ class BookingController extends BaseController
       $result = true; // default case of saving without making any changes is a successful result, so default $result to true
       // if even a single update request fails, reported result becomes false
       foreach($newValues as $id => $newValue){
-        if ($currentTemplates[$id]->value != $newValue){
+        if (isset($currentTemplates[$id]->value) &&  $currentTemplates[$id]->value != $newValue){
           $thisResult = CS_API::update('settings', $currentTemplates[$id]->settingsId, array('value' => $newValue));
           if (!$thisResult){
             $result = false;
