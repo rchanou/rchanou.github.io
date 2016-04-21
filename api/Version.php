@@ -37,6 +37,8 @@ class Version
                 return $this->eurekas();
             case "booking":
                 return $this->booking();
+            case "php":
+                return $this->php();
             default:
                 throw new RestException(401, "Invalid version parameter!");
         }
@@ -144,6 +146,15 @@ class Version
         );
         return $output;
     }
+
+    public function php() {
+        $phpversion = phpversion();
+        $output = array(
+          'php' => $phpversion
+        );
+        return $output;
+    }
+
     private function run_query($tsql, $params = array()) {
         $tsql_original = $tsql . ' ';
         // Connect
