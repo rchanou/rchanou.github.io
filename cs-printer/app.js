@@ -105,21 +105,23 @@ try {
   console.log('ERROR CLEARING CACHE', e);
 
   fs.writeFile('error-cache-' + n + '.err', e.toString(), function(err) {
-    if(err) return console.log('Error writing error logfile', err);
+    if(err) console.log('Error writing error logfile', err);
     // No need to exit, this is a "soft" error
   });
 }
 
 process.on('uncaughtException', function(e) {
+  console.log('ERROR: uncaughtException', e);
   fs.writeFile('error-uncaughtException-' + n + '.err', e.toString(), function(err) {
-    if(err) return console.log('uncaughtException', err);
+    if(err) console.log('Error writing uncaughtException log', err);
     process.exit(1);
   });
 });
 
 process.on('unhandledRejection', function(e) {
+  console.log('ERROR: unhandledRejection', e);
   fs.writeFile('error-unhandledRejection-' + n + '.err', e.toString(), function(err) {
-    if(err) return console.log('unhandledRejection', err);
+    if(err) console.log('Error writing unhandledRejection log', err);
     process.exit(1);
   });
 });
