@@ -104,7 +104,22 @@ try {
 } catch(e) {
   console.log('ERROR CLEARING CACHE', e);
 
-  fs.writeFile('error-' + n + '.err', e.toString(), function(err) {
+  fs.writeFile('error-cache-' + n + '.err', e.toString(), function(err) {
     if(err) return console.log('Error writing error logfile', err);
+    // No need to exit, this is a "soft" error
   });
 }
+
+process.on('uncaughtException', function(e) {
+  fs.writeFile('error-uncaughtException-' + n + '.err', e.toString(), function(err) {
+    if(err) return console.log('uncaughtException', err);
+    process.exit(1);
+  });
+});
+
+process.on('unhandledRejection', function(e) {
+  fs.writeFile('error-unhandledRejection-' + n + '.err', e.toString(), function(err) {
+    if(err) return console.log('unhandledRejection', err);
+    process.exit(1);
+  });
+});
