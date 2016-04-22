@@ -96,7 +96,15 @@ childProcess.execFile(phantomjsBinPath, phantomjsArgs, function(phantomErr, phan
   });
 })
 
-// Remove older files
-var findRemoveSync = require('find-remove');
-var deletedFiles = findRemoveSync(printJobDirectory, {age: {seconds: (oldFileLifetimeInMs / 1000) }, extensions: ['.txt', '.pdf']});
-console.log('Cleaned up older files:', deletedFiles);
+try {
+  // Remove older files
+  var findRemoveSync = require('find-remove');
+  var deletedFiles = findRemoveSync(printJobDirectory, {age: {seconds: (oldFileLifetimeInMs / 1000) }, extensions: ['.txt', '.pdf']});
+  console.log('Cleaned up older files:', deletedFiles);
+} catch(e) {
+  console.log('ERROR CLEARING CACHE', e);
+
+  fs.writeFile('error-' + n + '.err', e.toString(), function(err) {
+    if(err) return console.log('Error writing error logfile', err);
+  });
+}
