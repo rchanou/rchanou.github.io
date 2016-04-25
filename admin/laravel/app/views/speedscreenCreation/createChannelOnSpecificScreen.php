@@ -153,13 +153,4 @@ exec("del package.exe");
 exec("del app.exe");
 
 chdir("generatedChannels");
-header('Content-Type: application/x-msdownload');
-header('Content-Length: ' . filesize("./channel$channelNumber" . "screen" . $targetMonitor . ".exe"));
-header("Content-Disposition: attachment; filename=\"channel$channelNumber" . "screen" . $targetMonitor . ".exe\"");
-header("Content-Transfer-Encoding: binary");
-header("Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0"); // HTTP/1.1
-header("Cache-Control: private",false);
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-header('Pragma: public');
-
-readfile("./channel$channelNumber" . "screen" . $targetMonitor . ".exe");
+header("Location: https://" . $_SERVER['HTTP_HOST'] . "/admin/speedscreenCreation/generatedChannels/" . "channel$channelNumber" . "screen" . $targetMonitor . ".exe");
