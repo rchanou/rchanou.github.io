@@ -208,11 +208,23 @@ only screen and (min-device-pixel-ratio: 1.5){
 /*
     BOTTOM FOOTER
 */
-.footer {
-    position: absolute; /* Required for footer to be sticky within the container */
-    font-size: 24px;
-    margin-bottom: 20px;
+
+@media (min-width: 768px) {
+    .footer {
+        position: absolute; /* Required for footer to be sticky within the container */
+        font-size: 24px;
+        margin-bottom: 20px; /* fixes iPad buttons being off until the screen is panned */
+    }
 }
+
+/* For mobile responsiveness */
+@media (max-width: 767px) {
+    .footer {
+        position: absolute; /* Required for footer to be sticky within the container */
+        font-size: 24px;
+    }
+}
+
 .bottomLeftFooter {
     text-align: center;
     padding-right: 0;
