@@ -35,10 +35,16 @@ class Version
                 break;
             case "eurekas":
                 return $this->eurekas();
+                break;
             case "booking":
                 return $this->booking();
+                break;
+            case "oldbooking":
+                return $this->oldbooking();
+                break;
             case "php":
                 return $this->php();
+                break;
             default:
                 throw new RestException(401, "Invalid version parameter!");
         }
@@ -143,6 +149,35 @@ class Version
           'PaymentProcessor' => $paymentProcessor,
           'TestMode' => $testMode,
           'Enabled' => $registrationEnabled
+        );
+        return $output;
+    }
+
+    public function oldbooking() {
+        if (@$_REQUEST['secretkey'] !== "GusGus6021023!!GiftCardCustomer") {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        $tsql = "SELECT label as SettingName, htmlText as SettingValue from ReservationSettings where label in ('PayflowUser','PayflowVendor','PayflowPartner','PayflowPassword','VSPVendorName','EncryptionPassword')";
+        $tsql_params = array();
+        $rows = $this->run_query($tsql, $tsql_params);
+        $settings = array();
+        foreach($rows as $currentSetting)
+        {
+            $settings[$currentSetting["SettingName"]] = $currentSetting["SettingValue"];
+        }
+        $paypal = array(
+          'PayflowUser' => isset($settings['PayflowUser']) ? $settings['PayflowUser'] : "",
+          'PayflowVendor' => isset($settings['PayflowVendor']) ? $settings['PayflowVendor'] : "",
+          'PayflowPartner' => isset($settings['PayflowPartner']) ? $settings['PayflowPartner'] : "",
+          'PayflowPassword' => isset($settings['PayflowPassword']) ? $settings['PayflowPassword'] : ""
+        );
+        $sagepay = array(
+          'VSPVendorName' => isset($settings['VSPVendorName']) ? $settings['VSPVendorName'] : "",
+          'EncryptionPassword' => isset($settings['EncryptionPassword']) ? $settings['EncryptionPassword'] : ""
+        );
+        $output = array(
+          'paypal' => $paypal,
+          'sagepay' => $sagepay
         );
         return $output;
     }
