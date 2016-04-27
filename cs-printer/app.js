@@ -27,7 +27,8 @@ var config = {};
 if (fs.existsSync(path.join(__dirname, 'config.js'))) {
 	config = require(path.join(__dirname, 'config.js'));
 } else {
-	config.paperSize = '8.5in*11in';
+	config.debug = false;
+  config.paperSize = '8.5in*11in';
 	config.retentionTimeInMinutes = 10;
 }
 
@@ -104,24 +105,30 @@ try {
 } catch(e) {
   console.log('ERROR CLEARING CACHE', e);
 
-  fs.writeFile('error-cache-' + n + '.err', e.toString(), function(err) {
-    if(err) console.log('Error writing error logfile', err);
-    // No need to exit, this is a "soft" error
-  });
+  if(config.debug) {
+    fs.writeFile('error-cache-' + n + '.err', e.toString(), function(err) {
+      if(err) console.log('Error writing error logfile', err);
+      // No need to exit, this is a "soft" error
+    });
+  }
 }
 
 process.on('uncaughtException', function(e) {
   console.log('ERROR: uncaughtException', e);
-  fs.writeFile('error-uncaughtException-' + n + '.err', e.toString(), function(err) {
-    if(err) console.log('Error writing uncaughtException log', err);
-    process.exit(1);
-  });
+  if(config.debug) {
+    fs.writeFile('error-uncaughtException-' + n + '.err', e.toString(), function(err) {
+      if(err) console.log('Error writing uncaughtException log', err);
+      process.exit(1);
+    });
+  }
 });
 
 process.on('unhandledRejection', function(e) {
   console.log('ERROR: unhandledRejection', e);
-  fs.writeFile('error-unhandledRejection-' + n + '.err', e.toString(), function(err) {
-    if(err) console.log('Error writing unhandledRejection log', err);
-    process.exit(1);
-  });
+  if(config.debug) {
+    fs.writeFile('error-unhandledRejection-' + n + '.err', e.toString(), function(err) {
+      if(err) console.log('Error writing unhandledRejection log', err);
+      process.exit(1);
+    });
+  }
 });
