@@ -561,7 +561,10 @@ class BookingController extends BaseController
 		
 		private function applyPaymentTypeNotes($paymentType) {
 			$paymentType->friendlyName = str_replace('_', ' ', $paymentType->name);
-			
+
+      $phpversion = CS_API::getJSON('version/php');
+      $phpVersionMayBeOutOfDate = isset($phpversion->php) && $phpversion->php == "5.6.19" ? false : true;
+      $phpWarningMessage = '<br/><br/><em><strong><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Warning: Your server may require an update to use this payment processor. Please contact support.</strong></em>';
 			$notes = array();
 
 			switch($paymentType->name) {
@@ -648,6 +651,9 @@ class BookingController extends BaseController
                 case 'Payflow_Pro':
                     $paymentType->overview = 'This is the Payflow Pro on-site payment processor provided by PayPal.<br/><br/>
                     <strong>Useful links: </strong><a href="https://manager.paypal.com" target="_blank">Admin Portal</a>';
+                    if ($phpVersionMayBeOutOfDate) {
+                        $paymentType->overview .= $phpWarningMessage;
+                    }
                     $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor does NOT take the customer offsite to make payments.';
 
                     $notes = array(
@@ -663,6 +669,9 @@ class BookingController extends BaseController
                 case 'PayPal_Express':
                     $paymentType->overview = 'This is the PayPal Express off-site payment processor provided by PayPal. It requires a PayPal Business account.<br/><br/>
                     <strong>Useful links: </strong><a href="https://www.paypal.com/" target="_blank">Admin Portal</a>';
+                    if ($phpVersionMayBeOutOfDate) {
+                        $paymentType->overview .= $phpWarningMessage;
+                    }
                     $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor takes the customer offsite to make payments. The purchase is finalized when they are redirected back to the Online Booking page.';
 
                     $notes = array(
@@ -681,6 +690,9 @@ class BookingController extends BaseController
                 case 'PayPal_Pro':
                     $paymentType->overview = 'This is the PayPal Pro on-site payment processor provided by PayPal. It requires a PayPal Business Pro account.<br/><br/>
                     <strong>Useful links: </strong><a href="https://www.paypal.com/" target="_blank">Admin Portal</a>';
+                    if ($phpVersionMayBeOutOfDate) {
+                        $paymentType->overview .= $phpWarningMessage;
+                    }
                     $paymentType->supportOnly = '<strong>Support notes: </strong>This payment processor does NOT take the customer offsite to make payments. It requires a PayPal Business account that has been upgraded to Pro.';
 
                     $notes = array(
@@ -695,6 +707,9 @@ class BookingController extends BaseController
                 case 'SagePay_Direct':
                     $paymentType->overview = 'This is Sage Pay\'s Direct Integration method.<br/><br/>
                     <strong>Useful links: </strong><a href="https://live.sagepay.com/mysagepay/login.msp" target="_blank">Admin Portal</a>';
+                    if ($phpVersionMayBeOutOfDate) {
+                        $paymentType->overview .= $phpWarningMessage;
+                    }
                     $paymentType->supportOnly = '<strong>Support notes: </strong>This is SagePay version 3.0. <strong>The customer must whitelist their server\'s public IP address within SagePay\'s settings.</strong>';
 
                     $notes = array(
