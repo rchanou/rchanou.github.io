@@ -42,6 +42,9 @@ class Version
             case "oldbooking":
                 return $this->oldbooking();
                 break;
+            case "daytonabooking":
+                return $this->daytonabooking();
+                break;
             case "php":
                 return $this->php();
                 break;
@@ -177,6 +180,28 @@ class Version
         );
         $output = array(
           'paypal' => $paypal,
+          'sagepay' => $sagepay
+        );
+        return $output;
+    }
+
+    public function daytonabooking() {
+        if (@$_REQUEST['secretkey'] !== "GusGus6021023!!GiftCardCustomer") {
+            throw new RestException(401, "Invalid authorization!");
+        }
+        $tsql = "SELECT Label as SettingName, htmlText as SettingValue from EventReservationSettings where label in ('VSPVendorName','EncryptionPassword')";
+        $tsql_params = array();
+        $rows = $this->run_query($tsql, $tsql_params);
+        $settings = array();
+        foreach($rows as $currentSetting)
+        {
+            $settings[$currentSetting["SettingName"]] = $currentSetting["SettingValue"];
+        }
+        $sagepay = array(
+          'VSPVendorName' => isset($settings['VSPVendorName']) ? $settings['VSPVendorName'] : "",
+          'EncryptionPassword' => isset($settings['EncryptionPassword']) ? $settings['EncryptionPassword'] : ""
+        );
+        $output = array(
           'sagepay' => $sagepay
         );
         return $output;
