@@ -95,7 +95,7 @@ class RegistrationController extends BaseController
           array('shownId' => 'CfgRegRcrNameShow', 'requiredId' => 'CfgRegRcrNameReq', 'label' => 'Racer Name'),
           array('shownId' => 'CfgRegSrcShow', 'requiredId' => 'CfgRegSrcReq', 'label' => 'How did you hear about us?'),
           array('shownId' => 'CfgRegDrvrLicShow', 'requiredId' => 'CfgRegDrvrLicReq', 'label' => 'Driver\'s License', 'secondColumn' => true),
-          array('shownId' => 'CfgRegPhoneShow', 'requiredId' => 'CfgRegPhoneReq', 'label' => 'Phone', 'secondColumn' => true),
+          array('shownId' => 'CfgRegPhoneShow', 'requiredId' => 'CfgRegPhoneReq', 'label' => 'Cell/Mobile', 'secondColumn' => true),
           array('shownId' => 'CfgRegEmailShow', 'requiredId' => 'CfgRegEmailReq', 'label' => 'E-mail', 'secondColumn' => true),
           array('shownId' => 'cfgRegCustTxt1Show', 'requiredId' => 'cfgRegCustTxt1req', 'label' => 'Custom Text 1', 'secondColumn' => true),
           array('shownId' => 'cfgRegCustTxt2Show', 'requiredId' => 'cfgRegCustTxt2req', 'label' => 'Custom Text 2', 'secondColumn' => true),
