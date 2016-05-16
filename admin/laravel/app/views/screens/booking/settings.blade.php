@@ -421,6 +421,15 @@ Online Bookings Settings
                                   </div>
                               </div>
                           @endif
+                          @if(isset($isChecked['responsive']))
+                              <div class="form-group">
+                                  <label class="col-sm-4 col-md-4 col-lg-4 control-label">Use Mobile-Friendly Layout</label>
+                                  <div class="col-sm-8 col-md-8 col-lg-8">
+                                      <input type="checkbox" id="responsive" name="responsive" {{$isChecked['responsive']}}>
+                                      <span class="help-block text-left">If checked, Online Booking uses a new, mobile-friendly flexible layout. It still looks the same on larger displays.</span>
+                                  </div>
+                              </div>
+                          @endif
                       </div>
                       <div class="col-sm-6">
                           @if(isset($isChecked['showTermsAndConditions']))

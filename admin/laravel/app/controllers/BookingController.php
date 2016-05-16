@@ -410,6 +410,8 @@ class BookingController extends BaseController
         $newSettings['brokerSourceInURLEnabled'] = isset($input['brokerSourceInURLEnabled']) ? $input['brokerSourceInURLEnabled'] : 0;
         $newSettings['defaultPaymentCountry'] = isset($input['defaultPaymentCountry']) ? $input['defaultPaymentCountry'] : '';
         $newSettings['autoAddRacerToHeat'] = isset($input['autoAddRacerToHeat']) ? $input['autoAddRacerToHeat'] : 0;
+        $newSettings['responsive'] = isset($input['responsive']) ? $input['responsive'] : 0;
+
 
         if (isset($input['reservationTimeout']))
         {
