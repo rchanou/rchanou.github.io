@@ -38,9 +38,5 @@
               "name": "Deleted"
             , "type": "bit"
         }
-        , {
-              "name": "TransferID"
-            , "type": "uniqueidentifier"
-        }
     ]
 }

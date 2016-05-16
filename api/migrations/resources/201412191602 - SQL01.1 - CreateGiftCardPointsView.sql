@@ -16,4 +16,3 @@ SELECT
 FROM GiftCardPoints gcp
 INNER JOIN dbo.Customers c
     ON c.CustID = gcp.CustID
-WHERE c.CrdID > -1

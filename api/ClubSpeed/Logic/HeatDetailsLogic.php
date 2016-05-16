@@ -20,5 +20,20 @@ class HeatDetailsLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->heatDetails;
+
+        $self =& $this;
+        $afters = array(
+            'create' => array($self, 'clearCache'),
+            'update' => array($self, 'clearCache'),
+            'delete' => array($self, 'clearCache')
+        );
+        $this->after('uow', function($uow) use (&$afters) {
+            if (isset($afters[$uow->action]))
+                call_user_func($afters[$uow->action], $uow);
+        });
+    }
+
+    function clearCache($uow) {
+        $GLOBALS['webapi']->clearCache();
     }
 }

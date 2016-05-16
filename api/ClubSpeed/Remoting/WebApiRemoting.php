@@ -100,7 +100,7 @@ class WebApiRemoting {
             if ($response['code'] == 401)
                 Log::warn("Attempted to use WebAPI Remoting, but the apiUsername and apiPassword were invalid! Check the API config and Users table for proper credentials! Info: " . $response['info'], Enums::NSP_WEBAPI);
             else
-                Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Info: " . $response['info'], Enums::NSP_WEBAPI);
+                Log::warn("Attempted to use WebAPI Remoting, but the server was inaccessible or unusable! Info: " . print_r($response['info'], true), Enums::NSP_WEBAPI);
             return false;
         }
         catch(\Exception $e) {

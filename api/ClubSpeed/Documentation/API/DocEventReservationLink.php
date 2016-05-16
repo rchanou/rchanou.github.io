@@ -14,6 +14,7 @@ class DocEventReservationLink Extends DocAPIBase {
         $this->preface = $this->preface();
         $this->info    = $this->info();
         $this->json    = $this->json();
+        $this->readonly = true;
         $this->expand();
     }
 
@@ -52,14 +53,14 @@ EOS;
                 "type" => "Integer",
                 "default" => "",
                 "required" => true,
-                "description" => "The ID for a check linked to a reservation."
+                "description" => "The ID for the <a href=\"#checks\">check</a> to be linked to an <a href=\"#event-reservations\">event reservation</a>"
             ),
             array(
                 "name" => "reservationId",
                 "type" => "Integer",
                 "default" => "",
                 "required" => true,
-                "description" => "The ID for the event reservation."
+                "description" => "The ID for the <a href=\"#event-reservations\">event reservation</a> to which the <a href=\"#checks\">check</a> should be linked"
             )
         );
     }

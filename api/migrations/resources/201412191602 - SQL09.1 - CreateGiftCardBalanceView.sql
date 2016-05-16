@@ -9,6 +9,6 @@ SELECT
     , ISNULL(gcpv.Points, 0) AS Points
 FROM dbo.Customers c
 LEFT OUTER JOIN dbo.GiftCardMoney_V gcmv
-    ON c.CrdID = gcmv.CrdID
+    ON c.CustID = gcmv.CustID
 LEFT OUTER JOIN dbo.GiftCardPoints_V gcpv
-    ON c.CrdID = gcpv.CrdID
+    ON c.CustID = gcpv.CustID

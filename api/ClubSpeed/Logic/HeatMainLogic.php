@@ -23,6 +23,17 @@ class HeatMainLogic extends BaseLogic {
         parent::__construct($logic, $db);
         $this->interface = $this->db->heatMain;
 
+        $self =& $this;
+        $afters = array(
+            'create' => array($self, 'clearCache'),
+            'update' => array($self, 'clearCache'),
+            'delete' => array($self, 'clearCache')
+        );
+        $this->after('uow', function($uow) use (&$afters) {
+            if (isset($afters[$uow->action]))
+                call_user_func($afters[$uow->action], $uow);
+        });
+
         $this->before('uow', function($uow) use ($db) {
             switch($uow->action) {
                 case 'create':
@@ -75,5 +86,9 @@ class HeatMainLogic extends BaseLogic {
                     break;
             }
         });
+    }
+
+    function clearCache($uow) {
+        $GLOBALS['webapi']->clearCache();
     }
 }

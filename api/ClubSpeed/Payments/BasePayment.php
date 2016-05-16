@@ -377,6 +377,7 @@ class BasePayment {
             // if we continue, the check will be closed,
             // all line items will be processed (gift cards, etc),
             // and receipt email will be sent
+            throw $e;
         }
         return $this->finalizeCheck($checkId, $params); // should this be below the catch, or at the end of the try?
     }
@@ -395,6 +396,7 @@ class BasePayment {
 
             // how should we handle these exceptions? support email? track email?
             // exception should already be logged by checks->finalize() and rethrown back to here.
+            throw $e;
         }
     }
 

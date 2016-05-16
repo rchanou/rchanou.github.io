@@ -23,10 +23,11 @@ class GiftCardProductHandler extends BaseProductHandler {
         // move to utility class if necessary
         // note that we can't really move it to GiftCardHistoryLogic, 
         // since the CrdID lives on the dbo.Customers record
+        $minCardId = @$GLOBALS['minCardId'] ?: 1000000000;
+        $maxCardId = @$GLOBALS['maxCardId'] ?: 2147483647;
         $cardId = -1;
         while($cardId < 0) {
-            // where does the venue id come from? -- it doesn't. just use a random number.
-            $tempCardId = mt_rand(1000000000, 2147483647); // get a random 10 digit number, up to the max signed int value
+            $tempCardId = mt_rand($minCardId, $maxCardId);
             $customer = $this->logic->customers->find("CrdID = " . $tempCardId);
             if (empty($customer))
                 $cardId = $tempCardId; // card id was not being used yet, we can use this one

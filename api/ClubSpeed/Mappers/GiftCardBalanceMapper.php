@@ -8,10 +8,11 @@ class GiftCardBalanceMapper extends BaseMapper {
         parent::__construct();
         $this->namespace = 'cards';
         $this->register(array(
-              'CrdID'           => 'cardId'
-            , 'IsGiftCard'      => ''
-            , 'Points'          => ''
-            , 'Money'           => ''
+              'CustID'     => 'customerId'
+            , 'CrdID'      => 'cardId'
+            , 'IsGiftCard' => ''
+            , 'Points'     => ''
+            , 'Money'      => ''
         ));
     }
 }

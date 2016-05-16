@@ -27,15 +27,6 @@ class PointHistoryLogic extends BaseLogic {
                     $pointHistory =& $uow->data;
                     if (empty($pointHistory) || empty($pointHistory->CustID))
                         throw new \RequiredArgumentMissingException("PointHistory create requires a CustID!");
-                    if (isset($pointHistory->CheckID) && isset($pointHistory->CheckDetailID)) {
-                        // note that CheckID/CheckDetailID are not always required -- ie, when deducting points from a customer, 
-                        $existingPointHistory = $db->pointHistory->match(array(
-                            "CheckID" => $pointHistory->CheckID,
-                            "CheckDetailID" => $pointHistory->CheckDetailID
-                        ));
-                        if (!empty($existingPointHistory))
-                            throw new \CSException("PointHistory create is attempting to add points from CheckDetails which have already been applied!");
-                    }
                     break;
             }
         });

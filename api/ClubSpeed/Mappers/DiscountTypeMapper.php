@@ -15,7 +15,6 @@ class DiscountTypeMapper extends BaseMapper {
             , 'NeedApproved'   => ''
             , 'ProductClassID' => ''
             , 'Deleted'        => ''
-            , 'TransferID'     => ''
         ));
     }
 }

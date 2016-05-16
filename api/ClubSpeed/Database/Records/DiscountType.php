@@ -13,5 +13,4 @@ class DiscountType extends BaseRecord {
     public $NeedApproved;
     public $ProductClassID;
     public $Deleted;
-    public $TransferID;
 }

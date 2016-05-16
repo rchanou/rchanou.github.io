@@ -5,9 +5,13 @@
     },
     "columns": [
         {
+              "name": "CustID"
+            , "type": "int"
+            , "primaryKey": true
+        }
+        , {
               "name": "CrdID"
             , "type": "bigint"
-            , "primaryKey": true
         }
         , {
               "name": "IsGiftCard"
