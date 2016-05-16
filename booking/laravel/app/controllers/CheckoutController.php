@@ -97,7 +97,14 @@ class CheckoutController extends BaseController
             Session::forget('localCartHasExpiredItem');
         }
 
-        return View::make('/checkout',
+        //Render the page
+        $view = '/checkout';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/checkout-responsive';
+        }
+
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'localCartHasExpiredItem' => $localCartHasExpiredItem,
@@ -315,6 +322,8 @@ class CheckoutController extends BaseController
         //Added for WorldPayXML
         $onlineBookingPaymentProcessorSettings->session = Session::getId();
         $onlineBookingPaymentProcessorSettings->clientIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
+        $onlineBookingPaymentProcessorSettings->acceptHeader = Request::header('Accept');
+        $onlineBookingPaymentProcessorSettings->userAgentHeader = Request::header('User-Agent');
 
         $result = CS_API::pay($onlineBookingPaymentProcessorSettings,$checkFormatted,$paymentInformation);
 
@@ -548,7 +557,14 @@ class CheckoutController extends BaseController
                 {
                     if ($redirectMethod == "POST")
                     {
-                        return View::make('/payredirect',
+                        $settings = Session::get('settings');
+                        $view = '/payredirect';
+                        if (isset($settings['responsive']) && $settings['responsive'] == true)
+                        {
+                            $view = '/payredirect-responsive';
+                        }
+
+                        return View::make($view,
                             array(
                                 'images' => Images::getImageAssets(),
                                 'strings' => $strings,

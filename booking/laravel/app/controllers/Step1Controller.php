@@ -31,7 +31,12 @@ class Step1Controller extends BaseController
         $heatTypesAvailable = CS_API::filterDropdownHeatsByAvailableSpots($heatTypesAvailable,1); //Only list the ones with at least one spot
 
         //Render the page
-        return View::make('/steps/step1',
+        $view = '/steps/step1';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/steps/step1-responsive';
+        }
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'heatTypes' => $heatTypesAvailable,

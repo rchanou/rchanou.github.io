@@ -17,6 +17,12 @@ class SuccessController extends BaseController
         $currentCulture = Session::get('currentCulture');
         $translations = Session::get('translations');
         $strings = Strings::getStrings();
+        $settings = Session::get('settings');
+        $view = '/success';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/success-responsive';
+        }
 
         //Clear the session...
         Session::flush();
@@ -28,7 +34,9 @@ class SuccessController extends BaseController
         Session::put('translations',$translations);
         Strings::setStrings($strings);
 
-        return View::make('/success',
+
+
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'check' => $successResults['check'],

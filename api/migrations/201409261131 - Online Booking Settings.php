@@ -75,7 +75,8 @@ $settings = array(
 	'giftCardSalesEnabled' => false,
 	'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}',
 	'brokerFieldEnabled' => false,
-	'brokerSourceInURLEnabled' => false
+	'brokerSourceInURLEnabled' => false,
+	'responsive' => false
 	);
 
 error_reporting(E_ALL);

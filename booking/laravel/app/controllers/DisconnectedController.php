@@ -26,7 +26,14 @@ class DisconnectedController extends BaseController
         }
         CS_API::log('ERROR :: Online Booking user reached disconnected page. Most recent API call results: ' . $mostRecentAPICallResult);
 
-        return View::make('/errorpages/disconnected',
+        $settings = Session::get('settings');
+        $view = '/errorpages/disconnected';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/errorpages/disconnected-responsive';
+        }
+
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'errorInfo' => json_encode(var_export(Session::get('errorInfo'),true)),

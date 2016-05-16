@@ -11,7 +11,14 @@ class DisabledController extends BaseController
 {
     public function entry()
     {
-        return View::make('/errorpages/disabled',
+        $settings = Session::get('settings');
+        $view = '/errorpages/disabled';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/errorpages/disabled-responsive';
+        }
+
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'strings' => Strings::getStrings(),

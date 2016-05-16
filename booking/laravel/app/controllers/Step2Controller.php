@@ -99,7 +99,13 @@ class Step2Controller extends BaseController
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
         $currency = $settings['currency'];
 
-        return View::make('/steps/step2',
+        //Render the page
+        $view = '/steps/step2';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/steps/step2-responsive';
+        }
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'races' => $races,

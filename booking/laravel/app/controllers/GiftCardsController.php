@@ -62,7 +62,14 @@ class GiftCardsController extends BaseController
         $currency = $settings['currency'];
 
         //Render the page
-        return View::make('/giftcards',
+        $view = '/giftcards';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/giftcards-responsive';
+        }
+
+        //Render the page
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'strings' => Strings::getStrings(),

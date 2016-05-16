@@ -101,7 +101,8 @@ class Settings
             'giftCardSalesEnabled' => false,
             'giftCardsAvailableForOnlineSale' => '{"giftCardProductIDs": []}',
             'brokerFieldEnabled' => false,
-            'brokerSourceInURLEnabled' => false
+            'brokerSourceInURLEnabled' => false,
+            'responsive' => false
         );
 
         self::$currentSettings = self::$defaultSettings;

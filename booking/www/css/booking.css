@@ -14,6 +14,15 @@ body {
     background-size: 1920px 1080px;
 }
 
+.body-responsive {
+    padding: 0px;
+    margin: 0px;
+    background-color: #eee;
+    color: black;
+    background-image:url('../images/background.jpg');
+    background-size: auto auto;
+}
+
 footer {
     padding: 10px;
 }
@@ -23,6 +32,17 @@ footer {
     min-height: 570px;
     margin: 0 auto;
     /*border: 2px solid #888888; bbb*/
+    border: 2px solid #bbbbbb;
+    background-color: #eee;
+    -webkit-box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    4px 4px 5px 0px rgba(50, 50, 50, 0.75);
+    box-shadow:         4px 4px 5px 0px rgba(50, 50, 50, 0.75);
+}
+
+#mainPageWrapper-responsive {
+    max-width: 614px;
+    min-height: 570px;
+    margin: 0 auto;
     border: 2px solid #bbbbbb;
     background-color: #eee;
     -webkit-box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.75);
@@ -71,6 +91,21 @@ footer {
 
 }
 
+.inputRow-responsive {
+
+    padding: 20px;
+
+    background: #eeeeee; /* Old browsers */
+    background: -moz-linear-gradient(top,  #eeeeee 0%, #d1d1d1 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#d1d1d1)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #eeeeee 0%,#d1d1d1 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #eeeeee 0%,#d1d1d1 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #eeeeee 0%,#d1d1d1 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #eeeeee 0%,#d1d1d1 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#d1d1d1',GradientType=0 ); /* IE6-9 */
+
+}
+
 .inputLabel {
     display: inline-block;
     width: 48%;
@@ -78,9 +113,18 @@ footer {
     font-weight: bold;
 }
 
+.inputLabel-responsive {
+    text-align: center;
+    font-weight: bold;
+}
+
 .inputData {
     display: inline-block;
     width: 48%;
+    text-align: center;
+}
+
+.inputData-responsive {
     text-align: center;
 }
 
@@ -93,6 +137,26 @@ footer {
     color: white;
     font-size: 20px;
 }
+
+.formButton-responsive {
+    background: #cd2128;
+    color: white;
+    font-size: 20px;
+}
+
+@media (max-width: 600px) {
+    .formButton-responsive {
+        font-size: 18px;
+    }
+
+}
+
+@media (max-width: 380px) {
+    .formButton-responsive {
+        font-size: 14px;
+    }
+}
+
 
 .formButton:hover {
     color: white;
@@ -113,6 +177,28 @@ footer {
     color: white;
     font-size: 20px;
     width: 32%;
+}
+
+.regularButton-responsive {
+    background: #cd2128; /* Old browsers */
+    color: white;
+    font-size: 20px;
+    width: 32%;
+    vertical-align: top;
+}
+
+@media (max-width: 600px) {
+    .regularButton-responsive {
+        font-size: 18px;
+        height: 81px;
+    }
+}
+
+@media (max-width: 380px) {
+    .regularButton-responsive {
+        font-size: 14px;
+        height: 66px;
+    }
 }
 
 .ellipsis {
@@ -250,7 +336,6 @@ footer {
     vertical-align: middle;
     padding-right: 0px;
 }
-
 .bookingError {
     width: 80%;
     margin: 0 auto;
@@ -273,23 +358,40 @@ label {
 }
 
 .createAccount input[type=text] {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .createAccount input[type=password] {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .checkoutForm input[type=text] {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .checkoutForm input[type=password] {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
+}
+
+@media (max-width: 630px) {
+    .checkoutForm input[type=text] {
+        width: 100%;
+        max-width: 700px;
+    }
+
+    .checkoutForm input[type=password] {
+        width: 100%;
+        max-width: 700px;
+    }
 }
 
 .loginToAccount input {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .mainBodyHeader {
@@ -310,6 +412,60 @@ label {
     line-height: 41px;
     vertical-align: text-bottom;
 }
+
+.mainBodyHeader-responsive {
+    font-size: 24px;
+    text-align: center;
+}
+.yesterdayArrow-responsive {
+    font-size: 16px;
+    height: 41px;
+    line-height: 41px;
+    vertical-align: text-bottom;
+}
+.tomorrowArrow-responsive {
+    font-size: 16px;
+    height: 41px;
+    line-height: 41px;
+    vertical-align: text-bottom;
+}
+
+@media (max-width: 600px) {
+    .mainBodyHeader-responsive {
+        font-size: 18px;
+        text-align: center;
+    }
+    .yesterdayArrow-responsive {
+        font-size: 14px;
+        vertical-align: text-bottom;
+    }
+    .tomorrowArrow-responsive {
+        font-size: 14px;
+        vertical-align: text-bottom;
+    }
+    .availableRacesSection {
+        padding-top: 7px;
+    }
+}
+
+@media (max-width: 380px) {
+    .mainBodyHeader-responsive {
+        font-size: 18px;
+        text-align: center;
+    }
+    .yesterdayArrow-responsive {
+        font-size: 11px;
+        vertical-align: text-bottom;
+    }
+    .tomorrowArrow-responsive {
+        font-size: 11px;
+        vertical-align: text-bottom;
+    }
+    .availableRacesSection {
+        padding-top: 0px;
+    }
+}
+
 
 ::-webkit-input-placeholder {
     text-align: center;
@@ -497,9 +653,20 @@ th {text-align: center}
     width: 614px;
     margin: 0 auto;
 }
+
+.languageDropdownContainer-responsive {
+    width: 100%;
+    max-width: 614px;
+    margin: 0 auto;
+}
+
 .languageDropdown {
     z-index: 1049; text-align: right;
     padding-left: 430px;
+}
+
+.languageDropdown-responsive {
+    z-index: 1049; text-align: right;
 }
 
 .dropdown dd, .dropdown dt, .dropdown ul { margin:0px; padding:0px; }

@@ -33,7 +33,15 @@ class LoginController extends BaseController
                 'quantity' => null);
 
         }
-        return View::make('/login',
+
+        $settings = Session::get('settings');
+        $view = '/login';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/login-responsive';
+        }
+
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'settings' => Session::get('settings'),
@@ -204,7 +212,14 @@ class LoginController extends BaseController
                 $source = 'giftcards'; //Some day will need to be differentiated from other products
             }
 
-            return View::make('/loginfb',
+            $settings = Session::get('settings');
+            $view = '/loginfb';
+            if (isset($settings['responsive']) && $settings['responsive'] == true)
+            {
+                $view = '/loginfb-responsive';
+            }
+
+            return View::make($view,
                 array(
                     'images' => Images::getImageAssets(),
                     'heatId' => $heatId,

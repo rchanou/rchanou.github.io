@@ -16,7 +16,14 @@ class ResetPasswordController extends BaseController
      */
     public function entry()
     {
-        return View::make('/resetpassword',
+        $settings = Session::get('settings');
+        $view = '/resetpassword';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/resetpassword-responsive';
+        }
+
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'strings' => Strings::getStrings()
@@ -58,12 +65,18 @@ class ResetPasswordController extends BaseController
 
         $resetRequestResult = CS_API::requestPasswordReset($emailAddress);
 
+        $settings = Session::get('settings');
+        $view = '/resetpassword';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/resetpassword-responsive';
+        }
         if ($resetRequestResult != null)
         {
             $resetRequestSuccessful = ($resetRequestResult == true);
             if ($resetRequestSuccessful)
             {
-                return View::make('/resetpassword',
+                return View::make($view,
                     array(
                         'images' => Images::getImageAssets(),
                         'resetRequestSuccessful' => true,
@@ -73,7 +86,7 @@ class ResetPasswordController extends BaseController
             }
             else
             {
-                return View::make('/resetpassword',
+                return View::make($view,
                     array(
                         'images' => Images::getImageAssets(),
                         'resetRequestSuccessful' => false,
@@ -97,7 +110,14 @@ class ResetPasswordController extends BaseController
     {
         $authToken = Input::get('token');
         $email = Input::get('email');
-        return View::make('/resetpasswordform',
+
+        $settings = Session::get('settings');
+        $view = '/resetpasswordform';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/resetpasswordform-responsive';
+        }
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'userNeedsToSubmitForm' => true,

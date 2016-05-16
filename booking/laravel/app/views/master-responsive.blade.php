@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
     <!-- BEGIN CSS INCLUDES -->
     @section('css_includes')
@@ -36,7 +36,7 @@
     <title>@yield('title', 'Club Speed Online Booking')</title>
 </head>
 
-<body>
+<body class="body-responsive">
 
 <!-- BEGIN FACEBOOK INTEGRATION -->
     @section('facebook_integration')
@@ -73,25 +73,25 @@
 <!-- END FACEBOOK INTEGRATION -->
 
     <div class="container">
-        @include('languagedropdown')
-        <div id="mainPageWrapper">
-            <div>
+        <div class="row">
+        @include('languagedropdown-responsive')
+            <div id="mainPageWrapper-responsive">
 
-        <!-- BEGIN GLOBAL HEADER INCLUDE -->
-        @include('header')
-        <!-- END GLOBAL HEADER INCLUDE -->
+            <!-- BEGIN GLOBAL HEADER INCLUDE -->
+            @include('header-responsive')
+            <!-- END GLOBAL HEADER INCLUDE -->
 
-        <!-- BEGIN ERRORS INCLUDE -->
-        @include('errors', array('errors' => $errors))
-        <!-- END ERRORS INCLUDE -->
+            <!-- BEGIN ERRORS INCLUDE -->
+            @include('errors', array('errors' => $errors))
+            <!-- END ERRORS INCLUDE -->
 
-        <!-- START CONTENT INCLUDE -->
-        @yield('content')
-        <!-- END CONTENT INCLUDE -->
+            <!-- START CONTENT INCLUDE -->
+            @yield('content')
+            <!-- END CONTENT INCLUDE -->
 
-        <!-- START GLOBAL FOOTER INCLUDE -->
-        @include('footer')
-        <!-- END GLOBAL FOOTER INCLUDE -->
+            <!-- START GLOBAL FOOTER INCLUDE -->
+            @include('footer-responsive')
+            <!-- END GLOBAL FOOTER INCLUDE -->
 
             </div>
         </div>

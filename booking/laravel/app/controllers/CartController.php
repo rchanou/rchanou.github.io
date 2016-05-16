@@ -267,7 +267,14 @@ class CartController extends BaseController
         $moneyFormatter = new NumberFormatter($locale,  NumberFormatter::CURRENCY);
         $currency = $settings['currency'];
 
-        return View::make('/cart',
+        //Render the page
+        $view = '/cart';
+        if (isset($settings['responsive']) && $settings['responsive'] == true)
+        {
+            $view = '/cart-responsive';
+        }
+
+        return View::make($view,
             array(
                 'images' => Images::getImageAssets(),
                 'action' => $action,
