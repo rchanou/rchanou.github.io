@@ -13,7 +13,7 @@
     {{ HTML::style('css/vendors/jquery-ui/jquery-ui.theme.min.css') }}
     {{ HTML::style('css/vendors/bootstrap-theme.min.css') }}
 
-    <?php $bookingStylesURL = 'css/booking.css?v=1.6'; //To prevent caching ?>
+    <?php $bookingStylesURL = 'css/booking.css?v=1.7'; //To prevent caching ?>
     {{ HTML::style($bookingStylesURL) }}
 
     {{ HTML::script('js/vendors/jquery-2.1.0.min.js')}} <!-- Needed earlier -->
