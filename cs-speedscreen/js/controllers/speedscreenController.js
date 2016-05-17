@@ -101,7 +101,6 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
 
         apiService.verifyConnectivityToServerAndFetchSettings(). //Verify basic connectivity to the server by fetching settings
             success(function(data, status, headers, config) {
-
                 var formattedSettings = {};
                 if (typeof data.settings != "undefined" && data.settings.length > 0)
                 {
@@ -156,6 +155,7 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
                     });
             }).
             error(function(data, status, headers, config) { //Error case: Unable to hit Club Speed API
+                debugToConsole('Unable to fetch settings!');
                 reportErrorAndRestart($scope.strings['str_unableToConnect']);
             });
     }
@@ -288,7 +288,7 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
     };
 
     Channel.prototype.periodicallyCheckForChannelUpdates = function() {
-        $interval(function () {$scope.channel.checkForChannelUpdate();},this.channelUpdateFrequencyMs);
+        $scope.channelUpdateInterval = $interval(function () {$scope.channel.checkForChannelUpdate();},this.channelUpdateFrequencyMs);
     };
 
     $scope.checkForRaces = null;
@@ -581,7 +581,7 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
                     if ($scope.oldHash != data.hash)
                     {
                         debugToConsole("Hashes were different! Restarting...");
-                        window.location.reload();
+                        $window.location.reload(true);
                     }
                     else
                     {
@@ -1228,21 +1228,40 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
     {
         $scope.state = 'loading';
         Channel.prototype.abortAllSlideTimeouts();
+        $interval.cancel($scope.channelUpdateInterval);
+
         $scope.loadingHeaderText = $scope.strings['str_speedScreenOffline'];
         $scope.loadingStepText = message;
         $scope.loadingRestartText = $scope.strings['str_restartingIn'];
         $scope.loadingRestartTime = $scope.settings['timeUntilRestartOnErrorMs']/1000;
-        var intervalFunction = $interval(function(){
-            if ($scope.loadingRestartTime <= 1)
-            {
-                $interval.cancel(intervalFunction);
-                window.location.reload();
-            }
-            else
-            {
-                $scope.loadingRestartTime--;
-            }
-        },1000);
+        $scope.testingConnection = false;
+        if (typeof($scope.restartIntervalFunction) == "undefined" || $scope.restartIntervalFunction == null) {
+            $scope.restartIntervalFunction = $interval(function(){
+                if ($scope.loadingRestartTime <= 1)
+                {
+                    if (!$scope.testingConnection)
+                    {
+                        console.log("Checking online connectivity...");
+                        $scope.testingConnection = true;
+                        apiService.verifyConnectivityToServerAndFetchSettings(4000).
+                        success(function(data, status, headers, config) {
+                            console.log("Internet connection is back up. Restarting HD Speed Screen...");
+                            $interval.cancel($scope.restartIntervalFunction);
+                            $scope.restartIntervalFunction = null;
+                            $window.location.reload(true);                    }).
+                        error(function(data, status, headers, config) {
+                            $scope.testingConnection = false;
+                            console.log("Internet is still offline. Resuming countdown to next restart.");
+                            $scope.loadingRestartTime = $scope.settings['timeUntilRestartOnErrorMs']/1000;
+                        });
+                    }
+                }
+                else
+                {
+                    $scope.loadingRestartTime--;
+                }
+            },1000);
+        }
     }
 
     // ##########################

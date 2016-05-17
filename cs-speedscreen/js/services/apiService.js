@@ -12,8 +12,12 @@ angular.module('speedscreen.services')
         var apiDriver = apiDrivers[apiDriverName];
 
         return {
-            verifyConnectivityToServerAndFetchSettings: function() {
-                return $http.get(apiURL + '/settings.json?namespace=Speedscreen&key=' + apiKey);
+            verifyConnectivityToServerAndFetchSettings: function(timeout) {
+                var config = {};
+                if (timeout) {
+                    config.timeout = timeout;
+                }
+                return $http.get(apiURL + '/settings.json?namespace=Speedscreen&key=' + apiKey, config);
             },
             getChannelLineUp: function() {
                 return apiDriver.getChannelLineUp(currentChannel);
