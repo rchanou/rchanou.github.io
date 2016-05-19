@@ -15,7 +15,7 @@ class Comparator {
     // 3. accept operator abbreviations starting with a % and ending with a ;
     // 4. accept operator abbreviations starting with a $
     // 5. all letters are case-insensitive
-    protected static $pattern = '/((?: )?<=?|>=?|<>|!?=(?: )?|(?: )IS(?: NOT)?|(?:NOT )?LIKE|IN(?: )|(?:(?=.*;)%|(?:(?!.*;)\$))(?:[N]?EQ|LT[E]?|GT[E]?)(?:;?))/i'; // note case-insensitivity
+    protected static $pattern = '/((?: )?<>|<=?|>=?|!?=(?: )?|(?: )IS(?: NOT)?|(?:NOT )?LIKE|IN(?: )|(?:(?=.*;)%|(?:(?!.*;)\$))(?:[N]?EQ|LT[E]?|GT[E]?|IN)(?:;?))/i'; // note case-insensitivity
     public static $operators = array(
           '<'           => '<'
         , '<='          => '<='
@@ -92,7 +92,7 @@ class Comparator {
 
     public function toJSON() {
         return array(
-            $this->left => array( $this->_originalOperator => $this->right )
+            $this->left => array( strtolower($this->_originalOperator) => $this->right )
         );
     }
 
