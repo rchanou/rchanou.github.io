@@ -337,7 +337,7 @@ class CS_API
                         $result[$currentSettingKey] = $resultBeforeProcessing["settings"][$currentSettingKey]["SettingValue"];
                     }
 
-                    $url = self::$baseAPIURL . '/sources.json' . '?key=' .self::$privateKey;
+                    $url = self::$baseAPIURL . '/sources.json' . '?order=seq&key=' .self::$privateKey;
 
                     $sources = self::callApi($url);
 
