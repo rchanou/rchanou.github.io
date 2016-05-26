@@ -43,7 +43,7 @@
 
     ?>
 
-    <?php $customStylesURL = 'https://' . $_SERVER['HTTP_HOST'] . '/assets/cs-registration/css/custom-styles.css?' . time(); //To prevent caching ?>
+    <?php $customStylesURL = 'http://' . $_SERVER['HTTP_HOST'] . '/assets/cs-registration/css/custom-styles.css?' . time(); //To prevent caching ?>
     {{ (remoteFileExists($customStylesURL) ? HTML::style($customStylesURL) : '') }}
     @show
     <!-- END CSS INCLUDES -->
@@ -138,7 +138,7 @@
 {{ HTML::script('js/vendors/jquery-ui/jquery-ui.min.js') }}
 
     <!-- Custom JS if present in /assets -->
-    <?php $customJavaScriptURL = 'https://' . $_SERVER['HTTP_HOST'] . '/assets/cs-registration/js/custom-js.js?' . time(); //To prevent caching ?>
+    <?php $customJavaScriptURL = 'http://' . $_SERVER['HTTP_HOST'] . '/assets/cs-registration/js/custom-js.js?' . time(); //To prevent caching ?>
     {{ ((remoteFileExists($customJavaScriptURL)) ? HTML::script($customJavaScriptURL) : '') }}
 
     <script>
