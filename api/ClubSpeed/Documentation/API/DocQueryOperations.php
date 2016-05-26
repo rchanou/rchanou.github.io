@@ -526,6 +526,7 @@ EOS
   <li><code class="prettyprint">&lt;&gt;</code></li>
   <li><code class="prettyprint">IS</code></li>
   <li><code class="prettyprint">IS NOT</code></li>
+  <li><code class="prettyprint">IN</code></li>
   <li><code class="prettyprint">%lt; ( equivalent to &lt; )</code></li>
   <li><code class="prettyprint">%lte; ( equivalent to &lt;= )</code></li>
   <li><code class="prettyprint">%gt; ( equivalent to &gt; )</code></li>
@@ -538,6 +539,7 @@ EOS
   <li><code class="prettyprint">\$gte ( equivalent to &gt;= )</code></li>
   <li><code class="prettyprint">\$eq ( equivalent to = )</code></li>
   <li><code class="prettyprint">\$neq ( equivalent to != )</code></li>
+  <li><code class="prettyprint">\$in ( equivalent to IN )</code></li>
 </ul>
 <h4>
   Available Connectors
@@ -546,67 +548,59 @@ EOS
   <li><code class="prettyprint">AND</code></li>
   <li><code class="prettyprint">OR</code></li>
 </ul>
-<p>
-<br>
-  For example, to collect all checkTotals records
-  where the checkTax is greater than 17.00,
-  and the openedDate is greater than or equal to 2014&#8209;09&#8209;24,
-  we could make the following call 
-  (note the URI encoding, and the filter= portion of the query string):
-</p>
-EOS
-        , 'examples' => array(
-            'request' => <<<EOS
-GET https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals?&filter=checkTax%20%3E%2017.00%20AND%20openedDate%20%3E%3D%202014-09-24&select=checkId,%20openedDate,%20checkTotal,%20checkTax,%20checkSubtotal,%20checkDetailId,%20checkDetailSubtotal,%20checkDetailTax,%20checkDetailTotal HTTP/1.1
-EOS
-            , 'response' => <<<EOS
-HTTP/1.1 200 OK
-{
-  "checks": [
-    {
-      "checkId": 2356,
-      "openedDate": "2014-09-24",
-      "checkSubtotal": 85,
-      "checkTax": 17.85,
-      "checkTotal": 102.85,
-      "details": [
-        {
-          "checkDetailId": 7601,
-          "checkDetailSubtotal": 15,
-          "checkDetailTax": 3.15,
-          "checkDetailTotal": 18.15
-        },
-        {
-          "checkDetailId": 7602,
-          "checkDetailSubtotal": 70,
-          "checkDetailTax": 14.7,
-          "checkDetailTotal": 84.7
-        }
-      ]
-    },
-    {
-      "checkId": 2357,
-      "openedDate": "2014-09-24",
-      "checkSubtotal": 85,
-      "checkTax": 17.85,
-      "checkTotal": 102.85,
-      "details": [
-        {
-          "checkDetailId": 7603,
-          "checkDetailSubtotal": 15,
-          "checkDetailTax": 3.15,
-          "checkDetailTotal": 18.15
-        },
-        {
-          "checkDetailId": 7604,
-          "checkDetailSubtotal": 70,
-          "checkDetailTax": 14.7,
-          "checkDetailTotal": 84.7
-        }
-      ]
-    }
-  ]
-}
+<div class="row">
+  <div class="col-xs-12">
+    <h4>
+      Examples
+    </h4>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "amount": 43.2 } </pre>
+    <pre> [amount] = 43.2 </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "amount": 43.2, "type": 2 } </pre>
+    <pre> [amount] = 43.2 AND [type] = 2 </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "amount": null } </pre>
+    <pre> [amount] IS NULL </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "amount": { "\$gte": 43.2 } } </pre>
+    <pre> [amount] >= 43.2 </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "amount": { "\$gte": 43.2, "\$lte": 55.7 } } </pre>
+    <pre> ([amount] >= 43.2 AND [amount] <= 55.7) </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "amount": 43.2, "timestamp": { \$gte: "2016-01-01T00:00:00" } } </pre>
+    <pre> ([amount] = 43.2 AND [timestamp] >= '2016-01-01T00:00:00') </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "\$or": [ { "amount": 43.2 }, { "userId" : { "\$nin": [ 1, 2, 3 ] } } ] } </pre>
+    <pre> ([amount] = 43.2) OR ([userId] NOT IN (1, 2, 3)) </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "\$or": [ { "amount": 43.2, "type": 2 }, { "userId" : { "\$nin": [ 1, 2, 3 ] } } ] } </pre>
+    <pre> ([amount] = 43.2 AND [type] = 2) OR ([userId] NOT IN (1, 2, 3)) </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={ "notes": { "\$has": "Last Tuesday" } } </pre>
+    <pre> [notes] LIKE '%Last Tuesday%' </pre>
+  </div>
+  <div class="col-xs-12" style="margin-bottom:15px;">
+    <pre class="prettyprint"> ?where={"\$not":{"\$or":[{"transaction":null},{"\$and":[{"payType":3},{"payStatus":{"\$neq":2}}]}]}} </pre>
+    <pre>NOT (
+  [transaction] IS NULL
+  OR (
+    [payType] = 3
+    AND [payStatus] != 2
+  )
+)</pre>
+  </div>
+</div>
 EOS
             )
         );
