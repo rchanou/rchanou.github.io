@@ -17,6 +17,14 @@ class RegistrationController extends BaseController
         $this->image_paths = array();
         $this->image_urls = array();
 
+        //JS and CSS uploader data
+        $this->js_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'cs-registration' . DIRECTORY_SEPARATOR . 'js';
+        $this->css_directory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'cs-registration' . DIRECTORY_SEPARATOR . 'css';
+        $this->js_path = $this->js_directory . DIRECTORY_SEPARATOR . 'custom-js.js';
+        $this->js_url = '/assets/cs-registration/js/' . 'custom-js.js';
+        $this->css_path = $this->css_directory . DIRECTORY_SEPARATOR . 'custom-styles.css';
+        $this->css_url = '/assets/cs-registration/css/' . 'custom-styles.css';
+
         foreach($this->image_filenames as $currentFileName)
         {
             $this->image_paths[$currentFileName] = $this->image_directory . DIRECTORY_SEPARATOR . $currentFileName;
@@ -110,8 +118,10 @@ class RegistrationController extends BaseController
                   'registrationSettings' => $registrationSettingsData,
                   'mainEngineSettings' => $mainEngineSettingsData,
                   'countries' => $this->countries,
-                'background_image_url' => is_file($this->image_paths['bg_default.jpg']) ? $this->image_urls['bg_default.jpg'] : null,
-                'header_image_url' => is_file($this->image_paths['default_header.png']) ? $this->image_urls['default_header.png'] : null
+                  'background_image_url' => is_file($this->image_paths['bg_default.jpg']) ? $this->image_urls['bg_default.jpg'] : null,
+                  'header_image_url' => is_file($this->image_paths['default_header.png']) ? $this->image_urls['default_header.png'] : null,
+                  'custom_css_url' => is_file($this->css_path) ? $this->css_url : null,
+                  'custom_js_url' => is_file($this->js_path) ? $this->js_url : null
             ));
     }
 
@@ -174,7 +184,6 @@ class RegistrationController extends BaseController
         $registrationSettings['defaultCountry'] = isset($input['defaultCountry']) ? $input['defaultCountry'] : '';
         $registrationSettings['emailText'] = isset($input['emailText']) ? $input['emailText'] : '';
         $registrationSettings['textingWaiver'] = isset($input['textingWaiver']) ? $input['textingWaiver'] : '';
-        
         if (isset($input['waiverFontSize'])) { $registrationSettings['waiverFontSize'] = $input['waiverFontSize'];}
 
         $newMainEngineSettings = array();
@@ -510,6 +519,55 @@ class RegistrationController extends BaseController
             exec('c:\windows\system32\icacls.exe ' . $this->image_paths[$filename] . ' /inheritance:e');
 
             return Redirect::to('registration/settings')->with('message', 'Image uploaded successfully!');
+        }
+
+    }
+
+    public function updateFile()
+    {
+        // Build the input for our validation
+        $input = array('customfile' => Input::file('customfile'));
+        $filename = Input::get('filename');
+        $filetype = Input::get('filetype');
+
+        // Within the ruleset, make sure we let the validator know that this
+        $rules = array(
+          'customfile' => 'required|max:10000',
+        );
+
+        // Now pass the input and rules into the validator
+        $validator = Validator::make($input, $rules);
+
+        // Check to see if validation fails or passes
+        if ($validator->fails()) {
+            // VALIDATION FAILED
+            return Redirect::to('registration/settings')->with('error', 'The provided file was not accepted.');
+        } else {
+            // SAVE THE FILE...
+            $file_directory = "";
+            $file_path = "";
+            if ($filetype == 'js')
+            {
+                $file_directory = $this->js_directory;
+                $file_path = $this->js_path;
+            }
+            else if ($filetype == 'css')
+            {
+                $file_directory = $this->css_directory;
+                $file_path = $this->css_path;
+            }
+            // Ensure the directory exists, if not, create it!
+            if(!is_dir($file_directory)) mkdir($file_directory, null, true);
+
+            // Move the file, overwriting if necessary
+            Input::file('customfile')->move($file_directory, $filename);
+
+            // Fix permissions on Windows (works on 2003?). This is because by default the uploaded image
+            // does not inherit permissions from the folder it is moved to. Instead, it retains the
+            // permissions of the temporary folder.
+            exec('c:\windows\system32\icacls.exe ' . $file_path . ' /inheritance:e');
+
+            return Redirect::to('registration/settings')->with('message', 'File uploaded successfully!');
         }
 
     }

@@ -459,6 +459,74 @@ Registrations Settings
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="widget-box">
+                    <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                        <h5>Custom CSS</h5>
+                    </div>
+                    <div class="widget-content nopadding">
+                        {{ Form::open(array('action'=>'RegistrationController@updateFile','files' => true, 'class' => 'form-horizontal')) }}
+                        @if(!empty($custom_css_url))
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3 col-lg-2 control-label">Current CSS</div><div class="col-sm-9 col-md-9 col-lg-10 control-label" style="text-align: left;"><a href="{{$custom_css_url}}" target="_blank">custom-styles.css</a></div>
+                            </div>
+                        @endif
+                        <div class="form-group">
+                            <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('customfile','Select a CSS file',array('id'=>'','class'=>'')) }}</label>
+                            <div class="col-sm-9 col-md-9 col-lg-10">
+                                {{ Form::file('customfile','',array('id'=>'','class'=>'')) }}
+                                <span class="help-block text-left">This CSS file will be added at the end of all other CSS files on the page.</span>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <input type="hidden" name="filename" value="custom-styles.css">
+                            <input type="hidden" name="filetype" value="css">
+                            {{ Form::submit('Upload', array('class' => 'btn btn-info')) }}
+                        </div>
+                        {{ Form::close() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="widget-box">
+                    <div class="widget-title">
+                <span class="icon">
+                  <i class="fa fa-align-justify"></i>
+                </span>
+                        <h5>Custom JS</h5>
+                    </div>
+                    <div class="widget-content nopadding">
+                        {{ Form::open(array('action'=>'RegistrationController@updateFile','files' => true, 'class' => 'form-horizontal')) }}
+                        @if(!empty($custom_js_url))
+                            <div class="row">
+                                <div class="col-sm-3 col-md-3 col-lg-2 control-label">Current JS</div><div class="col-sm-9 col-md-9 col-lg-10 control-label" style="text-align: left;"><a href="{{$custom_js_url}}" target="_blank">custom-js.js</a></div>
+                            </div>
+                        @endif
+                        <div class="form-group">
+                            <label class="col-sm-3 col-md-3 col-lg-2 control-label">{{ Form::label('customfile','Select a JS file',array('id'=>'','class'=>'')) }}</label>
+                            <div class="col-sm-9 col-md-9 col-lg-10">
+                                {{ Form::file('customfile','',array('id'=>'','class'=>'')) }}
+                                <span class="help-block text-left">This JS file will be added at the end of all other JS files on the page.</span>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <input type="hidden" name="filename" value="custom-js.js">
+                            <input type="hidden" name="filetype" value="js">
+                            {{ Form::submit('Upload', array('class' => 'btn btn-info')) }}
+                        </div>
+                        {{ Form::close() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 

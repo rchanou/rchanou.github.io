@@ -15,11 +15,36 @@
     <link rel="stylesheet" href="css/cs-registration.css?<?php echo time(); ?>" />
 
     <?php
+
+        function remoteFileExists($url) {
+            $url = str_replace('https:', 'http:' , $url);
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_NOBODY, true);
+            $result = curl_exec($curl);
+            $ret = false;
+            if ($result !== false) {
+                $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                if ($statusCode == 200) {
+                    $ret = true;
+                }
+            }
+            curl_close($curl);
+            return $ret;
+        }
+
         if (file_exists('css/custom-styles.css')) //Used for tracks to overwrite css
         {
             echo '<link rel="stylesheet" href="css/custom-styles.css?' . time() .'" />';
         }
+        if (file_exists('css/custom-styles.css')) //Used for tracks to overwrite css
+        {
+            echo '<link rel="stylesheet" href="css/custom-styles.css?' . time() .'" />';
+        }
+
     ?>
+
+    <?php $customStylesURL = 'https://' . $_SERVER['HTTP_HOST'] . '/assets/cs-registration/css/custom-styles.css?' . time(); //To prevent caching ?>
+    {{ (remoteFileExists($customStylesURL) ? HTML::style($customStylesURL) : '') }}
     @show
     <!-- END CSS INCLUDES -->
 
@@ -111,6 +136,10 @@
 
 {{ HTML::script('js/vendors/modernizr-latest.js') }}
 {{ HTML::script('js/vendors/jquery-ui/jquery-ui.min.js') }}
+
+    <!-- Custom JS if present in /assets -->
+    <?php $customJavaScriptURL = 'https://' . $_SERVER['HTTP_HOST'] . '/assets/cs-registration/js/custom-js.js?' . time(); //To prevent caching ?>
+    {{ ((remoteFileExists($customJavaScriptURL)) ? HTML::script($customJavaScriptURL) : '') }}
 
     <script>
         if (!Modernizr.inputtypes.date) {
