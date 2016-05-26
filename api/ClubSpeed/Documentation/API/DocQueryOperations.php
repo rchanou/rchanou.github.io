@@ -210,25 +210,29 @@ EOS
       <thead>
         <tr>
           <th>Property</th>
-          <th>Comparator</th>
+          <th>Example</th>
+          <th>Parsed</th>
           <th>Notes</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>\$and</td>
-          <td>And</td>
-          <td>To be used with array of comparison objects. If multiple comparators are provided in the same object, then an implicit \$and grouping will be applied to them.</td>
+          <td><pre class="prettyprint">{"\$and": [{"col1":1},{"col2":2}]}</pre></td>
+          <td><pre class="prettyprint">[col1] = 1 AND [col2] = 2</pre></td>
+          <td>Note that if multiple comparators are provided in the same object, then an implicit \$and grouping will be applied to them. See below for examples.</td>
         </tr>
         <tr>
           <td>\$or</td>
-          <td>Or</td>
-          <td>To be used with array of comparison objects</td>
+          <td><pre class="prettyprint">{"\$or": [{"col1":1},{"col2":2}]}</pre></td>
+          <td><pre class="prettyprint">[col1] = 1 OR [col2] = 2</pre></td>
+          <td></td>
         </tr>
         <tr>
           <td>\$not</td>
-          <td>Not</td>
-          <td>To be used with a comparison object</td>
+          <td><pre class="prettyprint">{"\$not": { "col": 1 } }</pre></td>
+          <td><pre class="prettyprint">NOT ( [col] = 1 )</pre></td>
+          <td></td>
         </tr>
       </tbody>
     </table>
@@ -277,7 +281,17 @@ EOS
     <pre> [notes] LIKE '%Last Tuesday%' </pre>
   </div>
   <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={"\$not":{"\$or":[{"transaction":null},{"\$and":[{"payType":3},{"payStatus":{"\$neq":2}}]}]}} </pre>
+    <pre class="prettyprint"> ?where={
+  "\$not": {
+    "\$or": [
+      { "transaction": null },
+      { "\$and": [
+        { "payType": 3 },
+        { "payStatus": { "\$neq": 2 } }
+      ]}
+    ]
+  }
+}</pre>
     <pre>NOT (
   [transaction] IS NULL
   OR (
@@ -555,54 +569,31 @@ EOS
     </h4>
   </div>
   <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "amount": 43.2 } </pre>
+    <pre class="prettyprint"> ?filter=amount \$eq 43.2 </pre>
     <pre> [amount] = 43.2 </pre>
   </div>
   <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "amount": 43.2, "type": 2 } </pre>
+    <pre class="prettyprint"> ?filter=amount = 43.2 AND type = 2 </pre>
     <pre> [amount] = 43.2 AND [type] = 2 </pre>
   </div>
   <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "amount": null } </pre>
+    <pre class="prettyprint"> ?filter=amount IS NULL </pre>
     <pre> [amount] IS NULL </pre>
   </div>
   <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "amount": { "\$gte": 43.2 } } </pre>
+    <pre class="prettyprint"> ?filter=amount >= 43.2 </pre>
     <pre> [amount] >= 43.2 </pre>
   </div>
   <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "amount": { "\$gte": 43.2, "\$lte": 55.7 } } </pre>
-    <pre> ([amount] >= 43.2 AND [amount] <= 55.7) </pre>
+    <pre class="prettyprint"> ?filter=amount >= 43.2 AND amount <= 55.7 </pre>
+    <pre> [amount] >= 43.2 AND [amount] <= 55.7 </pre>
   </div>
   <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "amount": 43.2, "timestamp": { \$gte: "2016-01-01T00:00:00" } } </pre>
-    <pre> ([amount] = 43.2 AND [timestamp] >= '2016-01-01T00:00:00') </pre>
-  </div>
-  <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "\$or": [ { "amount": 43.2 }, { "userId" : { "\$nin": [ 1, 2, 3 ] } } ] } </pre>
-    <pre> ([amount] = 43.2) OR ([userId] NOT IN (1, 2, 3)) </pre>
-  </div>
-  <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "\$or": [ { "amount": 43.2, "type": 2 }, { "userId" : { "\$nin": [ 1, 2, 3 ] } } ] } </pre>
-    <pre> ([amount] = 43.2 AND [type] = 2) OR ([userId] NOT IN (1, 2, 3)) </pre>
-  </div>
-  <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={ "notes": { "\$has": "Last Tuesday" } } </pre>
-    <pre> [notes] LIKE '%Last Tuesday%' </pre>
-  </div>
-  <div class="col-xs-12" style="margin-bottom:15px;">
-    <pre class="prettyprint"> ?where={"\$not":{"\$or":[{"transaction":null},{"\$and":[{"payType":3},{"payStatus":{"\$neq":2}}]}]}} </pre>
-    <pre>NOT (
-  [transaction] IS NULL
-  OR (
-    [payType] = 3
-    AND [payStatus] != 2
-  )
-)</pre>
+    <pre class="prettyprint"> ?filter=amount = 43.2 OR timestamp >= 2016-01-01T00:00:00 </pre>
+    <pre> [amount] = 43.2 OR [timestamp] >= '2016-01-01T00:00:00' </pre>
   </div>
 </div>
 EOS
-            )
         );
 
         $this->calls['property-matching'] = array(
