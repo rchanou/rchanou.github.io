@@ -479,6 +479,12 @@ class CustomersLogic extends BaseLogic {
         if (!isset($customer->RacerName) || empty($customer->RacerName))
             $customer->RacerName = $customer->FName . " " . $customer->LName;
 
+        if (!isset($customer->BirthDate) || empty($customer->BirthDate)) {
+            // match POS functionality.
+            $customer->BirthDate = '1753-01-01T00:00:00.00';
+            $customer->IgnoreDOB = 1;
+        }
+
         // grab the CustID using an internal SQL call (can't be done using @@IDENTITY or anything of the like, due to the IDs matching with a LocationID)
         $customer->CustID = $this->getNextCustId(); //$CustID;
         if (empty($customer->CrdID))
@@ -545,6 +551,12 @@ class CustomersLogic extends BaseLogic {
         // if RacerName is missing, use FName + " " + LName
         if (!isset($customer->RacerName) || empty($customer->RacerName))
             $customer->RacerName = $customer->FName . " " . $customer->LName;
+
+        if (!isset($customer->BirthDate) || empty($customer->BirthDate)) {
+            // match POS functionality.
+            $customer->BirthDate = '1753-01-01T00:00:00.00';
+            $customer->IgnoreDOB = 1;
+        }
 
         // grab the CustID using an internal SQL call (can't be done using @@IDENTITY or anything of the like, due to the IDs matching with a LocationID)
         $customer->CustID = $this->getNextCustId(); //$CustID;
