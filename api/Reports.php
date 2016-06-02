@@ -350,6 +350,7 @@ EOS;
 		$tsql = <<<EOD
 select
 
+cd.CheckDetailID AS 'Check Detail ID',
 c.CheckID AS 'Check ID',
 cd.ProductID AS "Product ID",
 cd.ProductName AS "Product Name",
