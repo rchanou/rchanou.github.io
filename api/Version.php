@@ -4,11 +4,11 @@ class Version
 {
     public $restler;
     private $logic;
-		
-		// Versions of various applications and modules
-		public $speedscreenVersion = '2.0.0';
-		public $apiVersion = '1.7';
-		public $apiLastUpdatedAt = '5/16/2016 14:00';
+
+    // Versions of various applications and modules
+    public $speedscreenVersion = '2.0.0';
+    public $apiVersion = '1.7';
+    public $apiLastUpdatedAt = '5/16/2016 14:00';
 
     function __construct(){
         $this->logic = $GLOBALS['logic'];
@@ -19,7 +19,7 @@ class Version
         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
         }
-        
+
         switch($desiredData) {
             case "current":
                 return $this->current();
@@ -47,6 +47,9 @@ class Version
                 break;
             case "php":
                 return $this->php();
+                break;
+            case "cardpresentprocessor":
+                return $this->cardPresentProcessor();
                 break;
             default:
                 throw new RestException(401, "Invalid version parameter!");
@@ -101,7 +104,7 @@ class Version
         $output["Version"] = php_uname('v');
         return $output;
     }
-    
+
     public function sql()
     {
         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
@@ -112,7 +115,7 @@ class Version
         $tsql_params = array();
 
         $rows = $this->run_query($tsql, $tsql_params);
-        
+
         $output = count($rows) > 0 ? $rows[0][''] : null;
         return array('SqlVersion' => $output);
     }
@@ -211,6 +214,27 @@ class Version
         $phpversion = phpversion();
         $output = array(
           'php' => $phpversion
+        );
+        return $output;
+    }
+
+    // (could not use whitelisting as I cannot guarantee/know all of the TerminalNames in advance via /settings/get and /controlPanel doesn't support whitelisting)
+    public function cardPresentProcessor() {
+        if (@$_REQUEST['secretkey'] !== "GusGus6021023!!GiftCardCustomer") {
+            throw new RestException(401, "Invalid authorization!");
+        }
+
+        $tsql = "SELECT TerminalName, SettingName, SettingValue, Fixed, CreatedDate FROM ControlPanel WHERE SettingName IN ('CardPresentProcessor')";
+        $tsql_params = array();
+        $rows = $this->run_query($tsql, $tsql_params);
+        $settings = array();
+        foreach($rows as $currentSetting)
+        {
+            $settings[$currentSetting["TerminalName"]] = $currentSetting;
+        }
+
+        $output = array(
+          'CardPresentProcessors' => $settings
         );
         return $output;
     }
