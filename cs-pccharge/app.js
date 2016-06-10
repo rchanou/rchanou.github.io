@@ -95,7 +95,7 @@ function processRequest(incomingData, cb) {
         console.log('Parsed XML:', parsedXml)
 
         var command = _.has(parsedXml, 'XML_REQUEST.COMMAND.0') ? parsedXml.XML_REQUEST.COMMAND[0] : null;
-console.log(command)
+
         switch(command) {
           case '1': // CHARGE -- CAPTURED/APPROVED = Success; Anything else is a failure
           case '8':
@@ -251,7 +251,7 @@ function authnetRefund(opts, cb) {
                   "expirationDate": "XXXX"
               }
           },
-          "refTransId": opts.payment.transaction
+          "refTransId": opts.payment.troutd
       }
   }
 
