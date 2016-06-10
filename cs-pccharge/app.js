@@ -19,7 +19,6 @@ var _ = require('lodash');
 var request = require('request');
 var async = require('async');
 var parseString = require('xml2js').parseString;
-var AuthorizeNet = require('authorize-net');
 var jsonfile = require('jsonfile');
 var AuthNetRequest = require('auth-net-request');
 
