@@ -31,6 +31,10 @@ class Settings extends BaseApi
         'MobileApp' => true,
         'Booking' => array(
             'giftCardSalesEnabled' => true
+        ),
+        'MainEngine' => array(
+            'PCCharge_MerchantNumber' => true,
+            'BusinessName' => true
         )
     );
 
