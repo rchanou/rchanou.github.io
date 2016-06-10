@@ -1,0 +1,8 @@
+{
+    "AUTH_NET_API_LOGIN_ID": "CS-SUPPORT-TODO",
+    "AUTH_NET_TRANSACTION_KEY": "CS-SUPPORT-TODO",
+    "apiKey": "CS-SUPPORT-TODO",
+    "apiHost": "127.0.0.1",
+    "logging": false,
+    "testMode": false
+}
