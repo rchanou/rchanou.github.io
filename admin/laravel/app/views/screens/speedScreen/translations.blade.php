@@ -48,7 +48,7 @@ Translations
                                     <div class="row">
                                         <div class="col-sm-12">
                                         <label>Culture: </label>
-                                        <select name="cultureDropdown" id="cultureDropdown">
+                                        <select style="min-width: 200px;" name="cultureDropdown" id="cultureDropdown">
                                         @foreach($supportedCultures as $cultureKey => $cultureName)
                                             <option value="{{$cultureKey}}" @if($cultureKey == $currentCulture)selected="selected"@endif>
                                             {{$cultureName}}
@@ -115,7 +115,7 @@ Translations
                                   <div class="row">
                                       <div class="col-sm-12">
                                           <label>Culture: </label>
-                                          <select name="cultureDropdown_scoreboard" id="cultureDropdown_scoreboard">
+                                          <select style="min-width: 200px;" name="cultureDropdown_scoreboard" id="cultureDropdown_scoreboard">
                                               @foreach($supportedCultures as $cultureKey => $cultureName)
                                                   <option value="{{$cultureKey}}" @if($cultureKey == $currentCulture)selected="selected"@endif>
                                                       {{$cultureName}}

@@ -131,7 +131,7 @@ Speed Screen Channels
                                     <div class="form-group">
                                         <label class="col-sm-3 col-md-3 col-lg-2 control-label">Target Monitor</label>
                                         <div class="col-sm-9 col-md-9 col-lg-10">
-                                            <select name="targetMonitor" class="targetMonitor select2-offscreen" tabindex="-1">
+                                            <select name="targetMonitor" class="targetMonitor" tabindex="-1" style="min-width: 200px;">
                                                 <option value="1">Monitor 1 (Default)</option>
                                                 @for($i=2; $i <= $numberOfMonitors; $i++)
                                                 <option value="{{$i}}">Monitor {{$i}}</option>

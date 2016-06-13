@@ -106,7 +106,7 @@ class QuickPOSController extends BaseController
             $heatTypesMigrationWasRun = true;
         }
 
-        $products = CS_API::getJSON('products', array('order' => 'description', 'limit' => 999, 'filter' => 'productType <= 2'));
+        $products = CS_API::getJSON('products', array('select' => 'productId,productType,description,enabled,deleted', 'order' => 'description', 'limit' => 9999, 'filter' => 'productType <= 2'));
         if (!isset($products->products))
         {
             return Redirect::to('/disconnected');

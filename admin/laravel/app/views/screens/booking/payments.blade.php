@@ -65,7 +65,7 @@ Payment Processors
                                     <div class="row">
                                         <div class="col-sm-12">
                                         <label>Payment processor: </label>
-                                        <select name="paymentProcessorDropdown" id="paymentProcessorDropdown">
+                                        <select name="paymentProcessorDropdown" id="paymentProcessorDropdown" style="min-width: 200px;">
                                         @foreach($supportedPaymentTypes as $paymentType)
                                             <option value="{{$paymentType->name}}" @if($paymentType->name == $currentPaymentType)selected="selected"@endif>
                                             {{$paymentType->name}} @if($paymentType->name == $currentPaymentType)<em>(current)</em>@endif

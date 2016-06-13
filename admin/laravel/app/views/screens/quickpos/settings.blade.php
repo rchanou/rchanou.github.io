@@ -92,14 +92,14 @@ QuickPOS Settings
                                <div class="form-group">
                                    <label class="col-sm-4 col-md-4 col-lg-4 control-label">Tracks Shown</label>
                                    <div class="col-sm-8 col-md-8 col-lg-8">
-                                       <select multiple="multiple" name="QuickPOSTrackNumbers[]" id="QuickPOSTrackNumbers" placeholder="All" value="{{$quickPOSSettings['QuickPOSTrackNumbers']}}">
+                                       <select style="width: 100%;" multiple="multiple" name="QuickPOSTrackNumbers[]" id="QuickPOSTrackNumbers" value="{{$quickPOSSettings['QuickPOSTrackNumbers']}}">
                                            @foreach($tracks as $track)
                                                <option value="{{$track->id}}" @if(in_array($track->id,$trackIds))selected="selected"@endif>
                                                    {{$track->name}}
                                                </option>
                                            @endforeach
                                        </select>
-                                       <span class="help-block text-left">Which tracks to show in the track scheduler in the left pane.</span>
+                                       <span class="help-block text-left">Which tracks to show in the track scheduler in the left pane. <br/>Leave blank for all tracks.</span>
                                    </div>
                                </div>
                                @endif
@@ -146,21 +146,25 @@ QuickPOS Settings
                                         </label>
                                         <div class="col-sm-8 col-md-8 col-lg-8">
                                             <label class="control-label">Default Product: </label>
-                                            <select style="width: 100%;" name="defaultProductForHeatTypesId-{{$heatType->heatTypesId}}" value="{{isset($heatType->productId) ?: ""}}">
+                                            <select class="productSelect" style="width: 100%;" name="defaultProductForHeatTypesId-{{$heatType->heatTypesId}}" value="{{isset($heatType->productId) ?: ""}}">
                                                 <option value="null">None</option>
                                                 @foreach($products as $product)
+                                                    @if($product->productId == $heatType->productId)
                                                     <option value="{{$product->productId}}" @if($product->productId == $heatType->productId)selected="selected"@endif>
                                                         {{$product->description}}
                                                     </option>
+                                                    @endif
                                                 @endforeach
                                             </select><br/>
                                             @if($heatTypeProductsTableExists)
                                             <label class="control-label">Alternate Products: </label>
-                                            <select style="width: 100%;" multiple name="alternateProductsForHeatTypesId-{{$heatType->heatTypesId}}[]" value="">
+                                            <select class="productSelectAlternate" style="width: 100%;" multiple name="alternateProductsForHeatTypesId-{{$heatType->heatTypesId}}[]" value="">
                                                 @foreach($products as $product)
+                                                    @if(isset($heatTypeProducts[$heatType->heatTypesId][$product->productId]))
                                                     <option value="{{$product->productId}}" @if(isset($heatTypeProducts[$heatType->heatTypesId][$product->productId]))selected="selected"@endif>
                                                         {{$product->description}}
                                                     </option>
+                                                    @endif
                                                 @endforeach
                                             </select>
                                             @endif
@@ -212,12 +216,36 @@ QuickPOS Settings
 
     $(document).ready(function () {
 
-        window.setTimeout(function() {
-          $(".fadeAway").fadeTo(500, 0).slideUp(500, function(){
-              $(this).remove();
-          });
+        window.setTimeout(function () {
+            $(".fadeAway").fadeTo(500, 0).slideUp(500, function () {
+                $(this).remove();
+            });
         }, 5000);
 
+        var products = {{json_encode($products)}};
+        var productsData = products.map(function (element) {
+            return {id: element.productId, text: element.description};
+        });
+
+        $(".productSelect").one('select2:opening', function (e) {
+            var $this = $(this);
+            $this.select2({
+                data: productsData
+            }).trigger('change');
+            setTimeout(function(){
+                $this.select2("open");
+            }, 100);
+        });
+
+        $(".productSelectAlternate").one('select2:opening', function (e) {
+            var $this = $(this);
+            $this.select2({
+                data: productsData
+            }).trigger('change');
+            setTimeout(function(){
+                $this.select2("open");
+            }, 100);
+        });
     });
 
 </script>

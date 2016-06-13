@@ -12,7 +12,7 @@
     {{ HTML::style('css/fullcalendar.css') }}
     {{ HTML::style('css/jquery.jscrollpane.css') }}
     {{ HTML::style('css/icheck/flat/blue.css') }}
-    {{ HTML::style('css/select2.css') }}
+    {{ HTML::style('css/select2.css?v=002') }}
     {{ HTML::style('css/unicorn.css') }}
     {{ HTML::style('css/admin.css') }}
     <!--[if lt IE 9]>
@@ -207,7 +207,7 @@
 {{ HTML::script('js/jquery.sparkline.min.js') }}
 {{ HTML::script('js/fullcalendar.min.js') }}
 {{ HTML::script('js/jquery.icheck.min.js') }}
-{{ HTML::script('js/select2.min.js') }}
+{{ HTML::script('js/select2.min.js?v=002') }}
 {{ HTML::script('js/jquery.nicescroll.min.js') }}
 {{ HTML::script('js/unicorn.js') }}
 {{ HTML::script('js/unicorn.form_common.js') }}

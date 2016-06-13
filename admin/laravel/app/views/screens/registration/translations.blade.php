@@ -142,7 +142,7 @@ Translations
                                 <div class="row">
                                     <div class="col-sm-12">
                                     <label>Culture: </label>
-                                    <select name="cultureDropdown" id="cultureDropdown">
+                                    <select style="min-width: 200px;" name="cultureDropdown" id="cultureDropdown">
                                     @foreach($supportedCultures as $cultureKey => $cultureName)
                                         <option value="{{$cultureKey}}" @if($cultureKey == $currentCulture)selected="selected"@endif>
                                         {{$cultureName}} @if($cultureKey == $currentCulture)<em>(default)</em>@endif
