@@ -53,12 +53,6 @@ if(!config.AUTH_NET_TRANSACTION_KEY)
 if(!config.apiKey)
   console.log('Invalid Club Speed API Key given. Please set in config.json file. Value currently is: ' + config.apiKey)
 
-var authnet = new AuthorizeNet({
-  API_LOGIN_ID: config.AUTH_NET_API_LOGIN_ID,
-  TRANSACTION_KEY: config.AUTH_NET_TRANSACTION_KEY,
-  testMode: config.testMode
-});
-
 var AuthNet = new AuthNetRequest({
   api: config.AUTH_NET_API_LOGIN_ID,
   key: config.AUTH_NET_TRANSACTION_KEY,
@@ -144,6 +138,9 @@ function processCharge(xml, cb) { // CHARGE -- CAPTURED/APPROVED = Success; Anyt
                 "cardNumber": xml.XML_REQUEST.ACCT_NUM[0],
                 "expirationDate": xml.XML_REQUEST.EXP_DATE[0]
             }
+        },
+        "order": {
+          "invoiceNumber": xml.XML_REQUEST.TICKET_NUM[0],
         }
     }
   };
