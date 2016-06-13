@@ -264,7 +264,7 @@ function authnetRefund(opts, cb) {
       return cb(errMsg);
     } else {
       var pcchargeResponse = refundResponseTemplate
-        .replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0])
+        .replace('##TICKET##', opts.xml.XML_REQUEST.TICKET_NUM[0])
         .replace('##TROUTD##', response.transactionResponse.transId)
         .replace('##INTRN_SEQ_NUM##', Date.now());
 
