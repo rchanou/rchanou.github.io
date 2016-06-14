@@ -337,7 +337,8 @@ var server = net.createServer(function(socket) {
 })
 
 // Start the server!
-server.listen({ port: config.port }, function() {
+//server.listen({ port: config.port }, function() {
+server.listen(config.port, function() { // Older style command
   address = server.address();
   console.log('Opened CS-PCCharge Server on %j', address);
 }).on('connection', function (socket) {
