@@ -34,7 +34,7 @@ class PaymentMapper extends BaseMapper {
             // , 'AVS'                   => 'avs'
             // , 'ReferenceNumber'       => ''
             // , 'ResultCode'            => ''
-            // , 'TroutD'                => ''
+            , 'TroutD'                => 'troutd'
             // , 'TransactionDate'       => ''
             // , 'AutAmount'             => ''
             // , 'LastFour'              => ''
