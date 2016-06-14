@@ -156,7 +156,7 @@ function processCharge(xml, cb) { // CHARGE -- CAPTURED/APPROVED = Success; Anyt
   }
 
   AuthNet.send('createTransaction', transaction, function(err, response) {
-    console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', err, '\n\n\nAUTHNET RESPONSE:', response);
+    console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', JSON.stringify(err, null, 4), '\n\n\nAUTHNET RESPONSE:', JSON.stringify(response, null, 4));
 
     if(err) {
       var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
@@ -256,7 +256,7 @@ function authnetRefund(opts, cb) {
   }
 
   AuthNet.send('createTransaction', transaction, function(err, response) {
-    console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', err, '\n\n\nAUTHNET RESPONSE:', response);
+    console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', JSON.stringify(err, null, 4), '\n\n\nAUTHNET RESPONSE:', JSON.stringify(response, null, 4));
 
     if(err) {
       var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
@@ -295,7 +295,7 @@ function processVoid(xml, cb) { // VOID -- CAPTURED/VOIDED = Success; Anything e
   };
 
   AuthNet.send('createTransaction', transaction, function(err, response) {
-    console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', err, '\n\n\nAUTHNET RESPONSE:', response);
+    console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', JSON.stringify(err, null, 4), '\n\n\nAUTHNET RESPONSE:', JSON.stringify(response, null, 4));
 
     if(err) {
       var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
