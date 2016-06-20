@@ -34,7 +34,8 @@ class Settings extends BaseApi
         ),
         'MainEngine' => array(
             'PCCharge_MerchantNumber' => true,
-            'BusinessName' => true
+            'BusinessName' => true,
+            'PCCharge_Processor' => true
         )
     );
 
