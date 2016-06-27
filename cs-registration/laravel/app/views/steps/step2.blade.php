@@ -77,7 +77,7 @@
     });
 
     function autofillFormFields() {
-        FB.api('/me', function(response) {
+        FB.api('/me', { 'fields': 'first_name,last_name,email,birthday,gender' }, function(response) {
             $('#facebookId').val(response.id);
             $('#firstname').val(response.first_name);
             $('#lastname').val(response.last_name);
