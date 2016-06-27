@@ -53,7 +53,7 @@
             appId      : '296582647086963',
             cookie     : true,
             xfbml      : true,
-            version    : 'v2.0'
+            version    : 'v2.6'
         });
 
         FB.getLoginStatus(function(response) {

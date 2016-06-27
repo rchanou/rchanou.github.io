@@ -68,6 +68,7 @@
 <script>
 
     // Workaround for FB bug: https://developers.facebook.com/bugs/1518419788457961/
+    Cookies.remove('fbsr_296582647086963',{ path: '/', domain: '.clubspeedtiming.com' });
     Cookies.remove('fblo_296582647086963',{ path: '/', domain: '.clubspeedtiming.com' });
     Cookies.remove('fbm_296582647086963',{ path: '/', domain: '.clubspeedtiming.com' });
 
@@ -75,6 +76,7 @@
         if (response.status === 'connected') {
             FB.logout(function(response) {
                 // Workaround for FB bug: https://developers.facebook.com/bugs/1518419788457961/
+                Cookies.remove('fbsr_296582647086963',{ path: '/', domain: '.clubspeedtiming.com' });
                 Cookies.remove('fblo_296582647086963',{ path: '/', domain: '.clubspeedtiming.com' });
                 Cookies.remove('fbm_296582647086963',{ path: '/', domain: '.clubspeedtiming.com' });
             });
@@ -86,7 +88,7 @@
             appId      : '296582647086963',
             cookie     : true,
             xfbml      : true,
-            version    : 'v2.0'
+            version    : 'v2.6'
         });
 
         FB.getLoginStatus(function(response) {
