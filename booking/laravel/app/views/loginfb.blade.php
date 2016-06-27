@@ -25,7 +25,7 @@
                 appId      : '296582647086963',
                 cookie     : true,
                 xfbml      : true,
-                version    : 'v2.0'
+                version    : 'v2.6'
             });
 
             //Determines the user's login state
@@ -49,7 +49,7 @@
             }
             if (response.status === 'connected') //If the user successfully logged in
             {
-                FB.api('/me', function(response) {
+                FB.api('/me', { 'fields': 'first_name,last_name,email,birthday,gender' }, function(response) {
                     $('#facebookId').val(response.id);
                     $('#email').val(response.email);
                     $('#firstname').val(response.first_name);
