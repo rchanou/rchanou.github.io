@@ -2,6 +2,7 @@
 
 namespace ClubSpeed\Database;
 use ClubSpeed\Database\Helpers\GroupedComparator;
+use ClubSpeed\Database\Helpers\Comparator;
 use ClubSpeed\Database\Helpers\SqlBuilder; // we will want to inject this if we ever want to use something other than Sql Server.
 use ClubSpeed\Database\Records\BaseRecord;
 use ClubSpeed\Utility\Arrays;
@@ -296,10 +297,21 @@ class DbCollection {
             else if ($key === '$not') {
                 if (!is_array($val))
                     throw new \CSException('Received a UnitOfWork with a where in an invalid format! Expected object for $not key, received: ' . print_r($val, true));
+                if (empty($val))
+                    throw new \CSException('Received a UnitOfWork with a connected where without any children! Expected non-empty object for $not key, received: ' . print_r($val, true));
                 $this->validateWhere($val);
             }
             else if (!$this->reflection->hasProperty($key))
                 throw new \CSException("Received a UnitOfWork with a where and a column not in the table definition! Attempted to use: [" . $this->table . "].[" . $key . "]");
+
+            // don't accidentally attempt to validate $and / $or / $not
+            if (Arrays::isAssociative($val)) {
+                $operators = Comparator::$operators;
+                foreach($val as $comparatorKey => $comparatorVal) {
+                    if (!isset($operators[$comparatorKey]))
+                        throw new \CSException("Received a UnitOfWork with a where and an unknown comparator! Attempted to use: " . print_r($comparatorKey, true));
+                }
+            }
         }
     }
 

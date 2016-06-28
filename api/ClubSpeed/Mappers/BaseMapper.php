@@ -115,10 +115,12 @@ class BaseMapper {
                             $mapped[$key] = $grouped;
                     }
                     else if ($key === '$not') {
-                        $mapped[$key] = $this->uowMap($type, $val); // check for empty?
+                        $grouped = $this->uowMap($type, $val);
+                        if (!empty($grouped))
+                            $mapped[$key] = $grouped;
                     }
                     else {
-                       $mappedKey = $this->uowMap($type, $key); // ditch the recursive call, if performance is an issue
+                        $mappedKey = $this->uowMap($type, $key); // ditch the recursive call, if performance is an issue
                         if ($mappedKey)
                             $mapped[$mappedKey] = $val; 
                     }

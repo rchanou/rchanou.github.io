@@ -9,9 +9,9 @@ namespace ClubSpeed\Logic;
 class HeatTypesLogic extends BaseLogic {
 
     /**
-     * Constructs a new instance of the ActiveRaceLapCountLogic class.
+     * Constructs a new instance of the HeatTypesLogic class.
      *
-     * The ActiveRaceLapCountLogic constructor requires an instantiated DbService class for injection,
+     * The HeatTypesLogic constructor requires an instantiated DbService class for injection,
      * as well as a reference to the LogicService container where this class will be stored.
      *
      * @param LogicService $logic The parent logic service container.

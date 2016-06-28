@@ -82,7 +82,17 @@ class HeatMainLogic extends BaseLogic {
                             $heat->ScheduleDuration = $heatType->ScheduleDuration;
                         if (empty($heat->CadetsPerHeat))
                             $heat->CadetsPerHeat = $heatType->CadetsPerHeat;
+                        if (empty($heat->PointsNeeded) && $heat->PointsNeeded !== 0)
+                            $heat->PointsNeeded = $heatType->Cost;
                     }
+                    break;
+                case 'delete':
+                    $id = $uow->table_id;
+                    $heatDetails = $db->heatdetails->match(array(
+                        "HeatNo" => $id
+                    ));
+                    if (!empty($heatDetails))
+                        throw new \CSException('Attempted to delete heat #' . $id . ', but heat details still exist for that heat!');
                     break;
             }
         });

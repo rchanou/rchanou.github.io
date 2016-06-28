@@ -191,7 +191,8 @@ class CheckTotalsMapper extends BaseMapper {
                                 'details'             => array()
                             ));
                         }
-                        $carry['details'][] = $self->map('client', array(
+
+                        $detail = $self->map('client', array(
                             'CheckDetailID'                     => $current->CheckDetailID,
                             'CheckDetailStatus'                 => $current->CheckDetailStatus,
                             'CheckDetailType'                   => $current->CheckDetailType,
@@ -248,6 +249,9 @@ class CheckTotalsMapper extends BaseMapper {
                             'CheckDetailPST'                    => $current->CheckDetailPST,
                             'CheckDetailTotal'                  => $current->CheckDetailTotal
                         ));
+                        
+                        if (!empty($detail))
+                            $carry['details'][] = $detail;
                         return $carry;
                     });
                 }

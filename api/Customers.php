@@ -45,6 +45,13 @@ class Customers extends BaseUowApi {
      */
     public function get1($id, $request_data = null) {
         try {
+
+            // this route override breaks the /count routing,
+            // so check explicitly and re-route if necessary.
+            if ($id === 'count') {
+                return $this->getCount($request_data);
+            }
+
             $this->validate('get', $id);
             $uow = UnitOfWork::build($request_data)->action('get')->table_id($id);
             $this->_handle($uow);
