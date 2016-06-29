@@ -320,7 +320,8 @@ class Strings
             'it-IT' => 'Italiano',
             'bg-BG' => 'български език',
             'sv-SE' => 'Svenska',
-            'zh-CN' => '中文'
+            'zh-CN' => '中文',
+            'mn-MN' => 'Монгол'
         );
 
         //Error codes. Used for sparingly few API calls.
