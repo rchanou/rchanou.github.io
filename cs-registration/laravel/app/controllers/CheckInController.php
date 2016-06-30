@@ -89,6 +89,9 @@ class CheckInController extends BaseController
             return Redirect::to('/checkin')->withErrors($messages)->withInput();
         }
 
+        CS_API::log("INFO :: Customer check-in :: [Input] First: " .  $input['firstname'] . ", Last: " . $input['lastname'] . ", Birth: " . $input['birthdate'] .
+          " [Output] ID: " . $customer['customerId'] . ", First: " .  $customer['firstname'] . ", Last: " . $customer['lastname'] . ", Birth: " . $customer['birthdate'] . ", Email: " . $customer['email']  );
+
         Session::put('checkInUserID',$customer['customerId']); //Record the user's ID in the session
         Session::put('checkInUserEmail',$customer['email']); //Record the user's e-mail in the session
 
