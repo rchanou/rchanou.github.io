@@ -900,6 +900,9 @@ EOS;
 
         " Exclude employees
         /results?exclude_employees=1
+
+        " Only employees
+        /results?only_employees=1
         */
 
         $tsql_params = array();
@@ -909,6 +912,8 @@ EOS;
         $tsql_gender= '';
         $tsql_speed_level = '';
         $tsql_exclude_employees = isset($_GET['exclude_employees']) && $_GET['exclude_employees'] == 0 ? false : true;
+        $tsql_only_employees = isset($_GET['only_employees']) && $_GET['only_employees'] == 1 ? true : false;
+
         $tsql_birthdate = '';
 
         if(isset($_GET['limit']) && is_numeric($_GET['limit'])) {
@@ -1003,10 +1008,15 @@ EOS;
             $tsql_params[] = &$_GET['speed_level'];
         }
 
-        if($tsql_exclude_employees) {
+        if($tsql_only_employees) {
+            $tsql_exclude_employees = 'AND c.IsEmployee = ?';
+            $tsql_params[] = true;
+        }
+        else if ($tsql_exclude_employees) {
             $tsql_exclude_employees = 'AND c.IsEmployee = ?';
             $tsql_params[] = false;
-        } else {
+        }
+        else {
             $tsql_exclude_employees = '';
         }
 
