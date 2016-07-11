@@ -318,6 +318,12 @@
             color: black;
             vertical-align: middle;
         }
+        @media screen and (max-aspect-ratio: 4/3)
+        {
+            .headerText {
+                font-size: 3.3vh;
+            }
+        }
         .perspective {
             -webkit-perspective: 4000;
             perspective: 4000;
@@ -458,7 +464,15 @@
         self.numCols = numElems.roundUp(self.numRows) / self.numRows; // round up to the nearest numRows, then divide by numRows to get numCols
         self.height = self.heightMax / self.numRows; // determine the height by 
         self.width = self.widthMax / self.numCols;
-        var baseFontSize = 20 / ((self.numRows > 1 ? self.numRows : 2) + 7); // still too large with 10 racers
+        self.pageWidth = window.innerWidth
+            || document.documentElement.clientWidth
+            || document.body.clientWidth;
+        self.pageHeight = window.innerHeight
+            || document.documentElement.clientHeight
+            || document.body.clientHeight;
+        var isNotSixteenNineRatio = (self.pageWidth / self.pageHeight) < (16.0/9.0);
+        var baseFontSizeInitial = isNotSixteenNineRatio ? 15 : 20;
+        var baseFontSize = baseFontSizeInitial / ((self.numRows > 1 ? self.numRows : 2) + 7); // still too large with 10 racers
         self.labelFontSize = baseFontSize + "vh";
         self.dataFontSize = (function() {
             // note that 1, 2, and 3 are all single row items

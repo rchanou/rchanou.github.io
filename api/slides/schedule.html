@@ -438,7 +438,15 @@
                 var minRacers = 7; // don't use style calculations for fewer than 7 racers
                 var numElems = data.races.length > minRacers ? data.races.length : minRacers;
                 data.racerHeight = 96 / numElems + "%";
-                data.racerFontSize = 2 + (14 / numElems) + "vh";
+                var pageWidth = window.innerWidth
+                    || document.documentElement.clientWidth
+                    || document.body.clientWidth;
+                var pageHeight = window.innerHeight
+                    || document.documentElement.clientHeight
+                    || document.body.clientHeight;
+                var isNotSixteenNineRatio = (pageWidth / pageHeight) < (16.0/9.0);
+                var baseFontSizeInitial = isNotSixteenNineRatio ? 7 : 14;
+                data.racerFontSize = 2 + (baseFontSizeInitial / numElems) + "vh";
             }
             return data;
         }));
