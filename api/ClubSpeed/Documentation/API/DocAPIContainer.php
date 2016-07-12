@@ -119,6 +119,7 @@ class DocAPIContainer {
         $data['sections'][] = new DocEventReservationLink();
         $data['sections'][] = new DocEventReservations();
         $data['sections'][] = new DocEvents();
+        $data['sections'][] = new DocEventHeatDetails();
         $data['sections'][] = new DocEventStatus();
         $data['sections'][] = new DocEventTypes();
         $data['sections'][] = new DocHeatDetails();

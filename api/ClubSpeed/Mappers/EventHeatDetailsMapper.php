@@ -13,7 +13,7 @@ class EventHeatDetailsMapper extends BaseMapper {
             , 'RPM'               => 'proskill'
             , 'DateAdded'         => 'added'
             , 'RoundLoseNum'      => ''
-            , 'CheckID'           => ''
+            // , 'CheckID'           => ''
             , 'TotalRacesInEvent' => 'totalRaces'
         ));
     }
