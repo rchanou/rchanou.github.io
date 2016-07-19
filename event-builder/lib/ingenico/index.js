@@ -165,6 +165,7 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 			'￼￼<INTERACTIVECREDITAUTHTYPE>' + this.opts.INTERACTIVECREDITAUTHTYPE + '</INTERACTIVECREDITAUTHTYPE>' +
 			'</TRANSACTION>';
 	console.log('REQUEST', req);
+
 	return new Promise(function(resolve, reject) {
 		request({ body: req, headers: { 'Content-Length': req.length } }, function(err, response, body) {
 			if(err) {
@@ -181,11 +182,47 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 					var response = _.merge(self.opts.defaultHoistedVars, { message: err.code, error: err })
 					return reject(_.merge({ result: response }, response));
 				}
-				var TRANSUCCESS = _.get(result, 'TRANRESP.TRANSUCCESS[0]');
+
+			    /*
+			    The saga of approved (or not) transactions... see TLDR/CLIFF NOTES below for summary...
+
+			    /// AUSTIN @ TEMPUS
+			    For a CREDITAUTH I recommend looking at TRANSUCCESS = TRUE, CCAUTHCODE is populated.
+			    CCAUTHORIZED is only TRUE if it was authorized. The logic will change slightly based
+			    upon the transaction type ran.
+
+
+				/// WES @ CLUBSPEED
+				Here is the new chain of logic I'll use for INTERACTIVECREDITAUTH... successful if:
+				- TRANSUCCESS = TRUE (always exists)
+				- CCAUTHORIZED = TRUE (always exists)
+				- CCAUTHCODE (always exists, it must be populated)
+
+				What should the logic be for the other transaction type that we use -- INTERACTIVEISSUECREDIT
+
+
+				/// AUSTIN @ TEMPUS
+
+				INTERACTIVECREDITAUTH is essentially a CCAUTH, the only difference being CCAUTH is a direct to
+				gateway call while INTERACTIVE is a call to the Ingenico. The response to that
+				INTERACTIVECREDITAUTH is a CCAUTH response.
+ 
+				Your logic will work for Credit Auth (Note: if you denote it as an AUTHONLY transaction
+				CCAUTHORIZED will not come back as true but transaction will still be successful).
+				For IssueCredit you will want to look at TRANSUCCESS = TRUE because the transaction is
+				just an insert into the current batch. There is no reach out like Credit Auth.
+
+
+				/// TLDR; CLIFF NOTES OF ABOVE...
+				Since we are doing CREDITAUTH only, a successful transaction is one that...
+			    1. TRANSUCCESS = TRUE (field always exists)
+			    2. CCAUTHORIZED = TRUE (if field exists, always exists unless we're doing AUTHONLY -- see above)
+			    */
+				var isSuccessful = retrieveTransactionSuccess(result);
+
 				var hoistedVars = {
 					transactionId: retrieveTransactionId(result),
                     resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]'),
-					//isApproved: (_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE'), // Removed per Justin, using 'success' instead
 					requestAmount: _.get(result, 'TRANRESP.REQUESTEDAMOUNT[0]') || null,
 					authorizeAmount: _.get(result, 'TRANRESP.AUTHORIZEDAMOUNT[0]') || null,
 					creditCardAccount: _.get(result, 'TRANRESP.CCACCOUNT[0]') || null,
@@ -200,23 +237,23 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 					_original: result
 				};
 
-				if(TRANSUCCESS === 'FALSE') {
-					return resolve(_.merge(self.opts.defaultHoistedVars, {
-						success: false,
-						}, hoistedVars));		
-				} else if(TRANSUCCESS === 'TRUE') {
-					return resolve(_.merge(self.opts.defaultHoistedVars, {
-						success: true,
-						}, hoistedVars));
-				} else {
-					// Unsure if we can get to this case?
-					return resolve(_.merge(self.opts.defaultHoistedVars, {
-						success: false,
-						}, hoistedVars));
-				}
+				return resolve(_.merge(self.opts.defaultHoistedVars, { success: isSuccessful }, hoistedVars));
+
 			});
 		});
 	});
+}
+
+function retrieveTransactionSuccess(result) {
+	var isSuccessful = false;
+
+	if(_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE' && _.get(result, 'TRANRESP.TRANSUCCESS[0]') === 'TRUE') {
+    	isSuccessful = true;
+    } else {
+    	isSuccessful = false;
+    }
+
+    return isSuccessful;
 }
 
 function retrieveTransactionId(result) {
@@ -281,17 +318,9 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 					_original: result
 				};
 
-				// {"TRANRESP":{"RESPTYPE":["CCCREDRESP"],"TRANSUCCESS":["FALSE"],"TRANRESPMESSAGE":["User Cancel or Timeout"],"TRANRESPERRCODE":["-100"]}}
-				if(result.TRANRESP.TRANSUCCESS[0] === 'FALSE') {
-					return resolve(_.merge(self.opts.defaultHoistedVars, hoistedVars, {
-						'message': _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || '',
-						'code': _.get(result, 'TRANRESP.TRANRESPERRCODE[0]'),
-						'success': false,
-						'transactionId': null,
-						'emvReceiptRequirement': _.get(result, 'TRANRESP.EMVRECEIPTREQ[0]'),
-						'_original': result
-						}));		
-				} else if(result.TRANRESP.TRANSUCCESS[0] === 'TRUE') {
+				var isSuccessful = retrieveTransactionSuccess(result);
+
+				if(isSuccessful) {
 					return resolve(_.merge(self.opts.defaultHoistedVars, hoistedVars, {
 						'message': _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || '',
                         'success': true,
@@ -300,16 +329,16 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 						'_original': result
 						}));
 				} else {
-					// Unsure if we can get to this case?
 					return resolve(_.merge(self.opts.defaultHoistedVars, hoistedVars, {
 						'message': _.get(result, 'TRANRESP.TRANRESPMESSAGE[0]') || '',
-                        'success': false,
+						'code': _.get(result, 'TRANRESP.TRANRESPERRCODE[0]'),
+						'success': false,
 						'transactionId': null,
 						'emvReceiptRequirement': _.get(result, 'TRANRESP.EMVRECEIPTREQ[0]'),
 						'_original': result
 						}));
 				}
-						
+
 			});
 		});
 	});
