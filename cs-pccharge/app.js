@@ -63,7 +63,7 @@ var AuthNet = new AuthNetRequest({
   sandbox: config.testMode
 });
 
-//var failureRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>1</COMMAND><PROCESSOR_ID>CES</PROCESSOR_ID><MERCH_NUM>426193590996159873</MERCH_NUM><ACCT_NUM>440066******9799</ACCT_NUM><EXP_DATE>****</EXP_DATE><MANUAL_FLAG>1</MANUAL_FLAG><TRANS_AMOUNT>103.42</TRANS_AMOUNT><TRACK_DATA>*</TRACK_DATA><TICKET_NUM>862526</TICKET_NUM><CARDHOLDER>LARGENT/SARAH M</CARDHOLDER><MULTI_FLAG>1</MULTI_FLAG><PRESENT_FLAG>3</PRESENT_FLAG></XML_REQUEST>';
+//var failureRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>1</COMMAND><PROCESSOR_ID>CES</PROCESSOR_ID><MERCH_NUM>426193590996159873</MERCH_NUM><ACCT_NUM>440066******4242</ACCT_NUM><EXP_DATE>****</EXP_DATE><MANUAL_FLAG>1</MANUAL_FLAG><TRANS_AMOUNT>55.00</TRANS_AMOUNT><TRACK_DATA>*</TRACK_DATA><TICKET_NUM>40000783732</TICKET_NUM><CARDHOLDER>LARGENT/SARAH M</CARDHOLDER><MULTI_FLAG>1</MULTI_FLAG><PRESENT_FLAG>3</PRESENT_FLAG></XML_REQUEST>';
 //var failureResponse = '<XML_REQUEST><USER_ID>User1</USER_ID><TROUTD>273963</TROUTD><RESULT>Error</RESULT><AUTH_CODE>Invalid Track</AUTH_CODE><REFERENCE>Invalid Track</REFERENCE><INTRN_SEQ_NUM>273963</INTRN_SEQ_NUM></XML_REQUEST>';
 
 var failureResponseTemplate = '<XML_REQUEST><USER_ID>User1</USER_ID><TROUTD>##TROUTD##</TROUTD><RESULT>Error</RESULT><AUTH_CODE>Invalid XML</AUTH_CODE><REFERENCE>##REFERENCE##</REFERENCE><INTRN_SEQ_NUM>##INTRN_SEQ_NUM##</INTRN_SEQ_NUM></XML_REQUEST>';
@@ -181,7 +181,7 @@ function processCharge(xml, cb) { // CHARGE -- CAPTURED/APPROVED = Success; Anyt
 
 function processRefund(xml, cb) { // REFUND -- PROCESSED/CAPTURED/APPROVED = Success; Anything else is a failure
   /*
-  var refundRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>2</COMMAND><PROCESSOR_ID>CES</PROCESSOR_ID><MERCH_NUM>426193590996159873</MERCH_NUM><ACCT_NUM>375151*****6151</ACCT_NUM><EXP_DATE>****</EXP_DATE><MANUAL_FLAG>0</MANUAL_FLAG><TRANS_AMOUNT>10.90</TRANS_AMOUNT><TICKET_NUM>862426</TICKET_NUM><CVV2>****</CVV2><MULTI_FLAG>1</MULTI_FLAG><PRESENT_FLAG>2</PRESENT_FLAG></XML_REQUEST>'
+  var refundRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>2</COMMAND><PROCESSOR_ID>CES</PROCESSOR_ID><MERCH_NUM>426193590996159873</MERCH_NUM><ACCT_NUM>375151*****4242</ACCT_NUM><EXP_DATE>****</EXP_DATE><MANUAL_FLAG>0</MANUAL_FLAG><TRANS_AMOUNT>10.90</TRANS_AMOUNT><TICKET_NUM>64956</TICKET_NUM><CVV2>****</CVV2><MULTI_FLAG>1</MULTI_FLAG><PRESENT_FLAG>2</PRESENT_FLAG></XML_REQUEST>'
   var refundResponse = '<XML_REQUEST><USER_ID>User1</USER_ID><TROUTD>273938</TROUTD><RESULT>PROCESSED</RESULT><TICKET>862426</TICKET><INTRN_SEQ_NUM>273938</INTRN_SEQ_NUM><PURCH_CARD_TYPE>0</PURCH_CARD_TYPE></XML_REQUEST>';
   var declinedResponse = '<XML_REQUEST><USER_ID>User1</USER_ID><TROUTD>273569</TROUTD><RESULT>NOT CAPTURED</RESULT><AUTH_CODE>DECLINED</AUTH_CODE><TICKET>861239</TICKET><INTRN_SEQ_NUM>273569</INTRN_SEQ_NUM><CMRCL_TYPE>N</CMRCL_TYPE><PURCH_CARD_TYPE>0</PURCH_CARD_TYPE></XML_REQUEST>'
   */
@@ -189,12 +189,15 @@ function processRefund(xml, cb) { // REFUND -- PROCESSED/CAPTURED/APPROVED = Suc
   // Get payments for this check?
   var uri = 'http://' + config.apiHost + '/api/index.php/payments?key=' + config.apiKey + '&where={"checkId":"' + xml.XML_REQUEST.TICKET_NUM[0] + '"}';
 
+  var declinedResponseTemplate = '<XML_REQUEST><USER_ID>User1</USER_ID><TROUTD>##TROUTD##</TROUTD><RESULT>NOT CAPTURED</RESULT><AUTH_CODE>##AUTH_CODE##</AUTH_CODE><TICKET>##TICKET##</TICKET><INTRN_SEQ_NUM>##INTRN_SEQ_NUM##</INTRN_SEQ_NUM><CMRCL_TYPE></CMRCL_TYPE><PURCH_CARD_TYPE></PURCH_CARD_TYPE></XML_REQUEST>'
+
   request.get({ uri: uri, json: true }, function(error, response, body) {
+
     if(error)
       return cb(declinedResponseTemplate.replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0]).replace('##TROUTD##', '').replace('##INTRN_SEQ_NUM##', Date.now()).replace('##AUTH_CODE##', error.toString()));
 
     if(response.statusCode !== 200)
-      return cb(declinedResponseTemplate.replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0]).replace('##TROUTD##', '').replace('##INTRN_SEQ_NUM##', Date.now()).replace('##AUTH_CODE##', body.toString()));
+      return cb(declinedResponseTemplate.replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0]).replace('##TROUTD##', '').replace('##INTRN_SEQ_NUM##', Date.now()).replace('##AUTH_CODE##', JSON.stringify(body)));
 
     if (!Array.isArray(body))
       return cb(declinedResponseTemplate.replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0]).replace('##TROUTD##', '').replace('##INTRN_SEQ_NUM##', Date.now()).replace('##AUTH_CODE##', 'Could not parse the response: ' + body.toString()));
@@ -217,7 +220,6 @@ function processRefund(xml, cb) { // REFUND -- PROCESSED/CAPTURED/APPROVED = Suc
       var response = null;
 
       if(!successfulRefund) {
-        var declinedResponseTemplate = '<XML_REQUEST><USER_ID>User1</USER_ID><TROUTD>##TROUTD##</TROUTD><RESULT>NOT CAPTURED</RESULT><AUTH_CODE>##AUTH_CODE##</AUTH_CODE><TICKET>##TICKET##</TICKET><INTRN_SEQ_NUM>##INTRN_SEQ_NUM##</INTRN_SEQ_NUM><CMRCL_TYPE></CMRCL_TYPE><PURCH_CARD_TYPE></PURCH_CARD_TYPE></XML_REQUEST>'
         response = declinedResponseTemplate
           .replace('##AUTH_CODE##', 'No payment/transactionIds found that could be refunded against!')
           .replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0])

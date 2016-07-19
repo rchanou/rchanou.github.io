@@ -56,3 +56,6 @@ facebook/db.json
 /speed-text/node_modules/
 
 cs-printer/config.js
+
+cs-pccharge/node_modules
+cs-pccharge/config.json
