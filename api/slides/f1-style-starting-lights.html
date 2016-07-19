@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lights</title>
+	<style type="text/css">
+	body {
+		background-color: #000;
+		width: 100%;
+		height: 100%;
+		margin: 0px;
+
+	 }
+	.light {
+		background: red;
+		opacity: .2;
+		background-image: radial-gradient(brown, transparent);
+		background-size: 10px 100px; 
+		width: 17vw;
+		height: 17vw;
+		border-radius: 50%;
+		position: absolute;
+		box-shadow: 
+			0 0 20px #111 inset,
+			0 0 10px red;
+	}
+	.light-r1c1,
+	.light-r1c2,
+	.light-r1c3,
+	.light-r1c4,
+	.light-r1c5 {
+		top: 9vw;
+	}
+	.light-r2c1,
+	.light-r2c2,
+	.light-r2c3,
+	.light-r2c4,
+	.light-r2c5 {
+		top: 29vw;
+	}
+	
+	.light-r1c1,
+	.light-r2c1 {
+		left: 1.5vw;
+	}
+	.light-r1c2,
+	.light-r2c2 {
+		left: 21.5vw;
+	}
+	.light-r1c3,
+	.light-r2c3 {
+		left: 41.5vw;
+	}
+	.light-r1c4,
+	.light-r2c4 {
+		left: 61.5vw;
+	}
+	.light-r1c5,
+	.light-r2c5 {
+		left: 81.5vw;
+	}
+	.red {
+		opacity:1;
+		-webkit-transition: all 100ms cubic-bezier(1.000, 0.990, 0.000, -0.015); 
+		-webkit-transition-timing-function: cubic-bezier(1.000, 0.990, 0.000, -0.015);
+	}
+	.green {
+		-webkit-transition: all 100ms cubic-bezier(1.000, 0.990, 0.000, -0.015); 
+		-webkit-transition-timing-function: cubic-bezier(1.000, 0.990, 0.000, -0.015);
+		opacity:1;
+		background: green;
+		background-image: radial-gradient(lime, transparent);
+		background-size: 5px 100px; 
+		box-shadow: 
+			0 0 20px #111 inset,
+			0 0 10px lime;
+	}
+	</style>
+  <script src="/api/js/jquery.min.js"></script>
+</head>
+<body>
+  <div class="pole"></div> 
+  <div class="pole"></div> 
+  <div class="trafficlight">
+    <div class="protector"></div>
+    <div class="protector"></div>
+    <div class="light light-r1c1"></div>
+    <div class="light light-r2c1"></div>
+    <div class="light light-r1c2"></div>
+    <div class="light light-r2c2"></div>
+    <div class="light light-r1c3"></div>
+    <div class="light light-r2c3"></div>
+    <div class="light light-r1c4"></div>
+    <div class="light light-r2c4"></div>
+    <div class="light light-r1c5"></div>
+    <div class="light light-r2c5"></div>
+	</div>
+  <!--<div style="text-align: center;">
+    <a href="#" id="start" style="color: green">START</a> | 
+    <a href="#" id="clear" style="color: green">CLEAR</a>
+  </div>-->
+	<script>
+  (function( $ ) {
+    $(function() {
+      $( "#clear" ).click(function() {
+        clearAnimation();
+      });
+      $( "#start" ).click(function() {
+        startAnimation();
+      });
+    });
+    
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : sParameterName[1];
+            }
+        }
+    };
+
+    var apiUrl = (window.location.origin || (window.location.protocol + "//" + window.location.host)) + '/api/index.php/races/current_race_id.js?track=' + getUrlParameter('track') + '&key=cs-dev&callback=?';
+    var pollingInterval = 1000;
+	var animationRunning = false;
+	var raceRunning = false;
+    
+    setInterval(function() {
+      $.getJSON(apiUrl, function(data) {
+        if(!data.hasOwnProperty('error')) {
+          if(!raceRunning) {
+						raceRunning = true;
+						startAnimation();
+					}
+        } else {
+          raceRunning = false;
+					if(!animationRunning) clearAnimation();
+        }
+      });
+    }, pollingInterval);
+  
+		function startAnimation() {
+			if(animationRunning === true) return; // Don't run it more than once
+			animationRunning = true;
+			$('.light').removeClass('green');
+			$('.light').removeClass('red');
+			setTimeout(function() {
+				firstColumnRed();
+			}, 1000);
+			setTimeout(function() {
+				firstColumnRed();
+				secondColumnRed();
+			}, 2000);
+			setTimeout(function() {
+				firstColumnRed();
+				secondColumnRed();
+				thirdColumnRed();
+			}, 3000);
+			setTimeout(function() {
+				firstColumnRed();
+				secondColumnRed();
+				thirdColumnRed();
+				fourthColumnRed();
+			}, 4000);
+			setTimeout(function() {
+				firstColumnRed();
+				secondColumnRed();
+				thirdColumnRed();
+				fourthColumnRed();
+				fifthColumnRed();
+			}, 5000);
+			var randomization = Math.floor(Math.random() * 2000) + 1000;
+			setTimeout(function() {
+				allGreen();
+				animationRunning = false;
+			}, 5000 + randomization);
+		}
+		
+		function clearAnimation() {
+			$('.light').removeClass('green');
+			$('.light').removeClass('red');
+			// Could add handles into each setTimeout to clear then and set animationRunning = false
+		}
+		
+		function firstColumnRed() {
+			$('.light-r1c1').addClass('red');
+			$('.light-r2c1').addClass('red');
+		}
+		
+		function secondColumnRed() {
+			$('.light-r1c2').addClass('red');
+			$('.light-r2c2').addClass('red');
+		}
+		
+		function thirdColumnRed() {
+			$('.light-r1c3').addClass('red');
+			$('.light-r2c3').addClass('red');
+		}
+		
+		function fourthColumnRed() {
+			$('.light-r1c4').addClass('red');
+			$('.light-r2c4').addClass('red');
+		}
+		
+		function fifthColumnRed() {
+			$('.light-r1c5').addClass('red');
+			$('.light-r2c5').addClass('red');
+		}
+		
+		function allGreen() {
+			$('.light').addClass('green');
+		}	
+  })( jQuery );
+  </script>
+</body>
+</html>
