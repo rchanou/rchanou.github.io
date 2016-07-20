@@ -1,5 +1,3 @@
--- Note: PDO does NOT accept GO statements, and CREATE VIEW must be the first statement in a batch
-
 CREATE VIEW [dbo].[GiftCardPoints_V] AS
 WITH
 GiftCardPoints AS (
@@ -7,6 +5,9 @@ GiftCardPoints AS (
         ph.CustID
         , SUM(ISNULL(ph.PointAmount, 0)) AS Points
     FROM dbo.PointHistory ph
+    WHERE
+        ph.Type != 6 -- "Cancel Point Used By Racing"
+        AND ph.Type != 9 -- "Void Buy Point Item"
     GROUP BY ph.CustID
 )
 SELECT
