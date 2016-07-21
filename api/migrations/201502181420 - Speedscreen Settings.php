@@ -39,8 +39,8 @@ $settings = array(
         'Namespace'    => 'Speedscreen',
         'Name'         => 'racesPollingRateMs',
         'Type'         => 'Integer',
-        'DefaultValue' => "3000",
-        'Value'        => "3000",
+        'DefaultValue' => "1000",
+        'Value'        => "1000",
         'Description'  => '[CS Support Only] How often the Speed Screen should check for races happening on any track that it needs to watch, in milliseconds. This is separate from the Scoreboard slide polling, and can be slower.',
         'IsPublic'     => true
     ),
