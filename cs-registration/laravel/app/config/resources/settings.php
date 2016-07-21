@@ -314,7 +314,7 @@ class Settings {
                 'Sweden' => 'Sverige',
                 'Switzerland' => 'Suisse (French)',
                 'Syria' => 'Suriyah',
-                'Taiwan' => 'T\'ai-wan',
+                'Taiwan' => 'Taiwan',
                 'Tajikistan' => 'Jumhurii Tojikistan',
                 'Tanzania' => 'Tanzania',
                 'Thailand' => 'Muang Thai',
