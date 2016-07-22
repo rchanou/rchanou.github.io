@@ -125,7 +125,7 @@
         }
     };
 
-    var apiUrl = (window.location.origin || (window.location.protocol + "//" + window.location.host)) + '/api/index.php/races/current_race_id.js?track=' + getUrlParameter('track') + '&key=cs-dev&callback=?';
+    var apiUrl = (window.location.origin || (window.location.protocol + "//" + window.location.host)) + '/api/index.php/races/current_race_id.js?track_id=' + getUrlParameter('track') + '&key=cs-dev&callback=?';
     var pollingInterval = 1000;
 	var animationRunning = false;
 	var raceRunning = false;
