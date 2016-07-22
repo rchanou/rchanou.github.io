@@ -758,20 +758,20 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
         var numberOfTracks = tracksWithRacesSlides.length;
         var tracksWithRacesRunning = $q.defer();
 
-        var currentRaceIdCallsToMake = [];
+        var getScoreboardCallsToMake = [];
         for(var i = 0; i < numberOfTracks; i++) //Generate the needed API calls
         {
             var currentTrack = tracksWithRacesSlides[i];
-            currentRaceIdCallsToMake.push(createCurrentRaceIdCall(currentTrack));
+            getScoreboardCallsToMake.push(createScoreboardCall(currentTrack));
             //debugToConsole("Channel has called getScoreboard on track " + currentTrack);
         }
-        $q.all(currentRaceIdCallsToMake).then(function(results){ //Once all calls complete, see which tracks have a race running
+        $q.all(getScoreboardCallsToMake).then(function(results){ //Once all calls complete, see which tracks have a race running
             //debugToConsole("All getScoreboard calls have completed");
             var tracksRunningRaces = [];
             $scope.scoreboardsByTrack = {};
             for(var i = 0; i < results.length; i++)
             {
-                var currentTrack = getQueryVariable(results[i].config.url,'track');
+                var currentTrack = getQueryVariable(results[i].config.url,'track_id');
 
                 var raceWasRunning = (typeof results[i].data.error == "undefined");
                 $scope.scoreboardsByTrack[currentTrack] = results[i];
@@ -798,13 +798,13 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
     };
 
     /**
-     * Wraps a getCurrentRaceId call, allowing lists of these calls to specific tracks to be generated.
+     * Wraps a getScoreboard call, allowing lists of these calls to specific tracks to be generated.
      * @param track The track to call getScoreboard on.
      * @returns {*} The result of the function call.
      */
-    function createCurrentRaceIdCall(track)
+    function createScoreboardCall(track)
     {
-        return apiService.getCurrentRaceId(track);
+        return apiService.getScoreboard(track);
     }
 
 
@@ -1147,96 +1147,80 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
 
     }
 
-    function getScoreboard(track)
-    {
-        var deferred = $q.defer();
-        deferred.resolve(apiService.getScoreboard(track));
-        return deferred.promise;
-    }
-
     function updateRaceStateAndRunConditionalOverlays()
     {
         var currentSlide = $scope.channel.channelLineUp.timelines[$scope.currentTimeline]['slides'][$scope.channel.currentSlideIndex];
 
         if (currentSlide.type == 'scoreboard' && typeof currentSlide.options.eventSlides != "undefined")
         {
-            var promise = getScoreboard(currentSlide.options.trackId);
-            promise.then(
-                function(response)
+            var data = $scope.scoreboardsByTrack[currentSlide.options.trackId].data;
+
+            $scope.prevRaceState = $scope.raceState;
+
+            if (typeof data.error == "undefined")
+            {
+                if (data.race.race_time_in_seconds === null)
                 {
-                    var data = response.data;
-                    $scope.prevRaceState = $scope.raceState;
-
-                    if (typeof data.error == "undefined")
+                    $scope.raceState = 'startButtonPressed';
+                    if (typeof currentSlide.options.eventSlides.onRaceStart != "undefined" && $scope.prevRaceState == 'none')
                     {
-                        if (data.race.race_time_in_seconds === null)
-                        {
-                            $scope.raceState = 'startButtonPressed';
-                            if (typeof currentSlide.options.eventSlides.onRaceStart != "undefined" && $scope.prevRaceState == 'none')
-                            {
-                                debugToConsole("LAUNCH: onRaceStart overlay");
-                                $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceStart.url));
-                                $scope.showOverlaySlide = true;
-                                $timeout.cancel($scope.overlayTimeout);
-                                $scope.overlayTimeout = $timeout(function(){
-                                    $scope.showOverlaySlide = false;
-                                    $scope.overlaySlideURL = '';
-                                },currentSlide.options.eventSlides.onRaceStart.duration);
-                            }
-                        }
-                        else
-                        {
-                            $scope.raceState = 'firstLapStarted';
-                            if (typeof currentSlide.options.eventSlides.onFirstLapStart != "undefined" && $scope.prevRaceState == 'startButtonPressed')
-                            {
-                                debugToConsole("LAUNCH: onFirstLapStart overlay");
-                                $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapStart.url));
-                                $scope.showOverlaySlide = true;
-                                $timeout.cancel($scope.overlayTimeout);
-                                $scope.overlayTimeout = $timeout(function(){
-                                    $scope.showOverlaySlide = false;
-                                    $scope.overlaySlideURL = '';
-                                },currentSlide.options.eventSlides.onFirstLapStart.duration);
-                            }
-                        }
-
-                        if (data.scoreboard.length > 0)
-                        {
-                            $scope.raceState = 'running';
-                            if (typeof currentSlide.options.eventSlides.onFirstLapCompleted != "undefined" && $scope.prevRaceState == 'firstLapStarted')
-                            {
-                                debugToConsole("LAUNCH: onFirstLapCompleted overlay");
-                                $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapCompleted.url));
-                                $scope.showOverlaySlide = true;
-                                $timeout.cancel($scope.overlayTimeout);
-                                $scope.overlayTimeout = $timeout(function(){
-                                    $scope.showOverlaySlide = false;
-                                    $scope.overlaySlideURL = '';
-                                },currentSlide.options.eventSlides.onFirstLapCompleted.duration);
-                            }
-                        }
+                        debugToConsole("LAUNCH: onRaceStart overlay");
+                        $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceStart.url));
+                        $scope.showOverlaySlide = true;
+                        $timeout.cancel($scope.overlayTimeout);
+                        $scope.overlayTimeout = $timeout(function(){
+                            $scope.showOverlaySlide = false;
+                            $scope.overlaySlideURL = '';
+                        },currentSlide.options.eventSlides.onRaceStart.duration);
                     }
-                    else
-                    {
-                        $scope.raceState = 'none';
-                        if (typeof currentSlide.options.eventSlides.onRaceEnd != "undefined" && $scope.prevRaceState == 'running')
-                        {
-                            debugToConsole("LAUNCH: onRaceEnd overlay");
-                            $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceEnd.url));
-                            $scope.showOverlaySlide = true;
-                            $timeout.cancel($scope.overlayTimeout);
-                            $scope.overlayTimeout = $timeout(function(){
-                                $scope.showOverlaySlide = false;
-                                $scope.overlaySlideURL = '';
-                            },currentSlide.options.eventSlides.onRaceEnd.duration);
-                        }
-                    }
-                },
-                function(error)
+                }
+                else
                 {
-                    console.log(error);
-                });
+                    $scope.raceState = 'firstLapStarted';
+                    if (typeof currentSlide.options.eventSlides.onFirstLapStart != "undefined" && $scope.prevRaceState == 'startButtonPressed')
+                    {
+                        debugToConsole("LAUNCH: onFirstLapStart overlay");
+                        $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapStart.url));
+                        $scope.showOverlaySlide = true;
+                        $timeout.cancel($scope.overlayTimeout);
+                        $scope.overlayTimeout = $timeout(function(){
+                            $scope.showOverlaySlide = false;
+                            $scope.overlaySlideURL = '';
+                        },currentSlide.options.eventSlides.onFirstLapStart.duration);
+                    }
+                }
 
+                if (data.scoreboard.length > 0)
+                {
+                    $scope.raceState = 'running';
+                    if (typeof currentSlide.options.eventSlides.onFirstLapCompleted != "undefined" && $scope.prevRaceState == 'firstLapStarted')
+                    {
+                        debugToConsole("LAUNCH: onFirstLapCompleted overlay");
+                        $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapCompleted.url));
+                        $scope.showOverlaySlide = true;
+                        $timeout.cancel($scope.overlayTimeout);
+                        $scope.overlayTimeout = $timeout(function(){
+                            $scope.showOverlaySlide = false;
+                            $scope.overlaySlideURL = '';
+                        },currentSlide.options.eventSlides.onFirstLapCompleted.duration);
+                    }
+                }
+            }
+            else
+            {
+                $scope.raceState = 'none';
+                if (typeof currentSlide.options.eventSlides.onRaceEnd != "undefined" && $scope.prevRaceState == 'running')
+                {
+                    debugToConsole("LAUNCH: onRaceEnd overlay");
+                    $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceEnd.url));
+                    $scope.showOverlaySlide = true;
+                    $timeout.cancel($scope.overlayTimeout);
+                    $scope.overlayTimeout = $timeout(function(){
+                        $scope.showOverlaySlide = false;
+                        $scope.overlaySlideURL = '';
+                    },currentSlide.options.eventSlides.onRaceEnd.duration);
+                }
+            }
         }
     }
 
