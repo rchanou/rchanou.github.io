@@ -26,7 +26,7 @@ angular.module('speedscreen.services')
                 return apiDriver.getScoreboard(track);
             },
             getCurrentRaceId: function(track) {
-                return $http.get(apiURL + '/races/current_race_id.js?track_id=' + track + '&key=' + apiKey);
+                return $http.get(apiURL + '/races/current_race_id.js?track=' + track + '&key=' + apiKey);
             },
             getTranslations: function() {
                 return $http.get(apiURL + '/translations?&namespace=Speedscreen&key=' + apiKey);
