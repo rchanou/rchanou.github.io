@@ -9,18 +9,17 @@ Speed Screen Channels
 {{ HTML::style('css/select2-bootstrap.css') }}
 {{ HTML::style('css/jquery.ui.ie.css') }}
 {{ HTML::style('css/jquery-ui.css') }}
+<style>
+  .slide:hover {
+    border: 3px solid #3498db;
+  }
+</style>
 <!--{{ HTML::style('css/bootstrap-timepicker.min.css') }}-->
 @stop
 
 @section('pageHeader')
 Speed Screen Channels
 @stop
-
-<style>
-  .slide:hover {
-    border: 3px solid #3498db;
-  }
-</style>
 
 @section('breadcrumb')
     <a href="{{URL::to('dashboard')}}" title="Go to the Dashboard" class="tip-bottom"><i class="fa fa-home"></i> Dashboard</a>
@@ -107,8 +106,11 @@ Speed Screen Channels
                             <li class="">
                               <a data-toggle="tab" href="#panel_tab2_slidelineup_channel{{$currentChannel->channelId}}">  Slide Lineups  </a>
                             </li>
-                            <li class={{(Session::has('selectLastChannel') && $currentChannelCount == count($listOfChannels))? "active": ""}}>
+                            <li class="{{(Session::has('selectLastChannel') && $currentChannelCount == count($listOfChannels))? "active": ""}}">
                               <a data-toggle="tab" href="#panel_tab2_channelsettings_channel{{$currentChannel->channelId}}">  Channel Settings  </a>
+                            </li>
+                            <li class="">
+                              <a data-toggle="tab" href="#panel_tab2_deploy_channel{{$currentChannel->channelId}}_beta">  Download (BETA)  </a>
                             </li>
                         </ul>
                         <!-- Content of all channel tabs -->
@@ -165,6 +167,15 @@ Speed Screen Channels
                               <div class="alert alert-info">
                                 Loading...
                               </div>
+                            </div>
+
+                            <!-- Deploy BETA tab -->
+                            <div id="panel_tab2_deploy_channel{{$currentChannel->channelId}}_beta" class="tab-pane">
+                                <div class="alert alert-warning">
+                                    <p>We are currently testing the next generation of our Speed Screen application which allows real-time updating of settings and channel selection as well as multi-monitor support.</p>
+                                    <p>Please only use this application with the direction of our support personnel.</p>
+                                    <p><a href="/admin/speedscreenV2/speedscreen-setup-v2.0.0-beta.2.exe" target="_blank"><button type="button" class="btn btn-warning">Download Speed Screen Application Beta</button></a></p>
+                                </div>
                             </div>
                         </div>
                     </div>
