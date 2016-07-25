@@ -58,6 +58,7 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
 
     //Race state management
     $scope.raceState = 'none'; //Race states: 'none', 'startButtonPressed', 'firstLapStarted', 'running'
+    $scope.scoreboardsByTrack = {};
     $scope.showOverlaySlide = false;
     $scope.overlaySlideURL = '';
     $scope.overlayTimeout = null;
@@ -99,64 +100,64 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
         $scope.loadingStepText = $scope.strings['str_gettingSettings'];
 
         apiService.verifyConnectivityToServerAndFetchSettings(). //Verify basic connectivity to the server by fetching settings
-        success(function(data, status, headers, config) {
-            var formattedSettings = {};
-            if (typeof data.settings != "undefined" && data.settings.length > 0)
-            {
-                processAndUpdateSettings(data.settings);
-            }
-            else
-            {
-                debugToConsole("No settings found on server. Using defaults.");
-            }
-
-            //Set the API to the specified driver
-            $scope.loadingStepText = $scope.strings['str_attachingAPI'];
-            globalSettings.setAPIDriver($scope.settings['apiDriver']);
-
-            //Fetch current Channel configuration
-            $scope.loadingStepText = $scope.strings['str_fetchingChannelConfig'];
-            apiService.getChannelLineUp().
             success(function(data, status, headers, config) {
-                if (typeof data[0] != 'undefined' && typeof data[0].channelData != 'undefined')
+                var formattedSettings = {};
+                if (typeof data.settings != "undefined" && data.settings.length > 0)
                 {
-                    try
-                    {
-                        data = data[0].channelData;
-                        data = JSON.parse(data);
-                    }
-                    catch(e)
-                    {
-                        debugToConsole(e);
-                    }
+                    processAndUpdateSettings(data.settings);
+                }
+                else
+                {
+                    debugToConsole("No settings found on server. Using defaults.");
+                }
 
-                }
-                else if (typeof data.name == 'undefined') //Error case: Invalid JSON (multiple causes)
-                {
-                    reportErrorAndRestart($scope.strings['str_noValidChannelData']);
-                }
-                if (data.length == 0) //Error case: Empty channel
-                {
-                    reportErrorAndRestart($scope.strings['str_channelHasNoSlides']);
-                }
-                else //Success
-                {
-                    $scope.loadingStepText = $scope.strings['str_loadingChannel'];
+                //Set the API to the specified driver
+                $scope.loadingStepText = $scope.strings['str_attachingAPI'];
+                globalSettings.setAPIDriver($scope.settings['apiDriver']);
 
-                    var channelData = formatChannelData(data);
-                    $scope.channel = new Channel(channelData);
-                    $scope.oldHash = channelData.hash; //Used to determine if the channel configuration changed
-                    $scope.channel.start(); //Start the channel!
-                }
+                //Fetch current Channel configuration
+                $scope.loadingStepText = $scope.strings['str_fetchingChannelConfig'];
+                apiService.getChannelLineUp().
+                    success(function(data, status, headers, config) {
+                        if (typeof data[0] != 'undefined' && typeof data[0].channelData != 'undefined')
+                        {
+                            try
+                            {
+                                data = data[0].channelData;
+                                data = JSON.parse(data);
+                            }
+                            catch(e)
+                            {
+                                debugToConsole(e);
+                            }
+
+                        }
+                        else if (typeof data.name == 'undefined') //Error case: Invalid JSON (multiple causes)
+                        {
+                            reportErrorAndRestart($scope.strings['str_noValidChannelData']);
+                        }
+                        if (data.length == 0) //Error case: Empty channel
+                        {
+                            reportErrorAndRestart($scope.strings['str_channelHasNoSlides']);
+                        }
+                        else //Success
+                        {
+                            $scope.loadingStepText = $scope.strings['str_loadingChannel'];
+
+                            var channelData = formatChannelData(data);
+                            $scope.channel = new Channel(channelData);
+                            $scope.oldHash = channelData.hash; //Used to determine if the channel configuration changed
+                            $scope.channel.start(); //Start the channel!
+                        }
+                    }).
+                    error(function(data, status, headers, config) { //Error case: Unable to hit Channel API call
+                        reportErrorAndRestart($scope.strings['str_unableToGetChannels']);
+                    });
             }).
-            error(function(data, status, headers, config) { //Error case: Unable to hit Channel API call
-                reportErrorAndRestart($scope.strings['str_unableToGetChannels']);
+            error(function(data, status, headers, config) { //Error case: Unable to hit Club Speed API
+                debugToConsole('Unable to fetch settings!');
+                reportErrorAndRestart($scope.strings['str_unableToConnect']);
             });
-        }).
-        error(function(data, status, headers, config) { //Error case: Unable to hit Club Speed API
-            debugToConsole('Unable to fetch settings!');
-            reportErrorAndRestart($scope.strings['str_unableToConnect']);
-        });
     }
     else //Diagnostics mode display
     {
@@ -172,70 +173,70 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
         $scope.settingsStatus = 'N/A';
 
         apiService.verifyConnectivityToServerAndFetchSettings().
-        success(function(data, status, headers, config) {
-
-            if (typeof data.settings != "undefined" && data.settings.length > 0)
-            {
-                processAndUpdateSettings(data.settings);
-            }
-            else
-            {
-                debugToConsole("No settings found on server. Using defaults.");
-            }
-
-            if (typeof data.settings != "undefined" && data.settings.length > 0)
-            {
-                $scope.settingsStatus = 'Good';
-            }
-            else
-            {
-                $scope.settingsStatus = 'Needs Migration';
-            }
-
-            $scope.clubSpeedReachable = 'Good';
-            globalSettings.setAPIDriver('polling');
-
-            $scope.loadingStepText = 'Fetching Channel configuration...';
-            apiService.getChannelLineUp().
             success(function(data, status, headers, config) {
-                if (typeof data[0] != 'undefined' && typeof data[0].channelData != 'undefined')
-                {
-                    try
-                    {
-                        data = data[0].channelData;
-                        data = JSON.parse(data);
-                    }
-                    catch(e)
-                    {
-                        $scope.channelDataAvailable = 'Bad Data';
-                    }
-                }
-                if (data.length == 0) //Error case: Empty channel
-                {
-                    $scope.channelDataAvailable = 'Empty';
-                }
-                else if (typeof data.name == 'undefined') //Error case: Invalid JSON (multiple causes)
-                {
-                    $scope.channelDataAvailable = 'Bad Data';
-                }
-                else //Success
-                {
-                    $scope.channelDataAvailable = 'Good';
-                    $scope.loadingStepText = 'Loading Channel...';
 
-                    var channelData = formatChannelData(data);
-                    $scope.regularTimelineSize = channelData.timelines.regular.slides.length;
-                    $scope.racesTimelineSize = channelData.timelines.races.slides.length;
+                if (typeof data.settings != "undefined" && data.settings.length > 0)
+                {
+                    processAndUpdateSettings(data.settings);
                 }
+                else
+                {
+                    debugToConsole("No settings found on server. Using defaults.");
+                }
+
+                if (typeof data.settings != "undefined" && data.settings.length > 0)
+                {
+                    $scope.settingsStatus = 'Good';
+                }
+                else
+                {
+                    $scope.settingsStatus = 'Needs Migration';
+                }
+
+                $scope.clubSpeedReachable = 'Good';
+                globalSettings.setAPIDriver('polling');
+
+                $scope.loadingStepText = 'Fetching Channel configuration...';
+                apiService.getChannelLineUp().
+                    success(function(data, status, headers, config) {
+                        if (typeof data[0] != 'undefined' && typeof data[0].channelData != 'undefined')
+                        {
+                            try
+                            {
+                                data = data[0].channelData;
+                                data = JSON.parse(data);
+                            }
+                            catch(e)
+                            {
+                                $scope.channelDataAvailable = 'Bad Data';
+                            }
+                        }
+                        if (data.length == 0) //Error case: Empty channel
+                        {
+                            $scope.channelDataAvailable = 'Empty';
+                        }
+                        else if (typeof data.name == 'undefined') //Error case: Invalid JSON (multiple causes)
+                        {
+                            $scope.channelDataAvailable = 'Bad Data';
+                        }
+                        else //Success
+                        {
+                            $scope.channelDataAvailable = 'Good';
+                            $scope.loadingStepText = 'Loading Channel...';
+
+                            var channelData = formatChannelData(data);
+                            $scope.regularTimelineSize = channelData.timelines.regular.slides.length;
+                            $scope.racesTimelineSize = channelData.timelines.races.slides.length;
+                        }
+                    }).
+                    error(function(data, status, headers, config) { //Error case: Unable to hit Channel API call
+                        $scope.channelDataAvailable = 'Error';
+                    });
             }).
-            error(function(data, status, headers, config) { //Error case: Unable to hit Channel API call
-                $scope.channelDataAvailable = 'Error';
+            error(function(data, status, headers, config) { //Error case: Unable to hit Club Speed API
+                $scope.clubSpeedReachable = 'Error';
+                console.log(config);
             });
-        }).
-        error(function(data, status, headers, config) { //Error case: Unable to hit Club Speed API
-            $scope.clubSpeedReachable = 'Error';
-            console.log(config);
-        });
     }
 
 
@@ -426,7 +427,7 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
                             {
                                 var currentTrack = -1;
                                 var currentSlide = self.channelLineUp.timelines[$scope.currentTimeline]['slides'][self.currentSlideIndex];
-                                if (typeof currentSlide != "undefined" && currentSlide.type == 'scoreboard') {
+                                if (currentSlide.type == 'scoreboard') {
                                     currentTrack = currentSlide.options.trackId;
                                 }
 
@@ -530,9 +531,9 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
         {
             if  (
                 racesSlides[i].type != 'scoreboard' ||
-                (racesSlides[i].type == 'scoreboard' &&
-                racesSlides[i].options.trackId != currentTrackId &&
-                $scope.listOfTracksWithARaceRunning.indexOf(racesSlides[i].options.trackId.toString()) > -1))
+                   (racesSlides[i].type == 'scoreboard' &&
+                    racesSlides[i].options.trackId != currentTrackId &&
+                    $scope.listOfTracksWithARaceRunning.indexOf(racesSlides[i].options.trackId.toString()) > -1))
 
             {
                 debugToConsole("Slide found! Should switch to slide " + (i + originalIndexOffset)%racesSlidesOriginalLength);
@@ -551,48 +552,48 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
     Channel.prototype.checkForChannelUpdate = function() {
         debugToConsole("Checking channel line-up for updates");
         apiService.getChannelLineUp().
-        success(function(data, status, headers, config) {
-            if (typeof data[0] != 'undefined' && typeof data[0].channelData != 'undefined')
-            {
-                try
+            success(function(data, status, headers, config) {
+                if (typeof data[0] != 'undefined' && typeof data[0].channelData != 'undefined')
                 {
-                    data = data[0].channelData;
-                    data = JSON.parse(data);
-                }
-                catch(e)
-                {
-                    debugToConsole(e);
-                }
+                    try
+                    {
+                        data = data[0].channelData;
+                        data = JSON.parse(data);
+                    }
+                    catch(e)
+                    {
+                        debugToConsole(e);
+                    }
 
-            }
-            else if (typeof data.name == 'undefined') //Error case: Invalid JSON (multiple causes)
-            {
-                debugToConsole("New channel line-up had invalid JSON data");
-                reportErrorAndRestart($scope.strings['str_noValidChannelData']);
-            }
-            if (data.length == 0)
-            {
-                debugToConsole("New channel line-up was empty");
-                reportErrorAndRestart($scope.strings['str_channelHasNoSlides']);
-            }
-            else
-            {
-                if ($scope.oldHash != data.hash)
+                }
+                else if (typeof data.name == 'undefined') //Error case: Invalid JSON (multiple causes)
                 {
-                    debugToConsole("Hashes were different! Restarting...");
-                    $window.location.reload(true);
+                    debugToConsole("New channel line-up had invalid JSON data");
+                    reportErrorAndRestart($scope.strings['str_noValidChannelData']);
+                }
+                if (data.length == 0)
+                {
+                    debugToConsole("New channel line-up was empty");
+                    reportErrorAndRestart($scope.strings['str_channelHasNoSlides']);
                 }
                 else
                 {
-                    debugToConsole("No changes in the channel line-up");
+                    if ($scope.oldHash != data.hash)
+                    {
+                        debugToConsole("Hashes were different! Restarting...");
+                        $window.location.reload(true);
+                    }
+                    else
+                    {
+                        debugToConsole("No changes in the channel line-up");
+                    }
                 }
-            }
-        }).
-        error(function(data, status, headers, config) {
-            $interval.cancel($scope.checkForRacesInterval);
-            $scope.checkForRacesInterval = null;
-            reportErrorAndRestart($scope.strings['str_unableToGetChannels']);
-        });
+            }).
+            error(function(data, status, headers, config) {
+                $interval.cancel($scope.checkForRacesInterval);
+                $scope.checkForRacesInterval = null;
+                reportErrorAndRestart($scope.strings['str_unableToGetChannels']);
+            });
     };
 
     Channel.prototype.showFirstTimelineAndSlide = function() {
@@ -725,11 +726,11 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
     Channel.prototype.queueUpNextSlide = function(timeUntilNextSlideMs) {
 
         $scope.nextSlideTimeout = $timeout(function()
-        {
-            Channel.prototype.abortAllSlideTimeouts();
-            debugClearCountdownArea();
-            $scope.channel.showNextTimelineAndSlide();
-        },timeUntilNextSlideMs);
+         {
+             Channel.prototype.abortAllSlideTimeouts();
+             debugClearCountdownArea();
+             $scope.channel.showNextTimelineAndSlide();
+         },timeUntilNextSlideMs);
     };
 
     Channel.prototype.abortAllSlideTimeouts = function()
@@ -746,40 +747,43 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
     };
 
     /**
-     * Calls getCurrentRaceId on each track, and returns (deferred) an array of trackIds that currently has races running.
+     * Calls getScoreboard on each track, and returns (deferred) an array of trackIds that currently has races running.
      * @returns {promise|*} A promise that eventually leads to an array of trackIds that have races running. (Ex. [1,3])
      */
     Channel.prototype.determineWhichTracksHaveRaces = function()
     {
-        debugToConsole("Channel is determining at which tracks there are races running, if any");
+        //debugToConsole("Channel is determining at which tracks there are races running, if any");
 
         var tracksWithRacesSlides = this.channelLineUp.timelines.races.tracks;
         var numberOfTracks = tracksWithRacesSlides.length;
         var tracksWithRacesRunning = $q.defer();
 
-        var currentRaceIdCallsToMake = [];
+        var getScoreboardCallsToMake = [];
         for(var i = 0; i < numberOfTracks; i++) //Generate the needed API calls
         {
             var currentTrack = tracksWithRacesSlides[i];
-            currentRaceIdCallsToMake.push(createCurrentRaceIdCall(currentTrack));
-            debugToConsole("Channel has called getCurrentRaceId on track " + currentTrack);
+            getScoreboardCallsToMake.push(createScoreboardCall(currentTrack));
+            //debugToConsole("Channel has called getScoreboard on track " + currentTrack);
         }
-        $q.all(currentRaceIdCallsToMake).then(function(results){ //Once all calls complete, see which tracks have a race running
-            debugToConsole("All getCurrentRaceId calls have completed");
+        $q.all(getScoreboardCallsToMake).then(function(results){ //Once all calls complete, see which tracks have a race running
+            //debugToConsole("All getScoreboard calls have completed");
             var tracksRunningRaces = [];
+            $scope.scoreboardsByTrack = {};
             for(var i = 0; i < results.length; i++)
             {
                 var currentTrack = getQueryVariable(results[i].config.url,'track_id');
+
                 var raceWasRunning = (typeof results[i].data.error == "undefined");
+                $scope.scoreboardsByTrack[currentTrack] = results[i];
 
                 if (raceWasRunning)
                 {
-                    debugToConsole("Track " + currentTrack + " did have a race running");
+                    //debugToConsole("Track " + currentTrack + " did have a race running");
                     tracksRunningRaces.push(currentTrack);
                 }
                 else
                 {
-                    debugToConsole("Track " + currentTrack + " did NOT have a race running");
+                    //debugToConsole("Track " + currentTrack + " did NOT have a race running");
                     continue;
                 }
             }
@@ -794,13 +798,13 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
     };
 
     /**
-     * Wraps a getCurrentRaceId call, allowing lists of these calls to specific tracks to be generated.
-     * @param track The track to call getCurrentRaceId on.
+     * Wraps a getScoreboard call, allowing lists of these calls to specific tracks to be generated.
+     * @param track The track to call getScoreboard on.
      * @returns {*} The result of the function call.
      */
-    function createCurrentRaceIdCall(track)
+    function createScoreboardCall(track)
     {
-        return apiService.getCurrentRaceId(track);
+        return apiService.getScoreboard(track);
     }
 
 
@@ -881,32 +885,32 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
         }
     }
 
-    /*
-     Checks if the slide meets any conditions required to display.
+/*
+    Checks if the slide meets any conditions required to display.
 
-     Conditions are received in this format:
+    Conditions are received in this format:
 
-     "showConditions": {
-     "repeatable": {
-     "daysOfTheWeek": [],
-     "daysOfTheMonth": [],
-     "months": [],
-     "startTime": "",
-     "endTime": "",
+        "showConditions": {
+        "repeatable": {
+            "daysOfTheWeek": [],
+            "daysOfTheMonth": [],
+            "months": [],
+            "startTime": "",
+            "endTime": "",
 
-     },
-     "specific": {
-     "startDate": "",
-     "endDate": ""
-     }
-     }*/
+        },
+        "specific": {
+            "startDate": "",
+            "endDate": ""
+        }
+    }*/
     function shouldShowSlide()
     {
         var slide = $scope.channel.channelLineUp.timelines[$scope.currentTimeline]['slides'][$scope.channel.currentSlideIndex];
         var slideShouldBeShown = true;
         debugToConsole("-------------------------------------------------");
         debugToConsole('Checking for presence of slide conditions...');
-        if (typeof slide != "undefined" && Object.size(slide.options.showConditions) > 0)
+        if (typeof slide.options.showConditions != "undefined" && Object.size(slide.options.showConditions) > 0)
         {
             debugToConsole('Slide has show conditions:');
             debugToConsole(slide.options.showConditions);
@@ -1057,7 +1061,7 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
         {
             debugToConsole('Slide does not have any show conditions.');
         }
-        if (typeof slide != "undefined" && slideShouldBeShown)
+        if (slideShouldBeShown)
         {
             debugToConsole('RESULT: Slide will be shown.');
             debugToConsole("-------------------------------------------------");
@@ -1143,96 +1147,80 @@ speedscreenApp.controller('speedscreenController', function($scope, $interval, $
 
     }
 
-    function getScoreboard(track)
-    {
-        var deferred = $q.defer();
-        deferred.resolve(apiService.getScoreboard(track));
-        return deferred.promise;
-    }
-
     function updateRaceStateAndRunConditionalOverlays()
     {
         var currentSlide = $scope.channel.channelLineUp.timelines[$scope.currentTimeline]['slides'][$scope.channel.currentSlideIndex];
 
         if (currentSlide.type == 'scoreboard' && typeof currentSlide.options.eventSlides != "undefined")
         {
-            var promise = getScoreboard(currentSlide.options.trackId);
-            promise.then(
-                function(response)
+            var data = $scope.scoreboardsByTrack[currentSlide.options.trackId].data;
+
+            $scope.prevRaceState = $scope.raceState;
+
+            if (typeof data.error == "undefined")
+            {
+                if (data.race.race_time_in_seconds === null)
                 {
-                    var data = response.data;
-                    $scope.prevRaceState = $scope.raceState;
-
-                    if (typeof data.error == "undefined")
+                    $scope.raceState = 'startButtonPressed';
+                    if (typeof currentSlide.options.eventSlides.onRaceStart != "undefined" && $scope.prevRaceState == 'none')
                     {
-                        if (data.race.race_time_in_seconds === null)
-                        {
-                            $scope.raceState = 'startButtonPressed';
-                            if (typeof currentSlide.options.eventSlides.onRaceStart != "undefined" && $scope.prevRaceState == 'none')
-                            {
-                                debugToConsole("LAUNCH: onRaceStart overlay");
-                                $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceStart.url));
-                                $scope.showOverlaySlide = true;
-                                $timeout.cancel($scope.overlayTimeout);
-                                $scope.overlayTimeout = $timeout(function(){
-                                    $scope.showOverlaySlide = false;
-                                    $scope.overlaySlideURL = '';
-                                },currentSlide.options.eventSlides.onRaceStart.duration);
-                            }
-                        }
-                        else
-                        {
-                            $scope.raceState = 'firstLapStarted';
-                            if (typeof currentSlide.options.eventSlides.onFirstLapStart != "undefined" && $scope.prevRaceState == 'startButtonPressed')
-                            {
-                                debugToConsole("LAUNCH: onFirstLapStart overlay");
-                                $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapStart.url));
-                                $scope.showOverlaySlide = true;
-                                $timeout.cancel($scope.overlayTimeout);
-                                $scope.overlayTimeout = $timeout(function(){
-                                    $scope.showOverlaySlide = false;
-                                    $scope.overlaySlideURL = '';
-                                },currentSlide.options.eventSlides.onFirstLapStart.duration);
-                            }
-                        }
-
-                        if (data.scoreboard.length > 0)
-                        {
-                            $scope.raceState = 'running';
-                            if (typeof currentSlide.options.eventSlides.onFirstLapCompleted != "undefined" && $scope.prevRaceState == 'firstLapStarted')
-                            {
-                                debugToConsole("LAUNCH: onFirstLapCompleted overlay");
-                                $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapCompleted.url));
-                                $scope.showOverlaySlide = true;
-                                $timeout.cancel($scope.overlayTimeout);
-                                $scope.overlayTimeout = $timeout(function(){
-                                    $scope.showOverlaySlide = false;
-                                    $scope.overlaySlideURL = '';
-                                },currentSlide.options.eventSlides.onFirstLapCompleted.duration);
-                            }
-                        }
+                        debugToConsole("LAUNCH: onRaceStart overlay");
+                        $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceStart.url));
+                        $scope.showOverlaySlide = true;
+                        $timeout.cancel($scope.overlayTimeout);
+                        $scope.overlayTimeout = $timeout(function(){
+                            $scope.showOverlaySlide = false;
+                            $scope.overlaySlideURL = '';
+                        },currentSlide.options.eventSlides.onRaceStart.duration);
                     }
-                    else
-                    {
-                        $scope.raceState = 'none';
-                        if (typeof currentSlide.options.eventSlides.onRaceEnd != "undefined" && $scope.prevRaceState == 'running')
-                        {
-                            debugToConsole("LAUNCH: onRaceEnd overlay");
-                            $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceEnd.url));
-                            $scope.showOverlaySlide = true;
-                            $timeout.cancel($scope.overlayTimeout);
-                            $scope.overlayTimeout = $timeout(function(){
-                                $scope.showOverlaySlide = false;
-                                $scope.overlaySlideURL = '';
-                            },currentSlide.options.eventSlides.onRaceEnd.duration);
-                        }
-                    }
-                },
-                function(error)
+                }
+                else
                 {
-                    console.log(error);
-                });
+                    $scope.raceState = 'firstLapStarted';
+                    if (typeof currentSlide.options.eventSlides.onFirstLapStart != "undefined" && $scope.prevRaceState == 'startButtonPressed')
+                    {
+                        debugToConsole("LAUNCH: onFirstLapStart overlay");
+                        $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapStart.url));
+                        $scope.showOverlaySlide = true;
+                        $timeout.cancel($scope.overlayTimeout);
+                        $scope.overlayTimeout = $timeout(function(){
+                            $scope.showOverlaySlide = false;
+                            $scope.overlaySlideURL = '';
+                        },currentSlide.options.eventSlides.onFirstLapStart.duration);
+                    }
+                }
 
+                if (data.scoreboard.length > 0)
+                {
+                    $scope.raceState = 'running';
+                    if (typeof currentSlide.options.eventSlides.onFirstLapCompleted != "undefined" && $scope.prevRaceState == 'firstLapStarted')
+                    {
+                        debugToConsole("LAUNCH: onFirstLapCompleted overlay");
+                        $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onFirstLapCompleted.url));
+                        $scope.showOverlaySlide = true;
+                        $timeout.cancel($scope.overlayTimeout);
+                        $scope.overlayTimeout = $timeout(function(){
+                            $scope.showOverlaySlide = false;
+                            $scope.overlaySlideURL = '';
+                        },currentSlide.options.eventSlides.onFirstLapCompleted.duration);
+                    }
+                }
+            }
+            else
+            {
+                $scope.raceState = 'none';
+                if (typeof currentSlide.options.eventSlides.onRaceEnd != "undefined" && $scope.prevRaceState == 'running')
+                {
+                    debugToConsole("LAUNCH: onRaceEnd overlay");
+                    $scope.overlaySlideURL = $sce.trustAsResourceUrl(appendLocaleAndBackgroundImg(currentSlide.options.eventSlides.onRaceEnd.url));
+                    $scope.showOverlaySlide = true;
+                    $timeout.cancel($scope.overlayTimeout);
+                    $scope.overlayTimeout = $timeout(function(){
+                        $scope.showOverlaySlide = false;
+                        $scope.overlaySlideURL = '';
+                    },currentSlide.options.eventSlides.onRaceEnd.duration);
+                }
+            }
         }
     }
 
