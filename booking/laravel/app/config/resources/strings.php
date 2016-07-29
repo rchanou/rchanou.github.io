@@ -321,7 +321,8 @@ class Strings
             'bg-BG' => 'български език',
             'sv-SE' => 'Svenska',
             'zh-CN' => '中文',
-            'mn-MN' => 'Монгол'
+            'mn-MN' => 'Монгол',
+            'id-ID' => 'Bahasa Indonesia'
         );
 
         //Error codes. Used for sparingly few API calls.
