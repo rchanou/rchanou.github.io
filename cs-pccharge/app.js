@@ -125,7 +125,7 @@ function processRequest(incomingData, cb) {
 
 function processCharge(xml, cb) { // CHARGE -- CAPTURED/APPROVED = Success; Anything else is a failure
   /*
-  var successfulRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>1</COMMAND><PROCESSOR_ID>FDCN</PROCESSOR_ID><MERCH_NUM>000000000000000000</MERCH_NUM><ACCT_NUM>4111111111111111</ACCT_NUM><EXP_DATE>1017</EXP_DATE><MANUAL_FLAG>0</MANUAL_FLAG><TRANS_AMOUNT>15.00</TRANS_AMOUNT><TICKET_NUM>1862</TICKET_NUM><CARDHOLDER>test</CARDHOLDER><CVV2>666</CVV2><MULTI_FLAG>1</MULTI_FLAG><STREET>test</STREET><ZIP_CODE>30115</ZIP_CODE><PRESENT_FLAG>2</PRESENT_FLAG></XML_REQUEST>';
+  var successfulRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>1</COMMAND><PROCESSOR_ID>FDCN</PROCESSOR_ID><MERCH_NUM>000000000000000000</MERCH_NUM><ACCT_NUM>4111111111111111</ACCT_NUM><EXP_DATE>1018</EXP_DATE><MANUAL_FLAG>0</MANUAL_FLAG><TRANS_AMOUNT>15.00</TRANS_AMOUNT><TICKET_NUM>1862</TICKET_NUM><CARDHOLDER>test</CARDHOLDER><CVV2>666</CVV2><MULTI_FLAG>1</MULTI_FLAG><STREET>test</STREET><ZIP_CODE>30115</ZIP_CODE><PRESENT_FLAG>2</PRESENT_FLAG></XML_REQUEST>';
   var failingRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>1</COMMAND><PROCESSOR_ID>FDCN</PROCESSOR_ID><MERCH_NUM>000000000000000000</MERCH_NUM><ACCT_NUM>4111111111111111</ACCT_NUM><EXP_DATE>1017</EXP_DATE><MANUAL_FLAG>0</MANUAL_FLAG><TRANS_AMOUNT>6.66</TRANS_AMOUNT><TICKET_NUM>1862</TICKET_NUM><CARDHOLDER>test</CARDHOLDER><CVV2>666</CVV2><MULTI_FLAG>1</MULTI_FLAG><STREET>test</STREET><ZIP_CODE>30115</ZIP_CODE><PRESENT_FLAG>2</PRESENT_FLAG></XML_REQUEST>';
   var successfulResponse = '<XML_REQUEST><USER_ID>User1</USER_ID><TROUTD>273987</TROUTD><RESULT>CAPTURED</RESULT><AUTH_CODE>02574D</AUTH_CODE><TRANS_DATE>060916</TRANS_DATE><TICKET>862649</TICKET><INTRN_SEQ_NUM>273987</INTRN_SEQ_NUM><TRANS_ID>586161682726626</TRANS_ID><TICODE>ZCSH</TICODE><RET>A014</RET><ACI>E</ACI><CMRCL_TYPE>N</CMRCL_TYPE><PURCH_CARD_TYPE>0</PURCH_CARD_TYPE></XML_REQUEST>'
   var declinedRequest = '<XML_REQUEST><USER_ID>User1</USER_ID><COMMAND>1</COMMAND><PROCESSOR_ID>CES</PROCESSOR_ID><MERCH_NUM>426193590996159873</MERCH_NUM><ACCT_NUM>436618******9972</ACCT_NUM><EXP_DATE>****</EXP_DATE><MANUAL_FLAG>0</MANUAL_FLAG><TRANS_AMOUNT>26.26</TRANS_AMOUNT><TICKET_NUM>861239</TICKET_NUM><MULTI_FLAG>1</MULTI_FLAG><PRESENT_FLAG>1</PRESENT_FLAG></XML_REQUEST>'
@@ -166,7 +166,9 @@ function processCharge(xml, cb) { // CHARGE -- CAPTURED/APPROVED = Success; Anyt
   AuthNet.send('createTransaction', transaction, function(err, response) {
     console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', JSON.stringify(err, null, 4), '\n\n\nAUTHNET RESPONSE:', JSON.stringify(response, null, 4));
 
-    if(err) {
+    var responseCode = _.has(response, 'transactionResponse.responseCode') ? response.transactionResponse.responseCode : null;
+
+    if(responseCode !== '1' || err) {
       var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
 
       pcchargeResponse = declinedResponseTemplate
@@ -268,7 +270,9 @@ function authnetRefund(opts, cb) {
   AuthNet.send('createTransaction', transaction, function(err, response) {
     console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', JSON.stringify(err, null, 4), '\n\n\nAUTHNET RESPONSE:', JSON.stringify(response, null, 4));
 
-    if(err) {
+    var responseCode = _.has(response, 'transactionResponse.responseCode') ? response.transactionResponse.responseCode : null;
+
+    if(responseCode !== '1' || err) {
       var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
 
       return cb(errMsg);
@@ -307,7 +311,9 @@ function processVoid(xml, cb) { // VOID -- CAPTURED/VOIDED = Success; Anything e
   AuthNet.send('createTransaction', transaction, function(err, response) {
     console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', JSON.stringify(err, null, 4), '\n\n\nAUTHNET RESPONSE:', JSON.stringify(response, null, 4));
 
-    if(err) {
+    var responseCode = _.has(response, 'transactionResponse.responseCode') ? response.transactionResponse.responseCode : null;
+
+    if(responseCode !== '1' || err) {
       var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
 
       pcchargeResponse = declinedResponseTemplate
