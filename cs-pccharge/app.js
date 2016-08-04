@@ -169,7 +169,11 @@ function processCharge(xml, cb) { // CHARGE -- CAPTURED/APPROVED = Success; Anyt
     var responseCode = _.has(response, 'transactionResponse.responseCode') ? response.transactionResponse.responseCode : null;
 
     if(responseCode !== '1' || err) {
-      var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
+      //var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
+      var errMsg = ""
+      try {
+        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : err;
+      } catch(e) {}
 
       pcchargeResponse = declinedResponseTemplate
         .replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0])
@@ -273,7 +277,11 @@ function authnetRefund(opts, cb) {
     var responseCode = _.has(response, 'transactionResponse.responseCode') ? response.transactionResponse.responseCode : null;
 
     if(responseCode !== '1' || err) {
-      var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
+      //var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
+      var errMsg = ""
+      try {
+        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : err;
+      } catch(e) {}
 
       return cb(errMsg);
     } else {
@@ -314,7 +322,11 @@ function processVoid(xml, cb) { // VOID -- CAPTURED/VOIDED = Success; Anything e
     var responseCode = _.has(response, 'transactionResponse.responseCode') ? response.transactionResponse.responseCode : null;
 
     if(responseCode !== '1' || err) {
-      var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
+      //var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
+      var errMsg = ""
+      try {
+        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : err;
+      } catch(e) {}
 
       pcchargeResponse = declinedResponseTemplate
         .replace('##TICKET##', xml.XML_REQUEST.TICKET_NUM[0])
