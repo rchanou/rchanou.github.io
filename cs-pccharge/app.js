@@ -172,7 +172,7 @@ function processCharge(xml, cb) { // CHARGE -- CAPTURED/APPROVED = Success; Anyt
       //var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
       var errMsg = ""
       try {
-        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : err;
+        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : JSON.stringify(err);
       } catch(e) {}
 
       pcchargeResponse = declinedResponseTemplate
@@ -280,7 +280,7 @@ function authnetRefund(opts, cb) {
       //var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
       var errMsg = ""
       try {
-        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : err;
+        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : JSON.stringify(err);
       } catch(e) {}
 
       return cb(errMsg);
@@ -325,7 +325,7 @@ function processVoid(xml, cb) { // VOID -- CAPTURED/VOIDED = Success; Anything e
       //var errMsg = _.has(err, 'response.transactionResponse.errors.error.errorText') ? err.response.transactionResponse.errors.error.errorText : err.toString();
       var errMsg = ""
       try {
-        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : err;
+        errMsg = _.has(response, 'transactionResponse.errors.error.errorText') ? response.transactionResponse.errors.error.errorText : JSON.stringify(err);
       } catch(e) {}
 
       pcchargeResponse = declinedResponseTemplate
