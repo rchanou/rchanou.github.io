@@ -341,6 +341,9 @@ class Settings {
                 'Zimbabwe' => 'Zimbabwe')
         );
 
+        asort(self::$defaultSettings['countries']);
+
         self::$initialized = true;
+
     }
 } 
