@@ -217,6 +217,11 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 				Since we are doing CREDITAUTH only, a successful transaction is one that...
 			    1. TRANSUCCESS = TRUE (field always exists)
 			    2. CCAUTHORIZED = TRUE (if field exists, always exists unless we're doing AUTHONLY -- see above)
+
+			    /// August 8, 2016 #20332 -- Credits no longer return CCAUTHORIZED.
+			    Making a change for ONLY credits and will go back to only checking TRANSUCCESS = TRUE to judge
+			    if a transaction is successful. Will remove the check for CCAUTHORIZED = TRUE because the field
+			    is not being returned -- See ticket #20332 for Tempus responses.
 			    */
 				var isSuccessful = retrieveTransactionSuccess(result);
 
@@ -318,7 +323,8 @@ Ingenico.prototype.refundTransaction = function refundTransaction(order) {
 					_original: result
 				};
 
-				var isSuccessful = retrieveTransactionSuccess(result);
+				//var isSuccessful = retrieveTransactionSuccess(result); Removed per 8/8/2016 note above
+				var isSuccessful = _.get(result, 'TRANRESP.TRANSUCCESS[0]') === 'TRUE';
 
 				if(isSuccessful) {
 					return resolve(_.merge(self.opts.defaultHoistedVars, hoistedVars, {
