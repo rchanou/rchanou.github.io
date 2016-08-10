@@ -106,7 +106,7 @@ app.listen(config.socketIoPort);
 function handler (req, res) {
 
   // Could just pass req.url into readFile but we'd be able to read arbitary files then. :-)
-  var validFiles = ['/favicon.ico', '/timing.html'];
+  var validFiles = ['/charts.html', '/favicon.ico', '/timing.html'];
   var filename = ~validFiles.indexOf(req.url) ? req.url : '/client.html';
 
   fs.readFile(__dirname + filename,
