@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--script src="/socket.io/socket.io.js"></script-->
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"
+      integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
+      crossorigin="anonymous"
+    ></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.0/velocity.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        color: hsl(0,0%,95%);
+        font-family: sans-serif;
+      }
+
+      input, button {
+        color: black;
+      }
+
+      body {
+        background: hsl(0,0%,9%);
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        /*display: flex; table-cell;
+        text-align: center;
+        vertical-align: middle;
+        justify-content: center;
+        align-items: center;*/
+        width: 100vw;
+        height: 100vh;
+      }
+
+      #dot-field {
+        position: relative;
+        width: 1000px;
+        height: 1000px;
+      }
+
+      .raw-dot {
+        position: absolute; top:0; left:0;
+        background: hsl(120,50%,80%);
+        width: 14px; /*100px;*/
+        height: 14px; /*100px;*/
+        border-radius: 7px; /*100px;*/
+        transform-origin: 7px 7px;
+      }
+
+
+      .smooth {
+        transition: all 0.3s;
+        -webkit-transition: all 0.3s;
+      }
+
+      canvas {
+        position: absolute; top:0; left:0;
+        width: 1000px; /*100vw;*/
+        height: 1000px; /*100vh;*/
+      }
+
+      #trace-mode-display {
+        position: absolute; top:0; left:0;
+        display: none;
+      }
+
+      .arrow {
+        position: absolute; top:0; left:0;
+      }
+
+      #debug-panel {
+        position: absolute; top:0; left:0;
+      }
+
+      #set-top-left {
+        display: none;
+      }
+
+      #set-bottom-right {
+        display: none;
+      }
+
+      #lines {
+        position: absolute; top:0; left:0;
+      }
+
+      .coord-input {
+        width: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id='dot-field'>
+      <canvas id='canvas' width='1000' height='1000'></canvas>
+      <canvas id='tracer' width='1000' height='1000'></canvas>
+      <svg id='lines'>
+        <!--line id='line-finish' x1="20" y1="100"
+                  x2="100" y2="20"
+                  stroke="yellow"
+                  stroke-width="2"/-->
+      </svg>
+    </div>
+    <form id='debug-panel'>
+      <label>Smooth</label>
+      <input id='smooth-check' type='checkbox' checked>
+      <label>Show All Dots</label>
+      <input id='show-all-dots' type='checkbox' >
+      <div id='x-coord'></div>
+      <div id='y-coord' ></div>
+      <!--div class='coord-panel' id='finish'>
+        <input class='x1' type='number'>
+        <input class='y1' type='number'>
+        <input class='x2' type='number'>
+        <input class='y2' type='number'>
+      </div>
+      <div class='coord-panel' id='sector-1'>
+        <input class='x1' type='number'>
+        <input class='y1' type='number'>
+        <input class='x2' type='number'>
+        <input class='y2' type='number'>
+      </div>
+      <div class='coord-panel' id='sector-2'>
+        <input class='x1' type='number'>
+        <input class='y1' type='number'>
+        <input class='x2' type='number'>
+        <input class='y2' type='number'>
+      </div-->
+      <button id='set-top-left'>Set Top Left</button>
+      <button id='set-bottom-right'>Set Bottom Right</button>
+    </form>
+    <div id='trace-mode-display'>Trace track from start to finish.</div>
+
+    <script>
+      function moveTo(id, x, y){
+        var rawDotEl = document.getElementById(id);
+        if (rawDotEl){
+          //var newX = nextPoint.x - state.minXBound;
+
+          //var newY = nextPoint.y - state.minYBound;
+
+          rawDotEl.style.transform = 'translate(' + (
+            x //newX / calcXSize * appState.mapSize
+          ) + 'px,' + (
+            y //newY / calcYSize * appState.mapSize
+          ) + 'px)';
+        }
+      }
+
+      function getCurrentAngle(el){
+        try {
+          //var el = document.getElementById(id);
+          var st = window.getComputedStyle(el, null);
+          var tr = st.getPropertyValue("-webkit-transform") ||
+                   st.getPropertyValue("-moz-transform") ||
+                   st.getPropertyValue("-ms-transform") ||
+                   st.getPropertyValue("-o-transform") ||
+                   st.getPropertyValue("transform") ||
+                   "FAIL";
+
+          // rotation matrix - http://en.wikipedia.org/wiki/Rotation_matrix
+          var values = tr.split('(')[1].split(')')[0].split(',');
+          var a = values[0];
+          var b = values[1];
+          var c = values[2];
+          var d = values[3];
+
+          var scale = Math.sqrt(a*a + b*b);
+          // arc sin, convert from radians to degrees, round
+          var sin = b/scale;
+          // next line works for 30deg but not 130deg (returns 50);
+          var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+
+          return angle;
+        } catch(ex){
+          return 0;
+        }
+      }
+
+    	function calcPointLineDist(x, y, x1, y1, x2, y2) {
+    		var A = x - x1;
+    		var B = y - y1;
+    		var C = x2 - x1;
+    		var D = y2 - y1;
+
+    		var dot = A * C + B * D;
+    		var len_sq = C * C + D * D;
+    		var param = -1;
+    		if (len_sq != 0) //in case of 0 length line
+    				param = dot / len_sq;
+
+    		var xx, yy;
+
+    		if (param < 0) {
+    			xx = x1;
+    			yy = y1;
+    		}
+    		else if (param > 1) {
+    			xx = x2;
+    			yy = y2;
+    		}
+    		else {
+    			xx = x1 + param * C;
+    			yy = y1 + param * D;
+    		}
+
+    		var dx = x - xx;
+    		var dy = y - yy;
+    		return Math.sqrt(dx * dx + dy * dy);
+    	}
+
+      function getNearestPointIndex(others, me, prevIndex){
+        if (!others || !others.length){
+          return -1;
+        }
+
+        var smallestDistBound, nearestPointIndex;
+
+        var tolerance = 20;
+
+        for (var i = 0; i < others.length; i++){
+          var otherPoint = others[i];
+          var dist = Math.pow(me.x - otherPoint.x, 2) + Math.pow(me.y - otherPoint.y, 2);
+
+          if (
+            (typeof smallestDistBound === 'undefined' || dist < smallestDistBound)
+          ){
+            if (typeof prevIndex === 'undefined'){
+              smallestDistBound = dist;
+              nearestPointIndex = i;
+            } else if (i > prevIndex){
+              if (i - tolerance <= prevIndex){
+                smallestDistBound = dist;
+                nearestPointIndex = i;
+              }
+            } else if (i <= tolerance && (i + others.length) > prevIndex){
+              smallestDistBound = dist;
+              nearestPointIndex = i;
+            }
+            //console.log(dist, closestPointBound);
+          }
+        }
+
+        if (typeof nearestPointIndex === 'undefined'){
+          return prevIndex;
+        }
+
+        return nearestPointIndex;
+      }
+      window.closest = getNearestPointIndex;
+
+    	function sortTrackCoordsByDist(trackCoords, coord){
+    		return _.sortBy(trackCoords, function(t, i){
+    			if (i === 0){
+    				var prevCoord = trackCoords[trackCoords.length - 1];
+    			} else {
+    				var prevCoord = trackCoords[i - 1];
+    			}
+
+    			return calcPointLineDist(coord.x, coord.y, prevCoord.x, prevCoord.y, t.x, t.y);
+    		});
+
+    		return sortedCoords;
+    	}
+
+    	function calcCompletion(trackCoords, coords, prevCompletion){
+        var sortedTrackCoords = sortTrackCoordsByDist(trackPoints, coords);
+
+    		var currCompletion;
+    		var tolerance = 0.04;
+
+    		for (var i = 0; i < sortedTrackCoords.length; i++){
+          currCompletion = sortedTrackCoords[i].d;
+          if ( Math.abs(currCompletion - prevCompletion) < tolerance ){
+            return currCompletion;
+          } else if ( currCompletion < tolerance && prevCompletion > 1 - tolerance){
+            return currCompletion;
+          }
+    		}
+
+    		return currCompletion;
+    	}
+
+      function getColorFromId(id){
+        var hue = 0;
+        for (var i in id){
+          hue += Math.pow(id.charCodeAt(i), 2);
+        }
+        return 'hsl(' + (hue % 360) + ',50%,73%)';
+      }
+
+      var commands = {
+        createDots: function(id){
+          var $rawDot = $(
+            '<div class="raw-dot '
+            + (appState.smooth? 'smooth': '') + '" id="'
+            + id + '"></div>'
+          );
+
+          //console.log(hue, hue % 360);
+          var color = getColorFromId(id);
+
+          $rawDot.css(
+            'background',
+            color
+          );
+
+          $rawDot.appendTo('#dot-field');
+          //$rawDot.appendTo(document.body);
+
+          return;
+
+          var $arrow = $(
+            '<svg id="a-'
+              + id
+              + '" fill="'
+              + color
+              + '" height="48" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg">'
+              + '<path d="M0 0h24v24H0z" fill="none" />'
+              + '<path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>'
+            + '</svg>'
+          );
+
+          $arrow.appendTo(document.body);
+        },
+
+        initState: function(state){
+          if (appState.tags){
+            for (var id in appState.tags){
+              //console.log(id);
+              commands.createDots(id);
+              appState.tags[id].points = [];
+            }
+          }
+        },
+
+        loadLocal: function(stateRef){
+          var storedState = localStorage.getItem('track-map-state');
+
+          if (storedState) {
+          //} else {
+            state = JSON.parse(storedState);
+            //initState(state);
+          }
+          commands.initState(state);
+        },
+
+        pollForChanges: function(prevData){
+          $.getJSON(pollUrl, function(data, status){
+          	//if(debug) console.log('Polling', data, status);
+
+            if(prevData !== JSON.stringify(data)){
+              appState.tags = {};
+            }
+          });
+        }
+
+        /*processPoints: function(id, pointsRef){
+          var point = pointsRef.shift();
+
+          var arrowEl = document.getElementById('a-' + id);
+
+          if (arrowEl){
+            arrowEl.style.transform = 'translate(' + (
+              (point.x - state.minXBound) / state.xSize * 100
+            ) + 'vw,' + (
+              (point.y - state.minYBound) / state.ySize * 100
+            ) + 'vh)';
+          }
+
+          var timeToNext = pointsRef[0].timestamp - point.timestamp;
+
+          setTimeout(
+            function(){
+              commands.processPoints(id, pointsRef);
+            },
+            timeToNext
+          )
+        }*/
+      };
+
+      var NO_TRACE = 0;
+      var AWAIT_TRACE = 1;
+      var TRACE = 2;
+
+      var BUFFER_SIZE = 3;
+
+      var apiUrl = 'http://k1irvine.clubspeedtiming.com/api/index.php/';
+      var scoreboardUrl = apiUrl + 'races/scoreboard.js?track_id=1&key=cs-dev&callback=?'; // heat_id=2000
+      var pollUrl       = apiUrl + 'activeCountracelapcount.js?key=cs-dev&callback=?';
+
+      var appState = { // not saved to local storage
+        traceMode: NO_TRACE,
+        smooth: true,
+        tags: {},
+        maxSquareStep: 36,
+        mapSize: 1000,
+        showAllDots: false
+      };
+
+      var state = { // TODO: change name to store
+        minXBound: -50,
+        maxXBound: 50,
+        minYBound: -50,
+        maxYBound: 20,
+        flipX: false,
+        flipY: true,
+        trackPoints: [],
+        lines: {
+          finish: { x1: 6, y1: 0, x2: 6, y2: 7 },
+          sector1: { x1: 12, y1: 20, x2: 24, y2: 20 },
+          sector2: { x1: -12, y1: 23, x2: -12, y2: 18 },
+          pit1: { x1: -29, y1: 18, x2: -18, y2: -4 },
+          pit2: { x1: -18, y1: -4, x2: -33, y2: -7 },
+          pit3: { x1: -33, y1: -7, x2: -44, y2: 15 },
+          pit4: { x1: -44, y1: 15, x2: -29, y2: 18 }
+        }
+      };
+
+      $(document).ready(function(){
+        var socket = io('http://k1irvine.clubspeedtiming.com:3000');
+
+        //var socket = io();
+
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.globalAlpha = 0.2;
+        context.fillStyle = 'grey';
+
+        var tracer = document.getElementById('tracer');
+        var tracerCtx = tracer.getContext('2d');
+
+        var $window = $(window);
+        var $dotField = $('#dot-field');
+        var $canvas = $(canvas);
+        var $tracer = $(tracer);
+
+        var lines = document.getElementById('lines');
+        var $lines = $(lines);
+
+        $window.keydown(function(e){
+          if (e.keyCode === 13){
+            appState.traceMode = appState.traceMode? NO_TRACE: AWAIT_TRACE;
+
+            if (appState.traceMode){
+              $('#trace-mode-display').show();
+              //context.globalAlpha = 1;
+            } else {
+              $('#trace-mode-display').hide();
+              //context.globalAlpha = 0.1;
+            }
+          }
+        });
+
+        $tracer.bind('touchstart', function(){ //console.log('start');
+          if (appState.traceMode === NO_TRACE){
+            return;
+          }
+          appState.traceMode = TRACE;
+
+          state.trackPoints = [];
+          tracerCtx.fillStyle = 'tomato';
+          tracerCtx.clearRect(0, 0, tracer.width, tracer.height);
+        });
+
+        var requestingTouchFrame = false;
+        $tracer.bind('touchmove', function(e){
+          if (appState.traceMode !== TRACE){
+            return;
+          }
+
+          e.preventDefault();
+
+          if (requestingTouchFrame){
+            return;
+          }
+          requestingTouchFrame = true;
+          requestAnimationFrame(function(){
+            requestingTouchFrame = false;
+          });
+
+          var touch = e.touches[0];
+
+          var calcedTrackX = touch.pageX / window.innerWidth;
+          var calcedTrackY = touch.pageY / window.innerHeight;
+
+          state.trackPoints.push({
+            x: (calcedTrackX * (state.maxXBound - state.minXBound)) + state.minXBound,
+            y: (calcedTrackY * (state.maxYBound - state.minYBound)) + state.minYBound
+          })
+
+          tracerCtx.beginPath();
+          tracerCtx.arc(
+            calcedTrackX * tracer.width,
+            calcedTrackY * tracer.height,
+            5, 0, 2 * Math.PI, false
+          );
+          tracerCtx.fill();
+        });
+
+        $tracer.bind('touchend', function(){
+          if (appState.traceMode === NO_TRACE){
+            return;
+          }
+
+          console.log('old point count', state.trackPoints);
+          state.trackPoints = simplify(state.trackPoints, 0.01, true);
+          console.log('new point count', state.trackPoints);
+
+          tracerCtx.fillStyle = 'yellow';
+
+          var xSize = state.maxXBound - state.minXBound;
+          var ySize = state.maxYBound - state.minYBound;
+          state.trackPoints.forEach( point => {
+            tracerCtx.beginPath();
+            tracerCtx.arc(
+              (point.x - state.minXBound) / xSize * tracer.width, (point.y - state.minYBound) / ySize * tracer.height,
+              5, 0, 2 * Math.PI, false
+            );
+            tracerCtx.fill();
+          });
+        });
+        /*$('#tracer').bind('touchstart', function(){
+          state.tracing = false;
+        });*/
+
+        var dataURL = localStorage.getItem('track-map-canvas');
+        if (false && dataURL){
+          var img = new Image;
+          img.src = dataURL;
+          img.onload = function(){
+            context.globalAlpha = 0.9;
+            context.drawImage(img, 0, 0);
+            context.globalAlpha = 0.2;
+          };
+        }
+
+        socket.on('passing', function(data){
+          console.log('passing', data);
+        });
+
+        socket.on('point', function (data) {
+          if (!appState.tags[data.id]){
+            appState.tags[data.id] = {
+              points: [],
+              //angle: 0,
+              //stateChangeCount: 0,
+              //recentXDistance: 0,
+              //recentYDistance: 0,
+              //movementScore: 0,
+              avgStep: 0,
+              pointCount: 0,
+              activeCount: 0,
+              firstTime: data.t,
+              loc: data.loc
+            };
+            commands.createDots(data.id);
+
+            if (data.loc === 'pit'){
+              $('#' + data.id).hide();
+            } else {
+              $('#' + data.id).show();
+            }
+          }
+
+          /*if (appState.tags[data.id].pointCount < 5){
+            console.log(data);
+          }*/
+
+          if (!data.x && !data.y){
+            console.log(data.id);
+            return;
+          }
+
+          if (data.x > 9999 || data.y > 9999){
+            console.log(data.id);
+            //return;
+          }
+
+          appState.tags[data.id].points.push({
+            x: state.flipX? -data.x: data.x,
+            y: state.flipY? -data.y: data.y,
+            timestamp: data.t * 1000
+          });
+
+          if (data.loc === 'pit'){
+            if (appState.tags[data.id].activeCount > 0){
+              appState.tags[data.id].activeCount = 0;
+              $('#' + data.id).hide();
+            }
+          } else {
+            if (appState.tags[data.id].activeCount > 5){
+              appState.tags[data.id].activeCount = true;
+              $('#' + data.id).show();
+            } else {
+              appState.tags[data.id].activeCount++;
+            }
+          }
+
+          if (appState.tags[data.id].points.length > 1){
+            var prevPoint = appState.tags[data.id].points.shift();
+            var nextPoint = appState.tags[data.id].points[0];
+
+            var squareStep = Math.pow(nextPoint.x - prevPoint.x, 2)
+              + Math.pow(nextPoint.y - prevPoint.y, 2);
+
+            appState.tags[data.id].avgStep = (
+              appState.tags[data.id].avgStep * appState.tags[data.id].pointCount
+               + Math.pow(squareStep, 1/2)
+            ) / (appState.tags[data.id].pointCount + 1);
+            appState.tags[data.id].pointCount++;
+            appState.tags[data.id].latestTime = data.t;
+
+            var oldAngle = appState.tags[data.id].angle;
+            var newAngle = (Math.atan2(
+              nextPoint.y - prevPoint.y, nextPoint.x - prevPoint.x
+            ) * 180 / Math.PI) + 90;
+
+            var calcXSize = state.maxXBound - state.minXBound;
+            var calcYSize = state.maxYBound - state.minYBound;
+            var finalX = (nextPoint.x - state.minXBound) / calcXSize * appState.mapSize;
+            var finalY = (nextPoint.y - state.minYBound) / calcYSize * appState.mapSize;
+
+            if (!appState.smooth){
+              moveTo(data.id, finalX, finalY);
+            }
+
+            if (typeof oldAngle !== 'undefined' && Math.abs(newAngle - oldAngle) < 90
+              && squareStep < appState.maxSquareStep
+            ){
+              /*if (appState.tags[data.id].movementScore < 199){
+                appState.tags[data.id].movementScore++;
+                //if (appState.tags[data.id].activeCount) console.log(data.x, data.y, finalX, finalY);
+              }*/
+
+              if (appState.smooth) moveTo(data.id, finalX, finalY);
+              /*var rawDotEl = document.getElementById(data.id);
+              if (rawDotEl){
+                var newX = nextPoint.x - state.minXBound;
+
+                var newY = nextPoint.y - state.minYBound;
+
+                rawDotEl.style.transform = 'translate(' + (
+                  newX / calcXSize * appState.mapSize
+                ) + 'px,' + (
+                  newY / calcYSize * appState.mapSize
+                ) + 'px)';
+              }*/
+            } /*else {
+              appState.tags[data.id].movementScore = Math.max(
+                appState.tags[data.id].movementScore - 4, 0
+              );
+            }*/
+
+            appState.tags[data.id].angle = newAngle;
+
+            /*if (!appState.tags[data.id].activeCount
+              && (appState.tags[data.id].movementScore > 39
+                || appState.showAllDots
+              )
+            ){
+              //appState.tags[data.id].activeCount = true;
+              if (!appState.trackingTagId){
+                appState.trackingTagId = data.id;
+                $('#debug-panel')
+                .css('border', 'thick solid ' + getColorFromId(data.id));
+              }
+              $('#' + data.id).show();
+              console.log('show', data.id);
+            } else if (
+              appState.tags[data.id].activeCount
+              && appState.tags[data.id].movementScore <= 0
+                && !appState.showAllDots
+            ){
+              appState.tags[data.id].activeCount = false;
+              delete appState.trackingTagId;
+              $('#' + data.id).hide();
+              console.log('hide', data.id);
+            }*/
+
+            var arrowEl = document.getElementById('a-' + data.id);
+            var $arrow = $(arrowEl);
+            //console.log(nextPoint.timestamp - prevPoint.timestamp);
+            if ($arrow && appState.traceMode === NO_TRACE){
+              $arrow.velocity('stop');
+
+              var duration = nextPoint.timestamp - prevPoint.timestamp;
+
+              $arrow.velocity({
+                translateX: (
+                  (data.x - state.minXBound) / calcXSize * 100
+                  //(nextPoint.x - state.minXBound) / state.xSize * 100
+                ) + 'vh',
+                translateY: (
+                  (data.y - state.minYBound) / calcYSize * 100
+                  //(nextPoint.y - state.minYBound) / state.ySize * 100
+                ) + 'vh',
+                translateZ: 0,
+                duration: duration,
+                easing: 'linear',
+                queue: false
+              });
+
+              var newAngle = (Math.atan2(
+                data.y - prevPoint.y, data.x - prevPoint.x
+              ) * 180 / Math.PI) + 90;
+              var oldAngle = getCurrentAngle(arrowEl);
+
+              while (newAngle - oldAngle > 180){
+                newAngle -= 360;
+              }
+              while (oldAngle - newAngle > 180){
+                newAngle += 360;
+              }
+
+              $arrow.velocity({
+                rotateZ: '+=' + (newAngle - oldAngle) + 'deg',
+                translateZ: 0 // Force HA by animating a 3D property
+              }, {
+                duration: duration, easing: 'ease-out', queue: false
+              });
+              /*arrowEl.style.transform = 'translate(' + (
+                (point.x - state.minXBound) / state.xSize * 100
+              ) + 'vw,' + (
+                (point.y - state.minYBound) / state.ySize * 100
+              ) + 'vh)';*/
+            }
+
+            var centerX = nextPoint.x - state.minXBound; // / state.xSize * 1920;
+            var centerY = nextPoint.y - state.minYBound; // / state.ySize * 1080;
+            context.beginPath();
+            context.arc(
+              centerX / calcXSize * appState.mapSize,
+              centerY / calcYSize * appState.mapSize,
+              5, 0, 2 * Math.PI, false
+            );
+            context.fill();
+
+            if (appState.trackingTagId){
+              $('#x-coord').text(data.x);
+              $('#y-coord').text(data.y);
+            }
+          }
+          //return;
+        });
+
+        $('#smooth-check').change(function(){
+          //console.log( this.checked );
+          appState.smooth = this.checked;
+          if (this.checked){
+            $('.raw-dot').addClass('smooth');
+            //$('.raw-dot').css('transition', 'all 0.3s')
+            //.css('-webkit-transition', 'all 0.3s');
+          } else {
+            $('.smooth').removeClass('smooth');
+            //$('.raw-dot').css('transition', '').css('-webkit-transition', '');
+          }
+        });
+
+        $('#show-all-dots').change(function(){
+          appState.showAllDots = this.checked;
+          if (this.checked){
+            //$('.raw-dot').show();
+          } else {
+            //$('.raw-dot').hide();
+          }
+        });
+
+        $window.bind('beforeunload', function(){
+          localStorage.setItem( 'track-map-state', JSON.stringify(state) );
+          localStorage.setItem( 'track-map-canvas', canvas.toDataURL() );
+        });
+
+        /*$('#set-top-left').click(function(e){
+          e.preventDefault();
+          appState.settingTopLeft = true;
+        });
+
+        $('#set-bottom-right').click(function(e){
+          e.preventDefault();
+          appState.settingBottomRight = true;
+        });*/
+
+        $window.click(function(e){
+          var dotFieldOffset = $dotField.offset();
+
+          var domX = e.pageX - dotFieldOffset.left;
+          var domY = e.pageY - dotFieldOffset.top;
+
+
+          var xRatio = domX / appState.mapSize; //window.innerWidth;
+          var yRatio = domY / appState.mapSize; //window.innerHeight;
+
+
+
+          var calcedXSize = state.maxXBound - state.minXBound;
+          var calcedYSize = state.maxYBound - state.minYBound;
+
+          //console.log( 'x', -1 * (xRatio * calcedXSize) - state.minXBound );
+          //console.log( 'y', -1 * (yRatio  * calcedYSize) - state.minYBound );
+
+          var semiFinalX = (xRatio * calcedXSize) + state.minXBound;
+          var semiFinalY = (yRatio  * calcedYSize) + state.minYBound;
+
+          if (state.flipX) semiFinalX *= -1;
+          if (state.flipY) semiFinalY *= -1;
+
+          console.log( 'x', semiFinalX, 'y', semiFinalY );
+          //console.log( 'y', -1 * (yRatio  * calcedYSize) - state.minYBound );
+        })
+
+        /*$lines.append(`<line id='line-finish' x1="20" y1="100"
+                  x2="100" y2="20"
+                  stroke="yellow"
+                  stroke-width="2"/>`);*/
+
+        function initLine(lineId, line){
+          var $me = $(`<div class='coord-panel' id='${lineId}'>
+            <input class='coord-input x1' type='number' value='${line.x1}'>
+            <input class='coord-input y1' type='number' value='${line.y1}'>
+            <input class='coord-input x2' type='number' value='${line.x2}'>
+            <input class='coord-input y2' type='number' value='${line.y2}'>
+          </div>`);
+
+          $me.appendTo('#debug-panel');
+          var newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          newLine.id = 'line-' + lineId;
+          $lines.append(newLine);
+
+          function processX(x){
+            x = state.flipX? -x: x;
+            var calcXSize = state.maxXBound - state.minXBound;
+            return (x - state.minXBound) / calcXSize * appState.mapSize;
+          }
+
+          function processY(y){
+            y = state.flipY? -y: y;
+            var calcYSize = state.maxYBound - state.minYBound;
+            return (y - state.minYBound) / calcYSize * appState.mapSize;
+          }
+
+          function moveLine(coords){
+            $('#line-' + lineId)
+            .attr('stroke', getColorFromId(lineId))
+            .attr('x1', processX(coords.x1) )
+            .attr('y1', processY(coords.y1) )
+            .attr('x2', processX(coords.x2) )
+            .attr('y2', processY(coords.y2) );
+
+            //console.log(lineId, coords);
+          }
+
+          moveLine(line /*line.x1, line.y1, line.x2, line.y2*/);
+
+          /*$lines.append(`<line id='line-${line.id}'
+            x1="${processX(line.x1)}" y1="${processY(line.y1)}"
+            x2="${processX(line.x2)}" y2="${processY(line.y2)}"
+            stroke="${'red' || getColorFromId(line.id)}"
+            stroke-width="2"
+          />`);*/
+
+          $me.change(function(){
+            state.lines[lineId] = {
+              x1: parseFloat($me.find('.x1').val()),
+              y1: parseFloat($me.find('.y1').val()),
+              x2: parseFloat($me.find('.x2').val()),
+              y2: parseFloat($me.find('.y2').val())
+            };
+
+            moveLine(state.lines[lineId]);
+
+            //var $line = $('#line-' + this.id);
+            /*$('#line-' + line.id).attr('x1', x1)
+            .attr('y1', y1 )
+            .attr('x2', x2 )
+            .attr('y2', y2 );
+
+            console.log(this.id, processX(x1), y1, x2, y2);*/
+          });
+
+          $window.resize(function(){
+            moveLine(state.lines[lineId]);
+          });
+        }
+
+        for (var lineId in state.lines){
+          initLine(lineId, state.lines[lineId]);
+        }
+        //state.lines.forEach(initLine);
+
+        /*$('.coord-panel').each(function(){
+          var $me = $(this);
+            //<input class='x'>
+            //<input class='y'>
+          $me.change(function(){
+            var x1 = processX(parseFloat($me.find('.x1').val()));
+            var y1 = processY(parseFloat($me.find('.y1').val()));
+            var x2 = processX(parseFloat($me.find('.x2').val()));
+            var y2 = processY(parseFloat($me.find('.y2').val()));
+
+            function processX(x){
+              x = state.flipX? -x: x;
+              var calcXSize = state.maxXBound - state.minXBound;
+              return (x - state.minXBound) / calcXSize * appState.mapSize;
+            }
+
+            function processY(y){
+              y = state.flipY? -y: y;
+              var calcYSize = state.maxYBound - state.minYBound;
+              return (y - state.minYBound) / calcYSize * appState.mapSize;
+            }
+
+            var $line = $('#line-' + this.id);
+            $line.attr('x1', x1)
+            .attr('y1', y1 )
+            .attr('x2', x2 )
+            .attr('y2', y2 );
+
+            console.log(this.id, processX(x1), y1, x2, y2);
+          });
+        });*/
+
+        function fitSize(){
+          context.clearRect(0,0,canvas.width,canvas.height);
+          var winHeight = $window.height();
+          //var winWidth = $window.width();
+          appState.mapSize = winHeight;
+
+          $dotField.height(winHeight);
+          $canvas.height(winHeight);
+          $tracer.height(winHeight);
+          $lines.height(winHeight);
+
+          $dotField.width(winHeight);
+          $canvas.width(winHeight);
+          $tracer.width(winHeight);
+          $lines.width(winHeight);
+
+          canvas.width = winHeight;
+          canvas.height = winHeight;
+
+          lines.width = winHeight;
+          lines.height = winHeight;
+
+          context.globalAlpha = 0.2;
+          context.fillStyle = 'grey';
+        }
+
+        fitSize();
+        $window.resize(fitSize);
+
+        //commands.loadLocal(state);
+      });
+
+    </script>
+  </body>
+</html>

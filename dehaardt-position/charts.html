@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: sans-serif;
+      }
+
+      body {
+        background: hsl(0,0%,50%);
+      }
+    </style>
+    <script type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.27.0/smoothie.min.js"
+    ></script>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"
+      integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+  </body>
+  <script type="text/javascript">
+    function getColorFromId(id){
+      var hue = 0;
+      for (var i in id){
+        hue += Math.pow(id.charCodeAt(i), 2);
+      }
+      return `hsl(${hue % 360},50%,73%)`;
+    }
+
+    $(document).ready(function(){
+      var socket = io('http://k1irvine.clubspeedtiming.com:3000');
+      // Randomly add a data point every 500ms
+      //var distSet = new TimeSeries();
+
+      var appState = {
+        tags: {}
+      };
+
+      socket.on('point', function(data) {
+        if (!appState.tags[data.id]){
+          console.log(data);
+
+          var $chart = $(`<canvas id="dist-chart-${data.id}" width="400" height="100"></canvas>`);
+          $(document.body)
+          //.append(data.id)
+          .append($chart);
+          //$chart.appendTo(document.body);
+
+          appState.tags[data.id] = {
+            //distSet: new TimeSeries(),
+            mpsSet: new TimeSeries(),
+            prevLoc: 'pit',
+            shownChart: new SmoothieChart({
+              minValue: 0, maxValue: 20
+            })
+          };
+
+          var color = getColorFromId(data.id); //console.log(color);
+
+          appState.tags[data.id].shownChart.addTimeSeries(
+            appState.tags[data.id].mpsSet,
+            { strokeStyle: getColorFromId(data.id), fillStyle: 'hsla(0,100%,100%,0.1)', lineWidth: 2 }
+          );
+
+          appState.tags[data.id].shownChart.streamTo($chart[0], 500);
+        }
+
+        if (data.loc !== appState.tags[data.id].prevLoc){
+          // smoothie.js has no simple api for changing styles dynamically, so we have to do this mess
+          var shownChart = appState.tags[data.id].shownChart;
+          var seriesOptions;
+          for (var i = 0; i < shownChart.seriesSet.length; i++)
+          {
+            if (shownChart.seriesSet[i].timeSeries === appState.tags[data.id].mpsSet)
+            {
+              seriesOptions = shownChart.seriesSet[i].options;
+              break;
+            }
+          }
+          seriesOptions.fillStyle = `hsla(0,100%,100%,${data.loc === 'pit'? 0.1: 0.3})`;
+        }
+        appState.tags[data.id].prevLoc = data.loc;
+
+        //console.log(data.mps);
+        appState.tags[data.id].mpsSet.append(
+          //new Date().getTime(),
+          data.t * 1000,
+          data.mps
+        );
+      });
+    });
+  </script>
+</html>
