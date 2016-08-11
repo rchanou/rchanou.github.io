@@ -33,14 +33,12 @@
       return `hsl(${hue % 360},50%,73%)`;
     }
 
+    var appState = {
+      tags: {}
+    };
+
     $(document).ready(function(){
       var socket = io('http://k1irvine.clubspeedtiming.com:3000');
-      // Randomly add a data point every 500ms
-      //var distSet = new TimeSeries();
-
-      var appState = {
-        tags: {}
-      };
 
       socket.on('point', function(data) {
         if (!appState.tags[data.id]){
@@ -50,7 +48,6 @@
           $(document.body)
           //.append(data.id)
           .append($chart);
-          //$chart.appendTo(document.body);
 
           appState.tags[data.id] = {
             //distSet: new TimeSeries(),
@@ -61,7 +58,7 @@
             })
           };
 
-          var color = getColorFromId(data.id); //console.log(color);
+          var color = getColorFromId(data.id);
 
           appState.tags[data.id].shownChart.addTimeSeries(
             appState.tags[data.id].mpsSet,
