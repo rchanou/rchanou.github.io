@@ -98,10 +98,6 @@
       <canvas id='canvas' width='1000' height='1000'></canvas>
       <canvas id='tracer' width='1000' height='1000'></canvas>
       <svg id='lines'>
-        <!--line id='line-finish' x1="20" y1="100"
-                  x2="100" y2="20"
-                  stroke="yellow"
-                  stroke-width="2"/-->
       </svg>
     </div>
     <form id='debug-panel'>
@@ -111,24 +107,6 @@
       <input id='show-all-dots' type='checkbox' >
       <div id='x-coord'></div>
       <div id='y-coord' ></div>
-      <!--div class='coord-panel' id='finish'>
-        <input class='x1' type='number'>
-        <input class='y1' type='number'>
-        <input class='x2' type='number'>
-        <input class='y2' type='number'>
-      </div>
-      <div class='coord-panel' id='sector-1'>
-        <input class='x1' type='number'>
-        <input class='y1' type='number'>
-        <input class='x2' type='number'>
-        <input class='y2' type='number'>
-      </div>
-      <div class='coord-panel' id='sector-2'>
-        <input class='x1' type='number'>
-        <input class='y1' type='number'>
-        <input class='x2' type='number'>
-        <input class='y2' type='number'>
-      </div-->
       <button id='set-top-left'>Set Top Left</button>
       <button id='set-bottom-right'>Set Bottom Right</button>
     </form>
@@ -138,14 +116,10 @@
       function moveTo(id, x, y){
         var rawDotEl = document.getElementById(id);
         if (rawDotEl){
-          //var newX = nextPoint.x - state.minXBound;
-
-          //var newY = nextPoint.y - state.minYBound;
-
           rawDotEl.style.transform = 'translate(' + (
-            x //newX / calcXSize * appState.mapSize
+            x
           ) + 'px,' + (
-            y //newY / calcYSize * appState.mapSize
+            y
           ) + 'px)';
         }
       }
@@ -344,8 +318,9 @@
           //} else {
             state = JSON.parse(storedState);
             //initState(state);
+          } else {
+            commands.initState(state);
           }
-          commands.initState(state);
         },
 
         pollForChanges: function(prevData){
@@ -357,29 +332,6 @@
             }
           });
         }
-
-        /*processPoints: function(id, pointsRef){
-          var point = pointsRef.shift();
-
-          var arrowEl = document.getElementById('a-' + id);
-
-          if (arrowEl){
-            arrowEl.style.transform = 'translate(' + (
-              (point.x - state.minXBound) / state.xSize * 100
-            ) + 'vw,' + (
-              (point.y - state.minYBound) / state.ySize * 100
-            ) + 'vh)';
-          }
-
-          var timeToNext = pointsRef[0].timestamp - point.timestamp;
-
-          setTimeout(
-            function(){
-              commands.processPoints(id, pointsRef);
-            },
-            timeToNext
-          )
-        }*/
       };
 
       var NO_TRACE = 0;
@@ -523,9 +475,6 @@
             tracerCtx.fill();
           });
         });
-        /*$('#tracer').bind('touchstart', function(){
-          state.tracing = false;
-        });*/
 
         var dataURL = localStorage.getItem('track-map-canvas');
         if (false && dataURL){
@@ -547,10 +496,6 @@
             appState.tags[data.id] = {
               points: [],
               //angle: 0,
-              //stateChangeCount: 0,
-              //recentXDistance: 0,
-              //recentYDistance: 0,
-              //movementScore: 0,
               avgStep: 0,
               pointCount: 0,
               activeCount: 0,
@@ -566,9 +511,9 @@
             }
           }
 
-          /*if (appState.tags[data.id].pointCount < 5){
+          if (appState.tags[data.id].pointCount < 5){
             console.log(data);
-          }*/
+          }
 
           if (!data.x && !data.y){
             console.log(data.id);
@@ -589,7 +534,9 @@
           if (data.loc === 'pit'){
             if (appState.tags[data.id].activeCount > 0){
               appState.tags[data.id].activeCount = 0;
-              $('#' + data.id).hide();
+              if (!appState.showAllDots){
+                $('#' + data.id).hide();
+              }
             }
           } else {
             if (appState.tags[data.id].activeCount > 5){
@@ -630,56 +577,12 @@
 
             if (typeof oldAngle !== 'undefined' && Math.abs(newAngle - oldAngle) < 90
               && squareStep < appState.maxSquareStep
+              && appState.smooth
             ){
-              /*if (appState.tags[data.id].movementScore < 199){
-                appState.tags[data.id].movementScore++;
-                //if (appState.tags[data.id].activeCount) console.log(data.x, data.y, finalX, finalY);
-              }*/
-
-              if (appState.smooth) moveTo(data.id, finalX, finalY);
-              /*var rawDotEl = document.getElementById(data.id);
-              if (rawDotEl){
-                var newX = nextPoint.x - state.minXBound;
-
-                var newY = nextPoint.y - state.minYBound;
-
-                rawDotEl.style.transform = 'translate(' + (
-                  newX / calcXSize * appState.mapSize
-                ) + 'px,' + (
-                  newY / calcYSize * appState.mapSize
-                ) + 'px)';
-              }*/
-            } /*else {
-              appState.tags[data.id].movementScore = Math.max(
-                appState.tags[data.id].movementScore - 4, 0
-              );
-            }*/
+              moveTo(data.id, finalX, finalY);
+            }
 
             appState.tags[data.id].angle = newAngle;
-
-            /*if (!appState.tags[data.id].activeCount
-              && (appState.tags[data.id].movementScore > 39
-                || appState.showAllDots
-              )
-            ){
-              //appState.tags[data.id].activeCount = true;
-              if (!appState.trackingTagId){
-                appState.trackingTagId = data.id;
-                $('#debug-panel')
-                .css('border', 'thick solid ' + getColorFromId(data.id));
-              }
-              $('#' + data.id).show();
-              console.log('show', data.id);
-            } else if (
-              appState.tags[data.id].activeCount
-              && appState.tags[data.id].movementScore <= 0
-                && !appState.showAllDots
-            ){
-              appState.tags[data.id].activeCount = false;
-              delete appState.trackingTagId;
-              $('#' + data.id).hide();
-              console.log('hide', data.id);
-            }*/
 
             var arrowEl = document.getElementById('a-' + data.id);
             var $arrow = $(arrowEl);
@@ -763,9 +666,9 @@
         $('#show-all-dots').change(function(){
           appState.showAllDots = this.checked;
           if (this.checked){
-            //$('.raw-dot').show();
+            $('.raw-dot').show();
           } else {
-            //$('.raw-dot').hide();
+            $('.raw-dot').hide();
           }
         });
 
@@ -791,8 +694,8 @@
           var domY = e.pageY - dotFieldOffset.top;
 
 
-          var xRatio = domX / appState.mapSize; //window.innerWidth;
-          var yRatio = domY / appState.mapSize; //window.innerHeight;
+          var xRatio = domX / appState.mapSize;
+          var yRatio = domY / appState.mapSize;
 
 
 
@@ -811,11 +714,6 @@
           console.log( 'x', semiFinalX, 'y', semiFinalY );
           //console.log( 'y', -1 * (yRatio  * calcedYSize) - state.minYBound );
         })
-
-        /*$lines.append(`<line id='line-finish' x1="20" y1="100"
-                  x2="100" y2="20"
-                  stroke="yellow"
-                  stroke-width="2"/>`);*/
 
         function initLine(lineId, line){
           var $me = $(`<div class='coord-panel' id='${lineId}'>
@@ -853,14 +751,7 @@
             //console.log(lineId, coords);
           }
 
-          moveLine(line /*line.x1, line.y1, line.x2, line.y2*/);
-
-          /*$lines.append(`<line id='line-${line.id}'
-            x1="${processX(line.x1)}" y1="${processY(line.y1)}"
-            x2="${processX(line.x2)}" y2="${processY(line.y2)}"
-            stroke="${'red' || getColorFromId(line.id)}"
-            stroke-width="2"
-          />`);*/
+          moveLine(line);
 
           $me.change(function(){
             state.lines[lineId] = {
@@ -871,14 +762,6 @@
             };
 
             moveLine(state.lines[lineId]);
-
-            //var $line = $('#line-' + this.id);
-            /*$('#line-' + line.id).attr('x1', x1)
-            .attr('y1', y1 )
-            .attr('x2', x2 )
-            .attr('y2', y2 );
-
-            console.log(this.id, processX(x1), y1, x2, y2);*/
           });
 
           $window.resize(function(){
@@ -886,47 +769,15 @@
           });
         }
 
-        for (var lineId in state.lines){
-          initLine(lineId, state.lines[lineId]);
-        }
-        //state.lines.forEach(initLine);
-
-        /*$('.coord-panel').each(function(){
-          var $me = $(this);
-            //<input class='x'>
-            //<input class='y'>
-          $me.change(function(){
-            var x1 = processX(parseFloat($me.find('.x1').val()));
-            var y1 = processY(parseFloat($me.find('.y1').val()));
-            var x2 = processX(parseFloat($me.find('.x2').val()));
-            var y2 = processY(parseFloat($me.find('.y2').val()));
-
-            function processX(x){
-              x = state.flipX? -x: x;
-              var calcXSize = state.maxXBound - state.minXBound;
-              return (x - state.minXBound) / calcXSize * appState.mapSize;
-            }
-
-            function processY(y){
-              y = state.flipY? -y: y;
-              var calcYSize = state.maxYBound - state.minYBound;
-              return (y - state.minYBound) / calcYSize * appState.mapSize;
-            }
-
-            var $line = $('#line-' + this.id);
-            $line.attr('x1', x1)
-            .attr('y1', y1 )
-            .attr('x2', x2 )
-            .attr('y2', y2 );
-
-            console.log(this.id, processX(x1), y1, x2, y2);
-          });
-        });*/
+        setTimeout(function(){
+          for (var lineId in state.lines){
+            initLine(lineId, state.lines[lineId]);
+          }
+        }, 1111); // HACK: timeout to wait for line container to resize on load
 
         function fitSize(){
           context.clearRect(0,0,canvas.width,canvas.height);
           var winHeight = $window.height();
-          //var winWidth = $window.width();
           appState.mapSize = winHeight;
 
           $dotField.height(winHeight);
