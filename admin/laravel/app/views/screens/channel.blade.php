@@ -174,7 +174,7 @@ Speed Screen Channels
                                 <div class="alert alert-warning">
                                     <p>We are currently testing the next generation of our Speed Screen application which allows real-time updating of settings and channel selection as well as multi-monitor support.</p>
                                     <p>Please only use this application with the direction of our support personnel.</p>
-                                    <p><a href="/admin/speedscreenV2/speedscreen-setup-v2.0.0-beta.2.exe" target="_blank"><button type="button" class="btn btn-warning">Download Speed Screen Application Beta</button></a></p>
+                                    <p><a href="/admin/speedscreenV2/speed-screens-setup-v2.0.0-beta.2-win-ia32.exe" target="_blank"><button type="button" class="btn btn-warning">Download Speed Screen Application Beta</button></a></p>
                                 </div>
                             </div>
                         </div>
