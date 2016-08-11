@@ -130,7 +130,7 @@
 <!-- PAGE CONTENT -->
 @section('content')
 
-{{ Form::open(array('action' => 'Step2Controller@postStep2', 'files' => 'true', 'style' => '', 'autocomplete' => 'off')) }}
+{{ Form::open(array('action' => 'Step2Controller@postStep2', 'files' => 'true', 'style' => '', 'autocomplete' => 'off', 'id' => 'registration-form')) }}
 
 @if (count($errors) > 0) <!-- TODO: Move to errors.blade.php -->
 
@@ -611,6 +611,7 @@
 
         $('#submitButton').click(function() {setTimeout(function() {$('#submitButton').prop('disabled', true);},1)});
         $('input').focus(function() {$('#submitButton').prop('disabled', false);});
+        $('select').focus(function() {$('#submitButton').prop('disabled', false);});
 
         $("#cameraInput").on("change",pictureCaptured);
         $("#resetButton").on("click",resetPictures);
@@ -765,6 +766,7 @@
     }
 
     function resetPictures(event) {
+        event.preventDefault();
         $("#mostRecentPicture").attr("src","#");
         $('#facebookprofile').hide();
         $('#mostRecentPicture').hide();
@@ -773,6 +775,17 @@
             $('#switchToFacebookPicButton').show();
         }
         $('#facebookProfileURL').attr("value","#");
+
+        $(':input','#registration-form')
+            .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
+            .val('');
+
+        $(':date','#registration-form')
+                .not(':hidden')
+                .val('');
+
+        $(':select','#registration-form')
+            .removeAttr('selected');
 
 /*        console.log("Camera input value: " + $("#cameraInput").val());
         console.log("Picture taken: " + $('#mostRecentPicture').attr("src"));
@@ -1127,6 +1140,26 @@
                 }
             });
             <!-- END UNITED STATES AND CANADA DROPDOWN SCRIPT -->
+
+            $('#registration-form').submit(function(e){
+                var birthdate = $('#birthdate').val();
+                if (birthdate == "") {
+                    alert("{{$strings['str_birthdate.required']}}");
+                    return false;
+                }
+                else {
+                    var sourceReq = "{{$settings['CfgRegSrcReq']}}";
+                    var source = $('#howdidyouhearaboutus').val();
+                    if (sourceReq && source == "0") {
+                        alert("{{$strings['str_howdidyouhearaboutus.required']}}");
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
         });
 
     </script>
