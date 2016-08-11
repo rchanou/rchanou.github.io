@@ -86,8 +86,8 @@
 
         //console.log(data.mps);
         appState.tags[data.id].mpsSet.append(
-          //new Date().getTime(),
-          data.t * 1000,
+          new Date().getTime(),
+          //data.t * 1000,
           data.mps
         );
       });
