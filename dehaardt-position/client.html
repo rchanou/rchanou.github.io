@@ -109,8 +109,11 @@
       <button id='set-bottom-right'>Set Bottom Right</button>
     </form>
     <div id='trace-mode-display'>Trace track from start to finish.</div>
-
-    <script type='text/babel'>
+    <script type='text/javascript'>
+      var devUrl;
+    </script>
+    <script type='text/javascript' src='dev-setup.js'></script>
+    <script type='text/javascript'>
       function getCurrentAngle(el){
         try {
           //var el = document.getElementById(id);
@@ -373,9 +376,7 @@
       };
 
       $(document).ready(function(){
-        var socket = io();
-
-        //var socket = io();
+        var socket = io(devUrl);
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
