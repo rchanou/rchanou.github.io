@@ -124,7 +124,11 @@ function handler (req, res) {
 }
 
 io.on('connection', function (socket) {
-  console.log('Socket.io connection from ' + socket.request.connection.remoteAddress)
+  console.log('Socket.io connection from ' + socket.request.connection.remoteAddress);
+
+  socket.on('config', function(data) {
+    socket.emit('config', passingEngineConfig.boundaries);
+  });
 });
 
 io.on('error', function(err) {
