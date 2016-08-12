@@ -24,7 +24,6 @@
       body {
         background: hsl(0,0%,9%);
         overflow: hidden;
-        position: relative;
         display: flex;
         justify-content: center;
         /*display: flex; table-cell;
@@ -50,7 +49,6 @@
         border-radius: 7px; /*100px;*/
         transform-origin: 7px 7px;
       }
-
 
       .smooth {
         transition: all 0.3s;
@@ -112,18 +110,7 @@
     </form>
     <div id='trace-mode-display'>Trace track from start to finish.</div>
 
-    <script>
-      function moveTo(id, x, y){
-        var rawDotEl = document.getElementById(id);
-        if (rawDotEl){
-          rawDotEl.style.transform = 'translate(' + (
-            x
-          ) + 'px,' + (
-            y
-          ) + 'px)';
-        }
-      }
-
+    <script type='text/babel'>
       function getCurrentAngle(el){
         try {
           //var el = document.getElementById(id);
@@ -153,6 +140,8 @@
           return 0;
         }
       }
+
+      /* TODO: Currently unused; replace with quad-tree nearest neighbor algo? */
 
     	function calcPointLineDist(x, y, x1, y1, x2, y2) {
     		var A = x - x1;
@@ -299,6 +288,17 @@
           );
 
           $arrow.appendTo(document.body);
+        },
+
+        moveTo: function(id, x, y){
+          var rawDotEl = document.getElementById(id);
+          if (rawDotEl){
+            rawDotEl.style.transform = 'translate(' + (
+              x
+            ) + 'px,' + (
+              y
+            ) + 'px)';
+          }
         },
 
         initState: function(state){
@@ -572,14 +572,14 @@
             var finalY = (nextPoint.y - state.minYBound) / calcYSize * appState.mapSize;
 
             if (!appState.smooth){
-              moveTo(data.id, finalX, finalY);
+              commands.moveTo(data.id, finalX, finalY);
             }
 
             if (typeof oldAngle !== 'undefined' && Math.abs(newAngle - oldAngle) < 90
               && squareStep < appState.maxSquareStep
               && appState.smooth
             ){
-              moveTo(data.id, finalX, finalY);
+              commands.moveTo(data.id, finalX, finalY);
             }
 
             appState.tags[data.id].angle = newAngle;
@@ -793,8 +793,8 @@
           canvas.width = winHeight;
           canvas.height = winHeight;
 
-          lines.width = winHeight;
-          lines.height = winHeight;
+          //lines.width = winHeight;
+          //lines.height = winHeight;
 
           context.globalAlpha = 0.2;
           context.fillStyle = 'grey';
