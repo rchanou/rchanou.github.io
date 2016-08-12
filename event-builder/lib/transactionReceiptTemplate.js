@@ -235,7 +235,7 @@ exports.create = function(body) {
         // in order to match the display of the POS with line items separated
         var product = _.find(products, function(x) { return x.productId === detail.productId; });
         if (product) {
-          var description = product.description || '';
+          var description = detail.productName || '';
           if (description.length >= 25)
             description = (description.substr(0, 22) + '...');
           if (detail.qty > 1)
