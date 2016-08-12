@@ -52,7 +52,7 @@ telnet 192.168.111.223 8784
 
 {"response":"listAnchors","status":"ok","anchors": [{"id":"0xDECA313033600E0E","coordinates": {"x":0.000,"y":0.000,"z":0.000,"heading":0.000,"pqf":0.000}},{"id":"0xDECA32303240150E","coordinates": {"x":44.132,"y":-5.433,"z":-0.480,"heading":0.000,"pqf":0.000}},{"id":"0xDECA35303130150B","coordinates": {"x":24.223,"y":0.000,"z":0.000,"heading":0.000,"pqf":0.000}},{"id":"0xDECA363032401550","coordinates": {"x":-14.630,"y":35.427,"z":1.491,"heading":0.000,"pqf":0.000}},{"id":"0xDECA373031201572","coordinates": {"x":11.808,"y":17.412,"z":1.483,"heading":0.000,"pqf":0.000}},{"id":"0xDECA38303260150A","coordinates": {"x":-11.381,"y":16.654,"z":1.429,"heading":0.000,"pqf":0.000}},{"id":"0xDECA39303210034B","coordinates": {"x":-23.965,"y":-0.148,"z":0.008,"heading":0.000,"pqf":0.000}}]}
 
-
+ mDNS query for _workstation._tcp.local
 
 */
 
@@ -69,8 +69,18 @@ var config = {
   openRtlsListenPort: 8787,
   socketIoPort: 3000,
   pingInterval: 5000,
-  pingHandle: null
+  pingHandle: null,
+  enableMdns: false
 }
+
+// Load config overrides
+try {
+  var newConfig = require('./config.json');
+
+  if(newConfig.openRtlsIp)   config.openRtlsIp = newConfig.openRtlsIp;
+  if(newConfig.socketIoPort) config.socketIoPort = newConfig.socketIoPort;
+  if(newConfig.enableMdns)   config.enableMdns = newConfig.enableMdns;
+} catch(e) {}
 
 var lastPoints = {};
 
@@ -247,19 +257,20 @@ server.on('listening', function() {
 
 server.bind(config.openRtlsListenPort);
 
-/*
-// OpenRTLS location
-var mdns = require('mdns-js');
-//if you have another mdns daemon running, like avahi or bonjour, uncomment following line
-//mdns.excludeInterface('0.0.0.0');
+if(config.enableMdns) {
+  // OpenRTLS location
+  var mdns = require('mdns-js');
+  //if you have another mdns daemon running, like avahi or bonjour, uncomment following line
+  mdns.excludeInterface('0.0.0.0');
 
-var browser = mdns.createBrowser();
+  //var browser = mdns.createBrowser();
+  var browser = mdns.createBrowser(mdns.tcp("workstation"));
 
-browser.on('ready', function () {
-    browser.discover(); 
-});
+  browser.on('ready', function () {
+      browser.discover(); 
+  });
 
-browser.on('update', function (data) {
-    console.log('data:', data);
-});
-*/
+  browser.on('update', function (data) {
+      console.log('Found:', data, '\n\n');
+  });
+}

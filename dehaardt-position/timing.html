@@ -47,7 +47,9 @@
           //if(loggedPackets < 100 && data.loc !== 'pit') { console.log(data); loggedPackets++; }
           if(!laps[data.id]) { laps[data.id] = []; }
 
-          data.lapNumber = (lapNumbers[data.transponderId]) ? lapNumbers[data.transponderId] : 1;
+          if(data.loc && data.loc === 'pit') return;
+
+          data.lapNumber = (lapNumbers[data.id]) ? lapNumbers[data.id] : 1;
 
           laps[data.id].push(data);
         });
