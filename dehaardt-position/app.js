@@ -74,8 +74,9 @@ var config = {
 }
 
 // Load config overrides
+var newConfig = {};
 try {
-  var newConfig = require('./config.json');
+  newConfig = require('./config.json');
 
   if(newConfig.openRtlsIp)   config.openRtlsIp = newConfig.openRtlsIp;
   if(newConfig.socketIoPort) config.socketIoPort = newConfig.socketIoPort;
@@ -94,15 +95,8 @@ var io = require('socket.io')(app);
 var fs = require('fs');
 
 var passingEngineConfig = {
-  filterInSeconds: 20, // Throw out any passings faster than this
-  boundaries: [
-    { id: 'fini', type: 'line', coordinates: [ { x:6, y: 0 }, { x: 6, y: 7 } ] },
-    { id: 'int1', type: 'line', coordinates: [ { x:12, y: 20 }, { x: 24, y: 20 } ] },
-    { id: 'int2', type: 'line', coordinates: [ { x:-12, y: 23 }, { x: -12, y: 18 } ] },
-    { id: 'pit-in', type: 'line', coordinates: [ { x:-31.43, y: 35.11 }, { x: -32.185, y: 29.775 } ] },
-    { id: 'pit-out', type: 'line', coordinates: [ { x:-20.808, y: 5.464 }, { x: -19.311, y: 2.844 } ] },
-    { id: 'pit', type: 'polygon', coordinates: [[-30.389, 34.805], [-33.233, 24.995], [-23.353,14.895], [-19.610, 1.062], [-0.449, -1.452], [2.095, -19.476], [-51.796, -19.371], [-57.784, 36.796]] }
-  ],
+  filterInSeconds: (newConfig.passingEngineConfig && newConfig.passingEngineConfig.filterInSeconds) ? newConfig.passingEngineConfig.filterInSeconds : 5, // Throw out any passings faster than this
+  boundaries: (newConfig.passingEngineConfig && newConfig.passingEngineConfig.boundaries && newConfig.passingEngineConfig.boundaries.length > 0) ? newConfig.passingEngineConfig.boundaries : [],
   callback: function(event) {
     io.emit('passing', event);
   }
