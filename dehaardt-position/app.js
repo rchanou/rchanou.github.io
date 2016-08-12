@@ -62,6 +62,7 @@ var _ = require('underscore');
 var net = require('net');
 var reconnect = require('reconnect-net');
 var classifyPoint = require("robust-point-in-polygon");
+var newConfig = require('./config.json');
 
 var config = {
   openRtlsIp: "",
@@ -74,14 +75,9 @@ var config = {
 }
 
 // Load config overrides
-var newConfig = {};
-try {
-  newConfig = require('./config.json');
-
-  if(newConfig.openRtlsIp)   config.openRtlsIp = newConfig.openRtlsIp;
-  if(newConfig.socketIoPort) config.socketIoPort = newConfig.socketIoPort;
-  if(newConfig.enableMdns)   config.enableMdns = newConfig.enableMdns;
-} catch(e) {}
+if(newConfig.openRtlsIp)   config.openRtlsIp = newConfig.openRtlsIp;
+if(newConfig.socketIoPort) config.socketIoPort = newConfig.socketIoPort;
+if(newConfig.enableMdns)   config.enableMdns = newConfig.enableMdns;
 
 var lastPoints = {};
 
