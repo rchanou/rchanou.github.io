@@ -21,6 +21,10 @@
       integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
       crossorigin="anonymous"
     ></script>
+    <script type='text/javascript'>
+      var devUrl;
+    </script>
+    <script type='text/javascript' src='dev-setup.js'></script>
   </head>
   <body>
   </body>
@@ -38,7 +42,7 @@
     };
 
     $(document).ready(function(){
-      var socket = io('http://k1irvine.clubspeedtiming.com:3000');
+      var socket = io(devUrl);
 
       socket.on('point', function(data) {
         if (!appState.tags[data.id]){
