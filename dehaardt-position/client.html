@@ -465,22 +465,5 @@
     ReactDOM.render(
       <TrackMap />, document.body.firstElementChild
     );
-
-    /*
-    const socket = io('http://k1irvine.clubspeedtiming.com:3000');
-
-    const pointStream = Kefir.stream(emitter => {
-      socket.on( 'point', data => emitter.emit(data) );
-    });
-
-    const tagPointStreams = {};
-    pointStream.observe( point => {
-      if (!tagPointStreams[point.id]){
-        tagPointStreams[point.id] = pointStream.filter( newPoint => newPoint.id === point.id );
-        tagPointStreams[point.id].throttle(1111).log();
-      }
-    });
-    */
-
   </script>
 </body>
