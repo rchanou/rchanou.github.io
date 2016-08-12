@@ -1,812 +1,486 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <!--script src="/socket.io/socket.io.js"></script-->
-    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-    <script src="https://code.jquery.com/jquery-3.1.0.min.js"
-      integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
-      crossorigin="anonymous"
-    ></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.0/velocity.min.js"></script>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        color: hsl(0,0%,95%);
-        font-family: sans-serif;
+<head>
+  <!--script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/kefir/3.3.0/kefir.min.js"></script-->
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script src="https://code.jquery.com/jquery-3.1.0.min.js"
+    integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
+    crossorigin="anonymous"
+  ></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.12.0/babel.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/seamless-immutable/6.1.1/seamless-immutable.development.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react-dom.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      color: hsl(0,0%,95%);
+      font-family: sans-serif;
+    }
+
+    label {
+      min-width: 10em;
+    }
+
+    input, button {
+      color: black;
+      width: 3em;
+    }
+
+    body {
+      background: hsl(0,0%,9%);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    Loading...
+  </div>
+  <script type='text/javascript'>
+    var devUrl;
+  </script>
+  <script type='text/javascript' src='dev-setup.js'></script>
+  <script type='text/babel'>
+    function getColorFromId(id){
+      var hue = 0;
+      for (var i in id){
+        hue += Math.pow(id.charCodeAt(i), 2);
+      }
+      return 'hsl(' + (hue % 360) + ',50%,73%)';
+    }
+
+    const absoluteStyle = {
+      position: 'absolute',
+      top: 0,
+      left: 0
+    };
+
+    const getViewCoord = (coord, opts) =>
+      (coord * opts.mult - opts.minBound)
+      / (opts.maxBound - opts.minBound);
+      //* atom.winHeight;
+
+    class TrackMap extends React.Component {
+      state = {
+        atom: Immutable({
+          winWidth: 100,
+          winHeight: 100,
+          xOpts: {
+            minBound: -39,
+            maxBound: 39,
+            mult: 1
+          },
+          yOpts: {
+            minBound: -50,
+            maxBound: 30,
+            mult: -1
+          },
+          /*xOpts.minBound: 0,
+          xOpts.maxBound: 55,
+          yOpts.minBound: -65,
+          yOpts.maxBound: 5,*/
+          tags: {},
+          smooth: true,
+          showAllDots: false,
+          lines: [{
+            x1: 0, y1: 0, x2: 0, y2: 0, id: 'mouse'
+          }]
+        })
       }
 
-      input, button {
-        color: black;
-      }
+      render(){
+        const { atom } = this.state;
 
-      body {
-        background: hsl(0,0%,9%);
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        /*display: flex; table-cell;
-        text-align: center;
-        vertical-align: middle;
-        justify-content: center;
-        align-items: center;*/
-        width: 100vw;
-        height: 100vh;
-      }
-
-      #dot-field {
-        position: relative;
-        width: 1000px;
-        height: 1000px;
-      }
-
-      .raw-dot {
-        position: absolute; top:0; left:0;
-        background: hsl(120,50%,80%);
-        width: 14px; /*100px;*/
-        height: 14px; /*100px;*/
-        border-radius: 7px; /*100px;*/
-        transform-origin: 7px 7px;
-      }
-
-      .smooth {
-        transition: all 0.3s;
-        -webkit-transition: all 0.3s;
-      }
-
-      canvas {
-        position: absolute; top:0; left:0;
-        width: 1000px; /*100vw;*/
-        height: 1000px; /*100vh;*/
-      }
-
-      #trace-mode-display {
-        position: absolute; top:0; left:0;
-        display: none;
-      }
-
-      .arrow {
-        position: absolute; top:0; left:0;
-      }
-
-      #debug-panel {
-        position: absolute; top:0; left:0;
-      }
-
-      #set-top-left {
-        display: none;
-      }
-
-      #set-bottom-right {
-        display: none;
-      }
-
-      #lines {
-        position: absolute; top:0; left:0;
-      }
-
-      .coord-input {
-        width: 3em;
-      }
-    </style>
-  </head>
-  <body>
-    <div id='dot-field'>
-      <canvas id='canvas' width='1000' height='1000'></canvas>
-      <canvas id='tracer' width='1000' height='1000'></canvas>
-      <svg id='lines'>
-      </svg>
-    </div>
-    <form id='debug-panel'>
-      <label>Smooth</label>
-      <input id='smooth-check' type='checkbox' checked>
-      <label>Show All Dots</label>
-      <input id='show-all-dots' type='checkbox' >
-      <div id='x-coord'></div>
-      <div id='y-coord' ></div>
-      <button id='set-top-left'>Set Top Left</button>
-      <button id='set-bottom-right'>Set Bottom Right</button>
-    </form>
-    <div id='trace-mode-display'>Trace track from start to finish.</div>
-    <script type='text/javascript'>
-      var devUrl;
-    </script>
-    <script type='text/javascript' src='dev-setup.js'></script>
-    <script type='text/javascript'>
-      function getCurrentAngle(el){
-        try {
-          //var el = document.getElementById(id);
-          var st = window.getComputedStyle(el, null);
-          var tr = st.getPropertyValue("-webkit-transform") ||
-                   st.getPropertyValue("-moz-transform") ||
-                   st.getPropertyValue("-ms-transform") ||
-                   st.getPropertyValue("-o-transform") ||
-                   st.getPropertyValue("transform") ||
-                   "FAIL";
-
-          // rotation matrix - http://en.wikipedia.org/wiki/Rotation_matrix
-          var values = tr.split('(')[1].split(')')[0].split(',');
-          var a = values[0];
-          var b = values[1];
-          var c = values[2];
-          var d = values[3];
-
-          var scale = Math.sqrt(a*a + b*b);
-          // arc sin, convert from radians to degrees, round
-          var sin = b/scale;
-          // next line works for 30deg but not 130deg (returns 50);
-          var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
-
-          return angle;
-        } catch(ex){
-          return 0;
-        }
-      }
-
-      /* TODO: Currently unused; replace with quad-tree nearest neighbor algo? */
-
-    	function calcPointLineDist(x, y, x1, y1, x2, y2) {
-    		var A = x - x1;
-    		var B = y - y1;
-    		var C = x2 - x1;
-    		var D = y2 - y1;
-
-    		var dot = A * C + B * D;
-    		var len_sq = C * C + D * D;
-    		var param = -1;
-    		if (len_sq != 0) //in case of 0 length line
-    				param = dot / len_sq;
-
-    		var xx, yy;
-
-    		if (param < 0) {
-    			xx = x1;
-    			yy = y1;
-    		}
-    		else if (param > 1) {
-    			xx = x2;
-    			yy = y2;
-    		}
-    		else {
-    			xx = x1 + param * C;
-    			yy = y1 + param * D;
-    		}
-
-    		var dx = x - xx;
-    		var dy = y - yy;
-    		return Math.sqrt(dx * dx + dy * dy);
-    	}
-
-      function getNearestPointIndex(others, me, prevIndex){
-        if (!others || !others.length){
-          return -1;
+        const mapStyle = {
+          ...absoluteStyle,
+          width: atom.winHeight,
+          height: atom.winHeight
         }
 
-        var smallestDistBound, nearestPointIndex;
+        return <div
+          style={{
+            position: 'relative',
+            width: atom.winHeight,
+            height: atom.winHeight
+          }}
+        >
+          <canvas ref='canvas'
+            width={atom.winHeight} height={atom.winHeight}
+            style={mapStyle}
+          />
 
-        var tolerance = 20;
+          <svg style={mapStyle} width={atom.winHeight} height={atom.winHeight}>
+            {atom.lines.map(
+              (line, i) => <line key={i}
+                stroke={getColorFromId(line.id)} strokeWidth={3}
+                x1={getViewCoord(line.x1, atom.xOpts) * atom.winHeight}
+                y1={getViewCoord(line.y1, atom.yOpts) * atom.winHeight}
+                x2={getViewCoord(line.x2, atom.xOpts) * atom.winHeight}
+                y2={getViewCoord(line.y2, atom.yOpts) * atom.winHeight}
+              />
+            )}
+          </svg>
 
-        for (var i = 0; i < others.length; i++){
-          var otherPoint = others[i];
-          var dist = Math.pow(me.x - otherPoint.x, 2) + Math.pow(me.y - otherPoint.y, 2);
+          {Object.entries(atom.tags)
+          //.filter( (t, i) => i < 3 )
+          .map(
+            ([tagId, tag]) => (atom.showAllDots || tag.inRaceCount > 5)
+            && <div key={tagId}
+              style={{
+                ...absoluteStyle,
+                width: 14, height: 14, borderRadius: 7,
+                background: getColorFromId(tagId),
+                transformOrigin: '7px 7px',
+                transition: atom.smooth && 'all 0.3s',
+                transform: `translate(${
+                  getViewCoord(tag.points[0].x, atom.xOpts) * atom.winHeight
+                }px,${
+                  getViewCoord(tag.points[0].y, atom.yOpts) * atom.winHeight
+                }px)`
+              }}
+            />
+          )}
 
-          if (
-            (typeof smallestDistBound === 'undefined' || dist < smallestDistBound)
-          ){
-            if (typeof prevIndex === 'undefined'){
-              smallestDistBound = dist;
-              nearestPointIndex = i;
-            } else if (i > prevIndex){
-              if (i - tolerance <= prevIndex){
-                smallestDistBound = dist;
-                nearestPointIndex = i;
-              }
-            } else if (i <= tolerance && (i + others.length) > prevIndex){
-              smallestDistBound = dist;
-              nearestPointIndex = i;
-            }
-            //console.log(dist, closestPointBound);
-          }
-        }
-
-        if (typeof nearestPointIndex === 'undefined'){
-          return prevIndex;
-        }
-
-        return nearestPointIndex;
+          <form
+            style={{
+              position: 'fixed',
+              top: 0, left: 0,
+              width: '100%', height: '100%',
+              display: 'flex', flexDirection: 'column'
+            }}
+          >
+            <div>
+              {atom.lines[0].x1},{atom.lines[0].y1} to {atom.lines[0].x2},{atom.lines[0].y2}
+            </div>
+            <div>
+              <label>Smooth</label>
+              <input type='checkbox' checked={atom.smooth}
+                onChange={
+                  e => this.setState({ atom: atom.set('smooth', e.target.checked) })
+                }
+              />
+            </div>
+            <div>
+              <label>All Dots</label>
+              <input type='checkbox' checked={atom.showAllDots}
+                onChange={
+                  e => this.setState({ atom: atom.set('showAllDots', e.target.checked) })
+                }
+              />
+            </div>
+            <div>
+              <label>Flip X</label>
+              <input type='checkbox' checked={atom.xOpts.mult === -1}
+                onChange={
+                  e => this.setState({ atom: atom.setIn(['xOpts', 'mult'], e.target.checked? -1: 1) })
+                }
+              />
+            </div>
+            <div>
+              <label>Flip Y</label>
+              <input type='checkbox' checked={atom.yOpts.mult === -1}
+                onChange={
+                  e => this.setState({ atom: atom.setIn(['yOpts', 'mult'], e.target.checked? -1: 1) })
+                }
+              />
+            </div>
+            <div>
+              <label>Min X</label>
+              <input type='number' value={atom.xOpts.minBound * atom.xOpts.mult}
+                onChange={
+                  e => this.setState({
+                    atom: atom.setIn(
+                      ['xOpts', 'minBound'], e.target.value * atom.xOpts.mult
+                    )
+                  })
+                }
+              />
+            </div>
+            <div>
+              <label>Max X</label>
+              <input type='number' value={atom.xOpts.maxBound * atom.xOpts.mult}
+                onChange={
+                  e => this.setState({
+                    atom: atom.setIn(
+                      ['xOpts', 'maxBound'], e.target.value * atom.xOpts.mult
+                    )
+                  })
+                }
+              />
+            </div>
+            <div>
+              <label>Min Y</label>
+              <input type='number' value={atom.yOpts.minBound * atom.yOpts.mult}
+                onChange={
+                  e => this.setState({
+                    atom: atom.setIn(
+                      ['yOpts', 'minBound'], e.target.value * atom.yOpts.mult
+                    )
+                  })
+                }
+              />
+            </div>
+            <div>
+              <label>Max Y</label>
+              <input type='number' value={atom.yOpts.maxBound * atom.yOpts.mult}
+                onChange={
+                  e => this.setState({
+                    atom: atom.setIn(
+                      ['yOpts', 'maxBound'], e.target.value * atom.yOpts.mult
+                    )
+                  })
+                }
+              />
+            </div>
+          </form>
+          {'' && JSON.stringify(atom)}
+        </div>;
       }
-      window.closest = getNearestPointIndex;
 
-    	function sortTrackCoordsByDist(trackCoords, coord){
-    		return _.sortBy(trackCoords, function(t, i){
-    			if (i === 0){
-    				var prevCoord = trackCoords[trackCoords.length - 1];
-    			} else {
-    				var prevCoord = trackCoords[i - 1];
-    			}
-
-    			return calcPointLineDist(coord.x, coord.y, prevCoord.x, prevCoord.y, t.x, t.y);
-    		});
-
-    		return sortedCoords;
-    	}
-
-    	function calcCompletion(trackCoords, coords, prevCompletion){
-        var sortedTrackCoords = sortTrackCoordsByDist(trackPoints, coords);
-
-    		var currCompletion;
-    		var tolerance = 0.04;
-
-    		for (var i = 0; i < sortedTrackCoords.length; i++){
-          currCompletion = sortedTrackCoords[i].d;
-          if ( Math.abs(currCompletion - prevCompletion) < tolerance ){
-            return currCompletion;
-          } else if ( currCompletion < tolerance && prevCompletion > 1 - tolerance){
-            return currCompletion;
-          }
-    		}
-
-    		return currCompletion;
-    	}
-
-      function getColorFromId(id){
-        var hue = 0;
-        for (var i in id){
-          hue += Math.pow(id.charCodeAt(i), 2);
-        }
-        return 'hsl(' + (hue % 360) + ',50%,73%)';
-      }
-
-      var commands = {
-        createDots: function(id){
-          var $rawDot = $(
-            '<div class="raw-dot '
-            + (appState.smooth? 'smooth': '') + '" id="'
-            + id + '"></div>'
-          );
-
-          //console.log(hue, hue % 360);
-          var color = getColorFromId(id);
-
-          $rawDot.css(
-            'background',
-            color
-          );
-
-          $rawDot.appendTo('#dot-field');
-          //$rawDot.appendTo(document.body);
-
-          return;
-
-          var $arrow = $(
-            '<svg id="a-'
-              + id
-              + '" fill="'
-              + color
-              + '" height="48" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg">'
-              + '<path d="M0 0h24v24H0z" fill="none" />'
-              + '<path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>'
-            + '</svg>'
-          );
-
-          $arrow.appendTo(document.body);
-        },
-
-        moveTo: function(id, x, y){
-          var rawDotEl = document.getElementById(id);
-          if (rawDotEl){
-            rawDotEl.style.transform = 'translate(' + (
-              x
-            ) + 'px,' + (
-              y
-            ) + 'px)';
-          }
-        },
-
-        initState: function(state){
-          if (appState.tags){
-            for (var id in appState.tags){
-              //console.log(id);
-              commands.createDots(id);
-              appState.tags[id].points = [];
-            }
-          }
-        },
-
-        loadLocal: function(stateRef){
-          var storedState = localStorage.getItem('track-map-state');
-
-          if (storedState) {
-          //} else {
-            state = JSON.parse(storedState);
-            //initState(state);
-          } else {
-            commands.initState(state);
-          }
-        },
-
-        pollForChanges: function(prevData){
-          $.getJSON(pollUrl, function(data, status){
-          	//if(debug) console.log('Polling', data, status);
-
-            if(prevData !== JSON.stringify(data)){
-              appState.tags = {};
-            }
-          });
-        }
-      };
-
-      var NO_TRACE = 0;
-      var AWAIT_TRACE = 1;
-      var TRACE = 2;
-
-      var BUFFER_SIZE = 3;
-
-      var apiUrl = '/api/index.php/';
-      var scoreboardUrl = apiUrl + 'races/scoreboard.js?track_id=1&key=cs-dev&callback=?'; // heat_id=2000
-      var pollUrl       = apiUrl + 'activeCountracelapcount.js?key=cs-dev&callback=?';
-
-      var appState = { // not saved to local storage
-        traceMode: NO_TRACE,
-        smooth: true,
-        tags: {},
-        maxSquareStep: 36,
-        mapSize: 1000,
-        showAllDots: false
-      };
-
-      var state = { // TODO: change name to store
-        minXBound: -50,
-        maxXBound: 50,
-        minYBound: -50,
-        maxYBound: 20,
-        flipX: false,
-        flipY: true,
-        trackPoints: [],
-        lines: {
-          finish: { x1: 6, y1: 0, x2: 6, y2: 7 },
-          sector1: { x1: 12, y1: 20, x2: 24, y2: 20 },
-          sector2: { x1: -12, y1: 23, x2: -12, y2: 18 },
-          pit1: { x1: -29, y1: 18, x2: -18, y2: -4 },
-          pit2: { x1: -18, y1: -4, x2: -33, y2: -7 },
-          pit3: { x1: -33, y1: -7, x2: -44, y2: 15 },
-          pit4: { x1: -44, y1: 15, x2: -29, y2: 18 }
-        }
-      };
-
-      $(document).ready(function(){
-        var socket = io(devUrl);
-
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
+      componentDidMount(){
+        const canvasEl = ReactDOM.findDOMNode(this.refs.canvas);
+        const context = canvasEl.getContext('2d');
         context.globalAlpha = 0.2;
         context.fillStyle = 'grey';
 
-        var tracer = document.getElementById('tracer');
-        var tracerCtx = tracer.getContext('2d');
+        const socket = io(devUrl);
 
-        var $window = $(window);
-        var $dotField = $('#dot-field');
-        var $canvas = $(canvas);
-        var $tracer = $(tracer);
+        socket.on('point', data => { //console.log('point', atom);
+          const { atom } = this.state;
 
-        var lines = document.getElementById('lines');
-        var $lines = $(lines);
-
-        $window.keydown(function(e){
-          if (e.keyCode === 13){
-            appState.traceMode = appState.traceMode? NO_TRACE: AWAIT_TRACE;
-
-            if (appState.traceMode){
-              $('#trace-mode-display').show();
-              //context.globalAlpha = 1;
-            } else {
-              $('#trace-mode-display').hide();
-              //context.globalAlpha = 0.1;
-            }
-          }
-        });
-
-        $tracer.bind('touchstart', function(){ //console.log('start');
-          if (appState.traceMode === NO_TRACE){
-            return;
-          }
-          appState.traceMode = TRACE;
-
-          state.trackPoints = [];
-          tracerCtx.fillStyle = 'tomato';
-          tracerCtx.clearRect(0, 0, tracer.width, tracer.height);
-        });
-
-        var requestingTouchFrame = false;
-        $tracer.bind('touchmove', function(e){
-          if (appState.traceMode !== TRACE){
-            return;
-          }
-
-          e.preventDefault();
-
-          if (requestingTouchFrame){
-            return;
-          }
-          requestingTouchFrame = true;
-          requestAnimationFrame(function(){
-            requestingTouchFrame = false;
-          });
-
-          var touch = e.touches[0];
-
-          var calcedTrackX = touch.pageX / window.innerWidth;
-          var calcedTrackY = touch.pageY / window.innerHeight;
-
-          state.trackPoints.push({
-            x: (calcedTrackX * (state.maxXBound - state.minXBound)) + state.minXBound,
-            y: (calcedTrackY * (state.maxYBound - state.minYBound)) + state.minYBound
-          })
-
-          tracerCtx.beginPath();
-          tracerCtx.arc(
-            calcedTrackX * tracer.width,
-            calcedTrackY * tracer.height,
-            5, 0, 2 * Math.PI, false
-          );
-          tracerCtx.fill();
-        });
-
-        $tracer.bind('touchend', function(){
-          if (appState.traceMode === NO_TRACE){
-            return;
-          }
-
-          console.log('old point count', state.trackPoints);
-          state.trackPoints = simplify(state.trackPoints, 0.01, true);
-          console.log('new point count', state.trackPoints);
-
-          tracerCtx.fillStyle = 'yellow';
-
-          var xSize = state.maxXBound - state.minXBound;
-          var ySize = state.maxYBound - state.minYBound;
-          state.trackPoints.forEach( point => {
-            tracerCtx.beginPath();
-            tracerCtx.arc(
-              (point.x - state.minXBound) / xSize * tracer.width, (point.y - state.minYBound) / ySize * tracer.height,
-              5, 0, 2 * Math.PI, false
-            );
-            tracerCtx.fill();
-          });
-        });
-
-        var dataURL = localStorage.getItem('track-map-canvas');
-        if (false && dataURL){
-          var img = new Image;
-          img.src = dataURL;
-          img.onload = function(){
-            context.globalAlpha = 0.9;
-            context.drawImage(img, 0, 0);
+          if (!atom.tags[data.id]){
             context.globalAlpha = 0.2;
-          };
-        }
+            context.fillStyle = 'grey';
 
-        socket.on('passing', function(data){
-          console.log('passing', data);
-        });
-
-        socket.on('point', function (data) {
-          if (!appState.tags[data.id]){
-            appState.tags[data.id] = {
-              points: [],
-              //angle: 0,
+            const newTag = {
+              points: [{
+                x: data.x,
+                y: data.y
+              }],
+              angle: 0,
               avgStep: 0,
               pointCount: 0,
               activeCount: 0,
               firstTime: data.t,
-              loc: data.loc
+              inRaceCount: 0
             };
-            commands.createDots(data.id);
 
-            if (data.loc === 'pit'){
-              $('#' + data.id).hide();
-            } else {
-              $('#' + data.id).show();
+            this.setState({
+              atom: this.state.atom.setIn(
+                ['tags', data.id],
+                newTag
+              )
+            });
+          } else {
+            const thisTag = atom.tags[data.id];
+
+            if (true || thisTag.points.length >= 1){
+              const prevPoint = thisTag.points[0];
+              //const nextPoint = thisTag.points[1];
+
+
+              const squareStep = Math.pow(data.x - prevPoint.x, 2)
+                + Math.pow(data.y - prevPoint.y, 2);
+
+              if (false && squareStep > 36){
+                //console.log('throw', squareStep, data.x, data.y, prevPoint.x, prevPoint.y);
+              } else {
+                this.setState({
+                  atom: this.state.atom.updateIn(
+                    ['tags', data.id],
+                    tag => tag.set('points', [{ x: data.x, y: data.y }])
+                      .update(
+                        'inRaceCount',
+                        count => data.loc === 'pit'? 0: (count + 1)
+                      )
+                  )
+                });
+              }
             }
           }
 
-          if (appState.tags[data.id].pointCount < 5){
-            console.log(data);
+          const finalX = getViewCoord(data.x, atom.xOpts) * atom.winHeight;
+
+          const finalY = getViewCoord(data.y, atom.yOpts) * atom.winHeight;
+
+          //console.log(finalX, finalY);
+
+          context.beginPath();
+          context.arc(
+            finalX, finalY,
+            5, 0, 2 * Math.PI, false
+          );
+          context.fill();
+        });
+
+
+        socket.on('passing', data => {
+        });
+
+        socket.on('config', shapes => {
+          //console.log(data);
+          let newAtom = this.state.atom;
+
+          for (const item of shapes){
+            if (item.id === 'view'){
+              const minX = Math.min(
+                item.coordinates[0].x, item.coordinates[1].x
+              );
+              const maxX = Math.max(
+                item.coordinates[0].x, item.coordinates[1].x
+              );
+              const minY = Math.min(
+                item.coordinates[0].y, item.coordinates[1].y
+              );
+              const maxY = Math.max(
+                item.coordinates[0].y, item.coordinates[1].y
+              );
+
+              newAtom = newAtom.setIn(['xOpts', 'minBound'], minX)
+                .setIn(['xOpts', 'maxBound'], maxX)
+                .setIn(['yOpts', 'minBound'], minY)
+                .setIn(['yOpts', 'maxBound'], maxY)
+            } else if (item.type === 'line'){
+              newAtom = newAtom.update(
+                'lines',
+                lines => lines.concat({
+                  x1: item.coordinates[0].x,
+                  y1: item.coordinates[0].y,
+                  x2: item.coordinates[1].x,
+                  y2: item.coordinates[1].y,
+                  id: item.id
+                  //color: getColorFromId(item.id)
+                })
+              )
+            } else if (item.type === 'polygon'){
+              newAtom = newAtom.update(
+                'lines',
+                lines => lines.concat(
+                  item.coordinates.map(
+                    ([x,y], i) => ({
+                      x1: x,
+                      y1: y,
+                      ...i === (item.coordinates.length - 1)? {
+                        x2: item.coordinates[0][0],
+                        y2: item.coordinates[0][1]
+                      }: {
+                        x2: item.coordinates[i + 1][0],
+                        y2: item.coordinates[i + 1][1]
+                      },
+                      id: item.id
+                      //color: getColorFromId(item.id)
+                    })
+                  )
+                )
+              );
+            }
           }
 
-          if (!data.x && !data.y){
-            console.log(data.id);
+          this.setState({
+            atom: newAtom
+          });
+        });
+        socket.emit('config');
+
+        const $win = $(window);
+        $win.resize(o=> {
+          this.setState({
+            atom: this.state.atom.set('winWidth', $win.width()).set('winHeight', $win.height())
+          }, o=>{
+            context.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            context.globalAlpha = 0.2;
+            context.fillStyle = 'grey';
+          });
+        })
+        .resize();
+
+        $win.click( e => {
+          const { atom } = this.state;
+          const offset = $(canvasEl).offset();
+          const viewX = e.pageX - offset.left;
+          const viewY = e.pageY - offset.top;
+
+          const xRatio = viewX / atom.winHeight;
+          const yRatio = viewY / atom.winHeight;
+
+          const calcedXSize = atom.xOpts.maxBound - atom.xOpts.minBound;
+          const calcedYSize = atom.yOpts.maxBound - atom.yOpts.minBound;
+
+          const finalX = ((xRatio * calcedXSize) + atom.xOpts.minBound) / atom.xOpts.mult;
+          const finalY = ((yRatio  * calcedYSize) + atom.yOpts.minBound) / atom.yOpts.mult;
+
+          this.setState({
+            atom: atom.setIn(['lines', 0, 'x1'], finalX).setIn(['lines', 0, 'y1'], finalY)
+          });
+
+          console.log('x', finalX, 'y', finalY);
+        });
+
+        let mouseFree = true;
+        $win.mousemove( e => {
+          if (!mouseFree){
             return;
           }
+          mouseFree = false;
+          requestAnimationFrame(
+            o=> setTimeout(
+              o=> { mouseFree = true; }, 111
+            )
+          );
 
-          if (data.x > 9999 || data.y > 9999){
-            console.log(data.id);
-            //return;
-          }
 
-          appState.tags[data.id].points.push({
-            x: state.flipX? -data.x: data.x,
-            y: state.flipY? -data.y: data.y,
-            timestamp: data.t * 1000
+          const { atom } = this.state;
+          const offset = $(canvasEl).offset();
+          const viewX = e.pageX - offset.left;
+          const viewY = e.pageY - offset.top;
+
+          const xRatio = viewX / atom.winHeight;
+          const yRatio = viewY / atom.winHeight;
+
+          const calcedXSize = atom.xOpts.maxBound - atom.xOpts.minBound;
+          const calcedYSize = atom.yOpts.maxBound - atom.yOpts.minBound;
+
+          const finalX = ((xRatio * calcedXSize) + atom.xOpts.minBound) / atom.xOpts.mult;
+          const finalY = ((yRatio  * calcedYSize) + atom.yOpts.minBound) / atom.yOpts.mult;
+
+          this.setState({
+            atom: atom.setIn(['lines', 0, 'x2'], finalX).setIn(['lines', 0, 'y2'], finalY)
           });
-
-          if (data.loc === 'pit'){
-            if (appState.tags[data.id].activeCount > 0){
-              appState.tags[data.id].activeCount = 0;
-              if (!appState.showAllDots){
-                $('#' + data.id).hide();
-              }
-            }
-          } else {
-            if (appState.tags[data.id].activeCount > 5){
-              appState.tags[data.id].activeCount = true;
-              $('#' + data.id).show();
-            } else {
-              appState.tags[data.id].activeCount++;
-            }
-          }
-
-          if (appState.tags[data.id].points.length > 1){
-            var prevPoint = appState.tags[data.id].points.shift();
-            var nextPoint = appState.tags[data.id].points[0];
-
-            var squareStep = Math.pow(nextPoint.x - prevPoint.x, 2)
-              + Math.pow(nextPoint.y - prevPoint.y, 2);
-
-            appState.tags[data.id].avgStep = (
-              appState.tags[data.id].avgStep * appState.tags[data.id].pointCount
-               + Math.pow(squareStep, 1/2)
-            ) / (appState.tags[data.id].pointCount + 1);
-            appState.tags[data.id].pointCount++;
-            appState.tags[data.id].latestTime = data.t;
-
-            var oldAngle = appState.tags[data.id].angle;
-            var newAngle = (Math.atan2(
-              nextPoint.y - prevPoint.y, nextPoint.x - prevPoint.x
-            ) * 180 / Math.PI) + 90;
-
-            var calcXSize = state.maxXBound - state.minXBound;
-            var calcYSize = state.maxYBound - state.minYBound;
-            var finalX = (nextPoint.x - state.minXBound) / calcXSize * appState.mapSize;
-            var finalY = (nextPoint.y - state.minYBound) / calcYSize * appState.mapSize;
-
-            if (!appState.smooth){
-              commands.moveTo(data.id, finalX, finalY);
-            }
-
-            if (typeof oldAngle !== 'undefined' && Math.abs(newAngle - oldAngle) < 90
-              && squareStep < appState.maxSquareStep
-              && appState.smooth
-            ){
-              commands.moveTo(data.id, finalX, finalY);
-            }
-
-            appState.tags[data.id].angle = newAngle;
-
-            var arrowEl = document.getElementById('a-' + data.id);
-            var $arrow = $(arrowEl);
-            //console.log(nextPoint.timestamp - prevPoint.timestamp);
-            if ($arrow && appState.traceMode === NO_TRACE){
-              $arrow.velocity('stop');
-
-              var duration = nextPoint.timestamp - prevPoint.timestamp;
-
-              $arrow.velocity({
-                translateX: (
-                  (data.x - state.minXBound) / calcXSize * 100
-                  //(nextPoint.x - state.minXBound) / state.xSize * 100
-                ) + 'vh',
-                translateY: (
-                  (data.y - state.minYBound) / calcYSize * 100
-                  //(nextPoint.y - state.minYBound) / state.ySize * 100
-                ) + 'vh',
-                translateZ: 0,
-                duration: duration,
-                easing: 'linear',
-                queue: false
-              });
-
-              var newAngle = (Math.atan2(
-                data.y - prevPoint.y, data.x - prevPoint.x
-              ) * 180 / Math.PI) + 90;
-              var oldAngle = getCurrentAngle(arrowEl);
-
-              while (newAngle - oldAngle > 180){
-                newAngle -= 360;
-              }
-              while (oldAngle - newAngle > 180){
-                newAngle += 360;
-              }
-
-              $arrow.velocity({
-                rotateZ: '+=' + (newAngle - oldAngle) + 'deg',
-                translateZ: 0 // Force HA by animating a 3D property
-              }, {
-                duration: duration, easing: 'ease-out', queue: false
-              });
-              /*arrowEl.style.transform = 'translate(' + (
-                (point.x - state.minXBound) / state.xSize * 100
-              ) + 'vw,' + (
-                (point.y - state.minYBound) / state.ySize * 100
-              ) + 'vh)';*/
-            }
-
-            var centerX = nextPoint.x - state.minXBound; // / state.xSize * 1920;
-            var centerY = nextPoint.y - state.minYBound; // / state.ySize * 1080;
-            context.beginPath();
-            context.arc(
-              centerX / calcXSize * appState.mapSize,
-              centerY / calcYSize * appState.mapSize,
-              5, 0, 2 * Math.PI, false
-            );
-            context.fill();
-
-            if (appState.trackingTagId){
-              $('#x-coord').text(data.x);
-              $('#y-coord').text(data.y);
-            }
-          }
-          //return;
         });
 
-        $('#smooth-check').change(function(){
-          //console.log( this.checked );
-          appState.smooth = this.checked;
-          if (this.checked){
-            $('.raw-dot').addClass('smooth');
-            //$('.raw-dot').css('transition', 'all 0.3s')
-            //.css('-webkit-transition', 'all 0.3s');
-          } else {
-            $('.smooth').removeClass('smooth');
-            //$('.raw-dot').css('transition', '').css('-webkit-transition', '');
-          }
-        });
+        window.me = this;
+      }
 
-        $('#show-all-dots').change(function(){
-          appState.showAllDots = this.checked;
-          if (this.checked){
-            $('.raw-dot').show();
-          } else {
-            $('.raw-dot').hide();
-          }
-        });
-
-        $window.bind('beforeunload', function(){
-          localStorage.setItem( 'track-map-state', JSON.stringify(state) );
-          localStorage.setItem( 'track-map-canvas', canvas.toDataURL() );
-        });
-
-        /*$('#set-top-left').click(function(e){
-          e.preventDefault();
-          appState.settingTopLeft = true;
-        });
-
-        $('#set-bottom-right').click(function(e){
-          e.preventDefault();
-          appState.settingBottomRight = true;
-        });*/
-
-        $window.click(function(e){
-          var dotFieldOffset = $dotField.offset();
-
-          var domX = e.pageX - dotFieldOffset.left;
-          var domY = e.pageY - dotFieldOffset.top;
+      componentDidUpdate(){
+        //console.log(this.state.atom.xOpts.maxBound);
+      }
+    }
 
 
-          var xRatio = domX / appState.mapSize;
-          var yRatio = domY / appState.mapSize;
+    ReactDOM.render(
+      <TrackMap />, document.body.firstElementChild
+    );
 
+    /*
+    const socket = io('http://k1irvine.clubspeedtiming.com:3000');
 
+    const pointStream = Kefir.stream(emitter => {
+      socket.on( 'point', data => emitter.emit(data) );
+    });
 
-          var calcedXSize = state.maxXBound - state.minXBound;
-          var calcedYSize = state.maxYBound - state.minYBound;
+    const tagPointStreams = {};
+    pointStream.observe( point => {
+      if (!tagPointStreams[point.id]){
+        tagPointStreams[point.id] = pointStream.filter( newPoint => newPoint.id === point.id );
+        tagPointStreams[point.id].throttle(1111).log();
+      }
+    });
+    */
 
-          //console.log( 'x', -1 * (xRatio * calcedXSize) - state.minXBound );
-          //console.log( 'y', -1 * (yRatio  * calcedYSize) - state.minYBound );
-
-          var semiFinalX = (xRatio * calcedXSize) + state.minXBound;
-          var semiFinalY = (yRatio  * calcedYSize) + state.minYBound;
-
-          if (state.flipX) semiFinalX *= -1;
-          if (state.flipY) semiFinalY *= -1;
-
-          console.log( 'x', semiFinalX, 'y', semiFinalY );
-          //console.log( 'y', -1 * (yRatio  * calcedYSize) - state.minYBound );
-        })
-
-        function initLine(lineId, line){
-          var $me = $(`<div class='coord-panel' id='${lineId}'>
-            <input class='coord-input x1' type='number' value='${line.x1}'>
-            <input class='coord-input y1' type='number' value='${line.y1}'>
-            <input class='coord-input x2' type='number' value='${line.x2}'>
-            <input class='coord-input y2' type='number' value='${line.y2}'>
-          </div>`);
-
-          $me.appendTo('#debug-panel');
-          var newLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          newLine.id = 'line-' + lineId;
-          $lines.append(newLine);
-
-          function processX(x){
-            x = state.flipX? -x: x;
-            var calcXSize = state.maxXBound - state.minXBound;
-            return (x - state.minXBound) / calcXSize * appState.mapSize;
-          }
-
-          function processY(y){
-            y = state.flipY? -y: y;
-            var calcYSize = state.maxYBound - state.minYBound;
-            return (y - state.minYBound) / calcYSize * appState.mapSize;
-          }
-
-          function moveLine(coords){
-            $('#line-' + lineId)
-            .attr('stroke', getColorFromId(lineId))
-            .attr('x1', processX(coords.x1) )
-            .attr('y1', processY(coords.y1) )
-            .attr('x2', processX(coords.x2) )
-            .attr('y2', processY(coords.y2) );
-
-            //console.log(lineId, coords);
-          }
-
-          moveLine(line);
-
-          $me.change(function(){
-            state.lines[lineId] = {
-              x1: parseFloat($me.find('.x1').val()),
-              y1: parseFloat($me.find('.y1').val()),
-              x2: parseFloat($me.find('.x2').val()),
-              y2: parseFloat($me.find('.y2').val())
-            };
-
-            moveLine(state.lines[lineId]);
-          });
-
-          $window.resize(function(){
-            moveLine(state.lines[lineId]);
-          });
-        }
-
-        setTimeout(function(){
-          for (var lineId in state.lines){
-            initLine(lineId, state.lines[lineId]);
-          }
-        }, 1111); // HACK: timeout to wait for line container to resize on load
-
-        function fitSize(){
-          context.clearRect(0,0,canvas.width,canvas.height);
-          var winHeight = $window.height();
-          appState.mapSize = winHeight;
-
-          $dotField.height(winHeight);
-          $canvas.height(winHeight);
-          $tracer.height(winHeight);
-          $lines.height(winHeight);
-
-          $dotField.width(winHeight);
-          $canvas.width(winHeight);
-          $tracer.width(winHeight);
-          $lines.width(winHeight);
-
-          canvas.width = winHeight;
-          canvas.height = winHeight;
-
-          //lines.width = winHeight;
-          //lines.height = winHeight;
-
-          context.globalAlpha = 0.2;
-          context.fillStyle = 'grey';
-        }
-
-        fitSize();
-        $window.resize(fitSize);
-
-        //commands.loadLocal(state);
-      });
-
-    </script>
-  </body>
-</html>
+  </script>
+</body>
