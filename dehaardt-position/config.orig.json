@@ -1,5 +1,5 @@
 {
-  "openRtlsIp": null,
+  "openRtlsIp": "1.2.3.4",
   "socketIoPort": 3000,
   "enableMdns": false,
   "passingEngineConfig": {

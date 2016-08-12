@@ -64,7 +64,7 @@ var reconnect = require('reconnect-net');
 var classifyPoint = require("robust-point-in-polygon");
 
 var config = {
-  openRtlsIp: '10.10.140.122',
+  openRtlsIp: "",
   openRtlsCommandPort: 8784,
   openRtlsListenPort: 8787,
   socketIoPort: 3000,
