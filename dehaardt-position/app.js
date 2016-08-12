@@ -103,6 +103,8 @@ var passingEngineConfig = {
   // If we do AMB timing we'll need to use the last five hex digits cast to a number -- parseInt("0xFFFFF")
 };
 
+console.log('Starting with config:', config, passingEngineConfig, '\n\n');
+
 var passingEngine = require('./passingEngine')(passingEngineConfig);
 
 app.listen(config.socketIoPort);
