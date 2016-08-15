@@ -167,9 +167,10 @@ class BasePayment {
                         , 'notifyUrl'            => $this->getNotifyUrl()
                         , 'issuer'               => ''
                         , 'card'                 => new \Omnipay\Common\CreditCard(@$params['card'])
-                        , 'clientIp'             => $this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
+                        , 'clientIp'             => @$params['clientIp'] //$this->getIp() // use the api ip? or the client ip? or the middle-tier ip?
                         , 'session'              => Tokens::generate()
                     );
+                    Log::info($this->logPrefix . 'Purchase request from ip ' . $options['clientIp']);
                     Log::info($this->logPrefix . 'Charging card for ' . $options['amount'] . ' ' . $options['currency']);
                     $response = $callback($options); // the actual omnipay call
                 }

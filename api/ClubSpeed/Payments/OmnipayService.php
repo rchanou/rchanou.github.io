@@ -122,6 +122,14 @@ class OmnipayService {
         if (!isset($params['currency']))
             $params['currency'] = $this->currency;
 
+        $clientIp = @$params['clientIp'] ?: '(unprovided)';
+        $transactionId = @$params['transactionId'] ?: '(unprovided)';
+
+        // i know this isn't really a NSP_BOOKING call,
+        // but we're looking to get these logs inside 
+        // the "Online Booking Logs" in the admin panel.
+        Log::info('Check #' . $transactionId . ': Attempting payment request from origin ip: ' . $clientIp, Enums::NSP_BOOKING);
+
         try {
             $res = $callback($params);
         }

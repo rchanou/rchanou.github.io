@@ -4,6 +4,7 @@ namespace ClubSpeed\Logic;
 use ClubSpeed\Database\Helpers\UnitOfWork;
 use ClubSpeed\Utility\Arrays;
 use ClubSpeed\Utility\Convert;
+use Clubspeed\Enums\Enums;
 
 /**
  * The business logic class
@@ -23,10 +24,69 @@ class UsersLogic extends BaseLogic {
     public function __construct(&$logic, &$db) {
         parent::__construct($logic, $db);
         $this->interface = $this->db->users;
+
+        $self =& $this;
+        $befores = array(
+            'create' => array($self, 'validateCreate'),
+            'update' => array($self, 'validateUpdate')
+        );
+        $this->before('uow', function($uow) use ($befores) {
+            if (isset($befores[$uow->action]))
+                call_user_func($befores[$uow->action], $uow);
+        });
+    }
+
+    function validateCreate($uow) {
+        $user =& $uow->data;
+        if (empty($user->UserName) || $user->UserName === Enums::DB_NULL)
+            throw new \RequiredArgumentMissingException('Creating a user requires a username! Received: ' . $user->UserName);
+        if (empty($user->Password) || $user->Password === Enums::DB_NULL)
+            throw new \RequiredArgumentMissingException('Creating a user requires a password!');
+        if (empty($user->WebPassword) || $user->WebPassword === Enums::DB_NULL)
+            throw new \RequiredArgumentMissingException('Creating a user requires a web password!');
+        if (empty($user->Enabled) || $user->Enabled === Enums::DB_NULL)
+            $user->Enabled = 1;
+        if (empty($user->Deleted) || $user->Deleted === Enums::DB_NULL)
+            $user->Deleted = 0;
+
+        $usernameCount = $this->interface->uow(
+            UnitOfWork::build()
+                ->table('Users')
+                ->action('count')
+                ->where(array(
+                    "UserName" => $user->UserName
+                ))
+        )->data;
+        if ($usernameCount !== 0)
+            throw new \RecordAlreadyExistsException('Attempting to create a user with a username which already exists! Received: ' . $user->UserName);
+    }
+
+    function validateUpdate($uow) {
+        $user =& $uow->data;
+        $existing =& $uow->existing;
+        if ($user->UserName === Enums::DB_NULL || (is_string($user->UserName) && empty($user->UserName)))
+            throw new \RequiredArgumentMissingException('Cannot update username to an empty value!');
+        if ($user->Password === Enums::DB_NULL || (is_string($user->Password) && empty($user->Password)))
+            throw new \RequiredArgumentMissingException('Cannot update password to an empty value!');
+        if ($user->WebPassword === Enums::DB_NULL || (is_string($user->WebPassword) && empty($user->WebPassword)))
+            throw new \RequiredArgumentMissingException('Cannot update web password to an empty value!');
+
+        if (!empty($user->UserName)) {
+            $usernameCount = $this->interface->uow(
+                UnitOfWork::build()
+                    ->table('Users')
+                    ->action('count')
+                    ->where(array(
+                        "UserID" => array('$neq' => $existing->UserID), // allow update from one username to same username.
+                        "UserName" => $user->UserName
+                    ))
+            )->data;
+            if ($usernameCount !== 0)
+                throw new \RecordAlreadyExistsException('Attempting to update a user with a username which already exists! Received: ' . $user->UserName);
+        }
     }
 
     public final function login($data) {
-
         $username = @$data['username'];
         $password = @$data['password'];
         if (empty($username) || !is_string($username))

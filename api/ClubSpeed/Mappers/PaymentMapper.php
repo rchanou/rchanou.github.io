@@ -25,7 +25,7 @@ class PaymentMapper extends BaseMapper {
             // , 'CheckNumber'           => ''
             // , 'CheckingAccountName'   => ''
             // , 'CreditCardNo'          => ''
-            // , 'CardType'              => ''
+            , 'CardType'              => ''
             // , 'ExpirationDate'        => ''
             // , 'AccountName'           => ''
             // , 'Amount'                => ''

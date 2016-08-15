@@ -13,7 +13,7 @@ class UsersMapper extends BaseMapper {
             , 'FName'          => 'firstname' // to match the customers casing
             , 'LName'          => 'lastname'  // to match the customers casing
             , 'UserName'       => 'username'
-            , 'Password'       => ''
+            , 'Password'       => 'password'
             , 'CrdID'          => 'cardId'
             , 'Enabled'        => ''
             , 'EmailAddress'   => 'email'
@@ -44,6 +44,7 @@ class UsersMapper extends BaseMapper {
             // , 'SundayEnd'      => ''
             , 'EmpStartDate'   => ''
             , 'WebPassword'    => ''
+            , 'SystemUsers'    => 'isSystemUser'
             // , 'SystemUsers'    => '' // or keep this?
         ));
 

@@ -20,9 +20,10 @@ class DocPayment Extends DocAPIBase {
         return <<<EOS
 {
   "paymentId": 3391,
+  "cardType": null,
   "checkId": 3467,
   "customerId": 1,
-  "extCardType": "Dummy",
+  "extCardType": "AUTHORIZENET_AIM",
   "payAmount": 21.24,
   "payDate": "2014-12-05T11:46:28.00",
   "payStatus": 2,
@@ -96,14 +97,13 @@ EOS;
             //     "update" => "available",
             //     "description" => ""
             // ),
-            // array(
-            //     "name" => "cardType",
-            //     "type" => "String",
-            //     "default" => "",
-            //     "create" => "available",
-            //     "update" => "available",
-            //     "description" => ""
-            // ),
+            array(
+                "name" => "cardType",
+                "type" => "String",
+                "default" => "",
+                "required" => false,
+                "description" => "The type of the credit card used to make the payment, typically only filled out where <code class=\"prettyprint\">payType</code> is <code class=\"prettyprint\">Credit</code>"
+            ),
             array(
                 "name" => "checkId",
                 "type" => "Integer",

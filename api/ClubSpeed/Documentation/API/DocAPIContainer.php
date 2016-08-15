@@ -138,6 +138,7 @@ class DocAPIContainer {
         // $data['sections'][] = new DocScreenTemplate();
         $data['sections'][] = new DocSources();
         $data['sections'][] = new DocTaxes();
+        $data['sections'][] = new DocUsers();
 
         return $data;
     }

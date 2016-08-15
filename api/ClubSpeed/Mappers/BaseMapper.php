@@ -56,10 +56,27 @@ class BaseMapper {
     }
 
     public function uowIn(&$uow) {
-        if (!is_null($uow->select)) // limit by mapper limiting, or...
+        if (!is_null($uow->select))
             $this->limit('client', $uow->select); // consider a better way to do this
         $this->uowMap('server', $uow);
+        $uow->select = $this->filterRestrictedClientSelect($uow->select);
         return $uow;
+    }
+
+    private function filterRestrictedClientSelect($select) {
+        // if a user is trying to select a restricted field,
+        // then disallow it even before we get to SQL
+        // (we still wouldn't expose it later on in the mapping,
+        // but there's no real point to selecting it out in this case)
+        if (empty($select))
+            return $select;
+        $map = $this->_map['client'];
+        $values = array_values($map);
+        return Arrays::where($select, function($val) use ($values) {
+            return Arrays::contains($values, function($x) use ($val) {
+                return $x == $val;
+            });
+        });
     }
 
     public function uowOut(&$uow) {
