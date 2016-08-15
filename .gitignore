@@ -59,3 +59,5 @@ cs-printer/config.js
 
 cs-pccharge/node_modules
 cs-pccharge/config.json
+event-builder/*.err
+cs-printer/*.err
