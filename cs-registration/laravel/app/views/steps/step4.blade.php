@@ -82,8 +82,8 @@
         @else
         @endif
         <p/>
-        <a href="{{$step1URL}}" onclick="$('#loadingModal').modal();">
-        <img src="{{$images['completeRegistration']}}" class="center-block" style="margin-top: 10px;">
+        <a href="{{URL::to($step1URL)}}" onclick="$('#loadingModal').modal();">
+        <img src="{{asset($images['completeRegistration'])}}" class="center-block" style="margin-top: 10px;">
         <div class="text-center" style="font-size: 20px;">{{$strings['str_completeRegistration']}}</div>
         </a>
     </div>

@@ -2,7 +2,7 @@
 
 <!-- HEADER -->
 @section('backButton')
-    <a href="{{$step1URL}}" class="arrow" onclick="$('#loadingModal').modal();"><span>Back</span></a>
+    <a href="{{URL::to($step1URL)}}" class="arrow" onclick="$('#loadingModal').modal();"><span>Back</span></a>
 @stop
 
 @section('headerTitle')
@@ -27,8 +27,8 @@ Unable to Connect
     <div class="col-sm-3"></div>
     <div class="col-sm-6">
         <p/>
-            <img src="images/redhelmet_disconnect.png" class="center-block" style="margin-top: 80px;">
-            <a href="{{$step1URL}}" onclick="$('#loadingModal').modal();">
+            <img src="{{asset("images/redhelmet_disconnect.png")}}" class="center-block" style="margin-top: 80px;">
+            <a href="{{URL::to($step1URL)}}" onclick="$('#loadingModal').modal();">
             <div class="text-center" style="font-size: 20px;">{{$strings['str_disconnectedMessage']}}</div>
         </a>
     </div>

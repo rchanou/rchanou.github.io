@@ -25,7 +25,7 @@
 
 <!-- VENUE LOGO AND HEADER TEXT -->
 <div class="row">
-    <div class="col-xs-12 text-center"><img src="{{$images['venueLogo']}}"></div>
+    <div class="col-xs-12 text-center"><img src="{{asset($images['venueLogo'])}}"></div>
 </div>
 <div class="row" style="margin-top: 50px; font-size: 20px;">
     <div class="col-xs-12 text-center">{{$strings['str_welcomeMessage']}}</div>
@@ -40,14 +40,14 @@
     <div class="row step1RegistrationBody">
         @if ($settings['Reg_EnableFacebook'])
         <div class="{{$columnSize}} text-center" style="{{$checkInEnabled ? "" : "display: none;"}}">
-            <a href="checkin" style="font-size: 20px;">
-                <img src="{{$images['checkIn']}}"><br/>
+            <a href="{{URL::to("checkin")}}" style="font-size: 20px;">
+                <img src="{{asset($images['checkIn'])}}"><br/>
                 {{$strings['str_checkIn']}}
             </a>
         </div>
         <div class="{{$columnSize}} text-center">
-            <a href="step2" style="font-size: 20px;">
-                <img src="{{$images['createAccount']}}"><br/>
+            <a href="{{URL::to("step2")}}" style="font-size: 20px;">
+                <img src="{{asset($images['createAccount'])}}"><br/>
                 {{$strings['str_newAccount']}}
             </a>
         </div>
@@ -57,20 +57,20 @@
             @else
                 <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{Request::url()}}/step2&scope=public_profile,email,user_birthday,publish_actions">
             @endif
-                <img src="{{$images['createAccountFacebook']}}"><br/>
+                <img src="{{asset($images['createAccountFacebook'])}}"><br/>
             {{$strings['str_facebook']}}
             </a>
         </div>
         @else
         <div class="{{$columnSize}} text-center" style="{{$checkInEnabled ? "" : "display: none;"}}">
-            <a href="checkin" style="font-size: 20px;">
-                <img src="{{$images['checkIn']}}"><br/>
+            <a href="{{URL::to("checkin")}}" style="font-size: 20px;">
+                <img src="{{asset($images['checkIn'])}}"><br/>
                 {{$strings['str_checkIn']}}
             </a>
         </div>
         <div class="{{$columnSize}} text-center" style="font-size: 20px;">
-            <a href="step2">
-                <img src="{{$images['createAccount']}}"><br/>
+            <a href="{{URL::to("step2")}}">
+                <img src="{{asset($images['createAccount'])}}"><br/>
                 {{$strings['str_newAccount']}}
             </a>
         </div>
@@ -78,7 +78,7 @@
     </div>
     <div class="row">
         <div class="col-sm-12 centered">
-            <img src="{{$images['poweredByClubSpeed']}}" style="padding-top: 30px;">
+            <img src="{{asset($images['poweredByClubSpeed'])}}" style="padding-top: 30px;">
         </div>
     </div>
 </div>

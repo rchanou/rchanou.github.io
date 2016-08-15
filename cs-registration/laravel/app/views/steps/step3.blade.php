@@ -3,13 +3,13 @@
 <!-- BEGIN CSS INCLUDES -->
 @section('css_includes')
     @parent
-    <link rel="stylesheet" href="js/vendors/signature-pad/assets/jquery.signaturepad.css" />
+    <link rel="stylesheet" href="{{URL::to("js/vendors/signature-pad/assets/jquery.signaturepad.css")}}" />
 @stop
 <!-- END CSS INCLUDES -->
 
 <!-- HEADER -->
 @section('backButton')
-<a href="step2" class="arrow"><span>{{$strings['str_backButton']}}</span></a>
+<a href="{{URL::to("step2")}}" class="arrow"><span>{{$strings['str_backButton']}}</span></a>
 @stop
 
 @section('headerTitle')
@@ -98,7 +98,7 @@
 <!-- FOOTER -->
 
 @section('leftFooterButton')
-<a href="{{$step1URL}}" id="idisagreeButton" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_step3DoNotAgree']}}</a>
+<a href="{{URL::to($step1URL)}}" id="idisagreeButton" class="btn btn-danger btn-lg leftButton" onclick="$('#loadingModal').modal();">{{$strings['str_step3DoNotAgree']}}</a>
 @stop
 
 @section('rightFooterButton')
@@ -123,9 +123,9 @@
 @section('js_includes')
     @parent
 
-<!--[if lt IE 9]><script src="js/vendors/signature-pad/assets/flashcanvas.js"></script><![endif]-->
-<script src="js/vendors/signature-pad/jquery.signaturepad.min.js"></script>
-<script src="js/vendors/signature-pad/assets/json2.min.js"></script>
+<!--[if lt IE 9]><script src="{{URL::to('js/vendors/signature-pad/assets/flashcanvas.js')}}"></script><![endif]-->
+<script src="{{URL::to('js/vendors/signature-pad/jquery.signaturepad.min.js')}}"></script>
+<script src="{{URL::to('js/vendors/signature-pad/assets/json2.min.js')}}"></script>
 
 <script>
     $(document).ready(function () {

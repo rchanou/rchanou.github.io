@@ -8,11 +8,13 @@
 
     <!-- BEGIN CSS INCLUDES -->
     @section('css_includes')
-    <link rel="stylesheet" href="css/vendors/bootstrap.min.css" />
+        {{ HTML::style('css/vendors/bootstrap.min.css') }}
         {{ HTML::style('css/vendors/jquery-ui/jquery-ui.min.css') }}
         {{ HTML::style('css/vendors/jquery-ui/jquery-ui.theme.min.css') }}
-    <link rel="stylesheet" href="css/vendors/bootstrap-theme.min.css" />
-    <link rel="stylesheet" href="css/cs-registration.css?<?php echo time(); ?>" />
+        {{ HTML::style('css/vendors/bootstrap-theme.min.css') }}
+        {{ HTML::style('css/vendors/bootstrap-theme.min.css') }}
+
+    <link rel="stylesheet" href="{{asset("css/cs-registration.css?" . time())}}" />
 
     <?php
 
@@ -32,13 +34,9 @@
             return $ret;
         }
 
-        if (file_exists('css/custom-styles.css')) //Used for tracks to overwrite css
+        if (file_exists('css/custom-styles.css')) //Deprecated method used for tracks to overwrite css
         {
-            echo '<link rel="stylesheet" href="css/custom-styles.css?' . time() .'" />';
-        }
-        if (file_exists('css/custom-styles.css')) //Used for tracks to overwrite css
-        {
-            echo '<link rel="stylesheet" href="css/custom-styles.css?' . time() .'" />';
+            echo '<link rel="stylesheet" href="' . 'http://' . $_SERVER['HTTP_HOST'] . '/cs-registration/css/custom-styles.css?' . time() .'" />';
         }
 
     ?>
@@ -51,7 +49,7 @@
     <title>@yield('title', 'Registration Kiosk')</title>
 </head>
 
-<body style="background-image:url({{$images['bg_image']}})">
+<body style="background-image:url({{asset($images['bg_image'])}})">
 @section('facebook_integration')
     <?php
             $facebookEnabled = false;
@@ -63,7 +61,7 @@
     ?>
     @if($facebookEnabled)
 <!-- BEGIN FACEBOOK INTEGRATION -->
-<script src="js/vendors/js.cookie.js"></script>
+<script src="{{asset("js/vendors/js.cookie.js")}}"></script>
 
 <script>
 
@@ -129,12 +127,12 @@
 
 <!-- BEGIN JAVASCRIPT INCLUDES -->
 @section('js_includes')
-<script src="js/vendors/jquery-2.1.0.min.js"></script>
-<script src="js/vendors/moment-with-langs.min.js"></script>
-<script src="js/vendors/bootstrap.min.js"></script>
-<script src="js/vendors/holder.js"></script> <!-- TODO: Eliminate eventually -->
-<script src="js/vendors/livevalidation.min.js"></script>
-<script src="js/vendors/dropdown.js"></script>
+<script src="{{asset("js/vendors/jquery-2.1.0.min.js")}}"></script>
+<script src="{{asset("js/vendors/moment-with-langs.min.js")}}"></script>
+<script src="{{asset("js/vendors/bootstrap.min.js")}}"></script>
+<script src="{{asset("js/vendors/holder.js")}}"></script> <!-- TODO: Eliminate eventually -->
+<script src="{{asset("js/vendors/livevalidation.min.js")}}"></script>
+<script src="{{asset("js/vendors/dropdown.js")}}"></script>
 
 {{ HTML::script('js/vendors/modernizr-latest.js') }}
 {{ HTML::script('js/vendors/jquery-ui/jquery-ui.min.js') }}

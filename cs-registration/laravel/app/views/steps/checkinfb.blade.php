@@ -2,7 +2,7 @@
 
 <!-- HEADER -->
 @section('backButton')
-<a href="checkin" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
+<a href="{{URL::to("checkin")}}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
 
 @stop
 
@@ -52,21 +52,21 @@
 <div class="row formArea">
         @if ($settings['Reg_EnableFacebook'])
         <div class="col-sm-6 text-center">
-            <a href="checkinconfirm" style="font-size: 20px;">
-                <img src="{{$images['checkIn']}}"><br/>
+            <a href="{{URL::to("checkinconfirm")}}" style="font-size: 20px;">
+                <img src="{{asset($images['checkIn'])}}"><br/>
                 {{$strings['str_connectFacebookNo']}}
             </a>
         </div>
         <div class="col-sm-6 text-center" style="font-size: 20px;">
             <a href="https://www.facebook.com/dialog/oauth?client_id=296582647086963&redirect_uri={{str_replace('checkin','checkinconfirm',Request::url())}}&scope=public_profile,email,user_birthday,publish_actions">
-                <img src="{{$images['createAccountFacebook']}}"><br/>
+                <img src="{{asset($images['createAccountFacebook'])}}"><br/>
             {{$strings['str_connectFacebookYes']}}
             </a>
         </div>
         @else
         <div class="col-sm-12 text-center">
-            <a href="checkinconfirm" style="font-size: 20px;">
-                <img src="{{$images['checkIn']}}"><br/>
+            <a href="{{URL::to("checkinconfirm")}}" style="font-size: 20px;">
+                <img src="{{asset($images['checkIn'])}}"><br/>
                 {{$strings['str_connectFacebookNo']}}
             </a>
         </div>

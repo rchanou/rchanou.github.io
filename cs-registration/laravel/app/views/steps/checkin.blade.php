@@ -2,7 +2,7 @@
 
 <!-- HEADER -->
 @section('backButton')
-<a href="{{$step1URL}}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
+<a href="{{URL::to($step1URL)}}" class="arrow" onclick="$('#loadingModal').modal();"><span>{{$strings['str_backButton']}}</span></a>
 @stop
 
 @section('headerTitle')
