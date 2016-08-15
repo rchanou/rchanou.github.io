@@ -12,7 +12,7 @@
                     <a href="#">
                         <span>
                             <span class="currentCultureString" style="display: inline-block">{{$strings["cultureNames"][$currentCulture]}}</span>
-                            <img src="images/flags/{{strtolower(substr($currentCulture,3,2))}}.png" class="flag">
+                            <img class="flag" src="{{asset("images/flags/". strtolower(substr($currentCulture,3,2)). ".png")}}" alt="" />
                         </span>
                     </a>
                 </dt>
@@ -23,7 +23,7 @@
                                 <li>
                                     <a href="#">
                                         <span class="currentCultureString">{{$currentCulture}}</span>
-                                        <img class="flag" src="images/flags/{{strtolower(substr($currentCultureCode,3,2))}}.png" alt="" />
+                                        <img class="flag" src="{{asset("images/flags/". strtolower(substr($currentCultureCode,3,2)). ".png")}}" alt="" />
                                         <span class="value">{{$currentCultureCode}}</span>
                                     </a>
                                 </li>
