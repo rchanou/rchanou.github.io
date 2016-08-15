@@ -14,7 +14,7 @@
 
 <body data-color="grey" class="flat"> <!-- Improve template for these style pages -->
 <div id="logo">
-    <img src="img/logo.png" alt="" />
+    <img src="{{asset("img/logo.png")}}" alt="" />
 </div>
 
 @include('errors', array('errors' => $errors))

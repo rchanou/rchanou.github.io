@@ -19,7 +19,7 @@ Disconnected
         <div class="col-xs-12 col-sm-3"></div>
         <div class="col-xs-12 col-sm-6 text-center">
             <h1>Disconnected!</h1>
-            <img src="img/disconnected.png"><p/>
+            <img src="{{asset("img/disconnected.png")}}"><p/>
             <div class="alert alert-danger alert-block">
             Unable to reach the Club Speed server. Please try again later. If the issue persists, contact Club Speed support.<p/>
             </div>
