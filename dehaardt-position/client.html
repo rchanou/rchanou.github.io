@@ -155,7 +155,8 @@
             }}
           >
             <div>
-              {atom.lines[0].x1},{atom.lines[0].y1} to {atom.lines[0].x2},{atom.lines[0].y2}
+              {atom.lines[0].x1.toFixed(3)},{atom.lines[0].y1.toFixed(3)} to
+              {atom.lines[0].x2.toFixed(3)},{atom.lines[0].y2.toFixed(3)}
             </div>
             <div>
               <label>Smooth</label>
@@ -238,7 +239,6 @@
               />
             </div>
           </form>
-          {'' && JSON.stringify(atom)}
         </div>;
       }
 
