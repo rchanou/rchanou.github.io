@@ -89,7 +89,13 @@
                     { failureMessage: "{{$strings['str_required']}}" } );
 
             }
-
+            
+            $('#resetButton').click(function(e){
+                e.preventDefault();
+                $('#firstname').val('');
+                $('#lastname').val('');
+                $('#birthdate').val('');
+            });
     });
     </script>
 @stop
@@ -97,7 +103,7 @@
 <!-- FOOTER -->
 
 @section('leftFooterButton')
-{{ Form::reset($strings['str_checkInClear'], array('class'=>'leftButton btn btn-danger btn-lg', 'id'=>'resetButton')) }}
+    <input type="reset" id="resetButton" class="leftButton btn btn-danger btn-lg" value="{{$strings['str_checkInClear']}}">
 @stop
 
 @section('rightFooterButton')
