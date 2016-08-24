@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 var expect = require("chai").expect;
 var gridding = require("../lib/gridding.js");
 
@@ -626,13 +628,6 @@ describe("Gridding & Helper Methods (That probably don't belong here)", function
 			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'same' });
 			expect(res).to.have.deep.property('[0][0].vehicleId', 5);
 			expect(res).to.have.deep.property('[0][4].vehicleId', 1);
-		});
-		
-		it("should correctly assign same with less vehicles than drivers", function(){
-			var res = gridding.create('finishingPosition', participants.slice(0), { maxDrivers: 5, inverted: false, vehicleAssignmentType: 'fair', vehiclesAvailable: [ 8, 9 ] });
-			expect(res).to.have.deep.property('[0][0].vehicleId', 9);
-			expect(res).to.have.deep.property('[0][1].vehicleId', 8);
-			expect(res[0][4].vehicleId).to.equal(undefined);
 		});
 		
 		it("should correctly assign same", function(){

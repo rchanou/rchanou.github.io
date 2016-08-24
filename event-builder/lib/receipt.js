@@ -21,10 +21,8 @@ var customTemplateFolder = 'c:/clubspeedapps/assets/receipts/';
  */
 function loadCustomTemplateOrDefault(customTemplatePath, defaultTemplatePath) {
     var obj;
-    if(fs.existsSync(customTemplatePath)) {
-        console.log('found custom!');
+    if(fs.existsSync(customTemplatePath))
         obj = require(customTemplatePath);
-    }
     else
         obj = require(defaultTemplatePath);
     if (!obj)

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /*
 
  SITE-SPECIFIC SETTINGS (ENTERED INTO CLUB SPEED)

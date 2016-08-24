@@ -99,20 +99,7 @@ describe("Race Ticket Template", function() {
         compare(input, expected);
     });
 
-    it("should print the heat number by default", function() {
-        var input = {
-            "data": {
-                "heat": {
-                      "heatNumber"     : "10601"
-                    , "sequenceNumber" : "09"
-                }
-            }
-        };
-        var expected = "\n\n      Time:                               \n  Heat No.: 01                            \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
-        compare(input, expected);
-    });
-
-    it("should print the heat number by showHeatNumber", function() {
+    it("should print the heat number", function() {
         var input = {
             "data": {
                 "heat": {
@@ -128,40 +115,7 @@ describe("Race Ticket Template", function() {
         compare(input, expected);
     });
 
-    it("should print the heat number by showHeatNo", function() {
-        var input = {
-            "data": {
-                "heat": {
-                      "heatNumber"     : "10601"
-                    , "sequenceNumber" : "09"
-                }
-            },
-            "options": {
-                "showHeatNo": true
-            }
-        };
-        var expected = "\n\n      Time:                               \n  Heat No.: 01                            \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
-        compare(input, expected);
-    });
-
-
-    it("should print the sequence number by showHeatNumber", function() {
-        var input = {
-            "data": {
-                "heat": {
-                      "heatNumber"     : "10601"
-                    , "sequenceNumber" : "09"
-                }
-            },
-            "options": {
-                "showHeatNumber": false
-            }
-        };
-        var expected = "\n\n      Time:                               \n  Heat No.: 09                            \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
-        compare(input, expected);
-    });
-
-    it("should print the sequence number by showHeatNo", function() {
+    it("should print the sequence number", function() {
         var input = {
             "data": {
                 "heat": {
@@ -171,23 +125,6 @@ describe("Race Ticket Template", function() {
             },
             "options": {
                 "showHeatNo": false
-            }
-        };
-        var expected = "\n\n      Time:                               \n  Heat No.: 09                            \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";
-        compare(input, expected);
-    });
-
-    it("should print the sequence number by preferred showHeatNumber", function() {
-        var input = {
-            "data": {
-                "heat": {
-                      "heatNumber"     : "10601"
-                    , "sequenceNumber" : "09"
-                }
-            },
-            "options": {
-                "showHeatNumber": false,
-                "showHeatNo": true
             }
         };
         var expected = "\n\n      Time:                               \n  Heat No.: 09                            \n  Duration: N/A Minutes                   \n\nExperience: New                           \n\n\n\n\n\n\n{{CutPaper}}";

@@ -2,7 +2,6 @@
 /* eslint no-trailing-spaces:0 */
 var gulp        = require('gulp');
 var mocha       = require('gulp-mocha');
-var taskListing = require('gulp-task-listing');
 var fs          = require('fs');
 var cached      = require('gulp-cached');
 var eslint      = require('gulp-eslint');
@@ -15,12 +14,10 @@ var srcDir  = './lib/';
 var srcGlob = [srcDir + '*.js', './gulpfile.js'];
 
 var mochaOptions = {
-      reporter  : 'spec'
+    reporter  : 'spec'
 };
 
 var log = console.log.bind(console); // eslint-disable-line no-unused-vars
-
-gulp.task('help', taskListing);
 
 gulp.task('lint', function() {
     return gulp.src(srcGlob)
@@ -47,9 +44,9 @@ gulp.task('test', function() {
         gulp.task(taskName, function() {
             return gulp.src(rootDir + fileName)
                 .pipe(cached('test'))
-				.pipe(eslint())
-				.pipe(eslint.format())
-				.pipe(mocha(mochaOptions));
+                .pipe(eslint())
+                .pipe(eslint.format())
+                .pipe(mocha(mochaOptions));
         });
     });
 }());
@@ -66,7 +63,7 @@ gulp.task('watch', function() {
         */
         if (cached.caches && cached.caches.src)
             delete cached.caches.src[event.path];
-		return seq('lint');
+        return seq('lint');
     });
 
     gulp.watch(testGlob).on('change', function(event) {
@@ -80,15 +77,15 @@ gulp.task('watch', function() {
         */
         if (cached.caches && cached.caches.test)
             delete cached.caches.test[event.path];
-		return seq('test');
+        return seq('test');
     });
 });
 
 gulp.task('default', function(callback) {
-	seq(
-		'lint',
+    seq(
+        'lint',
         'test',
-		'watch',
-		callback
-	);
+        'watch',
+        callback
+    );
 });

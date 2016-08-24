@@ -377,12 +377,41 @@ exports.create = function(method, participantsToGrid, opts) {
 			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
 			break;*/
 
-		/* TODO
-		case 'fair': // Legacy call
-			if(method == 'fair') {
-				method = 'finishingPosition';
-				opts.gridType = 'fair';
-			}*/
+		case 'fairTeams': // Sort into teams
+			method = 'mostPoints';
+			opts.gridType = 'custom';
+
+			var sortedDrivers = this[method](participantsToGrid, opts);
+			sortedDrivers = this.filterParticipantsInRound(opts.filterName, opts.filterValue, sortedDrivers);
+			opts.customGrid = this.fair(sortedDrivers.length, opts.maxDrivers);
+			var heatLineup = this.createGrid(opts.gridType, sortedDrivers.length, opts.maxDrivers, opts);
+			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
+
+			// Massage array into better format
+			var decoratedResults = [];
+			results.forEach(function(group, groupNum) {
+				decoratedResults[groupNum] = { teamIndex: groupNum, teamResults: {}, drivers: group || [] };
+
+				var fastestDriver = null;
+				var res = { vehicleId: null, points: null, bestAverageLapTime: null, bestLapTime: null, startingPosition: null, finishingPosition: null };
+				group.forEach(function(driver, i) {
+					driverOriginalData = driver.originalData;
+					if(!fastestDriver || fastestDriver.bestLapTime > driverOriginalData.bestLapTime) {
+						fastestDriver = driverOriginalData;
+						res.vehicleId = driverOriginalData.vehicleId;
+						res.bestLapTime = driverOriginalData.bestLapTime;
+					}
+					driver.startingPosition = i+1;
+					res.bestAverageLapTime += driverOriginalData.bestAverageLapTime;
+					res.points += driverOriginalData.points;
+					res.startingPosition += driverOriginalData.startingPosition;
+					res.finishingPosition += driverOriginalData.finishingPosition;
+				});
+				res.bestAverageLapTime = res.bestAverageLapTime / decoratedResults[groupNum].drivers.length;
+				decoratedResults[groupNum].teamResults = res;
+			});
+			return decoratedResults;
+			break;
 
 		default:
 			throw new Error('Invalid gridding sort method given: ' + method);
@@ -395,38 +424,68 @@ exports.create = function(method, participantsToGrid, opts) {
 
 	// Good spot to handle kart assignment? No assignment, random, same, fair
 	// This may present a problem in the 'meta' gridding types like Magix that give multiple heats per person
-	if(opts.vehicleAssignmentType !== 'none') {
+	if(opts.vehicleAssignmentType && opts.vehicleAssignmentType !== 'none') {
 		
 		// Create list of vehicles available from participants if one was not provided
-		if(opts.vehiclesAvailable.length == 0) {
+		if(opts.vehiclesAvailable.length === 0 || (opts.vehicleAssignmentType === 'fair' || opts.vehicleAssignmentType === 'same')) {
+			opts.vehiclesAvailable = []; // Reset the array
 			sortedDrivers.forEach(function(participant) {
-				if(typeof participant.originalData.vehicleId !== 'undefined') opts.vehiclesAvailable.push(participant.originalData.vehicleId);
+				if(participant.originalData.vehicleId) opts.vehiclesAvailable.push(participant.originalData.vehicleId);
 			});
 		}
 		
 		switch(opts.vehicleAssignmentType) {
 			case 'random':
-				opts.vehiclesAvailable = shuffle(opts.vehiclesAvailable);
+				// Improvement -- could potentially improve this by using all available karts up instead of resetting
+				//                the array each time. This would allow karts to leave the pits as the previous
+				//                round is coming in.
 				results.forEach(function(group, groupNum) {
+					var vehiclesAvailableCopy = JSON.parse(JSON.stringify(shuffle(opts.vehiclesAvailable)));
 					group.forEach(function(participant, participantNum) {
-						var vehicle = opts.vehiclesAvailable.splice(0, 1)[0];
-						results[groupNum][participantNum].vehicleId = vehicle; // if(typeof vehicle !== 'undefined')
+						var vehicle = vehiclesAvailableCopy.splice(0, 1)[0];
+						results[groupNum][participantNum].vehicleId = vehicle || null;
 					});
 				});
 				break;
 			case 'same':
 				results.forEach(function(group, groupNum) {
 					group.forEach(function(participant, participantNum) {
-						results[groupNum][participantNum]['vehicleId'] = participant.originalData.vehicleId;
+						results[groupNum][participantNum]['vehicleId'] = participant.originalData.vehicleId || null;
 					});
 				});
 				break;
 			case 'fair':
-				opts.vehiclesAvailable.reverse();
+				var vehiclesAvailableCopy = JSON.parse(JSON.stringify(opts.vehiclesAvailable.reverse()));
 				results.forEach(function(group, groupNum) {
 					group.forEach(function(participant, participantNum) {
-						var vehicle = opts.vehiclesAvailable.splice(0, 1)[0];
-						results[groupNum][participantNum].vehicleId = vehicle; // if(typeof vehicle !== 'undefined') 
+						var vehicle = vehiclesAvailableCopy.splice(0, 1)[0];
+						results[groupNum][participantNum].vehicleId = vehicle || null;
+					});
+				});
+				break;
+			case 'nextAvailable':
+				results.forEach(function(group, groupNum) {
+					var vehiclesAvailableCopy = JSON.parse(JSON.stringify(opts.vehiclesAvailable));
+					group.forEach(function(participant, participantNum) {
+						var vehicle = vehiclesAvailableCopy.splice(0, 1)[0];
+						results[groupNum][participantNum].vehicleId = vehicle || null;
+					});
+				});
+				break;
+			case 'nextAvailableWithoutReset':
+				/*
+				// IN PROGRESS
+				- Start with copy of list
+				- Loop the groups
+				- Find next kart that's not assigned
+				*/
+				results.forEach(function(group, groupNum) {
+					var vehiclesAvailableCopy = JSON.parse(JSON.stringify(opts.vehiclesAvailable));
+					var vehiclesAssignedToGroup = [];
+					group.forEach(function(participant, participantNum) {
+						
+						var vehicle = vehiclesAvailableCopy.splice(0, 1)[0];
+						results[groupNum][participantNum].vehicleId = vehicle || null;
 					});
 				});
 				break;
@@ -728,42 +787,50 @@ exports.balanced = function(numDriversTotal, numDriversPerHeat) {
 
 /**
  * Fair lineup -- Create even groups where the best are paired with the worst. P1 & P4 == P2 & P3
+ * IMPORTANT -- We're making teams, not gridding a race. This is a departure from how this class works.
  */
-
-// TODO -- Is this clear? We're making teams, not gridding a race. This is a departure from how this class works.
 
 exports.fair = function(numDriversTotal, numDriversPerHeat) {
 	var fairGroups = [];
 	var numGroups = Math.ceil(numDriversTotal / numDriversPerHeat);
 	var groups = this.createBalancedGrid(numDriversTotal, numDriversPerHeat);
-	
-	// Calculate the middle of the array (we use this to pull from top, bottom or middle to fairly balance)
-	var middle = groups.length % 2 === 1 ? Math.floor(groups.length / 2) : (groups.length / 2) - 0.5;
 
-	for(var groupNum = 0; groupNum < numGroups; groupNum++) {
-		
-		fairGroups[groupNum] = [];
-		var groupSize = numDriversPerHeat;		
-		var participant;
-
-		for(var j = 0; j < groupSize; j++) {
-			if(j === middle) {
-				if(typeof groups[groupNum] !== 'undefined') {
-					// Pull from middle of array
-					var middleElement = Math.floor(groups[groupNum].length / 2);
-					participant = groups[j].splice(middleElement, 1)[0];
-				}
-			} else if(j < middle) {
-				// Pull from first of array
-				participant = groups[j].splice(0, 1)[0];
-			} else if(j > middle) {
-				// Pull from last of array
-				participant = groups[j].splice(-1, 1)[0];				
-			}
-			if(typeof participant !== 'undefined') fairGroups[groupNum].push(participant);
-		}
+	var drivers = [];
+	for(var i = 1; i <= numDriversTotal; i++) {
+		drivers.push(i);
 	}
 	
+	groups.forEach(function(group, groupNum) {
+	    fairGroups[groupNum] = [];
+	    
+        /*
+        // Original, less balanced algorithm
+        for(var i = (numDriversPerHeat-1); i >= 0; i--) {
+	        if(drivers.length <= 0) return;
+
+	        var pct = (i / (numDriversPerHeat-1));
+	        var pos = Math.floor(pct * (drivers.length-1));
+	        fairGroups[groupNum].push(drivers.splice(pos, 1));
+	    }*/
+
+        // More balanced algorithm
+        var positions = [];
+        for(var i = (numDriversPerHeat-1); i >= 0; i--) {
+            if(drivers.length === 0) return;
+
+            var pct = (i / (numDriversPerHeat-1));
+            positions.push(Math.floor(pct * (drivers.length-1)));
+        }
+        positions.forEach(function(pos) {
+            fairGroups[groupNum].push(drivers.splice(pos, 1));
+        });
+	});
+
+	// Give the sort order we expect (reversing the decrementing for loop above)
+	fairGroups.forEach(function(group, i) {
+		var group = fairGroups[i].reverse();
+	});
+
 	return fairGroups;
 }
 
@@ -776,8 +843,8 @@ exports.startingPosition = function startingPosition(array, opts) {
 	var inverted = opts.inverted || false;
 
 	array.sort(function(obj1, obj2) {
-		obj1.startingPosition = obj1.startingPosition || 9999999;
-		obj2.startingPosition = obj2.startingPosition || 9999999;
+		obj1.startingPosition = isNumeric(obj1.startingPosition) ? obj1.startingPosition : 9999999;
+		obj2.startingPosition = isNumeric(obj2.startingPosition) ? obj2.startingPosition : 9999999;
 		result = obj1.startingPosition - obj2.startingPosition;
 		if(result == 0) { // Break tie on best laptime
 			result = obj1.bestLapTime - obj2.bestLapTime;
@@ -804,8 +871,8 @@ exports.finishingPosition = function finishingPosition(array, opts) {
 	var inverted = opts.inverted || false;
 
 	array.sort(function(obj1, obj2) {
-		obj1.finishingPosition = obj1.finishingPosition || 9999999;
-		obj2.finishingPosition = obj2.finishingPosition || 9999999;
+		obj1.finishingPosition = isNumeric(obj1.finishingPosition) ? obj1.finishingPosition : 9999999;
+		obj2.finishingPosition = isNumeric(obj2.finishingPosition) ? obj2.finishingPosition : 9999999;
 		result = obj1.finishingPosition - obj2.finishingPosition;
 		if(result == 0) { // Break tie on best laptime
 			result = obj1.bestLapTime - obj2.bestLapTime;
@@ -833,8 +900,8 @@ exports.bestLapTime = function bestLapTime(array, opts) {
 	
 	// Sort
 	array.sort(function(obj1, obj2) {
-		obj1.bestLapTime = obj1.bestLapTime || 9999999;
-		obj2.bestLapTime = obj2.bestLapTime || 9999999;
+		obj1.bestLapTime = isNumeric(obj1.bestLapTime) ? obj1.bestLapTime : 9999999;
+		obj2.bestLapTime = isNumeric(obj2.bestLapTime) ? obj2.bestLapTime : 9999999;
 		return inverted ? obj2.bestLapTime - obj1.bestLapTime : obj1.bestLapTime - obj2.bestLapTime;
 	});
 	
@@ -855,8 +922,8 @@ exports.bestAverageLapTime = function bestAverageLapTime(array, opts) {
 	
 	// Sort
 	array.sort(function(obj1, obj2) {
-		obj1.bestAverageLapTime = obj1.bestAverageLapTime || 9999999;
-		obj2.bestAverageLapTime = obj2.bestAverageLapTime || 9999999;
+		obj1.bestAverageLapTime = isNumeric(obj1.bestAverageLapTime) ? obj1.bestAverageLapTime : 9999999;
+		obj2.bestAverageLapTime = isNumeric(obj2.bestAverageLapTime) ? obj2.bestAverageLapTime : 9999999;
 		return inverted ? obj2.bestAverageLapTime - obj1.bestAverageLapTime : obj1.bestAverageLapTime - obj2.bestAverageLapTime;
 	});
 	
@@ -877,8 +944,8 @@ exports.mostPoints = exports.mostPoints = function(array, opts) {
 	
 	// Sort
 	array.sort(function(obj1, obj2) {
-		if(obj1.points !== 0) obj1.points = obj1.points || -9999999;
-		if(obj2.points !== 0) obj2.points = obj2.points || -9999999;
+		if(obj1.points !== 0) obj1.points = isNumeric(obj1.points) ? obj1.points : -9999999;
+		if(obj2.points !== 0) obj2.points = isNumeric(obj2.points) ? obj2.points : -9999999;
 		var result = inverted ? obj1.points - obj2.points : obj2.points - obj1.points;
 		if(result == 0) { // Break tie on best laptime
 			result = obj1.bestLapTime - obj2.bestLapTime; // inverted? obj2.bestLapTime - obj1.bestLapTime : 
@@ -1081,6 +1148,10 @@ exports.assignPoints = function(participants, scoringTemplate) {
 	});
 	
 	return participants;
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 function shuffle(array) {
