@@ -465,5 +465,26 @@
     ReactDOM.render(
       <TrackMap />, document.body.firstElementChild
     );
+
+    /*$(window).on(
+      'popstate',
+      e => console.log('popit', e) & history.pushState({ lol: 'nope' }, 'Trololo')
+    );
+
+    $(window).on('replacestate', e => console.log('replace', e));
+    //$(window).on('pushstate', e => console.log('replace', e));
+    (function(history){
+        var pushState = history.pushState;
+        history.pushState = function(state) {
+            if (typeof history.onpushstate == "function") {
+                history.onpushstate({state: state});
+            }
+            // ... whatever else you want to do
+            // maybe call onhashchange e.handler
+            console.log('push');
+            return pushState.apply(history, arguments);
+        }
+    })(window.history);*/
+    //history.pushState({ lol: 'nope' }, 'Trololo', 'client.html#wassup');
   </script>
 </body>
