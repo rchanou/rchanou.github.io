@@ -1,5 +1,6 @@
 var AuthorizeNet = require('../lib/authorize-net');
 var Ingenico = require('../lib/ingenico');
+var Dejavoo = require('../lib/dejavoo');
 
 // clubspeed2008 / Karm@2006
 // API Login ID: 6nG2tqS43e
@@ -29,7 +30,8 @@ track 2
 		}
 	},
 	"order": {
-		"amount": "5.00"
+		"amount": "5.00",
+		"checkId": "123"
 	},
 	"creditCard": {
 		//"track1": "B4000000000000002^CardUser/John^181210100000019301000000877000000",
@@ -100,6 +102,9 @@ var getProvider = function getProvider(opts) {
 		case 'ingenico':
 			return new Ingenico(opts);
 			break;
+		case 'dejavoo-spin':
+			return new Dejavoo(opts);
+			break;
 		default:
 			return new Error('Unsupported provider: ' + opts.provider.type);
 	}
@@ -154,7 +159,7 @@ exports.refund = function(opts, callback) {
 			callback(err);
 		});
 	} else {
-		provider.refundTransaction(opts.order)
+		provider.refundTransaction(opts.order, opts.creditCard, opts.prospect, opts.other)
 		.then(function(response) {
 			callback(null, response);
 		}).catch(function(err) {
@@ -167,8 +172,29 @@ exports.void = function(opts, callback) {
 	if(opts.provider.type == 'authorize.net' && !opts.transactionId) return callback(new Error('No transactionId given!'));
 
 	var provider = getProvider(opts); // TODO Handle error status
+
+	if(opts.provider.type == 'dejavoo-spin') {
+		provider.voidTransaction(opts.order, opts.creditCard, opts.prospect, opts.other).then(function(response) {
+			return callback(null, response);
+		}).catch(function(err) {
+			return callback(err);
+		});
+	} else {
+		provider.voidTransaction(opts.transactionId).then(function(response) {
+			return callback(null, response);
+		}).catch(function(err) {
+			return callback(err);
+		});
+	}
 	
-	provider.voidTransaction(opts.transactionId).then(function(response) {
+};
+
+exports.tokenize = function(opts, callback) {
+	if(opts.provider.type == 'authorize.net' && !opts.transactionId) return callback(new Error('No transactionId given!'));
+
+	var provider = getProvider(opts); // TODO Handle error status
+	
+	provider.tokenize(opts.transactionId).then(function(response) {
 		callback(null, response);
 	}).catch(function(err) {
 		callback(err);

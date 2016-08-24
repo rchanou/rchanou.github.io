@@ -26,7 +26,7 @@ function AuthorizeNetGateway (options) {
   assert(options.API_LOGIN_ID, 'API_LOGIN_ID must be provided');
   assert(options.TRANSACTION_KEY, 'TRANSACTION_KEY must be provided');
 
-  this.endpoint = options.testMode === true ? 'https://apitest.authorize.net/xml/v1/request.api' : 'https://api.authorize.net/xml/v1/request.api';
+  this.endpoint = options.testMode === true ? 'https://apitest.authorize.net/xml/v1/request.api' : 'https://api2.authorize.net/xml/v1/request.api';
 
   BaseGateway.call(this, options);
 }

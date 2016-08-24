@@ -1,12 +1,8 @@
-var restify  = require('restify')
-  , receipt  = require('./lib/receipt.js')
-  , gridding = require('./lib/gridding.js')
+var restify    = require('./lib/node_modules/restify')
+  , receipt    = require('./lib/receipt.js')
+  , gridding   = require('./lib/gridding.js')
   , creditCard = require('./lib/creditCard.js')
   , fiscal     = require('./lib/fiscal.js');
-
-/*var socketio = require('./lib/socket.io')
-  , timeoutCallback = require('./lib/timeout-callback')
-  , clients = [];*/
 
 var debug = true;
 
@@ -71,7 +67,14 @@ function respondCreditCard(req, res, next) {
 				err ? res.send(err) : res.send({ result: result });
 			});
 			break;
-			
+		
+        case 'tokenize': // For creating a tokenized card without charging
+            creditCard.tokenize(req.body, function(err, result) {
+                //console.log('\n\nVOID Transaction Result', req.body, err, result);
+                err ? res.send(err) : res.send({ result: result });
+            });
+            break; 
+
 		default:
 			next(new Error('Action not supported: ' + req.params.action));
 			break;
@@ -137,7 +140,6 @@ function respondReceipt(req, res, next) {
 var server = restify.createServer({
     name : "Club Speed Services"
 });
-//var io = socketio.listen(server.server);
 
 server.use(restify.queryParser());
 server.use(restify.jsonp());
@@ -153,34 +155,87 @@ server.post('/signature/:action', respondSignature);
 server.post('/fiscal/print',      respondFiscalPrint);
 server.post('/fiscal/openDrawer', respondFiscalOpenDrawer);
 
-/*
-io.sockets.on('connection', function (socket) {
-	console.info('New client connected (id=' + socket.id + ').');
-  clients.push(socket);
-	
-	socket.on('authorize', function (data) {
-		console.log(data);
-		if(data.terminal) socket.terminal = data.terminal.toLowerCase();
-	});
-	
-	socket.on('signature:complete', function (data) {
-		console.log(data);
-	});
-	
-	socket.on('disconnect', function() {
-		var index = clients.indexOf(socket);
-		if (index != -1) {
-			clients.splice(index, 1);
-			console.info('Client disconnected (id=' + socket.id + ').');
-		}
-	});
+/**
+ * SOCKET.IO
+ */
+var http       = require('http');
+var io         = require('./lib/node_modules/socket.io')();
+var middleware = require('./lib/node_modules/socketio-wildcard')();
+require('./lib/node_modules/socketio-auth')(io, {
+  authenticate: authenticate, 
+  postAuthenticate: postAuthenticate,
+  timeout: 30000
 });
-*/
 
+io.use(middleware);
+
+io.on('connection', function(socket) {
+  var socketId = socket.id;
+  var clientIp = socket.request.connection.remoteAddress;
+  console.log('\n\nConnection from Socket.io client', socketId, clientIp);
+  socket.on('*', function(data){ 
+    console.log('Socket.IO Event Received', data);
+    io.emit('*', data);
+  });
+  socket.on('publish', function(data){ 
+    console.log('"publish" Event Received', data);
+    if(data.EventName) io.emit(data.EventName, data);
+  });
+  socket.on('disconnect', function() {
+    console.log('Disconnection from Socket.io client', socketId, clientIp);
+  });
+});
+
+/*setInterval(function() {
+    io.emit('PrintCustomerMembershipCard', {"CustID":1035431,"EventName":"PrintCustomerMembershipCard","Source":"POS1"});
+}, 5000);*/
+
+io.listen(server.server);
+
+// Serve up socket.io listener
 //server.get(/.*/, restify.serveStatic({
 //  directory: './public',
 //  default: 'index.html'
 //}));
+
+function authenticate(socket, data, callback) {
+    authenticateUsernamePassword(data, callback);
+};
+
+function postAuthenticate(socket, data) {
+    //console.log('postAuthenticate', data);
+};
+
+function authenticateUsernamePassword(opts, cb) {
+
+    var options = {
+      host: '127.0.0.1',
+      path: '/api/index.php/users/login.json?is_admin=1&username='+ opts.username +'&password=' + opts.password,
+      auth: opts.username + ':' + opts.password,
+      method: 'GET'
+    };
+
+    var req = http.request(options, function(res) {
+        if(res.statusCode === 200) {
+            console.log('Successful authentication')
+            return cb(null, true);
+        } else {
+            console.log('Failed authentication', res.statusCode, opts)
+            return cb(null, false);
+        }
+    });
+
+    req.on('error', function(e) {
+      console.log('Problem with authentiction API request:', e.message);
+      cb(e);
+    });
+
+    // write data to request body
+    req.end();
+}
+/**
+ * END SOCKET.IO
+ */
 
 server.listen(8000, function() {
   console.log('%s listening at %s', server.name, server.url);

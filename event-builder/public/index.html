@@ -1,0 +1,17 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+  socket.on('authenticated', function() {
+    socket.emit('authenticatedEvent', { my: 'data' });
+  });
+  socket.on('unauthorized', function(err){
+    console.log("There was an error with the authentication:", err.message); 
+  });
+  socket.on('connect', function() {
+    console.log('Connected')
+    socket.emit('authentication', { username: 'user', password: 'pass' });
+  });
+  socket.on('disconnect', function() {
+    console.log('Disconnected')
+  });
+</script>

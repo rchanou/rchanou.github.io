@@ -1289,6 +1289,22 @@ describe("Transaction Receipt Template", function() {
         compare(input, expected);
     });
 
+    it("should print emv footers", function() {
+        var input = {
+            "data": {
+                "listCreditCardPaymentResponse": [{
+                    "response": {
+                        "result": {
+                            "emvReceiptRequirement": "APP:AMERICAN EXPRESS\tAID:A000000025010801\tTVR:0000008000\tIAD:06720103603402\tTSI:E800\tARC:00\tMODE:ISSUER"
+                        }
+                    }
+                }]
+            }
+        };
+        var expected = "\n\n\nReceipt Number N/A                        \n------------------------------------------\n------------------------------------------\nSubtotal                                  \nTax                                       \n------------------------------------------\nTotal                                     \n------------------------------------------\nBalance                                   \n------------------------------------------\n------------------------------------------\n       Powered By www.ClubSpeed.com\n\n APP: AMERICAN EXPRESS\n AID: A000000025010801\n TVR: 0000008000\n IAD: 06720103603402\n TSI: E800\n ARC: 00\nMODE: ISSUER\n\n\n\n\n\n\n\n{{CutPaper}}";
+        compare(input, expected);
+    });
+
     it("should handle standard input", function() {
         var input = {
             "data": {
