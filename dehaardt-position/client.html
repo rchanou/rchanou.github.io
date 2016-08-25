@@ -46,6 +46,33 @@
   </script>
   <script type='text/javascript' src='dev-setup.js'></script>
   <script type='text/babel'>
+    /***** Object.entries shim *****/
+    const reduce = Function.bind.call(Function.call, Array.prototype.reduce);
+    const isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable);
+    const concat = Function.bind.call(Function.call, Array.prototype.concat);
+    const keys = Reflect.ownKeys;
+
+    if (!Object.values) {
+    	Object.values = function values(O) {
+    		return reduce(keys(O), (v, k) => concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []), []);
+    	};
+    }
+
+    if (!Object.entries) {
+    	Object.entries = function entries(O) {
+    		return reduce(keys(O), (e, k) => concat(e, typeof k === 'string' && isEnumerable(O, k) ? [[k, O[k]]] : []), []);
+    	};
+    }
+
+
+    /***** UTILITY FUNCTIONS *****/
+
+    const absoluteStyle = {
+      position: 'absolute',
+      top: 0,
+      left: 0
+    };
+    
     function getColorFromId(id){
       var hue = 0;
       for (var i in id){
@@ -54,16 +81,11 @@
       return 'hsl(' + (hue % 360) + ',50%,73%)';
     }
 
-    const absoluteStyle = {
-      position: 'absolute',
-      top: 0,
-      left: 0
-    };
-
     const getViewCoord = (coord, opts) =>
       (coord * opts.mult - opts.minBound)
       / (opts.maxBound - opts.minBound);
       //* atom.winHeight;
+
 
     class TrackMap extends React.Component {
       state = {
