@@ -317,7 +317,7 @@ EOS;
         }
         return array('races' => $schedule);
     }
-        
+
     public function next($track = null, $offset = 0) {
         if (!\ClubSpeed\Security\Authenticate::publicAccess()) {
             throw new RestException(401, "Invalid authorization!");
@@ -1127,7 +1127,6 @@ EOS;
         $tsql = "EXEC GetScoreboard " . $trackId . "," . $heatNum;
         $scoreboard = $this->run_query($tsql, array());
         return array('race' => $race, 'scoreboard' => $scoreboard);
-
     }
 
     public function raceSummary($heatId) {
@@ -1135,27 +1134,45 @@ EOS;
             throw new RestException(401, "Invalid authorization!");
         }
 
-        $tsql = "SELECT hm.*, ht.HeatTypeName, sl.Description AS sl_Description, t.Description AS t_Description FROM HeatMain hm LEFT JOIN HeatTypes ht ON ht.HeatTypeNo = hm.HeatTypeNo LEFT JOIN Tracks t ON t.TrackNo = hm.TrackNo LEFT JOIN SpeedLevel sl ON hm.SpeedLevel = sl.SpeedLevel WHERE HeatNo = ?";
+        $tsql = <<<EOS
+SELECT
+    hm.*,
+    ht.HeatTypeName,
+    sl.Description AS sl_Description,
+    t.Description AS t_Description,
+    t.AutoRun
+FROM HeatMain hm
+LEFT JOIN HeatTypes ht
+    ON ht.HeatTypeNo = hm.HeatTypeNo
+LEFT JOIN Tracks t
+    ON t.TrackNo = hm.TrackNo
+LEFT JOIN SpeedLevel sl
+    ON hm.SpeedLevel = sl.SpeedLevel
+WHERE
+    HeatNo = ?
+EOS;
         $heat = $this->run_query($tsql, array(&$heatId));
-
         $win_by  = array(0 => 'laptime', 1 => 'position');
         $race_by = array(0 => 'minutes', 1 => 'laps');
 
         foreach($heat as $row) {
-
             if($row['HeatStatus'] == 1) {
-                if($row['RaceBy'] == 0) {
-                    $tsql = "select top 1 datediff(ms, timestamp, current_timestamp) as time from racingdata where heatno = ? order by timestamp";
-                    $raceTimeInSeconds = $this->run_query($tsql, array(&$heatId));
-                    $raceTimeInSeconds = isset($raceTimeInSeconds[0]) && array_key_exists('time',$raceTimeInSeconds[0]) ? $raceTimeInSeconds[0]['time'] / 1000 : null;
-                    //TODO: Evaluate this functionality. At the moment the details are being handled by the user of the API.
-                } else {
-                    $tsql = "select top 1 datediff(ms, timestamp, current_timestamp) as time from racingdata where heatno = ? order by timestamp";
-                    $raceTimeInSeconds = $this->run_query($tsql, array(&$heatId));
-                    $raceTimeInSeconds = isset($raceTimeInSeconds[0]) && array_key_exists('time',$raceTimeInSeconds[0]) ? $raceTimeInSeconds[0]['time'] / 1000 : null;
+                $tsql = '';
+                if ($row['AutoRun'] == 1) {
+                    // consider the beginning of the race to be HeatMain.Begining
+                    $tsql = "SELECT TOP 1 DATEDIFF(ms, Begining, CURRENT_TIMESTAMP) AS time FROM dbo.HeatMain WHERE HeatNo = ?";
                 }
-
-            } else {
+                else {
+                    // consider the beginning of the race to be the first recorded passing / assignment
+                    $tsql = "select top 1 datediff(ms, timestamp, current_timestamp) as time from racingdata where heatno = ? order by timestamp";
+                    //TODO: Evaluate this functionality. At the moment the details are being handled by the user of the API.
+                }
+                $raceTimeInSeconds = $this->run_query($tsql, array(&$heatId));
+                $raceTimeInSeconds = isset($raceTimeInSeconds[0]) && array_key_exists('time', $raceTimeInSeconds[0])
+                    ? $raceTimeInSeconds[0]['time'] / 1000
+                    : null;
+            }
+            else {
                 $raceTimeInSeconds = null;
             }
 
