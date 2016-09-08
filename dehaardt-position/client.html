@@ -201,8 +201,6 @@
       //* atom.winHeight;
 
 
-
-
     class TrackMap extends React.Component {
 
       kalmanStates = {}
@@ -228,9 +226,10 @@
           tags: {},
           smooth: true,
           showAllDots: false,
-          lines: [{
-            x1: 0, y1: 0, x2: 0, y2: 0, id: 'mouse'
-          }]
+          lines: [
+            { x1: 0, y1: 0, x2: 0, y2: 0, id: 'mouse' },
+            { x1: 0, y1: 0, x2: 0, y2: 0, id: 'temp' }
+          ]
         })
       }
 
@@ -252,18 +251,39 @@
         >
           <canvas ref='canvas'
             width={atom.winHeight} height={atom.winHeight}
-            style={mapStyle}
+            style={{ ...mapStyle, background: 'hsl(0,0%,19%)' }}
           />
 
-          <svg style={mapStyle} width={atom.winHeight} height={atom.winHeight}>
+          <svg style={mapStyle} width={atom.winHeight} height={atom.winHeight} ref='lines'>
+            <defs>
+              <marker id="line-end"
+                viewBox="0 0 10 10"
+                refX="1" refY="5"
+                markerWidth={2}
+                markerHeight={2}
+                orient="auto"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill='white' />
+        	    </marker>
+            </defs>
+
             {atom.lines.map(
-              (line, i) => <line key={i}
-                stroke={getColorFromId(line.id)} strokeWidth={3}
-                x1={getViewCoord(line.x1, atom.xOpts) * atom.winHeight}
-                y1={getViewCoord(line.y1, atom.yOpts) * atom.winHeight}
-                x2={getViewCoord(line.x2, atom.xOpts) * atom.winHeight}
-                y2={getViewCoord(line.y2, atom.yOpts) * atom.winHeight}
-              />
+              (line, i) => {
+                if (!line.x1) return null;
+
+                const coords = {
+                  x1: getViewCoord(line.x1, atom.xOpts) * atom.winHeight,
+                  y1: getViewCoord(line.y1, atom.yOpts) * atom.winHeight,
+                  x2: getViewCoord(line.x2, atom.xOpts) * atom.winHeight,
+                  y2: getViewCoord(line.y2, atom.yOpts) * atom.winHeight
+                };
+
+                return <line key={i}
+                  stroke={getColorFromId(line.id) || `url(#${line.id}-stroke)` || `linear-gradient(white,${getColorFromId(line.id)})`}
+                  strokeWidth={3} markerEnd={`url(#line-end)`}
+                  {...coords}
+                />;
+              }
             )}
           </svg>
 
@@ -291,14 +311,10 @@
             style={{
               position: 'fixed',
               top: 0, left: 0,
-              width: '100%', height: '100%',
+              //width: '100%', height: '100%',
               display: 'flex', flexDirection: 'column'
             }}
           >
-            {!!atom.lines[0].x1 && <div>
-              {atom.lines[0].x1.toFixed(3)},{atom.lines[0].y1.toFixed(3)} to
-              {atom.lines[0].x2.toFixed(3)},{atom.lines[0].y2.toFixed(3)}
-            </div>}
             <div>
               <label>Smooth</label>
               <input type='checkbox' checked={atom.smooth}
@@ -379,6 +395,10 @@
                 }
               />
             </div>
+            {!!atom.lines[1].x1 && <div style={{ color: getColorFromId('temp') }}>
+              {atom.lines[1].x1.toFixed(3)},{atom.lines[1].y1.toFixed(3)} to {
+                atom.lines[1].x2.toFixed(3)},{atom.lines[1].y2.toFixed(3)}
+            </div>}
           </form>
         </div>;
       }
@@ -545,10 +565,12 @@
         })
         .resize();
 
-        $win.click( e => {
+        const $canvas = $(canvasEl);
+        $(ReactDOM.findDOMNode(this.refs.lines))
+        .click( e =>{ //console.log('win clik', e.pageX, e.pageY);
           const { atom } = this.state;
 
-          const offset = $(canvasEl).offset();
+          const offset = $canvas.offset();
           const viewX = e.pageX - offset.left;
           const viewY = e.pageY - offset.top;
 
@@ -565,19 +587,24 @@
 
           if ( atom.lines[0].x1 || atom.lines[0].y1 ){
             this.setState({
-              atom: atom.setIn(['lines', 0, 'x1'], 0).setIn(['lines', 0, 'y1'], 0)
-              .setIn(['lines', 0, 'x2'], 0).setIn(['lines', 0, 'y2'], 0),
+              atom: atom.setIn(['lines', 1, 'x1'], atom.lines[0].x1)
+                        .setIn(['lines', 1, 'y1'], atom.lines[0].y1)
+                        .setIn(['lines', 1, 'x2'], finalX)
+                        .setIn(['lines', 1, 'y2'], finalY)
+                        .setIn(['lines', 0, 'x1'], 0)
+                        .setIn(['lines', 0, 'y1'], 0)
+                        .setIn(['lines', 0, 'x2'], 0)
+                        .setIn(['lines', 0, 'y2'], 0),
             });
-            return;
+          } else {
+            this.setState({
+              atom: atom.setIn(['lines', 0, 'x1'], finalX).setIn(['lines', 0, 'y1'], finalY)
+            });
           }
-
-          this.setState({
-            atom: atom.setIn(['lines', 0, 'x1'], finalX).setIn(['lines', 0, 'y1'], finalY)
-          });
         });
 
         let mouseFree = true;
-        $win.mousemove( e => {
+        $win.mousemove( e =>{
           if (!mouseFree){
             return;
           }
