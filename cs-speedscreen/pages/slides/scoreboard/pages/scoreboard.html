@@ -159,9 +159,9 @@
                 </div>
                 <div class="racerBoxClassicLower">
                         <div class="statusBoxClassic">
-                            <div ng-if="racer.positionStatus == 'neutral'"><img src="images/noarrow.png" class="positionStatusImage" ng-style="{'max-height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
-                            <div ng-if="racer.positionStatus == 'wentUp'"><img src="images/uparrow.png" class="positionStatusImage" ng-style="{'max-height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
-                            <div ng-if="racer.positionStatus == 'wentDown'"><img src="images/downarrow.png" class="positionStatusImage" ng-style="{'max-height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
+                            <div ng-if="racer.positionStatus == 'neutral'"><img src="images/noarrow.png" class="positionStatusImage" ng-style="{'height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
+                            <div ng-if="racer.positionStatus == 'wentUp'"><img src="images/uparrow.png" class="positionStatusImage" ng-style="{'height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
+                            <div ng-if="racer.positionStatus == 'wentDown'"><img src="images/downarrow.png" class="positionStatusImage" ng-style="{'height': racerBoxClassicHeight*0.35 + 'vh', 'line-height': racerBoxClassicHeight*0.35 + 'vh'}"></div>
                         </div><div class="avgLapBoxClassic">
                             <div class="racerBoxClassicBottom" ng-class="{'racerBoxClassicBottom_RacerTab': (adjustLineHeights)}" ng-style="{{textLabelsColorStyle}}">{{strings["str_avgLap_classic"]}}
                                 <span class="dynamicData ellipsis" ng-class="{'racerFinishedALap': (racer.racerLapNumberIncreased)}" ng-style="{{textDataColorStyle}}">{{racer.average_lap_time}}</span>

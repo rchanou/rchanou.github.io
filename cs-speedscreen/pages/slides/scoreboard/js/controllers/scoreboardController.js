@@ -75,8 +75,8 @@ scoreboardApp.controller('scoreboardController', function($scope, $interval, $ti
     $scope.theme = $routeParams.theme == null ? 'classic' : $routeParams.theme; //Possible themes: 'big','classic'
     var backgroundImage = typeof $location.search().backgroundUrl == "undefined" ? "http://" + window.location.hostname + "/cs-speedscreen/pages/slides/scoreboard/images/backgrounds/default.jpg" : $location.search().backgroundUrl;
     var pollingIntervalMs = typeof $location.search().pollingInterval == "undefined" ? 1000 : $location.search().pollingInterval; //Milliseconds
-    $scope.classicThemeHeaderEnabled = true; //Can be made a configuration setting at a later date, if desired
-    $scope.classicThemeTopTimesEnabled = true; //Can be made a configuration setting at a later date, if desired
+    $scope.classicThemeHeaderEnabled = typeof $location.search().classicThemeHeaderEnabled == "undefined" ? true : ($location.search().classicThemeHeaderEnabled === '1');
+    $scope.classicThemeTopTimesEnabled = typeof $location.search().classicThemeTopTimesEnabled == "undefined" ? true : ($location.search().classicThemeTopTimesEnabled === '1');
     $scope.bigThemeHeaderEnabled = typeof $location.search().headerEnabled == "undefined" ? true : ($location.search().headerEnabled === '1');
     $scope.showHeatNumber = typeof $location.search().showHeatNumber == "undefined" ? true : ($location.search().showHeatNumber === '1');
     $scope.showHeatTime = typeof $location.search().showHeatTime == "undefined" ? false : ($location.search().showHeatTime === '1');
