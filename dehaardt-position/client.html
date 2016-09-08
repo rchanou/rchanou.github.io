@@ -5,10 +5,11 @@
     integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
     crossorigin="anonymous"
   ></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.12.0/babel.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/seamless-immutable/6.1.1/seamless-immutable.development.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react-dom.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.15.0/babel.min.js" integrity="sha256-mxaL+9zRy1U6ZxZsba9703g+UH0v8Tjo/GUhpGpAjSc=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/seamless-immutable/6.1.1/seamless-immutable.production.min.js" integrity="sha256-BAYGTuVK0Ux0rNZhSEmV7zWIS55RSnK7nbb7+Rmx/CM=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js" integrity="sha256-qmV2hf4R72tkCUkYeq7eJ0T/Wc0JGhp/UVP4lU/1DQo=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js" integrity="sha256-qjEbBfLfU7zskTkdyCDWW8iO9RWxF5G/LK9HXf1y5wo=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/sylvester/0.1.3/sylvester.js" integrity="sha256-tTBpFSB/FzKS2/mVIhhkhJhDiOrMbVL58G+52fra8cw=" crossorigin="anonymous"></script>
   <style>
     * {
       margin: 0;
@@ -67,18 +68,131 @@
 
     /***** UTILITY FUNCTIONS *****/
 
+    function makeKalmanFunction(decay = 0.003, measurementNoise = 0.1) {
+      const R = Matrix.Diagonal([measurementNoise, measurementNoise]);
+
+      // The decay errodes the assumption that velocity
+      // never changes.  This is the only unique addition
+      // I made to the proceedure.  If you set it to zero,
+      // the filter will act just like the one we designed
+      // in class which means it strives to find a consitent
+      // velocitiy.  Over time this will cause it to assume
+      // the mouse is moving very slowly with lots of noise.
+      // Set too high and the predicted fit will mirror the
+      // noisy data it recieves.  When at a nice setting,
+      // the fit will be resposive and will do a nice job
+      // of smoothing out the function noise.
+      //decay = 0.003;
+
+      // external motion
+      // I have not played with this at all, just
+      // added like a udacity zombie.
+      const u = $M([ [0], [0], [0], [0] ]);
+
+      // measurement function (4D -> 2D)
+      // This one has to be this way to make things run
+      const H = $M([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0]
+      ]);
+
+      // identity matrix
+      const I = Matrix.I(4);
+
+      return (prev, curr) => {
+        if (!prev) {
+          prev = {
+            // initial state (location and velocity)
+            // I haven't found much reason to play with these
+            // in general the model will update pretty quickly
+            // to any entry point.
+            // NB: this x is a matrix representing the state,
+            // 		 NOT an x-coordinate - Ronny
+            x: $M([ [0], [0], [0], [0] ]),
+            // initial uncertainty
+            // I don't see any reason to play with this
+            // like the entry point it quickly adjusts
+            // itself to the behavior of the mouse
+            P: Matrix.Random(4, 4),
+            t: $.now()
+          };
+        }
+
+        const xMeasure = curr.x;
+        const yMeasure = curr.y;
+        const currentT = (curr.t || $.now())
+        const dt = currentT - prev.t;
+
+        // Derive the next state
+        const F = $M([
+          [1, 0, dt, 0],
+          [0, 1, 0, dt],
+          [0, 0, 1, 0],
+          [0, 0, 0, 1]
+        ]);
+
+        let x = prev.x;
+        let P = prev.P;
+
+        // decay confidence
+        // to account for change in velocity
+        P = P.map( x => x * (1 + decay * dt) );
+
+        // prediction
+        x = F.x(x).add(u);
+        P = F.x(P).x(F.transpose());
+
+        // measurement update
+        const Z = $M([
+          [xMeasure, yMeasure]
+        ]);
+        const y = Z.transpose().subtract(H.x(x));
+        const S = H.x(P).x(H.transpose()).add(R);
+        const K = P.x(H.transpose()).x(S.inverse());
+
+        x = x.add(K.x(y));
+        P = I.subtract(K.x(H)).x(P);
+
+        // Draw our predicted point
+        const pSize = P.max() * 2000;
+
+        // I wanted more user-friendly names for these values,
+        // but I'm not sure if these names are accurate
+        // or if these values are even needed.
+        // We'll return them anyway. - Ronny
+        const certainty = 1 / pSize;
+        const deviation = pSize / 2;
+
+        const final = {
+          x: x.e(1, 1), // + deviation,
+          y: x.e(2, 1), // + deviation,
+          deviation,
+          certainty,
+          state: {
+            x: x,
+            P: P,
+            t: currentT
+          }
+        };
+
+        return final;
+      };
+    }
+
+    const getNextKalmanState = makeKalmanFunction();
+
     const absoluteStyle = {
       position: 'absolute',
       top: 0,
       left: 0
     };
-    
+
     function getColorFromId(id){
       var hue = 0;
       for (var i in id){
         hue += Math.pow(id.charCodeAt(i), 2);
       }
-      return 'hsl(' + (hue % 360) + ',50%,73%)';
+      return `hsl(${hue % 360},50%,73%)`;
     }
 
     const getViewCoord = (coord, opts) =>
@@ -87,7 +201,12 @@
       //* atom.winHeight;
 
 
+
+
     class TrackMap extends React.Component {
+
+      kalmanStates = {}
+
       state = {
         atom: Immutable({
           winWidth: 100,
@@ -176,10 +295,10 @@
               display: 'flex', flexDirection: 'column'
             }}
           >
-            <div>
+            {!!atom.lines[0].x1 && <div>
               {atom.lines[0].x1.toFixed(3)},{atom.lines[0].y1.toFixed(3)} to
               {atom.lines[0].x2.toFixed(3)},{atom.lines[0].y2.toFixed(3)}
-            </div>
+            </div>}
             <div>
               <label>Smooth</label>
               <input type='checkbox' checked={atom.smooth}
@@ -272,7 +391,7 @@
 
         const socket = io(devUrl);
 
-        socket.on('point', data => { //console.log('point', atom);
+        socket.on('point', data => { //console.log('point', data);
           const { atom } = this.state;
 
           if (!atom.tags[data.id]){
@@ -312,10 +431,15 @@
               if (false && squareStep > 36){
                 //console.log('throw', squareStep, data.x, data.y, prevPoint.x, prevPoint.y);
               } else {
+                const next = getNextKalmanState(
+                  this.kalmanStates[data.id], { x: data.x, y: data.y }
+                );
+                this.kalmanStates[data.id] = next.state;
+
                 this.setState({
                   atom: this.state.atom.updateIn(
                     ['tags', data.id],
-                    tag => tag.set('points', [{ x: data.x, y: data.y }])
+                    tag => tag.set('points', [{ x: next.x, y: next.y }])
                       .update(
                         'inRaceCount',
                         count => data.loc === 'pit'? 0: (count + 1)
@@ -423,6 +547,7 @@
 
         $win.click( e => {
           const { atom } = this.state;
+
           const offset = $(canvasEl).offset();
           const viewX = e.pageX - offset.left;
           const viewY = e.pageY - offset.top;
@@ -436,11 +561,19 @@
           const finalX = ((xRatio * calcedXSize) + atom.xOpts.minBound) / atom.xOpts.mult;
           const finalY = ((yRatio  * calcedYSize) + atom.yOpts.minBound) / atom.yOpts.mult;
 
+          console.log('x', finalX, 'y', finalY);
+
+          if ( atom.lines[0].x1 || atom.lines[0].y1 ){
+            this.setState({
+              atom: atom.setIn(['lines', 0, 'x1'], 0).setIn(['lines', 0, 'y1'], 0)
+              .setIn(['lines', 0, 'x2'], 0).setIn(['lines', 0, 'y2'], 0),
+            });
+            return;
+          }
+
           this.setState({
             atom: atom.setIn(['lines', 0, 'x1'], finalX).setIn(['lines', 0, 'y1'], finalY)
           });
-
-          console.log('x', finalX, 'y', finalY);
         });
 
         let mouseFree = true;
@@ -450,13 +583,18 @@
           }
           mouseFree = false;
           requestAnimationFrame(
-            o=> setTimeout(
+            o=> { mouseFree = true; }
+            /*o=> setTimeout(
               o=> { mouseFree = true; }, 111
-            )
+            )*/
           );
 
-
           const { atom } = this.state;
+
+          if ( !atom.lines[0].x1 && !atom.lines[0].y1 ){
+            return;
+          }
+
           const offset = $(canvasEl).offset();
           const viewX = e.pageX - offset.left;
           const viewY = e.pageY - offset.top;
@@ -483,30 +621,10 @@
       }
     }
 
-
-    ReactDOM.render(
-      <TrackMap />, document.body.firstElementChild
+    $(document).ready(
+      o=> ReactDOM.render(
+        <TrackMap />, document.body.firstElementChild
+      )
     );
-
-    /*$(window).on(
-      'popstate',
-      e => console.log('popit', e) & history.pushState({ lol: 'nope' }, 'Trololo')
-    );
-
-    $(window).on('replacestate', e => console.log('replace', e));
-    //$(window).on('pushstate', e => console.log('replace', e));
-    (function(history){
-        var pushState = history.pushState;
-        history.pushState = function(state) {
-            if (typeof history.onpushstate == "function") {
-                history.onpushstate({state: state});
-            }
-            // ... whatever else you want to do
-            // maybe call onhashchange e.handler
-            console.log('push');
-            return pushState.apply(history, arguments);
-        }
-    })(window.history);*/
-    //history.pushState({ lol: 'nope' }, 'Trololo', 'client.html#wassup');
   </script>
 </body>
