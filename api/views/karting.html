@@ -97,7 +97,7 @@
                         <li><strong>Find Racer's Races:</strong> <code>/racers/1000002/races</code> (<a href="index.php/racers/1000002/races.json?key={{daily_key}}">JSON</a>, <a href="index.php/racers/1000002/races.js?key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers.xml/1000002/races?key={{daily_key}}">XML</a>)</li>
                         <li><strong>Top RPM Ranking</strong>
                             <ul>
-                                <li><strong>Limt:</strong> <code>/racers/toprpm?limit=5</code> (<a href="index.php/racers/toprpm.json?limit=5&key={{daily_key}}">JSON</a>, <a href="index.php/racers/toprpm.js?limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/toprpm.xml?limit=5&key={{daily_key}}">XML</a>)</li>
+                                <li><strong>Limit:</strong> <code>/racers/toprpm?limit=5</code> (<a href="index.php/racers/toprpm.json?limit=5&key={{daily_key}}">JSON</a>, <a href="index.php/racers/toprpm.js?limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/toprpm.xml?limit=5&key={{daily_key}}">XML</a>)</li>
                                 <li><strong>Gender (m: Male, f: Female):</strong> <code>/racers/toprpm?gender=m</code> (<a href="index.php/racers/toprpm.json?gender=f&key={{daily_key}}">JSON</a>, <a href="index.php/racers/toprpm.js?gender=f&key={{daily_key}}&callback=myCallback">JSONP</a>, <a href="index.php/racers/toprpm.xml?gender=f&key={{daily_key}}">XML</a>)</li>
                                 <li>
                                   <strong>Most Improved RPM (range: (month or year); month; year):</strong>
@@ -105,6 +105,13 @@
                                   (<a href="index.php/racers/most_improved_rpm.json?range=month&month=6&year=2014&limit=5&key={{daily_key}}">JSON</a>,
                                   <a href="index.php/racers/most_improved_rpm.js?range=month&month=6&year=2014&limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>,
                                   <a href="index.php/racers/most_improved_rpm.xml?range=month&month=6&year=2014&limit=5&key={{daily_key}}">XML</a>)
+                                </li>
+                                <li>
+                                  <strong>Most Improved RPM (start; end):</strong>
+                                  <code>/racers/most_improved_rpm?start=2016-09-09&end=2016-10-02</code>
+                                  (<a href="index.php/racers/most_improved_rpm.json?start=2016-09-09&end=2016-10-02&limit=5&key={{daily_key}}">JSON</a>,
+                                  <a href="index.php/racers/most_improved_rpm.js?start=2016-09-09&end=2016-10-02&limit=5&key={{daily_key}}&callback=myCallback">JSONP</a>,
+                                  <a href="index.php/racers/most_improved_rpm.xml?start=2016-09-09&end=2016-10-02&limit=5&key={{daily_key}}">XML</a>)
                                 </li>
                             </ul>
                         </li>
@@ -177,6 +184,8 @@
                                 <li><strong>Limt:</strong> <code>/races/fastest?limit=5</code></li>
                                 <li><strong>Gender (m: Male, f: Female):</strong> <code>/races/fastest?gender=m</code></li>
                                 <li><strong>Exclude Employees:</strong> <code>/races/fastest?exclude_employees=1</code></li>
+                                <li><strong>Only Employees:</strong> <code>/races/fastest?only_employees=1</code></li>
+                                <li><strong>Employees and Customers:</strong> <code>/races/fastest?exclude_employees=0</code></li>
                                 <li><strong>Weight (light: 0-155lb, medium: 156-190lb, heavy: 191-220lb, sumo: 221+lb):</strong> <code>/races/fastest?weight=light</code></li>
                                 <li><strong>Birth Date in Range:</strong> <code>/races/fastest?start_birthdate=1982-01-01&end_birthdate=1982-12-31</code></li>
                             </ul>

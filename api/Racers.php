@@ -952,30 +952,84 @@ class Racers
             throw new RestException(401, "Invalid authorization!");
         }
         $limit = empty($params['limit']) ? 50 : (int)$params['limit'];
-        switch(@$params['range']) {
-            case 'month':
-                $month = empty($params['month']) ? date('n') : (int)$params['month'];
-                $year  = empty($params['year']) ? date('Y') : (int)$params['year'];
-                $tsql_params = $month . ', ' . $year . ', ' . $limit;
-                break;
-            case 'year':
-                $year = empty($params['year']) ? date('Y') : (int)$params['year'];
-                $tsql_params = '0, ' . $year . ', ' . $limit;
-                break;
-            default:
-                throw new RestException(412,'Not a valid range (Must be "month" or "year")');
+
+        if (isset($params['range'])) {
+            switch(@$params['range']) {
+                case 'month':
+                    $month = empty($params['month']) ? date('n') : (int)$params['month'];
+                    $year  = empty($params['year']) ? date('Y') : (int)$params['year'];
+                    $tsql_params = $month . ', ' . $year . ', ' . $limit;
+                    break;
+                case 'year':
+                    $year = empty($params['year']) ? date('Y') : (int)$params['year'];
+                    $tsql_params = '0, ' . $year . ', ' . $limit;
+                    break;
+                default:
+                    throw new RestException(412,'Not a valid range (Must be "month" or "year")');
+            }
+
+            // TODO Add filtering by Speed Level
+
+            $tsql = "GetMostImproveRPM " . $tsql_params;
+            $rows = $this->run_query($tsql, array());
+
+            foreach($rows as $key => $value) {
+                $rows[$key] = array('rpmChange' => $value['RPMDiff'], 'nickname' => $value['RacerName'], 'rpm' => $value['RPM']);
+            }
+
+            return $rows;
         }
-        
-        // TODO Add filtering by Speed Level
-        
-        $tsql = "GetMostImproveRPM " . $tsql_params;
-        $rows = $this->run_query($tsql, array());
-        
-        foreach($rows as $key => $value) {
-            $rows[$key] = array('rpmChange' => $value['RPMDiff'], 'nickname' => $value['RacerName'], 'rpm' => $value['RPM']);
+        else if (isset($_GET['start']) && isset($_GET['end'])) {
+            $starttime = '00:00:00';
+            $endtime = '00:00:00';
+            $isoDateFormat = 'Y-m-d';
+            $start = date($isoDateFormat, strtotime($_GET['start'])) . 'T' . $starttime;
+            $end = date($isoDateFormat, strtotime($_GET['end'] . ' +1 day')) . 'T' . $endtime;
+
+            $tsql = <<<EOS
+SELECT TOP (CONVERT(INT, :limit))
+    Customers.RPM - HeatDetails.RPM AS RPMDiff,
+    Customers.RacerName,
+    Customers.RPM 
+FROM (
+    SELECT
+        hd.CustID,
+        MIN(hd.HeatNo) AS HeatNo
+    FROM dbo.HeatDetails hd
+    INNER JOIN dbo.HeatMain hm
+        ON hd.HeatNo = hm.HeatNo
+    WHERE 1=1
+        AND hm.ScheduledTime >= :start
+        AND hm.ScheduledTime < :end
+    GROUP BY hd.CustID
+) AS FirstHeat
+INNER JOIN HeatDetails
+    ON FirstHeat.HeatNo = HeatDetails.HeatNo
+    AND FirstHeat.CustID = HeatDetails.CustID
+INNER JOIN Customers
+    ON HeatDetails.CustID = Customers.CustID
+WHERE
+        Customers.IsEmployee = 0
+    AND Customers.IsGiftCard = 0
+    AND Customers.Deleted = 0
+ORDER BY
+    RPMDiff DESC,
+    RPM DESC
+EOS;
+            $params = array(
+                'limit' => $limit,
+                'start' => $start,
+                'end' => $end
+            );
+            $rows = $this->run_query($tsql, $params);
+            foreach($rows as $key => $value) {
+                $rows[$key] = array('rpmChange' => $value['RPMDiff'], 'nickname' => $value['RacerName'], 'rpm' => $value['RPM']);
+            }
+            return $rows;
         }
-        
-        return $rows;
+        else {
+            throw new RestException(400, 'Most improved RPM requires either a pre-defined range or start and end parameters!');
+        }
     }
 
     /**
