@@ -34,8 +34,13 @@ telnet 192.168.111.223 8784
 {"id":"0xDECA38303260150A","coordinates": {"x":0.000,"y":2.130,"z":-0.250,"heading":0.000,"pqf":0.000}}
 ]}
 
+{"command":"reset"}
+
 {"command":"listTags"}
 {"response":"listTags","status":"ok","tags": [{"id":"0xDECA343037101323","nodeDetails": {"hwVersion":"0x289A0760","ldrfwVersion":"0x16040600","fwVersion":"0x16040600","nodeOptions":"0x30411"},"coordinates": {"x":0.000,"y":0.000,"z":0.000,"heading":0.000,"pqf":0.000}}]}
+
+{"command":"getStats"}
+{"response":"getStats","status":"ok","id":"DECA313033600E0E","uptime":8566,"memFree":58828,"cpuLoad":0.920,"tdoaCnt":0,"twrCnt":4704,"twrErrCnt":0,"reportsSent":0,"tsyncCnt":0,"dwVbat":2.334,"dwTemp":47.460}
 
 { "command": "setPos", "id": "0xDECA313033600E0E", "x": 7.92, "y": 1.82, "z": 0 }
 { "command": "setPos", "id": "0xDECA32303240150E", "x": 5.18, "y": 3.96, "z": -0.25 }
@@ -71,13 +76,17 @@ var config = {
   socketIoPort: 3000,
   pingInterval: 5000,
   pingHandle: null,
-  enableMdns: false
+  enableMdns: false,
+  externalServerEnabled: false
 }
 
 // Load config overrides
 if(newConfig.openRtlsIp)   config.openRtlsIp = newConfig.openRtlsIp;
 if(newConfig.socketIoPort) config.socketIoPort = newConfig.socketIoPort;
 if(newConfig.enableMdns)   config.enableMdns = newConfig.enableMdns;
+if(newConfig.externalServerEnabled) config.externalServerEnabled = newConfig.externalServerEnabled;
+if(newConfig.externalServerIp)      config.externalServerIp = newConfig.externalServerIp;
+if(newConfig.externalServerPort)    config.externalServerPort = newConfig.externalServerPort;
 
 var lastPoints = {};
 
@@ -128,6 +137,9 @@ io.on('connection', function (socket) {
 
   socket.on('config', function(data) {
     socket.emit('config', passingEngineConfig.boundaries);
+  }).on('command', function(data) {
+    console.log('Received command:', command);
+    try { re.write(command) } catch(e) { console.log('Error writing command:', e); }
   });
 });
 
@@ -147,7 +159,8 @@ var re = reconnect({
 }, function (stream) {
   console.log('When is this fired?')
   stream.on('data', function(data) {
-    //console.log('OpenRTLS Received: ' + data);
+    console.log('OpenRTLS Received: ' + data);
+    io.emit('commandResponse', data)
   });
 })
 .on('connect', function (con) {
@@ -174,11 +187,54 @@ var re = reconnect({
 })
 .connect(config.openRtlsCommandPort, config.openRtlsIp);
 
+if(config.externalServerEnabled) {
+  // External Service
+  var externalServer = reconnect({
+    initialDelay: 1000,
+    maxDelay: 10000,
+    strategy: 'fibonacci',
+    failAfter: Infinity,
+    randomisationFactor: 0,
+    immediate: false
+  }, function (stream) {
+    stream.on('data', function(data) {
+      console.log('External Server Received: ' + data);
+    });
+  })
+  .on('connect', function (con) {
+    console.log('Connected to External Server');
+  })
+  .on('reconnect', function (n, delay) {
+    // n = current number of reconnect  
+    // delay = delay used before reconnect
+    console.log('External Server reconnection attempt', n, delay);
+  })
+  .on('disconnect', function (err) {
+    console.log('External Server connection disconnected', err);
+  })
+  .on('error', function (err) {
+    console.log('External Server error:', err);
+  })
+  .connect(config.externalServerPort, config.externalServerIp);
+}
 
 // LISTEN FOR UDP
 server.on('message', function(msg, rinfo) {
   //console.log('server got: ' + msg + ' from ' + rinfo.address + ':' + rinfo.port);
   // {"id":"0xDECA343037101323","timestamp":1469033913.667,"msgid":940531,"coordinates":{"x":2.202,"y":-0.400,"z":0.000,"heading":0.000,"pqf":69},"meas":[{"anchor":"0xDECA32303240150E","dist":0.878,"tqf":1,"rssi":-78.5},{"anchor":"0xDECA38303260150A","dist":4.858,"tqf":2,"rssi":-80.5},{"anchor":"0xDECA313033600E0E","dist":1.381,"tqf":1,"rssi":-80.5},{"anchor":"0xDECA373031201572","dist":4.600,"tqf":2,"rssi":-79.5},{"anchor":"0xDECA363033001546","dist":3.570,"tqf":2,"rssi":-80.0}]}
+  
+  // Emit raw UDP response
+  io.emit('rawUDP', msg);
+
+  // If external service
+  if(config.externalServerEnabled) {
+    try {
+      externalServer.write(msg)
+    } catch(e) {
+      console.log("Error writing to external server:", e)
+    }
+  }
+
   try {
     var coordinates = msg.toString().split(/\r?\n/)
 
@@ -239,7 +295,7 @@ server.on('message', function(msg, rinfo) {
       });
 
       passingEngine.point(pointPacket);
-      io.emit('point', pointPacket);  
+      io.emit('point', pointPacket);
     });
   } catch(e) {
     console.log('ERROR', e)

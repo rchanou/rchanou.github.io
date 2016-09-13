@@ -14,5 +14,8 @@
         { "id": "view", "type": "rectangle", "coordinates": [ { "x":-40, "y":-50 }, { "x":40, "y":30 } ] }
         // Lot66 S/F: x 43.33333333333333 y 28.74074074074074 / x 49.55555555555556 y 28.74074074074074
       ]
-    }
+    },
+  "externalServerEnabled": false,
+  "externalServerIp": "212.238.134.24",
+  "externalServerPort": 1000
 }

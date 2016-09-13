@@ -59,5 +59,10 @@ cs-printer/config.js
 
 cs-pccharge/node_modules
 cs-pccharge/config.json
+<<<<<<< Updated upstream
 event-builder/*.err
 cs-printer/*.err
+=======
+
+dehaardt-position/config.json
+>>>>>>> Stashed changes
