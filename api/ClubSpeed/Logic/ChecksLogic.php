@@ -182,6 +182,7 @@ class ChecksLogic extends BaseLogic {
             throw new \InvalidArgumentValueException($message);
         }
 
+        Log::info($logPrefix . 'Received metadata: ' . print_r($metadata, true));
         $handled = Handlers::handle($checkTotals, $metadata); // can throw, but finalized is wrapped in try/catch from restler level
         Log::info('Check #' . $checkId . ': Finalize complete!', Enums::NSP_API);
 
