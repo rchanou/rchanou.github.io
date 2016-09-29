@@ -987,34 +987,38 @@ class Racers
             $end = date($isoDateFormat, strtotime($_GET['end'] . ' +1 day')) . 'T' . $endtime;
 
             $tsql = <<<EOS
+;WITH RankedHeats AS (
+  SELECT
+    hd.CustID,
+	hd.HeatNo,
+	hd.RPM,
+	hd.RPMDiff,
+	ROW_NUMBER() OVER (
+	  PARTITION BY hd.CustID
+	  ORDER BY hm.ScheduledTime
+	) AS [Rank]
+  FROM dbo.HeatDetails hd
+  INNER JOIN dbo.HeatMain hm
+    ON hd.HeatNo = hm.HeatNo
+  WHERE 1=1
+    AND hm.ScheduledTime >= :start
+	AND hm.ScheduledTime < :end
+)
 SELECT TOP (CONVERT(INT, :limit))
-    Customers.RPM - HeatDetails.RPM AS RPMDiff,
-    Customers.RacerName,
-    Customers.RPM 
-FROM (
-    SELECT
-        hd.CustID,
-        MIN(hd.HeatNo) AS HeatNo
-    FROM dbo.HeatDetails hd
-    INNER JOIN dbo.HeatMain hm
-        ON hd.HeatNo = hm.HeatNo
-    WHERE 1=1
-        AND hm.ScheduledTime >= :start
-        AND hm.ScheduledTime < :end
-    GROUP BY hd.CustID
-) AS FirstHeat
-INNER JOIN HeatDetails
-    ON FirstHeat.HeatNo = HeatDetails.HeatNo
-    AND FirstHeat.CustID = HeatDetails.CustID
-INNER JOIN Customers
-    ON HeatDetails.CustID = Customers.CustID
+  c.RPM - rh.RPM AS RPMDiff,
+  c.RacerName,
+  c.RPM
+FROM RankedHeats rh
+INNER JOIN dbo.Customers c
+  ON rh.CustID = c.CustID
 WHERE
-        Customers.IsEmployee = 0
-    AND Customers.IsGiftCard = 0
-    AND Customers.Deleted = 0
+  rh.[Rank] = 1
+  AND c.IsEmployee = 0
+  AND c.Deleted = 0
+  AND c.IsGiftCard = 0
 ORDER BY
-    RPMDiff DESC,
-    RPM DESC
+  RPMDiff DESC,
+  RPM DESC
 EOS;
             $params = array(
                 'limit' => $limit,
