@@ -58,8 +58,8 @@ class BaseMapper {
     public function uowIn(&$uow) {
         if (!is_null($uow->select))
             $this->limit('client', $uow->select); // consider a better way to do this
-        $this->uowMap('server', $uow);
         $uow->select = $this->filterRestrictedClientSelect($uow->select);
+        $this->uowMap('server', $uow);
         return $uow;
     }
 
