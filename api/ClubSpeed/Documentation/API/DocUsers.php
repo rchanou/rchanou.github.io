@@ -132,9 +132,9 @@ EOS;
             array(
                 "name" => "webPassword",
                 "type" => "String",
-                "default" => "",
+                "default" => "{User.password}",
                 "required" => true,
-                "description" => "The password of the user to be used for logging in to a web portal. Note that this field can be created and updated, but not read"
+                "description" => "The password of the user to be used for logging in to a web portal, such as the admin panel or posting to <code class=\"prettyprint\">/users/login</code>. Will use <code class=\"prettyprint\">User.password</code> as a default, if not <code class=\"prettyprint\">webPassword</code> is not provided during a create. Note that this field can be created and updated, but not read"
             )
         );
     }

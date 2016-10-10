@@ -43,7 +43,7 @@ class UsersLogic extends BaseLogic {
         if (empty($user->Password) || $user->Password === Enums::DB_NULL)
             throw new \RequiredArgumentMissingException('Creating a user requires a password!');
         if (empty($user->WebPassword) || $user->WebPassword === Enums::DB_NULL)
-            throw new \RequiredArgumentMissingException('Creating a user requires a web password!');
+            $user->WebPassword = $user->Password;
         if (empty($user->Enabled) || $user->Enabled === Enums::DB_NULL)
             $user->Enabled = 1;
         if (empty($user->Deleted) || $user->Deleted === Enums::DB_NULL)
