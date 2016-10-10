@@ -53,6 +53,7 @@ $r->addAPIClass('EventContactStatusLookup');
 $r->addAPIClass('EventHeatDetails');
 $r->addAPIClass('EventReservationLinks');
 $r->addAPIClass('EventReservations');
+$r->addAPIClass('EventRounds');
 $r->addAPIClass('Events');
 $r->addAPIClass('EventStatuses');
 $r->addAPIClass('EventTypes');
