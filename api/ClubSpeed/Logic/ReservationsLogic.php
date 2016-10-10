@@ -86,6 +86,10 @@ class ReservationsLogic extends BaseLogic {
                 throw new \InvalidArgumentValueException("Create reservation attempted to use a quantity less than 1! Received: " . $reservation->Quantity);
 
             $reservation->OnlineBookingReservationStatusID = 1; // hard coded to 1 (temporary) -- make a lookup from dbo.OnlineBookingReservationStatus eventually
+            if (empty($reservation->ExpiresAt)) {
+                $reservation->ExpiresAt = Convert::getDate(strtotime('+2 hours'));
+            }
+            
             return $reservation;
         });
     }
