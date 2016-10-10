@@ -27,6 +27,12 @@ class DocReservations Extends DocAPIBase {
   whenever a <code class="prettyprint">Customer</code> adds a <code class="prettyprint">Booking</code> to their kart,
   and then updated to be made permanent whenever the purchase has been successfully made.
 </p>
+<p>
+  Please note that a <code class="prettyprint">Reservation</code> does <span style="font-style:italic">not</span>
+  correspond directly to <code class="prettyprint">HeatMain.numberOfReservation</code>. A <code class="prettyprint">Reservation</code>
+  corresponds directly to a <code class="prettyprint">Booking</code> and represents either a permanent or temporary hold
+  on a <code class="prettyprint">Booking</code>.
+</p>
 EOS;
     }
 

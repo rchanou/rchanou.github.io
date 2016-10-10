@@ -78,7 +78,7 @@ EOS;
                 "name" => "eventRound",
                 "type" => "Integer",
                 "default" => "",
-                "description" => "The event round which corresponds to the heat, where applicable"
+                "description" => "The <a href=\"event-rounds\">event round</a> which corresponds to the heat, where applicable"
             ),
             array(
                 "name" => "finish",
@@ -120,7 +120,7 @@ EOS;
                 "name" => "numberOfReservation",
                 "type" => "Integer",
                 "default" => "0",
-                "description" => "Number of additional reservations for the heat"
+                "description" => "Number of additional reservations for the heat. Note that these typically represent purchased slots in a heat. The sum of this field and the count of <a href=\"#heat-details\">heat detail</a> records can be considered the number of slots used for the heat"
             ),
             array(
                 "name" => "pointsNeeded",

@@ -55,6 +55,11 @@ EOS;
     To remove a <code class="prettyprint">Customer</code> from a <code class="prettyprint">Heat</code>,
     simply delete the <code class="prettyprint">HeatDetails</code> record.
 </p>
+<p>
+    Note that the count of <code class="prettyprint">HeatDetails</code> grouped by <code class="prettyprint">heatId</code>
+    plus the <code class="prettyprint">HeatMain.numberOfReservation</code> for that <code class="prettyprint">heatId</code>
+    can be considered the total number of racers in a <code class="prettyprint">Heat</code>.
+</p>
 EOS;
     }
 
