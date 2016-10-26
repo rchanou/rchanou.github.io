@@ -1005,6 +1005,7 @@ class Racers
 	AND hm.ScheduledTime < :end
 )
 SELECT TOP (CONVERT(INT, :limit))
+  c.CustID,
   c.RPM - rh.RPM AS RPMDiff,
   c.RacerName,
   c.RPM
@@ -1027,7 +1028,7 @@ EOS;
             );
             $rows = $this->run_query($tsql, $params);
             foreach($rows as $key => $value) {
-                $rows[$key] = array('rpmChange' => $value['RPMDiff'], 'nickname' => $value['RacerName'], 'rpm' => $value['RPM']);
+                $rows[$key] = array('customerId' => $value['CustID'], 'rpmChange' => $value['RPMDiff'], 'nickname' => $value['RacerName'], 'rpm' => $value['RPM']);
             }
             return $rows;
         }
