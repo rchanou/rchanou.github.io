@@ -166,6 +166,14 @@ Dejavoo.prototype.submitTransaction = function submitTransaction(order, creditCa
 					extData = querystring.parse(_.get(result, 'xmp.response[0].ExtData[0]'));
 				}
 
+				// Combine messages (if both exist)
+				var message = "";
+				if(_.get(result, 'xmp.response[0].RespMSG[0]') && _.get(result, 'xmp.response[0].Message[0]')) {
+					message = _.get(result, 'xmp.response[0].Message[0]') + " " + _.get(result, 'xmp.response[0].RespMSG[0]');
+				} else {
+					message = _.get(result, 'xmp.response[0].RespMSG[0]') || _.get(result, 'xmp.response[0].Message[0]') || null;
+				}
+
 				var hoistedVars = {
 					transactionId: _.get(result, 'xmp.response[0].RefId[0]') || null,
                     resultCode: _.get(result, 'xmp.response[0].ResultCode[0]'),
@@ -178,7 +186,7 @@ Dejavoo.prototype.submitTransaction = function submitTransaction(order, creditCa
 					troutD: _.get(result, 'xmp.response[0].RefId[0]') || null,
 					emvReceiptRequirement: _.get(result, 'xmp.response[0].EMVData[0]') || null,
 					code: _.get(result, 'xmp.response[0].ResultCode[0]') || null,
-                    message: _.get(result, 'xmp.response[0].RespMSG[0]') || _.get(result, 'xmp.response[0].Message[0]') || null,
+                    message: message,
 					_original: result
 				};
 

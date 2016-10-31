@@ -387,6 +387,21 @@ exports.create = function(method, participantsToGrid, opts) {
 			var heatLineup = this.createGrid(opts.gridType, sortedDrivers.length, opts.maxDrivers, opts);
 			results = this.bindParticipantsToHeatLineup(sortedDrivers, heatLineup);
 
+			// Get unique, sorted list of kart #s from those used, ordered ascending (1 ... N)
+			var karts = []
+			participantsToGrid.forEach(function(participant) {
+				if(participant.vehicleId) {
+					// Make it numeric
+					vehicleId = parseInt(participant.vehicleId);
+					
+					// If it doesn't exist in the array, add it
+					if(!~karts.indexOf(vehicleId))
+						karts.push(vehicleId)
+				}
+			});
+			// Sort the karts in ascending order... ex: 1 -> 20
+			karts.sort(sortNumber);
+
 			// Massage array into better format
 			var decoratedResults = [];
 			results.forEach(function(group, groupNum) {
@@ -398,15 +413,23 @@ exports.create = function(method, participantsToGrid, opts) {
 					driverOriginalData = driver.originalData;
 					if(!fastestDriver || fastestDriver.bestLapTime > driverOriginalData.bestLapTime) {
 						fastestDriver = driverOriginalData;
-						res.vehicleId = driverOriginalData.vehicleId;
+						// Assigning from list used (code below and above), not fastest driver
+						//res.vehicleId = driverOriginalData.vehicleId;
 						res.bestLapTime = driverOriginalData.bestLapTime;
 					}
+
 					driver.startingPosition = i+1;
 					res.bestAverageLapTime += driverOriginalData.bestAverageLapTime;
 					res.points += driverOriginalData.points;
 					res.startingPosition += driverOriginalData.startingPosition;
 					res.finishingPosition += driverOriginalData.finishingPosition;
 				});
+
+				// Assign a kart from the list of karts used, which was generated above
+				if(karts.length >= groupNum+1) {
+					res.vehicleId = karts[groupNum];
+				}
+
 				res.bestAverageLapTime = res.bestAverageLapTime / decoratedResults[groupNum].drivers.length;
 				decoratedResults[groupNum].teamResults = res;
 			});
@@ -417,7 +440,18 @@ exports.create = function(method, participantsToGrid, opts) {
 			throw new Error('Invalid gridding sort method given: ' + method);
 			break;
 	}
-	
+	/*
+	Result from gridding printer without crashing: [[{"participantId":1000432,"startingPosition":1,"originalData":{"vehicleId":"106","_customer":null,"name":"Team 1 (Team 1)","points":95,"participantId":1000432,"bestAverageLapTime":48461,"bestLapTime":48364,"startingPosition":11,"finishingPosition":7},"vehicleId":"101"},{"participantId":1000433,"startingPosition":2,"originalData":{"vehicleId":"102","_customer":null,"name":"Team 2 (Team 2)","points":95,"participantId":1000433,"bestAverageLapTime":48445.5,"bestLapTime":48409,"startingPosition":5,"finishingPosition":7},"vehicleId":"102"},{"participantId":1000553,"startingPosition":3,"originalData":{"vehicleId":"101","_customer":null,"name":"Team 03 (Team 03)","points":95,"participantId":1000553,"bestAverageLapTime":48449.5,"bestLapTime":48442,"startingPosition":5,"finishingPosition":7},"vehicleId":"106"}]]
+	Event to be gridded sent to gridding service with griddingType: bestLapTime{"participants":[{"vehicleId":"106","_customer":null,"name":"Team 1 (Team 1)","points":95,"participantId":1000432,"bestAverageLapTime":48461,"bestLapTime":48364,"startingPosition":11,"finishingPosition":7},{"vehicleId":"102","_customer":null,"name":"Team 2 (Team 2)","points":95,"participantId":1000433,"bestAverageLapTime":48445.5,"bestLapTime":48409,"startingPosition":5,"finishingPosition":7},{"vehicleId":"101","_customer":null,"name":"Team 03 (Team 03)","points":95,"participantId":1000553,"bestAverageLapTime":48449.5,"bestLapTime":48442,"startingPosition":5,"finishingPosition":7}],"options":{"vehiclesAvailable":[101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,146],"vehicleAssignmentType":"fair","maxDrivers":40,"numHeatsPerParticipant":1,"filterName":"topPercent","filterValue":100,"numGroups":1,"inverted":false,"customGrid":null}}
+
+	Result from gridding printer without crashing: [{"teamIndex":0,"teamResults":{"vehicleId":"106","points":95,"bestAverageLapTime":48461,"bestLapTime":48364,"startingPosition":11,"finishingPosition":7},"drivers":[{"participantId":1000553,"startingPosition":1,"originalData":{"vehicleId":"106","_customer":null,"name":"Team","points":50,"participantId":1000553,"bestAverageLapTime":48364,"bestLapTime":48364,"startingPosition":6,"finishingPosition":1}},{"participantId":1000554,"startingPosition":2,"originalData":{"vehicleId":"105","_customer":null,"name":"Team","points":45,"participantId":1000554,"bestAverageLapTime":48558,"bestLapTime":48558,"startingPosition":5,"finishingPosition":6}}]},{"teamIndex":1,"teamResults":{"vehicleId":"102","points":95,"bestAverageLapTime":48445.5,"bestLapTime":48409,"startingPosition":5,"finishingPosition":7},"drivers":[{"participantId":1000556,"startingPosition":1,"originalData":{"vehicleId":"102","_customer":null,"name":"Team","points":49,"participantId":1000556,"bestAverageLapTime":48409,"bestLapTime":48409,"startingPosition":2,"finishingPosition":2}},{"participantId":1007147,"startingPosition":2,"originalData":{"vehicleId":"103","_customer":null,"name":"Team","points":46,"participantId":1007147,"bestAverageLapTime":48482,"bestLapTime":48482,"startingPosition":3,"finishingPosition":5}}]},{"teamIndex":2,"teamResults":{"vehicleId":"101","points":95,"bestAverageLapTime":48449.5,"bestLapTime":48442,"startingPosition":5,"finishingPosition":7},"drivers":[{"participantId":1007148,"startingPosition":1,"originalData":{"vehicleId":"101","_customer":null,"name":"Team","points":48,"participantId":1007148,"bestAverageLapTime":48442,"bestLapTime":48442,"startingPosition":1,"finishingPosition":3}},{"participantId":1000555,"startingPosition":2,"originalData":{"vehicleId":"104","_customer":null,"name":"Team","points":47,"participantId":1000555,"bestAverageLapTime":48457,"bestLapTime":48457,"startingPosition":4,"finishingPosition":4}}]}]
+	Event to be gridded sent to gridding service with griddingType: fairTeams{"participants":[{"vehicleId":"101","_customer":null,"name":"Team","points":48,"participantId":1007148,"bestAverageLapTime":48442.0,"bestLapTime":48442.0,"startingPosition":1,"finishingPosition":3},{"vehicleId":"102","_customer":null,"name":"Team","points":49,"participantId":1000556,"bestAverageLapTime":48409.0,"bestLapTime":48409.0,"startingPosition":2,"finishingPosition":2},{"vehicleId":"103","_customer":null,"name":"Team","points":46,"participantId":1007147,"bestAverageLapTime":48482.0,"bestLapTime":48482.0,"startingPosition":3,"finishingPosition":5},{"vehicleId":"104","_customer":null,"name":"Team","points":47,"participantId":1000555,"bestAverageLapTime":48457.0,"bestLapTime":48457.0,"startingPosition":4,"finishingPosition":4},{"vehicleId":"105","_customer":null,"name":"Team","points":45,"participantId":1000554,"bestAverageLapTime":48558.0,"bestLapTime":48558.0,"startingPosition":5,"finishingPosition":6},{"vehicleId":"106","_customer":null,"name":"Team","points":50,"participantId":1000553,"bestAverageLapTime":48364.0,"bestLapTime":48364.0,"startingPosition":6,"finishingPosition":1}],"options":{"vehiclesAvailable":null,"vehicleAssignmentType":null,"maxDrivers":2,"numHeatsPerParticipant":0,"filterName":null,"filterValue":0,"numGroups":0,"inverted":false,"customGrid":null}}
+
+
+	Result from gridding printer without crashing: [[{"participantId":1007148,"startingPosition":1,"originalData":{"vehicleId":null,"_customer":null,"name":null,"points":0,"participantId":1007148,"bestAverageLapTime":0,"bestLapTime":0,"startingPosition":0,"finishingPosition":0},"vehicleId":null},{"participantId":1007147,"startingPosition":2,"originalData":{"vehicleId":null,"_customer":null,"name":null,"points":1,"participantId":1007147,"bestAverageLapTime":1,"bestLapTime":1,"startingPosition":1,"finishingPosition":1},"vehicleId":null},{"participantId":1000553,"startingPosition":3,"originalData":{"vehicleId":null,"_customer":null,"name":null,"points":2,"participantId":1000553,"bestAverageLapTime":2,"bestLapTime":2,"startingPosition":2,"finishingPosition":2},"vehicleId":null},{"participantId":1000554,"startingPosition":4,"originalData":{"vehicleId":null,"_customer":null,"name":null,"points":3,"participantId":1000554,"bestAverageLapTime":3,"bestLapTime":3,"startingPosition":3,"finishingPosition":3},"vehicleId":null},{"participantId":1000555,"startingPosition":5,"originalData":{"vehicleId":null,"_customer":null,"name":null,"points":4,"participantId":1000555,"bestAverageLapTime":4,"bestLapTime":4,"startingPosition":4,"finishingPosition":4},"vehicleId":null},{"participantId":1000556,"startingPosition":6,"originalData":{"vehicleId":null,"_customer":null,"name":null,"points":5,"participantId":1000556,"bestAverageLapTime":5,"bestLapTime":5,"startingPosition":5,"finishingPosition":5},"vehicleId":null}]]
+	Event to be gridded sent to gridding service with griddingType: bestLapTime{"participants":[{"vehicleId":null,"_customer":null,"name":null,"points":0,"participantId":1007148,"bestAverageLapTime":0,"bestLapTime":0,"startingPosition":0,"finishingPosition":0},{"vehicleId":null,"_customer":null,"name":null,"points":1,"participantId":1007147,"bestAverageLapTime":1,"bestLapTime":1,"startingPosition":1,"finishingPosition":1},{"vehicleId":null,"_customer":null,"name":null,"points":2,"participantId":1000553,"bestAverageLapTime":2,"bestLapTime":2,"startingPosition":2,"finishingPosition":2},{"vehicleId":null,"_customer":null,"name":null,"points":3,"participantId":1000554,"bestAverageLapTime":3,"bestLapTime":3,"startingPosition":3,"finishingPosition":3},{"vehicleId":null,"_customer":null,"name":null,"points":4,"participantId":1000555,"bestAverageLapTime":4,"bestLapTime":4,"startingPosition":4,"finishingPosition":4},{"vehicleId":null,"_customer":null,"name":null,"points":5,"participantId":1000556,"bestAverageLapTime":5,"bestLapTime":5,"startingPosition":5,"finishingPosition":5}],"options":{"vehiclesAvailable":[101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,146],"vehicleAssignmentType":"fair","maxDrivers":40,"numHeatsPerParticipant":1,"filterName":"topPercent","filterValue":100,"numGroups":1,"inverted":false,"customGrid":null}}
+	*/
+
 	/**
 	 * Handle assigning vehicles to participants
 	 */
@@ -1148,6 +1182,10 @@ exports.assignPoints = function(participants, scoringTemplate) {
 	});
 	
 	return participants;
+}
+
+function sortNumber(a,b) {
+	return a - b;
 }
 
 function isNumeric(n) {
