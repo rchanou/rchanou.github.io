@@ -50,4 +50,17 @@ class Checks extends BaseApi {
             $this->_error($e);
         }
     }
+
+    /**
+     * @url POST /:id/recalculate
+     */
+    public function recalculate($id, $request_data = array()) {
+        $this->validate('recalculate');
+        try {
+            $this->interface->applyCheckTotal($id, $request_data);
+        }
+        catch (Exception $e) {
+            $this->_error($e);
+        }
+    }
 }
