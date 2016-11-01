@@ -2,6 +2,7 @@
 
 namespace ClubSpeed\Logic;
 use ClubSpeed\Enums\Enums;
+use Clubspeed\Utility\Convert;
 
 /**
  * The business logic class
@@ -43,13 +44,13 @@ class CheckDetailsLogic extends BaseLogic {
             $checkDetails->TaxID = $tax->TaxID;
             $checkDetails->TaxPercent = $tax->Amount;
             $checkDetails->Status = Enums::CHECK_DETAIL_STATUS_IS_NEW;
-            $checkDetails->CreatedDate = \ClubSpeed\Utility\Convert::getDate();
+            $checkDetails->CreatedDate = Convert::getDate();
             $checkDetails->ProductName = $product->Description;
             $checkDetails->UnitPrice = $product->Price1;
             $checkDetails->UnitPrice2 = $product->Price2;
             $checkDetails->Type = $product->ProductType; // seems to be the product type -- DOUBLE CHECK
             $checkDetails->GST = $tax->GST;
-            $checkDetails->P_Points = ($product->P_Points ?: 0) * $checkDetails->Qty; // use 0 instead of null (for the front end)
+            $checkDetails->P_Points = $product->P_Points; // null P_Points is reproduceable with a non point product on the front end
             if (!is_null($checkDetails->P_Points) && $checkDetails->P_Points > 0)
                 $checkDetails->P_CustID = $check->CustID;
             $checkDetails->R_Points = $product->R_Points; // we want nulls to stay null, don't convert to 0
