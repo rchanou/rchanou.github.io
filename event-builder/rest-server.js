@@ -5,7 +5,7 @@ var restify = require('./lib/node_modules/restify'),
     fiscal = require('./lib/fiscal.js');
 
 var moment = require('./lib/node_modules/moment');
-var momentT = require('./lib/node_modules/moment-transform');
+var momentT = require('./lib/node_modules/moment-transform/src/moment-transform.js');
 var debug = true;
 
 function respondGrid(req, res, next) {
