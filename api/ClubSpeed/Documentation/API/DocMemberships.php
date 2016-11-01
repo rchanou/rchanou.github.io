@@ -50,7 +50,7 @@ EOS;
                 "description" => "Part of the composite primary key for the record, references a <a href=\"#customers\">customer</a>"
             ),
             array(
-                "name" => "membershipId",
+                "name" => "membershipTypeId",
                 "type" => "Integer",
                 "default" => "{Generated}",
                 "required" => true,
