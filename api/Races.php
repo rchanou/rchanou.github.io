@@ -1048,7 +1048,7 @@ EOS;
             PARTITION BY rd.CustID
             ORDER BY rd.LTime
         ) AS PersonalRank
-    FROM dbo.RacingData rd
+    FROM dbo.RacingData rd WITH (NOLOCK)
     INNER JOIN dbo.Customers c
         ON rd.CustID = c.CustID
     INNER JOIN dbo.HeatMain hm
