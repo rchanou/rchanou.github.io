@@ -21,8 +21,22 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-2 col-md-2 col-lg-3"></div>
-        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-6">
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+            <div class="widget-box">
+                <div class="widget-title">
+                    <span class="icon">
+                        <i class="fa fa-th-list"></i>
+                    </span>
+                    <h5>Marketing Automation</h5>
+                </div>
+                <div class="widget-content" style="text-align: center;">
+                    <iframe width="100%" height="315" style="max-width:560px;"
+                            src="https://www.youtube.com/embed/7PTYI7oaiXU" frameborder="0" allowfullscreen></iframe>
+                    <p>Check out Club Speed's new marketing automation tool! McKenna will walk you through how to use this amazing new tool as well as how to leverage the features already present in your current version.</p><br/>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
             <div class="widget-box">
                 <div class="widget-title">
                     <span class="icon">
@@ -37,7 +51,6 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-2 col-md-2 col-lg-3"></div>
     </div>
     <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
