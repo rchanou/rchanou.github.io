@@ -307,7 +307,8 @@ class RegistrationController extends BaseController
             'sv-SE' => 'Svenska',
             'zh-CN' => '中文',
             'mn-MN' => 'Монгол',
-            'id-ID' => 'Bahasa Indonesia'
+            'id-ID' => 'Bahasa Indonesia',
+            'fi-FI' => 'Suomi'
         );
 
         $registrationCultureSetting = CS_API::getSettingsFromNewTableFor('Registration','currentCulture');
@@ -438,7 +439,8 @@ class RegistrationController extends BaseController
             'sv-SE',
             'zh-CN',
             'mn-MN',
-            'id-ID'
+            'id-ID',
+            'fi-FI'
         );
 
 
@@ -603,7 +605,8 @@ class RegistrationController extends BaseController
             'sv-SE' => 'Svenska',
             'zh-CN' => '中文',
             'mn-MN' => 'Монгол',
-            'id-ID' => 'Bahasa Indonesia'
+            'id-ID' => 'Bahasa Indonesia',
+            'fi-FI' => 'Suomi'
         );
 
         $registrationSettings = CS_API::getSettingsFor('Registration');

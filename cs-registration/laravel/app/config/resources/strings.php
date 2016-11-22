@@ -181,7 +181,8 @@ class Strings {
             'sv-SE' => 'Svenska',
             'zh-CN' => '中文',
             'mn-MN' => 'Монгол',
-            'id-ID' => 'Bahasa Indonesia'
+            'id-ID' => 'Bahasa Indonesia',
+            'fi-FI' => 'Suomi'
         );
 
         self::$defaultTranslations = array(
