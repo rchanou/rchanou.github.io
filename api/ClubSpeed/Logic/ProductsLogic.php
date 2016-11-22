@@ -29,7 +29,9 @@ class ProductsLogic extends BaseLogic {
                 $product->TaxID = 1; // this cannot be null, so set it to something, or let it fail?
             $tax = $logic->taxes->get($product->TaxID);
             $tax = $tax[0];
-            $product->ProductClassID = 1; // TODO: non-null
+            if (empty($product->ProductClassID)) {
+                $product->ProductClassID = 1;
+            }
             $product->IsSpecial = false; // TODO: non-null
             $product->AvailableDay = ''; // TODO: non-null
             $product->AvailableFromTime = \ClubSpeed\Utility\Convert::getDate(); // TODO: non-null

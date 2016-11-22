@@ -1,0 +1,110 @@
+{
+    "table": {
+        "name": "EventHeatTypes",
+        "alias": "eht"
+    },
+    "columns": [
+        {
+            "name": "EventHeatTypeNo",
+            "type": "int",
+            "nullable": false,
+            "primaryKey": true,
+            "identity": true,
+            "length": 10
+        },
+        {
+            "name": "CadetsPerHeat",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "Description",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": 50
+        },
+        {
+            "name": "EventTypeID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "GridID",
+            "type": "int",
+            "nullable": true,
+            "length": 10
+        },
+        {
+            "name": "HeatsPerRacer",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "HeatTypeNo",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "IsInverted",
+            "type": "bit",
+            "nullable": true
+        },
+        {
+            "name": "IsSemi",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "LineUpType",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "ProceedMethod",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "ProceedValue",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "RacersPerHeat",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "RoundNum",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "RoundWinby",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "ScoreSystemID",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "TeamGroupingType",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        }
+    ]
+}

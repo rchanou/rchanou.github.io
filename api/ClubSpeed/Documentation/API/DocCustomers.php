@@ -247,7 +247,7 @@ EOS;
                 "name" => "gender",
                 "type" => "Integer",
                 "default" => "0",
-                "required" => true,
+                "required" => false,
                 "description" => ""
                     ."\n<span>"
                     ."\n  The gender of the customer"

@@ -435,9 +435,7 @@ class CustomersLogic extends BaseLogic {
             throw new \RequiredArgumentMissingException("Customer create received a null or empty LName!");
         // if (!isset($customer->BirthDate) || empty($customer->BirthDate))
             // throw new \RequiredArgumentMissingException("Customer create received a null or empty BirthDate!");
-        if (!isset($customer->Gender)) // Gender of 0 is allowed, and PHP considers this to be empty - only check for isset
-            throw new \RequiredArgumentMissingException("Customer create received a null Gender!");
-
+        
         // validate email
         if (isset($customer->EmailAddress) && !empty($customer->EmailAddress)) {
 
@@ -473,6 +471,9 @@ class CustomersLogic extends BaseLogic {
                     $customer->Gender = 0;
                     break;
             }
+        }
+        else {
+            $customer->Gender = 0; // other
         }
 
         // if RacerName is missing, use FName + " " + LName
@@ -507,9 +508,7 @@ class CustomersLogic extends BaseLogic {
             throw new \RequiredArgumentMissingException("Customer create received a null or empty FName!");
         if (!isset($customer->LName) || empty($customer->LName))
             throw new \RequiredArgumentMissingException("Customer create received a null or empty LName!");
-        if (!isset($customer->Gender)) // Gender of 0 is allowed, and PHP considers this to be empty - only check for isset
-            throw new \RequiredArgumentMissingException("Customer create received a null Gender!");
-
+        
         // validate email
         if (isset($customer->EmailAddress) && !empty($customer->EmailAddress)) {
 
@@ -531,21 +530,12 @@ class CustomersLogic extends BaseLogic {
             $customer->Hash = Hasher::hash($customer->Hash);
         }
 
-        // convert the gender to the expected gender "id" on the database
-        if (isset($params['Gender']) && !empty($params['Gender'])) {
-            $gender = strtolower($params['Gender']);
-            $genderChar = $gender[0];
-            switch ($genderChar) {
-                case "m": // male
-                    $customer->Gender = 1;
-                    break;
-                case "f": // female
-                    $customer->Gender = 2;
-                    break;
-                case "o": // other
-                    $customer->Gender = 0;
-                    break;
-            }
+        // gender will already be "casted" to an int in uow,
+        // so we can't do the mapping from "male" to 1, "female" to 2
+        // we could cheat and look at @$request_data['gender'],
+        // if we wanted to bypass the system and support that lookup.
+        if (!isset($customer->Gender)) {
+            $customer->Gender = 0; // other
         }
 
         // if RacerName is missing, use FName + " " + LName
@@ -699,6 +689,9 @@ class CustomersLogic extends BaseLogic {
                         $customer->Gender = 0;
                         break;
                 }
+            }
+            else {
+                $customer->Gender = 0; // other
             }
 
             // validate password strength, then hash it
