@@ -7,8 +7,8 @@ class Version
         
     // Versions of various applications and modules
     public $speedscreenVersion = '2.0.0';
-    public $apiVersion = '1.7.1';
-    public $apiLastUpdatedAt = '6/28/2016 10:00';
+    public $apiVersion = '1.7.2';
+    public $apiLastUpdatedAt = '11/28/2016 11:00';
 
     function __construct(){
         $this->logic = $GLOBALS['logic'];
@@ -152,6 +152,8 @@ class Version
         $registrationEnabled = isset($settings["registrationEnabled"]) ? (bool)$settings["registrationEnabled"] : null;
 
         $output = array(
+          'phpversion' => phpversion(),
+          'curl_version' => curl_version(),
           'PaymentProcessor' => $paymentProcessor,
           'TestMode' => $testMode,
           'Enabled' => $registrationEnabled
