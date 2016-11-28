@@ -90,6 +90,8 @@ Gridding Types:
 - Balanced: P1 given to 1, 2, 3; P2 for 4, 5, 6; P3 for 7, 8, 9; P4 for 10 (in the case of a 10 person, 4 per group race)
 - Magix (every racer races every grid position)
 - Fair (most equal combination of best and worst people)
+- Fair Teams (Drivers sorted by points then gridded "fairly" into teams)
+- Custom (Defined by sp_admin panel)
 
 Invert the Lineup? Yes/No
 
