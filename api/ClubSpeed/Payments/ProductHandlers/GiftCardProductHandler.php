@@ -40,6 +40,9 @@ class GiftCardProductHandler extends BaseProductHandler {
         $return = array(
             'success' => array()
         );
+
+        $sendEmail = isset($metadata['sendEmail']) ? $metadata['sendEmail'] : true;
+
         for($i = 0; $i < $checkTotal->Qty; $i++) {
             // note: since the handler is now handling looping qty,
             // where should the loop end? on first error, or continue processing?
@@ -95,112 +98,114 @@ class GiftCardProductHandler extends BaseProductHandler {
                 throw new \Exception($message);
             }
 
-            try {
-                $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
-                $businessName = $businessName[0];
-                $businessName = $businessName->SettingValue;
+            if ($sendEmail) {
+                try {
+                    $businessName = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = BusinessName");
+                    $businessName = $businessName[0];
+                    $businessName = $businessName->SettingValue;
 
-                $customer = $this->logic->customers->get($checkTotal->CustID);
-                $customer = $customer[0];
-                $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
-                
-                $customer = $this->logic->customers->get($checkTotal->CustID);
-                $customer = $customer[0];
-                $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
+                    $customer = $this->logic->customers->get($checkTotal->CustID);
+                    $customer = $customer[0];
+                    $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
+                    
+                    $customer = $this->logic->customers->get($checkTotal->CustID);
+                    $customer = $customer[0];
+                    $emailTo  = array($customer->EmailAddress => $customer->FName . ' ' . $customer->LName);
 
-                $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
-                $emailFrom = $emailFrom[0];
-                $emailFrom = array($emailFrom->SettingValue => $businessName);
+                    $emailFrom = $this->logic->controlPanel->find("TerminalName = MainEngine AND SettingName = EmailWelcomeFrom");
+                    $emailFrom = $emailFrom[0];
+                    $emailFrom = array($emailFrom->SettingValue => $businessName);
 
-                $giftCardBalance = $this->logic->giftCardBalance->match(array(
-                    'CrdID' => $giftCardCustomer->CrdID // not using `get` in case primary key changes
-                ));
-                $giftCardBalance = $giftCardBalance[0];
+                    $giftCardBalance = $this->logic->giftCardBalance->match(array(
+                        'CrdID' => $giftCardCustomer->CrdID // not using `get` in case primary key changes
+                    ));
+                    $giftCardBalance = $giftCardBalance[0];
 
-                $barCodeUtil = new DNS1D(); //Bar-code generating library
+                    $barCodeUtil = new DNS1D(); //Bar-code generating library
 
-                $giftCardEmailBodyHtml = $this->logic->settings->match(array(
-                    'Namespace' => 'Booking',
-                    'Name' => 'giftCardEmailBodyHtml'
-                ));
-                $giftCardEmailBodyHtml = $giftCardEmailBodyHtml[0];
-                $giftCardEmailBodyHtml = $giftCardEmailBodyHtml->Value;
+                    $giftCardEmailBodyHtml = $this->logic->settings->match(array(
+                        'Namespace' => 'Booking',
+                        'Name' => 'giftCardEmailBodyHtml'
+                    ));
+                    $giftCardEmailBodyHtml = $giftCardEmailBodyHtml[0];
+                    $giftCardEmailBodyHtml = $giftCardEmailBodyHtml->Value;
 
-                $giftCardEmailSubject = $this->logic->settings->match(array(
-                    'Namespace' => 'Booking',
-                    'Name' => 'giftCardEmailSubject'
-                ));
+                    $giftCardEmailSubject = $this->logic->settings->match(array(
+                        'Namespace' => 'Booking',
+                        'Name' => 'giftCardEmailSubject'
+                    ));
 
-                $giftCardEmailSubject = $giftCardEmailSubject[0];
-                $giftCardEmailSubject = $giftCardEmailSubject->Value;
-                $giftCardEmailSubject = str_replace(
-                    array('{{business}}', '{{checkId}}'),
-                    array($businessName, $checkTotal->CheckID),
-                    $giftCardEmailSubject
-                );
+                    $giftCardEmailSubject = $giftCardEmailSubject[0];
+                    $giftCardEmailSubject = $giftCardEmailSubject->Value;
+                    $giftCardEmailSubject = str_replace(
+                        array('{{business}}', '{{checkId}}'),
+                        array($businessName, $checkTotal->CheckID),
+                        $giftCardEmailSubject
+                    );
 
-                $giftCardEmailBodyHtml = str_replace(
-                    array('{{giftCardImage}}'),
-                    array('##giftCardImage##'),
-                    $giftCardEmailBodyHtml
-                );
-
-                $giftCardData = array(
-                    'customer'    => $customer->FName . ' ' . $customer->LName,
-                    'giftCardNo'  => $giftCardCustomer->CrdID,
-                    'description' => $product->Description,
-                    'balance'     => Currency::toCurrencyString($giftCardBalance->Money),
-                    'business'    => $businessName
-                );
-
-                $dateFormat = $this->findStringBetween($giftCardEmailBodyHtml,'{{date:','}}');
-
-                if ($dateFormat !== null)
-                {
-                    $dateTag = '{{date:' . $dateFormat . '}}';
-                    $date = date($dateFormat);
                     $giftCardEmailBodyHtml = str_replace(
-                        array($dateTag),
-                        array($date),
+                        array('{{giftCardImage}}'),
+                        array('##giftCardImage##'),
                         $giftCardEmailBodyHtml
                     );
-                }
 
-                $receiptBody = Templates::buildFromString($giftCardEmailBodyHtml, $giftCardData);
+                    $giftCardData = array(
+                        'customer'    => $customer->FName . ' ' . $customer->LName,
+                        'giftCardNo'  => $giftCardCustomer->CrdID,
+                        'description' => $product->Description,
+                        'balance'     => Currency::toCurrencyString($giftCardBalance->Money),
+                        'business'    => $businessName
+                    );
 
-                $sendReceiptCopyTo = $this->logic->controlPanel->match(array(
-                    'TerminalName' => 'Booking',
-                    'SettingName' => 'sendReceiptCopyTo'
-                ));
-                if (!empty($sendReceiptCopyTo)) {
-                    $sendReceiptCopyTo = $sendReceiptCopyTo[0];
-                    $sendReceiptCopyTo = $sendReceiptCopyTo->SettingValue; // this will default to an empty string
-                    if (!empty($sendReceiptCopyTo)) {
-                        $sendReceiptCopyTo = explode(",", $sendReceiptCopyTo); // we should be able to use this directly as the BCC
-                        array_walk($sendReceiptCopyTo, function(&$val) {
-                            $val = trim($val); // get rid of any additional whitespace in the comma-delimited list of emails
-                        });
+                    $dateFormat = $this->findStringBetween($giftCardEmailBodyHtml,'{{date:','}}');
+
+                    if ($dateFormat !== null)
+                    {
+                        $dateTag = '{{date:' . $dateFormat . '}}';
+                        $date = date($dateFormat);
+                        $giftCardEmailBodyHtml = str_replace(
+                            array($dateTag),
+                            array($date),
+                            $giftCardEmailBodyHtml
+                        );
                     }
+
+                    $receiptBody = Templates::buildFromString($giftCardEmailBodyHtml, $giftCardData);
+
+                    $sendReceiptCopyTo = $this->logic->controlPanel->match(array(
+                        'TerminalName' => 'Booking',
+                        'SettingName' => 'sendReceiptCopyTo'
+                    ));
+                    if (!empty($sendReceiptCopyTo)) {
+                        $sendReceiptCopyTo = $sendReceiptCopyTo[0];
+                        $sendReceiptCopyTo = $sendReceiptCopyTo->SettingValue; // this will default to an empty string
+                        if (!empty($sendReceiptCopyTo)) {
+                            $sendReceiptCopyTo = explode(",", $sendReceiptCopyTo); // we should be able to use this directly as the BCC
+                            array_walk($sendReceiptCopyTo, function(&$val) {
+                                $val = trim($val); // get rid of any additional whitespace in the comma-delimited list of emails
+                            });
+                        }
+                    }
+
+                    $mail = Mail::builder()
+                        ->subject($giftCardEmailSubject)
+                        ->from($emailFrom)
+                        ->to($emailTo)
+                        ->body($receiptBody);
+
+                    if (!empty($sendReceiptCopyTo)) {
+                        Log::info($logPrefix . 'Gift card receipt copies will be sent to the following addresses: ' . print_r($sendReceiptCopyTo, true), Enums::NSP_BOOKING);
+                        $mail->bcc($sendReceiptCopyTo);
+                    }
+
+                    Mail::sendWithInlineImages($mail, array('giftCardImage' => $barCodeUtil->getBarcodePNG($giftCardCustomer->CrdID, "C128",2,60)));
+                    Log::info($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID, Enums::NSP_BOOKING);
                 }
-
-                $mail = Mail::builder()
-                    ->subject($giftCardEmailSubject)
-                    ->from($emailFrom)
-                    ->to($emailTo)
-                    ->body($receiptBody);
-
-                if (!empty($sendReceiptCopyTo)) {
-                    Log::info($logPrefix . 'Gift card receipt copies will be sent to the following addresses: ' . print_r($sendReceiptCopyTo, true), Enums::NSP_BOOKING);
-                    $mail->bcc($sendReceiptCopyTo);
+                catch(\Exception $e) {
+                    $message = $logPrefix . 'Unable to send gift card email! ' . $e->getMessage();
+                    Log::error($message, Enums::NSP_BOOKING);
+                    throw new \Exception($message);
                 }
-
-                Mail::sendWithInlineImages($mail, array('giftCardImage' => $barCodeUtil->getBarcodePNG($giftCardCustomer->CrdID, "C128",2,60)));
-                Log::info($logPrefix . 'Sent gift card email to: ' . $customer->EmailAddress . ' for gift card #' . $giftCardCustomer->CrdID, Enums::NSP_BOOKING);
-            }
-            catch(\Exception $e) {
-                $message = $logPrefix . 'Unable to send gift card email! ' . $e->getMessage();
-                Log::error($message, Enums::NSP_BOOKING);
-                throw new \Exception($message);
             }
         }
 
