@@ -231,7 +231,7 @@ class Settings {
                 'Israel' => 'Yisra\'el',
                 'Italy' => 'Italia',
                 'Jamaica' => 'Jamaica',
-                'Japan' => 'Nippon',
+                'Japan' => 'Japan',
                 'Jordan' => 'Al Urdun',
                 'Kazakhstan' => 'Qazaqstan',
                 'Kenya' => 'Kenya',
