@@ -16,7 +16,7 @@ class DocRESTful Extends DocAPIBase {
           'header_icon' => 'info-sign',
           'preface' => <<<EOS
 <p>
-  The ClubSpeed API maintains a RESTful set of interfaces.
+  The ClubSpeed API implements a RESTful set of interfaces.
 </p>
 <p>
   For almost every resource detailed below (with a few exceptions,
@@ -78,25 +78,34 @@ class DocRESTful Extends DocAPIBase {
                     <td></td>
                     <td>Number representing record count</td>
                 </tr>
-                <tr>
-                    <td>GET</td>
-                    <td>/api/index.php/resource/:id1/:id2</td>
-                    <td>Get single record by composite key</td>
-                    <td></td>
-                    <td>Object representation of record</td>
-                </tr>
             </tbody>
         </table>
     </div>
 </div>
 <p>
+  Wherever a word prefixed with <code class="prettyprint">:</code> appears in a URL, such as
+  <code class="prettyprint">:variable</code>, you should replace
+  <code class="prettyprint">:variable</code> with its corresponding value.
+</p>
+<p>
   If a resource is noted to be read-only,
   then you should assume that only <code class="prettyprint">GET</code> methods are available.
 </p>
+<br>
 <p>
-  Wherever a string prefixed with <code class="prettyprint">:</code> appears in the URL, such as
-  <code class="prettyprint">:variable</code>, you should replace
-  <code class="prettyprint">:variable</code> with its corresponding value.
+  Also note that some resources make use of composite primary keys.
+  When a composite key is being used, then each piece of the composite key
+  will correspond to one <code class="prettyprint">:id</code> in the route,
+  placed in the order they appear in the documentation.
+</p>
+<p>
+  For example, to
+  <code class="prettyprint">GET</code>,
+  <code class="prettyprint">PUT</code>,
+  or <code class="prettyprint">DELETE</code>
+  a <a href="#heat-details">HeatDetail</a> record,
+  the relevant route will be:
+  <code class="prettyprint">/api/index.php/heatdetails/:heatId/:customerId</code>
 </p>
 EOS
         );

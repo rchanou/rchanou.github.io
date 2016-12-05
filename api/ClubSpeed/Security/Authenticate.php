@@ -62,6 +62,15 @@ class Authenticate {
             self::$isInitialized = true;
         }
     }
+	
+	 public static function localAccess() {
+     $whitelist = array('127.0.0.1','::1' );
+	  
+     if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+		return true;
+	 }
+	    return false;
+    }
 
     /**
      * Verifies the credentials of the current session by comparing public keys,

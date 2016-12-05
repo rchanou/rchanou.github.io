@@ -363,7 +363,7 @@ EOS;
                 "name" => "g_Points",
                 "type" => "Double",
                 "default" => "",
-                "description" => "The amount of money to be applied to <code class=\"prettyprint\">CheckDetail.g_CustId on purchase</code>, which corresponds to <code class=\"prettyprint\">Product.g_Points</code>"
+                "description" => "The amount of money to be given to <code class=\"prettyprint\">CheckDetail.g_CustId</code> at purchase / <a href=\"#checks-finalize\">check finalize</a>. This value typically corresponds to <code class=\"prettyprint\">Product.g_Points</code>"
             ),
             array(
                 "name" => "gst",

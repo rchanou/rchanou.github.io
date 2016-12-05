@@ -144,26 +144,41 @@ class SqlBuilder {
         $from = self::buildUowFrom($uow);
         $where = self::buildUowWhere($uow);
 
-        $all['statement'] = ""
-            ."\n". $select['statement']
-            ."\nFROM ("
-            ."\n    SELECT"
-            ."\n        *"
-            ."\n        , ROW_NUMBER() OVER (ORDER BY " . $order . ") AS [Rank]"
-            ."\n    " . $from['statement']
-            . (!empty($where['statement']) ? "\n    " . $where['statement'] : '')
-            ."\n) " . $alias
-            ."\nWHERE"
-            ."\n        " . $alias . ".[Rank] >  :offset"
-            ."\n    AND " . $alias . ".[Rank] <= :offsetLimit"
-            ."\nORDER BY"
-            ."\n    ". $alias . ".[Rank]"
-            ;
+        $hasOffset = !empty($uow->offset);
 
-        $all['values'] = array_merge($where['values'], array( // where values should come first.
-              ':offset'      => $uow->offset
-            , ':offsetLimit' => $uow->offset + $uow->limit
-        ));
+        if ($hasOffset) {
+            $all['statement'] = ""
+                ."\n". $select['statement']
+                ."\nFROM ("
+                ."\n    SELECT"
+                ."\n        *"
+                ."\n        , ROW_NUMBER() OVER (ORDER BY " . $order . ") AS [Rank]"
+                ."\n    " . $from['statement']
+                . (!empty($where['statement']) ? "\n    " . $where['statement'] : '')
+                ."\n) " . $alias
+                ."\nWHERE"
+                ."\n        " . $alias . ".[Rank] >  :offset"
+                ."\n    AND " . $alias . ".[Rank] <= :offsetLimit"
+                ."\nORDER BY"
+                ."\n    ". $alias . ".[Rank]"
+                ;
+
+            $all['values'] = array_merge($where['values'], array( // where values should come first.
+                  ':offset'      => $uow->offset
+                , ':offsetLimit' => $uow->offset + $uow->limit
+            ));
+        }
+        else {
+            $all['statement'] = ""
+                ."\n" . $select['statement']
+                ."\n" . $from['statement']
+                . (!empty($where['statement']) ? "\n" . $where['statement'] : '')
+                ."\nORDER BY"
+                ."\n    ". $order
+                ;
+            $all['values'] = $where['values'];
+        }
+
         return $all;
     }
 
@@ -318,6 +333,7 @@ class SqlBuilder {
         );
         $table = $uow->definition['table']['name'];
         $alias = $uow->definition['table']['alias'];
+
         if (is_null($uow->select) || empty($uow->select)) {
             $uow->select = array();
             $columns = $uow->table->getProperties(\ReflectionProperty::IS_PUBLIC);
@@ -330,10 +346,21 @@ class SqlBuilder {
         foreach ($uow->select as $column)
             $select['names'][] = $alias . '.' . $column; // do we want the table alias? problematic with the paging.
         $select['names'][0] = '      ' . $select['names'][0]; // for readability (?)
-        $select['statement'] = ""
-            ."SELECT"
-            ."\n" . implode("\n    , ", $select['names'])
-            ;
+
+        $columns = implode("\n    , ", $select['names']);
+
+        $header = null;
+        $hasOffset = !empty($uow->offset);
+        if (!$hasOffset) {
+            // use SELECT TOP for performance, instead of windowing functions / rank?
+            $header = 'SELECT TOP ' . $uow->limit;
+        }
+        else {
+            $header = 'SELECT';
+        }
+
+        $statement = $header . "\n" . $columns;
+        $select['statement'] = $statement;
 
         return $select;
     }

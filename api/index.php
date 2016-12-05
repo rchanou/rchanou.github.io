@@ -68,6 +68,7 @@ $r->addAPIClass('HeatTypeProducts');
 $r->addAPIClass('HeatTypes');
 $r->addAPIClass('Locations');
 $r->addAPIClass('Logs');
+$r->addAPIClass('Maintenance');
 $r->addAPIClass('Memberships');
 $r->addAPIClass('MembershipTypes');
 $r->addAPIClass('Omnipay');
