@@ -2,11 +2,71 @@ var restify = require('./lib/node_modules/restify'),
     receipt = require('./lib/receipt.js'),
     gridding = require('./lib/gridding.js'),
     creditCard = require('./lib/creditCard.js'),
-    fiscal = require('./lib/fiscal.js');
-
-var moment = require('./lib/node_modules/moment');
-var momentT = require('./lib/node_modules/moment-transform/src/moment-transform.js');
+    schedule =  require('./lib/node_modules/node-schedule'),
+    fiscal = require('./lib/fiscal.js'),
+    request = require('./lib/node_modules/request'),
+    moment = require('./lib/node_modules/moment'),
+    momentT = require('./lib/node_modules/moment-transform/src/moment-transform.js');
 var debug = true;
+
+
+var maintenanceRequestTimeout = 1200000;
+var rebuildIndexesRule = new schedule.RecurrenceRule();
+rebuildIndexesRule.hour = 3;
+rebuildIndexesRule.minute = 0;
+
+var apiKey = 'cs-dev';
+
+var qs = {
+  key: apiKey
+};
+
+var rebuildIndexesJob = schedule.scheduleJob(rebuildIndexesRule, function() {
+  var options = {
+    url: 'http://localhost/api/index.php/maintenance/rebuild_indexes',
+    qs: qs,
+    timeout: maintenanceRequestTimeout,
+    headers: {'content-type' : 'application/json'}
+  };
+
+  request.post(options, function(error, response, body) {
+    if (error) {
+       return console.error(error); 
+    }
+    if (response.statusCode !== 200) {
+       return console.error('Received status ' + response.statusCode + ': ' + JSON.stringify(body)); 
+    }
+    console.log('Received status 200');
+	});
+});
+
+
+var updateStatisticsRule = new schedule.RecurrenceRule();
+updateStatisticsRule.dayOfWeek = 0; //Sunday
+updateStatisticsRule.hour = 4;
+updateStatisticsRule.minute = 0;
+ 
+var updateStatisticsJob = schedule.scheduleJob(updateStatisticsRule, function(){
+    var options = {
+    url: 'http://localhost/api/index.php/maintenance/update_statistics',
+    qs: qs,
+    timeout: maintenanceRequestTimeout,
+    headers: {'content-type' : 'application/json'}
+  };
+  
+  request.post(options, function(error, response, body) {
+    if (error) {
+       return console.error(error); 
+    }
+    if (response.statusCode !== 200) {
+       return console.error('Received status ' + response.statusCode + ': ' + JSON.stringify(body)); 
+    }
+    console.log('Received status 200');
+   });
+});
+
+
+
 
 function respondGrid(req, res, next) {
     var result = gridding.create(req.params.gridType, req.body.participants, req.body.options);
