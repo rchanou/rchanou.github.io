@@ -181,14 +181,12 @@ deviceType: 5
   // Inject CVV, if provided
   if(_.has(xml, 'XML_REQUEST.CVV2.0')) transaction.transactionRequest.payment.creditCard.cardCode = xml.XML_REQUEST.CVV2[0];
 
-  // Inject "billTo", if provided --> 12/9 GKRBurlingame couldn't process manual cards
-  /*
+  // Inject "billTo", if provided
   if(_.has(xml, 'XML_REQUEST.STREET.0') || _.has(xml, 'XML_REQUEST.ZIP_CODE.0')) {
     transaction.transactionRequest.billTo = {};
     if(_.has(xml, 'XML_REQUEST.STREET.0')) transaction.transactionRequest.billTo.address = xml.XML_REQUEST.STREET[0];
     if(_.has(xml, 'XML_REQUEST.ZIP_CODE.0')) transaction.transactionRequest.billTo.zip = xml.XML_REQUEST.ZIP_CODE[0];
   }
-*/
 
   AuthNet.send('createTransaction', transaction, function(err, response) {
     console.log('\n\n\nAUTHNET PARAMS:', JSON.stringify(transaction, null, 4), '\n\n\nAUTHNET ERROR:', JSON.stringify(err, null, 4), '\n\n\nAUTHNET RESPONSE:', JSON.stringify(response, null, 4));
