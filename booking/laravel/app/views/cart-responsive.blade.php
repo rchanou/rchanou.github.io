@@ -11,7 +11,7 @@
 <div class="steps">
     {{link_to('step1',$strings['str_seeTheLineup'])}} > {{link_to('step2',$strings['str_chooseARace'])}} > <em>{{$strings['str_reviewYourOrder']}}</em>
     @if(Session::has('authenticated') && Session::has('cart') && count(Session::get('cart')) > 0)
-    > {{link_to('checkout',$strings['str_checkout'])}}
+    > {{link_to('checkout',$strings['str_checkout'],array('class' => 'disableDoubleClick'))}}
     @else
     > {{$strings['str_checkout']}}
     @endif
@@ -158,9 +158,9 @@
                 </div>
                 @endif
                 <br/>
-                <form action="{{URL::action('CheckoutController@entry')}}">
+                <form action="{{URL::action('CheckoutController@entry')}}" id="checkoutForm" autocomplete="off">
                     <a class="btn formButton formButton-responsive" style="margin-bottom: 5px;" href="{{URL::to('step2')}}">{{$strings['str_addMoreRaces']}}</a>
-                    <button class="btn formButton formButton-responsive" style="margin-bottom: 5px;">{{$strings['str_proceedToCheckout']}}</button>
+                    <button class="btn formButton formButton-responsive" style="margin-bottom: 5px;" id="checkoutButton">{{$strings['str_proceedToCheckout']}}</button>
                 </form>
             @else
                     {{$strings['str_yourCartIsEmpty']}}
@@ -179,6 +179,19 @@
 <!-- BEGIN JAVASCRIPT INCLUDES -->
 @section('js_includes')
 @parent
+<script>
+    window.onunload = function(){}; // prevent firefox's back button showing a disabled button / loading modal
+    $(".disableDoubleClick").one("click", function() {
+        $(this).click(function () { return false; });
+    });
+    $("#checkoutForm").validate({
+        submitHandler: function(form) {
+            $("#checkoutButton").prop('disabled', true);
+            $('#loadingModal').modal();
+            form.submit();
+        }
+    });
+</script>
 @stop
 <!-- END JAVASCRIPT INCLUDES -->
 
