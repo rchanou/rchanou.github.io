@@ -3,8 +3,7 @@ use Clubspeed\Security\Authenticate;
 use ClubSpeed\Enums\Enums as Enums;
 use ClubSpeed\Logging\LogService as Log;
 
-class Maintenance {
-
+class Maintenance   {
      /**
      * @url POST /rebuild_indexes
      */
@@ -38,6 +37,7 @@ INNER JOIN sys.indexes AS dbindexes
 WHERE
  indexstats.database_id = DB_ID()
  AND dbindexes.[name] IS NOT NULL
+ AND indexstats.index_type_desc = 'CLUSTERED INDEX'
  AND indexstats.avg_fragmentation_in_percent > 5.0
 ORDER BY
  indexstats.avg_fragmentation_in_percent DESC
@@ -60,7 +60,8 @@ EOD;
 		 Log::info("Finished rebuilding indexes.", Enums::NSP_MAINTENANCE);
         }
         catch (Exception $e) {
-            $this->_error($e);
+            Log::error($e->getMessage(), Enums::NSP_MAINTENANCE); 
+            _error($e);
         }
     }
      /**
@@ -78,11 +79,18 @@ EOD;
 		Log::info("Finished updating statistics.", Enums::NSP_MAINTENANCE);
         }
         catch (Exception $e) {
-            $this->_error($e);
+           Log::error($e->getMessage(), Enums::NSP_MAINTENANCE); 
+           _error($e);
         }
     }
   
-  
+     private function _error($e) {
+        if ($e instanceof RestException)
+            throw $e;
+        if ($e instanceof CSException)
+            throw new RestException($e->getCode() ?: 412, $e->getMessage());
+        throw new RestException(500, $e->getMessage());
+    }
   
   
 }
