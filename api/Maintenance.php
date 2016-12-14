@@ -37,7 +37,6 @@ INNER JOIN sys.indexes AS dbindexes
 WHERE
  indexstats.database_id = DB_ID()
  AND dbindexes.[name] IS NOT NULL
- AND indexstats.index_type_desc = 'CLUSTERED INDEX'
  AND indexstats.avg_fragmentation_in_percent > 5.0
 ORDER BY
  indexstats.avg_fragmentation_in_percent DESC
