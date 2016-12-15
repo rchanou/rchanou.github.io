@@ -286,7 +286,7 @@ EOS;
                 "type" => "Integer",
                 "default" => "",
                 "required" => false,
-                "description" => "The ID for the event reservation type"
+                "description" => "The ID for the <a href=\"#event-reservation-types\">event reservation type</a>"
             ),
             array(
                 "name" => "userId",

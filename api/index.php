@@ -57,6 +57,7 @@ $r->addAPIClass('EventRounds');
 $r->addAPIClass('Events');
 $r->addAPIClass('EventStatuses');
 $r->addAPIClass('EventHeatTypes');
+$r->addAPIClass('EventReservationTypes');
 $r->addAPIClass('EventTypes');
 $r->addAPIClass('Facebook');
 $r->addAPIClass('FacebookRaces');
