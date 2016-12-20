@@ -136,7 +136,7 @@ EOS;
                 "required" => false,
                 "description" => ""
                     ."\n<span>"
-                    ."\n  The indication of whether the heat will treat the value at <code class=\"prettyprint\">lapsOrMinutes</code> as laps or minutes, defaults to a lookup from <code class=\"prettyprint\">type</code>"
+                    ."\n  The type of the transaction"
                     ."\n</span>"
                     ."\n<ol start=0>"
                     ."\n  <li value=\"0\">Sold gift card</li>"// GIFT_CARD_HISTORY_SELL_GIFT_CARD
