@@ -120,7 +120,7 @@ EOS;
                 "type" => "Double",
                 "default" => "",
                 "required" => false,
-                "description" => "The number of changed points for this transaction. Note that a summation of this field, excluding any records which have a <strong>voided</strong> type, can be considered the current balance for the card"
+                "description" => "The number of changed points (which can be considered <strong>currency / money</strong>) for this transaction. Note that a summation of this field, excluding any records which have a <strong>voided</strong> type, can be considered the current balance for the card"
             ),
             array(
                 "name" => "transactionDate",
