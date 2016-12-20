@@ -18,9 +18,9 @@ class GiftCardHistoryMapper extends BaseMapper {
             , 'CheckDetailID'      => ''
             , 'IPAddress'          => 'ipAddress'
             , 'TransactionDate'    => ''
-            , 'EurekasDBName'      => ''
-            , 'EurekasCheckID'     => ''
-            , 'EurekasPaidInvoice' => ''
+            // , 'EurekasDBName'      => ''
+            // , 'EurekasCheckID'     => ''
+            // , 'EurekasPaidInvoice' => ''
         ));
     }
 }
