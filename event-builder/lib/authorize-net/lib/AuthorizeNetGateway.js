@@ -334,7 +334,11 @@ AuthorizeNetGateway.prototype.refundTransaction = function refundTransaction (tr
           expirationDate: fullOpt.expirationMonth + fullOpt.expirationYear
         }
       },
-      refTransId: transactionId
+      refTransId: transactionId,
+      retail: {
+        marketType: 2,
+        deviceType: 5
+      }
     }, function (transaction) {
       return {
         _original: transaction
@@ -631,5 +635,3 @@ AuthorizeNetGateway.prototype.createSubscription = function createSubscription (
 };
 
 module.exports = AuthorizeNetGateway;
-
-
