@@ -1,0 +1,39 @@
+{
+    "table": {
+        "name": "TasksForCheckEvent",
+        "alias": "tfce"
+    },
+    "columns": [
+        {
+            "name": "TaskID",
+            "type": "int",
+            "nullable": false,
+            "primaryKey": true,
+            "identity": true,
+            "length": 10
+        },
+        {
+            "name": "Deleted",
+            "type": "bit",
+            "nullable": false
+        },
+        {
+            "name": "Seq",
+            "type": "int",
+            "nullable": false,
+            "length": 10
+        },
+        {
+            "name": "TaskDescription",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": 255
+        },
+        {
+            "name": "TaskName",
+            "type": "nvarchar",
+            "nullable": false,
+            "length": 50
+        }
+    ]
+}

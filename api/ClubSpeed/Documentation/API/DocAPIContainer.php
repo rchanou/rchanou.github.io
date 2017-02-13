@@ -124,6 +124,8 @@ class DocAPIContainer {
         $data['sections'][] = new DocEventRounds();
         $data['sections'][] = new DocEvents();
         $data['sections'][] = new DocEventStatus();
+        $data['sections'][] = new DocEventTasks();
+        $data['sections'][] = new DocEventTaskTypes();
         $data['sections'][] = new DocEventTypes();
         $data['sections'][] = new DocGiftCardHistory();
         $data['sections'][] = new DocHeatDetails();
