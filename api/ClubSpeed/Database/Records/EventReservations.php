@@ -31,4 +31,5 @@ class EventReservations extends BaseRecord {
     public $Subject;
     public $TypeID;
     public $UserID;
+    public $ExternalSystemID;
 }

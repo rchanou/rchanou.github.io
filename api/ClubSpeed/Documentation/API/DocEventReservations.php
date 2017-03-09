@@ -112,7 +112,8 @@ EOS
   "status": 3,
   "subject": "",
   "typeId": 1,
-  "userId": 5
+  "userId": 5,
+  "externalSystemId": null
 }
 EOS;
     }
@@ -294,6 +295,13 @@ EOS;
                 "default" => "",
                 "required" => false,
                 "description" => "The ID for the user that made the event reservation"
+            ),
+            array(
+                "name" => "externalSystemId",
+                "type" => "String",
+                "default" => "",
+                "required" => false,
+                "description" => "A field for storing an external reference for the event reservation. Not utilized internally by ClubSpeed"
             )
         );
     }

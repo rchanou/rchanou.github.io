@@ -155,6 +155,12 @@
             "type": "int",
             "nullable": true,
             "length": 10
+        },
+        {
+            "name": "ExternalSystemID",
+            "type": "nvarchar",
+            "nullable": true,
+            "length": -1
         }
     ]
 }

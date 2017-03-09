@@ -34,6 +34,7 @@ class EventReservationsMapper extends BaseMapper {
             , 'Subject' => 'subject'
             , 'TypeID' => 'typeId'
             , 'UserID' => 'userId'
+            , 'ExternalSystemID' => 'externalSystemId'
         ));
     }
 }
