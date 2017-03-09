@@ -92,7 +92,10 @@ class ChecksLogic extends BaseLogic {
             $user = $db->users->get($check->UserID);
             if (is_null($user))
                 throw new \RecordNotFoundException('Users', $check->UserID);
-            $check->CheckType = Enums::CHECK_TYPE_REGULAR;
+            
+            if (empty($check->CheckType)) {
+                $check->CheckType = Enums::CHECK_TYPE_REGULAR;
+            }
             $check->CheckStatus = Enums::CHECK_STATUS_OPEN;
             $check->OpenedDate = Convert::getDate();
             
