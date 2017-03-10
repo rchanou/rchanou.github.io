@@ -221,7 +221,10 @@ class CheckTotalsLogic extends BaseLogic {
             $check->CheckDetailStatus = Enums::CHECK_DETAIL_STATUS_IS_NEW;
             $check->CheckStatus       = Enums::CHECK_STATUS_OPEN;
             $check->CheckDetailType   = $product->ProductType;
-            $check->CheckType         = Enums::CHECK_TYPE_REGULAR; // should we allow events or "show all" (whatever that is) with virtual?
+
+            if (empty($check->CheckType)) {
+                $check->CheckType = Enums::CHECK_TYPE_REGULAR;
+            }
 
             $checkDetailActualQuantity = ($check->Qty ?: 0) + ($check->CadetQty ?: 0);
 
