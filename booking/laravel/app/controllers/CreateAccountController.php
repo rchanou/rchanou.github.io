@@ -198,7 +198,7 @@ class CreateAccountController extends BaseController
                 return Redirect::to('/step1')->withErrors($messages);
             }
         }
-        if ($input['Password'] != $input['PasswordConfirmation'] ) //Enforce password matching requirement
+        if (array_key_exists('Password', $input) && $input['Password'] != $input['PasswordConfirmation'] ) //Enforce password matching requirement
         {
             $createAccountErrors[$itemId][] = $strings['str_passwordsDoNotMatch'];
 
