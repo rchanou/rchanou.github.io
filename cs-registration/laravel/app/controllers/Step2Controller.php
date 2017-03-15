@@ -281,7 +281,7 @@ class Step2Controller extends BaseController {
         }
 
         // If there's an event code, fetch the corresponding eventId if one exists
-        if (array_key_exists("EventCode",$input)) {
+        if (array_key_exists("EventCode",$input) && array_key_exists("eventgroupid",$input) && $input["eventgroupid"] == "EventCode") {
             $eventsMatchingEventCode = CS_API::getEventGroupsByEventCode($input["EventCode"]);
             if (empty($eventsMatchingEventCode))
             {
@@ -294,6 +294,7 @@ class Step2Controller extends BaseController {
                 $input["eventgroupid"] = $eventsMatchingEventCode[0]["eventId"];
             }
         }
+
         //If there was an image selected, convert it and insert into session
         if (array_key_exists("cameraInput",$input))
         {
