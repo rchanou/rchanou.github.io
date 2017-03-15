@@ -241,6 +241,11 @@ class Step2Controller extends BaseController {
             return Redirect::to('/step2')->withErrors($messages)->withInput();
         }
 
+        if (isset($input['eventgroupid']) && $input['eventgroupid'] == 'EventCode')
+        {
+            $rules['EventCode'] = 'required';
+        }
+
         //Error messages in case of validation failure
         $messages = array(
             'birthdate.required' => $strings['str_birthdate.required'],
@@ -263,7 +268,8 @@ class Step2Controller extends BaseController {
             'Custom3.required' => $strings['str_Custom3.required'],
             'Custom4.required' => $strings['str_Custom4.required'],
             'LicenseNumber.required' => $strings['str_LicenseNumber.required'],
-            'Zip.validzipcode' => $strings['str_invalidZipCode']
+            'Zip.validzipcode' => $strings['str_invalidZipCode'],
+            'EventCode.required' => $strings['str_EventCode.required']
         );
 
         //Create the validator
@@ -272,6 +278,19 @@ class Step2Controller extends BaseController {
         // If validation fails, redirect
         if ($validator->fails()) {
             return Redirect::to('/step2')->withErrors($validator)->withInput();
+        }
+
+        // If there's an event code, fetch the corresponding eventId if one exists
+        $eventsMatchingEventCode = CS_API::getEventGroupsByEventCode($input["EventCode"]);
+        if (empty($eventsMatchingEventCode))
+        {
+            $messages = new Illuminate\Support\MessageBag;
+            $messages->add('errors', $strings['str_invalidEventCode']);
+            return Redirect::to('/step2')->withErrors($messages)->withInput();
+        }
+        else
+        {
+            $input["eventgroupid"] = $eventsMatchingEventCode[0]["eventId"];
         }
 
         //If there was an image selected, convert it and insert into session

@@ -199,6 +199,48 @@ class CS_API
         return $result;
     }
 
+    public static function getEventGroupsByEventCode($eventCode)
+    {
+        self::initialize();
+
+        $urlParams = array(
+            'where' => array(
+                'onlineCode' => $eventCode
+            ),
+            'key' => self::$privateKey
+        );
+
+        $url = self::$baseAPIURL. '/events?' . http_build_query($urlParams);
+
+        //Set up headers
+        $options = array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 6,
+            CURLOPT_HTTPHEADER => array('Content-type: application/json'),
+            CURLOPT_SSL_VERIFYPEER => false
+        );
+
+        //Execute the query
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, $options);
+        $result = curl_exec($ch);
+
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($status !== 200)
+            return false;
+
+        $result = json_decode($result,true);
+
+        $errorInfo = array('url' => $url, 'params' => $urlParams, 'response' => $result);
+        Session::put('errorInfo', $errorInfo);
+        Session::put('errorInfoURL',$url);
+        Session::put('errorParams',$urlParams);
+        Session::put('errorResponse',$result);
+
+        return $result;
+    }
+
     public static function extendFacebookToken($shortLivedToken)
     {
         self::initialize();

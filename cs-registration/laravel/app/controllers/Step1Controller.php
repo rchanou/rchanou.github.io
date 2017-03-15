@@ -265,6 +265,8 @@ class Step1Controller extends BaseController
                 $settings['eventGroupIDOptions']['-1'] = 'Walk-in';
             }
 
+            $settings['eventGroupIDOptions']['EventCode'] = $strings['str_iHaveAnEventCode'];
+
             //If the new-style waiver texts have been defined and requested, use those instead of the old Waiver1 and Waiver2 settings
             if (isset($settings['useNewWaivers']) && $settings['useNewWaivers'] === true)
             {

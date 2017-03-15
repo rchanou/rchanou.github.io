@@ -154,7 +154,11 @@ class Strings {
             'str_liveImageFromCamera' => 'Live Image from Camera',
             'str_takeAPicture' => 'Take a picture',
             'str_currentProfilePicture' => 'Current Profile Picture',
-            'str_switchToFacebookPicture' => 'Switch to Facebook Picture'
+            'str_switchToFacebookPicture' => 'Switch to Facebook Picture',
+            'str_iHaveAnEventCode' => 'I have an event code',
+            'str_EventCode.required' => 'Event code is required',
+            'str_invalidEventCode' => 'Invalid event code. Please try again.',
+            'str_EventCode' => 'Event Code'
         );
 
         self::$cultureNames = array(
@@ -300,7 +304,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''),
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''),
             'en-NZ' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -415,7 +423,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''),
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''),
             'en-AU' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -530,7 +542,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''),
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''),
             'en-IE' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -645,7 +661,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''),
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''),
             'en-CA' => array(
                 'str_welcomeMessage' => 'Welcome to our track!',
                 'str_registerHeader' => 'Register',
@@ -760,7 +780,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''),
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''),
             'zh-CN' => array(
                 'str_welcomeMessage' => '欢迎来到我们车馆',
                 'str_registerHeader' => '注册',
@@ -875,7 +899,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''
             ),
             'de-DE' => array(
                 'str_welcomeMessage' => 'Herzlich Willkommen!',
@@ -991,7 +1019,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''
             ),
             'nl-NL' => array(
                 "str_LicenseNumber.required" => "Licentie # nodig",
@@ -1106,7 +1138,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''
             ),
             'fr-CA' => array(
             'str_welcomeMessage' => 'Bienvenue sur notre piste!',
@@ -1222,7 +1258,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''
         ),
             'fr-FR' => array(
                 'str_welcomeMessage' => 'Bienvenue sur notre piste!',
@@ -1338,7 +1378,11 @@ class Strings {
                 'str_liveImageFromCamera' => '',
                 'str_takeAPicture' => '',
                 'str_currentProfilePicture' => '',
-                'str_switchToFacebookPicture' => ''
+                'str_switchToFacebookPicture' => '',
+                'str_iHaveAnEventCode' => '',
+                'str_EventCode.required' => '',
+                'str_invalidEventCode' => '',
+                'str_EventCode' => ''
             )
 
         );
