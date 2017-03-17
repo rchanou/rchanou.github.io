@@ -112,7 +112,13 @@
                 <div class="centered">
                     {{ Form::label('eventgroupid', $strings['str_imherefor'] . ':') }}
                     <span class="requiredAsterisk">*</span><br/>
-                    {{ Form::select('eventgroupid', $settings['eventGroupIDOptions'], Input::old('eventgroupid',''),array('style' => 'color: black;') ) }}<p/>
+                    {{ Form::select('eventgroupid', $settings['eventGroupIDOptions'], Input::old('eventgroupid',''),array('id' => 'EventGroupSelector', 'style' => 'color: black;') ) }}<p/>
+                    <div id="EventCodeField" style="display: none;">
+                        {{ Form::label('EventCode', $strings['str_EventCode'] . ':') }}
+                        <span class="requiredAsterisk">*</span><br/>
+                        {{ Form::text('EventCode',Input::old('EventCode',''),array('maxlength'=>'100')) }}
+                    </div>
+
                 </div>
             @else
                 <div class="centered">
@@ -132,6 +138,27 @@
 @stop
 <!-- END PAGE CONTENT -->
 
+@section('js_includes')
+    @parent
+    <script>
+        var $eventGroupSelector = $('#EventGroupSelector');
+        var $eventCodeField = $('#EventCodeField');
+
+        var currentEventGroup = $eventGroupSelector.val();
+        if (currentEventGroup == 'EventCode') {
+          $eventCodeField.show();
+        }
+        $eventGroupSelector.change(function() {
+          var currentSelection = this.value;
+          if (currentSelection == 'EventCode') {
+            $eventCodeField.show();
+          }
+          else {
+            $eventCodeField.hide();
+          }
+        });
+    </script>
+@stop
 <!-- FOOTER -->
 
 @section('leftFooterButton')

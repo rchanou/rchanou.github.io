@@ -154,6 +154,9 @@ class CheckInController extends BaseController
      */
     public function postCheckInFinal()
     {
+        $session = Session::all();
+        $strings = $session['strings'];
+
         //Two separate calls? One for Facebook, one for check-in? Needs to be put in queue.
 
         $input = Input::all();
@@ -173,6 +176,26 @@ class CheckInController extends BaseController
 
             //Update their Facebook token with Club Speed
             CS_API::updateFacebookToken($userEmail,$input['facebookId'],$input['facebookToken']);
+        }
+
+        if (array_key_exists("EventCode",$input) && $input["EventCode"] === "" && array_key_exists("eventgroupid",$input) && $input["eventgroupid"] == "EventCode") {
+            $messages = new Illuminate\Support\MessageBag;
+            $messages->add('errors', $strings['str_EventCode.required']);
+            return Redirect::to('/checkinconfirm')->withErrors($messages)->withInput();
+        }
+        // If there's an event code, fetch the corresponding eventId if one exists
+        if (array_key_exists("EventCode",$input) && array_key_exists("eventgroupid",$input) && $input["eventgroupid"] == "EventCode") {
+            $eventsMatchingEventCode = CS_API::getEventGroupsByEventCode($input["EventCode"]);
+            if (empty($eventsMatchingEventCode))
+            {
+                $messages = new Illuminate\Support\MessageBag;
+                $messages->add('errors', $strings['str_invalidEventCode']);
+                return Redirect::to('/checkinconfirm')->withErrors($messages)->withInput();
+            }
+            else
+            {
+                $input["eventgroupid"] = $eventsMatchingEventCode[0]["eventId"];
+            }
         }
 
         //Add the user to the queue (the API will ignore this if their Club Speed version doesn't support clearing the queue cache)
