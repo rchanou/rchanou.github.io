@@ -163,7 +163,8 @@ Dejavoo.prototype.submitTransaction = function submitTransaction(order, creditCa
 				
 				var extData = {};
 				if(_.get(result, 'xmp.response[0].ExtData[0]')) {
-					extData = querystring.parse(_.get(result, 'xmp.response[0].ExtData[0]'));
+					var extDataAsQuery = _.get(result, 'xmp.response[0].ExtData[0]').replace(/,/g, '&');
+					extData = querystring.parse(extDataAsQuery);
 				}
 
 				// Combine messages (if both exist)
@@ -178,7 +179,7 @@ Dejavoo.prototype.submitTransaction = function submitTransaction(order, creditCa
 					transactionId: _.get(result, 'xmp.response[0].RefId[0]') || null,
                     resultCode: _.get(result, 'xmp.response[0].ResultCode[0]'),
 					requestAmount: order.amount.toFixed(2) || null,
-					authorizeAmount: extData.TotalAmt.toFixed(2) || null,
+					authorizeAmount: extData.TotalAmt || null,
 					creditCardAccount:  extData.AcntLast4 || null,
 					creditCardType: extData.CardType || null,
 					creditCardAuthorizationCode: _.get(result, 'xmp.response[0].AuthCode[0]') || null,
