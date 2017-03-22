@@ -178,7 +178,7 @@ Dejavoo.prototype.submitTransaction = function submitTransaction(order, creditCa
 					transactionId: _.get(result, 'xmp.response[0].RefId[0]') || null,
                     resultCode: _.get(result, 'xmp.response[0].ResultCode[0]'),
 					requestAmount: order.amount.toFixed(2) || null,
-					authorizeAmount: order.amount.toFixed(2) || null,
+					authorizeAmount: extData.TotalAmt.toFixed(2) || null,
 					creditCardAccount:  extData.AcntLast4 || null,
 					creditCardType: extData.CardType || null,
 					creditCardAuthorizationCode: _.get(result, 'xmp.response[0].AuthCode[0]') || null,
