@@ -86,6 +86,10 @@ class Step2Controller extends BaseController {
 
         //Rules for validation - many are determined by the track itself via Club Speed
         $rules = array();
+        if ($settings['genderShown'] && $settings['genderRequired'])
+        {
+            $rules['gender'] = 'required';
+        }
         if ($settings['showBirthDate'] && $settings['requireBirthDate'])
         {
             $rules['birthdate'] = 'required|before:today|date';
@@ -248,6 +252,7 @@ class Step2Controller extends BaseController {
 
         //Error messages in case of validation failure
         $messages = array(
+            'gender.required' => $strings['str_gender.required'],
             'birthdate.required' => $strings['str_birthdate.required'],
             'birthdate.before' => $strings['str_birthdate.before'],
             'birthdate.date' => $strings['str_birthdate.date'],
