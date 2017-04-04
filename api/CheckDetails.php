@@ -1,10 +1,9 @@
 <?php
 
-class CheckDetails extends BaseApi {
+class CheckDetails extends BaseUowApi {
     
     function __construct() {
         parent::__construct();
-        $this->mapper = new \ClubSpeed\Mappers\CheckDetailsMapper();
-        $this->interface = $this->logic->checkDetails;
+        $this->resource = 'CheckDetails';
     }
 }
