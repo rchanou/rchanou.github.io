@@ -331,14 +331,12 @@ class CS_API
         $errorMessage = $result['error'];
         $result = $result['response'];
 
-        if ($result !== null && $result->code == 200 && isset($result->body))
+        if ($result !== null && isset($result->code) && $result->code == 200 && isset($result->body))
         {
-            $parsedString = array();
-            parse_str($result->body,$parsedString);
-
-            if (isset($parsedString['access_token']))
+            $result = $result->body;
+            if (isset($result->access_token))
             {
-                return $parsedString['access_token'];
+                return $result->access_token;
             }
             else
             {
