@@ -267,15 +267,13 @@ class CS_API
 
         curl_setopt_array($ch, $options);
         $result = curl_exec($ch);
+        $result = json_decode($result);
 
         if ($result !== null)
         {
-            $parsedString = array();
-            parse_str($result,$parsedString);
-
-            if (isset($parsedString['access_token']))
+            if (isset($result->access_token))
             {
-                return $parsedString['access_token'];
+                return $result->access_token;
             }
             else
             {
