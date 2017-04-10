@@ -49,11 +49,12 @@ class DocCheckTotals Extends DocAPIBase {
 </p>
 EOS;
         $virtual['examples']['request'] = <<<EOS
-POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals/virtual?select=customerId,%20checkSubtotal,%20checkTax,%20checkTotal,%20checkDetailSubtotal,%20checkDetailTax,%20checkDetailTotal HTTP/1.1
+POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals/virtual?select=customerId,checkSubtotal,checkTax,checkTotal,checkDetailSubtotal,checkDetailTax,checkDetailTotal,discount,discountApplied HTTP/1.1
 {
   "checks": [
     {
       "customerId": 1000001,
+      "checkDiscountId": 1,
       "details": [
         {
           "productId": 3,
@@ -61,7 +62,8 @@ POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals/virtual?select=
         },
         {
           "productId": 5,
-          "qty": 2
+          "qty": 2,
+          "checkDetailDiscountId": 5
         }
       ]
     }
@@ -78,6 +80,7 @@ HTTP/1.1 200 OK
       "checkSubtotal": 85,
       "checkTax": 17.85,
       "checkTotal": 102.85,
+      "discount": 1,
       "details": [
         {
           "checkDetailSubtotal": 15,
@@ -87,7 +90,8 @@ HTTP/1.1 200 OK
         {
           "checkDetailSubtotal": 70,
           "checkDetailTax": 14.7,
-          "checkDetailTotal": 84.7
+          "checkDetailTotal": 84.7,
+          "discountApplied": 2.3
         }
       ]
     }
@@ -115,7 +119,7 @@ EOS;
                   'name'        => 'Check.userId'
                 , 'type'        => 'Integer'
                 , 'description' => 'The id for the user who is creating the <a href="#checks">check</a>'
-                , 'create'      => 'optional'
+                , 'create'      => 'available'
             )
             , array(
                   'name'        => 'Check.checkType'
@@ -175,22 +179,23 @@ EOS;
             , array(
                   'name'        => 'Check.discount'
                 , 'type'        => 'Decimal'
-                , 'description' => 'The discount to be applied to the <a href="#checks">check</a>'
+                , 'description' => 'The calculated <a href="#discount-types">discount</a> amount which was applied to the <a href="#checks">check</a>. Note that this is <strong>not</strong> a summation which includes the check detail discounts. That information will be reflected in the check total'
             )
             , array(
                   'name'        => 'Check.checkDiscountId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The discount id for the <a href="#checks">check</a>'
+                , 'description' => 'The <a href="#discount-types">discount</a> for the <a href="#checks">check</a>'
+                , 'create'      => 'available'
             )
             , array(
                   'name'        => 'Check.checkDiscountNotes'
                 , 'type'        => 'String'
-                , 'description' => 'The notes for the discount on the <a href="#checks">check</a>'
+                , 'description' => 'The notes for the <a href="#discount-types">discount</a> on the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkDiscountUserId'
                 , 'type'        => 'Integer'
-                , 'description' => 'The id for the user that applied the discount to the <a href="#checks">check</a>'
+                , 'description' => 'The id for the user that applied the <a href="#discount-types">discount</a> to the <a href="#checks">check</a>'
             )
             , array(
                   'name'        => 'Check.checkSubtotal'
@@ -266,19 +271,30 @@ EOS;
                 , 'create'      => 'required'
             )
             , array(
+                  'name'        => 'CheckDetail.checkDetailDiscountId'
+                , 'description' => 'The id for the <a href="#discount-type">discount</a> which was applied to the <a href="#check-details">check detail</a>'
+                , 'type'        => 'Integer'
+                , 'create'      => 'available'
+            )
+            , array(
                   'name'        => 'CheckDetail.checkDetailDiscountUserId'
-                , 'description' => 'The id for the user who applied the <a href="#check-details">check detail</a> discount'
+                , 'description' => 'The id for the <a href="#users">user</a> who applied the <a href="#check-details">check detail</a> <a href="#discount-types">discount</a>'
                 , 'type'        => 'Integer'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailDiscountDesc'
                 , 'type'        => 'String'
-                , 'description' => 'The description for the <a href="#check-details">check detail</a> discount'
+                , 'description' => 'The description for the <a href="#check-details">check detail</a> <a href="#discount-types">discount</a>'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailDiscountCalculateType'
                 , 'type'        => 'String'
-                , 'description' => 'The calculation type for the <a href="#check-details">check detail</a> discount'
+                , 'description' => 'The calculation type for the <a href="#check-details">check detail</a> <a href="#discount-types">discount</a>'
+            )
+            , array(
+                  'name'        => 'CheckDetail.discountApplied'
+                , 'type'        => 'Integer'
+                , 'description' => 'The calculated amount of the <a href="#discount-types">discount</a> applied to this <a href="#check-details">check detail</a>'
             )
             , array(
                   'name'        => 'CheckDetail.checkDetailSubtotal'
@@ -312,6 +328,16 @@ EOS;
     by using the <code class="prettyprint">customerId</code>, <code class="prettyprint">productId</code>,
     and <code class="prettyprint">qty</code> fields.
 </p>
+<p>
+    To apply a discount at the <code class="prettyprint">Check</code> level,
+    include a <code class="prettyprint">checkDiscountId</code>
+    which corresponds to a <code class="prettyprint">Discount</code>.
+</p>
+<p>
+    To apply a discount at the <code class="prettyprint">Check Detail</code> level,
+    include a <code class="prettyprint">checkDetailDiscountId</code>,
+    which again corresponds to a <code class="prettyprint">Discount</code>.
+</p>
 EOS
             , 'examples' => array(
                 'request' => <<<EOS
@@ -320,6 +346,7 @@ POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals?debug=1 HTTP/1.
   "checks": [
     {
       "customerId": 1000001,
+      "checkDiscountId": 1,
       "details": [
         {
           "productId": 3,
@@ -327,7 +354,8 @@ POST https://{$_SERVER['SERVER_NAME']}/api/index.php/checkTotals?debug=1 HTTP/1.
         },
         {
           "productId": 5,
-          "qty": 2
+          "qty": 2,
+          "checkDetailDiscountId": 5
         }
       ]
     }
