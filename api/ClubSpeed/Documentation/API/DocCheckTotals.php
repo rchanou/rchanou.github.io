@@ -338,6 +338,17 @@ EOS;
     include a <code class="prettyprint">checkDetailDiscountId</code>,
     which again corresponds to a <code class="prettyprint">Discount</code>.
 </p>
+<p>
+    Note that if you apply a <code class="prettyprint">Check</code> level
+    <code class="prettyprint">Discount</code> through this endpoint,
+    then make modifications to related <code class="prettyprint">Check Details</code>
+    by deleting, adding, or modifying existing line items,
+    the <code class="prettyprint">Check</code> level <code class="prettyprint">Discount</code>
+    will <strong>not</strong> be recalculated, and instead will still reflect
+    the original amount which was calculated. As such, care should be taken to
+    apply any <code class="prettyprint">Discounts</code> as part of the last
+    operation before accepting payment and closing the check.
+</p>
 EOS
             , 'examples' => array(
                 'request' => <<<EOS
