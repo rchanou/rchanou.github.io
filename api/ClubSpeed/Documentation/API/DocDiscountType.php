@@ -50,7 +50,7 @@ EOS;
     private function info() {
         return array(
             array(
-                "name" => "discountTypeId",
+                "name" => "discountId",
                 "type" => "Integer",
                 "default" => "{Generated}",
                 "required" => false,
