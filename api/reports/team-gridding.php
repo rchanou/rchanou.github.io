@@ -18,10 +18,12 @@ $(document).ready(function() {
   teams.forEach(function(team, teamIndex) {
     var html = '';
     html += ('<h1>' + (customers[teamIndex] && customers[teamIndex].racerName ? customers[teamIndex].racerName : '') + '</h1>');
-    html += ('<table class="table"><thead><tr><th>Pos</th><th>Best Lap</th><th>Driver</th></tr></thead><tbody>');
+    html += ('<table class="table"><thead><tr><th width="200px">Pos</th><th width="200px">Best Lap</th><th>Driver</th></tr></thead><tbody>');
     team.drivers.forEach(function(driver) {
+      var lastNames = driver.originalData.lastName ? driver.originalData.lastName : ' '
+      var racerNames = driver.originalData.racerName ? ' ('+driver.originalData.racerName+')' : ' '
       var lapTime = (driver.originalData.bestLapTime) ? parseInt(driver.originalData.bestLapTime)/1000 : '';
-      html += '<tr scope="row"><td>'+driver.startingPosition+'</td><td>'+lapTime+'</td><td>'+(driver.originalData.name || 'Customer ID: ' + driver.participantId) +'</td></tr>';
+      html += '<tr scope="row"><td>'+driver.startingPosition+'</td><td>'+lapTime+'</td><td>'+(driver.originalData.name || 'Customer ID: ' + driver.participantId)+' '+lastNames+' '+racerNames+'</td></tr>';
     });
     html += '</tbody></table><div class="page-break"></div>';
     $('#container').append(html);

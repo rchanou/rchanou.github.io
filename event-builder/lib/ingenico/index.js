@@ -232,7 +232,7 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 					authorizeAmount: _.get(result, 'TRANRESP.AUTHORIZEDAMOUNT[0]') || null,
 					creditCardAccount: _.get(result, 'TRANRESP.CCACCOUNT[0]') || null,
 					creditCardType: _.get(result, 'TRANRESP.CCCARDTYPE[0]') || null,
-					creditCardAuthorizationCode: _.get(result, 'TRANRESP.TRANSARMORTOKENTYPE[0]') || null,
+					creditCardAuthorizationCode: _.get(result, 'TRANRESP.CCAUTHCODE[0]') || null,
 					creditCardExpirationDate: _.get(result, 'TRANRESP.CCEXP[0]') || null,
 					resultCode: _.get(result, 'TRANRESP.CCAUTHORIZED[0]') || null,
 					troutD: _.get(result, 'TRANRESP.TRANSARMORTOKEN[0]') || null,
