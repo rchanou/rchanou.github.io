@@ -38,10 +38,23 @@ class CheckDetailsLogic extends BaseLogic {
     function beforeCreate($uow) {
         $checkDetails =& $uow->data;
         $logic = &$this->logic;
-        if ((is_null($checkDetails->Qty) || !is_int($checkDetails->Qty) || $checkDetails->Qty < 1) && (is_null($checkDetails->CadetQty) || !is_int($checkDetails->CadetQty) || $checkDetails->CadetQty < 1))
+
+        if (empty($checkDetails->CheckID)) {
+            throw new \RequiredArgumentMissingException("CheckDetails create requires a valid CheckID! Received: " . $checkDetails->CheckID);
+        }
+
+        if ((is_null($checkDetails->Qty) || !is_int($checkDetails->Qty) || $checkDetails->Qty < 1) && (is_null($checkDetails->CadetQty) || !is_int($checkDetails->CadetQty) || $checkDetails->CadetQty < 1)) {
             throw new \RequiredArgumentMissingException("CheckDetails create requires a positive Qty or CadetQty! Received Qty: " . $checkDetails->Qty . " and CadetQty: " . $checkDetails->CadetQty);
-        $check = $logic->checks->get($checkDetails->CheckID);
+        }
+
+        $check = $logic->checks->get($checkDetails->CheckID); // throws when not found
         $check = $check[0];
+
+        $checkStatus = $check->CheckStatus;
+        if ($checkStatus !== Enums::CHECK_STATUS_OPEN) {
+            throw new \CSException('Cannot create a CheckDetail for a Check which is not open! Current check status: ' . $checkStatus);
+        }
+
         $product = $logic->products->get($checkDetails->ProductID);
         $product = $product[0];
         $tax = $logic->taxes->get($product->TaxID);
