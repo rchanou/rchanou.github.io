@@ -26,8 +26,8 @@ class QuickPOSController extends BaseController
         {
             $trackIds = explode(',', $quickPOSSettingsData['QuickPOSTrackNumbers']);
         }
-
-        $categories = CS_API::getJSON('categories');
+        $categoryParameters = array('limit' => 999);
+        $categories = CS_API::getJSON('categories', $categoryParameters);
         if ($categories === null)
         {
             return Redirect::to('/disconnected');
