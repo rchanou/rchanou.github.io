@@ -111,40 +111,6 @@ class RegistrationController extends BaseController
           array('shownId' => 'cfgRegCustTxt4Show', 'requiredId' => 'cfgRegCustTxt4req', 'label' => 'Custom Text 4', 'secondColumn' => true)
         );
 
-
-        $customerStatuses = CS_API::getCustomerStatus();
-        $customerStatusesFormatted = array(array()); //Grouped by status number
-        foreach($customerStatuses as $currentStatus)
-        {
-            if (!$currentStatus->deleted)
-            {
-                $currentStatusId = $currentStatus->statusId;
-                $currentStatusName = $currentStatus->description;
-                if ($currentStatus->showOn1) { $customerStatusesFormatted[1][$currentStatusId] = $currentStatusName; };
-                if ($currentStatus->showOn2) { $customerStatusesFormatted[2][$currentStatusId] = $currentStatusName; };
-                if ($currentStatus->showOn3) { $customerStatusesFormatted[3][$currentStatusId] = $currentStatusName; };
-                if ($currentStatus->showOn4) { $customerStatusesFormatted[4][$currentStatusId] = $currentStatusName; };
-
-                //$customerStatusesFormatted[$currentStatusId] = $currentStatusName;
-            }
-        }
-        $customerStatusesFormatted[1][0] = 'Do Nothing';
-        $customerStatusesFormatted[2][0] = 'Do Nothing';
-        $customerStatusesFormatted[3][0] = 'Do Nothing';
-        $customerStatusesFormatted[4][0] = 'Do Nothing';
-
-        $registrationSettingsData['customerStatuses'] = $customerStatusesFormatted;
-        if (isset($registrationSettingsData['statusChangesWhenRegistered']) && count($registrationSettingsData['statusChangesWhenRegistered']) > 0)
-        {
-            $registrationSettingsData['statusChangesWhenRegistered'] = json_decode($registrationSettingsData['statusChangesWhenRegistered']);
-            $registrationSettingsData['statusChangesWhenRegistered'] = $registrationSettingsData['statusChangesWhenRegistered']->statusChanges;
-        }
-        if (isset($registrationSettingsData['statusChangesWhenRegisteredForEvent']) && count($registrationSettingsData['statusChangesWhenRegisteredForEvent']) > 0)
-        {
-            $registrationSettingsData['statusChangesWhenRegisteredForEvent'] = json_decode($registrationSettingsData['statusChangesWhenRegisteredForEvent']);
-            $registrationSettingsData['statusChangesWhenRegisteredForEvent'] = $registrationSettingsData['statusChangesWhenRegisteredForEvent']->statusChanges;
-        }
-
         return View::make('/screens/registration/settings',
             array('controller' => 'RegistrationController',
                   'customerFields' => $customerFields,
@@ -219,33 +185,6 @@ class RegistrationController extends BaseController
         $registrationSettings['emailText'] = isset($input['emailText']) ? $input['emailText'] : '';
         $registrationSettings['textingWaiver'] = isset($input['textingWaiver']) ? $input['textingWaiver'] : '';
         if (isset($input['waiverFontSize'])) { $registrationSettings['waiverFontSize'] = $input['waiverFontSize'];}
-
-        if (isset($input['customerStatus1']))
-        {
-            $registrationSettings['statusChangesWhenRegistered'] = json_encode(
-                array(
-                    "statusChanges" => array(
-                        $input['customerStatus1'],
-                        $input['customerStatus2'],
-                        $input['customerStatus3'],
-                        $input['customerStatus4']
-                    )
-                )
-            );
-        }
-        if (isset($input['customerStatus1Event']))
-        {
-            $registrationSettings['statusChangesWhenRegisteredForEvent'] = json_encode(
-                array(
-                    "statusChanges" => array(
-                        $input['customerStatus1Event'],
-                        $input['customerStatus2Event'],
-                        $input['customerStatus3Event'],
-                        $input['customerStatus4Event']
-                    )
-                )
-            );
-        }
 
         $newMainEngineSettings = array();
         $newreg1Settings = array();
