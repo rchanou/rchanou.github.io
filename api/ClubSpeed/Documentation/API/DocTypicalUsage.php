@@ -27,7 +27,7 @@ class DocTypicalUsage Extends DocAPIBase {
 </p>
 <ol>
     <li>
-        <a href="#booking-create">Create an Online Booking</a>
+        <a href="#booking">Create an Online Booking</a>
         <ul>
             <li>
                 The Online Booking is considered to be a container for available reservations for a selected race.
@@ -36,7 +36,7 @@ class DocTypicalUsage Extends DocAPIBase {
         </ul>
     </li>
     <li>
-        <a href="#booking-availability-list">Get a List of Available Online Bookings</a>
+        <a href="#booking-availability">Get a List of Available Online Bookings</a>
         <ul>
             <li>
                 If the Booking containers are already created, then the result from this call should be used
@@ -57,7 +57,7 @@ class DocTypicalUsage Extends DocAPIBase {
         </ul>
     </li>
     <li>
-        <a href=#reservations-create>Create an Online Booking Reservation</a>
+        <a href=#reservations>Create an Online Booking Reservation</a>
         <ul>
             <li>
                 A temporary booking reservation should be made at the point a customer adds a race to their cart.
@@ -91,7 +91,7 @@ class DocTypicalUsage Extends DocAPIBase {
         </ul>
     </li>
     <li>
-        <a href=#check-totals-single>Load the Permanent Check data by CheckID</a>
+        <a href=#check-totals>Load the Permanent Check data by CheckID</a>
         <ul>
             <li>
                 This should be done to ensure data integrity with the database,
@@ -103,7 +103,7 @@ class DocTypicalUsage Extends DocAPIBase {
         <a href=#process-payment-process>Process Payment</a>
     </li>
     <li>
-        <a href=#reservations-update>Update each Reservation to be Permanent</a>
+        <a href=#reservations>Update each Reservation to be Permanent</a>
         <ul>
             <li>
                 Once the purchase has been made, any temporary reservations for the cart
