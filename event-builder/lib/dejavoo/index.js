@@ -37,7 +37,7 @@ function Dejavoo (opts) {
 
 	request = request.defaults({
 		url: this.opts.spinApiUrl,
-		timeout: 2*60*1000 + (this.opts.timeout * 1000)
+		timeout: 7*60*1000 + (this.opts.timeout * 1000)
 		});
 }
 
