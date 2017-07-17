@@ -15,6 +15,12 @@ class Step1Controller extends BaseController
 {
     public function entry()
     {
+        $locale = Input::get('locale');
+        if (!empty($locale))
+        {
+            return Redirect::to('/changeLanguage/' . $locale . '/step1');
+        }
+
         $settings = Settings::getSettings(true); //Force a refresh of all settings
         Session::put('settings',$settings);
         checkForCultureChange();
