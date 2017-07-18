@@ -211,7 +211,8 @@ class ChannelController extends BaseController
             'zh-CN' => '中文',
             'mn-MN' => 'Монгол',
             'id-ID' => 'Bahasa Indonesia',
-            'fi-FI' => 'Suomi'
+            'fi-FI' => 'Suomi',
+			'lv-LV' => 'Latviešu Valoda'
         );
 
         $currentCulture = "en-US";
@@ -348,7 +349,8 @@ class ChannelController extends BaseController
                 'zh-CN' => '中文',
                 'mn-MN' => 'Монгол',
                 'id-ID' => 'Bahasa Indonesia',
-                'fi-FI' => 'Suomi'
+                'fi-FI' => 'Suomi',
+				'lv-LV' => 'Latviešu Valoda'
             );
 
             return View::make('/screens/settings',

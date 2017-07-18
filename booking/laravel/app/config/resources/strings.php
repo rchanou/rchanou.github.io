@@ -323,7 +323,8 @@ class Strings
             'zh-CN' => '中文',
             'mn-MN' => 'Монгол',
             'id-ID' => 'Bahasa Indonesia',
-            'fi-FI' => 'Suomi'
+            'fi-FI' => 'Suomi',
+			'lv-LV' => 'Latviešu Valoda'
         );
 
         //Error codes. Used for sparingly few API calls.

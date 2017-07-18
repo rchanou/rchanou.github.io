@@ -386,7 +386,8 @@ class MobileAppController extends BaseController
             'zh-CN' => '中文',
             'mn-MN' => 'Монгол',
             'id-ID' => 'Bahasa Indonesia',
-            'fi-FI' => 'Suomi'
+            'fi-FI' => 'Suomi',
+			'lv-LV' => 'Latviešu Valoda'
         );
 
         $currentCulture = CS_API::getCurrentCultureForMobile();
@@ -509,7 +510,8 @@ class MobileAppController extends BaseController
             'zh-CN',
             'mn-MN',
             'id-ID',
-            'fi-FI'
+            'fi-FI',
+			'lv-LV'
         );
 
 
