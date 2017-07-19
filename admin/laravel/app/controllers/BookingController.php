@@ -227,7 +227,8 @@ class BookingController extends BaseController
             'RUB' => 'Russian ruble',
             'SEK' => 'Swedish krona',
             'AED' => 'United Arab Emirates dirham',
-            'USD' => 'United States dollar'
+            'USD' => 'United States dollar',
+			'CAD' => 'Canadian dollar'
         );
 
         $supportedNumberLocales = array(
