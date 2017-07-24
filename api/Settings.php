@@ -30,8 +30,7 @@ class Settings extends BaseApi
         'ScotKart' => true,
         'MobileApp' => true,
         'Booking' => array(
-            'giftCardSalesEnabled' => true,
-            'onlineBookingPaymentProcessorSettings' => true
+            'giftCardSalesEnabled' => true
         ),
         'MainEngine' => array(
             'PCCharge_MerchantNumber' => true,
