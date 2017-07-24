@@ -1,4 +1,4 @@
-var Promise = require("bluebird");
+﻿var Promise = require("bluebird");
 var request = require('request');
 var toJson = require('xml2js').parseString;
 var xml2js = require('xml2js');
@@ -144,10 +144,20 @@ Ingenico.prototype.signature = function signature(signature) {
 
 Ingenico.prototype.submitTransaction = function submitTransaction(order, creditCard, prospect, other) {
 	var self = this;
+	var tranident = order.checkId ? '￼￼<TRANIDENT>' + order.checkId + '</TRANIDENT>' : ''
+
+	//<ENCODING>UTF-8</ENCODING> tags added per Alex Harris in separate email & ZD ticket #28621 - Michael Greene @ AIS/Singo/Kari Speer @ Tempus --RW 7/13/2017
+
+	//TRANIDENT (ZD #24257) - RW 7-13-2017 = passing through the check number to Tempus will allow us to turn on DUPLICATE TRANS from Tempus. If 2 transactions with the same amount
+	//con't - is charged w/in same time period (~3 minute by default) it will send through the same authorized info (auth code) as the orig succ. trans. If the checkID is passed 
+	//con't - it will only send auth info for transactions with the same checkID
+
 	var req = '<TRANSACTION>' +
 			'  <TRANSACTIONTYPE>INTERACTIVECREDITAUTH</TRANSACTIONTYPE>' +
+			'￼￼<ENCODING>UTF-8</ENCODING>' +
 			'￼￼<INTERACTIVETIMEOUT>' + parseInt(self.opts.timeout) + '</INTERACTIVETIMEOUT>' +
 			'￼￼<CREDITAMT>'     + convertToDecimal(order.amount)   + '</CREDITAMT>' +
+			tranident +
 			'￼￼<LEGALTEXT>' + this.opts.LEGALTEXT + '</LEGALTEXT>' +
 			'￼￼<RECEIPTCOUNT>'  + this.opts.RECEIPTCOUNT   + '</RECEIPTCOUNT>' +
 			'￼￼<CONFIRMAMOUNT>' + this.opts.CONFIRMAMOUNT  + '</CONFIRMAMOUNT>' +
@@ -252,11 +262,26 @@ Ingenico.prototype.submitTransaction = function submitTransaction(order, creditC
 function retrieveTransactionSuccess(result) {
 	var isSuccessful = false;
 
+/* Original Success Logic - replaced to flag duplicate transactions, sending through as a failed w/ a custom Message to the cashier 
+
 	if(_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE' && _.get(result, 'TRANRESP.TRANSUCCESS[0]') === 'TRUE') {
     	isSuccessful = true;
     } else {
     	isSuccessful = false;
     }
+*/
+
+//TRANIDENT (ZD #24257) - RW 7-13-2017 = passing through the check number to Tempus will allow us to turn on DUPLICATE TRANS from Tempus.
+
+	if(_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE' && _.get(result, 'TRANRESP.TRANSUCCESS[0]') === 'TRUE' && !(_.get(result, 'TRANRESP.DUPETRANCHECK[0]'))) {
+    	isSuccessful = true;
+	}else if(_.get(result, 'TRANRESP.DUPETRANCHECK[0]') === 'TRUE' && _.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE' && _.get(result, 'TRANRESP.TRANSUCCESS[0]') === 'TRUE') {
+		isSuccessful = false;
+		_.set(result, 'TRANRESP.TRANRESPMESSAGE[0]', "Duplicate Transaction was detected and was not charged again. Please contact the bank for details.");
+    } else {
+    	isSuccessful = false;
+    }
+
 
     return isSuccessful;
 }
