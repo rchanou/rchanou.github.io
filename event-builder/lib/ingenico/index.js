@@ -1,4 +1,4 @@
-﻿var Promise = require("bluebird");
+var Promise = require("bluebird");
 var request = require('request');
 var toJson = require('xml2js').parseString;
 var xml2js = require('xml2js');
@@ -275,7 +275,7 @@ function retrieveTransactionSuccess(result) {
 
 	if(_.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE' && _.get(result, 'TRANRESP.TRANSUCCESS[0]') === 'TRUE' && !(_.get(result, 'TRANRESP.DUPETRANCHECK[0]'))) {
     	isSuccessful = true;
-	}else if(_.get(result, 'TRANRESP.DUPETRANCHECK[0]') === 'TRUE' && _.get(result, 'TRANRESP.CCAUTHORIZED[0]') === 'TRUE' && _.get(result, 'TRANRESP.TRANSUCCESS[0]') === 'TRUE') {
+	}else if(_.get(result, 'TRANRESP.DUPETRANCHECK[0]') === 'TRUE') {
 		isSuccessful = false;
 		_.set(result, 'TRANRESP.TRANRESPMESSAGE[0]', "Duplicate Transaction was detected and was not charged again. Please contact the bank for details.");
     } else {
