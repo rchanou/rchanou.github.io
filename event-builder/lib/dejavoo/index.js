@@ -13,8 +13,11 @@ function Dejavoo (opts) {
 	this.opts.spinApiUrl = opts.provider.options.spinApiUrl                       || 'https://spinpos.net:443/spin/cgi.html';
 	this.opts.authorizationKey = opts.provider.options.authorizationKey;
 	this.opts.dejavooSpinRegisterId = opts.provider.options.dejavooSpinRegisterId;
+	if (opts.provider.options.referenceId != null ) {
+	    this.opts.referenceId = opts.provider.options.referenceId;
+	}
 	this.opts.timeout = opts.provider.options.timeout                             || 240;
-	
+
 	// Variables Justin/VB code expects to always exist.
 	this.opts.defaultHoistedVars = {
 		success: false,
@@ -125,7 +128,7 @@ Dejavoo.prototype.submitTransaction = function submitTransaction(order, creditCa
 
 	var self = this;
 
-	var referenceId = order.checkId + '-' + Date.now()
+    var referenceId  = this.opts.referenceId || order.checkId + '-' + Date.now();
 	var qs = {
 		'TerminalTransaction': '<request>' +
 			'<PaymentType>Credit</PaymentType>' +
@@ -167,12 +170,18 @@ Dejavoo.prototype.submitTransaction = function submitTransaction(order, creditCa
 					extData = querystring.parse(extDataAsQuery);
 				}
 
-				// Combine messages (if both exist)
+			    // Combine messages (if both exist)
 				var message = "";
-				if(_.get(result, 'xmp.response[0].RespMSG[0]') && _.get(result, 'xmp.response[0].Message[0]')) {
-					message = _.get(result, 'xmp.response[0].Message[0]') + " " + _.get(result, 'xmp.response[0].RespMSG[0]');
+				if (_.get(result, 'xmp.response[0].RespMSG[0]') && _.get(result, 'xmp.response[0].Message[0]')) {
+				    //MTM - Checking for Duplicate Reference Id to convert to a more user friendly message
+				    if (_.get(result, 'xmp.response[0].RespMSG[0]') == "Duplicate%20Reference%20Id") {
+				        message = "Duplicate Transaction was detected and was not charged again. Please contact the bank for details. " + _.get(result, 'xmp.response[0].Message[0]');
+				    }
+				    else {
+				        message = _.get(result, 'xmp.response[0].Message[0]') + " " + _.get(result, 'xmp.response[0].RespMSG[0]');
+				    }
 				} else {
-					message = _.get(result, 'xmp.response[0].RespMSG[0]') || _.get(result, 'xmp.response[0].Message[0]') || null;
+				    message = _.get(result, 'xmp.response[0].RespMSG[0]') || _.get(result, 'xmp.response[0].Message[0]') || null;
 				}
 
 				var hoistedVars = {
