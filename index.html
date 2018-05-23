@@ -5,13 +5,14 @@
   <meta charset="utf-8">
   <meta name="theme-color" content="steelblue">
   <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/alegreya-sans/stylesheet.css" type="text/css" charset="utf-8" />
   <title>Ron ChanOu</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Helvetica, Arial, san-serif;
+      font-family: alegreya_sansregular, Helvetica, Arial, san-serif;
     }
 
     body {
@@ -22,7 +23,7 @@
     }
 
     a {
-      font-family: Helvetica, Arial, san-serif;
+      font-family: alegreya_sansregular, Helvetica, Arial, san-serif;
       text-decoration: none;
     }
 
@@ -32,15 +33,41 @@
 
     .link {
       margin-top: 1rem;
+      font-size: 2rem;
+    }
+
+    .desc {
+      font-size: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
   </style>
 </head>
 
 <body>
-  <h2 class='title'>Ron ChanOu</h2>
-  <h3 class='title'>A Most Modest Portfolio</h3>
-  <a class='link' href='./liana'>Liana</a>
-  <a class='link' href='./sokoban'>Sokoban</a>
+  <h1 class='title'>Ron ChanOu</h1>
+  <h2 class='title'>A Most Modest Portfolio</h2>
+  <a class='link' href='/liana'>Liana</a>
+  <div class='desc'>
+    An environment for interactive, semantic JavaScript programming. Demo coming soon. Built with...
+    <ul>
+      <li>TypeScript</li>
+      <li>Create-React-App</li>
+      <li>Mobx</li>
+    </ul>
+  </div>
+  <a class='link' href='/sokoban'>Sokoban</a>
+  <div class='desc'>
+    My version of the classic box puzzle game, with an editor to create, edit, and save custom levels. Built with...
+    <ul>
+      <li>Create-React-App</li>
+      <li>Mobx</li>
+      <li>Amazon Web Services</li>
+      <li>DynamoDB</li>
+      <li>Google Recaptcha</li>
+    </ul>
+  </div>
 </body>
 
 </html>
