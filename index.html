@@ -33,6 +33,11 @@
     section.portfolio {
       padding-top: 3em;
     }
+
+    .popup-iframe {
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
 
@@ -74,36 +79,28 @@
       <hr class="star-dark mb-5">
       <div class="row">
         <div class="col-md-6">
-          <a class="portfolio-item d-block mx-auto" href="/liana">
-            <div class="portfolio-item-caption d-flex position-absolute h-100 w-100">
-              <div class="portfolio-item-caption-content my-auto w-100 text-center text-white">
-                Liana
-              </div>
-            </div>
-            <img class="img-fluid" src="img/portfolio/liana.png" alt="Liana Preview">
-          </a>
-        </div>
-        <div class="col-md-6">
-          <a class="portfolio-item d-block mx-auto" href="/sokoban">
-            <div class="portfolio-item-caption d-flex position-absolute h-100 w-100">
-              <div class="portfolio-item-caption-content my-auto w-100 text-center text-white">
-                Sokoban
-              </div>
-            </div>
-            <img class="img-fluid" src="img/portfolio/sokoban.png" alt="Sokoban Preview">
-          </a>
-        </div>
-        <!-- <div class="col-md-6 col-lg-4">
-          <a class="portfolio-item d-block mx-auto" href="#portfolio-modal-3">
+          <a class="portfolio-item d-block mx-auto popup" href="#portfolio-modal-1">
             <div class="portfolio-item-caption d-flex position-absolute h-100 w-100">
               <div class="portfolio-item-caption-content my-auto w-100 text-center text-white">
                 <i class="fa fa-search-plus fa-3x"></i>
+                <h3>Liana</h3>
               </div>
             </div>
-            <img class="img-fluid" src="img/portfolio/circus.png" alt="">
+            <img class="img-fluid" src="img/portfolio/liana.png" alt="">
           </a>
         </div>
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6">
+          <a class="portfolio-item d-block mx-auto popup" href="#portfolio-modal-2">
+            <div class="portfolio-item-caption d-flex position-absolute h-100 w-100">
+              <div class="portfolio-item-caption-content my-auto w-100 text-center text-white">
+                <i class="fa fa-search-plus fa-3x"></i>
+                <h3>Sokoban</h3>
+              </div>
+            </div>
+            <img class="img-fluid" src="img/portfolio/sokoban.png" alt="">
+          </a>
+        </div>
+        <!-- <div class="col-md-6 col-lg-4">
           <a class="portfolio-item d-block mx-auto" href="#portfolio-modal-4">
             <div class="portfolio-item-caption d-flex position-absolute h-100 w-100">
               <div class="portfolio-item-caption-content my-auto w-100 text-center text-white">
@@ -204,15 +201,16 @@
       <div class="container text-center">
         <div class="row">
           <div class="col-lg-8 mx-auto">
-            <h2 class="text-secondary text-uppercase mb-0">Project Name</h2>
+            <h2 class="text-secondary text-uppercase mb-0">Liana</h2>
             <hr class="star-dark mb-5">
-            <img class="img-fluid mb-5" src="img/portfolio/cabin.png" alt="">
-            <p class="mb-5">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia neque assumenda ipsam nihil, molestias magnam,
-              recusandae quos quis inventore quisquam velit asperiores, vitae? Reprehenderit soluta, eos quod consequuntur
-              itaque. Nam.</p>
+            <iframe class='popup-iframe' src='/liana'></iframe>
+            <p class="mb-5">
+              An interactive, visual programming environment. Built with TypeScript, Mobx and React.
+              <a href='/liana'>Click here to go to it.</a>
+            </p>
             <a class="btn btn-primary btn-lg rounded-pill portfolio-modal-dismiss" href="#">
               <i class="fa fa-close"></i>
-              Close Project</a>
+              Close</a>
           </div>
         </div>
       </div>
@@ -228,15 +226,17 @@
       <div class="container text-center">
         <div class="row">
           <div class="col-lg-8 mx-auto">
-            <h2 class="text-secondary text-uppercase mb-0">Project Name</h2>
+            <h2 class="text-secondary text-uppercase mb-0">Sokoban</h2>
             <hr class="star-dark mb-5">
-            <img class="img-fluid mb-5" src="img/portfolio/cake.png" alt="">
-            <p class="mb-5">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia neque assumenda ipsam nihil, molestias magnam,
-              recusandae quos quis inventore quisquam velit asperiores, vitae? Reprehenderit soluta, eos quod consequuntur
-              itaque. Nam.</p>
+            <iframe class='popup-iframe' src='/sokoban'></iframe>
+            <p class="mb-5">
+              My implementation of the classic box puzzle game, complete with the ability to create, edit, and save new levels. Uses AWS,
+              DynamoDB, Google Recaptcha, Mobx, and React.
+              <a href='/sokoban'>Click here to go to it.</a>
+            </p>
             <a class="btn btn-primary btn-lg rounded-pill portfolio-modal-dismiss" href="#">
               <i class="fa fa-close"></i>
-              Close Project</a>
+              Close</a>
           </div>
         </div>
       </div>
