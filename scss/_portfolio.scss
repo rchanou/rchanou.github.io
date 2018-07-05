@@ -11,7 +11,7 @@
       -moz-transition: all ease 0.5s;
       transition: all ease 0.5s;
       opacity: 0;
-      background-color: fade-out($primary, .1);
+      background-color: fade-out($primary, 0.1);
       &:hover {
         opacity: 1;
       }
@@ -31,13 +31,13 @@
 .portfolio-modal {
   .portfolio-modal-dialog {
     padding: 3rem 1rem;
-    min-height: calc(100vh - 2rem);
+    min-height: calc(55vh - 2rem);
     margin: 1rem calc(1rem - 8px);
     position: relative;
     z-index: 2;
-    -moz-box-shadow: 0 0 3rem 1rem fade-out(black, .5);
-    -webkit-box-shadow: 0 0 3rem 1rem fade-out(black, .5);
-    box-shadow: 0 0 3rem 1rem fade-out(black, .5);
+    -moz-box-shadow: 0 0 3rem 1rem fade-out(black, 0.5);
+    -webkit-box-shadow: 0 0 3rem 1rem fade-out(black, 0.5);
+    box-shadow: 0 0 3rem 1rem fade-out(black, 0.5);
     .close-button {
       position: absolute;
       top: 2rem;
@@ -50,7 +50,7 @@
       font-size: 2rem;
     }
   }
-  @media(min-width: 768px) {
+  @media (min-width: 768px) {
     .portfolio-modal-dialog {
       min-height: 100vh;
       padding: 5rem;
