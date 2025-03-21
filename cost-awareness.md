@@ -12,25 +12,27 @@ INSERT MEME IMAGE
 
 In fact, you can already find several scathing critiques of conventional programming wisdom, by engineers much more talented than myself. Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least giving these a listen while you're working or doing chores):
 
-- The 3-part series "Object-Oriented Programming is Bad/Embarrassing/Garbage" by Brian Will
-- "Clean Code is Bad" by Internet of Bugs
+- The 3-part series _Object-Oriented Programming is Bad/Embarrassing/Garbage_ by Brian Will
+- _Clean Code is Bad_ by Internet of Bugs
 - Shawn Mcgrath's legendary OOP Rant
-- "Solving the Right Problems for Engine Programmers" by Mike Acton (despite the title, this is absolutely applicable outside of engine programming)
-- "Where Does Bad Code Come From?" by Casey Muratori (he has lots of great videos on his Molly Rocket channel that you should check out, but this one's a good start)
+- _Solving the Right Problems for Engine Programmers_ by Mike Acton (despite the title, this is absolutely applicable outside of engine programming)
+- _Where Does Bad Code Come From?_ by Casey Muratori
 
-Note that these videos focus on how OOP harms code maintainability and developer velocity, with performance as an aside. Proponents of OOP will often acknowledge the potential performance overhead, but claim it is worth it for supposedly improved maintainability. Or they'll admit that OOP is worse for small projects or teams, but postulate some magical inflection point where it makes code better as its scope increases.
+Note that these videos focus on how OOP harms code maintainability and developer velocity, not performance. Proponents of OOP will often acknowledge the potential performance overhead, but claim it is worth it for the supposedly improved developer experience it brings. Or they'll admit that OOP is worse for small projects or teams, but postulate some magical inflection point where it makes code better as its scope increases.
 
 No, I'm not even conceding that. I am saying that implementing OOP, as it is commonly described and taught, just leads to worse code all around.
 
-So, what's my alternative proposal for "good code", and why do I think it's better? Well, I thought about the many techniques that I use, and they seem to boil down to these core principles:
+So, what's my alternative proposal for "good code", and why do I think it's better? Well, I thought about the many techniques that I use, and they seem to boil down to these core tenets:
 
 - Cost Awareness
 - Human Orientation
-- Ahead-of-time assertions and analysis
+- Ahead-of-time evaluation and assertions
 - Reproducibility
-- **Minimize** variability, ambiguity, unknowns, duplication
+- **Minimize** variability, ambiguity, duplication, and dead-ends
 
-I guess this is my response to SOLID: the CHARM principles. Cute, no? Anyway, this article will focus on Cost Awareness, since that is usually the first principle I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
+I guess this is my response to SOLID: the CHARM method. Cute, no?
+
+Anyway, this article will focus on Cost Awareness, since that is usually the first principle I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
 
 ## What is Cost Awareness?
 
@@ -207,8 +209,7 @@ You can also think of the disk and file system as implicit parameters to ReadFil
 
 For ReadFile, you can reasonably test "the happy path" with a modicum of setup.
 
-https://dhh.dk/2014/tdd-is-dead-long-live-testing.html
-https://dhh.dk/2014/test-induced-design-damage.html
+[TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html) by Mr. Ruby on Rails himself, DHH.
 
 > Test-first units leads to an overly complex web of intermediary objects and indirection in order to avoid doing anything that's "slow". Like hitting the database. Or file IO.
 
@@ -261,15 +262,15 @@ Here's the problem with these pervasively taught ideas: they _sound_ good in a v
 
 In fact, I have a litmus test for these things: if some overzealous team lead were to require it fullstop, for every line of code, how would that affect the codebase an developer velocity? I know that sounds like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
 
-Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers, yada yada yada..."
+Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers", etc.
 
-Well then, why don't we call it SOLID _Guidelines_ instead of SOLID _Principles_, or Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Not as marketable, I guess? Seriously though, look up how the average article on these topics are written. In fact, make it a drinking game:
+Well then, why don't we call it SOLID _Guidelines_ instead of SOLID _Principles_, or Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Seriously though, look up how the average article on these topics are written. In fact, make it a drinking game:
 
 - Take a shot every time they use a "Bad Way" vs "Good Way" comparison example for each principle. Take two shots if they use cringier terms like "Noob" vs. "Expert".
 - Take a shot if they use some example that's lazily modeled or analogized on something in the real world, like showing you how to make a "HamburgerProvider" that takes a "CookingStrategy" or some crap like that.
 - Now, if they _do_ add the caveat that you shouldn't apply these principles everywhere, take a shot if _they leave it at that_. It's such an unhelpful copout, a tautology to shield them from any criticism: "these ideas are good until they're not".
 
-So when are they actually good? Well, I'd say it's when they happen to align with the CHARM principles I described earlier. (Ugh, I already hate my own acronym, but it's useful.) Ironically enough, CHARM may actually provide clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest. But I don't even feel the need to think about "should I be using SOLID". To me, CHARM alone offers the best balance between velocity and "getting sh\*t done", while still maintaining the ability to refactor later without fear, and ensure my abstractions are actually helpful by basing them on concrete use cases (the opposite of what SOLID recommends, which I think is an absolute disaster).
+So when are they actually good? Well, I'd say it's when they happen to align with the CHARM method I described earlier. (Ugh, I already hate my own acronym, but it's useful.) Ironically enough, CHARM may actually provide clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest. But I don't even feel the need to think about "should I be using SOLID". To me, CHARM alone offers the best balance between velocity and "getting sh\*t done", while still maintaining the ability to refactor later without fear, and ensure my abstractions are actually helpful by basing them on concrete use cases (the opposite of what SOLID recommends, which I think is an absolute disaster).
 
 To be clear, I'm not claiming I'm some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, and general user satisfaction.
 
