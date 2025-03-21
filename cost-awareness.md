@@ -1,6 +1,6 @@
 ## Yup, I'm jumping on the anti-OOP bandwagon.
 
-I'm not clickbaiting with that title. You are better off literally forgetting about Object-Oriented Programming. Same goes for Functional Programming, SOLID, Clean Code, Hexagonal Architecture, Domain-Driven Design, MVC, and a slew of other buzzwords parroted by countless FAANG-wannabe astronaut architects who've been touched by Uncle Bob.
+You are better off literally forgetting about Object-Oriented Programming. Same goes for Functional Programming, SOLID, Clean Code, Hexagonal Architecture, Domain-Driven Design, MVC, and a slew of other buzzwords parroted by countless FAANG-wannabe astronaut architects who've been touched by Uncle Bob. All these ideas fall under the purview of what I call "Conventional Programming Wisdom", which I'll hereafter refer to as **CPW**.
 
 This advice is especially targeted to those young, enthusiastic junior developers, eager to improve themselves by mastering design patterns and so-called "best practices". No, you don't need to study them. That will only set you back in the long run, just like they did for me.
 
@@ -10,7 +10,7 @@ I'm hardly the first person to think this; the sentiment seems to be common enou
 
 INSERT MEME IMAGE
 
-In fact, you can already find several scathing critiques of conventional programming wisdom, by engineers much more talented than myself. Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least giving these a listen while you're working or doing chores):
+In fact, you can already find several scathing critiques of CPW, by engineers much more talented than myself. Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least giving these a listen while you're working or doing chores):
 
 - The 3-part series _Object-Oriented Programming is Bad/Embarrassing/Garbage_ by Brian Will
 - _Clean Code is Bad_ by Internet of Bugs
@@ -18,25 +18,25 @@ In fact, you can already find several scathing critiques of conventional program
 - _Solving the Right Problems for Engine Programmers_ by Mike Acton (despite the title, this is absolutely applicable outside of engine programming)
 - _Where Does Bad Code Come From?_ by Casey Muratori
 
-Note that these videos focus on how OOP harms code maintainability and developer velocity, not performance. Proponents of OOP will often acknowledge the potential performance overhead, but claim it is worth it for the supposedly improved developer experience it brings. Or they'll admit that OOP is worse for small projects or teams, but postulate some magical inflection point where it makes code better as its scope increases.
+Note that these videos focus on how CPW harms code maintainability and developer velocity, not performance. Proponents of CPW will often acknowledge the potential performance overhead, but claim it is worth it for the supposedly improved developer experience it brings. Or they'll admit that CPW is worse for small projects or teams, but postulate some magical inflection point where it makes code better as its scope increases.
 
-No, I'm not even conceding that. I am saying that implementing OOP, as it is commonly described and taught, just leads to worse code all around.
+No, I'm not even conceding that. I am saying that implementing CPW, as it is commonly described and taught, just leads to worse code all around.
 
-So, what's my alternative proposal for "good code", and why do I think it's better? Well, I thought about the many techniques that I use, and they seem to boil down to these core tenets:
+So then, what's my alternative proposal for "good code", and why do I think it's better? Well, I thought about the many techniques that I employ, and they seem to boil down to these core tenets:
 
-- Cost Awareness
-- Human Orientation
-- Ahead-of-time evaluation and assertions
-- Reproducibility
+- **Cost Awareness**
+- **Human Orientation**
+- **Ahead-of-time** evaluation and assertions
+- **Reproducibility**
 - **Minimize** variability, ambiguity, duplication, and dead-ends
 
-I guess this is my response to SOLID: the CHARM method. Cute, no?
+I guess this is my response to the SOLID acronym: The **CHARM** Method. Cute, no?
 
 Anyway, this article will focus on Cost Awareness, since that is usually the first principle I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
 
 ## What is Cost Awareness?
 
-The easiest way for me to explain this is by example. So what we'll do is review a list of Go-inspired function headers and, based only on their names and type definitions, we are going to guess what other properties they have. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
+The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess what other properties they have. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -119,7 +119,7 @@ func GenerateWorldFromSeed(seed int) *World
 // pure
 ```
 
-If you're into games that employ procedural generation (such as many roguelikes) you're probably familiar with the concept of a seed: a single value that serves as an input to the game's generation algorithm, returning the same game world for that value every time. Besides making the generation logic easier to debug for its developers, this allows players to share seeds and play the same "runs", some of which might be particularly desirable or intriguing. Even though the generated world returned by this algorithm can be quite complex, it is still a pure function, much like the simple Sum.
+If you're into games that employ procedural generation (such as many roguelikes) you're probably familiar with the concept of a seed: a single value that serves as an input to the game's generation algorithm, returning the same game world for that value every time. Besides making the generation logic easier to debug for its developers, this allows players to share seeds and play the same "runs", some of which might be particularly desirable or intriguing. Even though the generated world returned by this algorithm can be quite complex, it is still a pure function, mu>ch like the simple Sum.
 
 This will be a recurring theme: pushing non-deterministic data and events out to the "edges" of the system, and keeping the "core" deterministic. (Note that I didn't say "impure" and "pure" like a functional programmer; I'll elaborate on that as we continue.)
 
@@ -249,28 +249,31 @@ I find it a bit amusing that…
 
 ## In summary…
 
-- Organize and label your procedures by costs. Keep most of your logic in lower-cost procedures.
-- Costs entail not just the physical resources required for a given procedure to run, but qualitative "meta-costs", such as whether the output keeps or loses predictability, human-readability, etc.
+- Organize and label your procedures by costs.
+- Keep most of your logic in lower-cost procedures.
+- Costs entail not just the physical resources required for a given procedure to run, but qualitative "meta-costs", such as whether the output keeps or loses predictability, readability, etc.
 - Ensure you have mechanisms for containing and recouping costs.
 - The ultimate costs we should minimize are our human time and energy, both for developers and end-users.
 
 Sounds like common sense, right? Well, based on my experience and observations, I don't think it's obvious to many developers. To illustrate that, note what I didn't say earlier.
 
-I didn't say functions must be shorter than some arbitrary number of lines. I didn't say you need to use getters and setters with private variables and methods to hide implementation details inside class objects. I didn't say you should prefer polymorphism over "if" and "switch" statements, or replace all your imperative for-loops with map/reduce/filter chains. I didn't say you need to use curried higher-order functions, or model all your side effects as monads. And I definitely didn't say concrete implementation details should depend on abstractions.
+I didn't say functions must be shorter than some arbitrary number of lines. I didn't say you need to use getters and setters with private variables and methods to hide implementation details inside class objects. I didn't say you should prefer polymorphism over "if" and "switch" statements, or replace all your imperative for-loops with map/reduce/filter chains. I didn't say you need to use curried higher-order functions, or model all your side effects as monads. And I _definitely_ didn't say concrete implementation details should depend on abstractions.
 
-Here's the problem with these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not actually solving any problems I care about.
+Here's what's wrong with these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not solving any problems that _actually_ matter. If anything, their "benefits" largely boil down to superficial aesthetic improvements, and even those are still debatable.
 
-In fact, I have a litmus test for these things: if some overzealous team lead were to require it fullstop, for every line of code, how would that affect the codebase an developer velocity? I know that sounds like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
+In fact, I have a litmus test for these techniques: if some overzealous team lead were to require it as a rule, fullstop, for every line of code, how would that affect the codebase? That may sound like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
 
 Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers", etc.
 
-Well then, why don't we call it SOLID _Guidelines_ instead of SOLID _Principles_, or Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Seriously though, look up how the average article on these topics are written. In fact, make it a drinking game:
+Well then, why don't we call it SOLID _Guidelines_ instead of SOLID _Principles_, or Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Seriously though, look up how the average article or video on these topics is written. In fact, make it a drinking game:
 
-- Take a shot every time they use a "Bad Way" vs "Good Way" comparison example for each principle. Take two shots if they use cringier terms like "Noob" vs. "Expert".
+- Take a shot every time they use a "Bad Way" vs. "Good Way" comparison example for each principle. Take two shots if they use cringier terms like "Noob" vs. "Expert".
 - Take a shot if they use some example that's lazily modeled or analogized on something in the real world, like showing you how to make a "HamburgerProvider" that takes a "CookingStrategy" or some crap like that.
 - Now, if they _do_ add the caveat that you shouldn't apply these principles everywhere, take a shot if _they leave it at that_. It's such an unhelpful copout, a tautology to shield them from any criticism: "these ideas are good until they're not".
 
-So when are they actually good? Well, I'd say it's when they happen to align with the CHARM method I described earlier. (Ugh, I already hate my own acronym, but it's useful.) Ironically enough, CHARM may actually provide clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest. But I don't even feel the need to think about "should I be using SOLID". To me, CHARM alone offers the best balance between velocity and "getting sh\*t done", while still maintaining the ability to refactor later without fear, and ensure my abstractions are actually helpful by basing them on concrete use cases (the opposite of what SOLID recommends, which I think is an absolute disaster).
+So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with the CHARM method I described earlier. (Ugh, I already hate my own acronym, but it's useful.) Ironically enough, CHARM may actually provide clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest. But I don't even feel the need to think about "should I be using SOLID". To me, CHARM alone offers the best balance between velocity and "getting sh\*t done", while still maintaining the ability to refactor later without fear, and ensure my abstractions are actually helpful by basing them on concrete use cases (the opposite of what SOLID recommends, which I think is an absolute disaster).
+
+What I like about CHARM is that it scales in all directions, up and down, forward and backward in scale. It's not full of external caveats; the tenets already holistically "account" for themselves. You know, like _actual_ principles.
 
 To be clear, I'm not claiming I'm some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, and general user satisfaction.
 
@@ -288,21 +291,3 @@ No matter how code is written or generated, it should be designed to be understa
 
 There's this concept of an "omniscient debugger" which has been tried a few times in various languages, but never really caught on. Despite that, I see potential in a similar development utility that analyzes simple cost-aware assertions (such as with the functions above) to automatically add instrumentation to code. Natural usage of the instrumented program could automatically generate robust, exhaustive test suites, mock implementations, execution traces, visualizations and more. And no, it wouldn't use AI (although that might actually be quite complementary).
 =I know this all sounds overly hand-wavy, but I have a pretty clear vision in my head for how this would work. It's a potential solution to many of the day-to-day problems I personally face; more so than any fancy language feature or design pattern could ever do. I am attempting to develop a proof-of-concept in what little free time I have, and I hope to share what I have soon.
-
-TRASH TRASH TRASH
-
-- Minimize variability, duplicate data, ambiguity and unknowns
-- Upfront evaluation, assertion and analysis
-- Labeled, localizable logical links (yeah, I went crazy with the alliteration here)
-- Cost Awareness
-- Human Orientation
-
-in practice they often end up hurting more than they actually help. I could write several articles about their pitfalls, but for now, I'll just say that they all have inherent costs that often get overlooked. I'm not even talking about performance; I'm talking about the overall costs to code understandability and developer productivity. Applying these patterns can induce significant levels of indirection into a system, which consumes our human time and energy to implement and work with.
-
-I'm not outright saying "don't do those things", but I do recommend that you seriously weigh their costs. If your development journey goes like mine, and that of so many others, you'll find that much more often than not, You Ain't Gonna Need It.
-
-In fact, I have a hypothesis for why these methodologies have such a mixed reception: Some engineers read up on them and intuitively employ them in a sensible fashion. Like the story of Stone Soup, they didn't really _need_ OOP, but it was the catalyst they needed to get them thinking about their design.
-
-Other developers interpret the advice literally, leading to its logical absurd outcome: excessively, unnecessarily indirect, fragmented, and hard-to-understand code…which their colleagues, subordinates and successors are then forced to deal with. Or even more sadly, perpetuate.
-
-There's another more cynical reason I think these principles took over.
