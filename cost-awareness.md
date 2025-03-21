@@ -265,17 +265,24 @@ In fact, I have a litmus test for these techniques: if some overzealous team lea
 
 Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers", etc.
 
-Well then, why don't we call it SOLID _Guidelines_ instead of SOLID _Principles_, or Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Seriously though, look up how the average article or video on these topics is written. In fact, make it a drinking game:
+Well then, why don't we call Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Or SOLID _Guidelines_ instead of SOLID _Principles_, ? If there are external caveats, shouldn't SOLID add letters to _internalize_ those, and help us determine when we should and shouldn't use them? Even if not explicitly saying so, the way SOLID is taught is implicitly telling impressionable programmers to use them everywhere.
+
+Try this, look up how the average article or video on these topics is written. In fact, make it a drinking game:
 
 - Take a shot every time they use a "Bad Way" vs. "Good Way" comparison example for each principle. Take two shots if they use cringier terms like "Noob" vs. "Expert".
+- Take a shot in memory pure function
 - Take a shot if they use some example that's lazily modeled or analogized on something in the real world, like showing you how to make a "HamburgerProvider" that takes a "CookingStrategy" or some crap like that.
 - Now, if they _do_ add the caveat that you shouldn't apply these principles everywhere, take a shot if _they leave it at that_. It's such an unhelpful copout, a tautology to shield them from any criticism: "these ideas are good until they're not".
 
-So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with the CHARM method I described earlier. (Ugh, I already hate my own acronym, but it's useful.) Ironically enough, CHARM may actually provide clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest. But I don't even feel the need to think about "should I be using SOLID". To me, CHARM alone offers the best balance between velocity and "getting sh\*t done", while still maintaining the ability to refactor later without fear, and ensure my abstractions are actually helpful by basing them on concrete use cases (the opposite of what SOLID recommends, which I think is an absolute disaster).
+So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with the CHARM method I described earlier. (Ugh, I already hate my own acronym, but it's useful.) Ironically enough, CHARM may actually provide clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest.
 
-What I like about CHARM is that it scales in all directions, up and down, forward and backward in scale. It's not full of external caveats; the tenets already holistically "account" for themselves. You know, like _actual_ principles.
+But I don't even feel the need to think about "should I be using SOLID". To me, CHARM alone offers the best balance between velocity and "getting sh\*t done", while still maintaining the ability to refactor later without fear, and ensure my abstractions are actually helpful by basing them on concrete use cases. That's the opposite of what SOLID recommends, which I think leads to disaster.
 
-To be clear, I'm not claiming I'm some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, and general user satisfaction.
+What I like about CHARM is that it scales in all directions, up and down in size, forward and backward in time. The tenets already holistically "account" for each other. You know, like _actual_ principles.
+
+business app vs game vs hdd/memory vs bureaucracy (real reason)
+
+I'm not claiming that CHARM makes me some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, general user satisfaction, and developer sanity.
 
 ## "BuT wHaT aBoUt Ai?"
 
