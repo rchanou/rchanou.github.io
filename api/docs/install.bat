@@ -1,1 +1,0 @@
-git pull https://clubspeed-api-updater:,git2014!GusGus,@github.com/clubspeed/clubspeed-api.git

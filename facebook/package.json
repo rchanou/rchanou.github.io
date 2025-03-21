@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "fb": "^0.7.0",
-    "jsonfile": "^2.0.0",
-    "request": "^2.53.0"
-  }
-}
