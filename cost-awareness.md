@@ -1,26 +1,28 @@
-## Forget about Object-Oriented Programming.
+## Intro
 
-Literally, forget about it. Same goes for Functional Programming, SOLID, Clean Code, Hexagonal Architecture, Domain-Driven Design, MVC, and a slew of other buzzwords parroted by countless ~~FAANG~~ MAANG wannabe astronaut architects who've been touched by Uncle Bob. All these ideas fall under the purview of what I call "Conventional Programming Wisdom", hereafter referred to as **CPW**.
-
-This advice is especially targeted to you young, enthusiastic junior developers, eager to improve yourself by mastering design patterns and so-called "best practices". No, you don't _need_ to study them. There's a good chance they'll even set you back.
-
-It's not that these schools of thought are totally wrong. They do have some good ideas, and I'm sure they've helped many folks ditch their habit of carelessly copy-pasting spaghetti code. However, the ways they are taught are likely to lead developers to overcorrect in the _other_ direction: over-engineered, cargo-culted, excessively abstract code.
-
-I'm hardly the first person to think this; it's such a common sentiment that [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/) achieved mild popularity:
+Now that I'm over a decade into my programming career, I can confidently say that most of the programming advice I've received over the years is bad, and that the general culture of software development has been steering us in the wrong direction. Like many other developers, I went through a mild episode of [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/):
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 
-In fact, you can already find several scathing critiques of CPW by engineers much more talented than myself. Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least listening to them while you're working or doing chores):
+It's not that I fell in love with SOLID, Clean Architecture, Domain Driven Design or design patterns and started using them everywhere. In fact, it's kind of the opposite: I felt that I _should_ be using them but never really quite _got_ them. I felt inadequate.
+
+Then, I jumped on the "Functional Programming" train in 2014, when people were noticing React was "good" because it was way simpler than Angular, the reigning state-of-the-art framework at the time. Yeah, it took a while for everyone to realize Angular sucked. That's when I started realizing the Emperor wasn't wearing any clothes. I was still a relative noob, but you 10x FAANG gurus don't _really_ know what you're doing, either.
+
+Initially, React started as a simple "Whoa, dude, the view is just a function of state". Basically, they stole the idea of immediate-mode interfaces, then caked that over the DOM, which is basically the equivalent of pouring concrete over a toxic landfill. Almost _immediately_ after that, they started going down the same path as Angular.
+
+Any of y'all remember the Flux architecture proposed by Facebook? Then a dozen variations popped up with some corny _Back to the Future_-themed name like Marty. Then Redux somehow became the standard. Then everyone realized it sucked to write 10 extra lines to pretend you don't have state. It's the programmer equivalent of a behaviorist saying "my heart rate is elevated and my lips are curled upward" instead of "I'm happy".
+
+So they switched to Vue or Svelte or whatever. (I used Mobx without the class crap, myself.) Anyone remember Functional Reactive Programming, too? Netflix was hyping RxJS pretty hard, made it sound like a good idea, then it turned out to suck. Their engineering team was way ahead of their production studio when it came to releasing high budget slop.
+
+Finally, a few years ago I started to find talks and articles by engineers who were able to scratch that nagging itch in the back of my head: Why does this not feel quite right?
+
+Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least listening to them while you're working or doing chores):
 
 - The 3-part series _[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Brian Will
 - _["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Internet of Bugs
 - [Shawn Mcgrath's legendary OOP Rant](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)
 - _[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)_ by Mike Acton (despite the title, the advice applies to other domains)
 - _[Where Does Bad Code Come From?](https://youtu.be/7YpFGkG-u1w?si=Fd9wMoVtAr1j-Fz7)_ by Casey Muratori
-
-Note that these videos largely focus on how CPW harms code maintainability and developer velocity, not performance. Proponents of CPW will often acknowledge the potential performance overhead, but claim it is worth it for the supposedly improved developer experience it brings. Or they'll admit that some principles are worse for small projects or teams, but then posit some magical inflection point where they makes code better as scale increases.
-
-No, I'm not even conceding that. I am claiming that implementing CPW, as it is commonly described and taught, results in worse code all around. Which begs the question: What's my alternative proposal for "good code", and why do I think it's better?
 
 Well, I thought about the many techniques that I employ, and they all seem to be some variation of these core tenets:
 
@@ -265,25 +267,6 @@ Sounds like common sense, right? Well, based on my experience and observations, 
 
 I didn't say functions must be shorter than some arbitrary number of lines. I didn't say you need to use getters and setters with private variables and methods to hide implementation details inside class objects. I didn't say you should prefer polymorphism over "if" and "switch" statements, or replace all your imperative for-loops with map/reduce/filter chains. I didn't say you need to use curried higher-order functions, or model all your side effects as monads. And I _definitely_ didn't say concrete implementation details should depend on abstractions.
 
-Here's what's wrong with these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not solving any problems that _actually_ matter.
-
-In fact, I have a sort of litmus test for these techniques: if some overzealous team lead were to require it as a rule, fullstop, for every line of code, how would that affect the codebase? That may sound like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
-
-Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers", etc.
-
-Well then, why don't we call Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Or SOLID _Guidelines_ instead of SOLID _Principles_? If SOLID has caveats, shouldn't they add letters to handle and _internalize_ that, helping us determine when we should and shouldn't use them? Proponents teach SOLID in a way that implicitly tells impressionable programmers to use it _everywhere_, even if they expressively deny that.
-
-Try this, look up how the average article or video on these topics is written. In fact, make it a drinking game:
-
-- Take a shot every time they use a "Bad Way" vs. "Good Way" comparison example for each principle. Take two shots if they use cringier terms like "Noob" vs. "Expert".
-- Take a shot in memory pure function
-- Take a shot if they use some example that's lazily modeled or analogized on something in the real world, like showing you how to make a "HamburgerProvider" that takes a "CookingStrategy" or some crap like that.
-- Now, if they _do_ add the caveat that you shouldn't apply these principles everywhere, take a shot if _they leave it at that_. It's such an unhelpful copout, a tautology to shield them from any criticism: "these ideas are good until they're not".
-
-So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with "The CHARM Method" I described earlier. (Ugh, I already hate that acronym, but whatever.) Ironically, CHARM provides clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest.
-
-For me personally, I don't even think about SOLID or most of that other advice. CHARM alone lets me "just get sh\*t done" without stressing myself by overthinking my design, while still maintaining the necessary structure and testability to let me refactor without fear later on. By waiting until I have concrete use cases and data before I begin abstracting, I can ensure my abstractions actually _help_ instead of harm my code.
-
 ## "BuT wHaT aBoUt Ai?"
 
 The development of LLMs and other AI tech for code generation does not change my thesis. If anything, it strengthens it. Beyond a small portion of entertainment-oriented novelty apps, we won't be able to get away with not understanding our code. If you disagree, you do you, but mark my words, you're inevitably going to hit a wall…so at the very least, slow your roll, lest you crash and burn at 90 MPH.
@@ -300,6 +283,25 @@ There's this concept of an "omniscient debugger" which has been tried a few time
 =I know this all sounds overly hand-wavy, but I have a pretty clear vision in my head for how this would work. It's a potential solution to many of the day-to-day problems I personally face; more so than any fancy language feature or design pattern could ever do. I am attempting to develop a proof-of-concept in what little free time I have, and I hope to share what I have soon.
 
 ```TRASH TRASH TRASH ~~~~~~~~~~~~~~~~~~~~~~
+
+You should keep your functions small. You should use getters and setters with private variables and methods to hide implementation details inside class objects. Prefer polymorphism over "if" and "switch" statements. Replace all your imperative for-loops with map/reduce/filter chains. Use curried higher-order functions and model all your side effects as monads. Concrete implementation details should depend on abstractions.
+
+Here's what's wrong with these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not solving any problems that _actually_ matter.
+
+In fact, I have a sort of litmus test for these techniques: if some overzealous team lead were to require it as a rule, fullstop, for every line of code, how would that affect the codebase? That may sound like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
+
+Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers", etc.
+
+Well then, why don't we call Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Or SOLID _Guidelines_ instead of SOLID _Principles_? If SOLID has caveats, shouldn't they add letters to handle and _internalize_ that, helping us determine when we should and shouldn't use them? Proponents teach SOLID in a way that implicitly tells impressionable programmers to use it _everywhere_, even if they expressively deny that.
+
+Try this, look up how the average article or video on these topics is written. In fact, make it a drinking game:
+
+- Take a shot every time they use a "Bad Way" vs. "Good Way" comparison example for each principle. Take two shots if they use cringier terms like "Noob" vs. "Expert".
+- Take a shot in memory pure function
+- Take a shot if they use some example that's lazily modeled or analogized on something in the real world, like showing you how to make a "HamburgerProvider" that takes a "CookingStrategy" or some crap like that.
+- Now, if they _do_ add the caveat that you shouldn't apply these principles everywhere, take a shot if _they leave it at that_. It's such an unhelpful copout, a tautology to shield them from any criticism: "these ideas are good until they're not".
+
+So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with "The CHARM Method" I described earlier. (Ugh, I already hate that acronym, but whatever.) Ironically, CHARM provides clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest.
 
 What I like about CHARM is that it scales in all directions, up and down in size, forward and backward in time. The tenets already holistically "account" for each other. You know, like _actual_ principles.
 
