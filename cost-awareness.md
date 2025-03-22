@@ -1,28 +1,28 @@
-## Yup, I'm jumping on the anti-OOP bandwagon.
+## Forget about Object-Oriented Programming.
 
-You are better off literally forgetting about Object-Oriented Programming. Same goes for Functional Programming, SOLID, Clean Code, Hexagonal Architecture, Domain-Driven Design, MVC, and a slew of other buzzwords parroted by countless FAANG-wannabe astronaut architects who've been touched by Uncle Bob. All these ideas fall under the purview of what I call "Conventional Programming Wisdom", which I'll hereafter refer to as **CPW**.
+Literally, forget about it. Same goes for Functional Programming, SOLID, Clean Code, Hexagonal Architecture, Domain-Driven Design, MVC, and a slew of other buzzwords parroted by countless ~~FAANG~~ MAANG wannabe astronaut architects who've been touched by Uncle Bob. All these ideas fall under the purview of what I call "Conventional Programming Wisdom", hereafter referred to as **CPW**.
 
-This advice is especially targeted to those young, enthusiastic junior developers, eager to improve themselves by mastering design patterns and so-called "best practices". No, you don't need to study them. That will only set you back in the long run, just like they did for me.
+This advice is especially targeted to you young, enthusiastic junior developers, eager to improve yourself by mastering design patterns and so-called "best practices". No, you don't _need_ to study them. There's a good chance they'll even set you back.
 
-It's not that these schools of thought are totally wrong. They do have some good ideas, and I'm sure they've helped many folks ditch their habit of carelessly copy-pasting spaghetti code. However, the ways they are generally taught are likely to lead developers to overcorrect in the other direction: over-engineered, cargo-culted, excessively abstract code.
+It's not that these schools of thought are totally wrong. They do have some good ideas, and I'm sure they've helped many folks ditch their habit of carelessly copy-pasting spaghetti code. However, the ways they are taught are likely to lead developers to overcorrect in the _other_ direction: over-engineered, cargo-culted, excessively abstract code.
 
-I'm hardly the first person to think this; the sentiment seems to be common enough such that this meme achieved mild popularity:
+I'm hardly the first person to think this; it's such a common sentiment that [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/) achieved mild popularity:
 
-INSERT MEME IMAGE
+![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 
-In fact, you can already find several scathing critiques of CPW, by engineers much more talented than myself. Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least giving these a listen while you're working or doing chores):
+In fact, you can already find several scathing critiques of CPW by engineers much more talented than myself. Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least listening to them while you're working or doing chores):
 
-- The 3-part series _Object-Oriented Programming is Bad/Embarrassing/Garbage_ by Brian Will
-- _Clean Code is Bad_ by Internet of Bugs
-- Shawn Mcgrath's legendary OOP Rant
-- _Solving the Right Problems for Engine Programmers_ by Mike Acton (despite the title, this is absolutely applicable outside of engine programming)
-- _Where Does Bad Code Come From?_ by Casey Muratori
+- The 3-part series _[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Brian Will
+- _["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Internet of Bugs
+- [Shawn Mcgrath's legendary OOP Rant](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)
+- _[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)_ by Mike Acton (despite the title, the advice applies to other domains)
+- _[Where Does Bad Code Come From?](https://youtu.be/7YpFGkG-u1w?si=Fd9wMoVtAr1j-Fz7)_ by Casey Muratori
 
-Note that these videos focus on how CPW harms code maintainability and developer velocity, not performance. Proponents of CPW will often acknowledge the potential performance overhead, but claim it is worth it for the supposedly improved developer experience it brings. Or they'll admit that CPW is worse for small projects or teams, but postulate some magical inflection point where it makes code better as its scope increases.
+Note that these videos largely focus on how CPW harms code maintainability and developer velocity, not performance. Proponents of CPW will often acknowledge the potential performance overhead, but claim it is worth it for the supposedly improved developer experience it brings. Or they'll admit that some principles are worse for small projects or teams, but then posit some magical inflection point where they makes code better as scale increases.
 
-No, I'm not even conceding that. I am saying that implementing CPW, as it is commonly described and taught, just leads to worse code all around.
+No, I'm not even conceding that. I am claiming that implementing CPW, as it is commonly described and taught, results in worse code all around. Which begs the question: What's my alternative proposal for "good code", and why do I think it's better?
 
-So then, what's my alternative proposal for "good code", and why do I think it's better? Well, I thought about the many techniques that I employ, and they seem to boil down to these core tenets:
+Well, I thought about the many techniques that I employ, and they all seem to be some variation of these core tenets:
 
 - **Cost Awareness**
 - **Human Orientation**
@@ -30,7 +30,7 @@ So then, what's my alternative proposal for "good code", and why do I think it's
 - **Reproducibility**
 - **Minimize** variability, ambiguity, duplication, and dead-ends
 
-I guess this is my response to the SOLID acronym: The **CHARM** Method. Cute, no?
+I guess this is my response to the SOLID principles: use **The **CHARM** Method** instead. Cute, no?
 
 Anyway, this article will focus on Cost Awareness, since that is usually the first principle I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
 
@@ -84,7 +84,7 @@ func Sum(addends...int) int
 // pure
 ```
 
-Let's start simple. Sum has the properties of a pure function: for a given set of input parameters, it always returns the same output, and it has no side effects. It requires a CPU and RAM to run, but that's implied for all functions; we know those requirements are met if we can run this program in the first place.
+Let's start simple. `Sum` has the properties of a pure function: for a given set of input parameters, it always returns the same output, and it has no side effects. It requires a CPU and RAM to run, but that's implied for all functions; we know those requirements are met if we can run this program in the first place.
 
 ```
 func Ceil(x float64) float64
@@ -166,9 +166,9 @@ Like GetRandomInt, it has a nondeterministic output. Like Sleep, it causes a del
 
 However, unlike the previous functions, it potentially mutates the variables passed into it. For most applications, mutable state is necessary, but is a likely source of bugs. So you might want to make note of what state can be shared among multiple functions, and when that might be mutated.
 
-This is also where clear, consistent naming conventions help. For my own mutating functions, a common prefix I use is "Set". For this function, I might prefer a name like SetRefsFromUserInput.
+This is also where consistent naming conventions help. For my own mutating functions, I commonly use a `Set` prefix; so for this function, I might prefer a name like `SetRefsFromUserInput`.
 
-Conversely, you might want a distinct "subword" for globally shared mutable references, such as "Instance" or "Ref". (You thought Hungarian notation was dead? Nah, it just evolved.)
+Conversely, you could use a "subword" to distinguish globally shared mutable references, such as "Instance" or "Ref". (Hungarian notation didn't die, we just evolved it to fill in the remaining holes in our type systems.)
 
 ```
 func GetCurrentTimeNow() Time
@@ -203,13 +203,15 @@ func ReadFile(name string) ([]byte, error)
 // requires: disk/filesys; contained
 ```
 
-Here is our first function that relies on a consumable dependency besides memory. In this case, that dependency is the disk. However, the act of running this function itself doesn't actually consume the resource; it simply requires it.
+Here is our first function that relies on a consumable dependency besides memory. In this case, that dependency is the disk and filesystem. However, the act of running `ReadFile` doesn't actually consume more of the resource itself; it simply requires it.
 
-You can also think of the disk and file system as implicit parameters to ReadFile. You can expect that if the state of the filesystem remains the same between subsequent calls, you will get the same output. This contrasts with GetRandomInt and GetCurrentTimeNow, which are expected to return a different, largely unpredictable result every time you call them. Even if the filesystem is in a "broken" state, we expect it to return the same error for each call with that state.
+You can also think of the disk as an implicit parameter to ReadFile. You can expect the same output for the same input _if_ the relevant disk state also remains the same between subsequent calls. This contrasts with `GetRandomInt` and `GetCurrentTimeNow`, which are expected to return a different, largely unpredictable result every time you call them. Even if the call results in an error because of some file issue (like lack of permissions), we expect it to return the same error for each call with that particular "invalid" disk state.
 
-For ReadFile, you can reasonably test "the happy path" with a modicum of setup.
+### Tangent Time: The Fallacy of "Testable Code"
 
-[TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html) by Mr. Ruby on Rails himself, DHH.
+This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
+
+I disagree, and to explain, I'll simply defer to the iconoclastic David Heinemeier Hansson. Here are some key quotes I vibe with, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first units leads to an overly complex web of intermediary objects and indirection in order to avoid doing anything that's "slow". Like hitting the database. Or file IO.
 
@@ -218,6 +220,10 @@ For ReadFile, you can reasonably test "the happy path" with a modicum of setup.
 > You do not let your tests drive your design, you let your design drive your tests!
 
 > Stop obsessing about unit tests, embrace backfilling of tests when you're happy with the design, and strive for overall system clarity.
+
+I have my own thoughts here, but that exploration deserves its own article. (Read to the end for a teaser.)
+
+Getting back to `ReadFile`, this specifically
 
 ```
 func WriteFile(name string, data []byte, perm FileMode) error
@@ -259,13 +265,13 @@ Sounds like common sense, right? Well, based on my experience and observations, 
 
 I didn't say functions must be shorter than some arbitrary number of lines. I didn't say you need to use getters and setters with private variables and methods to hide implementation details inside class objects. I didn't say you should prefer polymorphism over "if" and "switch" statements, or replace all your imperative for-loops with map/reduce/filter chains. I didn't say you need to use curried higher-order functions, or model all your side effects as monads. And I _definitely_ didn't say concrete implementation details should depend on abstractions.
 
-Here's what's wrong with these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not solving any problems that _actually_ matter. If anything, their "benefits" largely boil down to superficial aesthetic improvements, and even those are still debatable.
+Here's what's wrong with these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not solving any problems that _actually_ matter.
 
-In fact, I have a litmus test for these techniques: if some overzealous team lead were to require it as a rule, fullstop, for every line of code, how would that affect the codebase? That may sound like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
+In fact, I have a sort of litmus test for these techniques: if some overzealous team lead were to require it as a rule, fullstop, for every line of code, how would that affect the codebase? That may sound like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
 
 Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers", etc.
 
-Well then, why don't we call Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Or SOLID _Guidelines_ instead of SOLID _Principles_, ? If there are external caveats, shouldn't SOLID add letters to _internalize_ those, and help us determine when we should and shouldn't use them? Even if not explicitly saying so, the way SOLID is taught is implicitly telling impressionable programmers to use them everywhere.
+Well then, why don't we call Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Or SOLID _Guidelines_ instead of SOLID _Principles_? If SOLID has caveats, shouldn't they add letters to handle and _internalize_ that, helping us determine when we should and shouldn't use them? Proponents teach SOLID in a way that implicitly tells impressionable programmers to use it _everywhere_, even if they expressively deny that.
 
 Try this, look up how the average article or video on these topics is written. In fact, make it a drinking game:
 
@@ -274,15 +280,9 @@ Try this, look up how the average article or video on these topics is written. I
 - Take a shot if they use some example that's lazily modeled or analogized on something in the real world, like showing you how to make a "HamburgerProvider" that takes a "CookingStrategy" or some crap like that.
 - Now, if they _do_ add the caveat that you shouldn't apply these principles everywhere, take a shot if _they leave it at that_. It's such an unhelpful copout, a tautology to shield them from any criticism: "these ideas are good until they're not".
 
-So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with the CHARM method I described earlier. (Ugh, I already hate my own acronym, but it's useful.) Ironically enough, CHARM may actually provide clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest.
+So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with "The CHARM Method" I described earlier. (Ugh, I already hate that acronym, but whatever.) Ironically, CHARM provides clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest.
 
-But I don't even feel the need to think about "should I be using SOLID". To me, CHARM alone offers the best balance between velocity and "getting sh\*t done", while still maintaining the ability to refactor later without fear, and ensure my abstractions are actually helpful by basing them on concrete use cases. That's the opposite of what SOLID recommends, which I think leads to disaster.
-
-What I like about CHARM is that it scales in all directions, up and down in size, forward and backward in time. The tenets already holistically "account" for each other. You know, like _actual_ principles.
-
-business app vs game vs hdd/memory vs bureaucracy (real reason)
-
-I'm not claiming that CHARM makes me some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, general user satisfaction, and developer sanity.
+For me personally, I don't even think about SOLID or most of that other advice. CHARM alone lets me "just get sh\*t done" without stressing myself by overthinking my design, while still maintaining the necessary structure and testability to let me refactor without fear later on. By waiting until I have concrete use cases and data before I begin abstracting, I can ensure my abstractions actually _help_ instead of harm my code.
 
 ## "BuT wHaT aBoUt Ai?"
 
@@ -298,3 +298,12 @@ No matter how code is written or generated, it should be designed to be understa
 
 There's this concept of an "omniscient debugger" which has been tried a few times in various languages, but never really caught on. Despite that, I see potential in a similar development utility that analyzes simple cost-aware assertions (such as with the functions above) to automatically add instrumentation to code. Natural usage of the instrumented program could automatically generate robust, exhaustive test suites, mock implementations, execution traces, visualizations and more. And no, it wouldn't use AI (although that might actually be quite complementary).
 =I know this all sounds overly hand-wavy, but I have a pretty clear vision in my head for how this would work. It's a potential solution to many of the day-to-day problems I personally face; more so than any fancy language feature or design pattern could ever do. I am attempting to develop a proof-of-concept in what little free time I have, and I hope to share what I have soon.
+
+```TRASH TRASH TRASH ~~~~~~~~~~~~~~~~~~~~~~
+
+What I like about CHARM is that it scales in all directions, up and down in size, forward and backward in time. The tenets already holistically "account" for each other. You know, like _actual_ principles.
+
+business app vs game vs hdd/memory vs bureaucracy (real reason)
+
+I'm not claiming that CHARM makes me some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, general user satisfaction, and developer sanity.
+```
