@@ -1,32 +1,32 @@
 ## Intro
 
-After professionally programming for over a dozen years, I can now confidently say that most coding advice is bad, and that the general culture of software development has been steering us in the wrong direction.
-
-Like many other developers, I went through a variation of [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/):
+After professionally programming for over a dozen years, I can now confidently say that most coding advice is bad, and that the general culture of software development has been steering us in the wrong direction. Like many other developers, I went through a variation of [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/):
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 
 My journey was a bit different, though: it's not that I fell in love with paradigms like SOLID, Clean Architecture, and Domain Driven Design. In fact, it's kind of the opposite: I felt that I _should_ be using them, but never really quite _got_ them. I felt inadequate.
 
-In 2013, I remember getting an ASP.NET MVC book that had at least 4.5 stars and glowing reviews, so young me assumed I could learn _something_ from it. Almost right out the bat, it recommended I should use the Ninject Dependency Injection framework with the Repository Pattern. It was literally mentally fatiguing to understand the code, but I figured if I kept at it enough, it would become second nature and I would understand the benefits.
+In 2013, I remember getting an ASP.NET MVC book that had at least 4.5 stars and glowing reviews, so young me assumed I could learn _something_ from it. Almost right out the bat, it recommended I should use the Ninject Dependency Injection framework with the Repository Pattern. It was literally mentally fatiguing for me to understand the code, but I figured if I kept at it enough, it would become second nature and I would understand the benefits.
 
 Meanwhile, on the frontend, Angular was the reigning state-of-the-art UI framework at the time. I remember working through several videos and tutorials about Angular, and again, I was desperately grinding, trying to "get" it and understand how it would help me in the long run. Again, I felt inadequate.
 
 Fortunately, a few months later, Pete Hunt did a talk titled "Rethinking Best Practices" making the case for this new UI library called React, and I immediately saw it as a breath of fresh air. So I _wasn't_ crazy for thinking that Angular was unnecessary overkill!
 
-That's when I started realizing the Emperor had no clothes. As a relative noob, I started noticing, you 10x FAANG gurus don't _really_ know what you're doing, either. Y'all are just making it up as you go along.
+That's when I started realizing the Emperor had no clothes. As a relative noob, I started noticing: you 10x FAANG gurus don't _really_ know what you're doing, either. Y'all are just making it up as you go along.
 
 React started with a simple idea: "The view is just a function of state". Basically, Facebook stole the philosophy of immediate-mode interfaces, then caked it on top of the DOM, which is the frontend equivalent of pouring concrete over a toxic wasteland to make it suitable for development. Still, I was much more productive with React than I was with Angular; it even helped me get my next job.
 
 Not too long after, though, React started going that same downhill path. Do any of y'all remember the Flux state management architecture proposed by Facebook? It led to a slew of competing variations with cute names like Flummox and Marty. Then, because Dan Abramov gave a flashy demo, Redux somehow became the new standard, and everyone ditched Flux.
 
-At this point I was already jaded. React + Redux became the new Angular. Job listings started putting it in their requirements. Bootcamps added it to their curriculum. Even Dan Abramov himself thought it was overused.
+At this point I was already jaded. React + Redux became the new Angular. Job listings started putting it in their requirements. Bootcamps added it to their curriculum, teaching droves of new developers, "this is the way software development is done". Even Dan Abramov himself thought it was overused.
 
-Like Angular, I gave Redux an earnest try, and it just felt like I was writing ten extra lines for each state transition to pretend I didn't have any state. It's the programming equivalent of psychological behaviorism: "My heart rate is elevated, my lips are curled upward, and there is a warm, stiff bulge protruding from my trousers, but I _cannot_ confirm my internal emotional condition." Sigh...you 10xers just cannot keep simple things simple.
+Like Angular, I gave Redux an earnest try, and it just felt like I was adding way too much ceremony and indirection for each state transition, in an effort to sweep state under the rug and pretend I didn't have any. It was like the programming equivalent of psychological behaviorism: "My heart rate is elevated, my lips are curled upward, and there is a warm, stiff bulge protruding from my trousers, but I _cannot_ confirm my internal emotional condition."
 
-I started using a small subset of Mobx myself, without all of its OOP fluff. It provided a simple alternative to what Flux and Redux were essentially doing: Put the application state first, with view rendering as a secondary "subscriber" to it. It wasn't perfect, but it worked well enough and got out of my way. I stopped caring to keep up.
+Soon after, I found Mobx, and started using that without all the object-oriented fluff. It provided a simple alternative to what Flux and Redux were essentially doing: Put the application state first, with view-rendering as a secondary "subscriber" to it. Mobx observables let me treat state like state. It didn't pretend to be anything it wasn't. It wasn't perfect, but it worked well enough and got out of my way. There wouldn't ever be a "MobxConf", and that's what I liked about it.
 
-Finally, I started to find talks and articles by engineers who were able to scratch that nagging itch in the back of my head: Why does this not feel quite right?
+After that, I stopped caring to keep up. It seemed like everyone else who was fed up with React + Redux flocked to Vue. Then Vue started hosting conferences. Then Vue had its "controversial new version" moment. Then folks started switching to Svelte, and that had its own conferences, and its "controversial new version", and so on and so forth. Meanwhile, "hooks" felt like React's mea culpa for Redux, and Angular tried to stay relevant with "signals". The funny thing is, Vue's refs, Angular's signals, and Svelte's runes all look like proprietary view-coupled observables, so I think I made the right call.
+
+During this time, I continued to seek new talks to listen to while I was working.
 
 Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least listening to them while you're working or doing chores):
 
@@ -35,18 +35,22 @@ Here are some choice videos on YouTube (if you're too busy to watch these, I rec
 - [Shawn Mcgrath's legendary OOP Rant](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)
 - _[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)_ by Mike Acton (despite the title, the advice applies to other domains)
 
-In 2020, around when the pandemic lockdowns were in full force, my team lead got another job, and I had the good fortune of taking over one of our company's major internal systems which he spearheaded. He was a brilliant lead in many ways
+Then in 2020, around when the pandemic lockdowns were in full force, my team lead left for another job, and I had the good fortune of taking over one of our company's major internal systems, which he spearheaded. It presented my first opportunity to really flesh out
 
-Here are the points I typically agree with:
+He was a brilliant lead in many ways
 
-- **Assert and evaluate upfront**. Don't wait to evaluate at runtime what you should already know at compile-time.
-- **Flat is better than nested**.
-- **Single Source of Truth (SSOT)**, which is usually talked about in reference to data, but I also believe it should apply to code. **SSOT** is _not_ the same as **Don't Repeat Yourself (DRY)**, a misleading phrase which can lead to "DRY Rot". An example that comes to mind is handling errors in Go: It _looks_ repetitive to handle each `err`, but each error _is_ a distinct, unique event in the system. Which is why I don't mind the repetitiveness. Sure, there could be syntactic sugar like Odin's `or_return` but in the grand scheme of things, I've found I prefer the explicitness of Go's error values compared to exceptions.
+I'll serve a compliment flatbread and start with the good. Here is the common advice that I agree with:
+
+**Assert and evaluate upfront**. Don't wait to evaluate at runtime what you should already know at compile-time.
+
+**Flat is better than nested**.
+
+**Single Source of Truth (SSOT)**, which is usually talked about in reference to data, but it applies just as well to code. (After all, code is data, right?) **SSOT** is _not_ the same as **Don't Repeat Yourself (DRY)**, a misleading maxim which can lead to "DRY Rot". In fact, those two ideas often conflict with each other. An example that comes to mind is handling errors in Go: It _looks_ repetitive to handle each `err`, but each error _is_ a distinct, unique event in the system. Which is why I don't mind the repetitiveness. Sure, there could be syntactic sugar like Odin's `or_return` but in the grand scheme of things, I've found I prefer the explicitness of Go's error values compared to exceptions.
 
 Here are ideas that _do not_ jibe with me:
 
 - **Over-emphasis on isolation**, which is neither necessary nor sufficient to scale. In fact, it's often _counterproductive_ to scaling. "components" and composition.
-- **Over-emphasis on domain-specific languages and declarative programming**.
+- **Over-emphasis on domain-specific languages and declarative programming**. "You need to keep up with new tech." This is what causes the constant churn. I don't see this as fundamentally solving any real problems. StackOverflow on a simple stack. Radical Simplicity.
 - **Excessive design and ceremony around tests**. We have an inefficient approach to testing that points to a feature and tool that all mainstream languages lack. Creating useful tests _should_ be as easy as declaring a couple extra types for each function, developing in a "naive" fashion, and verifying the correctness of any desired output.
   : Developers have built techniques and tools that seem to dance tantalizingly around this, such as spec-generated tests, table-tests, snapshot testing, fuzz testing, AI-assisted testing and omniscient debuggers.
 
