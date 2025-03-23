@@ -4,7 +4,7 @@ Now that I have over a dozen years of professional programming experience, I can
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 
-In my case, it's not that I fell in love with SOLID, Clean Architecture, design patterns, Domain Driven Design, etc. and started using them everywhere. In fact, it's kind of the opposite: I felt that I _should_ be using them, but never really quite _got_ them. I felt inadequate.
+My journey was slightly different: it's not that I fell in love with SOLID, Clean Architecture, design patterns, Domain Driven Design, etc. and started using them everywhere. In fact, it's kind of the opposite: I felt that I _should_ be using them, but never really quite _got_ them. I felt inadequate.
 
 In 2013, I remember getting an ASP.NET MVC book that had at least 4.5 stars and glowing reviews, so young me assumed I could learn _something_ from it. Almost right out the bat, it recommended I should use the Ninject Dependency Injection framework with the Repository Pattern. It was literally mentally fatiguing to understand the code, but I figured if I kept at it enough, it would become second nature and I would understand the benefits. ~~Looking back on that type of code now, even though I "get" it now, it still _is_ mentally fatiguing.~~
 
@@ -12,17 +12,17 @@ Meanwhile, on the frontend, Angular was the reigning state-of-the-art UI framewo
 
 Fortunately, a few months later, Pete Hunt came out with "Rethinking Best Practices" making the case for React, and I immediately saw it as a breath of fresh air. So I _wasn't_ crazy for thinking that Angular was unnecessary overkill! That's when I started realizing the Emperor had no clothes. As a relative noob, I started noticing, you 10x FAANG gurus don't _really_ know what you're doing, either. Y'all are just making it up as you go along.
 
-React started with a simple idea: "The view is just a function of state". Basically, Facebook stole the idea of immediate-mode interfaces, then caked that over the DOM, which is the frontend equivalent of pouring concrete over a toxic landfill to make it suitable for development. Still, I was much more productive with it than I was with Angular; it even helped me get my next job.
+React started with a simple idea: "The view is just a function of state". Basically, Facebook stole the philosophy of immediate-mode interfaces, then caked it on top of the DOM, which is the frontend equivalent of pouring concrete over a toxic wasteland to make it suitable for development. Still, I was much more productive with React than I was with Angular; it even helped me get my next job.
 
-Soon after that, though, React started going downhill, too. Any of y'all remember the Flux state management architecture proposed by Facebook? Then a dozen variations popped up with some corny _Back to the Future_-themed name like "Marty", or "Capacitor". It introduced a whole lot of complication for what, in hindsight, should've been two simple goals: Separate the application state from the view logic, and put state first.
+Not too long after, though, React started going that same downhill path. Do any of y'all remember the Flux state management architecture proposed by Facebook? It lead to a slew of competing variations with cute names like Flummox and Marty. Then, of course, Redux somehow became the new standard, and everyone ditched Flux. It introduced a whole lot of complication to achieve what, in hindsight, should've been two simple goals: Separate the application state from the view library, and initialize and consider your application state first.
 
-Then, of course, Redux somehow became the new standard, and everyone ditched Flux. This was during the heyday of coding bootcamps, who collectively decided we should teach bespoke convoluted frameworks like Angular and Redux instead of actual programming fundamentals. So now you had hundreds of inexperienced, passionless developers thinking this was how "good engineering" should be done, perpetuating and compounding on that complexity.
+This was during the heyday of coding bootcamps, who collectively decided we should teach bespoke convoluted frameworks like Angular and Redux instead of _actual_ programming fundamentals. So now you had hundreds of inexperienced, passionless developers released into the wild, thinking this was how "good engineering" should be done, perpetuating and compounding that complexity.
 
-Those who actually though about what they were doing, tried Redux and realized the insanity of writing 10 extra lines for each state transition to pretend you don't have any state. It's the programming equivalent of psychological behaviorism: "My heart rate is elevated, my lips are curled upward, and there is a warm, stiff bulge protruding from my trousers, but I _cannot_ confirm my internal emotional condition." Sigh...you 10xers just can't keep simple things simple.
+Those few who actually though about what they were doing, tried Redux and realized the insanity of writing 10 extra lines for each state transition to pretend you don't have any state. It's the programming equivalent of psychological behaviorism: "My heart rate is elevated, my lips are curled upward, and there is a warm, stiff bulge protruding from my trousers, but I _cannot_ confirm my internal emotional condition." Sigh...you 10xers just can't keep simple things simple.
 
+Eventually the commonfolk wised up and got fed up with the new mad king that was React + Redux, and started switching to Vue or Svelte or whatever. I started using Mobx myself, without all the class crap, which did exactly what I wanted it to do, and I stopped bothering to keep up after that.
 
-
-Eventually the commonfolk got fed up with React + Redux becoming , and started switching to Vue or Svelte or whatever. I started using Mobx myself, without all the class crap, which did exactly what I wanted it to do, and I stopped bothering to keep up after that. React tried to save face with "hooks", and I guess New Angular is using "signals", and now Svelte is using "runes", and now people are complaining about Vue and Svelte getting too complicated, and the cycle continues...whatever, I'm over that, I don't care anymore.
+React tried to save face with "hooks", and I guess New Angular is using "signals", and the latest Svelte is using "runes". Of course, now people are complaining about Vue and Svelte getting too complicated, and the cycle continues...whatever, I'm over that, I don't care anymore.
 
 Finally, I started to find talks and articles by engineers who were able to scratch that nagging itch in the back of my head: Why does this not feel quite right?
 
@@ -318,7 +318,6 @@ business app vs game vs hdd/memory vs bureaucracy (real reason)
 
 I'm not claiming that CHARM makes me some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, general user satisfaction, and developer sanity.
 ```
-
 
 INTRO
 
