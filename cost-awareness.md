@@ -10,11 +10,11 @@ In 2013, I remember getting an ASP.NET MVC book that had at least 4.5 stars and 
 
 Meanwhile, on the frontend, Angular was the reigning state-of-the-art UI framework at the time. I remember working through several videos and tutorials about Angular, and again, I was desperately grinding, trying to "get" it and understand how it would help me in the long run. Again, I felt inadequate.
 
-Fortunately, a few months later, Pete Hunt did a talk titled "Rethinking Best Practices" making the case for this new UI library called React, and I immediately saw it as a breath of fresh air. So I _wasn't_ crazy for thinking that Angular was unnecessary overkill!
+Fortunately, a few months later, Facebook engineer Pete Hunt did a talk titled "Rethinking Best Practices", making the case for this new UI library called React. I immediately saw it as a breath of fresh air: so I _wasn't_ crazy for thinking that Angular was unnecessary overkill!
 
 That's when I started realizing the Emperor had no clothes. As a relative noob, I started noticing: you 10x FAANG gurus don't _really_ know what you're doing, either. Y'all are just making it up as you go along.
 
-React started with a simple idea: "The view is just a function of state". Basically, Facebook stole the philosophy of immediate-mode interfaces, then caked it on top of the DOM, which is the frontend equivalent of pouring concrete over a toxic wasteland to make it suitable for development. Still, I was much more productive with React than I was with Angular; it even helped me get my next job.
+React started with a simple idea: "The view is a pure function of state". Basically, Facebook stole the philosophy of immediate-mode interfaces, then caked it on top of the DOM, which is the frontend equivalent of pouring concrete over a toxic wasteland to make it suitable for development. Still, I was much more productive with React than I was with Angular; it even helped me get my next job.
 
 Not too long after, though, React started going that same downhill path. Do any of y'all remember the Flux state management architecture proposed by Facebook? It led to a slew of competing variations with cute names like Flummox and Marty. Then, because Dan Abramov gave a flashy demo, Redux somehow became the new standard, and everyone ditched Flux.
 
@@ -26,18 +26,9 @@ Soon after, I found Mobx, and started using that without all the object-oriented
 
 After that, I stopped caring to keep up. It seemed like everyone else who was fed up with React + Redux flocked to Vue. Then Vue started hosting conferences. Then Vue had its "controversial new version" moment. Then folks started switching to Svelte, and that had its own conferences, and its "controversial new version", and so on and so forth. Meanwhile, "hooks" felt like React's mea culpa for Redux, and Angular tried to stay relevant with "signals". The funny thing is, Vue's refs, Angular's signals, and Svelte's runes all look like proprietary view-coupled observables, so I think I made the right call.
 
-During this time, I continued to seek new talks to listen to while I was working.
+In early 2020, when the pandemic lockdowns were in full force, my team lead left for another job, and I had the good fortune of taking over one of our company's major internal systems, which he spearheaded. It presented my first opportunity to really flesh out and test my own programming philosophy against his.
 
-Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least listening to them while you're working or doing chores):
-
-- The 3-part series _[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Brian Will
-- _["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Internet of Bugs
-- [Shawn Mcgrath's legendary OOP Rant](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)
-- _[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)_ by Mike Acton (despite the title, the advice applies to other domains)
-
-Then in 2020, around when the pandemic lockdowns were in full force, my team lead left for another job, and I had the good fortune of taking over one of our company's major internal systems, which he spearheaded. It presented my first opportunity to really flesh out
-
-He was a brilliant lead in many ways
+My former lead was as smart dude. He had all the pieces in place for me to build upon. He was also a very much a product of modern mainstream programming culture; as was another former colleague of mine, who worked closely with my old lead. They once proposed we switch to the dependency-injection heavy NestJS to "modernize" and "futureproof" our system. They created separate repos and libraries for different "concerns". They created a separate worker app pipeline that communicated via a Redis PubSub job queue. They liked to use builders and providers a lot.
 
 I'll serve a compliment flatbread and start with the good. Here is the common advice that I agree with:
 
@@ -343,3 +334,12 @@ Oh, and does anyone remember Functional Reactive Programming (which React _isn't
 > The Reactive Extensions library models each event as a collection of data rather than a series of callbacks. This is a revolutionary idea, because once you model an event as a collection you can transform events in much the same way you might transform in-memory collections. Rx provides developers with a SQL-like query language that can be used to sequence, filter, and transform events. Rx also makes it possible to propagate and handle asynchronous errors in a manner similar to synchronous error handling.
 
 Oh, how confident they sound. Well, as an eager junior at the time, I gave this FRP idea an earnest try, just like I did with Angular. And looking back on it now, I clearly see that the promises that FRP sold were an `fn pipe()` dream. I swear, you functional bros are just as bad as OOP fanatics.
+
+During this time, I continued to seek new talks to listen to while I was working.
+
+Here are some choice videos on YouTube (if you're too busy to watch these, I recommend at least listening to them while you're working or doing chores):
+
+- The 3-part series _[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Brian Will
+- _["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)_ by Internet of Bugs
+- [Shawn Mcgrath's legendary OOP Rant](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)
+- _[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)_ by Mike Acton (despite the title, the advice applies to other domains)
