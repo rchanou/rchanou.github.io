@@ -1,61 +1,52 @@
 ## Intro
 
-After professionally programming for over a dozen years, I can now confidently say that most coding advice is bad, and that the general culture of software development has been steering us in the wrong direction. Like many other developers, I went through a variation of [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/):
+I've thought a lot about why [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/) is such a common experience:
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 
-My journey was a bit different, though: it's not that I fell in love with paradigms like SOLID, Clean Architecture, and Domain Driven Design. In fact, it's kind of the opposite: I felt that I _should_ be using them, but never really quite _got_ them. I felt inadequate.
+Me, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. Just replace the OOP concepts in the meme with functional concepts like higher-order functions, currying, composition, immutable data structures, homoiconicity, declarative DSLs, and provable correctness.
 
-In 2013, I remember getting an ASP.NET MVC book that had at least 4.5 stars and glowing reviews, so young me assumed I could learn _something_ from it. Almost right out the bat, it recommended I should use the Ninject Dependency Injection framework with the Repository Pattern. It was literally mentally fatiguing for me to understand the code, but I figured if I kept at it enough, it would become second nature and I would understand the benefits.
+Here's what's wrong with many of these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not solving any problems that _actually_ matter.
 
-Meanwhile, on the frontend, Angular was the reigning state-of-the-art UI framework at the time. I remember working through several videos and tutorials about Angular, and again, I was desperately grinding, trying to "get" it and understand how it would help me in the long run. Again, I felt inadequate.
+Yes, writing good code is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. That is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
 
-Fortunately, a few months later, Facebook engineer Pete Hunt did a talk titled "Rethinking Best Practices", making the case for this new UI library called React. I immediately saw it as a breath of fresh air: so I _wasn't_ crazy for thinking that Angular was unnecessary overkill!
+I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He was a smart guy who definitely knew a lot, and I wouldn't be where I am today without him. But by that nature, he also had a tendency to over-engineer: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and "clean" to a non-technical outsider, with loads of method chains like:
 
-That's when I started realizing the Emperor had no clothes. As a relative noob, I started noticing: you 10x FAANG gurus don't _really_ know what you're doing, either. Y'all are just making it up as you go along.
+```
+InitProcessingProvider(db).LoadFromOrderBuilder(ob).LoadRelatedRecords().
+DownloadAllFiles().ProcessStandardFiles().ProcessCustomFiles().
+UploadAllFiles().OnSuccess(SaveOrder)
+```
 
-React started with a simple idea: "The view is a pure function of state". Basically, Facebook stole the philosophy of immediate-mode interfaces, then caked it on top of the DOM, which is the frontend equivalent of pouring concrete over a toxic wasteland to make it suitable for development. Still, I was much more productive with React than I was with Angular; it even helped me get my next job.
+Wow, it feels more like reading English instead of code! Right? _Right?!_
 
-Not too long after, though, React started going that same downhill path. Do any of y'all remember the Flux state management architecture proposed by Facebook? It led to a slew of competing variations with cute names like Flummox and Marty. Then, because Dan Abramov gave a flashy demo, Redux somehow became the new standard, and everyone ditched Flux.
+Well, despite all that sophistication, I learned that the system was buggy and broken to the point that,in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. They clearly weren't happy with it. And yes, there were tests, by the way; although a lot of them did not seem to be testing anything useful.
 
-At this point I was already jaded. React + Redux became the new Angular. Job listings started putting it in their requirements. Bootcamps added it to their curriculum, teaching droves of new developers, "this is the way software development is done". Even Dan Abramov himself thought it was overused.
+So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. At least it didn't suck as much to work with the codebase, as I gradually refactored the legacy logic while I added fixes and features. Users were happier, and I was happier.
 
-Like Angular, I gave Redux an earnest try, and it just felt like I was adding way too much ceremony and indirection for each state transition, in an effort to sweep state under the rug and pretend I didn't have any. It was like the programming equivalent of psychological behaviorism: "My heart rate is elevated, my lips are curled upward, and there is a warm, stiff bulge protruding from my trousers, but I _cannot_ confirm my internal emotional condition."
+My anecdote is not an isolated inciduent. Below are some YouTube videos by engineers with more experience than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
 
-Soon after, I found Mobx, and started using that without all the object-oriented fluff. It provided a simple alternative to what Flux and Redux were essentially doing: Put the application state first, with view-rendering as a secondary "subscriber" to it. Mobx observables let me treat state like state. It didn't pretend to be anything it wasn't. It wasn't perfect, but it worked well enough and got out of my way. There wouldn't ever be a "MobxConf", and that's what I liked about it.
+**[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)**, a three-part series by Brian Will. In part 1, he outlines his case against OOP; in part 2, he critiques four OOP snippets; and in part 3, he refactors a large OOP codebase.
 
-After that, I stopped caring to keep up. It seemed like everyone else who was fed up with React + Redux flocked to Vue. Then Vue started hosting conferences. Then Vue had its "controversial new version" moment. Then folks started switching to Svelte, and that had its own conferences, and its "controversial new version", and so on and so forth. Meanwhile, "hooks" felt like React's mea culpa for Redux, and Angular tried to stay relevant with "signals". The funny thing is, Vue's refs, Angular's signals, and Svelte's runes all look like proprietary view-coupled observables, so I think I made the right call.
+**["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)** by Internet of Bugs, describing his experience working with "Clean Coders".
 
-In early 2020, when the pandemic lockdowns were in full force, my team lead left for another job, and I had the good fortune of taking over one of our company's major internal systems, which he spearheaded. It presented my first opportunity to really flesh out and test my own programming philosophy against his.
+**[Shawn Mcgrath's legendary OOP Rant](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)** (NSFW language), in which he drunkenly debugs, rails against, and rewrites an object-oriented library written by an eminent Microsoft researcher/author.
 
-My former lead was as smart dude. He had all the pieces in place for me to build upon. He was also a very much a product of modern mainstream programming culture; as was another former colleague of mine, who worked closely with my old lead. They once proposed we switch to the dependency-injection heavy NestJS to "modernize" and "futureproof" our system. They created separate repos and libraries for different "concerns". They created a separate worker app pipeline that communicated via a Redis PubSub job queue. They liked to use builders and providers a lot.
+**[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. Despite the title, his advice applies to other domains as well.
 
-I'll serve a compliment flatbread and start with the good. Here is the common advice that I agree with:
+The legendary Casey Muratori has many great talks on his **Molly Rocket** channel, as well some great articles on his blog. If I had to pick one to read, it would be Semantic Compression, in which he illustrates how he refactors his code.
 
-**Assert and evaluate upfront**. Don't wait to evaluate at runtime what you should already know at compile-time.
+Alright, enough background, let's get to my first technique. I call it **Cost-Based Organization**.
 
-**Flat is better than nested**.
+## Cost-Based Organization
 
-**Single Source of Truth (SSOT)**, which is usually talked about in reference to data, but it applies just as well to code. (After all, code is data, right?) **SSOT** is _not_ the same as **Don't Repeat Yourself (DRY)**, a misleading maxim which can lead to "DRY Rot". In fact, those two ideas often conflict with each other. An example that comes to mind is handling errors in Go: It _looks_ repetitive to handle each `err`, but each error _is_ a distinct, unique event in the system. Which is why I don't mind the repetitiveness. Sure, there could be syntactic sugar like Odin's `or_return` but in the grand scheme of things, I've found I prefer the explicitness of Go's error values compared to exceptions.
+Cost-Based Organization (CBO) is usually the first technique I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details.
 
-Here are ideas that _do not_ jibe with me:
+As I explain it, CBO might sound a lot like basic functional programming. I do, in fact, use plain structs and plain functions 99% of the time when writing new code. However, it should become clear where CBO departs from the standard functional programming ethos.
 
-- **Over-emphasis on isolation**, which is neither necessary nor sufficient to scale. In fact, it's often _counterproductive_ to scaling. "components" and composition.
-- **Over-emphasis on domain-specific languages and declarative programming**. "You need to keep up with new tech." This is what causes the constant churn. I don't see this as fundamentally solving any real problems. StackOverflow on a simple stack. Radical Simplicity.
-- **Excessive design and ceremony around tests**. We have an inefficient approach to testing that points to a feature and tool that all mainstream languages lack. Creating useful tests _should_ be as easy as declaring a couple extra types for each function, developing in a "naive" fashion, and verifying the correctness of any desired output.
-  : Developers have built techniques and tools that seem to dance tantalizingly around this, such as spec-generated tests, table-tests, snapshot testing, fuzz testing, AI-assisted testing and omniscient debuggers.
+In my experience, other methodologies encourage programmers to prematurely oversplit their code. Not only that, they are coached to split them along suboptimal boundaries. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
 
-This is what I care about:
-
-- Reproducibility
-- Data Inspectability
-- Cost Neutrality (to be explained)
-
-Cost Awareness, since that is usually the first principle I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
-
-## What is Cost Awareness?
-
-The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess what other properties they have. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
+The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess and discuss what other properties they might have. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -284,6 +275,13 @@ Sounds like common sense, right? Well, based on my experience and observations, 
 
 I didn't say functions must be shorter than some arbitrary number of lines. I didn't say you need to use getters and setters with private variables and methods to hide implementation details inside class objects. I didn't say you should prefer polymorphism over "if" and "switch" statements, or replace all your imperative for-loops with map/reduce/filter chains. I didn't say you need to use curried higher-order functions, or model all your side effects as monads. And I _definitely_ didn't say concrete implementation details should depend on abstractions.
 
+These are the other major reasons I would split a "naively" written single function into separate functions:
+
+- If a portion of the function's logic can be extracted to a separate function for reuse.
+- If a portion of the program's logical flow can be made flattened and made clearer with early-return guard clauses. Either a second external function can be defined, or a sub-function can be declared.
+
+Semantic Compression
+
 ## "BuT wHaT aBoUt Ai?"
 
 The development of LLMs and other AI tech for code generation does not change my thesis. If anything, it strengthens it. Beyond a small portion of entertainment-oriented novelty apps, we won't be able to get away with not understanding our code. If you disagree, you do you, but mark my words, you're inevitably going to hit a wall…so at the very least, slow your roll, lest you crash and burn at 90 MPH.
@@ -303,7 +301,6 @@ There's this concept of an "omniscient debugger" which has been tried a few time
 
 You should keep your functions small. You should use getters and setters with private variables and methods to hide implementation details inside class objects. Prefer polymorphism over "if" and "switch" statements. Replace all your imperative for-loops with map/reduce/filter chains. Use curried higher-order functions and model all your side effects as monads. Concrete implementation details should depend on abstractions.
 
-Here's what's wrong with these pervasively taught ideas: they _sound_ good in a vacuum, but often don't work out in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to increase friction, indirection, and ambiguity, while not solving any problems that _actually_ matter.
 
 In fact, I have a sort of litmus test for these techniques: if some overzealous team lead were to require it as a rule, fullstop, for every line of code, how would that affect the codebase? That may sound like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
 
