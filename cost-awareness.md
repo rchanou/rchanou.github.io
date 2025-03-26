@@ -4,15 +4,17 @@ I've thought a lot about why [this meme](https://www.reddit.com/r/ProgrammerHumo
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 
-Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. The meme applies just as much to concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
+Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. Just replace the OOP diagrams with concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
 
-Those are all compelling ideas that _might_ have their time and place. However, I do not think they should be part of the \_default approach.
+These are compelling ideas that _sound_ beneficial in a vacuum, but in practice, most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
 
-Here's the thing: they _sound_ good in a vacuum, but often don't pay off in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, unnecessary ambiguity, premature ossification and reduced flexibility, while often not really solving any hard problems that _actually_ matter.
+> Bad programmers worry about the code. Good programmers worry about data structures and their relationships.
+>
+> -- <cite>Linus Torvalds</cite>
 
-Yes, writing good code is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. That is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
+Yes, writing good software is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. Which is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
 
-I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He was a smart guy who definitely knew a lot, and I wouldn't be where I am today without him. But by that nature, he also had a tendency to over-engineer: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and "clean" to a non-technical outsider, with loads of method chains like:
+I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He and another old colleague of mine were smart guys who definitely knew a lot, and I wouldn't be where I am today without them. But by that nature, they also had a tendency to over-engineer with modern, hip practices: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a separate PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and elegant to a non-technical outsider, with loads of method chains like:
 
 ```
 InitProcessingProvider(db).LoadFromOrderBuilder(ob).LoadRelatedRecords().
@@ -20,11 +22,11 @@ DownloadAllFiles().ProcessStandardFiles().ProcessCustomFiles().
 UploadAllFiles().OnSuccess(SaveOrder)
 ```
 
-Wow, so clean, it feels more like reading English instead of code! Right?
+Wow, so clean, it feels more like reading English instead of code! Isn't that cool?
 
-Well, despite all that sophistication, soon after I took over, I learned how buggy and broken the system was: it got to the point that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. They clearly weren't happy with it. And yes, the codebase did have tests; although a lot of them did not seem to be testing anything useful. I know this because they _didn't_ fail much at all, despite the many changes I needed to make, in order to fix the many bugs still present in the system.
+Well, despite all that sophistication, soon after I took over, I learned just how buggy and broken the system was: it had gotten to the point that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. They clearly weren't happy with it. And yes, the codebase did have automated tests, though I can't say exactly how helpful they were. It clearly wasn't enough.
 
-So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. At least it didn't suck as much to work with the codebase, as I gradually refactored the legacy logic while I added fixes and features. Users were happier, and I was happier.
+So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase started to suck less, as I gradually refactored the legacy logic while I added fixes and features, and added tests that actually helped me. Users were happier, and I was happier.
 
 My anecdote is not an isolated incident. Below are some YouTube videos by engineers with more experience than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
 
@@ -32,23 +34,23 @@ My anecdote is not an isolated incident. Below are some YouTube videos by engine
 
 **["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)** by Internet of Bugs, describing his experiences dealing with "Clean Code" and explaining why it's flawed.
 
-**[Shawn McGrath Demonstrates Why OOP Is A Nightmare](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)** (NSFW language), in which he drunkenly debugs, rails against, and rewrites an object-oriented library written by an eminent Microsoft researcher/author.
+**[Shawn McGrath Demonstrates Why OOP Is A Nightmare](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)** (NSFW language), a hilariously drunken yet supremely lucid rant in which he debugs, rails against, and rewrites a convoluted object-oriented library by an eminent Microsoft researcher/author.
 
-**[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, a prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
+**[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
 
-**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by none other than Casey Muratori. You can (and should) [read the article here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson reads the article and relates it back to his own experiences while sharing additional insights, which I think are all spot on and just as enlightening.
+**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by the wise sage Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
 
-Alright, enough background, let's get to my first technique. I call it **Cost-Explicit Management**.
+Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I'll call it **Cost-Explicit Organization**. That's right, **CEO**.
 
-## Cost-Explicit Management
+## Cost-Explicit Organization
 
-Cost-Explicit Management (CEM) is usually the first technique I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details.
+Cost-Explicit Organization (CEO) is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details.
 
-As I explain it, CEM might sound a lot like basic functional programming. I do, in fact, use plain structs and plain functions 99% of the time when writing new code. However, it should become clear where CEM departs from the standard functional programming ethos.
+CEO is a procedural paradigm that takes inspiration from functional programming. I do, in fact, use plain structs and plain functions 99% of the time when writing new code. If you've read functional programming tutorials, you'll notice that many of them start by explaining how FP separates pure functions from functions with side effects. However, they usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then monadically bind it or some BS like that.
 
-In my experience, other methodologies encourage programmers to prematurely oversplit their code. Not only that, they are coached to split them along suboptimal boundaries. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
+To that, I say: Hold up, let's wind back. There's a lot more nuance to functions than just "pure" versus "impure". In fact, I cringe when I call them "functions", because "procedure" is the proper word. (Thanks GingerBill, for getting this right with Odin.)
 
-The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess and discuss what other properties they might have. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
+The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess and discuss what other properties they might have, that _aren't_ captured by the type system. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -271,9 +273,13 @@ I find it a bit amusing that…
 - Keep most of your logic in lower-cost procedures.
 - Costs entail not just the physical resources required for a given procedure to run, but qualitative "meta-costs", such as whether the output keeps or loses predictability, readability, etc.
 - Ensure you have mechanisms for containing and recouping costs.
-- The ultimate costs we should minimize are our human time and energy, both for developers and end-users.
+- Consider and balance costs holistically. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
 
-## Proposal: A Cost-Explicit Development Tool
+## Proposal: A Cost-Aware Development Tool
+
+> Show me your flowcharts and conceal your tables, and I shall continue to be mystified. Show me your tables, and I won't usually need your flowcharts; they'll be obvious.
+>
+> -- <cite>Fred Brooks</cite>
 
 > We spend so much time as an industry building tools to...refactor our code, or move the text, or collapse the text...but almost no time solving the actual problem that we need to deal with, which is analyzing our data throughout the whole process.
 >
@@ -329,7 +335,7 @@ You might have heard of the folk story of Stone Soup. Imagine if from that, ever
 
 The development of LLMs and other AI tech for code generation does not change my thesis. Beyond a small portion of entertainment-oriented novelty apps, we won't be able to get away with not understanding our code. If you disagree, you do you, but I'm willing to bet that you will hit a local maximum very quickly.
 
-No matter how code is written or generated, it should be designed to be understandable by humans. As AI increases the rate at which code proliferates (for better or worse), we will have to increase our ability to understand code, and Cost-Explicit Management will remain a useful tool for that.
+No matter how code is written or generated, it should be designed to be understandable by humans. As AI increases the rate at which code proliferates (for better or worse), we will have to increase our ability to understand code, and Cost-Explicit Organization will remain a useful tool for that.
 
 You should keep your functions small. You should use getters and setters with private variables and methods to hide implementation details inside class objects. Prefer polymorphism over "if" and "switch" statements. Replace all your imperative for-loops with map/reduce/filter chains. Use curried higher-order functions and model all your side effects as monads. Concrete implementation details should depend on abstractions.
 
