@@ -40,17 +40,17 @@ My anecdote is not an isolated incident. Below are some YouTube videos by engine
 
 **[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by the wise sage Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
 
-Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I'll call it **Cost-Explicit Organization**. That's right, **CEO**.
+Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I'll call it **Explicit Cost Organization (ECO)**.
 
-## Cost-Explicit Organization
+## Explicit Cost Organization
 
-Cost-Explicit Organization (CEO) is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details.
+ECO is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. If I had to classify this approach, I would consider it "pragmatically functional".
 
-CEO is a procedural paradigm that takes inspiration from functional programming. I do, in fact, use plain structs and plain functions 99% of the time when writing new code. If you've read functional programming tutorials, you'll notice that many of them start by explaining how FP separates pure functions from functions with side effects. However, they usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then monadically bind it or some BS like that.
+When writing new code, I use plain structs and plain functions 99% of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then monadically bind it or some BS like that.
 
-To that, I say: Hold up, let's wind back. There's a lot more nuance to functions than just "pure" versus "impure". In fact, I cringe when I call them "functions", because "procedure" is the proper word. (Thanks GingerBill, for getting this right with Odin.)
+To that, I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure". In fact, calling them "impure functions" makes me cringe a bit, because "procedure" is the proper general term. (GingerBill got this right.)
 
-The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess and discuss what other properties they might have, that _aren't_ captured by the type system. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
+The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -91,7 +91,7 @@ func DestroyCity(name string) (int, error)
 
 ### Ready? Here are my answers…
 
-For each function, I wrote a code comment with my own "cost-based" annotations, plus an explanation.
+For each function, I wrote a code comment below with my own "cost-based" annotations, plus an explanation.
 
 ```
 func Sum(addends...int) int
@@ -126,14 +126,14 @@ func GetRandomInt(max int) int
 // nondeterministic
 ```
 
-Now we have a function that can return different outputs for multiple calls with the same input. Although running this might have a low computational cost, the nondeterminism adds a "meta-cost" that affects any _human_ working with the code. It does so by decreasing the predictability of the output, not just for this function, but for any subsequent functions.
+Now we have a function that can return different outputs for multiple calls with the same input. Although running this might have a low computational cost, the nondeterminism adds a "meta-cost" that affects any _human_ working with the code. It does so by decreasing the predictability of the output, not just for this function, but for any functions that use the output.
 
 ```
 func GenerateWorldFromSeed(seed int) *World
 // pure
 ```
 
-If you're into games that employ procedural generation (such as many roguelikes) you're probably familiar with the concept of a seed: a single value that serves as an input to the game's generation algorithm, returning the same game world for that value every time. Besides making the generation logic easier to debug for its developers, this allows players to share seeds and play the same "runs", some of which might be particularly desirable or intriguing. Even though the generated world returned by this algorithm can be quite complex, it is still a pure function, mu>ch like the simple Sum.
+If you're into games that employ procedural generation (such as many roguelikes) you're probably familiar with the concept of a seed: a single value that serves as an input to the game's generation algorithm, returning the same game world for that value every time. Besides making the generation logic easier to debug for its developers, this allows players to share seeds and play the same "runs", some of which might be particularly desirable or intriguing. Even though the generated world returned by this algorithm can be quite complex, it is still a pure function, much like the simple Sum.
 
 This will be a recurring theme: pushing non-deterministic data and events out to the "edges" of the system, and keeping the "core" deterministic. (Note that I didn't say "impure" and "pure" like a functional programmer; I'll elaborate on that as we continue.)
 
@@ -160,7 +160,7 @@ func Sleep(d Duration)
 
 This function is technically "pure"; in fact, it returns nothing. But it does use one important resource: time. The time cost of `Sleep` directly correlates with the duration passed into it.
 
-All types of resource consumption essentially convert into two "final" costs: energy usage and time. We might care a bit about the former, but we usually care a lot more about the latter. Big O is a notation that approximates time. We care to distinguish between getting data from the CPU cache, memory, disk and the network, because their access times can differ by several orders of magnitude. Game rendering has a strict time budget in order to achieve a target FPS. So, it's important to note when a function can increase "time consumption", even without computation (and even if that's the desired outcome).
+All types of resource consumption essentially convert into two "final" costs: energy usage and time. We might care a bit about the former, but we usually care a lot more about the latter. We care to distinguish between getting data from the CPU cache, memory, disk and the network, because their access times can differ by several orders of magnitude. Game rendering has a strict time budget in order to achieve a target FPS. So, it's important to note when a function can increase "time consumption", even without computation (and even if that's the desired outcome).
 
 ```
 func ConvertStringToInt(string) (int, error)
@@ -180,9 +180,9 @@ Like GetRandomInt, it has a nondeterministic output. Like Sleep, it causes a del
 
 However, unlike the previous functions, it potentially mutates the variables passed into it. For most applications, mutable state is necessary, but is a likely source of bugs. So you might want to make note of what state can be shared among multiple functions, and when that might be mutated.
 
-This is also where consistent naming conventions help. For my own mutating functions, I commonly use a `Set` prefix; so for this function, I might prefer a name like `SetRefsFromUserInput`.
+This is also where consistent naming conventions help. For my own mutating functions, I commonly use a `Set` prefix; so for this function, I might prefer a name like `SetRefsFromUserInput`. Conversely, you could use a "subword" to distinguish globally shared mutable references, such as "Instance" or "Ref".
 
-Conversely, you could use a "subword" to distinguish globally shared mutable references, such as "Instance" or "Ref". (Hungarian notation didn't die, we just evolved it to fill in the remaining holes in our type systems.)
+ I think experienced programmers tend to have built up a suite of keywords that they use to signal any impure effects a function might have. It's a sort of modernized Hungarian notation that evolved to fill in the remaining gaps left by mainstream type systems.
 
 ```
 func GetCurrentTimeNow() Time
@@ -225,7 +225,7 @@ You can also think of the disk as an implicit parameter to ReadFile. You can exp
 
 This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
 
-I disagree, and to explain, I'll simply defer to the iconoclastic David Heinemeier Hansson. Here are some key quotes I vibe with, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
+To rebut that, I'll simply defer to the iconoclastic David Heinemeier Hansson. Here are some key quotes I vibe with, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first units leads to an overly complex web of intermediary objects and indirection in order to avoid doing anything that's "slow". Like hitting the database. Or file IO.
 
@@ -271,9 +271,11 @@ I find it a bit amusing that…
 
 - Organize and label your procedures by costs.
 - Keep most of your logic in lower-cost procedures.
-- Costs entail not just the physical resources required for a given procedure to run, but qualitative "meta-costs", such as whether the output keeps or loses predictability, readability, etc.
+- Costs entail not just the physical resources required for a given procedure to run, but qualitative costs that affect human understanding, such as whether the output keeps or loses predictability, readability, etc.
 - Ensure you have mechanisms for containing and recouping costs.
-- Consider and balance costs holistically. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
+- Holistically consider and balance all costs. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
+
+Sounds pretty straightforward, right? Well, I _wish_ most other developers saw it so easily! But here's something that might get them onboard...
 
 ## Proposal: A Cost-Aware Development Tool
 
@@ -335,7 +337,7 @@ You might have heard of the folk story of Stone Soup. Imagine if from that, ever
 
 The development of LLMs and other AI tech for code generation does not change my thesis. Beyond a small portion of entertainment-oriented novelty apps, we won't be able to get away with not understanding our code. If you disagree, you do you, but I'm willing to bet that you will hit a local maximum very quickly.
 
-No matter how code is written or generated, it should be designed to be understandable by humans. As AI increases the rate at which code proliferates (for better or worse), we will have to increase our ability to understand code, and Cost-Explicit Organization will remain a useful tool for that.
+No matter how code is written or generated, it should be designed to be understandable by humans. As AI increases the rate at which code proliferates (for better or worse), we will have to increase our ability to understand code, and Explicit Cost Organization will remain a useful tool for that.
 
 You should keep your functions small. You should use getters and setters with private variables and methods to hide implementation details inside class objects. Prefer polymorphism over "if" and "switch" statements. Replace all your imperative for-loops with map/reduce/filter chains. Use curried higher-order functions and model all your side effects as monads. Concrete implementation details should depend on abstractions.
 
