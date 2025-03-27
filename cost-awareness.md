@@ -1,8 +1,7 @@
-## Background
-
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
-([Meme on Reddit by PM_ME_LECTURE_NOTES](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/)
+[Something I have noticed as juniors become intermediate, and as intermediate become seniors](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/), posted by PM_ME_LECTURE_NOTES
 
+## Background
 
 SOLID is scalability theatre. Have you ever read the children's story of Stone Soup? That's the extent to which Object-Oriented Programming "works": a placebo to get fresh programmers to think beyond copy-pasting a bunch of crap everywhere. Objects are fine, but the doctrine of Object-_Orientation_ never did anything useful in itself.
 
