@@ -4,7 +4,11 @@ I've thought a lot about why [this meme](https://www.reddit.com/r/ProgrammerHumo
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 
-Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. The meme applies just as much to concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
+SOlID is scalability theatre. You ever read the story of Stone Soup as a kid? That's the extent to which OOP "works": something to get new programers thinking how they can "not" just blindly copy-paste a bunch of crap everywhere. But it never really did anything useful in itself.
+
+Some people learn to they don't need the stone, and ditch it. Others still carry heavy stones around with them everywhere. They might even have heated debates about what types of stones make the best soup. Some argue for soft, round pumice, others for sharp obsidian. Some say we should use sand and eat it with the soup b ecause that's what birds do, or some crazy reason like that. That's what modern programming discussions now sound like to me.
+
+Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. The meme applies just as much to concepts like higher-order functions, currying, "composability", declarative DSLs, functional programming, homoiconicity, provable correctness, and algebraic effects. I'm taking no prisoners, here.
 
 Those are all compelling ideas that _might_ have their time and place. However, I do not think they should be part of the \_default approach.
 
