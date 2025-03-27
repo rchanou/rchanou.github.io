@@ -8,15 +8,17 @@ SOlID is scalability theatre. You ever read the story of Stone Soup as a kid? Th
 
 Some people learn to they don't need the stone, and ditch it. Others still carry heavy stones around with them everywhere. They might even have heated debates about what types of stones make the best soup. Some argue for soft, round pumice, others for sharp obsidian. Some say we should use sand and eat it with the soup b ecause that's what birds do, or some crazy reason like that. That's what modern programming discussions now sound like to me.
 
-Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. The meme applies just as much to concepts like higher-order functions, currying, "composability", declarative DSLs, functional programming, homoiconicity, provable correctness, and algebraic effects. I'm taking no prisoners, here.
+Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. Just replace the OOP diagrams with concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
 
-Those are all compelling ideas that _might_ have their time and place. However, I do not think they should be part of the \_default approach.
+These are compelling ideas that _sound_ beneficial in a vacuum, but in practice, most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
 
-Here's the thing: they _sound_ good in a vacuum, but often don't pay off in practice, because they all have cost and drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, unnecessary ambiguity, premature ossification and reduced flexibility, while often not really solving any hard problems that _actually_ matter.
+> Bad programmers worry about the code. Good programmers worry about data structures and their relationships.
+>
+> -- <cite>Linus Torvalds</cite>
 
-Yes, writing good code is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. That is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
+Yes, writing good software is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. Which is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
 
-I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He was a smart guy who definitely knew a lot, and I wouldn't be where I am today without him. But by that nature, he also had a tendency to over-engineer: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and "clean" to a non-technical outsider, with loads of method chains like:
+I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He and another old colleague of mine were smart guys who definitely knew a lot, and I wouldn't be where I am today without them. But by that nature, they also had a tendency to over-engineer with modern, hip practices: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a separate PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and elegant to a non-technical outsider, with loads of method chains like:
 
 ```
 InitProcessingProvider(db).LoadFromOrderBuilder(ob).LoadRelatedRecords().
@@ -24,11 +26,11 @@ DownloadAllFiles().ProcessStandardFiles().ProcessCustomFiles().
 UploadAllFiles().OnSuccess(SaveOrder)
 ```
 
-Wow, so clean, it feels more like reading English instead of code! Right?
+Wow, so clean, it feels more like reading English instead of code! Isn't that cool?
 
-Well, despite all that sophistication, soon after I took over, I learned how buggy and broken the system was: it got to the point that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. They clearly weren't happy with it. And yes, the codebase did have tests; although a lot of them did not seem to be testing anything useful. I know this because they _didn't_ fail much at all, despite the many changes I needed to make, in order to fix the many bugs still present in the system.
+Well, despite all that sophistication, soon after I took over, I learned just how buggy and broken the system was: it had gotten to the point that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. They clearly weren't happy with it. And yes, the codebase did have automated tests, though I can't say exactly how helpful they were. It clearly wasn't enough.
 
-So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. At least it didn't suck as much to work with the codebase, as I gradually refactored the legacy logic while I added fixes and features. Users were happier, and I was happier.
+So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase started to suck less, as I gradually refactored the legacy logic while I added fixes and features, and added tests that actually helped me. Users were happier, and I was happier.
 
 My anecdote is not an isolated incident. Below are some YouTube videos by engineers with more experience than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
 
@@ -36,23 +38,23 @@ My anecdote is not an isolated incident. Below are some YouTube videos by engine
 
 **["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)** by Internet of Bugs, describing his experiences dealing with "Clean Code" and explaining why it's flawed.
 
-**[Shawn McGrath Demonstrates Why OOP Is A Nightmare](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)** (NSFW language), in which he drunkenly debugs, rails against, and rewrites an object-oriented library written by an eminent Microsoft researcher/author.
+**[Shawn McGrath Demonstrates Why OOP Is A Nightmare](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)** (NSFW language), a hilariously drunken yet supremely lucid rant in which he debugs, rails against, and rewrites a convoluted object-oriented library by an eminent Microsoft researcher/author.
 
-**[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, a prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
+**[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
 
-**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by none other than Casey Muratori. You can (and should) [read the article here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson reads the article and relates it back to his own experiences while sharing additional insights, which I think are all spot on and just as enlightening.
+**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by the wise sage Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
 
-Alright, enough background, let's get to my first technique. I call it **Cost-Explicit Management**.
+Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I'll call it **Explicit Cost Organization (ECO)**.
 
-## Cost-Explicit Management
+## Explicit Cost Organization
 
-Cost-Explicit Management (CEM) is usually the first technique I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details.
+ECO is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. If I had to classify this approach, I would consider it "pragmatically functional".
 
-As I explain it, CEM might sound a lot like basic functional programming. I do, in fact, use plain structs and plain functions 99% of the time when writing new code. However, it should become clear where CEM departs from the standard functional programming ethos.
+When writing new code, I use plain structs and plain functions 99% of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then monadically bind it or some BS like that.
 
-In my experience, other methodologies encourage programmers to prematurely oversplit their code. Not only that, they are coached to split them along suboptimal boundaries. I generally organize my functions along lines of specific, narrowly-defined costs, rather than vague notions of "domains", "responsibilities" or "services".
+To that, I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure". In fact, calling them "impure functions" makes me cringe a bit, because "procedure" is the proper general term. (GingerBill got this right.)
 
-The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess and discuss what other properties they might have. (For some of these, I just took Go standard library functions and gave them more intuitive names.)
+The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -93,7 +95,7 @@ func DestroyCity(name string) (int, error)
 
 ### Ready? Here are my answers…
 
-For each function, I wrote a code comment with my own "cost-based" annotations, plus an explanation.
+For each function, I wrote a code comment below with my own "cost-based" annotations, plus an explanation.
 
 ```
 func Sum(addends...int) int
@@ -128,14 +130,14 @@ func GetRandomInt(max int) int
 // nondeterministic
 ```
 
-Now we have a function that can return different outputs for multiple calls with the same input. Although running this might have a low computational cost, the nondeterminism adds a "meta-cost" that affects any _human_ working with the code. It does so by decreasing the predictability of the output, not just for this function, but for any subsequent functions.
+Now we have a function that can return different outputs for multiple calls with the same input. Although running this might have a low computational cost, the nondeterminism adds a "meta-cost" that affects any _human_ working with the code. It does so by decreasing the predictability of the output, not just for this function, but for any functions that use the output.
 
 ```
 func GenerateWorldFromSeed(seed int) *World
 // pure
 ```
 
-If you're into games that employ procedural generation (such as many roguelikes) you're probably familiar with the concept of a seed: a single value that serves as an input to the game's generation algorithm, returning the same game world for that value every time. Besides making the generation logic easier to debug for its developers, this allows players to share seeds and play the same "runs", some of which might be particularly desirable or intriguing. Even though the generated world returned by this algorithm can be quite complex, it is still a pure function, mu>ch like the simple Sum.
+If you're into games that employ procedural generation (such as many roguelikes) you're probably familiar with the concept of a seed: a single value that serves as an input to the game's generation algorithm, returning the same game world for that value every time. Besides making the generation logic easier to debug for its developers, this allows players to share seeds and play the same "runs", some of which might be particularly desirable or intriguing. Even though the generated world returned by this algorithm can be quite complex, it is still a pure function, much like the simple Sum.
 
 This will be a recurring theme: pushing non-deterministic data and events out to the "edges" of the system, and keeping the "core" deterministic. (Note that I didn't say "impure" and "pure" like a functional programmer; I'll elaborate on that as we continue.)
 
@@ -162,7 +164,7 @@ func Sleep(d Duration)
 
 This function is technically "pure"; in fact, it returns nothing. But it does use one important resource: time. The time cost of `Sleep` directly correlates with the duration passed into it.
 
-All types of resource consumption essentially convert into two "final" costs: energy usage and time. We might care a bit about the former, but we usually care a lot more about the latter. Big O is a notation that approximates time. We care to distinguish between getting data from the CPU cache, memory, disk and the network, because their access times can differ by several orders of magnitude. Game rendering has a strict time budget in order to achieve a target FPS. So, it's important to note when a function can increase "time consumption", even without computation (and even if that's the desired outcome).
+All types of resource consumption essentially convert into two "final" costs: energy usage and time. We might care a bit about the former, but we usually care a lot more about the latter. We care to distinguish between getting data from the CPU cache, memory, disk and the network, because their access times can differ by several orders of magnitude. Game rendering has a strict time budget in order to achieve a target FPS. So, it's important to note when a function can increase "time consumption", even without computation (and even if that's the desired outcome).
 
 ```
 func ConvertStringToInt(string) (int, error)
@@ -182,9 +184,9 @@ Like GetRandomInt, it has a nondeterministic output. Like Sleep, it causes a del
 
 However, unlike the previous functions, it potentially mutates the variables passed into it. For most applications, mutable state is necessary, but is a likely source of bugs. So you might want to make note of what state can be shared among multiple functions, and when that might be mutated.
 
-This is also where consistent naming conventions help. For my own mutating functions, I commonly use a `Set` prefix; so for this function, I might prefer a name like `SetRefsFromUserInput`.
+This is also where consistent naming conventions help. For my own mutating functions, I commonly use a `Set` prefix; so for this function, I might prefer a name like `SetRefsFromUserInput`. Conversely, you could use a "subword" to distinguish globally shared mutable references, such as "Instance" or "Ref".
 
-Conversely, you could use a "subword" to distinguish globally shared mutable references, such as "Instance" or "Ref". (Hungarian notation didn't die, we just evolved it to fill in the remaining holes in our type systems.)
+I think experienced programmers tend to have built up a suite of keywords that they use to signal any impure effects a function might have. It's a sort of modernized Hungarian notation that evolved to fill in the remaining gaps left by mainstream type systems.
 
 ```
 func GetCurrentTimeNow() Time
@@ -227,7 +229,7 @@ You can also think of the disk as an implicit parameter to ReadFile. You can exp
 
 This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
 
-I disagree, and to explain, I'll simply defer to the iconoclastic David Heinemeier Hansson. Here are some key quotes I vibe with, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
+To rebut that, I'll simply defer to the iconoclastic David Heinemeier Hansson. Here are some key quotes I vibe with, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first units leads to an overly complex web of intermediary objects and indirection in order to avoid doing anything that's "slow". Like hitting the database. Or file IO.
 
@@ -273,11 +275,17 @@ I find it a bit amusing that…
 
 - Organize and label your procedures by costs.
 - Keep most of your logic in lower-cost procedures.
-- Costs entail not just the physical resources required for a given procedure to run, but qualitative "meta-costs", such as whether the output keeps or loses predictability, readability, etc.
+- Costs entail not just the physical resources required for a given procedure to run, but qualitative costs that affect human understanding, such as whether the output keeps or loses predictability, readability, etc.
 - Ensure you have mechanisms for containing and recouping costs.
-- The ultimate costs we should minimize are our human time and energy, both for developers and end-users.
+- Holistically consider and balance all costs. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
 
-## Proposal: A Cost-Explicit Development Tool
+Sounds pretty straightforward, right? Well, I _wish_ most other developers saw it so easily! But here's something that might get them onboard...
+
+## Proposal: A Cost-Aware Development Tool
+
+> Show me your flowcharts and conceal your tables, and I shall continue to be mystified. Show me your tables, and I won't usually need your flowcharts; they'll be obvious.
+>
+> -- <cite>Fred Brooks</cite>
 
 > We spend so much time as an industry building tools to...refactor our code, or move the text, or collapse the text...but almost no time solving the actual problem that we need to deal with, which is analyzing our data throughout the whole process.
 >
@@ -302,57 +310,3 @@ Tools
 There's this concept of an "omniscient debugger" which has been tried a few times in various languages, but never really caught on. Despite that, I see potential in a similar development utility that analyzes simple cost-aware assertions (such as with the functions above) to automatically add instrumentation to code. Natural usage of the instrumented program could automatically generate robust, exhaustive test suites, mock implementations, execution traces, visualizations and more. And no, it wouldn't use AI (although that might actually be quite complementary).
 
 =I know this all sounds overly hand-wavy, but I have a pretty clear vision in my head for how this would work. It's a potential solution to many of the day-to-day problems I personally face; more so than any fancy language feature or design pattern could ever do. I am attempting to develop a proof-of-concept in what little free time I have, and I hope to share what I have soon.
-
-```TRASH TRASH TRASH ~~~~~~~~~~~~~~~~~~~~~~
-
-
-Sounds like common sense, right? Well, based on my experience and observations, I don't think it's obvious to many developers. Remember that builder provider example earlier
-
-You could say mis-application of pattern. I disagree, it is a _direct_ result of how OOP, SOLID are taught
-
-Now I know a bunch of you are ready to jump in and say, "_Of course_ you shouldn't apply these everywhere, they're just tools, use the right tool for the right job, hammers and screwdrivers", etc.
-
-Well then, why don't we call Object-_Assisted_ Programming instead of Object-_Oriented_ Programming? Or SOLID _Guidelines_ instead of SOLID _Principles_? If SOLID has caveats, shouldn't they add letters to handle and _internalize_ that, helping us determine when we should and shouldn't use them? Proponents teach SOLID in a way that implicitly tells impressionable programmers to use it _everywhere_, even if they expressively deny that.
-
-Try this, look up how the average article or video on these topics is written. In fact, make it a drinking game:
-
-- Take a shot every time they use a "Bad Way" vs. "Good Way" comparison example for each principle. Take two shots if they use cringier terms like "Noob" vs. "Expert".
-- Take a shot in memory pure function
-- Take a shot if they use some example that's lazily modeled or analogized on something in the real world, like showing you how to make a "HamburgerProvider" that takes a "CookingStrategy" or some crap like that.
-- Now, if they _do_ add the caveat that you shouldn't apply these principles everywhere, take a shot if _they leave it at that_. It's such an unhelpful copout, a tautology to shield them from any criticism: "these ideas are good until they're not".
-
-SOLID can't have cake and eat it too
-
-In fact, I have a sort of litmus test for these techniques: if some overzealous team lead were to require it as a rule, fullstop, for every line of code, how would that affect the codebase? That may sound like a strawman, but that is literally what happens. It's why `AbstractSingletonProxyFactoryBean` is a real thing. It's why some projects force you to wade through logic fragmented into a thousand different files that each have one class defined in them. I _wish_ crap like this and Onion Architecture were parodies, but alas, they're not.
-
-So why does it prevail? Like I said, there are some good ideas. Intuitive vs literal
-
-You might have heard of the folk story of Stone Soup. Imagine if from that, everyone took the message that we should carry heavy stones everywhere.
-
-## "BuT wHaT aBoUt Ai?"
-
-The development of LLMs and other AI tech for code generation does not change my thesis. Beyond a small portion of entertainment-oriented novelty apps, we won't be able to get away with not understanding our code. If you disagree, you do you, but I'm willing to bet that you will hit a local maximum very quickly.
-
-No matter how code is written or generated, it should be designed to be understandable by humans. As AI increases the rate at which code proliferates (for better or worse), we will have to increase our ability to understand code, and Cost-Explicit Management will remain a useful tool for that.
-
-You should keep your functions small. You should use getters and setters with private variables and methods to hide implementation details inside class objects. Prefer polymorphism over "if" and "switch" statements. Replace all your imperative for-loops with map/reduce/filter chains. Use curried higher-order functions and model all your side effects as monads. Concrete implementation details should depend on abstractions.
-
-
-
-
-So when _are_ these ideas actually good? Well, I'd say it's when they happen to align with "The CHARM Method" I described earlier. (Ugh, I already hate that acronym, but whatever.) Ironically, CHARM provides clearer answers for the "when" and "why" of SOLID, compared to what SOLID's own acolytes might suggest.
-
-What I like about CHARM is that it scales in all directions, up and down in size, forward and backward in time. The tenets already holistically "account" for each other. You know, like _actual_ principles.
-
-business app vs game vs hdd/memory vs bureaucracy (real reason)
-
-I'm not claiming that CHARM makes me some 10x rockstar that can style on these Clean Code plebs. But what I can say is that I've worked on and taken over systems that were clearly negatively impacted by this prevailing culture of over-abstraction. By shifting development to a more grounded approach, I have been able to significantly improve them in several aspects such as the reduction of bugs, ability to add new features that work reliably in a timely manner, general user satisfaction, and developer sanity.
-```
-
-INTRO
-
-Oh, and does anyone remember Functional Reactive Programming (which React _isn't_, confusingly enough)? BaconJS, CycleJS...even Netflix was pushing their RxJS library pretty hard at conferences. This was their pitch:
-
-> The Reactive Extensions library models each event as a collection of data rather than a series of callbacks. This is a revolutionary idea, because once you model an event as a collection you can transform events in much the same way you might transform in-memory collections. Rx provides developers with a SQL-like query language that can be used to sequence, filter, and transform events. Rx also makes it possible to propagate and handle asynchronous errors in a manner similar to synchronous error handling.
-
-Oh, how confident they sound. Well, as an eager junior at the time, I gave this FRP idea an earnest try, just like I did with Angular. And looking back on it now, I clearly see that the promises that FRP sold were an `fn pipe()` dream. I swear, you functional bros are just as bad as OOP fanatics.
