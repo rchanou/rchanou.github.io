@@ -1,16 +1,16 @@
-## Intro
-
-I've thought a lot about why [this meme](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/) is such a common experience:
+## Background
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
+([Meme on Reddit by PM_ME_LECTURE_NOTES](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/)
 
-SOlID is scalability theatre. You ever read the story of Stone Soup as a kid? That's the extent to which OOP "works": something to get new programers thinking how they can "not" just blindly copy-paste a bunch of crap everywhere. But it never really did anything useful in itself.
 
-Some people learn to they don't need the stone, and ditch it. Others still carry heavy stones around with them everywhere. They might even have heated debates about what types of stones make the best soup. Some argue for soft, round pumice, others for sharp obsidian. Some say we should use sand and eat it with the soup b ecause that's what birds do, or some crazy reason like that. That's what modern programming discussions now sound like to me.
+SOLID is scalability theatre. Have you ever read the children's story of Stone Soup? That's the extent to which Object-Oriented Programming "works": a placebo to get fresh programmers to think beyond copy-pasting a bunch of crap everywhere. Objects are fine, but the doctrine of Object-_Orientation_ never did anything useful in itself.
 
-Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. Just replace the OOP diagrams with concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
+Some people eventually learn they don't need the OOP stone, and ditch it. Others still feel the need to put stones in their soup, and carry these heavy stones around with them everywhere. They might even _refuse_ to eat soup served without a stone. They'll get into heated debates about what types of stones make the best soup: some argue for soft, rounded pumice, others for sharp obsidian. Some say we should use even eat little rocks with the soup because that's what birds do, and we need to model the way we make soup after nature.
 
-These are compelling ideas that _sound_ beneficial in a vacuum, but in practice, most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
+Personally, I never bought into SOLID and the like, but I _did_ go through a Functional Programming phase. To get what I went through, just replace the OOP diagrams in the meme above with concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
+
+These are all compelling ideas that _sound_ cool in a vacuum, but in practice, most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
 
 > Bad programmers worry about the code. Good programmers worry about data structures and their relationships.
 >
@@ -18,7 +18,7 @@ These are compelling ideas that _sound_ beneficial in a vacuum, but in practice,
 
 Yes, writing good software is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. Which is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
 
-I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He and another old colleague of mine were smart guys who definitely knew a lot, and I wouldn't be where I am today without them. But by that nature, they also had a tendency to over-engineer with modern, hip practices: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a separate PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and elegant to a non-technical outsider, with loads of method chains like:
+I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He and another old colleague of mine were smart guys who definitely knew a lot, and I wouldn't be where I am today without them. But by that nature, they also had a tendency to over-engineer with modern, "hip" practices: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a separate PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and elegant to a non-technical outsider, with loads of method chains like:
 
 ```
 InitProcessingProvider(db).LoadFromOrderBuilder(ob).LoadRelatedRecords().
@@ -28,11 +28,11 @@ UploadAllFiles().OnSuccess(SaveOrder)
 
 Wow, so clean, it feels more like reading English instead of code! Isn't that cool?
 
-Well, despite all that sophistication, soon after I took over, I learned just how buggy and broken the system was: it had gotten to the point that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. They clearly weren't happy with it. And yes, the codebase did have automated tests, though I can't say exactly how helpful they were. It clearly wasn't enough.
+Well, despite all that sophistication, I could tell from the Slack messages that our users weren't very satisfied with the system. Soon after I took over, I learned just how buggy and broken it was: it had gotten to the point that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. And yes, the codebase did have automated tests, though I can't say exactly how helpful they were. They clearly weren't enough.
 
 So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase started to suck less, as I gradually refactored the legacy logic while I added fixes and features, and added tests that actually helped me. Users were happier, and I was happier.
 
-My anecdote is not an isolated incident. Below are some YouTube videos by engineers with more experience than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
+My anecdote is not an isolated incident. Below are some YouTube videos by engineers more experienced than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
 
 **[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)**, a three-part series by Brian Will. In part 1, he outlines his case against OOP; in part 2, he critiques four OOP snippets; and in part 3, he rewrites a large OOP codebase.
 
@@ -50,9 +50,9 @@ Alright, enough context, let's get to my first technique. I'm still struggling t
 
 ECO is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. If I had to classify this approach, I would consider it "pragmatically functional".
 
-When writing new code, I use plain structs and plain functions 99% of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then monadically bind it or some BS like that.
+When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
 
-To that, I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure". In fact, calling them "impure functions" makes me cringe a bit, because "procedure" is the proper general term. (GingerBill got this right.)
+To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure". In fact, calling them "impure functions" makes me cringe a bit, because "procedure" is the proper general term. (GingerBill got this right.)
 
 The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
 
