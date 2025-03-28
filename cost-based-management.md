@@ -41,7 +41,7 @@ My experience is not an isolated incident. Below are some YouTube videos by engi
 
 **["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)** by Internet of Bugs, describing his experiences dealing with "Clean Code" and explaining why it's flawed.
 
-**[Shawn McGrath: OOP Rant](https://www.youtube.com/watch?v=q4nUK0EBzmI&t=3h21m18s)** (NSFW language), in which, with hilariously drunken lucidity, he steps through, rails against, and rewrites a convoluted object-oriented library by an eminent Microsoft researcher/author.
+**[Shawn McGrath: OOP Rant](https://www.youtube.com/watch?v=q4nUK0EBzmI&t=3h21m18s)** (NSFW language), in which, with hilariously drunken lucidity, he steps through, rails against, and rewrites a convoluted object-oriented library authored by an eminent Microsoft researcher.
 
 **[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
 
