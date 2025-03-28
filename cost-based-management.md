@@ -244,8 +244,6 @@ To rebut that, I'll simply defer to David Heinemeier Hansson. Here are some key 
 
 > Stop obsessing about unit tests, embrace backfilling of tests when you're happy with the design, and strive for overall system clarity.
 
-I have my own thoughts here, but that exploration deserves its own article. (Read to the end for a teaser.)
-
 Getting back to `ReadFile`, this specifically
 
 ```
@@ -319,9 +317,9 @@ Let's say this tool is an app called `cbtg`, for "Cost-Based Test Generator". He
 - Interface allows developer to mark input/output pairs as "verified"
 - Each function table's non-verified records are automatically capped and pruned 
 - Mocks can automatically be generated from input/output tables for "unreliable" functions like API calls
-- Documenting and generating tests for third-party APIs emerges from notating cost-based types for endpoints and naturally experimenting with them
+- Generating documentative tests for third-party APIs naturally emerges from notating cost-based types for endpoints and using them
 
-There are certainly edge cases to consider around how to handle special types of data and code changes, but those are hardly showstoppers. I think this could significantly improve developer quality-of-life by reducing cognitive load and repetitive drudgework, which in turn would increase productivity and software robustness. That's all I want, more than any fancy language feature or design pattern: effective tools. This is just one of many ideas that I have, but it's the one I want most.
+There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I think this could significantly improve developer quality-of-life by reducing cognitive load and repetitive drudgework, which in turn would increase productivity and software robustness. That's all I want, more than any fancy language feature or design pattern: effective tools. This is just one of many ideas that I have, but it's the one I want most.
 
 Our "elegant" models are hitting a local maximum; what we need now, instead, are better microscopes. Don't treat me like a child and give me "better" Lego bricks to build with. Give me an advanced exo-suit that respects, complements and enhances my innate abilities!
 
@@ -330,3 +328,4 @@ I'll put my money where my mouth is, and develop a proof-of-concept in what litt
 >
 >
 > -- <cite>John Carmack</cite>
+
