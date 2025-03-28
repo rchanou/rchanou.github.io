@@ -45,7 +45,7 @@ My experience is not an isolated incident. Below are some YouTube videos by engi
 
 **[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
 
-**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
+**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by Casey Muratori (of Handmade Hero fame). You can [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson gives an animated reading of the article, while relating it back to his own experiences and adding even more great insights.
 
 Alright, enough context, let's get to my first technique. I'm still not sure about the name, but for now I've settled on **Cost-Based Management (CBM)**. I like this name precisely because it doesn't sound programming-specific, dogmatic or academic.
 
@@ -232,7 +232,7 @@ You can also think of the disk as an implicit parameter to ReadFile. You can exp
 
 This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
 
-To rebut that, I'll simply defer to David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
+To rebut that, I'll simply defer to another notorious bugbear, David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first fundamentalism is like abstinence-only sex ed: An unrealistic, ineffective morality campaign for self-loathing and shaming.
 
@@ -299,9 +299,9 @@ In the suite of development tools available to us, I sense an empty void that we
 - Fuzz testing
 - Spec-generated tests
 - AI-generated tests
-- Code instrumentation for profiling and telemetry
+- Code instrumentation for profiling, memory error detectiion, telemetry, etc.
 - Built-in test runners
-- Auto-formatters, linters, AddressSanitizer, other static analysis tools
+- Auto-formatters, linter, other static analysis tools
 - Omniscient debuggers
 
 Seriously, read up on that last one, because [omniscient debugging] is similar to what I'm thinking about. Even though it never became mainstream, I still see tons of potential in the "just capture everything" approach, with the proper execution.
