@@ -310,9 +310,9 @@ In the suite of development tools available to us, I sense an empty void that we
 - Auto-formatters, linter, other static analysis tools
 - Omniscient debuggers
 
-Seriously, read up on that last one, because [omniscient debugging] is similar to what I'm thinking about. Even though it never became mainstream, I still see tons of potential in the "just capture everything" approach, with the proper execution.
+Seriously, read up on that last one, because [omniscient debugging] is similar to what I'm thinking about. Even though it never became mainstream, I still see tons of potential in the "just capture everything" approach, given the proper execution. Modern storage capacities make this more achievable by the day.
 
-Generating at least 80% of our tests _should_ be as easy as adding a few extra "cost-based type" assertions, as shown earlier. It wouldn't be much different than how we currently define static types. Just like static types enable a whole lot useful analysis of the code, cost-based types could enable seamless tracking and analysis of the data that flows through our code.
+Generating at least 80% of our tests _should_ be as simple as adding a few extra "cost-based type" assertions, as shown earlier. It wouldn't be much different than how we currently define static types. Just like static types enable a whole lot useful analysis of the code, cost-based types could enable seamless tracking and analysis of the data that flows through our code. This would be `Printf(result)` on steroids, and just about as easy to type.
 
 Let's say this tool is an app called `cbtg`, for "Cost-Based Test Generator". Here is one workflow I envision:
 
