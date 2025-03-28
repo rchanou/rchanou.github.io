@@ -3,13 +3,13 @@
 
 ## Background
 
-SOLID is scalability theatre. Objects are fine, but the doctrine of Object-_Orientation_ never did any good in itself. Have you ever read the children's story of Stone Soup? That's the extent to which Object-Oriented Programming "works": a placebo to get fresh programmers thinking about how to structure their programs, beyond copy-pasting a bunch of crap everywhere. 
+SOLID is scalability theatre. Objects are fine, but the doctrine of Object-_Orientation_ never did anyone any good. Have you ever read the children's story of Stone Soup? That's the extent to which Object-Oriented Programming "works": a placebo to get fresh programmers thinking about how they can design their programs, beyond copy-pasting a bunch of crap everywhere. 
 
-Some people eventually learn they don't need the OOP stone, and ditch it. Others still feel the need to put stones in their soup, and carry these heavy stones around with them everywhere. They might even refuse to eat soup served without a stone. They'll get into heated debates about what types of stones make the best soup: some argue for soft, rounded pumice, others for sharp obsidian. Some say we should even use little rocks that we eat with the soup because that's what birds do, and we need to model the way we cook our soup after nature. Sound familiar?
+Some of us eventually learn we don't need the OOP stone, and ditch it. Others still feel the need to put stones in their soup, and carry these heavy stones around with them everywhere. They might even refuse to eat soup served without a stone. They'll get into heated debates about what types of stones make the best soup: some argue for soft, rounded pumice, others for sharp obsidian. Some say we should even use little rocks that we eat with the soup because that's what birds do, and we need to model the way we cook our soup after nature. They'll tell you it's painful at first, but promise one day it'll just click, and you'll wonder how you ever lived without eating and sh!tting rocks in the first place.
 
 Personally, I never bought into SOLID and the like, but I did go through a Functional Programming phase. To get what I went through, just replace the OOP diagrams in the meme above with concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
 
-These are all compelling ideas that sound cool in a vacuum, but they should not be part of the default approach. In practice, they are far too over-applied and most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, unnecessary ambiguity, mental overloading, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
+These are all compelling ideas that sound cool in a vacuum, but they should not be part of anyone's default approach. In practice, they are far too overused and most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, increased mental overloading, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
 
 > Bad programmers worry about the code. Good programmers worry about data structures and their relationships.
 >
@@ -27,9 +27,9 @@ UploadAllFiles().OnSuccess(SaveOrder)
 
 Wow, so clean, it feels more like reading English instead of code! Isn't that cool?
 
-Well, despite all that sophistication, I could tell from the Slack messages that our users weren't very satisfied with the system. Soon after I took over, I learned just how buggy and broken it was: it had gotten to the point that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. And yes, the codebase did have automated tests, though I can't say exactly how helpful they were. They clearly weren't enough.
+Well, despite all that sophistication, I could tell from the Slack messages that our users weren't very satisfied with the system. Soon after I took over, I learned just how buggy and broken it was: it had gotten bad enough that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. And yes, the codebase did have automated tests, though I can't say exactly how useful they were. They clearly weren't enough, and they didn't help _me_ all that much.
 
-So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase started to suck less, as I gradually refactored the legacy logic while I added fixes and features, and added tests that actually helped me. Users were happier, and I was happier.
+So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase started to suck less, as I gradually refactored the legacy logic and introduced a more practical testing framework. Users were happier, and I was happier.
 
 My anecdote is not an isolated incident. Below are some YouTube videos by engineers more experienced than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
 
@@ -41,19 +41,19 @@ My anecdote is not an isolated incident. Below are some YouTube videos by engine
 
 **[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
 
-**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by the wise sage Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
+**[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
 
-Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I'll call it **Explicit Cost Organization (ECO)**.
+Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I've settled on **Cost-Based Management (CBM)**.
 
-## Explicit Cost Organization
+## Cost-Based Management
 
-ECO is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. If I had to classify this approach, I would consider it "pragmatically functional".
+I like this name precisely because it doesn't sound too programming-specific or dogmatic. CBM is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. If I had to classify this approach, I would consider it "functionally procedural".
 
 When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
 
-To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure". In fact, calling them "impure functions" makes me cringe a bit, because "procedure" is the proper general term. (GingerBill got this right.)
+To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure", and I'd like to dig into that. Not all side effects are created equal.
 
-The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
+The easiest way for me to do this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -228,7 +228,7 @@ You can also think of the disk as an implicit parameter to ReadFile. You can exp
 
 This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
 
-To rebut that, I'll simply defer to the iconoclastic David Heinemeier Hansson. Here are some key quotes I vibe with, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
+To rebut that, I'll simply defer to David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first units leads to an overly complex web of intermediary objects and indirection in order to avoid doing anything that's "slow". Like hitting the database. Or file IO.
 
@@ -290,9 +290,19 @@ Sounds pretty straightforward, right? Well, I _wish_ most other developers saw i
 >
 > -- <cite>Mike Acton</cite>
 
-I think our industry collectively obsesses with either elegant models over useful tools. When we do use tools, they seem to be overly byzantine frameworks.
+In the suite of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. 
 
-My desire is to make tools that feel as intuitive to pick up as a well-designed video game introduction. Note that this is _not_ dumbing down our languages to appease the lowest common denominator. It's making sure everyone knows what tools are available to them. Otherwise, you'll be like Rowan not knowing what Detective Mode is.
+- Table testing
+- Snapshot testing
+- Fuzz testing
+- Spec-generated tests
+- AI-generated tests
+- Code instrumentation for profiling and telemetry
+- Built-in test runners
+- Auto-formatters, linters, ASAN, other static analysis tools
+- Omniscient debuggers
+
+Seriously, read up on that last one, because [omniscient debugging] comes pretty close to what I am thinking about, but not quite. I am thinking something like an "omniscient tester".
 
 Chide you writing tests
 
@@ -304,8 +314,23 @@ There's this joke that devs should use 10-year old computers. Not a bad idea, it
 
 Well, let's kill two birds with one stone. We should do more upfront. We should sacrifice our resources so our users don't have to.
 
+This is the workflow I envision:
+
+- Write code as usual
+- Add cost-based assertions
+- For development build, `cbm` adds automatic input/output tracking
+- 
+
+There are certainly edge cases to consider around what happens when a function is changed. What if it gets renamed? A single renamed function might be detectable, but larger refactors would necessitate pre-assigned IDs. What if the developer adds or removes an argument?
+
+I know this all sounds overly optimistic and hand-wavy, but I think it's worth trying out. It could potentially solve many of the day-to-day problems I personally face; more so than any fancy language feature or design pattern could ever do. At the very least, I believe it could significantly improve my development quality-of-life, reducing cognitive load and repetitive drudgework. I am attempting to develop a proof-of-concept in what little free time I have, and I hope to share what I have soon.
+
+
+####### SCRAP SCRAP SCRAP SCRAP SCRAP #########
+
+
 Tools
 
-There's this concept of an "omniscient debugger" which has been tried a few times in various languages, but never really caught on. Despite that, I see potential in a similar development utility that analyzes simple cost-aware assertions (such as with the functions above) to automatically add instrumentation to code. Natural usage of the instrumented program could automatically generate robust, exhaustive test suites, mock implementations, execution traces, visualizations and more. And no, it wouldn't use AI (although that might actually be quite complementary).
+My desire is to make tools that feel as intuitive to pick up as a well-designed video game introduction. Note that this is _not_ dumbing down our languages to appease the lowest common denominator. It's making sure everyone knows what tools are available to them. Otherwise, you'll be like Rowan not knowing what Detective Mode is.
 
-=I know this all sounds overly hand-wavy, but I have a pretty clear vision in my head for how this would work. It's a potential solution to many of the day-to-day problems I personally face; more so than any fancy language feature or design pattern could ever do. I am attempting to develop a proof-of-concept in what little free time I have, and I hope to share what I have soon.
+There's this concept of an "omniscient debugger" which has been tried a few times in various languages, but never really caught on. Despite that, I see potential in a similar development utility that analyzes simple cost-aware assertions (such as with the functions above) to automatically add instrumentation to code. Natural usage of the instrumented program could automatically generate robust, exhaustive test suites, mock implementations, execution traces, visualizations and more. And no, it wouldn't use AI (although that might actually be quite complementary).
