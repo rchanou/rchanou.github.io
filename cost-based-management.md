@@ -1,3 +1,7 @@
+# SOLID Must Die: A No-BS Guide to Scalable Code
+
+## Part 1: Cost-Based Management
+
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 [Something I have noticed as juniors become intermediate, and as intermediate become seniors](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/), posted by PM_ME_LECTURE_NOTES
 
@@ -15,7 +19,7 @@ These are all compelling ideas that sound cool in a vacuum, but they should not 
 >
 > -- <cite>Linus Torvalds</cite>
 
-Yes, writing good software is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. Which is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
+Yes, writing good software is a nuanced art that takes lots of practice. However, I think there are a handful of simple, yet very helpful techniques that most resources overlook. I have seen others touch upon these ideas, but none in the clear, satisfying detail that I would like. That is why I am writing this series: to serve as the no-nonsense guidebook that I wish I had when I first began my programming career.
 
 I've recently used the methods I will describe with great success, on a codebase I inherited from my old lead when he left a few years ago. He and another old colleague of mine were smart guys who definitely knew a lot, and I wouldn't be where I am today without them. But by that nature, they also had a tendency to over-engineer with modern, "hip" practices: Separate packages that didn't _really_ need to be split into separate packages. Multiple services that communicated to each other via a separate PubSub service, for internal business applications that didn't really need them at all. Code full of builders and providers that accepted other builders and providers as parameters. A good portion of the code might _appear_ readable and elegant to a non-technical outsider, with loads of method chains like:
 
@@ -43,13 +47,11 @@ My anecdote is not an isolated incident. Below are some YouTube videos by engine
 
 **[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
 
-Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I've settled on **Cost-Based Management (CBM)**.
+Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I've settled on **Cost-Based Management (CBM)**. I like this name precisely because it doesn't sound programming-specific, dogmatic or academic. CBM is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. 
 
-## Cost-Based Management
+## Cost-Based Management, Explained
 
-I like this name precisely because it doesn't sound too programming-specific or dogmatic. CBM is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. If I had to classify this approach, I would consider it "functionally procedural".
-
-When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
+If I had to classify this approach, I would consider it "functionally procedural". When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
 
 To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure", and I'd like to dig into that. Not all side effects are created equal.
 
@@ -278,7 +280,7 @@ I find it a bit amusing that…
 - Ensure you have mechanisms for containing and recouping costs.
 - Holistically consider and balance all costs. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
 
-Sounds pretty straightforward, right? Well, I _wish_ most other developers saw it so easily! But here's something that might get them onboard...
+Sounds pretty straightforward and non-controversial, right? Well, conventional paradigms like SOLID either say nothing directly about addressing costs, or tell you to atomize your code along lines that don't affect cost. Unlike splitting by costs, there is no reasonable upper bound on Single-Responsibility Principle , or "depend on abstractions, not concretions". This is why you unironically get crap like AbstractSingletonProxyFactoryBean. Some say this is a mis-application of...that's a copout.
 
 ## Proposal: A Cost-Aware Development Tool
 
@@ -290,7 +292,9 @@ Sounds pretty straightforward, right? Well, I _wish_ most other developers saw i
 >
 > -- <cite>Mike Acton</cite>
 
-In the suite of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. 
+In the suite of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. In particular, I think we can do better when it comes to testing.
+
+
 
 - Table testing
 - Snapshot testing
@@ -307,6 +311,8 @@ Seriously, read up on that last one, because [omniscient debugging] comes pretty
 Chide you writing tests
 
 Generating 80% of our tests _should_ be as easy as adding a few extra "cost type" assertions, as shown earlier.
+
+Iron Man
 
 It would be no different than how we define static types, perhaps even simpler. Just like static types enable a whole lot analysis of the code, cost-based types enable tracking and analysis of the data that flows through our code.
 
