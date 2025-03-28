@@ -1,6 +1,4 @@
-# SOLID Must Die: A No-BS Guide to Scalable Code
-
-## Part 1: Cost-Based Management
+# SOLID Must Die: A No-BS Guide to Scalable Code, Part 1
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
 ["Something I have noticed as juniors become intermediate, and as intermediate become seniors"](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/), posted by PM_ME_LECTURE_NOTES
