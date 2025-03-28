@@ -31,7 +31,13 @@ Wow, so clean, it feels more like reading English instead of code! Isn't that co
 
 Well, despite all that sophistication, I could tell from the Slack messages that our users weren't very satisfied with the system. Soon after I took over, I learned just how buggy and broken it was: it had gotten bad enough that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. And yes, the codebase did have automated tests, though I can't say exactly how useful they were. They clearly weren't enough, and they didn't help _me_ all that much.
 
-So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase also sucked less, as I gradually refactored the legacy logic and slotted in a more practical testing framework. Both the users were happier, and I was happier.
+So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system."
+
+Ah, rewarding good work with more work, classic. Well, at least working with the codebase also sucked less, as I gradually refactored the legacy logic and slotted in a more practical testing framework. Both the users were happier, and I was happier.
+
+The psychological benefits of this approach cannot be overstated. Writing and especially _reading_ excessively abstracted, dependency-inverted code may have gotten easier for me, but it never got any less mentally fatiguing. It's just as bad to look at this type of code now as it was when I first tried to use Angular and Ninject 12 years ago. I have no doubt these paradigms are pushing many smart individuals out of or away from software development. I can say this because I was at the brink myself. In fact, the cynic in me would say that this is the ulterior motive for all these paradigms...but I won't get into that.
+
+[balance and productivity]
 
 ## I'm Not Alone
 
@@ -321,11 +327,10 @@ Let's say this tool is an app called `cbtg`, for "Cost-Based Test Generator". He
 
 There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I think this could significantly improve developer quality-of-life by reducing cognitive load and repetitive drudgework, which in turn would increase productivity and software robustness. That's all I want, more than any fancy language feature or design pattern: effective tools. This is just one of many ideas that I have, but it's the one I want most.
 
-Our "elegant" models are hitting a local maximum; what we need now, instead, are better microscopes. Don't treat me like a child and give me "better" Lego bricks to build with. Give me an advanced exo-suit that respects, complements and enhances my innate abilities!
-
-I'll put my money where my mouth is, and develop a proof-of-concept in what little free time I have. Keep an eye out. Until, then, I'll leave you on this quote:
-
 >
 >
 > -- <cite>John Carmack</cite>
 
+Our "elegant" models are hitting a local maximum; what we need now, instead, are better microscopes. Don't treat me like a child and give me "better" Lego bricks to build with. Give me an advanced exo-suit that respects, complements and enhances my innate abilities!
+
+I'll put my money where my mouth is, and develop a proof-of-concept in what little free time I have. Keep an eye out for it.
