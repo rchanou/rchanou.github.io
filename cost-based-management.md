@@ -3,7 +3,7 @@
 ## Part 1: Cost-Based Management
 
 ![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
-[Something I have noticed as juniors become intermediate, and as intermediate become seniors](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/), posted by PM_ME_LECTURE_NOTES
+["Something I have noticed as juniors become intermediate, and as intermediate become seniors"](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/), posted by PM_ME_LECTURE_NOTES
 
 ## Background
 
@@ -33,29 +33,33 @@ Wow, so clean, it feels more like reading English instead of code! Isn't that co
 
 Well, despite all that sophistication, I could tell from the Slack messages that our users weren't very satisfied with the system. Soon after I took over, I learned just how buggy and broken it was: it had gotten bad enough that, in order to work around its failure points, our users were maintaining their own auxiliary Google Sheets and sending each other emails. And yes, the codebase did have automated tests, though I can't say exactly how useful they were. They clearly weren't enough, and they didn't help _me_ all that much.
 
-So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase started to suck less, as I gradually refactored the legacy logic and introduced a more practical testing framework. Users were happier, and I was happier.
+So I got to work making sense of the code, squashing bugs and implementing feature requests using a much more straightforward approach. Within a few months, I had turned things around significantly. Eventually, my boss told me (I'm paraphrasing): "Before, management was bashing the system. Now they're praising it. Now they want to consolidate orders from the other systems into your system." Ah, rewarding good work with more work, classic. Well, at least working with the codebase also sucked less, as I gradually refactored the legacy logic and slotted in a more practical testing framework. Both the users were happier, and I was happier.
 
-My anecdote is not an isolated incident. Below are some YouTube videos by engineers more experienced than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
+## I'm Not Alone
+
+My experience is not an isolated incident. Below are some YouTube videos by engineers more knowledgable than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
 
 **[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)**, a three-part series by Brian Will. In part 1, he outlines his case against OOP; in part 2, he critiques four OOP snippets; and in part 3, he rewrites a large OOP codebase.
 
 **["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)** by Internet of Bugs, describing his experiences dealing with "Clean Code" and explaining why it's flawed.
 
-**[Shawn McGrath Demonstrates Why OOP Is A Nightmare](https://youtu.be/C90H3ZueZMM?si=_TFHYmo-30P8xSBG)** (NSFW language), a hilariously drunken yet supremely lucid rant in which he debugs, rails against, and rewrites a convoluted object-oriented library by an eminent Microsoft researcher/author.
+**[Shawn McGrath: OOP Rant](https://www.youtube.com/watch?v=q4nUK0EBzmI&t=3h21m18s)** (NSFW language), in which, with hilariously drunken lucidity, he steps through, rails against, and rewrites a convoluted object-oriented library by an eminent Microsoft researcher/author.
 
 **[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
 
 **[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by Casey Muratori. You can (and should) [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson recites the article, relating it back to his own experiences while sharing additional great insights.
 
-Alright, enough context, let's get to my first technique. I'm still struggling to find the right name for it, but for now I've settled on **Cost-Based Management (CBM)**. I like this name precisely because it doesn't sound programming-specific, dogmatic or academic. CBM is one of the first tools I reach for when starting work on a new app or feature. It's much like how an artist might sketch a broad outline before filling in all the details. 
+Alright, enough context, let's get to my first technique. I'm still not sure about the name, but for now I've settled on **Cost-Based Management (CBM)**. I like this name precisely because it doesn't sound programming-specific, dogmatic or academic.
 
 ## Cost-Based Management, Explained
 
-If I had to classify this approach, I would consider it "functionally procedural". When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
+CBM is one of the first tools I reach for when starting work on a new app or feature, much like how an artist might sketch an outline before filling in all the details. If I had to classify this approach, I would consider it "functionally procedural".
+
+When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
 
 To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure", and I'd like to dig into that. Not all side effects are created equal.
 
-The easiest way for me to do this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
+The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -232,6 +236,8 @@ This is where you would commonly be told you should do something like isolate op
 
 To rebut that, I'll simply defer to David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
+> Test-first fundamentalism is like abstinence-only sex ed: An unrealistic, ineffective morality campaign for self-loathing and shaming.
+
 > Test-first units leads to an overly complex web of intermediary objects and indirection in order to avoid doing anything that's "slow". Like hitting the database. Or file IO.
 
 > The fear of letting [tests] talk to the database is outdated. This decoupling is simply not worth it any more, even if it may once have been.
@@ -272,15 +278,13 @@ at
 
 I find it a bit amusing that…
 
-## In summary…
+## In Summary…
 
 - Organize and label your procedures by costs.
 - Keep most of your logic in lower-cost procedures.
 - Costs entail not just the physical resources required for a given procedure to run, but qualitative costs that affect human understanding, such as whether the output keeps or loses predictability, readability, etc.
 - Ensure you have mechanisms for containing and recouping costs.
 - Holistically consider and balance all costs. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
-
-Sounds pretty straightforward and non-controversial, right? Well, conventional paradigms like SOLID either say nothing directly about addressing costs, or tell you to atomize your code along lines that don't affect cost. Unlike splitting by costs, there is no reasonable upper bound on Single-Responsibility Principle , or "depend on abstractions, not concretions". This is why you unironically get crap like AbstractSingletonProxyFactoryBean. Some say this is a mis-application of...that's a copout.
 
 ## Proposal: A Cost-Aware Development Tool
 
@@ -292,9 +296,7 @@ Sounds pretty straightforward and non-controversial, right? Well, conventional p
 >
 > -- <cite>Mike Acton</cite>
 
-In the suite of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. In particular, I think we can do better when it comes to testing.
-
-
+In the suite of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. In particular, I think we can do much better when it comes to testing. Instead of shaming developers for not testing or writing "enough" tests, we should consider how we can make the process of creating effective tests more efficient and frictionless. Several techniques and tools have emerged in this regard:
 
 - Table testing
 - Snapshot testing
@@ -303,18 +305,39 @@ In the suite of development tools available to us, I sense an empty void that we
 - AI-generated tests
 - Code instrumentation for profiling and telemetry
 - Built-in test runners
-- Auto-formatters, linters, ASAN, other static analysis tools
+- Auto-formatters, linters, AddressSanitizer, other static analysis tools
 - Omniscient debuggers
 
-Seriously, read up on that last one, because [omniscient debugging] comes pretty close to what I am thinking about, but not quite. I am thinking something like an "omniscient tester".
+Seriously, read up on that last one, because [omniscient debugging] is similar to what I'm thinking about. Even though it never became mainstream, I still see tons of potential in the "just capture everything" approach, with the proper execution.
 
-Chide you writing tests
+Generating at least 80% of our tests _should_ be as easy as adding a few extra "cost-based type" assertions, as shown earlier. It wouldn't be much different than how we currently define static types. Just like static types enable a whole lot useful analysis of the code, cost-based types could enable seamless tracking and analysis of the data that flows through our code.
 
-Generating 80% of our tests _should_ be as easy as adding a few extra "cost type" assertions, as shown earlier.
+Let's say this tool is an app called `cbtg`, for "Cost-Based Test Generator". Here is one workflow I envision:
 
-Iron Man
+- Run `cbtg`
+- Write code as usual, but also write cost-based assertions next to types
+- `cbtg` creates instrumented development build with automatic input/output capture
+- Input/output is serialized and written to tables either in file format, or in embedded database
+- Interface allows developer to mark input/output pairs as "verified"
+- Each function table's non-verified records are automatically capped and pruned 
+- Mocks can automatically be generated from input/output tables for "unreliable" functions like API calls
+- Documenting and generating tests for third-party APIs emerges from notating cost-based types for endpoints and naturally experimenting with them
 
-It would be no different than how we define static types, perhaps even simpler. Just like static types enable a whole lot analysis of the code, cost-based types enable tracking and analysis of the data that flows through our code.
+There are certainly edge cases to consider around how to handle special types of data and code changes, but those are hardly showstoppers. I think this could significantly improve developer quality-of-life by reducing cognitive load and repetitive drudgework, which in turn would increase productivity and software robustness. That's all I want, more than any fancy language feature or design pattern: effective tools. This is just one of many ideas that I have, but it's the one I want most.
+
+Our "elegant" models are hitting a local maximum; what we need now, instead, are better microscopes. Don't treat me like a child and give me "better" Lego bricks to build with. Give me an advanced exo-suit that respects, complements and enhances my innate abilities!
+
+I'll put my money where my mouth is, and develop a proof-of-concept in what little free time I have. Keep an eye out. Until, then, I'll leave you on this quote:
+
+>
+>
+> -- <cite>John Carmack</cite>
+
+
+####### SCRAP SCRAP SCRAP SCRAP SCRAP #########
+
+
+
 
 There's this joke that devs should use 10-year old computers. Not a bad idea, it's like music producers making sure their mix still sounds good on crappy speakers that most people have.
 
@@ -322,17 +345,6 @@ Well, let's kill two birds with one stone. We should do more upfront. We should 
 
 This is the workflow I envision:
 
-- Write code as usual
-- Add cost-based assertions
-- For development build, `cbm` adds automatic input/output tracking
-- 
-
-There are certainly edge cases to consider around what happens when a function is changed. What if it gets renamed? A single renamed function might be detectable, but larger refactors would necessitate pre-assigned IDs. What if the developer adds or removes an argument?
-
-I know this all sounds overly optimistic and hand-wavy, but I think it's worth trying out. It could potentially solve many of the day-to-day problems I personally face; more so than any fancy language feature or design pattern could ever do. At the very least, I believe it could significantly improve my development quality-of-life, reducing cognitive load and repetitive drudgework. I am attempting to develop a proof-of-concept in what little free time I have, and I hope to share what I have soon.
-
-
-####### SCRAP SCRAP SCRAP SCRAP SCRAP #########
 
 
 Tools
