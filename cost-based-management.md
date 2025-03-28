@@ -305,27 +305,30 @@ In the suite of development tools available to us, I sense an empty void that we
 - Fuzz testing
 - Spec-generated tests
 - AI-generated tests
-- Code instrumentation for profiling, memory error detectiion, telemetry, etc.
+- Code instrumentation for profiling, memory error detection, telemetry, etc.
 - Built-in test runners
 - Auto-formatters, linter, other static analysis tools
 - Omniscient debuggers
 
 Seriously, read up on that last one, because [omniscient debugging] is similar to what I'm thinking about. Even though it never became mainstream, I still see tons of potential in the "just capture everything" approach, given the proper execution. Modern storage capacities make this more achievable by the day.
 
-Generating at least 80% of our tests _should_ be as simple as adding a few extra "cost-based type" assertions, as shown earlier. It wouldn't be much different than how we currently define static types. Just like static types enable a whole lot useful analysis of the code, cost-based types could enable seamless tracking and analysis of the data that flows through our code. This would be `Printf(result)` on steroids, and just about as easy to type.
+Generating at least 80% of our tests _should_ be as simple as adding a few extra "cost-based type" assertions, as shown earlier. It wouldn't be much different than how we currently define static types. Just like static types enable a whole lot useful analysis of the code, cost-based types could enable seamless tracking and analysis of the data that flows through our code. Think of it like `Printf(result)` on steroids, and about as easy to type.
 
 Let's say this tool is an app called `cbtg`, for "Cost-Based Test Generator". Here is one workflow I envision:
 
 - Run `cbtg`
 - Write code as usual, but also write cost-based assertions next to types
 - `cbtg` creates instrumented development build with automatic input/output capture
-- Input/output is serialized and written to tables either in file format, or in embedded database
-- Interface allows developer to mark input/output pairs as "verified"
+- Input/output is serialized and written to tables, either in files or in embedded database
+- `cbtg` automatically tests cost-based type assertions against input/output
+- Example: `pure` or `deterministic` asserts that the same input always results in the same output
+- Interface also allows developer to mark input/output pairs as "verified"
+- Custom verification tests may be written for any input/output pairs
 - Each function table's non-verified records are automatically capped and pruned 
 - Mocks can automatically be generated from input/output tables for "unreliable" functions like API calls
-- Generating documentative tests for third-party APIs naturally emerges from notating cost-based types for endpoints and using them
+- Generating documentative tests for third-party APIs naturally emerges, from notating cost-based types for endpoints and usingc3 them
 
-There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I think this could significantly improve developer quality-of-life by reducing cognitive load and repetitive drudgework, which in turn would increase productivity and software robustness. That's all I want, more than any fancy language feature or design pattern: effective tools. This is just one of many ideas that I have, but it's the one I want most.
+There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I think this could significantly improve developer quality-of-life by reducing cognitive load and repetitive drudgework, which in turn would increase productivity and software robustness. That's all I want, more than any fancy language feature or design pattern: effective tools. This test generator is just one of many ideas that I have, but it's the one I want most.
 
 >
 >
