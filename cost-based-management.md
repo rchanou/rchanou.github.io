@@ -330,23 +330,3 @@ I'll put my money where my mouth is, and develop a proof-of-concept in what litt
 >
 >
 > -- <cite>John Carmack</cite>
-
-
-####### SCRAP SCRAP SCRAP SCRAP SCRAP #########
-
-
-
-
-There's this joke that devs should use 10-year old computers. Not a bad idea, it's like music producers making sure their mix still sounds good on crappy speakers that most people have.
-
-Well, let's kill two birds with one stone. We should do more upfront. We should sacrifice our resources so our users don't have to.
-
-This is the workflow I envision:
-
-
-
-Tools
-
-My desire is to make tools that feel as intuitive to pick up as a well-designed video game introduction. Note that this is _not_ dumbing down our languages to appease the lowest common denominator. It's making sure everyone knows what tools are available to them. Otherwise, you'll be like Rowan not knowing what Detective Mode is.
-
-There's this concept of an "omniscient debugger" which has been tried a few times in various languages, but never really caught on. Despite that, I see potential in a similar development utility that analyzes simple cost-aware assertions (such as with the functions above) to automatically add instrumentation to code. Natural usage of the instrumented program could automatically generate robust, exhaustive test suites, mock implementations, execution traces, visualizations and more. And no, it wouldn't use AI (although that might actually be quite complementary).
