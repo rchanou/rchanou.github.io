@@ -298,7 +298,9 @@ I find it a bit amusing that…
 >
 > -- <cite>Mike Acton</cite>
 
-In the suite of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. In particular, I think we can do much better when it comes to testing. Instead of shaming developers for not testing or writing "enough" tests, we should consider how we can make the process of creating effective tests more efficient and frictionless. Several techniques and tools have emerged in this regard:
+In the suite of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. Specifically, I think we can do much better when it comes to **testing**. Rather than shame developers for not dedicating "enough" time to writing tests, we should instead consider how we can aid and streamline the creation of effective test suites.
+
+Let's take note of some techniques and tools that are currently in the wild:
 
 - Table testing
 - Snapshot testing
@@ -310,30 +312,40 @@ In the suite of development tools available to us, I sense an empty void that we
 - Auto-formatters, linter, other static analysis tools
 - Omniscient debuggers
 
-Seriously, read up on that last one, because [omniscient debugging] is similar to what I'm thinking about. Even though it never became mainstream, I still see tons of potential in the "just capture everything" approach, given the proper execution. Modern storage capacities make this more achievable by the day.
+Seriously, read up on that last one, because [omniscient debugging] is similar to the "missing tool" that I have in mind. Even though this sort of tool hasn't become mainstream yet, I still see huge untapped potential in the "just capture everything" approach, with the right execution and a well-designed interface. And ever-increasing storage capacities make this approach more trivial and appealing by the day.
 
-Generating at least 80% of our tests _should_ be as simple as adding a few extra "cost-based type" assertions, as shown earlier. It wouldn't be much different than how we currently define static types. Just like static types enable a whole lot useful analysis of the code, cost-based types could enable seamless tracking and analysis of the data that flows through our code. Think of it like `Printf(result)` on steroids, and about as easy to type.
+What I propose is an "omnisicient test generator". You can think of it like `Printf` on steroids. Generating at least 80% of our tests _should_ be as simple as declaring a few "cost-based type" assertions (as shown earlier). Whereas static types are checkable assertions about individual values, cost-based types make assertions about the relationships and interactions _between_ values. This unlocks seamless tracking and analysis of not just the code, but any data that flows through it. It's almost like test-driven development, but way more practical.
 
-Let's say this tool is an app called `cbtg`, for "Cost-Based Test Generator". Here is one workflow I envision:
+Let's say this tool is an app called `otg`. Here is one workflow I envision:
 
-- Run `cbtg`
-- Write code as usual, but also write cost-based assertions next to types
+- Run `otg`
+- Write code as usual, but also write cost-based assertions
 - `cbtg` creates instrumented development build with automatic input/output capture
 - Input/output is serialized and written to tables, either in files or in embedded database
-- `cbtg` automatically tests cost-based type assertions against input/output
+- As you develop and refactor functions, `otg` automatically tests cost-based assertions against previously captured input/output pairs
 - Example: `pure` or `deterministic` asserts that the same input always results in the same output
-- Interface also allows developer to mark input/output pairs as "verified"
-- Custom verification tests may be written for any input/output pairs
+- App interface also allows developer to mark input/output pairs as "verified"
+- Custom verification tests can also be written
 - Each function table's non-verified records are automatically capped and pruned 
 - Mocks can automatically be generated from input/output tables for "unreliable" functions like API calls
-- Generating documentative tests for third-party APIs naturally emerges, from notating cost-based types for endpoints and usingc3 them
+- Generating documentative tests for third-party APIs naturally emerges from simply notating cost-based types for endpoints and using them
 
-There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I think this could significantly improve developer quality-of-life by reducing cognitive load and repetitive drudgework, which in turn would increase productivity and software robustness. That's all I want, more than any fancy language feature or design pattern: effective tools. This test generator is just one of many ideas that I have, but it's the one I want most.
+There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I feel this tool could significantly improve developer quality-of-life, by reducing cognitive load and repetitive drudgework. In turn, this would increase productivity and software robustness.
+
+I'll put my money where my mouth is, and develop a proof-of-concept in what little free time I have. Keep an eye out for it. Until then, I'll leave you on this quote:
 
 >
 >
 > -- <cite>John Carmack</cite>
 
-Our "elegant" models are hitting a local maximum; what we need now, instead, are better microscopes. Don't treat me like a child and give me "better" Lego bricks to build with. Give me an advanced exo-suit that respects, complements and enhances my innate abilities!
 
-I'll put my money where my mouth is, and develop a proof-of-concept in what little free time I have. Keep an eye out for it.
+
+
+
+
+-------
+
+
+One of my pet peeves is the framing of good development experience versus good user experience as two mutually exclusive goals. Another is the framing of beginner tools and expert tools. There's a huge overlap between the two! Yes, you can get better at running code through your head, but it still takes _effort_. 
+
+That's all I want, more than any fancy language feature or design pattern: effective tools. This test generator is just one of many ideas that I have, but it's the one I want most. Our "elegant" models are hitting a local maximum; what we need now, instead, are better microscopes. Don't treat me like a child and dangle "better" Lego bricks and kid gloves to build with. Give me an advanced exo-suit that respects, complements and enhances my innate abilities!
