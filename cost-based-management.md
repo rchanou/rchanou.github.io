@@ -237,7 +237,7 @@ You can also think of the disk as an implicit parameter to ReadFile. You can exp
 
 This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
 
-To rebut that, I'll simply defer to another notorious bugbear, David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
+To rebut that, I'll simply defer to another notorious programming bugbear, David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first fundamentalism is like abstinence-only sex ed: An unrealistic, ineffective morality campaign for self-loathing and shaming.
 
@@ -249,7 +249,7 @@ To rebut that, I'll simply defer to another notorious bugbear, David Heinemeier 
 
 > Stop obsessing about unit tests, embrace backfilling of tests when you're happy with the design, and strive for overall system clarity.
 
-Getting back to `ReadFile`, this specifically
+Getting back to `ReadFile`, 
 
 ```
 func WriteFile(name string, data []byte, perm FileMode) error
@@ -265,17 +265,17 @@ func WriteNewTemporaryFile(name string, data []byte, perm FileMode) error
 
 ```
 func WriteToRotatingLog(logDir, str string) error
-// consumes: disk; cont
+// consumes: disk/filesys; contained
 ```
 
-it a
+
 
 ```
 func SendEmail(email *Email) error
 // requires: network; irrevocable
 ```
 
-at
+
 
 ```
 func DestroyCity(name string) (int, error)
@@ -284,7 +284,7 @@ func DestroyCity(name string) (int, error)
 This function is based on a classic programming joke by OG computer scientist Nathaniel Borenstein:
 > It should be noted that no ethically-trained software engineer would ever consent to write a DestroyBaghdad procedure. Basic professional ethics would instead require him to write a DestroyCity procedure, to which Baghdad could be given as a parameter.
 
-To add a layer to the joke, isn't it a bit funny that no mainstream language has any capability to formalize the distinction between a lowly `Printf` and this? Even functional languages that claim to do something like this, seem to use it as an excuse for academic navel-gazing, and don't really give a sh!t about the actual distinguishable effects of these procedures.
+To add a layer to the joke, isn't it a bit funny that no mainstream language has any capability to formalize the distinction between a lowly `Printf` and this? Even functional languages that claim to do something like this, seem to use it as an excuse for academic navel-gazing, and don't really give a sh!t about the actual distinguishable effects of these procedures. Well, maybe you should.
 
 ## In Summary…
 
