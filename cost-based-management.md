@@ -11,7 +11,7 @@ Some of us eventually learn we don't need the OOP stone, and ditch it. Others st
 
 Personally, I never bought into SOLID and the like, but I did go through a Functional Programming phase. To get what I went through, just replace the OOP diagrams in the meme above with concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
 
-These are all compelling ideas that sound cool in a vacuum, but they should not be part of anyone's default approach. In practice, they are far too overused and most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to induce excessive fragmentation, increased mental overloading, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
+These are all compelling ideas that sound cool in a vacuum, but they should not be part of anyone's default approach. In practice, they are far too overused and most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to cause excessive fragmentation, increased mental overloading, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
 
 > Bad programmers worry about the code. Good programmers worry about data structures and their relationships.
 >
@@ -59,7 +59,7 @@ Alright, enough context, let's get to my first technique. I'm still not sure abo
 
 CBM is one of the first tools I reach for when starting work on a new app or feature, much like how an artist might sketch an outline before filling in all the details. If I had to classify this approach, I would consider it "functionally procedural".
 
-When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how pure functions are separated from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
+When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how to separate pure functions from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
 
 To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure", and I'd like to dig into that. Not all side effects are created equal.
 
@@ -298,7 +298,7 @@ I find it a bit amusing that…
 >
 > -- <cite>Mike Acton</cite>
 
-Looking at the arsenal of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. Specifically, I think we can do much better when it comes to **testing**. Rather than shame developers for not devoting enough time to writing a litany of ad hoc tests, we should instead consider how we can aid and streamline the creation of effective test suites.
+Looking at the arsenal of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. Specifically, I think we can do much better when it comes to **testing**. Rather than chastise developers for not devoting enough time to writing a litany of ad hoc tests, we should instead consider how we can eliminate tedium and streamline the creation of effective test suites.
 
 Let's take note of some techniques and tools that currently exist:
 
@@ -315,27 +315,27 @@ Let's take note of some techniques and tools that currently exist:
 
 I hope that last one piqued your interest, because [omniscient debugging] closely mirrors the "missing tool" that I have in mind. Although omniscient debuggers haven't gone mainstream yet, I still see immense untapped potential in the "just capture everything" approach, given the right execution and a well-designed interface. As our storage capacities continue to grow and get even cheaper, this idea becomes more trivial and appealing by the day.
 
-What I propose is an **omnisicient test generator**. Generating at least 80% of our tests _should_ be as simple as declaring a few "cost-based" assertions along with our usual static types, as shown above. You can think of it like `Printf` on steroids: it would be just as fast to type, but with a whole lot more payoff.
+What I propose is an **Omnisicient Test Generator**. Generating at least 80% of our tests _should_ be as simple as declaring a few "cost-based" assertions along with our usual static types, as shown above. You can think of it like `Printf` on steroids: it should be just as fast to type, but with a whole lot more payoff.
 
-Whereas static types are checkable assertions about individual values, cost-based types make assertions about the relationships and interactions _between_ values. This could unlock seamless tracking and analysis of not just the code, but any data that flows through it. Also, unlike static types, the semantics of these cost-based assertions would not have to be dependent on the language they are "embedded" in. In fact, language-independence could allow more flexibility, more possibilities, and a unification of the polyglot codebases which make up many modern systems.
+Whereas static types are checkable assertions about individual values, cost-based types make assertions about the relationships and interactions _between_ values. This could unlock seamless tracking and analysis of not just the code, but any data that flows through it. And unlike static types, the semantics of these cost-based assertions would not have to be tied to the language of the files they are contained in. In fact, language-independence could allow more flexibility, more possibilities, and a unification of the polyglot codebases which constitute many modern systems.
 
 Let's say this test generator is an app called `otg`. Here is one workflow I envision:
 
 - Run `otg`
 - Write code as usual, but also write cost-based assertions
-- `cbtg` creates instrumented development build with automatic input/output capture
-- Input/output is serialized and written to tables, either in files or in embedded database
+- `otg` creates an instrumented development build with automatic input/output capture
+- Input/output pairs are serialized and written to tables, either in files or in an embedded database
 - As you develop and refactor functions, `otg` automatically tests cost-based assertions against previously captured input/output pairs
 - Example: `pure` or `deterministic` asserts that the same input always results in the same output
-- App interface also allows developer to mark input/output pairs as "verified"
-- Custom verification tests can also be written
-- Each function table's non-verified records are automatically capped and pruned 
+- An interface would also allow developer to mark input/output pairs as "verified"
+- Custom verification logic can also be written for more specialized tests
+- Each function table's non-verified records are automatically capped and pruned
 - Mocks can automatically be generated from input/output tables for "unreliable" functions like API calls
 - Generating documentative tests for third-party APIs naturally emerges from simply notating cost-based types for endpoints and using them
 
-There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I feel this tool could significantly improve developer quality-of-life, by reducing cognitive load and repetitive drudgework. In turn, this would increase programming productivity and software robustness. This is what Test-Driven Development _should have_ been: not a whip and a Bible, but an advanced exo-suit that makes the 
+There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I feel this tool could significantly improve developer quality-of-life, by reducing cognitive load and repetitive drudgework. In turn, this would increase programming productivity and software robustness.
 
-I'll put my money where my mouth is, and develop a proof-of-concept in what little free time I have. Keep an eye out for that. Until then, I'll leave you on this quote:
+_This_ is what the acolytes of "test-driven development" should strive for: not an antiquated ideological horsewhip, but an advanced exosuit that serves _us_, instantly providing the information and power we need to enhance our innate abilities. I'll put my money where my mouth is, and develop a proof-of-concept in what little free time I have. Until then, I'll leave you on this quote:
 
 >
 >
