@@ -98,7 +98,6 @@ func HTTPPost(req *Request) (resp *Response, err error)
 func FetchListOfYouTubeVideos(req *Request) (resp *Response, err error)
 func ChargeCreditCard (cc *CreditCard, amount float64) error
 func SendDocumentToPrinter(printer *Printer, doc *Document) error
-func LaunchRocket(plan \*LaunchPlan) error
 func DestroyCity(name string) (int, error)
 ```
 
@@ -278,7 +277,14 @@ func SendEmail(email *Email) error
 
 at
 
-I find it a bit amusing that…
+```
+func DestroyCity(name string) (int, error)
+// irrevocable, destructive
+```
+This function is based on a classic programming joke by OG computer scientist Nathaniel Borenstein:
+> It should be noted that no ethically-trained software engineer would ever consent to write a DestroyBaghdad procedure. Basic professional ethics would instead require him to write a DestroyCity procedure, to which Baghdad could be given as a parameter.
+
+To add a layer to the joke, isn't it a bit funny that no mainstream language has any capability to formalize the distinction between a lowly `Printf` and this? Even functional languages that claim to do something like this, seem to use it as an excuse for academic navel-gazing, and don't really give a sh!t about the actual distinguishable effects of these procedures.
 
 ## In Summary…
 
