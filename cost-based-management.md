@@ -237,7 +237,7 @@ You can also think of the disk as an implicit parameter to ReadFile. You can exp
 
 This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
 
-To rebut that, I'll simply defer to another notorious programming bugbear, David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
+To rebut that, I'll simply defer to another infamous programming bugbear, David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first fundamentalism is like abstinence-only sex ed: An unrealistic, ineffective morality campaign for self-loathing and shaming.
 
@@ -281,10 +281,10 @@ func SendEmail(email *Email) error
 func DestroyCity(name string) (int, error)
 // irrevocable, destructive
 ```
-This function is based on a classic programming joke by OG computer scientist Nathaniel Borenstein:
+This function is based on an old programming joke by OG computer scientist Nathaniel Borenstein:
 > It should be noted that no ethically-trained software engineer would ever consent to write a DestroyBaghdad procedure. Basic professional ethics would instead require him to write a DestroyCity procedure, to which Baghdad could be given as a parameter.
 
-To add a layer to the joke, isn't it a bit funny that no mainstream language has any capability to formalize the distinction between a lowly `Printf` and this? Even functional languages that claim to do something like this, seem to use it as an excuse for academic navel-gazing, and don't really give a sh!t about the actual distinguishable effects of these procedures. Well, maybe you should.
+that no mainstream language has any capability to formalize the distinction between a lowly `Printf` and `DestroyCity`. Some functional languages do formalize different effects, but seem to be more concerned with control flow
 
 ## In Summary…
 
@@ -294,7 +294,7 @@ To add a layer to the joke, isn't it a bit funny that no mainstream language has
 - Ensure you have mechanisms for containing and recouping costs.
 - Holistically consider and balance all costs. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
 
-## Proposal: A Cost-Aware Development Tool
+## Proposal: A Cost-Aware Test Manager
 
 > Show me your flowcharts and conceal your tables, and I shall continue to be mystified. Show me your tables, and I won't usually need your flowcharts; they'll be obvious.
 >
@@ -304,22 +304,27 @@ To add a layer to the joke, isn't it a bit funny that no mainstream language has
 >
 > -- <cite>Mike Acton</cite>
 
-Looking at the arsenal of development tools available to us, I sense an empty void that we are all collectively feeling around like blind mice, without seeing the bigger picture. Specifically, I think we can do much better when it comes to **testing**. Rather than chastise developers for not devoting enough time to writing a litany of ad hoc tests, we should instead consider how we can eliminate tedium and streamline the creation of effective test suites.
+Programming culture seems to be obsessed with finding elegant, all-encompassing models. These usually seem to be designed by galaxy-brain tryhards who feel more like they're trying to sell you a product to lock you into, rather than actual 
+
+I want simple, straightforward, intuitive tools that don't try to do everything and don't require 
+
+Specifically, I think we can do much better when it comes to **testing**. Rather than chastise developers for not devoting enough time to writing a litany of ad hoc tests, we should instead consider how we can eliminate tedium and streamline the creation of effective test suites.
 
 Let's take note of some techniques and tools that currently exist:
 
 - Table testing
+- Database-driven tests
 - Snapshot testing
 - Fuzz testing
 - Spec-generated tests
 - AI-generated tests
-- Code instrumentation for profiling, detection of memory issues, telemetry, etc.
-- Structured logging
 - Built-in test runners
 - Auto-formatters, linters, other static analysis tools
+- Code instrumentation for profiling, detection of memory issues, telemetry, etc.
+- Structured logging
 - Omniscient debuggers
 
-I hope that last one piqued your interest, because [omniscient debugging] closely mirrors the "missing tool" that I have in mind. Although omniscient debuggers haven't gone mainstream yet, I still see immense untapped potential in the "just capture everything" approach, given the right execution and a well-designed interface. As our storage capacities continue to grow and get even cheaper, this idea becomes more trivial and appealing by the day.
+Although these haven't gone mainstream yet, I still see immense untapped potential in the "just capture everything" approach, given the right visualization and a well-designed interface. As our storage capacities continue to grow and get even cheaper, this idea becomes more trivial and appealing by the day.
 
 What I propose is an **Omnisicient Test Generator**. Generating at least 80% of our tests _should_ be as simple as declaring a few "cost-based" assertions along with our usual static types, as shown above. You can think of it like `Printf` on steroids: it should be just as fast to type, but with a whole lot more payoff.
 
@@ -338,6 +343,7 @@ Let's say this test generator is an app called `otg`. Here is one workflow I env
 - Each function table's non-verified records are automatically capped and pruned
 - Mocks can automatically be generated from input/output tables for "unreliable" functions like API calls
 - Generating documentative tests for third-party APIs naturally emerges from simply notating cost-based types for endpoints and using them
+- Tests can be "ejected" to standard code-based tests
 
 There are certainly edge cases to consider around how to handle special types of data or code changes, but those are hardly showstoppers. I feel this tool could significantly improve developer quality-of-life, by reducing cognitive load and repetitive drudgework. In turn, this would increase programming productivity and software robustness.
 
