@@ -1,17 +1,24 @@
-# SOLID Must Die: A No-BS Guide to Scalable Code, Part 1
 
-![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](/assets/programmer_bell_curve_meme.webp)
-["Something I have noticed as juniors become intermediate, and as intermediate become seniors"](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/), posted by PM_ME_LECTURE_NOTES
+# SOLID Must Die: A No-BS Guide to Simple, Scalable Code
+
+### by Ron ChanOu
+
+# Part 1: Cost-Based Management
+
+
+![Bell curve meme showing junior programmer saying "I will write only the code needed to solve the problem", intermediate programmer crying about how you should use SOLID, design patterns, MVC, etc. and senior programmer saying "I will write only the code needed to solve the problem".](https://raw.githubusercontent.com/rchanou/rchanou.github.io/refs/heads/master/assets/programmer_bell_curve_meme.webp)
+["Something I have noticed as juniors become intermediate, and as intermediate become seniors"](https://www.reddit.com/r/ProgrammerHumor/comments/x5sle0/something_i_have_noticed_as_juniors_become/)
+-- meme posted by PM_ME_LECTURE_NOTES
 
 ## Background
 
-SOLID is scalability theatre. Objects are fine, but the doctrine of Object-_Orientation_ never did anyone any good. Have you ever read the children's story of Stone Soup? That's the extent to which Object-Oriented Programming "works": a placebo to get fresh programmers thinking about how they can design their programs, beyond copy-pasting a bunch of crap everywhere. 
+SOLID is scalability theatre. Objects are fine, but the doctrine of Object-_Orientation_ . Have you ever read the children's story of Stone Soup? That's the extent to which Object-Oriented Programming "works": a placebo to get fresh programmers thinking about how they can design their programs, beyond copy-pasting a bunch of crap everywhere. 
 
 Some of us eventually learn we don't need the OOP stone, and ditch it. Others still feel the need to put stones in their soup, and carry these heavy stones around with them everywhere. They might even refuse to eat soup served without a stone. They'll get into heated debates about what types of stones make the best soup: some argue for soft, rounded pumice, others for sharp obsidian. Some say we should even use little rocks that we eat with the soup because that's what birds do, and we need to model the way we cook our soup after nature. They'll tell you it's painful at first, but promise one day it'll just click, and you'll wonder how you ever lived without eating and sh!tting rocks in the first place.
 
 Personally, I never bought into SOLID and the like, but I did go through a Functional Programming phase. To get what I went through, just replace the OOP diagrams in the meme above with concepts like higher-order functions, currying, "composability", declarative DSLs, homoiconicity, provable correctness, and algebraic effects.
 
-These are all compelling ideas that sound cool in a vacuum, but they should not be part of anyone's default approach. In practice, they are far too overused and most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to cause excessive fragmentation, increased mental overloading, unnecessary ambiguity, premature ossification and reduced flexibility, while not really solving any hard problems that _actually_ matter.
+These are all compelling techniques that sound cool in a vacuum. In practice, they are far too overused and most of them do not pay off, because they all have drawbacks which usually aren't mentioned (or even noticed) when they are first proposed. I could write several articles discussing the specific pros and cons of each of these ideas, but for now, I'll just say that they tend to cause excessive fragmentation, increased mental overloading, unnecessary ambiguity, premature ossification and reduced flexibility...while not _actually_ solving any hard problems that _actually_ matter.
 
 > Bad programmers worry about the code. Good programmers worry about data structures and their relationships.
 >
@@ -35,35 +42,51 @@ So I got to work making sense of the code, squashing bugs and implementing featu
 
 Ah, rewarding good work with more work, classic. Well, at least working with the codebase also sucked less, as I gradually refactored the legacy logic and slotted in a more practical testing framework. Both the users were happier, and I was happier.
 
-The psychological benefits of this approach cannot be overstated. Writing and especially _reading_ excessively abstracted, dependency-inverted code may have gotten easier for me, but it never got any less mentally fatiguing. It's just as bad to look at this type of code now as it was when I first tried to use Angular and Ninject 12 years ago. I have no doubt these paradigms are pushing many smart individuals out of or away from software development. I can say this because I was at the brink myself. In fact, the cynic in me would say that this is the ulterior motive for all these paradigms...but I won't get into that.
+The psychological benefits of this approach cannot be overstated. Writing and especially _reading_ excessively abstracted, dependency-inverted code may have gotten easier for me, but it never got any less mentally fatiguing. It's just as annoying to wade through this type of code now, as it was when I first tried to "get" Angular and Ninject 12 years ago.
+
+I have no doubt these paradigms are pushing many smart individuals out of or away from software development. I can say this because I was at the brink myself. In fact, the cynic in me would say that this is the ulterior motive for all these paradigms...but I won't get into that.
+
+Some of you might say use the right tool for the right job, etc.
+
+That is a *failing* of the paradigm. Aspirational
 
 [balance and productivity]
 
 ## I'm Not Alone
 
-My experience is not an isolated incident. Below are some YouTube videos by engineers more knowledgable than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
+My experience is not an isolated one. Below are some YouTube videos by engineers more knowledgable than myself, who have inspired and affirmed my current programming philosophy. If you're too busy to watch these, I recommend at least listening to them while you're working or doing chores.
 
-**[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)**, a three-part series by Brian Will. In part 1, he outlines his case against OOP; in part 2, he critiques four OOP snippets; and in part 3, he rewrites a large OOP codebase.
+**[Object-Oriented Programming is Bad](https://youtu.be/QM1iUe6IofM?si=GQHNLsGfGn0sbEGk)/[Embarrassing](https://youtu.be/IRTfhkiAqPw?si=M4uR-1Kz6Ga0opdY)/[Garbage](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)**: a three-part series by Brian Will. In part 1, he outlines his case against OOP; in part 2, he critiques four OOP snippets; and in part 3, he rewrites a large OOP codebase.
+> ttstrtsr
 
 **["Clean Code" is bad. What makes code "maintainable"?](https://youtu.be/V6VP-2aIcSc?si=F_XTuR17209RYd8t)** by Internet of Bugs, describing his experiences dealing with "Clean Code" and explaining why it's flawed.
+> ttstrtsr
 
-**[Shawn McGrath: OOP Rant](https://www.youtube.com/watch?v=q4nUK0EBzmI&t=3h21m18s)** (NSFW language), in which, with hilariously drunken lucidity, he steps through, rails against, and rewrites a convoluted object-oriented library authored by an eminent Microsoft researcher.
+**[Shawn McGrath: OOP Rant](https://www.youtube.com/watch?v=q4nUK0EBzmI&t=3h21m18s)** (NSFW language): in which, with remarkable drunken lucidity, he steps through, rails against, and rewrites a convoluted object-oriented library authored by an eminent Microsoft researcher.
+> ttstrtsr
 
-**[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, perhaps the most prominent proponent of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
+**[Solving the Right Problems for Engine Programmers](https://youtu.be/4B00hV3wmMY?si=Hk_v2Hola2ehbpnA)** by Mike Acton, a prominent advocate of Data-Oriented Design. His advice applies to other domains as well, not just engine programming.
+> ttstrtsr
 
 **[The most important article on software development](https://youtu.be/U5BuRz6lzO4?si=fI8i6BtZ1CL5QO-E)**, a review of the article "Semantic Compression", written by Casey Muratori (of Handmade Hero fame). You can [read the original article yourself, here](https://caseymuratori.com/blog_0015). In the video, Ted Bendixson gives an animated reading of the article, while relating it back to his own experiences and adding even more great insights.
+> ttstrtsr
 
-Alright, enough context, let's get to my first technique. I'm still not sure about the name, but for now I've settled on **Cost-Based Management (CBM)**. I like this name precisely because it doesn't sound programming-specific, dogmatic or academic.
+Okay, enough ranting, let's get to my first technique. I'm still not sure about the name, but for now I've settled on **Cost-Based Management (CBM)**. I like this name precisely because it doesn't sound overly technical, programming-specific, dogmatic or academic.
 
 ## Cost-Based Management, Explained
 
+> If you look at the development process for a piece of code as a whole, you won’t overlook any hidden costs. Given a certain level of performance and quality required by the places the code gets used, beginning at its inception and ending with the last time the code is ever used by anyone for any reason, the goal is to minimize the amount of human effort it cost. This includes the time to type it in. It includes the time to debug it. It includes the time to modify it. It includes the time to adapt it for other uses. It includes any work done to other code to get it to work with this code that perhaps wouldn’t have been necessary if the code were written differently. All work on the code for its entire usable lifetime is included.
+> -- <cite>Casey Muratori, "Semantic Compression"</cite>
+
 CBM is one of the first tools I reach for when starting work on a new app or feature, much like how an artist might sketch an outline before filling in all the details. If I had to classify this approach, I would consider it "functionally procedural".
 
-When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start by explaining how to separate pure functions from functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
+When writing new code, I use plain structs and plain functions the vast majority of the time. If you've read or watched introductory functional programming tutorials, you may have noticed that many of them start with this basic, sensible idea: separate pure functions from impure functions with side effects. However, they'll usually leave it at that, then proceed to tell you that you should compose curried higher-order functions into elegant map/reduce/filter pipes, and then do a monadic bind or some BS like that.
 
-To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure", and I'd like to dig into that. Not all side effects are created equal.
+To which I say: Hold up, let's wind back a bit. There's a lot more nuance to functions than just "pure" versus "impure", and I'd like to delve into that. Not all side effects are created equal.
 
-The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess, and discuss, other properties they might have, that _aren't_ captured by the types. (For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
+The easiest way for me to explain this is by example. So what we'll do is review a list of Go function headers and, based only on their names and type definitions, we are going to guess other properties they might have, that _aren't_ captured by the types.
+
+(For some of these, I just took Go standard library function signatures, and gave them more intuitive names.)
 
 ```
 func Sum(addends...int) int
@@ -233,11 +256,11 @@ Here is our first function that relies on a consumable dependency besides memory
 
 You can also think of the disk as an implicit parameter to ReadFile. You can expect the same output for the same input _if_ the relevant disk state also remains the same between subsequent calls. This contrasts with `GetRandomInt` and `GetCurrentTimeNow`, which are expected to return a different, largely unpredictable result every time you call them. Even if the call results in an error because of some file issue (like lack of permissions), we expect it to return the same error for each call with that particular "invalid" disk state.
 
-### Tangent Time: The Fallacy of "Testable Code"
+### Tangent Time: 
 
 This is where you would commonly be told you should do something like isolate operations that touch the filesystem into a service dependency that you then inject into every other service that uses it. That way you can mock out the filesystem for unit-testing.
 
-To rebut that, I'll simply defer to another infamous programming bugbear, David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
+To rebut that, I'll simply defer to another infamous programming contrarian, David Heinemeier Hansson. Here are some key quotes of his that I endorse, from his posts [TDD is Dead](https://dhh.dk/2014/tdd-is-dead-long-live-testing.html) and [Test-Induced Design Damage](https://dhh.dk/2014/test-induced-design-damage.html):
 
 > Test-first fundamentalism is like abstinence-only sex ed: An unrealistic, ineffective morality campaign for self-loathing and shaming.
 
@@ -294,7 +317,7 @@ that no mainstream language has any capability to formalize the distinction betw
 - Ensure you have mechanisms for containing and recouping costs.
 - Holistically consider and balance all costs. The ultimate costs we should minimize are our human time and energy, both for developers and especially for end-users.
 
-## Proposal: A Cost-Aware Test Manager
+## Proposal: A Cost-Aware Development Tool
 
 > Show me your flowcharts and conceal your tables, and I shall continue to be mystified. Show me your tables, and I won't usually need your flowcharts; they'll be obvious.
 >
@@ -304,13 +327,7 @@ that no mainstream language has any capability to formalize the distinction betw
 >
 > -- <cite>Mike Acton</cite>
 
-Programming culture seems to be obsessed with finding elegant, all-encompassing models. These usually seem to be designed by galaxy-brain tryhards who feel more like they're trying to sell you a product to lock you into, rather than actual 
 
-I want simple, straightforward, intuitive tools that don't try to do everything and don't require 
-
-Specifically, I think we can do much better when it comes to **testing**. Rather than chastise developers for not devoting enough time to writing a litany of ad hoc tests, we should instead consider how we can eliminate tedium and streamline the creation of effective test suites.
-
-Let's take note of some techniques and tools that currently exist:
 
 - Table testing
 - Database-driven tests
@@ -323,6 +340,19 @@ Let's take note of some techniques and tools that currently exist:
 - Code instrumentation for profiling, detection of memory issues, telemetry, etc.
 - Structured logging
 - Omniscient debuggers
+
+### Scrap
+
+
+Programming culture seems to be obsessed with finding elegant, all-encompassing models. These usually seem to be designed by galaxy-brain tryhards who feel more like they're trying to sell you a product to lock you into, rather than actual 
+
+I want simple, straightforward, intuitive tools that don't try to do everything and don't require 
+
+Specifically, I think we can do much better when it comes to **testing**. Rather than chastise developers for not devoting enough time to writing a litany of ad hoc tests, we should instead consider how we can eliminate tedium and streamline the creation of effective test suites.
+
+Let's take note of some techniques and tools that currently exist:
+
+
 
 Although these haven't gone mainstream yet, I still see immense untapped potential in the "just capture everything" approach, given the right visualization and a well-designed interface. As our storage capacities continue to grow and get even cheaper, this idea becomes more trivial and appealing by the day.
 
